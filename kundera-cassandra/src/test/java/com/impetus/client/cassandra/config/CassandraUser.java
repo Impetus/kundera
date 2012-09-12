@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.impetus.client.hbase.crud;
+package com.impetus.client.cassandra.config;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,8 +13,8 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "USERXYZ", schema = "KunderaHbaseXmlTest@XmlPropertyTest")
-public class User
+@Table(name = "USERXYZ", schema = "KunderaCassandraXmlTest@CassandraXmlPropertyTest")
+public class CassandraUser
 {
 
     @Id

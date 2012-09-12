@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.kundera.configure.KunderaClientProperties;
+import com.impetus.kundera.configure.ClientProperties;
 
 /**
  * The Class SchemaMetadata.
@@ -30,7 +30,7 @@ import com.impetus.kundera.configure.KunderaClientProperties;
  */
 public final class SchemaMetadata
 {
-    private static Map<String, KunderaClientProperties> configurationProperties;
+    private static Map<String, ClientProperties> configurationProperties;
 
     /**
      * The pu to schema metadata holds the map of pu to list of tableInfo.
@@ -67,11 +67,11 @@ public final class SchemaMetadata
     /**
      * @return the configurationProperties
      */
-    public Map<String, KunderaClientProperties> getConfigurationProperties()
+    public Map<String, ClientProperties> getConfigurationProperties()
     {
         if (configurationProperties == null)
         {
-            configurationProperties = new HashMap<String, KunderaClientProperties>();
+            configurationProperties = new HashMap<String, ClientProperties>();
         }
         return configurationProperties;
     }

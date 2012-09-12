@@ -32,11 +32,10 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.KunderaClientProperties;
-import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -46,7 +45,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * @author kuldeep.mishra
  * 
  */
-public class CassandraPropertyReader implements PropertyReader
+public class CassandraPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
     /** The log instance. */
     private Log log = LogFactory.getLog(CassandraPropertyReader.class);
@@ -64,31 +63,41 @@ public class CassandraPropertyReader implements PropertyReader
     public void read(String pu)
     {
         Properties properties = new Properties();
-        try
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        String propertyName = puMetadata != null ? puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+
+        if (propertyName != null && PropertyType.isXml(propertyName))
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-            String propertyName = puMetadata != null ? puMetadata
-                    .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+            csmd.setClientProperties(parseXML(propertyName));
+        }
+        else if (propertyName != null && PropertyType.isProperties(propertyName))
+        {
 
             InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(propertyName) : null;
 
             if (inStream != null)
             {
-                properties.load(inStream);
-                readKeyspaceSpecificProprerties(properties);
-                readColumnFamilySpecificProperties(properties);
-            }
-            else
-            {
-                log.info("No property file found in class path, kundera will use default property");
+                try
+                {
+                    properties.load(inStream);
+                    readKeyspaceSpecificProprerties(properties);
+                    readColumnFamilySpecificProperties(properties);
+                }
+                catch (IOException e)
+                {
+                    log.warn("error in loading properties , caused by :" + e.getMessage());
+                    throw new KunderaException(e);
+                }
             }
         }
-        catch (IOException e)
+        else
         {
-            log.warn("error in loading properties , caused by :" + e.getMessage());
-            throw new KunderaException(e);
+            log.info("No property file found in class path, kundera will use default property");
         }
+
     }
 
     /**
@@ -170,6 +179,8 @@ public class CassandraPropertyReader implements PropertyReader
          */
         private Map<String, String> dataCentersInfo;
 
+        private ClientProperties clientProperties;
+
         /**
          * @return the familyToProperties
          */
@@ -180,6 +191,22 @@ public class CassandraPropertyReader implements PropertyReader
                 columnFamilyProperties = new HashMap<String, CassandraColumnFamilyProperties>();
             }
             return columnFamilyProperties;
+        }
+
+        /**
+         * @param parseXML
+         */
+        private void setClientProperties(ClientProperties clientProperties)
+        {
+            this.clientProperties = clientProperties;
+        }
+
+        /**
+         * @return the clientProperties
+         */
+        public ClientProperties getClientProperties()
+        {
+            return clientProperties;
         }
 
         public void addCf_defs(String cf_defs)

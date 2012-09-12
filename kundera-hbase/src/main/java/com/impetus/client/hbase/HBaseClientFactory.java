@@ -24,7 +24,7 @@ import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.configure.KunderaPropertyReader;
+import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;

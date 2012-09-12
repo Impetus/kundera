@@ -31,8 +31,10 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.KunderaClientProperties;
-import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.AbstractPropertyReader;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.AbstractPropertyReader.PropertyType;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -46,9 +48,8 @@ import com.mongodb.ReadPreference;
  * @author kuldeep.mishra
  * 
  */
-public class MongoDBPropertyReader implements PropertyReader
+public class MongoDBPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
-
     /** log instance */
     private static Log log = LogFactory.getLog(MongoDBPropertyReader.class);
 
@@ -57,7 +58,7 @@ public class MongoDBPropertyReader implements PropertyReader
 
     public MongoDBPropertyReader()
     {
-        // msmd = new MongoDBSchemaMetadata();
+        msmd = new MongoDBSchemaMetadata();
     }
 
     @Override
@@ -67,22 +68,28 @@ public class MongoDBPropertyReader implements PropertyReader
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-
-        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(propertyName) : null;
-        if (inStream != null)
+        if (propertyName != null && PropertyType.isXml(propertyName))
         {
-            try
+            msmd.setClientProperties(parseXML(propertyName));
+        }
+        else if (propertyName != null && PropertyType.isProperties(propertyName))
+        {
+            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(propertyName) : null;
+            if (inStream != null)
             {
-                properties.load(inStream);
-                msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
-                msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
-                msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
-            }
-            catch (IOException e)
-            {
-                log.warn("error in loading properties , caused by :" + e.getMessage());
-                throw new KunderaException(e);
+                try
+                {
+                    properties.load(inStream);
+                    msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
+                    msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
+                    msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
+                }
+                catch (IOException e)
+                {
+                    log.warn("error in loading properties , caused by :" + e.getMessage());
+                    throw new KunderaException(e);
+                }
             }
         }
         else
@@ -110,9 +117,28 @@ public class MongoDBPropertyReader implements PropertyReader
 
         private ReadPreference preference = ReadPreference.PRIMARY;
 
+        private ClientProperties clientProperties;
+
         public MongoDBSchemaMetadata()
         {
 
+        }
+
+        /**
+         * @return the clientProperties
+         */
+        public ClientProperties getClientProperties()
+        {
+            return clientProperties;
+        }
+
+        /**
+         * @param clientProperties
+         *            the clientProperties to set
+         */
+        private void setClientProperties(ClientProperties clientProperties)
+        {
+            this.clientProperties = clientProperties;
         }
 
         private MongoDBSchemaMetadata(final String connectionStr)
@@ -292,6 +318,6 @@ public class MongoDBPropertyReader implements PropertyReader
                 builder.append(port);
                 return builder.toString();
             }
-        }      
+        }
     }
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.impetus.client.hbase.crud;
+package com.impetus.client.hbase.config;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ import com.impetus.client.hbase.junits.HBaseCli;
  * @author Kuldeep Mishra
  * 
  */
-public class UserTest
+public class HBaseUserTest
 {
 
     private EntityManagerFactory emf;
@@ -36,7 +36,7 @@ public class UserTest
     /**
      * logger used for logging statement.
      */
-    private static final Logger logger = LoggerFactory.getLogger(UserTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(HBaseUserTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -60,10 +60,6 @@ public class UserTest
     }
 
     @Test
-    public void dummytest(){
-        
-    }
-//    @Test
     public void test()
     {
         try

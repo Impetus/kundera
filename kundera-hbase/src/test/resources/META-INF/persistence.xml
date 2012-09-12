@@ -53,7 +53,7 @@
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property"
-				value="/home/impadmin/development/Kundera/kundera-cassandra/src/test/resources/kundera.xml" />
+				value="/home/impadmin/development/Kundera/kundera-cassandra/src/test/resources/kunderaTest.xml" />
 		</properties>
 	</persistence-unit>
 
