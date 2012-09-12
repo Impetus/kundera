@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 
 import junit.framework.Assert;
 
@@ -47,8 +48,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
@@ -220,6 +219,95 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertEquals("Amry", ((PersonCassandra)oo1).getPersonName());        
     }
 
+    /**
+     * On typed create query
+     * @throws TException
+     * @throws InvalidRequestException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     * @throws SchemaDisagreementException
+     */
+    @Test
+    public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        
+        List<PersonCassandra> results = query.getResultList();
+        Assert.assertNotNull(query);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+    }
+    
+    /**
+     * On typed create query
+     * @throws TException
+     * @throws InvalidRequestException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     * @throws SchemaDisagreementException
+     */
+    @Test
+    public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        TypedQuery<Object> query = em.createQuery("Select p from PersonCassandra p", Object.class);
+        
+        List<Object> results = query.getResultList();
+        Assert.assertNotNull(query);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(PersonCassandra.class, results.get(0).getClass());
+    }
+
+    /**
+     * on invalid typed query.
+     * @throws TException
+     * @throws InvalidRequestException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     * @throws SchemaDisagreementException
+     */
+    @Test
+    public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        
+        TypedQuery<PersonAuth> query = null;
+        try
+        {
+            query = em.createQuery("Select p from PersonCassandra p", PersonAuth.class);
+            Assert.fail("Should have gone to catch block, as it is an invalid scenario!");
+        } catch (IllegalArgumentException iaex) 
+        {
+            Assert.assertNull(query);
+        }
+    }
+    
     /**
      * Tear down.
      * 

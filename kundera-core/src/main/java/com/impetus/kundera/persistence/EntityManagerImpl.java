@@ -45,15 +45,14 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
-import com.impetus.kundera.utils.ObjectUtils;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaTypedQuery;
+import com.impetus.kundera.query.QueryImpl;
 
 /**
  * The Class EntityManagerImpl.
@@ -742,7 +741,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
     {
-        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+        Query q = createQuery(paramString);
+        return onTypedQuery(paramClass, q);
     }
 
     /*
@@ -754,7 +754,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
     {
-        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+        Query q = createNamedQuery(paramString);
+        return onTypedQuery(paramClass, q);
     }
 
     /*
@@ -963,4 +964,24 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     {
         doRollback();
     }
+
+    /**
+     * Validates if expected result class is matching with supplied one, else throws {@link IllegalArgumentException}
+     * 
+     * @param <T>  object type
+     * @param paramClass    expected result class
+     * @param q            query
+     * @return             typed query instance.
+     */
+    private <T> TypedQuery<T> onTypedQuery(Class<T> paramClass, Query q)
+    {
+        if (paramClass.equals(((QueryImpl) q).getKunderaQuery().getEntityClass()) || paramClass.equals(Object.class))
+        {
+            return new KunderaTypedQuery<T>(q);
+        }
+        
+        throw new IllegalArgumentException("Mismatch in expected return type. Expected:" + paramClass
+                + " But actual class is:" + ((QueryImpl) q).getKunderaQuery().getEntityClass());
+    }
+
 }
