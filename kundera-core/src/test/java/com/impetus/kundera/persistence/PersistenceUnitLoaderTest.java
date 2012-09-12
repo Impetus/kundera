@@ -76,7 +76,7 @@ public class PersistenceUnitLoaderTest
                 final String _pattern = "/kundera-core/target/test-classes/";
                 List<PersistenceUnitMetadata> metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement());
                 Assert.assertNotNull(metadatas);
-                Assert.assertEquals(1, metadatas.size());
+                Assert.assertEquals(2, metadatas.size());
 
                 // commented out to keep ConfiguratorTest happy! as it tries to
                 // load it.
