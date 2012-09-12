@@ -53,9 +53,13 @@ public class PersistenceUtilHelper
     public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
     {       
         Class<?> entityClass = proxy.getClass();
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
-
-        Relation relation = m.getRelation(property);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);        
+        if(m == null || m.getRelation(property) == null)
+        {
+            return LoadState.UNKNOWN;
+        }
+        
+        Relation relation = m.getRelation(property);       
         Object relValue = PropertyAccessorHelper.getObject(proxy, relation.getProperty());
         if (relValue == null)
         {
