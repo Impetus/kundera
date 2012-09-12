@@ -41,19 +41,39 @@ public class AbstractPropertyReader
         return (ClientProperties) o;
         // configurationProperties.put(pu, (KunderaClientProperties) o);
     }
+    
+    protected PropertyType getProperty(String propertyName)
+    {
+        return PropertyType.value(propertyName);
+    }
 
     public enum PropertyType
     {
         xml, properties;
 
+        private static final String DELIMETER = ".";
+
+        static PropertyType value(String propertyName)
+        {
+            if (isXml(propertyName))
+            {
+                return xml;
+            }
+            else if (isProperties(propertyName))
+            {
+                return properties;
+            }
+            throw new IllegalArgumentException("unsupported property provided format:" + propertyName);
+        }
+        
         public static boolean isXml(String propertyName)
         {
-            return propertyName.endsWith(".xml");
+            return propertyName.endsWith(DELIMETER + xml);
         }
 
         public static boolean isProperties(String propertyName)
         {
-            return propertyName.endsWith(".properties");
+            return propertyName.endsWith(DELIMETER+properties);
         }
     }
 }
