@@ -69,7 +69,7 @@
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="rdbms" />
-			<property name="kundera.client.lookup.class" value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+			<property name="kundera.client.lookup.class" value="com.impetus.kundera.cache.ehcache.CoreTestClient" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
