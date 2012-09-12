@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.mongodb.config;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,16 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBConstants;
-import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.AbstractPropertyReader;
-import com.impetus.kundera.configure.ClientProperties.DataStore;
-import com.impetus.kundera.configure.AbstractPropertyReader.PropertyType;
+import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.PropertyReader;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.mongodb.ReadPreference;
 
 /**
@@ -61,40 +53,21 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
         msmd = new MongoDBSchemaMetadata();
     }
 
-    @Override
-    public void read(String pu)
+    public void onXml(ClientProperties cp)
     {
-        Properties properties = new Properties();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String propertyName = puMetadata != null ? puMetadata
-                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-        if (propertyName != null && PropertyType.isXml(propertyName))
+        if (cp != null)
         {
-            msmd.setClientProperties(parseXML(propertyName));
+            msmd.setClientProperties(cp);
         }
-        else if (propertyName != null && PropertyType.isProperties(propertyName))
+    }
+
+    public void onProperties(Properties properties)
+    {
+        if (properties != null)
         {
-            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(propertyName) : null;
-            if (inStream != null)
-            {
-                try
-                {
-                    properties.load(inStream);
-                    msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
-                    msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
-                    msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
-                }
-                catch (IOException e)
-                {
-                    log.warn("error in loading properties , caused by :" + e.getMessage());
-                    throw new KunderaException(e);
-                }
-            }
-        }
-        else
-        {
-            log.warn("No property file found in class path, kundera will use default property");
+            msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
+            msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
+            msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
         }
     }
 
@@ -318,6 +291,21 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
                 builder.append(port);
                 return builder.toString();
             }
+        }
+
+        public DataStore getDataStore()
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("mongo"))
+                    {
+                        return dataStore;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

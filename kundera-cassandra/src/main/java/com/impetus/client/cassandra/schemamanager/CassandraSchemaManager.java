@@ -705,8 +705,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void setProperties(KsDef ksDef, Map<String, String> strategy_options)
     {
-        if (getDataStore("Cassandra", CassandraPropertyReader.csmd.getClientProperties()) != null)
+        dataStore = CassandraPropertyReader.csmd.getDataStore();
+        if (CassandraPropertyReader.csmd.getDataStore() != null)
         {
+            schemas = dataStore.getSchemas();
+            conn = dataStore.getConnection();
             if (schemas != null && !schemas.isEmpty())
             {
                 for (Schema schema : schemas)

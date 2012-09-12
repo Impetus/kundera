@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase.config;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -27,16 +25,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.io.hfile.Compression;
 
 import com.impetus.client.hbase.HBaseConstants;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.AbstractPropertyReader;
-import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
-import com.impetus.kundera.configure.AbstractPropertyReader.PropertyType;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -49,10 +42,19 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public class HBasePropertyReader extends AbstractPropertyReader implements PropertyReader
 {
 
+    /**
+     * The log instance.
+     */
     private static Log log = LogFactory.getLog(HBasePropertyReader.class);
 
+    /**
+     * The Hbase schema metadata instance.
+     */
     public static HBaseSchemaMetadata hsmd;
 
+    /**
+     * The puMetadata instance.
+     */
     private PersistenceUnitMetadata puMetadata;
 
     public HBasePropertyReader()
@@ -65,41 +67,22 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      * 
      * @see com.impetus.kundera.configure.PropertyReader#read(java.lang.String)
      */
-    @Override
-    public void read(String pu)
-    {
-        Properties properties = new Properties();
-        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        hsmd.onInitialize();
-        String propertyName = puMetadata != null ? puMetadata
-                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-        if (propertyName != null && PropertyType.isXml(propertyName))
-        {
-            hsmd.setClientProperties(parseXML(propertyName));
-        }
-        else if (propertyName != null && PropertyType.isProperties(propertyName))
-        {
-            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(propertyName) : null;
-            if (inStream != null)
-            {
-                try
-                {
-                    properties.load(inStream);
-                    readProperties(properties);
-                }
-                catch (IOException e)
-                {
-                    log.warn("error in loading properties , caused by :" + e.getMessage());
-                    throw new KunderaException(e);
-                }
-            }
-        }
-        else
-        {
-            log.warn("No property file found in class path, kundera will use default property");
-        }
 
+    public void onXml(ClientProperties cp)
+    {
+        if (cp != null)
+        {
+            hsmd.setClientProperties(cp);
+        }
+    }
+
+    public void onProperties(Properties properties)
+    {
+        hsmd.onInitialize();
+        if (properties != null)
+        {
+            readProperties(properties);
+        }
     }
 
     /**
@@ -127,6 +110,9 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
          */
         private String zookeeperHost;
 
+        /**
+         * client properties.
+         */
         private ClientProperties clientProperties;
 
         /**
@@ -134,9 +120,6 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
          */
         private void onInitialize()
         {
-            // zookeeperPort = puMetadata != null ?
-            // puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) :
-            // null;
             zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
         }
 
@@ -253,5 +236,19 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
             }
         }
 
+        public DataStore getDataStore()
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("hbase"))
+                    {
+                        return dataStore;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

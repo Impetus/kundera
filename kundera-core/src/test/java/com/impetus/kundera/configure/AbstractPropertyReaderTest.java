@@ -1,6 +1,18 @@
-/**
- * 
- */
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.kundera.configure;
 
 import junit.framework.Assert;
@@ -12,15 +24,17 @@ import org.junit.Test;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 
 /**
+ * Abstract property reader test
+ * 
  * @author Kuldeep Mishra
  * 
  */
 public class AbstractPropertyReaderTest
 {
 
-    private AbstractPropertyReader reader;
+    private PropertyReader reader;
 
-    private final String propertyName = "/home/impadmin/development/Kundera/kundera-cassandra/src/test/resources/kunderaTest.xml";
+    private final String pu = "XmlPropertyTest";
 
     /**
      * @throws java.lang.Exception
@@ -28,7 +42,8 @@ public class AbstractPropertyReaderTest
     @Before
     public void setUp() throws Exception
     {
-        reader = new AbstractPropertyReader();
+        reader = new DummyPropertyReader();
+        new PersistenceUnitConfiguration(pu).configure();
     }
 
     /**
@@ -41,13 +56,15 @@ public class AbstractPropertyReaderTest
 
     /**
      * Test method for
-     * {@link com.impetus.kundera.configure.AbstractPropertyReader#parseXML(java.lang.String)}
+     * {@link com.impetus.kundera.configure.AbstractPropertyReader#onParseXML(java.lang.String)}
      * .
      */
     @Test
     public void testParseXML()
     {
-        ClientProperties cp = reader.parseXML(propertyName);
+        ClientProperties cp = null;
+        reader.read(pu);
+        cp = DummyPropertyReader.dsmd.getClientProperties();
         Assert.assertNotNull(cp);
         Assert.assertNotNull(cp.getDatastores());
         Assert.assertEquals(3, cp.getDatastores().size());
@@ -55,6 +72,7 @@ public class AbstractPropertyReaderTest
         {
             Assert.assertNotNull(store);
             Assert.assertNotNull(store.getName());
+            // Test for hbase properties.
             if (store.getName().equalsIgnoreCase("HBase"))
             {
                 Assert.assertNotNull(store.getSchemas());
@@ -76,6 +94,7 @@ public class AbstractPropertyReaderTest
                 Assert.assertEquals(2, store.getConnection().getProperties().size());
 
             }
+            // Test for mongo properties.
             else if (store.getName().equalsIgnoreCase("Mongo"))
             {
                 Assert.assertNull(store.getSchemas());
@@ -85,6 +104,7 @@ public class AbstractPropertyReaderTest
                 Assert.assertNotNull(store.getConnection().getServers());
                 Assert.assertEquals(2, store.getConnection().getServers().size());
             }
+            // Test for cassandra properties.
             else if (store.getName().equalsIgnoreCase("Cassandra"))
             {
                 Assert.assertNotNull(store.getSchemas());

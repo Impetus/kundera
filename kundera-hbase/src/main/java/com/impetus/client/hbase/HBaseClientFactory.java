@@ -25,6 +25,8 @@ import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.AbstractPropertyReader;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -70,19 +72,25 @@ public class HBaseClientFactory extends GenericClientFactory
         propertyReader = new HBasePropertyReader();
         propertyReader.read(getPersistenceUnit());
 
-//        KunderaPropertyReader kunderaPropertyReader = new KunderaPropertyReader();
-//        kunderaPropertyReader.parseXML(getPersistenceUnit());
-
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
-        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
-        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
+
+        Connection conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                .getConnection() : null;
+        if (conn != null && conn.getProperties() != null)
+        {
+            String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
+            String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
+            hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : node);
+            hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : "2181");
+        }
+        else
+        {
+            hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
+            hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
+        }
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
-        //
-        // schemaManager = new
-        // HBaseSchemaManager(HBaseClientFactory.class.getName());
-        // schemaManager.exportSchema();
     }
 
     @Override

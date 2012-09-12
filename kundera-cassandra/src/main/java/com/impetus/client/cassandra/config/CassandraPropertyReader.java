@@ -16,7 +16,6 @@
 package com.impetus.client.cassandra.config;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,13 +29,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
-import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.AbstractPropertyReader;
+import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.PropertyReader;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
 
 /**
  * Cassandra Property Reader reads cassandra properties from property file
@@ -59,45 +55,22 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         csmd = new CassandraSchemaMetadata();
     }
 
-    @Override
-    public void read(String pu)
+    public void onXml(ClientProperties cp)
     {
-        Properties properties = new Properties();
-
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String propertyName = puMetadata != null ? puMetadata
-                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-
-        if (propertyName != null && PropertyType.isXml(propertyName))
+        if (cp != null)
         {
-            csmd.setClientProperties(parseXML(propertyName));
+            csmd.setClientProperties(cp);
         }
-        else if (propertyName != null && PropertyType.isProperties(propertyName))
+    }
+
+    public void onProperties(Properties properties)
+    {
+        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
+        if (properties != null)
         {
-
-            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(propertyName) : null;
-
-            if (inStream != null)
-            {
-                try
-                {
-                    properties.load(inStream);
-                    readKeyspaceSpecificProprerties(properties);
-                    readColumnFamilySpecificProperties(properties);
-                }
-                catch (IOException e)
-                {
-                    log.warn("error in loading properties , caused by :" + e.getMessage());
-                    throw new KunderaException(e);
-                }
-            }
+            readKeyspaceSpecificProprerties(properties);
+            readColumnFamilySpecificProperties(properties);
         }
-        else
-        {
-            log.info("No property file found in class path, kundera will use default property");
-        }
-
     }
 
     /**
@@ -376,6 +349,21 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             return getColumnFamilyProperties().containsKey(cfName)
                     && getColumnFamilyProperties().get(cfName).getDefault_validation_class()
                             .equalsIgnoreCase(CounterColumnType.class.getSimpleName()) ? true : false;
+        }
+
+        public DataStore getDataStore()
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("cassandra"))
+                    {
+                        return dataStore;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

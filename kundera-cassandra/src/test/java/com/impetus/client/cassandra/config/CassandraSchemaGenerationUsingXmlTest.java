@@ -19,6 +19,8 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.persistence.CassandraCli;
 
@@ -31,6 +33,8 @@ public class CassandraSchemaGenerationUsingXmlTest
     private EntityManagerFactory emf;
 
     private String keyspaceName = "KunderaCassandraXmlTest";
+
+    private Logger logger = LoggerFactory.getLogger(CassandraSchemaGenerationUsingXmlTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -86,21 +90,20 @@ public class CassandraSchemaGenerationUsingXmlTest
             }
 
         }
-        catch (NotFoundException e)
+        catch (NotFoundException nfe)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Assert.fail();
+            logger.error("Error in test, caused by :" + nfe.getMessage());
         }
-        catch (InvalidRequestException e)
+        catch (InvalidRequestException ire)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Assert.fail();
+            logger.error("Error in test, caused by :" + ire.getMessage());
         }
-        catch (TException e)
+        catch (TException te)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Assert.fail();
+            logger.error("Error in test, caused by :" + te.getMessage());
         }
     }
-
 }

@@ -329,15 +329,20 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", host + ":" + port);
-        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
-        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
-
+        conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                .getConnection() : null;
         if (conn != null && conn.getProperties() != null)
         {
             String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
             String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
             hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : host);
             hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : "2181");
+        }
+        else
+        {
+            hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
+            hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
+
         }
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
@@ -366,8 +371,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     private HTableDescriptor getTableMetaData(TableInfo tableInfo)
     {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableInfo.getTableName());
-        getDataStore("hbase", HBasePropertyReader.hsmd.getClientProperties());
         Properties tableProperties = null;
+        schemas = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                .getSchemas() : null;
         if (schemas != null && !schemas.isEmpty())
         {
             for (Schema s : schemas)
@@ -411,6 +417,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
 
     private void setColumnFamilyProperties(HColumnDescriptor hColumnDescriptor, String tableName)
     {
+        dataStore = HBasePropertyReader.hsmd.getDataStore();
         if (dataStore != null)
         {
             if (tables != null && !tables.isEmpty())

@@ -15,65 +15,200 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.thoughtworks.xstream.XStream;
 
 /**
+ * Abstract ptoperty reader parse xml or properties on the basis of
+ * {@code PropertyType}
  * 
  * @author Kuldeep Mishra
  * 
  */
-public class AbstractPropertyReader
+public abstract class AbstractPropertyReader
 {
-    public ClientProperties parseXML(String propertyName)
-    {
-        XStream stream = new XStream();
-        stream.alias("clientProperties", ClientProperties.class);
-        stream.alias("dataStore", ClientProperties.DataStore.class);
-        stream.alias("schema", ClientProperties.DataStore.Schema.class);
-        stream.alias("table", ClientProperties.DataStore.Schema.Table.class);
-        stream.alias("dataCenter", ClientProperties.DataStore.Schema.DataCenter.class);
-        stream.alias("connection", ClientProperties.DataStore.Connection.class);
-        stream.alias("server", ClientProperties.DataStore.Connection.Server.class);
+    /** The log instance. */
+    private Log log = LogFactory.getLog(AbstractPropertyReader.class);
 
-        Object o = stream.fromXML(new File(propertyName));
-        return (ClientProperties) o;
-        // configurationProperties.put(pu, (KunderaClientProperties) o);
-    }
-    
-    protected PropertyType getProperty(String propertyName)
+    /** The xStream instance */
+    private XStream xStream;
+
+    /**
+     * Reads property file which is given in persistence unit
+     * 
+     * @param pu
+     */
+    public void read(String pu)
     {
-        return PropertyType.value(propertyName);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        String propertyFileName = puMetadata != null ? puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+
+        if (propertyFileName == null)
+        {
+            log.warn("No property file found in class path, kundera will use default property");
+        }
+        else
+        {
+            if (PropertyType.value(propertyFileName).equals(PropertyType.xml))
+            {
+                onXml(onParseXML(propertyFileName, puMetadata));
+            }
+            else
+            {
+                onProperties(onParseProperties(propertyFileName, puMetadata));
+            }
+        }
     }
 
-    public enum PropertyType
+    /**
+     * If property file is xml.
+     * 
+     * @param propertyFileName
+     * @param puMetadata
+     * @return
+     */
+    private ClientProperties onParseXML(String propertyFileName, PersistenceUnitMetadata puMetadata)
+    {
+        InputStream inStream = puMetadata.getClassLoader().getResourceAsStream(propertyFileName);
+        xStream = getXStreamObject();
+        if (inStream != null)
+        {
+            Object o = xStream.fromXML(inStream);
+            return (ClientProperties) o;
+        }
+        return null;
+    }
+
+    /**
+     * If property file is properties.
+     * 
+     * @param propertyFileName
+     * @param puMetadata
+     * @return
+     */
+    private Properties onParseProperties(String propertyFileName, PersistenceUnitMetadata puMetadata)
+    {
+        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
+        Properties properties = new Properties();
+        InputStream inStream = puMetadata.getClassLoader().getResourceAsStream(propertyFileName);
+
+        if (inStream != null)
+        {
+            try
+            {
+                properties.load(inStream);
+                return properties;
+            }
+            catch (IOException e)
+            {
+                log.warn("error in loading properties , caused by :" + e.getMessage());
+                throw new KunderaException(e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * get XStream Object.
+     * 
+     * @return XStream object.
+     */
+    private XStream getXStreamObject()
+    {
+        if (xStream == null)
+        {
+            XStream stream = new XStream();
+            stream.alias("clientProperties", ClientProperties.class);
+            stream.alias("dataStore", ClientProperties.DataStore.class);
+            stream.alias("schema", ClientProperties.DataStore.Schema.class);
+            stream.alias("table", ClientProperties.DataStore.Schema.Table.class);
+            stream.alias("dataCenter", ClientProperties.DataStore.Schema.DataCenter.class);
+            stream.alias("connection", ClientProperties.DataStore.Connection.class);
+            stream.alias("server", ClientProperties.DataStore.Connection.Server.class);
+            return stream;
+        }
+        else
+        {
+            return xStream;
+        }
+    }
+
+    /**
+     * property type emun.
+     * 
+     * @author Kuldeep Mishra
+     * 
+     */
+    private enum PropertyType
     {
         xml, properties;
 
         private static final String DELIMETER = ".";
 
-        static PropertyType value(String propertyName)
+        /**
+         * Check for allowed property format.
+         * 
+         * @param propertyFileName
+         * @return
+         */
+        static PropertyType value(String propertyFileName)
         {
-            if (isXml(propertyName))
+            if (isXml(propertyFileName))
             {
                 return xml;
             }
-            else if (isProperties(propertyName))
+            else if (isProperties(propertyFileName))
             {
                 return properties;
             }
-            throw new IllegalArgumentException("unsupported property provided format:" + propertyName);
-        }
-        
-        public static boolean isXml(String propertyName)
-        {
-            return propertyName.endsWith(DELIMETER + xml);
+            throw new IllegalArgumentException("unsupported property provided format:" + propertyFileName);
         }
 
-        public static boolean isProperties(String propertyName)
+        /**
+         * Check for property is xml.
+         * 
+         * @param propertyFileName
+         * @return
+         */
+        private static boolean isXml(String propertyFileName)
         {
-            return propertyName.endsWith(DELIMETER+properties);
+            return propertyFileName.endsWith(DELIMETER + xml);
+        }
+
+        /**
+         * Check for property is properties.
+         * 
+         * @param propertyFileName
+         * @return
+         */
+        private static boolean isProperties(String propertyFileName)
+        {
+            return propertyFileName.endsWith(DELIMETER + properties);
         }
     }
+
+    /**
+     * If property is xml.
+     * 
+     * @param cp
+     */
+    protected abstract void onXml(ClientProperties cp);
+
+    /**
+     * If property is properties.
+     * 
+     * @param props
+     */
+    protected abstract void onProperties(Properties props);
 }
