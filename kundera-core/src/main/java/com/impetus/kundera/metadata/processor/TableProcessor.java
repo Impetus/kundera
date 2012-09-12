@@ -134,7 +134,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             for (Field f : clazz.getDeclaredFields())
             {
-                if (f.isAnnotationPresent(Column.class))
+                if (f != null && f.isAnnotationPresent(Column.class))
                 {
                     // construct metamodel.
                     metaModelBuilder.construct(clazz, f);
