@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
@@ -133,21 +134,25 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             for (Field f : clazz.getDeclaredFields())
             {
-                // construct metamodel.
-                metaModelBuilder.construct(clazz, f);
+                if (f.isAnnotationPresent(Column.class))
+                {
+                    // construct metamodel.
+                    metaModelBuilder.construct(clazz, f);
 
-                // on id attribute.
+                    // on id attribute.
 
-                onIdAttribute(metaModelBuilder, metadata, clazz, f);
+                    onIdAttribute(metaModelBuilder, metadata, clazz, f);
 
-                // determine if it is a column family or super column family.
+                    // determine if it is a column family or super column
+                    // family.
 
-                onFamilyType(metadata, clazz, f);
+                    onFamilyType(metadata, clazz, f);
 
-                onJPAColumnMapping(metaModelBuilder, metadata, f);
+                    onJPAColumnMapping(metaModelBuilder, metadata, f);
 
-                /* Scan for Relationship field */
-                addRelationIntoMetadata(clazz, f, metadata);
+                    /* Scan for Relationship field */
+                    addRelationIntoMetadata(clazz, f, metadata);
+                }
             }
         }
 
