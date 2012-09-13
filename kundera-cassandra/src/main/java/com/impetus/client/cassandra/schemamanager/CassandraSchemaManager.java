@@ -449,7 +449,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (TException e)
             {
-                e.printStackTrace();
+                log.info(e.getMessage());
             }
 
         }
