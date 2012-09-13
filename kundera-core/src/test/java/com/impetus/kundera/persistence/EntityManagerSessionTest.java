@@ -79,6 +79,7 @@ public class EntityManagerSessionTest extends TestCase
     {
         super.tearDown();
         ems.clear();
+        cacheProvider.shutdown();
     }
 
     /**

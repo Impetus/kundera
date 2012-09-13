@@ -106,7 +106,7 @@ public class PersonCassandraTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
 
-        KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
+//        KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);

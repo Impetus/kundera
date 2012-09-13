@@ -17,6 +17,8 @@ package com.impetus.kundera.cache.ehcache;
 
 import javax.persistence.Cache;
 
+import net.sf.ehcache.CacheManager;
+
 import junit.framework.TestCase;
 
 import com.impetus.kundera.cache.CacheException;
