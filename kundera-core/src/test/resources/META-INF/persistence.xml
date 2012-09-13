@@ -75,7 +75,7 @@
 		</properties>
 	</persistence-unit>
 
-	<persistence-unit name="XmlPropertyTest">
+	<persistence-unit name="PropertyTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />

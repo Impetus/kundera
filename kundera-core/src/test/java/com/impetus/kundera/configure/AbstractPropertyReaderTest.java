@@ -34,7 +34,7 @@ public class AbstractPropertyReaderTest
 
     private PropertyReader reader;
 
-    private final String pu = "XmlPropertyTest";
+    private final String pu = "PropertyTest";
 
     /**
      * @throws java.lang.Exception
