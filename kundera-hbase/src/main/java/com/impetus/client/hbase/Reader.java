@@ -92,5 +92,5 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName);
+    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName) throws IOException;
 }

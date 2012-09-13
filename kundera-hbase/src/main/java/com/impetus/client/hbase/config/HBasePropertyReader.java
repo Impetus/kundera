@@ -52,11 +52,6 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      */
     public static HBaseSchemaMetadata hsmd;
 
-    /**
-     * The puMetadata instance.
-     */
-    private PersistenceUnitMetadata puMetadata;
-
     public HBasePropertyReader()
     {
         hsmd = new HBaseSchemaMetadata();
@@ -78,10 +73,17 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
 
     public void onProperties(Properties properties)
     {
+        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
         hsmd.onInitialize();
         if (properties != null)
         {
             readProperties(properties);
+        }
+        else
+        {
+
+            log.warn("No property file found in class path, kundera will use default property");
+
         }
     }
 

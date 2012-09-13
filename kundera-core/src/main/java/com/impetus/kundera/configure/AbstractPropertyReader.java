@@ -43,6 +43,8 @@ public abstract class AbstractPropertyReader
     /** The xStream instance */
     private XStream xStream;
 
+    protected PersistenceUnitMetadata puMetadata;
+
     /**
      * Reads property file which is given in persistence unit
      * 
@@ -50,25 +52,25 @@ public abstract class AbstractPropertyReader
      */
     public void read(String pu)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String propertyFileName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
-        if (propertyFileName == null)
+        // if (propertyFileName == null)
+        // {
+        // log.warn("No property file found in class path, kundera will use default property");
+        // }
+        // else
+        // {
+        if (propertyFileName != null && PropertyType.value(propertyFileName).equals(PropertyType.xml))
         {
-            log.warn("No property file found in class path, kundera will use default property");
+            onXml(onParseXML(propertyFileName, puMetadata));
         }
         else
         {
-            if (PropertyType.value(propertyFileName).equals(PropertyType.xml))
-            {
-                onXml(onParseXML(propertyFileName, puMetadata));
-            }
-            else
-            {
-                onProperties(onParseProperties(propertyFileName, puMetadata));
-            }
+            onProperties(onParseProperties(propertyFileName, puMetadata));
         }
+        // }
     }
 
     /**
@@ -101,7 +103,8 @@ public abstract class AbstractPropertyReader
     {
         log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
         Properties properties = new Properties();
-        InputStream inStream = puMetadata.getClassLoader().getResourceAsStream(propertyFileName);
+        InputStream inStream = propertyFileName != null ? puMetadata.getClassLoader().getResourceAsStream(
+                propertyFileName) : null;
 
         if (inStream != null)
         {

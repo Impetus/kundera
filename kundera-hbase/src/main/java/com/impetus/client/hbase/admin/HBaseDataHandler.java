@@ -859,36 +859,19 @@ public class HBaseDataHandler implements DataHandler
     }
 
     public List scanData(Filter f, final String tableName, Class clazz, EntityMetadata m, String qualifier)
+            throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
-        try
+        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, null);
+        if (results != null)
         {
-            List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, null);
-            if (results != null)
+            for (HBaseData row : results)
             {
-                for (HBaseData row : results)
-                {
-                    Object entity = clazz.newInstance();
-                    returnedResults.add(populateEntityFromHbaseData(entity, row, m, row.getRowKey(),
-                            m.getRelationNames()));
-                }
+                Object entity = clazz.newInstance();
+                returnedResults.add(populateEntityFromHbaseData(entity, row, m, row.getRowKey(), m.getRelationNames()));
             }
         }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (InstantiationException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
         return returnedResults;
     }
 
@@ -921,8 +904,6 @@ public class HBaseDataHandler implements DataHandler
         return null;
     }
 
-
-
     /**
      * 
      * @param tableName
@@ -935,7 +916,7 @@ public class HBaseDataHandler implements DataHandler
      * @return
      * @throws IOException
      */
-    public void  preparePersistentData(String tableName, Object entity, Object rowId, MetamodelImpl metaModel,
+    public void preparePersistentData(String tableName, Object entity, Object rowId, MetamodelImpl metaModel,
             Set<Attribute> attributes, HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> persistentData)
             throws IOException
     {
@@ -1037,17 +1018,17 @@ public class HBaseDataHandler implements DataHandler
 
             }
         }
-        
+
     }
 
     /**
      * @param data
-     * @throws IOException 
+     * @throws IOException
      */
     public void batch_insert(Map<HTable, List<HBaseDataWrapper>> data) throws IOException
     {
         hbaseWriter.persistRows(data);
-        
+
     }
 
 }

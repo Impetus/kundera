@@ -63,11 +63,16 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
 
     public void onProperties(Properties properties)
     {
+        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
         if (properties != null)
         {
             msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
             msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
             msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
+        }
+        else
+        {
+            log.warn("No property file found in class path, kundera will use default property");
         }
     }
 

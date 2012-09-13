@@ -71,6 +71,10 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             readKeyspaceSpecificProprerties(properties);
             readColumnFamilySpecificProperties(properties);
         }
+        else
+        {
+            log.warn("No property file found in class path, kundera will use default property");
+        }
     }
 
     /**

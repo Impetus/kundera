@@ -174,30 +174,23 @@ public class HBaseReader implements Reader
 
     @Override
     public Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
-            final String columnName)
+            final String columnName) throws IOException
     {
         List<Object> rowKeys = new ArrayList<Object>();
-        try
+        Scan s = new Scan();
+        s.setFilter(filter);
+        s.addColumn(Bytes.toBytes(columnFamilyName), Bytes.toBytes(columnName));
+
+        ResultScanner scanner = hTable.getScanner(s);
+
+        for (Result result : scanner)
         {
-            Scan s = new Scan();
-            s.setFilter(filter);
-            s.addColumn(Bytes.toBytes(columnFamilyName), Bytes.toBytes(columnName));
-
-            ResultScanner scanner = hTable.getScanner(s);
-
-            for (Result result : scanner)
+            for (KeyValue keyValue : result.list())
             {
-                for (KeyValue keyValue : result.list())
-                {
-                    rowKeys.add(keyValue.getKey());
-                }
+                rowKeys.add(keyValue.getKey());
             }
         }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
         if (rowKeys != null && !rowKeys.isEmpty())
         {
             return rowKeys.toArray(new Object[0]);

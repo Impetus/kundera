@@ -86,7 +86,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     private int batchSize;
 
-    
     /**
      * Instantiates a new h base client.
      * 
@@ -108,7 +107,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
-        
+
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
         batchSize = puMetadata.getBatchSize();
 
@@ -466,8 +465,25 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
         Filter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
-        return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
-        // reader.set
+        try
+        {
+            return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
+        }
+        catch (IOException ioe)
+        {
+            log.error("Error during find By Relation, Caused by:" + ioe.getMessage());
+            throw new KunderaException(ioe);
+        }
+        catch (InstantiationException ie)
+        {
+            log.error("Error during find By Relation, Caused by:" + ie.getMessage());
+            throw new KunderaException(ie);
+        }
+        catch (IllegalAccessException iae)
+        {
+            log.error("Error during find By Relation, Caused by:" + iae.getMessage());
+            throw new KunderaException(iae);
+        }
     }
 
     /*
@@ -521,12 +537,17 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             throw new KunderaException(e);
         }
     }
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
      */
     public void addBatch(Node node)
     {
-        
+
         if (node != null)
         {
             nodes.add(node);
@@ -535,14 +556,16 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         onBatchLimit();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
      */
     @Override
     public int getBatchSize()
     {
         return batchSize;
-    }   
+    }
 
     /*
      * (non-Javadoc)
@@ -605,7 +628,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 }
             }
 
-            if(!data.isEmpty())
+            if (!data.isEmpty())
             {
                 ((HBaseDataHandler) handler).batch_insert(data);
             }
@@ -621,9 +644,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     /**
      * Add records to data wrapper.
-     * @param columnWrapper          column wrapper
-     * @param embeddableData         embeddable data
-     * @param dataSet                data collection set
+     * 
+     * @param columnWrapper
+     *            column wrapper
+     * @param embeddableData
+     *            embeddable data
+     * @param dataSet
+     *            data collection set
      */
     private void addRecords(HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> embeddableData,
             List<HBaseDataWrapper> dataSet)
@@ -641,7 +668,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      */
     private void onBatchLimit()
     {
-        if(batchSize > 0 && batchSize == nodes.size())
+        if (batchSize > 0 && batchSize == nodes.size())
         {
             executeBatch();
             nodes.clear();
@@ -652,7 +679,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
-    } 
-    
+    }
 
 }
