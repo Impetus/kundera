@@ -65,7 +65,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
     public void onProperties(Properties properties)
     {
-        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
+        log.warn("Use of Properties file is Depricated ,please use xml format instead ");
         if (properties != null)
         {
             readKeyspaceSpecificProprerties(properties);

@@ -73,7 +73,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
 
     public void onProperties(Properties properties)
     {
-        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
+        log.warn("Use of Properties file is Depricated ,please use xml format instead ");
         hsmd.onInitialize();
         if (properties != null)
         {
