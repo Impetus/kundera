@@ -23,10 +23,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Queue;
-import java.util.regex.Pattern;
 
 import javax.persistence.Query;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
@@ -36,9 +34,6 @@ import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -144,7 +139,7 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }
 
