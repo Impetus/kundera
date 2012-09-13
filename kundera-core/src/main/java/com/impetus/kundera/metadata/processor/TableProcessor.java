@@ -29,6 +29,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PersistenceException;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
@@ -136,7 +137,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             for (Field f : clazz.getDeclaredFields())
             {
-                if (f != null && ! Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers()))
+                if (f != null && ! Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())  && ! f.isAnnotationPresent(Transient.class))
                 {
                     // construct metamodel.
                     metaModelBuilder.construct(clazz, f);
