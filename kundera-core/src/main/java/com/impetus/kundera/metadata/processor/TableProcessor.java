@@ -19,6 +19,8 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+import javassist.Modifier;
+
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.NamedNativeQueries;
@@ -134,8 +136,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             for (Field f : clazz.getDeclaredFields())
             {
-//                if (f != null && f.isAnnotationPresent(Column.class))
-//                {
+                if (f != null && ! Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers()))
+                {
                     // construct metamodel.
                     metaModelBuilder.construct(clazz, f);
 
@@ -153,7 +155,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     /* Scan for Relationship field */
                     addRelationIntoMetadata(clazz, f, metadata);
                 }
-//            }
+            }
         }
 
     }

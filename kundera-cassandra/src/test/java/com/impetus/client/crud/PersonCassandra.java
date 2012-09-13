@@ -33,16 +33,16 @@ import com.impetus.kundera.annotations.Index;
 public class PersonCassandra
 {
 
-//    private static final long serialVersionUID = 6068131491098913126L;
-//    private static final Logger LOG = LoggerFactory.getLogger(PersonCassandra.class);
-//
-//    public static final String UID = "uid";
-//    public static final String EID = "eid";
-//    public static final String FIRST_NAME = "firstName";
-//    public static final String LAST_NAME = "lastName";
-//    public static final String CITY = "city";
-//    public static final String CREATED = "created";
-//    public static final String LAST_MODIFIED = "lastModified";
+    private static final long serialVersionUID = 6068131491098913126L;
+    private static final Logger LOG = LoggerFactory.getLogger(PersonCassandra.class);
+
+    public static final String UID = "uid";
+    public static final String EID = "eid";
+    public static final String FIRST_NAME = "firstName";
+    public static final String LAST_NAME = "lastName";
+    public static final String CITY = "city";
+    public static final String CREATED = "created";
+    public static final String LAST_MODIFIED = "lastModified";
     
     /** The person id. */
     @Id
