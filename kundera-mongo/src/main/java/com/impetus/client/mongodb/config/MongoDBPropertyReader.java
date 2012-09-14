@@ -63,9 +63,9 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
 
     public void onProperties(Properties properties)
     {
-        log.warn("Use of Properties file is Depricated ,please use xml format instead ");
         if (properties != null)
         {
+            log.warn("Use of properties file is Deprecated ,please use xml file instead ");
             msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
             msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
             msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));

@@ -30,7 +30,6 @@ import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * HBase Property Reader reads hbase properties from property file
@@ -73,17 +72,15 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
 
     public void onProperties(Properties properties)
     {
-        log.warn("Use of Properties file is Depricated ,please use xml format instead ");
         hsmd.onInitialize();
         if (properties != null)
         {
+            log.warn("Use of properties file is Deprecated ,please use xml file instead ");
             readProperties(properties);
         }
         else
         {
-
             log.warn("No property file found in class path, kundera will use default property");
-
         }
     }
 
