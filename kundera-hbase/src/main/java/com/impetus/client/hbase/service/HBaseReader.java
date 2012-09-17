@@ -70,7 +70,7 @@ public class HBaseReader implements Reader
         {
             scan = new Scan();
         }
-        setScanCriteria(filter, columnFamily, scan);
+        setScanCriteria(filter, columnFamily, scan, null);
         scanner = hTable.getScanner(scan);
 
         return scanResults(columnFamily, results, scanner);
@@ -97,8 +97,8 @@ public class HBaseReader implements Reader
      * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
-    public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily)
-            throws IOException
+    public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
+            String[] columns) throws IOException
     {
         List<HBaseData> results = null;
         Scan s = null;
@@ -110,12 +110,17 @@ public class HBaseReader implements Reader
         {
             s = new Scan(startRow);
         }
+        else if (endRow != null)
+        {
+            s = new Scan();
+            s.setStopRow(endRow);
+        }
         else
         {
             s = new Scan();
         }
 
-        setScanCriteria(filter, columnFamily, s);
+        setScanCriteria(filter, columnFamily, s, columns);
 
         ResultScanner scanner = hTable.getScanner(s);
         return scanResults(null, results, scanner);
@@ -126,7 +131,7 @@ public class HBaseReader implements Reader
      * @param columnFamily
      * @param s
      */
-    private void setScanCriteria(Filter filter, String columnFamily, Scan s)
+    private void setScanCriteria(Filter filter, String columnFamily, Scan s, String[] columns)
     {
         if (filter != null)
         {
@@ -135,6 +140,16 @@ public class HBaseReader implements Reader
         if (columnFamily != null)
         {
             s.addFamily(Bytes.toBytes(columnFamily));
+        }
+        if (columns != null && columns.length > 0)
+        {
+            for (String columnName : columns)
+            {
+                if (columnName != null)
+                {
+                    s.addColumn(Bytes.toBytes(columnName), Bytes.toBytes(columnName));
+                }
+            }
         }
     }
 

@@ -50,7 +50,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
 import com.impetus.client.hbase.Writer;
-import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.client.hbase.utils.HBaseUtils;
@@ -239,8 +238,8 @@ public class HBaseDataHandler implements DataHandler
      * byte[], byte[])
      */
     @Override
-    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow)
-            throws IOException
+    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
+            String[] columns) throws IOException
     {
         List output = null;
         HTable hTable = null;
@@ -248,7 +247,7 @@ public class HBaseDataHandler implements DataHandler
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, filter, startRow, endRow, null);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, null, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -862,7 +861,7 @@ public class HBaseDataHandler implements DataHandler
             throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, null);
+        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, null, null);
         if (results != null)
         {
             for (HBaseData row : results)

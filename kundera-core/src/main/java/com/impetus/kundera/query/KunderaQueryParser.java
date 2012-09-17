@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.sql.Array;
 import java.util.StringTokenizer;
+
+import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 
 /**
  * Parser for handling JPQL Single-String queries. Takes a JPQLQuery and the
@@ -223,10 +226,28 @@ public class KunderaQueryParser
         private void compileResult()
         {
             String content = tokenizer.parseContent();
+            String[] result = null;
+            int count = 0;
             // content may be empty
             if (content.length() > 0)
             {
-                query.setResult(content);
+                StringTokenizer stringTokenizer = new StringTokenizer(content, ",");
+                result = new String[stringTokenizer.countTokens() + 1];
+                while (stringTokenizer.hasMoreTokens())
+                {
+                    String property = stringTokenizer.nextToken();
+                    if (property.indexOf(".") > 0)
+                    {
+                        result[0] = property.substring(0, property.indexOf("."));
+                        String fieldName = property.substring(property.indexOf(".") + 1, property.length());
+                        result[++count] = fieldName;
+                    }
+                    else
+                    {
+                        result[0] = property;
+                    }
+                }
+                query.setResult(result);
             }
         }
 

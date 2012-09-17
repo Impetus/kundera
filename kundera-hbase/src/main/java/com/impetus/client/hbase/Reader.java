@@ -71,11 +71,12 @@ public interface Reader
      *            the start row
      * @param endRow
      *            the end row
+     * @param columns 
      * @return the list
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily) throws IOException;
+    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily, String[] columns) throws IOException;
 
     /**
      * Scan row keys.

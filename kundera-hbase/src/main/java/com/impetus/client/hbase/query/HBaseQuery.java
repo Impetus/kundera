@@ -16,6 +16,7 @@
 package com.impetus.client.hbase.query;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -158,7 +159,8 @@ public class HBaseQuery extends QueryImpl implements Query
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
         Map<Boolean, Filter> filter = translator.getFilter();
-        if (translator.isFindById)
+        String[] columns = getTranslatedColumns(m, getKunderaQuery().getResult());
+        if (translator.isFindById && (filter == null && columns == null))
         {
             List results = new ArrayList();
 
@@ -168,7 +170,11 @@ public class HBaseQuery extends QueryImpl implements Query
                 results.add(output);
                 return results;
             }
-
+        }
+        if (translator.isFindById && filter == null && columns != null)
+        {
+            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
+                    columns);
         }
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
@@ -179,11 +185,11 @@ public class HBaseQuery extends QueryImpl implements Query
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow());
+                            translator.getEndRow(), columns);
                 }
                 else
                 {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null);
+                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null, null);
                 }
             }
             else
@@ -194,13 +200,20 @@ public class HBaseQuery extends QueryImpl implements Query
                 {
                     ((HBaseClient) client).setFilter(filter.values().iterator().next());
                 }
+                if (translator.isRangeScan())
+                {
+                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
+                            translator.getEndRow(), columns);
+                }
+                else
+                {
+                    // if range query. means query over id column. create range
+                    // scan method.
 
-                // if range query. means query over id column. create range
-                // scan method.
-
-                // else setFilter to client and invoke new method. find by
-                // query if isFindById is false! else invoke findById
+                    // else setFilter to client and invoke new method. find by
+                    // query if isFindById is false! else invoke findById
                     return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m);
+                }
             }
         }
         else
@@ -208,7 +221,39 @@ public class HBaseQuery extends QueryImpl implements Query
             List results = null;
             return populateUsingLucene(m, client, results);
         }
-//        return null;
+        // return null;
+    }
+
+    /**
+     * @param columns
+     * @param m
+     * @return
+     */
+    private String[] getTranslatedColumns(EntityMetadata m, String[] columns)
+    {
+        if (columns != null)
+        {
+            String[] translatedColumns = new String[columns.length - 1];
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            int count = 0;
+            for (int i = 1; i < columns.length; i++)
+            {
+                if (columns[i] != null)
+                {
+                    Attribute col = entity.getAttribute(columns[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + columns[i]);
+                    }
+                    translatedColumns[count++] = ((AbstractAttribute) col).getJPAColumnName();
+                }
+            }
+            return translatedColumns;
+        }
+        return null;
     }
 
     /**
@@ -242,7 +287,7 @@ public class HBaseQuery extends QueryImpl implements Query
         private boolean isFindById;
 
         /* row key value. */
-        Object rowKey;
+        byte[] rowKey;
 
         /**
          * Translates kundera query into collection of to be applied HBase
@@ -266,9 +311,13 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
-                    if (!isIdColumn && idColumn.equalsIgnoreCase(name))
+                    if ((!isIdColumn || isIdColumn) && idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
+                    }
+                    else
+                    {
+                        isIdColumn = false;
                     }
 
                     onParseFilter(condition, name, value, isIdColumn, m);
@@ -322,7 +371,7 @@ public class HBaseQuery extends QueryImpl implements Query
         private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
         {
             CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn);
-            
+
             byte[] valueInBytes = getBytes(name, m, value);
             if (!isIdColumn)
             {
@@ -344,6 +393,8 @@ public class HBaseQuery extends QueryImpl implements Query
                 else if (operator.equals(CompareOp.EQUAL))
                 {
                     rowKey = getBytes(m.getIdAttribute().getName(), m, value);
+                    // startRow = getBytes(m.getIdAttribute().getName(), m,
+                    // value);
                     endRow = null;
                     isFindById = true;
                 }
@@ -377,7 +428,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
         boolean isRangeScan()
         {
-            return startRow != null && endRow != null && !isFindById;
+            return startRow != null || endRow != null && !isFindById;
         }
 
         /**
@@ -394,8 +445,6 @@ public class HBaseQuery extends QueryImpl implements Query
 
         }
     }
-
-       
 
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {

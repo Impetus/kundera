@@ -72,9 +72,10 @@ public interface DataHandler
      * @param relationNames
      * @param startRow
      * @param endRow
+     * @param columns 
      * @return
      */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow)
+    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow, String[] columns)
             throws IOException;
 
     /**

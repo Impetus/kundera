@@ -114,7 +114,8 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    getKunderaQuery().getResult(), null, orderByClause);
+                    getKunderaQuery().getResult() != null ? getKunderaQuery().getResult()[0] : null, null,
+                    orderByClause);
         }
         catch (Exception e)
         {
@@ -135,7 +136,7 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    getKunderaQuery().getResult(), m.getRelationNames(), orderByClause);
+                    getKunderaQuery().getResult()[0], m.getRelationNames(), orderByClause);
         }
         catch (Exception e)
         {

@@ -73,7 +73,7 @@ public class KunderaQuery
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
 
     /** The result. */
-    private String result;
+    private String[] result;
 
     /** The from. */
     private String from;
@@ -138,7 +138,7 @@ public class KunderaQuery
      * @param result
      *            the new result
      */
-    public final void setResult(String result)
+    public final void setResult(String... result)
     {
         this.result = result;
     }
@@ -212,7 +212,7 @@ public class KunderaQuery
      * 
      * @return the result
      */
-    public final String getResult()
+    public final String[] getResult()
     {
         return result;
     }
@@ -226,7 +226,8 @@ public class KunderaQuery
      */
     public final boolean isAliasOnly()
     {
-        return result != null && (result.indexOf(".") == -1);
+        // TODO
+        return result != null && (result[0].indexOf(".") == -1);
     }
 
     /**
@@ -350,7 +351,8 @@ public class KunderaQuery
 
         if (!this.isDeleteUpdate)
         {
-            StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
+            // TODO
+            StringTokenizer tokenizer = new StringTokenizer(getResult()[0], ",");
             while (tokenizer.hasMoreTokens())
             {
                 String token = tokenizer.nextToken();
@@ -416,7 +418,6 @@ public class KunderaQuery
         boolean newClause = true;
         for (String clause : clauses)
         {
-
             if (newClause)
             {
                 List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
@@ -435,18 +436,21 @@ public class KunderaQuery
                 String columnName = null;
                 try
                 {
-                Metamodel metaModel =  KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(getPersistenceUnit());
-//                String columnName = metadata.getColumnName(property);
-                    columnName = ((AbstractAttribute)metaModel.entity(entityClass).getAttribute(property)).getJPAColumnName();
-                }catch(IllegalArgumentException iaex)
+                    Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                            getPersistenceUnit());
+                    // String columnName = metadata.getColumnName(property);
+                    columnName = ((AbstractAttribute) metaModel.entity(entityClass).getAttribute(property))
+                            .getJPAColumnName();
+                }
+                catch (IllegalArgumentException iaex)
                 {
-                    logger.info("No column found by this name : " + property + " checking for embeddedfield" );
+                    logger.info("No column found by this name : " + property + " checking for embeddedfield");
                 }
                 // where condition may be for search within embedded object
                 if (columnName == null && property.indexOf(".") > 0)
                 {
-                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata,
-                            property, true);
+                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property,
+                            true);
                     if (enclosingEmbeddedField != null)
                     {
                         columnName = property;
@@ -467,7 +471,6 @@ public class KunderaQuery
                 onTypedParameter(tokens, filterClause, property);
                 newClause = false;
             }
-
             else
             {
                 if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase()))
@@ -537,9 +540,10 @@ public class KunderaQuery
     {
         String attributeName = getAttributeName(fieldName);
 
-        Attribute entityAttribute = ((MetamodelImpl)KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(persistenceUnit)).getEntityAttribute(entityClass, attributeName);
+        Attribute entityAttribute = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                persistenceUnit)).getEntityAttribute(entityClass, attributeName);
         Class fieldType = entityAttribute.getJavaType();
-        
+
         if (type.equals(Type.INDEXED))
         {
             typedParameter.addJPAParameter(new JPAParameter(null, Integer.valueOf(name), fieldType));
@@ -553,9 +557,9 @@ public class KunderaQuery
     private String getAttributeName(String fieldName)
     {
         String attributeName = fieldName;
-        if(fieldName.indexOf(".") != -1)
+        if (fieldName.indexOf(".") != -1)
         {
-            attributeName = fieldName.substring(0,fieldName.indexOf("."));
+            attributeName = fieldName.substring(0, fieldName.indexOf("."));
         }
         return attributeName;
     }

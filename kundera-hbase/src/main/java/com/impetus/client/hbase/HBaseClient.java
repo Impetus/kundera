@@ -292,7 +292,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            end row.
      * @return collection holding results.
      */
-    public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow)
+    public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow,
+            String[] columns)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
@@ -305,7 +306,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         try
         {
 
-            results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow);
+            results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns);
         }
         catch (IOException ioex)
         {

@@ -29,7 +29,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * Abstract ptoperty reader parse xml or properties on the basis of
+ * Abstract property reader parse xml or properties on the basis of
  * {@code PropertyType}
  * 
  * @author Kuldeep Mishra
@@ -101,7 +101,7 @@ public abstract class AbstractPropertyReader
      */
     private Properties onParseProperties(String propertyFileName, PersistenceUnitMetadata puMetadata)
     {
-        log.warn("Use of Properties file is Depricated ,please use xml format instaed ");
+//        log.warn("Use of Properties file is Deprecated ,please use xml format instead ");
         Properties properties = new Properties();
         InputStream inStream = propertyFileName != null ? puMetadata.getClassLoader().getResourceAsStream(
                 propertyFileName) : null;

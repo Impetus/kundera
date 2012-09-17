@@ -65,7 +65,6 @@ public class PersonHBaseTest extends BaseTest
         col = new java.util.HashMap<Object, Object>();
     }
 
-
     @Test
     public void onInsertHbase() throws Exception
     {
@@ -74,6 +73,7 @@ public class PersonHBaseTest extends BaseTest
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
+
         assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
         assertFindByNameAndAgeGTAndLT(em, "PersonHBase", PersonHBase.class, "vivek", "10", "20", "personName");
