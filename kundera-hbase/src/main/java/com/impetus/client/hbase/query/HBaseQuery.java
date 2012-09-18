@@ -16,7 +16,6 @@
 package com.impetus.client.hbase.query;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +38,6 @@ import com.impetus.client.hbase.HBaseEntityReader;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -189,7 +187,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 }
                 else
                 {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null, null);
+                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null, columns);
                 }
             }
             else

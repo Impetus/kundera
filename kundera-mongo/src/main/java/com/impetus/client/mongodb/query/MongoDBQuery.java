@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Queue;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
@@ -114,8 +115,7 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    getKunderaQuery().getResult() != null ? getKunderaQuery().getResult()[0] : null, null,
-                    orderByClause);
+                    null, orderByClause, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)
         {
@@ -131,12 +131,12 @@ public class MongoDBQuery extends QueryImpl
         // if it is a parent..then find data related to it only
         // else u need to load for associated fields too.
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
-
         try
         {
             BasicDBObject orderByClause = getOrderByClause();
-            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    getKunderaQuery().getResult()[0], m.getRelationNames(), orderByClause);
+            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m
+                    .getRelationNames(), orderByClause, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
+                    .getResult());
         }
         catch (Exception e)
         {
@@ -165,6 +165,7 @@ public class MongoDBQuery extends QueryImpl
      *            the m
      * @param filterClauseQueue
      *            the filter clause queue
+     * @param columns
      * @return the basic db object
      */
     private BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
@@ -281,12 +282,35 @@ public class MongoDBQuery extends QueryImpl
                         query.append(property, new BasicDBObject("$lte", value));
                     }
                 }
-
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
         }
         return query;
+    }
+
+    private BasicDBObject getKeys(EntityMetadata m, String[] columns)
+    {
+        BasicDBObject keys = new BasicDBObject();
+        if (columns != null && columns.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            for (int i = 1; i < columns.length; i++)
+            {
+                if (columns[i] != null)
+                {
+                    Attribute col = entity.getAttribute(columns[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + columns);
+                    }
+                    keys.put(((AbstractAttribute) col).getJPAColumnName(), 1);
+                }
+            }
+        }
+        return keys;
     }
 
     /**

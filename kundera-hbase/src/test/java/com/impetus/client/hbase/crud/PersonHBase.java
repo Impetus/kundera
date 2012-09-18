@@ -87,7 +87,7 @@ public class PersonHBase
     /**
      * @return the age
      */
-    public int getAge()
+    public Integer getAge()
     {
         return age;
     }

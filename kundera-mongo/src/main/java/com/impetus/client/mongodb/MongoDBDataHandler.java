@@ -137,7 +137,7 @@ final class MongoDBDataHandler
                         Object colValue = document.get(fieldName);
                         if (colValue != null)
                         {
-                           String colFieldName = m.getFieldName(fieldName);
+                            String colFieldName = m.getFieldName(fieldName);
                             Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName) : null;
                             EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
                                     .getJavaType());
@@ -404,14 +404,15 @@ final class MongoDBDataHandler
      *             the property access exception
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, BasicDBObject keys)
+            throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
         // MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // Specified after entity alias in query
-        String columnName = getColumnName(result);
+        String columnName = result /* getColumnName(result) */;
 
         // Something user didn't specify and we have to derive
         // TODO: User must specify this in query and remove this logic once
@@ -456,7 +457,8 @@ final class MongoDBDataHandler
         }
 
         // Query for fetching entities based on user specified criteria
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection.find(mongoQuery);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
+                mongoQuery, keys);
 
         // EmbeddableType superColumn =
         // m.getEmbeddedColumn(enclosingDocumentName);

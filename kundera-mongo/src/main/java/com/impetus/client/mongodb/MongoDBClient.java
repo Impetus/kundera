@@ -75,6 +75,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private List<Node> nodes = new ArrayList<Node>();
 
     private int batchSize;
+
     /**
      * Instantiates a new mongo db client.
      * 
@@ -94,7 +95,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
         handler = new MongoDBDataHandler();
-        
+
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
         batchSize = puMetadata.getBatchSize();
     }
@@ -278,12 +279,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the relation names
      * @param orderBy
      *            the order by
+     * @param keys
      * @return the list
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, String result,
-            List<String> relationNames, BasicDBObject orderBy) throws Exception
+    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
+            BasicDBObject orderBy, BasicDBObject keys, String... results) throws Exception
     {
         String documentName = entityMetadata.getTableName();
         // String dbName = entityMetadata.getSchema();
@@ -292,30 +294,39 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(documentName);
         List entities = new ArrayList<E>();
 
-        // If User wants search on a column within a particular super column,
-        // fetch that embedded object collection only
-        // otherwise retrieve whole entity
-        // TODO: improve code
-        if (result != null && result.indexOf(".") >= 0)
+        if (results != null && results.length > 0)
         {
-            // TODO i need to discuss with Amresh before modifying it.
-            entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName, mongoQuery,
-                    result, orderBy));
-
-        }
-        else
-        {
-            log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
-
-            DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection
-                    .find(mongoQuery);
-            while (cursor.hasNext())
+            for (int i = 1; i < results.length; i++)
             {
-                DBObject fetchedDocument = cursor.next();
-                Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
-                entities.add(entity);
+                String result = results[i];
+
+                // If User wants search on a column within a particular super
+                // column,
+                // fetch that embedded object collection only
+                // otherwise retrieve whole entity
+                // TODO: improve code
+                if (result != null && result.indexOf(".") >= 0)
+                {
+                    // TODO i need to discuss with Amresh before modifying it.
+                    entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
+                            mongoQuery, result, orderBy, keys));
+                    return entities;
+                }
             }
         }
+        // else
+        // {
+        log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
+
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
+                mongoQuery, keys);
+        while (cursor.hasNext())
+        {
+            DBObject fetchedDocument = cursor.next();
+            Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
+            entities.add(entity);
+        }
+        // }
 
         return entities;
     }
@@ -484,8 +495,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         onFlushCollection(collections);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
      */
     public void addBatch(Node node)
     {
@@ -497,7 +512,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         onBatchLimit();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
      */
     @Override
@@ -506,7 +523,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return batchSize;
     }
 
-    
     /*
      * (non-Javadoc)
      * 
@@ -530,14 +546,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-                    collections = onPersist(collections,node.getData(), node.getEntityId(), metadata, relationHolders,
+                    collections = onPersist(collections, node.getData(), node.getEntityId(), metadata, relationHolders,
                             node.isUpdate());
                     indexNode(node, metadata);
                 }
             }
         }
 
-        if(!collections.isEmpty())
+        if (!collections.isEmpty())
         {
             onFlushCollection(collections);
         }
@@ -547,7 +563,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /**
      * On collections flush.
      * 
-     * @param collections collection containing records to be inserted in mongo db.
+     * @param collections
+     *            collection containing records to be inserted in mongo db.
      */
     private void onFlushCollection(Map<String, List<DBObject>> collections)
     {
@@ -561,13 +578,19 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /**
      * Executes on list of entities to be persisted.
      * 
-     * @param collections  collection containing list of db objects.
-     * @param entity       entity in question. 
-     * @param id           entity id.
-     * @param metadata     entity metadata 
-     * @param relationHolders relation holders.
-     * @param isUpdate        if it is an update 
-     * @return                collection of DB objects.
+     * @param collections
+     *            collection containing list of db objects.
+     * @param entity
+     *            entity in question.
+     * @param id
+     *            entity id.
+     * @param metadata
+     *            entity metadata
+     * @param relationHolders
+     *            relation holders.
+     * @param isUpdate
+     *            if it is an update
+     * @return collection of DB objects.
      */
     private Map<String, List<DBObject>> onPersist(Map<String, List<DBObject>> collections, Object entity, Object id,
             EntityMetadata metadata, List<RelationHolder> relationHolders, boolean isUpdate)
@@ -610,14 +633,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
 
         return collections;
-    }    
+    }
 
     /**
      * Check on batch limit.
      */
     private void onBatchLimit()
     {
-        if(batchSize > 0 && batchSize == nodes.size())
+        if (batchSize > 0 && batchSize == nodes.size())
         {
             executeBatch();
             nodes.clear();

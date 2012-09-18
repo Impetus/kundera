@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.impetus.client.hbase.crud;
+package com.impetus.client.crud;
 
 import java.util.List;
 import java.util.Map;
@@ -17,13 +17,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
-
 /**
  * @author Kuldeep Mishra
  * 
  */
-public class HBaseIdQueryTest extends BaseTest
+public class MongoDBQueryOnIdTest extends BaseTest
 {
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -33,17 +31,13 @@ public class HBaseIdQueryTest extends BaseTest
 
     private Map<Object, Object> col;
 
-    private HBaseCli cli;
-
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        cli = new HBaseCli();
-        cli.startCluster();
-        emf = Persistence.createEntityManagerFactory("hbaseTest");
+        emf = Persistence.createEntityManagerFactory("mongoTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -60,11 +54,6 @@ public class HBaseIdQueryTest extends BaseTest
         }
         em.close();
         emf.close();
-        if (cli != null && cli.isStarted())
-        {
-            cli.stopCluster("PERSON");
-        }
-        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
     }
 
     @Test
@@ -91,13 +80,13 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByWithOutWhereClause()
     {
-        String qry = "Select p.personName from PersonHBase p";
+        String qry = "Select p.personName from PersonMongo p";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(3, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
             {
@@ -128,12 +117,12 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdEQ()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId = 2";
+        String qry = "Select p.personName from PersonMongo p where p.personId = 2";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(1, persons.size());
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             Assert.assertNull(person.getAge());
             Assert.assertEquals("2", person.getPersonId());
@@ -147,13 +136,13 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdLT()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId < 3";
+        String qry = "Select p.personName from PersonMongo p where p.personId < 3";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(2, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
             {
@@ -177,17 +166,23 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdLTE()
     {
-        String qry = "Select p.personName, p.age from PersonHBase p where p.personId <= 3";
+        String qry = "Select p.personName, p.age from PersonMongo p where p.personId <= 3";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
-        Assert.assertEquals(2, persons.size());
+        Assert.assertEquals(3, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
             {
                 Assert.assertEquals(new Integer(20), person.getAge());
+                Assert.assertEquals("vivek", person.getPersonName());
+                count++;
+            }
+            else if (person.getPersonId().equals("3"))
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
                 Assert.assertEquals("vivek", person.getPersonName());
                 count++;
             }
@@ -199,7 +194,7 @@ public class HBaseIdQueryTest extends BaseTest
                 count++;
             }
         }
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(3, count);
     }
 
     /**
@@ -207,21 +202,15 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdGT()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId > 1";
+        String qry = "Select p.personName from PersonMongo p where p.personId > 1";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
-        Assert.assertEquals(3, persons.size());
+        Assert.assertEquals(2, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
-            {
-                Assert.assertNull(person.getAge());
-                Assert.assertEquals("vivek", person.getPersonName());
-                count++;
-            }
-            else if (person.getPersonId().equals("3"))
             {
                 Assert.assertNull(person.getAge());
                 Assert.assertEquals("vivek", person.getPersonName());
@@ -230,12 +219,12 @@ public class HBaseIdQueryTest extends BaseTest
             else
             {
                 Assert.assertNull(person.getAge());
-                Assert.assertEquals("1", person.getPersonId());
+                Assert.assertEquals("3", person.getPersonId());
                 Assert.assertEquals("vivek", person.getPersonName());
                 count++;
             }
         }
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(2, count);
     }
 
     /**
@@ -243,13 +232,13 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdGTE()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId >= 1 ";
+        String qry = "Select p.personName from PersonMongo p where p.personId >= 1 ";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(3, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
             {
@@ -279,13 +268,13 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdGTEAndLT()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId >= 1 and p.personId < 3";
+        String qry = "Select p.personName from PersonMongo p where p.personId >= 1 and p.personId < 3";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(2, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
             {
@@ -310,16 +299,16 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdGTAndLTE()
     {
-        String qry = "Select p.personName from PersonHBase p where p.personId > 1 and p.personId <= 2";
+        String qry = "Select p.personName from PersonMongo p where p.personId > 1 and p.personId <= 2";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(1, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
-            Assert.assertEquals("1", person.getPersonId());
             Assert.assertNull(person.getAge());
+            Assert.assertEquals("2", person.getPersonId());
             Assert.assertEquals("vivek", person.getPersonName());
             count++;
         }
@@ -332,21 +321,15 @@ public class HBaseIdQueryTest extends BaseTest
     private void findByIdGTAndAgeGTAndLT()
     {
 
-        String qry = "Select p.personName from PersonHBase p where p.personId > 1 and p.age >=10 and p.age <= 20";
+        String qry = "Select p.personName from PersonMongo p where p.personId > 1 and p.age >=10 and p.age <= 20";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
-        Assert.assertEquals(3, persons.size());
+        Assert.assertEquals(2, persons.size());
         int count = 0;
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             if (person.getPersonId().equals("2"))
-            {
-                Assert.assertNull(person.getAge());
-                Assert.assertEquals("vivek", person.getPersonName());
-                count++;
-            }
-            else if (person.getPersonId().equals("3"))
             {
                 Assert.assertNull(person.getAge());
                 Assert.assertEquals("vivek", person.getPersonName());
@@ -355,12 +338,12 @@ public class HBaseIdQueryTest extends BaseTest
             else
             {
                 Assert.assertNull(person.getAge());
-                Assert.assertEquals("1", person.getPersonId());
+                Assert.assertEquals("3", person.getPersonId());
                 Assert.assertEquals("vivek", person.getPersonName());
                 count++;
             }
         }
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(2, count);
     }
 
     /**
@@ -368,17 +351,17 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findById()
     {
-        PersonHBase personHBase = findById(PersonHBase.class, "1", em);
+        PersonMongo personHBase = findById(PersonMongo.class, "1", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
         Assert.assertEquals(new Integer(10), personHBase.getAge());
 
-        personHBase = findById(PersonHBase.class, "2", em);
+        personHBase = findById(PersonMongo.class, "2", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
         Assert.assertEquals(new Integer(20), personHBase.getAge());
 
-        personHBase = findById(PersonHBase.class, "3", em);
+        personHBase = findById(PersonMongo.class, "3", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
         Assert.assertEquals(new Integer(15), personHBase.getAge());
@@ -389,12 +372,12 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdGTEAndAge()
     {
-        String qry = "Select p.personName, p.age from PersonHBase p where p.personId >= 1 and p.age = 10";
+        String qry = "Select p.personName, p.age from PersonMongo p where p.personId >= 1 and p.age = 10";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(1, persons.size());
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             Assert.assertEquals(new Integer(10), person.getAge());
             Assert.assertEquals("1", person.getPersonId());
@@ -407,12 +390,12 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdLTEAndAge()
     {
-        String qry = "Select p.personName, p.age from PersonHBase p where p.personId <= 3 and p.age = 10";
+        String qry = "Select p.personName, p.age from PersonMongo p where p.personId <= 3 and p.age = 10";
         Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
+        List<PersonMongo> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(1, persons.size());
-        for (PersonHBase person : persons)
+        for (PersonMongo person : persons)
         {
             Assert.assertEquals(new Integer(10), person.getAge());
             Assert.assertEquals("1", person.getPersonId());
@@ -423,13 +406,9 @@ public class HBaseIdQueryTest extends BaseTest
 
     private void init()
     {
-
-        cli.createTable("PERSON");
-        cli.addColumnFamily("PERSON", "PERSON_NAME");
-        cli.addColumnFamily("PERSON", "AGE");
-        Object p1 = prepareHbaseInstance("1", 10);
-        Object p2 = prepareHbaseInstance("2", 20);
-        Object p3 = prepareHbaseInstance("3", 15);
+        Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);

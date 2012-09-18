@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.query.JPQLParseException;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
@@ -147,6 +148,56 @@ public class KunderaQueryParserTest
         Assert.assertNull(kunderaQuery.getResult());
         Assert.assertFalse(kunderaQuery.isUpdateClause());
         Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
+    }
+
+    @Test
+    public void onInvalidQueryParse()
+    {
+        KunderaQuery kunderQuery = new KunderaQuery();
+
+        // Valid Query with where clause.
+        String validQuery = "SELECT c,c.currency FROM Country c where c.currency = INR";
+
+        KunderaQueryParser parser = new KunderaQueryParser(kunderQuery, validQuery);
+        try
+        {
+            parser.parse();
+        }
+        catch (JPQLParseException jpqlpe)
+        {
+            Assert.assertEquals("Bad query format", jpqlpe.getMessage());
+        }
+
+        kunderQuery = new KunderaQuery();
+
+        // Valid Query with where clause.
+        validQuery = "SELECT c.currency,c FROM Country c where c.currency = INR";
+
+        parser = new KunderaQueryParser(kunderQuery, validQuery);
+        try
+        {
+            parser.parse();
+        }
+        catch (JPQLParseException jpqlpe)
+        {
+            Assert.assertEquals("Bad query format", jpqlpe.getMessage());
+        }
+
+        kunderQuery = new KunderaQuery();
+
+        // Valid Query with where clause.
+        validQuery = "SELECT c. FROM Country c where c.currency = INR";
+
+        parser = new KunderaQueryParser(kunderQuery, validQuery);
+        try
+        {
+            parser.parse();
+        }
+        catch (JPQLParseException jpqlpe)
+        {
+            Assert.assertEquals("You have not given any column name after . ,Column name should not be empty",
+                    jpqlpe.getMessage());
+        }
     }
 
     /**

@@ -15,10 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-import java.sql.Array;
 import java.util.StringTokenizer;
-
-import com.sun.corba.se.spi.orbutil.fsm.Guard.Result;
 
 /**
  * Parser for handling JPQL Single-String queries. Takes a JPQLQuery and the
@@ -240,11 +237,25 @@ public class KunderaQueryParser
                     {
                         result[0] = property.substring(0, property.indexOf("."));
                         String fieldName = property.substring(property.indexOf(".") + 1, property.length());
+                        if (fieldName == null || fieldName.isEmpty())
+                        {
+                            throw new JPQLParseException(
+                                    "You have not given any column name after . ,Column name should not be empty");
+                        }
+                        if (result[count] == null)
+                        {
+                            throw new JPQLParseException("Bad query format");
+                        }
                         result[++count] = fieldName;
                     }
                     else
                     {
-                        result[0] = property;
+                        if (count > 0)
+                        {
+                            throw new JPQLParseException("Bad query format");
+                        }
+                        result[count] = content;
+                        count++;
                     }
                 }
                 query.setResult(result);
