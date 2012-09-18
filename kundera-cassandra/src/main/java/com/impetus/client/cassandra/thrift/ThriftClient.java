@@ -132,13 +132,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         IPooledConnection conn = null;
+        Cassandra.Client cassandra_client = null;
         try
         {
             Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
             prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
             // Write Mutation map to database
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
-            Cassandra.Client cassandra_client = conn.getAPI();
+            cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
 
             cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
@@ -167,6 +168,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         finally
         {
             PelopsUtils.releaseConnection(conn);
+            cassandra_client = null;
         }
 
     }
