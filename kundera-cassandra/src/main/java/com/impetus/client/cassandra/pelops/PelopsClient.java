@@ -236,7 +236,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             for (Object value : values)
             {
                 Column column = new Column();
-                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + value.toString()));
+                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
+                        + Constants.JOIN_COLUMN_NAME_SEPARATOR + value.toString()));
                 // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
                 // value));
                 column.setValue(PropertyAccessorHelper.getBytes(value));
@@ -246,7 +247,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
 
             createIndexesOnColumns(joinTableName, poolName, columns);
-//            Object pk = key;
+            // Object pk = key;
 
             mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(key)),
                     Arrays.asList(columns.toArray(new Column[0])));
@@ -259,9 +260,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Object parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-//        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId.toString()),
-//                Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
+        // List<Column> columns = selector.getColumnsFromRow(joinTableName,
+        // Bytes.fromUTF8(parentId.toString()),
+        // Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+        List<Column> columns = selector.getColumnsFromRow(joinTableName,
+                Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
                 Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());
 
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
@@ -277,11 +280,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
 
-        IndexClause ix = Selector.newIndexClause(
-                Bytes.EMPTY,
-                10000,
-                Selector.newIndexExpression(columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
-                        Bytes.fromByteArray(childIdStr.getBytes())));
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, Selector.newIndexExpression(columnName
+                + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
+                Bytes.fromByteArray(childIdStr.getBytes())));
 
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
                 getConsistencyLevel());
@@ -524,7 +525,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
     {
-        return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);        
+        return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
     }
 
     /**
@@ -542,12 +543,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     @Override
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
-            int maxResult)
+            int maxResult, List<String> columns)
     {
         // ixClause can be 0,1 or more!
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        if (columns != null && !columns.isEmpty())
+        {
+            slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
+        }
 
         List<Object> entities = null;
         if (ixClause.isEmpty())
@@ -629,9 +634,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * @return the list
      */
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
-            int maxResult)
+            int maxResult, List<String> columns)
     {
-        return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
+        return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult, columns);
     }
 
     /**
@@ -652,13 +657,17 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *             the exception
      */
     @Override
-    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
-            throws Exception
+    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
+            List<String> columns) throws Exception
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-        List<Object> entities = null;
+        if (columns != null && !columns.isEmpty())
+        {
+            slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
+        }
+        // List<Object> entities = null;
         List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(
                 minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
                 maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
@@ -680,7 +689,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), getConsistencyLevel());
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -691,5 +699,4 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return dataHandler;
     }
-
 }

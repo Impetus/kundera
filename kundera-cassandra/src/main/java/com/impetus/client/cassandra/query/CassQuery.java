@@ -105,25 +105,22 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
-
                 Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((CassandraClientBase) client)
-                            .find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
+                    result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null,
+                            maxResult, getColumnList(m, getKunderaQuery().getResult()));
                 }
                 else
                 {
                     result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
-                            isRowKeyQuery);
+                            isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult()));
                 }
-
             }
             else
             {
                 result = populateUsingLucene(m, client, result);
-
             }
         }
         return result;
@@ -148,20 +145,16 @@ public class CassQuery extends QueryImpl implements Query
             {
                 ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery()
                         .getFilterClauseQueue());
-
             }
             else
             {
                 Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
                         : null;
-
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
-
                 ls = reader.populateRelation(m, client);
             }
         }
         return setRelationEntities(ls, client, m);
-
     }
 
     /**
@@ -190,6 +183,31 @@ public class CassQuery extends QueryImpl implements Query
         return 0;
     }
 
+    private List<String> getColumnList(EntityMetadata m, String[] results)
+    {
+        List<String> columns = new ArrayList<String>();
+        if (results != null && results.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            for (int i = 1; i < results.length; i++)
+            {
+                if (results[i] != null)
+                {
+                    Attribute col = entity.getAttribute(results[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + results);
+                    }
+                    columns.add(((AbstractAttribute) col).getJPAColumnName());
+                }
+            }
+            return columns;
+        }
+        return null;
+    }
+
     /**
      * Prepare index clause.
      * 
@@ -204,7 +222,7 @@ public class CassQuery extends QueryImpl implements Query
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
-        String idColumn = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
+        String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         boolean idPresent = false;
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
@@ -219,7 +237,6 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     idPresent = true;
                 }
-
                 if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
                 {
                     log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
@@ -275,11 +292,11 @@ public class CassQuery extends QueryImpl implements Query
         {
             return IndexOperator.EQ;
         }
-        else if (!idPresent && condition.equals(">"))
+        else if (/* !idPresent && */condition.equals(">"))
         {
             return IndexOperator.GT;
         }
-        else if (!idPresent && condition.equals("<"))
+        else if (/* !idPresent && */condition.equals("<"))
         {
             return IndexOperator.LT;
         }
@@ -331,14 +348,15 @@ public class CassQuery extends QueryImpl implements Query
      */
     private Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
-//        Column idCol = m.getIdColumn();
-        Attribute idCol =  m.getIdAttribute();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
-        
+        // Column idCol = m.getIdColumn();
+        Attribute idCol = m.getIdAttribute();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (((AbstractAttribute)idCol).getJPAColumnName().equals(jpaFieldName))
+        if (((AbstractAttribute) idCol).getJPAColumnName().equals(jpaFieldName))
         {
             f = (Field) idCol.getJavaMember();
             isId = true;
@@ -347,7 +365,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             String fieldName = m.getFieldName(jpaFieldName);
             Attribute col = entity.getAttribute(fieldName);
-//            Column col = m.getColumn(jpaFieldName);
+            // Column col = m.getColumn(jpaFieldName);
             if (col == null)
             {
                 throw new QueryHandlerException("column type is null for: " + jpaFieldName);
@@ -359,7 +377,7 @@ public class CassQuery extends QueryImpl implements Query
         // create query.
         if (f != null && f.getType() != null)
         {
-            return CassandraUtilities.toBytes(value,f);
+            return CassandraUtilities.toBytes(value, f);
         }
         else
         {

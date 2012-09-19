@@ -88,11 +88,10 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * @author amresh.singh
  */
 public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher
-{   
+{
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(ThriftClient.class);
-
 
     /** The data handler. */
     private ThriftDataHandler dataHandler;
@@ -203,7 +202,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 for (Object value : values)
                 {
                     Column column = new Column();
-                    column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
+                    column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
+                            + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
                     column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
                     column.setTimestamp(System.currentTimeMillis());
 
@@ -305,8 +305,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         try
         {
-            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq, getConsistencyLevel(),
-                    rowIds);
+            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
+                    getConsistencyLevel(), rowIds);
         }
         catch (Exception e)
         {
@@ -317,7 +317,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Finds a {@link List} of entities from database for given super columns 
+     * Finds a {@link List} of entities from database for given super columns
      */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
@@ -457,8 +457,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
-        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(),
-                IndexOperator.EQ, Bytes.fromUTF8(childIdStr).getBytes());
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
+                columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
+                .fromUTF8(childIdStr).getBytes());
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
 
         List<Object> rowKeys = new ArrayList<Object>();
@@ -716,7 +717,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.dataHandler = null;
         this.invertedIndexHandler = null;
         super.close();
-        
+
     }
 
     private void populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities, boolean isRelational,
@@ -769,7 +770,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     @Override
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
-            int maxResult)
+            int maxResult, List<String> columns)
     {
         List<Object> entities = null;
         IPooledConnection conn = null;
@@ -857,17 +858,20 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     @Override
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
-            int maxResult)
+            int maxResult, List<String> columns)
     {
-        return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
+        return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult, columns);
     }
 
     @Override
-    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
-            throws Exception
+    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
+            List<String> columns) throws Exception
     {
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-
+        if (columns != null && !columns.isEmpty())
+        {
+            slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
+        }
         KeyRange keyRange = new KeyRange(10000);
         keyRange.setStart_key(minVal == null ? "".getBytes() : minVal);
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);
@@ -906,6 +910,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     protected CassandraDataHandler getDataHandler()
     {
         return dataHandler;
-    }  
+    }
 
 }

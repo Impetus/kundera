@@ -46,7 +46,7 @@ public class PersonCassandra
     
     /** The person id. */
     @Id
-    @Column(name = "PERSON_ID")
+//    @Column(name = "PERSON_ID")
     private String personId;
 
     /** The person name. */
@@ -122,7 +122,7 @@ public class PersonCassandra
     /**
      * @return the age
      */
-    public int getAge()
+    public Integer getAge()
     {
         return age;
     }

@@ -114,7 +114,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
                 {
 
-                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100);
+                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100,
+                            null);
 
                 }
                 else
@@ -141,7 +142,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100);
+                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100,
+                            null);
                 }
                 else
                 {
@@ -152,7 +154,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         else
         {
             // List<Object> results = new ArrayList<Object>();
-            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery);
+            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null);
             // ls = (List<EnhanceEntity>) results;
         }
         return ls;
@@ -171,10 +173,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      *            the ix clause
      * @param isRowKeyQuery
      *            the is row key query
+     * @param columns
      * @return the list
      */
     public List handleFindByRange(EntityMetadata m, Client client, List result,
-            Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery)
+            Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery, List<String> columns)
     {
         List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
 
@@ -191,7 +194,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         if (expressions.size() == 1)
         {
             IndexOperator operator = expressions.get(0).op;
-            if (operator.equals(IndexOperator.LTE))
+            if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
             {
                 maxVal = expressions.get(0) != null ? expressions.get(0).getValue() : null;
                 minValue = null;
@@ -200,6 +203,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             {
                 minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
                 maxVal = null;
+            }
+            if (operator.equals(IndexOperator.EQ))
+            {
+
+                maxVal = minValue;
             }
         }
         else
@@ -210,7 +218,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
         try
         {
-            result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null && !m.getRelationNames().isEmpty(), m.getRelationNames());
+            result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
+                    && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns);
         }
         catch (Exception e)
         {

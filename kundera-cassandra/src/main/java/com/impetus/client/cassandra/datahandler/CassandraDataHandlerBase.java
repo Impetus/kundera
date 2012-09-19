@@ -512,7 +512,6 @@ public abstract class CassandraDataHandlerBase
 
                 if (thriftColumnName != null && thriftColumnName.startsWith(inverseJoinColumnName))
                 {
-
                     // EntityMetadata relationMetadata =
                     // KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
                     // Object value =
@@ -699,7 +698,6 @@ public abstract class CassandraDataHandlerBase
             {
                 PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
             }
-
         }
         catch (InstantiationException iex)
         {
@@ -714,7 +712,6 @@ public abstract class CassandraDataHandlerBase
 
         return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
                 : entity;
-
     }
 
     /**

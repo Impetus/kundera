@@ -102,7 +102,6 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         teardownInternal(persistenceUnit);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void executeTests()
     {
@@ -309,7 +308,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(1, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());            
+            Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals((short) 8, results.get(0).getCgpa());
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             em.clear();

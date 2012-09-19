@@ -101,22 +101,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
-    
+
     private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
 
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
     /** The closed. */
     private boolean closed = false;
-    
+
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
 
     /** batch size */
     private int batchSize;
-    
+
     /**
-     *  constructor using fields. 
+     * constructor using fields.
      */
     protected CassandraClientBase(String persistenceUnit)
     {
@@ -165,9 +165,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
-                            m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
-                            new ArrayList<CounterColumn>(0), counterSuperColumns);
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),
+                            Charset.forName(Constants.CHARSET_UTF8)), m.getTableName(), new ArrayList<Column>(0),
+                            new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
                 }
                 catch (CharacterCodingException ccex)
@@ -193,9 +193,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
-                            m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns,
-                            new ArrayList<CounterSuperColumn>(0));
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),
+                            Charset.forName(Constants.CHARSET_UTF8)), m.getTableName(), new ArrayList<Column>(0),
+                            new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
                 }
                 catch (CharacterCodingException ccex)
@@ -303,7 +303,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         CounterColumn counterCol = new CounterColumn();
         counterCol.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        counterCol.setValue((Long)rlValue);
+        counterCol.setValue((Long) rlValue);
         return counterCol;
     }
 
@@ -623,7 +623,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());            
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
@@ -767,8 +767,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
         }
         return results;
-    }  
-
+    }
 
     /**
      * @return the cqlVersion
@@ -779,7 +778,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param cqlVersion the cqlVersion to set
+     * @param cqlVersion
+     *            the cqlVersion to set
      */
     public void setCqlVersion(String cqlVersion)
     {
@@ -830,25 +830,27 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public abstract List executeQuery(String cqlQuery, Class clazz, List<String> relationalField);
 
     public abstract List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
-            int maxResult);
+            int maxResult, List<String> columns);
 
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
-            List<String> relations) throws Exception;
+            List<String> relations,List<String> columns) throws Exception;
 
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue);
 
     public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames,
-            List<IndexClause> conditions, int maxResult);
+            List<IndexClause> conditions, int maxResult,List<String> columns);
 
     protected abstract CassandraDataHandler getDataHandler();
 
     protected abstract void delete(Object entity, Object pKey);
 
-
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
      */
     public void addBatch(Node node)
     {
@@ -861,7 +863,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         onBatchLimit();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
      */
     public int getBatchSize()
@@ -869,7 +873,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return batchSize;
     }
 
-    
     /*
      * (non-Javadoc)
      * 
@@ -909,7 +912,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
 
             // Write Mutation map to database
-            
+
             if (!mutationMap.isEmpty())
             {
                 conn = PelopsUtils.getCassandraConnection(persistenceUnit);
@@ -955,8 +958,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param id
      * @param relationHolders
      */
-    protected Map<ByteBuffer, Map<String, List<Mutation>>> prepareMutation(EntityMetadata entityMetadata, Object entity,
-            Object id, List<RelationHolder> relationHolders, Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap)
+    protected Map<ByteBuffer, Map<String, List<Mutation>>> prepareMutation(EntityMetadata entityMetadata,
+            Object entity, Object id, List<RelationHolder> relationHolders,
+            Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap)
     {
 
         if (!isOpen())
@@ -1057,23 +1061,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return mutationMap;
     }
 
-
     /**
      * Check on batch limit.
      */
     private void onBatchLimit()
     {
-        if(batchSize > 0 && batchSize == nodes.size())
+        if (batchSize > 0 && batchSize == nodes.size())
         {
             executeBatch();
             nodes.clear();
         }
     }
-    
+
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new CassandraClientProperties().populateClientProperties(client, properties);
-    }  
+    }
 
 }
