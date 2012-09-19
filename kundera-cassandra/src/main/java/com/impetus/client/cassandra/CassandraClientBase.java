@@ -232,12 +232,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     protected void addRelationsToThriftRow(EntityMetadata metadata, ThriftRow tf, List<RelationHolder> relations)
     {
-        long timestamp = System.currentTimeMillis();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
-
         if (relations != null)
         {
+            long timestamp = System.currentTimeMillis();
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
             for (RelationHolder rh : relations)
             {
                 String linkName = rh.getRelationName();
@@ -978,8 +977,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             String columnFamily = entityMetadata.getTableName();
-            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);
-            Long timestamp = System.currentTimeMillis();
+            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);            
         }
         catch (Exception e)
         {
@@ -988,8 +986,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         addRelationsToThriftRow(entityMetadata, tf, relationHolders);
-
-        byte[] rowKey = PropertyAccessorHelper.get(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+        
         String columnFamily = entityMetadata.getTableName();
         // Create Insertion List
         List<Mutation> insertion_list = new ArrayList<Mutation>();
@@ -1031,7 +1028,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             // Populate Insertion list for columns
             if (thriftColumns != null && !thriftColumns.isEmpty())
             {
-
                 for (Column column : thriftColumns)
                 {
                     Mutation mut = new Mutation();
