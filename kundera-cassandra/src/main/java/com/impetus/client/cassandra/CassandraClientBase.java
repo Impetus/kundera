@@ -42,6 +42,7 @@ import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
@@ -832,7 +833,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             int maxResult, List<String> columns);
 
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
-            List<String> relations,List<String> columns) throws Exception;
+            List<String> relations,List<String> columns,List<IndexExpression> conditions) throws Exception;
 
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue);

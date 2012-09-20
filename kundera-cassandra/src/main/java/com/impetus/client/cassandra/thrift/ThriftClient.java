@@ -867,7 +867,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
-            List<String> columns) throws Exception
+            List<String> columns, List<IndexExpression> conditions) throws Exception
     {
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         if (columns != null && !columns.isEmpty())
@@ -878,6 +878,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         keyRange.setStart_key(minVal == null ? "".getBytes() : minVal);
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);
         ColumnParent cp = new ColumnParent(m.getTableName());
+        
+        if(conditions != null)
+        {
+            keyRange.setRow_filter(conditions);
+        }
+        
 
         IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
         Cassandra.Client cassandra_client = conn.getAPI();

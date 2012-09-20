@@ -17,6 +17,7 @@ package com.impetus.client.cassandra.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -35,6 +36,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -47,6 +49,16 @@ import com.impetus.kundera.query.QueryHandlerException;
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
+
+    /**
+     * 
+     */
+    private static final String MIN_ = "min";
+
+    /**
+     * 
+     */
+    private static final String MAX_ = "max";
 
     /** The conditions. */
     Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
@@ -186,40 +198,46 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             return null;
         }
 
-        byte[] minValue = null;
-        byte[] maxVal = null;
+        Map<String,byte[]> rowKeys = getRowKeyValue(expressions, ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName());
+
+        byte[] minValue = rowKeys.get(MIN_);
+        byte[] maxVal = rowKeys.get(MAX_);
 
         // If one field for range is given.
-
-        if (expressions.size() == 1)
-        {
-            IndexOperator operator = expressions.get(0).op;
-            if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
-            {
-                maxVal = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-                minValue = null;
-            }
-            else
-            {
-                minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-                maxVal = null;
-            }
-            if (operator.equals(IndexOperator.EQ))
-            {
-
-                maxVal = minValue;
-            }
-        }
-        else
-        {
-            minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-            maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
-        }
+//
+//        if (expressions.size() == 1)
+//        {
+//            IndexOperator operator = expressions.get(0).op;
+//            if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
+//            {
+//                maxVal = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+//                minValue = null;
+//            }
+//            else
+//            {
+//                minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+//                maxVal = null;
+//            }
+//            if (operator.equals(IndexOperator.EQ))
+//            {
+//
+//                maxVal = minValue;
+//            }
+//            expressions.remove(0);
+//        }
+//        else
+//        {
+//            minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+//            maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
+//            expressions.remove(0);
+//            expressions.remove(1);
+//        }
 
         try
         {
+            
             result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
-                    && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns);
+                    && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns, expressions);
         }
         catch (Exception e)
         {
@@ -283,5 +301,51 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     public void setConditions(Map<Boolean, List<IndexClause>> conditions)
     {
         this.conditions = conditions;
+    }
+
+
+    /**
+     * Returns list of row keys. First element will be min value and second will be major value.
+     * 
+     * @param expressions
+     * @param primaryKeyName
+     * @return
+     */
+    private Map<String,byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
+    {
+        Map<String,byte[]> rowKeys = new HashMap<String,byte[]>();
+        
+        List<IndexExpression> rowExpressions = new ArrayList<IndexExpression>();
+        
+        for(IndexExpression e : expressions)
+        {
+            
+            if (primaryKeyName.equals(new String(e.getColumn_name())))
+            {
+                IndexOperator operator = e.op;
+                if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
+                {
+                    rowKeys.put(MAX_,e.getValue());
+                    rowExpressions.add(e);
+                }
+                else if (operator.equals(IndexOperator.GTE) || operator.equals(IndexOperator.GT))
+                {
+                    rowKeys.put(MIN_,e.getValue());
+                    rowExpressions.add(e);
+                } else if (operator.equals(IndexOperator.EQ))
+                {
+
+                    rowKeys.put(MAX_,e.getValue());
+                    rowKeys.put(MIN_,e.getValue());
+                    rowExpressions.add(e);
+                }
+
+            }
+            
+        }
+        
+        expressions.removeAll(rowExpressions);
+        return rowKeys;
+        
     }
 }

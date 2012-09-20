@@ -90,9 +90,9 @@ public class CassandraIdQueryTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
-        // findByIdGTAndAgeGTAndLT();
-        // findByIdGTEAndAge();
-        // findByIdLTEAndAge();
+         findByIdGTAndAgeGTAndLT();
+         findByIdGTEAndAge();
+         findByIdLTEAndAge();
     }
 
     /**
@@ -366,7 +366,7 @@ public class CassandraIdQueryTest extends BaseTest
     private void findByIdGTAndAgeGTAndLT()
     {
 
-        String qry = "Select p.personName from PersonCassandra p where p.personId > 1 and p.age >=10 and p.age <= 20";
+        String qry = "Select p.personName from PersonCassandra p where p.personId > 1 and p.personName = vivek and p.age >=10 and p.age <= 20";
         Query q = em.createQuery(qry);
         List<PersonCassandra> persons = q.getResultList();
         Assert.assertNotNull(persons);
