@@ -237,20 +237,21 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     idPresent = true;
                 }
-                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
-                {
-                    log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
-                    throw new QueryHandlerException("unsupported query operation clause for cassandra");
-
-                }
+//                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
+//                {
+//                    log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
+//                    throw new QueryHandlerException("unsupported query operation clause for cassandra");
+//
+//                }
                 String condition = clause.getCondition();
                 Object value = clause.getValue();
                 // value.e
                 /*
                  * if(idPresent) { expr = null; } else {
                  */
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                        getBytesValue(fieldName, m, value)));
+                IndexExpression expression = Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
+                        getBytesValue(fieldName, m, value));
+                expr.add(expression);
                 // }
 
             }

@@ -33,8 +33,10 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -658,7 +660,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
-            List<String> columns) throws Exception
+            List<String> columns, List<IndexExpression> conditions) throws Exception
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
@@ -667,10 +669,17 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
         }
-        // List<Object> entities = null;
-        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(
+        
+        KeyRange keyRange = selector.newKeyRange(
                 minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
-                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
+                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000);
+        if(conditions != null)
+        {
+            keyRange.setRow_filter(conditions);
+            keyRange.setRow_filterIsSet(true);
+        }
+        // List<Object> entities = null;
+        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), keyRange, slicePredicate,
                 getConsistencyLevel());
 
         List results = null;
