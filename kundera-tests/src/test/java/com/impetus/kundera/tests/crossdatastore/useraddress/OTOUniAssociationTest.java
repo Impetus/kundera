@@ -71,9 +71,7 @@ public class OTOUniAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {
-        HBaseCli cli = new HBaseCli();
-        cli.startCluster();
+    {        
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FK.class);
         clazzz.add(HabitatUni1To1FK.class);

@@ -15,16 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.persistence.lazy;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_1;
 
 /**
  * @author amresh.singh
@@ -42,12 +36,7 @@ public class Album
     private String albumName;
 
     @Column(name = "ALBUM_DESC")
-    private String albumDescription;
-
-    // One to many, will be persisted separately
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "PHOTO_ID")
-    private PhotoUni_1_1_1_1 photo;
+    private String albumDescription;    
 
     public Album()
     {
@@ -110,23 +99,6 @@ public class Album
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
-    }
-
-    /**
-     * @return the photo
-     */
-    public PhotoUni_1_1_1_1 getPhoto()
-    {
-        return photo;
-    }
-
-    /**
-     * @param photo
-     *            the photo to set
-     */
-    public void setPhoto(PhotoUni_1_1_1_1 photo)
-    {
-        this.photo = photo;
-    }
+    }   
 
 }

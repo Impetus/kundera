@@ -57,7 +57,7 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "addHbase"
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo"/*, "addHbase"
     /* , "rdbms" */};
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
@@ -79,9 +79,9 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
+    //private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
 
-    // private String persistenceUnits = "addCassandra,rdbms";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo";
 
     /**
      * Sets the up internal.
@@ -169,6 +169,9 @@ public abstract class AssociationBase
                     {
                         CassandraCli.cassandraSetUp();
                         CassandraCli.initClient();
+                        
+                        //HBaseCli cli = new HBaseCli();
+                        //cli.startCluster();
                     }
 
                     if (AUTO_MANAGE_SCHEMA)
