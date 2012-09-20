@@ -882,6 +882,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         if(conditions != null)
         {
             keyRange.setRow_filter(conditions);
+            keyRange.setRow_filterIsSet(true);
         }
         
 
