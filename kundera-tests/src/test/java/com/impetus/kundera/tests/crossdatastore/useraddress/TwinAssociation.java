@@ -108,10 +108,10 @@ public abstract class TwinAssociation extends AssociationBase
                 switchPersistenceUnits(c);
                 insert();
                 find();
-                findPersonByIdColumn();
-                findPersonByName();
-                findAddressByIdColumn();
-                findAddressByStreet();
+                //findPersonByIdColumn();
+                //findPersonByName();
+                //findAddressByIdColumn();
+                //findAddressByStreet();
                 update();
                 remove();
             }

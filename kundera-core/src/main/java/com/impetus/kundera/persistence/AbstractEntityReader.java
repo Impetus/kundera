@@ -113,7 +113,7 @@ public class AbstractEntityReader
 
                 //If fetch type is LAZY, just populate proxy object
                 FetchType fetch = relation.getFetchType();
-                if (fetch.equals(FetchType.LAZY) )
+                /*if (fetch.equals(FetchType.LAZY) )
                 {
                     String relationName = MetadataUtils.getMappedName(m, relation);
                     Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
@@ -134,7 +134,7 @@ public class AbstractEntityReader
                     
                 }
                 else
-                {
+                {*/
                     if (relation.isRelatedViaJoinTable())
                     {
                         // M-M relationship. Relationship entities are always
@@ -180,7 +180,7 @@ public class AbstractEntityReader
                         }
 
                     }
-                }              
+                //}              
 
             }
 

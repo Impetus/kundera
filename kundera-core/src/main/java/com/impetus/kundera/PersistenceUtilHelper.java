@@ -38,6 +38,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializer;
 
 /**
  * Helper for {@link PersistenceUtil}
@@ -52,31 +53,23 @@ public class PersistenceUtilHelper
     
     public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
     {       
-        Class<?> entityClass = proxy.getClass();
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);        
-        if(m == null || m.getRelation(property) == null)
-        {
-            return LoadState.UNKNOWN;
-        }
-        
-        Relation relation = m.getRelation(property);       
-        Object relValue = PropertyAccessorHelper.getObject(proxy, relation.getProperty());
-        if (relValue == null)
+        if(proxy == null || property == null)
         {
             return LoadState.NOT_LOADED;
-        }
-        else if (relValue instanceof KunderaProxy)
+        }        
+        
+        if(proxy instanceof KunderaProxy)
         {
-
-            LoadState state = isLoaded(get(proxy, property, cache));
-            if (state == LoadState.UNKNOWN)
-                state = LoadState.LOADED;
-            return state;
-        }
-        else
+            LazyInitializer li = ((KunderaProxy) proxy).getKunderaLazyInitializer();
+            if (li.isUninitialized())
+            {
+                return LoadState.NOT_LOADED;
+            }
+            return LoadState.LOADED;
+        } else
         {
             return LoadState.LOADED;
-        }   
+        } 
 
     }
 

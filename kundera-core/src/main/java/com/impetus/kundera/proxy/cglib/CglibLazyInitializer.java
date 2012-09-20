@@ -250,8 +250,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 {
                     return this;
                 }
-            }
-
+            }            
             Object target = getImplementation();
             try
             {
@@ -270,9 +269,9 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                     {
                         method.setAccessible(true);
                     }
-                    returnValue = method.invoke(target, args);
+                    returnValue = method.invoke(target, args);                    
                 }
-                return returnValue == target ? proxy : returnValue;
+                return ((returnValue == target) ? proxy : returnValue);
             }
             catch (InvocationTargetException ite)
             {
@@ -420,6 +419,8 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     @Override
     public void setImplementation(Object paramObject)
     {
+        this.target = paramObject;
+        this.initialized = true;
     }      
     
     /**

@@ -192,7 +192,9 @@ public class OTOUniAssociationTest extends TwinAssociation
             // p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class,
             // "unionetoonefk_1");
             p.setPersonName("Saurabh");
-            p.getAddress().setStreet("Brand New Street");
+            HabitatUni1To1FK address = p.getAddress();
+            address.setStreet("Brand New Street");
+            p.setAddress(address);
             dao.merge(p);
 
             PersonnelUni1To1FK pAfterMerge = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class,
@@ -353,7 +355,8 @@ public class OTOUniAssociationTest extends TwinAssociation
      */
     private void assertPersonBeforeUpdate(PersonnelUni1To1FK p)
     {
-        Assert.assertNotNull(p);
+        Assert.assertNotNull(p);        
+        
         Assert.assertEquals("unionetoonefk_1", p.getPersonId());
         Assert.assertEquals("Amresh", p.getPersonName());
 
@@ -366,9 +369,13 @@ public class OTOUniAssociationTest extends TwinAssociation
     private void assertAddressBeforeUpdate(HabitatUni1To1FK add)
     {
         Assert.assertNotNull(add);
-        Assert.assertNotNull(add.getAddressId());
-        Assert.assertEquals("unionetoonefk_a", add.getAddressId());
-        Assert.assertEquals("123, New street", add.getStreet());
+        
+        String addressId = add.getAddressId();
+        String street = add.getStreet();
+        
+        Assert.assertNotNull(addressId);
+        Assert.assertEquals("unionetoonefk_a", addressId);
+        Assert.assertEquals("123, New street", street);
     }
 
     /**
