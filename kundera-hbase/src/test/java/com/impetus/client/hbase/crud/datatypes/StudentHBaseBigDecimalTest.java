@@ -52,6 +52,7 @@ public class StudentHBaseBigDecimalTest extends Base
             stopCluster();
         }
     }
+      
 
     @Test
     public void testExecuteUseSameEm()
