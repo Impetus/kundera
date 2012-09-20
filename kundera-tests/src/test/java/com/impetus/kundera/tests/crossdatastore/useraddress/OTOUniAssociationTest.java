@@ -38,7 +38,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUni1To1FK;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
 
@@ -59,7 +58,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
  * family PERSONNEL with comparator=UTF8Type and column_metadata=[{column_name:
  * PERSON_NAME, validation_class: UTF8Type, index_type: KEYS}, {column_name:
  * AGE, validation_class: IntegerType, index_type: KEYS}];
- * 
+ * PersonnelUni1ToM
  * @author vivek.mishra
  */
 
@@ -248,10 +247,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            HBaseCli.stopCluster();
-        }
+        
     }
 
     @Override

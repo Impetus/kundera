@@ -53,15 +53,7 @@ public class MTOUniAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            CassandraCli.initClient();
-        }
+    {        
 
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUniMTo1.class);
@@ -269,11 +261,11 @@ public class MTOUniAssociationTest extends TwinAssociation
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        // columnDef.index_type = IndexType.KEYS;
+        columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
-        // columnDef1.index_type = IndexType.KEYS;
+        columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();

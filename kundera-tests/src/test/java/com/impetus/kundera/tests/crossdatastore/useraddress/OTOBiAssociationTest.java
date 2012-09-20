@@ -48,11 +48,7 @@ public class OTOBiAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-        }
+    {        
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBi1To1FK.class);
         clazzz.add(HabitatBi1To1FK.class);

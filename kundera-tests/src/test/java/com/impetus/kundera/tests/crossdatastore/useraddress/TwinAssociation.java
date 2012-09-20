@@ -31,6 +31,7 @@ import org.junit.Assert;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * The Class TwinAssociation.
@@ -54,8 +55,19 @@ public abstract class TwinAssociation extends AssociationBase
      * @param persistenceUnits
      *            the persistence units
      */
-    public static void init(List<Class> classes, String... persistenceUnits)
+    public static void init(List<Class> classes, String... persistenceUnits) throws Exception
     {
+        /*if (RUN_IN_EMBEDDED_MODE)
+        {
+            CassandraCli.cassandraSetUp();
+
+        }
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            CassandraCli.initClient();
+        }*/
+        
         // list of PUS with class.
         Map<Class, String> puClazzMapper = null;
 
@@ -108,10 +120,10 @@ public abstract class TwinAssociation extends AssociationBase
                 switchPersistenceUnits(c);
                 insert();
                 find();
-                //findPersonByIdColumn();
-                //findPersonByName();
-                //findAddressByIdColumn();
-                //findAddressByStreet();
+                findPersonByIdColumn();
+                findPersonByName();
+                findAddressByIdColumn();
+                findAddressByStreet();
                 update();
                 remove();
             }

@@ -51,17 +51,7 @@ public class MTMBiAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-
-        }
-
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            CassandraCli.initClient();
-        }
+    {        
 
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMToM.class);

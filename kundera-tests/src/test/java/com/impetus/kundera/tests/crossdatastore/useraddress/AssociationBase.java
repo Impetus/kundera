@@ -233,7 +233,8 @@ public abstract class AssociationBase
         if (AUTO_MANAGE_SCHEMA)
         {
             truncateSchema();
-        }
+        }       
+        
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
@@ -268,7 +269,8 @@ public abstract class AssociationBase
      */
     protected void truncateSchema() throws InvalidRequestException, SchemaDisagreementException
     {
-        log.warn("Truncating....");
+        log.warn("Truncating....");        
+        
         CassandraCli.dropColumnFamily("PERSONNEL", "KunderaTests");
         CassandraCli.dropColumnFamily("ADDRESS", "KunderaTests");
         CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", "KunderaTests");
