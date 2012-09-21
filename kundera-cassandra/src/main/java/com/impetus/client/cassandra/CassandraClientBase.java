@@ -85,7 +85,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;

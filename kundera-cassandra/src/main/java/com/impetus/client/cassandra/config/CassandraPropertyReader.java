@@ -31,8 +31,8 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
-import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.PropertyReader;
 
 /**
  * Cassandra Property Reader reads cassandra properties from property file
