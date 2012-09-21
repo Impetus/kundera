@@ -90,8 +90,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
     {
         String cf_defs = properties.getProperty(CassandraConstants.CF_DEFS);
         csmd.addCf_defs(cf_defs);
-    }    
-    
+    }
 
     /**
      * loads keyspace specific properties
@@ -374,19 +373,39 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             }
             return null;
         }
-        
+
         public boolean isInvertedIndexingEnabled(String schemaName)
         {
             boolean result = false;
-            for(Schema schema : getDataStore().getSchemas())
+            if(schemaName != null && getDataStore() != null && getDataStore().getSchemas() != null)
             {
-                if(schema != null && schemaName.equals(schema.getName()))
+                for (Schema schema : getDataStore().getSchemas())
                 {
-                    result = Boolean.parseBoolean((String)schema.getSchemaProperties().get(CassandraConstants.INVERTED_INDEXING_ENABLED));
-                    break;
+                    if (schema != null && schemaName.equals(schema.getName()))
+                    {
+                        result = Boolean.parseBoolean((String) schema.getSchemaProperties().get(
+                                CassandraConstants.INVERTED_INDEXING_ENABLED));
+                        break;
+                    }
                 }
             }
+            
             return result;
+        }
+
+        public String getCqlVersion()
+        {
+            if (getDataStore() != null)
+            {
+                Properties properties = getDataStore().getConnection() != null ? getDataStore().getConnection()
+                        .getProperties() : null;
+
+                if (properties != null)
+                {
+                    return properties.getProperty(CassandraConstants.CQL_VERSION);
+                }
+            }
+            return CassandraConstants.CQL_VERSION_2_0;
         }
     }
 }

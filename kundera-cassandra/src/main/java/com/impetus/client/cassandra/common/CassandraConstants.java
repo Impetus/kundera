@@ -75,4 +75,6 @@ public interface CassandraConstants
     public static final String READ_REPAIR_CHANCE = "read.repair.chance";
 
     public static final String DCLOCAL_READ_REPAIR_CHANCE = "dclocal.read.repair.chance";
+
+    public static final String CQL_VERSION = "cql.version";
 }
