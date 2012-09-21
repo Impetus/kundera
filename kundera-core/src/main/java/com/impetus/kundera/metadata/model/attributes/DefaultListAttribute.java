@@ -22,15 +22,17 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Type;
 
-
 /**
-* Implementation class for <code> {@link ListAttribute} </code> interface.
- * Offers metadata information implementation for collection attribute as per jpa.
+ * Implementation class for <code> {@link ListAttribute} </code> interface.
+ * Offers metadata information implementation for collection attribute as per
+ * jpa.
  * 
  * @author vivek.mishra
  * 
- * @param <X>    managed type
- * @param <E>    attribute type of list attribute.
+ * @param <X>
+ *            managed type
+ * @param <E>
+ *            attribute type of list attribute.
  */
 public class DefaultListAttribute<X, E> extends AbstractPluralAttribute<X, E, List<E>> implements ListAttribute<X, E>
 {
@@ -38,11 +40,16 @@ public class DefaultListAttribute<X, E> extends AbstractPluralAttribute<X, E, Li
     /**
      * Constructor using fields.
      * 
-     * @param attribType                       attribute type
-     * @param attribName                       attribute name   
-     * @param persistenceAttribType            persistent attribute type.
-     * @param managedType                      managed type
-     * @param member                           attribute's java member. 
+     * @param attribType
+     *            attribute type
+     * @param attribName
+     *            attribute name
+     * @param persistenceAttribType
+     *            persistent attribute type.
+     * @param managedType
+     *            managed type
+     * @param member
+     *            attribute's java member.
      */
     public DefaultListAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
@@ -51,8 +58,12 @@ public class DefaultListAttribute<X, E> extends AbstractPluralAttribute<X, E, Li
         super(attribType, attribName, persistenceAttribType, managedType, member, clazz);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute#getCollectionType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute
+     * #getCollectionType()
      */
     @Override
     public javax.persistence.metamodel.PluralAttribute.CollectionType getCollectionType()
@@ -60,22 +71,27 @@ public class DefaultListAttribute<X, E> extends AbstractPluralAttribute<X, E, Li
         return CollectionType.LIST;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute#getElementType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute
+     * #getElementType()
      */
     @Override
     public Type<E> getElementType()
     {
         return attribType;
     }
-   
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Attribute#getJavaType()
      */
     @Override
     public Class<List<E>> getJavaType()
     {
-        return  super.getBoundJavaType();
+        return super.getBoundJavaType();
     }
 }

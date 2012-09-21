@@ -28,7 +28,7 @@ public class SQLTimeAccessorTest
     @Before
     public void setUp() throws Exception
     {
-        
+
         accessor = new SQLTimeAccessor();
     }
 

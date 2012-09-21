@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class BigDecimalDataGenerator implements DataGenerator<BigDecimal>
 {
     private static final LongDataGenerator LONG_DATA_GENERATOR = new LongDataGenerator();
+
     @Override
     public BigDecimal randomValue()
     {

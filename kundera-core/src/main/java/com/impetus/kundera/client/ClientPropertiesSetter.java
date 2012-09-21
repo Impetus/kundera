@@ -18,12 +18,13 @@ package com.impetus.kundera.client;
 import java.util.Map;
 
 /**
- * Defines methods for setting client properties 
+ * Defines methods for setting client properties
+ * 
  * @author amresh.singh
  */
 public interface ClientPropertiesSetter
-{   
-    
-    void populateClientProperties(Client client, Map<String, Object> properties);   
+{
+
+    void populateClientProperties(Client client, Map<String, Object> properties);
 
 }

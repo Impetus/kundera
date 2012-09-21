@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -26,13 +25,13 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class LongAccessorTest
 {
 
     private PropertyAccessor<Long> longAccessor;
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -53,15 +52,15 @@ public class LongAccessorTest
     @Test
     public void testFromBytes()
     {
-        byte[] bytes = new byte[]{};
+        byte[] bytes = new byte[] {};
         Assert.assertNull(longAccessor.fromBytes(LongAccessor.class, bytes));
         Long l = 49L;
         bytes = longAccessor.toBytes(l);
-        Assert.assertEquals(l,longAccessor.fromBytes(LongAccessor.class, bytes));
-        
+        Assert.assertEquals(l, longAccessor.fromBytes(LongAccessor.class, bytes));
+
         l = 12l;
         bytes = longAccessor.toBytes(l);
-        Assert.assertEquals(l, (Long)longAccessor.fromBytes(LongAccessor.class, bytes));
-        
+        Assert.assertEquals(l, (Long) longAccessor.fromBytes(LongAccessor.class, bytes));
+
     }
 }

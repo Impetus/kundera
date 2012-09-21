@@ -68,18 +68,16 @@ public final class EntityMetadata
     private boolean isCounterColumnType = false;
 
     private SingularAttribute idAttribute;
-    
+
     private List<String> colToBeIndexed;
-    
+
     private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
-    
 
     /** The read identifier method. */
     private Method readIdentifierMethod;
 
     /** The write identifier method. */
     private Method writeIdentifierMethod;
-
 
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
@@ -89,7 +87,6 @@ public final class EntityMetadata
     // value=>EntityLisntener Class and method
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
-
 
     /** Relationship map, key=>property name, value=>relation. */
     private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
@@ -104,7 +101,6 @@ public final class EntityMetadata
 
     // Whether it contains One-To-Many relationship
     private boolean isParent;
-
 
     /** The log. */
     private static Log log = LogFactory.getLog(EntityMetadata.class);
@@ -467,10 +463,10 @@ public final class EntityMetadata
      *            the field class
      * @return true, if is embeddable
      */
-//    public boolean isEmbeddable(Class<?> fieldClass)
-//    {
-//        return embeddableCollection.contains(fieldClass);
-//    }
+    // public boolean isEmbeddable(Class<?> fieldClass)
+    // {
+    // return embeddableCollection.contains(fieldClass);
+    // }
 
     /**
      * Adds the to embed collection.
@@ -478,13 +474,13 @@ public final class EntityMetadata
      * @param fieldClass
      *            the field class
      */
-//    public void addToEmbedCollection(Class<?> fieldClass)
-//    {
-//        if (!embeddableCollection.contains(fieldClass))
-//        {
-//            embeddableCollection.add(fieldClass);
-//        }
-//    }
+    // public void addToEmbedCollection(Class<?> fieldClass)
+    // {
+    // if (!embeddableCollection.contains(fieldClass))
+    // {
+    // embeddableCollection.add(fieldClass);
+    // }
+    // }
 
     /**
      * Checks if is cacheable.
@@ -525,7 +521,6 @@ public final class EntityMetadata
         builder.append("\tReadIdMethod: " + readIdentifierMethod.getName() + ",\n");
         builder.append("\tWriteIdMethod: " + writeIdentifierMethod.getName() + ",\n");
         builder.append("\tCacheable: " + cacheable + ",\n");
-
 
         if (!indexPrperties.isEmpty())
         {
@@ -575,7 +570,6 @@ public final class EntityMetadata
         return builder.toString();
     }
 
-
     /**
      * Getter method for isRelatedViaJoinTable.
      * 
@@ -618,7 +612,6 @@ public final class EntityMetadata
     {
         return relationNames;
     }
-
 
     /**
      * Method to add specific relation name for given relational field.
@@ -703,7 +696,8 @@ public final class EntityMetadata
     }
 
     /**
-     * @param idAttribute the idAttribute to set
+     * @param idAttribute
+     *            the idAttribute to set
      */
     public void setIdAttribute(SingularAttribute idAttribute)
     {
@@ -719,7 +713,8 @@ public final class EntityMetadata
     }
 
     /**
-     * @param colToBeIndexed the colToBeIndexed to set
+     * @param colToBeIndexed
+     *            the colToBeIndexed to set
      */
     public void setColToBeIndexed(List<String> colToBeIndexed)
     {

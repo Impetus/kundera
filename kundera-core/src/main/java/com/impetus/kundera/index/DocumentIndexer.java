@@ -179,22 +179,23 @@ public abstract class DocumentIndexer implements Indexer
         // Add all super column fields into document
         Set<Attribute> attributes = superColumn.getAttributes();
         Iterator<Attribute> iter = attributes.iterator();
-        while(iter.hasNext())
+        while (iter.hasNext())
         {
             Attribute attr = iter.next();
             java.lang.reflect.Field field = (java.lang.reflect.Field) attr.getJavaMember();
             String colName = field.getName();
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
-            
+
         }
-//        for (Column col : superColumn.getColumns())
-//        {
-//            java.lang.reflect.Field field = col.getField();
-//            String colName = field.getName();
-//            String indexName = metadata.getIndexName();
-//            addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
-//        }
+        // for (Column col : superColumn.getColumns())
+        // {
+        // java.lang.reflect.Field field = col.getField();
+        // String colName = field.getName();
+        // String indexName = metadata.getIndexName();
+        // addFieldToDocument(embeddedObject, currentDoc, field, colName,
+        // indexName);
+        // }
         // Add all entity fields to document
         addEntityFieldsToDocument(metadata, object, currentDoc);
 

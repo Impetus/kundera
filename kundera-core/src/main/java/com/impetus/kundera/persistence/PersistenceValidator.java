@@ -33,7 +33,9 @@ public class PersistenceValidator
 
     /**
      * Validates an entity object for CRUD operations
-     * @param entity Instance of entity object
+     * 
+     * @param entity
+     *            Instance of entity object
      * @return True if entity object is valid, false otherwise
      */
     public boolean isValidEntityObject(Object entity)

@@ -22,17 +22,19 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
 public class EmbeddedIdOwnerEntity
 {
 
-    @EmbeddedId private EmbeddableEntity id;
-    
-    @Column private long logColumn;
-    
+    @EmbeddedId
+    private EmbeddableEntity id;
+
+    @Column
+    private long logColumn;
+
     /**
      * @return the logColumn
      */
@@ -40,13 +42,16 @@ public class EmbeddedIdOwnerEntity
     {
         return logColumn;
     }
+
     /**
-     * @param logColumn the logColumn to set
+     * @param logColumn
+     *            the logColumn to set
      */
     public void setLogColumn(long logColumn)
     {
         this.logColumn = logColumn;
     }
+
     /**
      * @return the id
      */
@@ -54,13 +59,14 @@ public class EmbeddedIdOwnerEntity
     {
         return id;
     }
+
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(EmbeddableEntity id)
     {
         this.id = id;
     }
 
-    
 }

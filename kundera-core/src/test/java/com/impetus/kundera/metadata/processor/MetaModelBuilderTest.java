@@ -479,7 +479,6 @@ public class MetaModelBuilderTest
         CollectionAttribute<? super X, ?> collectionAttribute = (CollectionAttribute<? super X, ?>) managedType
                 .getCollection("association", AssociationEntity.class);
         Assert.assertNotNull(collectionAttribute);
-        
 
         // assert with invalid collection type class.
         try
@@ -580,9 +579,11 @@ public class MetaModelBuilderTest
 
     /**
      * On id class test.
-     *
-     * @param <X> the generic type
-     * @param <T> the generic type
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
      */
     @Test
     public <X extends Class, T extends Object> void onIdClassTest()
@@ -621,9 +622,11 @@ public class MetaModelBuilderTest
 
     /**
      * On embedded id test.
-     *
-     * @param <X> the generic type
-     * @param <T> the generic type
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
      */
     @Test
     public <X extends Class, T extends Object> void onEmbeddedIdTest()
@@ -662,9 +665,11 @@ public class MetaModelBuilderTest
 
     /**
      * Test mapped super class.
-     *
-     * @param <X> the generic type
-     * @param <T> the generic type
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
      */
     @Test
     public <X extends Class, T extends Object> void testMappedSuperClass()
@@ -690,8 +695,8 @@ public class MetaModelBuilderTest
         Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
         Assert.assertNotNull(managedTypes);
         Assert.assertEquals(2, managedTypes.size());
-        
-        Assert.assertEquals(1,builder.getMappedSuperClassTypes().size());
+
+        Assert.assertEquals(1, builder.getMappedSuperClassTypes().size());
 
         // on subClass A
         AbstractManagedType managedType = managedTypes.get(SubClassA.class);

@@ -27,7 +27,6 @@ public class CoreMetadata
 
     /** The lazy initializer factory. */
     private LazyInitializerFactory lazyInitializerFactory;
-   
 
     /**
      * Gets the lazy initializer factory.

@@ -21,7 +21,6 @@ import java.util.List;
 
 import javassist.Modifier;
 
-import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
@@ -88,11 +87,15 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * Populate metadata.
-     *
-     * @param <X> the generic type
-     * @param <T> the generic type
-     * @param metadata the metadata
-     * @param clazz the clazz
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
+     * @param metadata
+     *            the metadata
+     * @param clazz
+     *            the clazz
      */
     private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz)
     {
@@ -124,7 +127,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
         MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr);
 
-//        metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.COLUMN_FAMILY);
+        // metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.COLUMN_FAMILY);
         // scan for fields
 
         // process for metamodelImpl
@@ -137,7 +140,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             for (Field f : clazz.getDeclaredFields())
             {
-                if (f != null && ! Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())  && ! f.isAnnotationPresent(Transient.class))
+                if (f != null && !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
+                        && !f.isAnnotationPresent(Transient.class))
                 {
                     // construct metamodel.
                     metaModelBuilder.construct(clazz, f);
@@ -241,11 +245,15 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * On id attribute.
-     *
-     * @param builder the builder
-     * @param entityMetadata the entity metadata
-     * @param clazz the clazz
-     * @param f the f
+     * 
+     * @param builder
+     *            the builder
+     * @param entityMetadata
+     *            the entity metadata
+     * @param clazz
+     *            the clazz
+     * @param f
+     *            the f
      */
     private void onIdAttribute(final MetaModelBuilder builder, EntityMetadata entityMetadata, final Class clazz, Field f)
     {
@@ -254,20 +262,23 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
             entityMetadata.setIdAttribute((SingularAttribute) attrib);
-//            populateIdAccessorMethods(entityMetadata, clazz, f);
+            // populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }
 
     /**
      * On family type.
-     *
-     * @param entityMetadata the entity metadata
-     * @param clazz the clazz
-     * @param f the f
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param clazz
+     *            the clazz
+     * @param f
+     *            the f
      */
     private void onFamilyType(EntityMetadata entityMetadata, final Class clazz, Field f)
     {
-        if (entityMetadata.getType() == null ||  !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        if (entityMetadata.getType() == null || !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
             if (f.isAnnotationPresent(Embedded.class))
             {
@@ -282,10 +293,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * On jpa column mapping.
-     *
-     * @param builder the builder
-     * @param entityMetadata the entity metadata
-     * @param f the f
+     * 
+     * @param builder
+     *            the builder
+     * @param entityMetadata
+     *            the entity metadata
+     * @param f
+     *            the f
      */
     private void onJPAColumnMapping(final MetaModelBuilder builder, EntityMetadata entityMetadata, Field f)
     {

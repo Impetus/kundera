@@ -24,12 +24,15 @@ import javax.persistence.metamodel.Type;
 
 /**
  * Implementation class for <code> {@link MapAttribute} </code> interface.
- * Offers metadata information implementation for collection attribute as per jpa.
+ * Offers metadata information implementation for collection attribute as per
+ * jpa.
  * 
  * @author vivek.mishra
  * 
- * @param <X> managed type
- * @param <E> attribute type present in map.
+ * @param <X>
+ *            managed type
+ * @param <E>
+ *            attribute type present in map.
  */
 public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, Map<K, V>> implements
         MapAttribute<X, K, V>
@@ -40,12 +43,18 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     /**
      * Constructor using fields.
      * 
-     * @param attribType                       attribute type
-     * @param attribName                       attribute name   
-     * @param persistenceAttribType            persistent attribute type.
-     * @param managedType                      managed type
-     * @param member                           attribute's java member. 
-     * @param key type                         attribute of key type.
+     * @param attribType
+     *            attribute type
+     * @param attribName
+     *            attribute name
+     * @param persistenceAttribType
+     *            persistent attribute type.
+     * @param managedType
+     *            managed type
+     * @param member
+     *            attribute's java member.
+     * @param key
+     *            type attribute of key type.
      */
     public DefaultMapAttribute(Type<V> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,

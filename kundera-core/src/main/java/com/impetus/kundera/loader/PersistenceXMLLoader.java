@@ -244,8 +244,8 @@ public class PersistenceXMLLoader
                 // look for "persistence-unit" element
                 if (tag.equals("persistence-unit"))
                 {
-                    PersistenceUnitMetadata metadata = parsePersistenceUnit(url, element, versionName );
-//                    metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
+                    PersistenceUnitMetadata metadata = parsePersistenceUnit(url, element, versionName);
+                    // metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
                     units.add(metadata);
                 }
             }

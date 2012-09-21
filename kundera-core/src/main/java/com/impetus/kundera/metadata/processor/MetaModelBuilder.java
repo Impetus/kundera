@@ -47,7 +47,6 @@ import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.IllegalAddException;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.attributes.DefaultCollectionAttribute;
@@ -78,7 +77,6 @@ public final class MetaModelBuilder<X, T>
 {
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(MetaModelBuilder.class);
-
 
     /** The managed type. */
     private AbstractManagedType<X> managedType;
@@ -200,15 +198,17 @@ public final class MetaModelBuilder<X, T>
                 return processOnEmbeddables(attribType);
 
             case ELEMENT_COLLECTION:
-                if(attribute != null && Collection.class.isAssignableFrom(attribType))
+                if (attribute != null && Collection.class.isAssignableFrom(attribType))
                 {
-                java.lang.reflect.Type[] argument = ((ParameterizedType) attribute.getGenericType())
-                .getActualTypeArguments();
-                
-                return processOnEmbeddables(getTypedClass(argument[0]));
-                } else 
+                    java.lang.reflect.Type[] argument = ((ParameterizedType) attribute.getGenericType())
+                            .getActualTypeArguments();
+
+                    return processOnEmbeddables(getTypedClass(argument[0]));
+                }
+                else
                 {
-                    LOG.warn("Cannot process for : " + attribute + " as it is not a collection but annotated with @ElementCollection");
+                    LOG.warn("Cannot process for : " + attribute
+                            + " as it is not a collection but annotated with @ElementCollection");
                 }
             default:
                 if (!(managedTypes.get(attribType) != null))
@@ -257,7 +257,7 @@ public final class MetaModelBuilder<X, T>
          *            the attrib type
          * @return the abstract managed type
          */
-        private  AbstractManagedType processOnEmbeddables(Class attribType)
+        private AbstractManagedType processOnEmbeddables(Class attribType)
         {
             // Check if this embeddable type is already present in
             // collection of MetaModelBuider.
@@ -525,7 +525,6 @@ public final class MetaModelBuilder<X, T>
     {
         return embeddables;
     }
-    
 
     /**
      * @return the mappedSuperClassTypes
@@ -629,47 +628,49 @@ public final class MetaModelBuilder<X, T>
         if (clazz.isAnnotationPresent(Embeddable.class))
         {
 
-            
             validate(clazz, true);
-            if(!embeddables.containsKey(clazz))
+            if (!embeddables.containsKey(clazz))
             {
                 managedType = new DefaultEmbeddableType<X>(clazz, PersistenceType.EMBEDDABLE, getType(
-                    clazz.getSuperclass(), isIdClass));
-            onDeclaredFields(clazz, managedType);
-            embeddables.put(clazz, managedType);
-            } else
-            {
-                managedType = (AbstractManagedType<X>) embeddables.get(clazz); 
+                        clazz.getSuperclass(), isIdClass));
+                onDeclaredFields(clazz, managedType);
+                embeddables.put(clazz, managedType);
             }
-            
+            else
+            {
+                managedType = (AbstractManagedType<X>) embeddables.get(clazz);
+            }
+
         }
         else if (clazz.isAnnotationPresent(MappedSuperclass.class))
         {
-            
+
             validate(clazz, false);
-            if(!mappedSuperClassTypes.containsKey(clazz))
+            if (!mappedSuperClassTypes.containsKey(clazz))
             {
-            managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
-                    (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
-            onDeclaredFields(clazz, managedType);
-            mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
-            }else
+                managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
+                        (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
+                onDeclaredFields(clazz, managedType);
+                mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
+            }
+            else
             {
                 managedType = (AbstractManagedType<X>) mappedSuperClassTypes.get(clazz);
             }
         }
         else if (clazz.isAnnotationPresent(Entity.class) || isIdClass)
         {
-            if(!managedTypes.containsKey(clazz))
+            if (!managedTypes.containsKey(clazz))
             {
-            managedType = new DefaultEntityType<X>(clazz, PersistenceType.ENTITY, (AbstractIdentifiableType) getType(
-                    clazz.getSuperclass(), isIdClass));
-            // in case of @IdClass, it is a temporary managed type.
-            if (!isIdClass)
-            {
-                managedTypes.put(clazz, (EntityType<?>) managedType);
+                managedType = new DefaultEntityType<X>(clazz, PersistenceType.ENTITY,
+                        (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
+                // in case of @IdClass, it is a temporary managed type.
+                if (!isIdClass)
+                {
+                    managedTypes.put(clazz, (EntityType<?>) managedType);
+                }
             }
-            } else
+            else
             {
                 managedType = (AbstractManagedType<X>) managedTypes.get(clazz);
             }

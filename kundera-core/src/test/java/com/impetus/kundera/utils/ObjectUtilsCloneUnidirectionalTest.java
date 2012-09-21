@@ -61,7 +61,6 @@ public class ObjectUtilsCloneUnidirectionalTest
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
-    // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 
     /**
@@ -71,8 +70,8 @@ public class ObjectUtilsCloneUnidirectionalTest
     public void setUp() throws Exception
     {
         // configurator.configure();
-//        new PersistenceUnitConfiguration("kunderatest").configure();
-//        new MetamodelConfiguration("kunderatest").configure();
+        // new PersistenceUnitConfiguration("kunderatest").configure();
+        // new MetamodelConfiguration("kunderatest").configure();
         getEntityManagerFactory(null);
     }
 
@@ -89,11 +88,6 @@ public class ObjectUtilsCloneUnidirectionalTest
     {
         // Construct photographer object
         PhotographerUni_1_M_1_M a1 = constructPhotographer(1);
-        // Create a deep copy using cloner
-        long t1 = System.currentTimeMillis();
-        PhotographerUni_1_M_1_M a3 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
-        long t2 = System.currentTimeMillis();
-        log.info("Time taken by Deep Cloner:" + (t2 - t1));
 
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
@@ -104,33 +98,15 @@ public class ObjectUtilsCloneUnidirectionalTest
 
         // Check for reference inequality
         assertObjectReferenceInequality(a1, a2);
-        assertObjectReferenceInequality(a1, a3);
 
         // Check for deep clone object equality
         Assert.assertTrue(DeepEquals.deepEquals(a1, a2));
-        Assert.assertTrue(DeepEquals.deepEquals(a1, a3));
 
         // Change original object
         modifyPhotographer(a1);
 
         // Check whether clones are unaffected from change in original object
         assertOriginalObjectValues(a2);
-        assertOriginalObjectValues(a3);
-
-    }
-
-    // @Test
-    public void testBulkCopyUsingDeepCloner()
-    {
-        int n = 100000;
-        long t1 = System.currentTimeMillis();
-        for (int i = 0; i < n; i++)
-        {
-            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
-            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
-        }
-        long t2 = System.currentTimeMillis();
-        log.info("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
     }
 
     // @Test
@@ -310,7 +286,7 @@ public class ObjectUtilsCloneUnidirectionalTest
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, _keyspace);
-//        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+        // props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

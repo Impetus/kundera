@@ -160,7 +160,9 @@ public interface Client<Q extends Query>
     /**
      * Delete rows from given table for given column name and corresponding
      * value..
-     * @param schemaName Schema Name
+     * 
+     * @param schemaName
+     *            Schema Name
      * @param tableName
      *            Name of the table
      * @param columnName
@@ -197,6 +199,6 @@ public interface Client<Q extends Query>
      * 
      * @return class instance of configured query interface.
      */
-    Class<Q> getQueryImplementor();   
-    
+    Class<Q> getQueryImplementor();
+
 }

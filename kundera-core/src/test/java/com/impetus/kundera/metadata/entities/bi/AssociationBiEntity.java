@@ -23,7 +23,7 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "asso_table", schema = "testSchema@keyspace")
@@ -31,15 +31,15 @@ public class AssociationBiEntity
 {
 
     @Id
-    @Column(name="Association_ID")
+    @Column(name = "Association_ID")
     private String assoRowKey;
-    
-    @Column(name="ADDRESS")
+
+    @Column(name = "ADDRESS")
     private String address;
-    
-    @Column(name="AGE")
+
+    @Column(name = "AGE")
     private int age;
-    
+
     @OneToOne(mappedBy = "association")
     private OToOOwnerBiEntity owner;
 
@@ -52,7 +52,8 @@ public class AssociationBiEntity
     }
 
     /**
-     * @param rowKey the rowKey to set
+     * @param rowKey
+     *            the rowKey to set
      */
     public void setRowKey(String rowKey)
     {
@@ -68,7 +69,8 @@ public class AssociationBiEntity
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(String address)
     {
@@ -84,7 +86,8 @@ public class AssociationBiEntity
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -100,7 +103,8 @@ public class AssociationBiEntity
     }
 
     /**
-     * @param assoRowKey the assoRowKey to set
+     * @param assoRowKey
+     *            the assoRowKey to set
      */
     public void setAssoRowKey(String assoRowKey)
     {
@@ -116,12 +120,12 @@ public class AssociationBiEntity
     }
 
     /**
-     * @param owner the owner to set
+     * @param owner
+     *            the owner to set
      */
     public void setOwner(OToOOwnerBiEntity owner)
     {
         this.owner = owner;
     }
 
-    
 }

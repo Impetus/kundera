@@ -35,7 +35,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     @Override
     public final Integer fromBytes(Class targetClass, byte[] b)
     {
-        if(b == null)
+        if (b == null)
         {
             return null;
         }
@@ -84,7 +84,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

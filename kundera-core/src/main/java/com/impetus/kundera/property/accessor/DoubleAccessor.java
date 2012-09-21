@@ -61,7 +61,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     @Override
     public String toString(Object object)
     {
-        return object != null? object.toString() : null;
+        return object != null ? object.toString() : null;
     }
 
     /**
@@ -110,7 +110,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

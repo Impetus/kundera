@@ -3,7 +3,7 @@ package com.impetus.kundera.datatypes.datagenerator;
 import java.util.Calendar;
 
 public class CalendarDataGenerator implements DataGenerator<Calendar>
-{    
+{
     private static final Calendar INSTANCE = Calendar.getInstance();
 
     @Override

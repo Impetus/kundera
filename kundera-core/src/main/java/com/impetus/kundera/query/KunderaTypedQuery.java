@@ -29,9 +29,10 @@ import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
 /**
- * Implementation class for <code> javax.persitence.TypedQuery </code> interface.
- * More sort of a compile time type check wrapper on top of {@link QueryImpl}.
- *  
+ * Implementation class for <code> javax.persitence.TypedQuery </code>
+ * interface. More sort of a compile time type check wrapper on top of
+ * {@link QueryImpl}.
+ * 
  * @author vivek.mishra
  * 
  */
@@ -41,11 +42,12 @@ public class KunderaTypedQuery<X> implements TypedQuery<X>
      * Query instance.
      */
     private Query query;
-   
+
     /**
      * Constructor using query as parameter.
      * 
-     * @param query query instance.
+     * @param query
+     *            query instance.
      */
     public KunderaTypedQuery(Query query)
     {

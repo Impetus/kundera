@@ -48,7 +48,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     {
         try
         {
-            if(bytes == null)
+            if (bytes == null)
             {
                 return null;
             }
@@ -134,7 +134,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

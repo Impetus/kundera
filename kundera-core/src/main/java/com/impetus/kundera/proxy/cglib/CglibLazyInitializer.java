@@ -18,7 +18,6 @@ package com.impetus.kundera.proxy.cglib;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import net.sf.cglib.proxy.Callback;
@@ -40,7 +39,7 @@ import com.impetus.kundera.proxy.LazyInitializer;
  * library.
  */
 public final class CglibLazyInitializer implements LazyInitializer, InvocationHandler
-{  
+{
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(CglibLazyInitializer.class);
@@ -240,7 +239,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             int params = args.length;
 
             if (params == 0)
-            {               
+            {
                 if (isUninitialized() && method.equals(getIdentifierMethod))
                 {
                     return getIdentifier();
@@ -250,7 +249,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 {
                     return this;
                 }
-            }            
+            }
             Object target = getImplementation();
             try
             {
@@ -269,7 +268,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                     {
                         method.setAccessible(true);
                     }
-                    returnValue = method.invoke(target, args);                    
+                    returnValue = method.invoke(target, args);
                 }
                 return ((returnValue == target) ? proxy : returnValue);
             }
@@ -305,7 +304,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     public final String getEntityName()
     {
         return entityName;
-    }   
+    }
 
     /**
      * @return the id
@@ -317,7 +316,8 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     @Override
     public void setIdentifier(Object id)
@@ -334,8 +334,6 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         return !initialized;
     }
-
-    
 
     /**
      * Initialize.
@@ -421,8 +419,8 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         this.target = paramObject;
         this.initialized = true;
-    }      
-    
+    }
+
     /**
      * @return the persistenceDelegator
      */
@@ -432,7 +430,8 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     }
 
     /**
-     * @param persistenceDelegator the persistenceDelegator to set
+     * @param persistenceDelegator
+     *            the persistenceDelegator to set
      */
     public void setPersistenceDelegator(PersistenceDelegator persistenceDelegator)
     {
@@ -443,7 +442,6 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     public void unsetPersistenceDelegator()
     {
         this.persistenceDelegator = null;
-    }     
-    
+    }
 
 }

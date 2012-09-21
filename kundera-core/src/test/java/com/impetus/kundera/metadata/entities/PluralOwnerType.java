@@ -30,29 +30,29 @@ import javax.persistence.OneToMany;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 public class PluralOwnerType
 {
     @Id
-    @Column(name="P_KEY")
+    @Column(name = "P_KEY")
     private Double primaryKey;
-    
+
     @OneToMany
-    @Column(name="set_type")
+    @Column(name = "set_type")
     private Set<SetTypeAssociationEntity> setAssocition;
-    
+
     @ManyToMany
     @JoinTable(name = "OWNER_LIST", joinColumns = { @JoinColumn(name = "P_KEY") }, inverseJoinColumns = { @JoinColumn(name = "listKey") })
-    @Column(name="list_type")
+    @Column(name = "list_type")
     private List<ListTypeAssociationEntity> listAssociation;
-    
+
     @OneToMany
-    @Column(name="col_type")
+    @Column(name = "col_type")
     private Collection<CollectionTypeAssociationEntity> collectionAssociation;
-    
-    @Column(name="map_type")
+
+    @Column(name = "map_type")
     @OneToMany
     private Map<Integer, MapTypeAssociationEntity> mapAssociation;
 
@@ -65,7 +65,8 @@ public class PluralOwnerType
     }
 
     /**
-     * @param primaryKey the primaryKey to set
+     * @param primaryKey
+     *            the primaryKey to set
      */
     public void setPrimaryKey(Double primaryKey)
     {
@@ -81,7 +82,8 @@ public class PluralOwnerType
     }
 
     /**
-     * @param setAssocition the setAssocition to set
+     * @param setAssocition
+     *            the setAssocition to set
      */
     public void setSetAssocition(Set<SetTypeAssociationEntity> setAssocition)
     {
@@ -97,7 +99,8 @@ public class PluralOwnerType
     }
 
     /**
-     * @param listAssociation the listAssociation to set
+     * @param listAssociation
+     *            the listAssociation to set
      */
     public void setListAssociation(List<ListTypeAssociationEntity> listAssociation)
     {
@@ -113,7 +116,8 @@ public class PluralOwnerType
     }
 
     /**
-     * @param collectionAssociation the collectionAssociation to set
+     * @param collectionAssociation
+     *            the collectionAssociation to set
      */
     public void setCollectionAssociation(Collection<CollectionTypeAssociationEntity> collectionAssociation)
     {
@@ -129,12 +133,12 @@ public class PluralOwnerType
     }
 
     /**
-     * @param mapAssociation the mapAssociation to set
+     * @param mapAssociation
+     *            the mapAssociation to set
      */
     public void setMapAssociation(Map<Integer, MapTypeAssociationEntity> mapAssociation)
     {
         this.mapAssociation = mapAssociation;
     }
-    
-    
+
 }

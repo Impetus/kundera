@@ -80,11 +80,11 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }
-            
+
             Boolean b = new Boolean(s);
             return b;
         }

@@ -20,7 +20,8 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class CoreTestClientFactory extends GenericClientFactory
@@ -89,6 +90,5 @@ public class CoreTestClientFactory extends GenericClientFactory
     {
         return super.getConnectionPoolOrConnection();
     }
-    
 
 }

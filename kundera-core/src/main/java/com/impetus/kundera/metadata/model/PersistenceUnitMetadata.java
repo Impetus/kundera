@@ -79,14 +79,15 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     public PersistenceUnitMetadata()
     {
-        
+
     }
-    
+
     public PersistenceUnitMetadata(String xmlSchemaVersion, URL rootUrl)
     {
         this.schemaVersion = xmlSchemaVersion;
         this.rootUrl = rootUrl;
     }
+
     /*
      * (non-Javadoc)
      * 
@@ -553,7 +554,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     {
         return getProperty(PersistenceProperties.KUNDERA_BATCH_SIZE) != null;
     }
-    
+
     /**
      * Return batch.size value.
      * 
@@ -561,17 +562,17 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
      */
     public int getBatchSize()
     {
-        if(isBatch())
+        if (isBatch())
         {
             String batchSize = getProperty(PersistenceProperties.KUNDERA_BATCH_SIZE);
             int batch_Size = Integer.valueOf(batchSize);
-            if(batch_Size == 0)
+            if (batch_Size == 0)
             {
                 throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
             }
             return batch_Size;
         }
-        
+
         return 0;
     }
 }

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
-
 /**
  * Interface for proxies.
  * 

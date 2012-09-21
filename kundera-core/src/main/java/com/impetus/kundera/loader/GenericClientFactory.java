@@ -50,7 +50,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
-    
+
     /** The index manager. */
     protected IndexManager indexManager;
 
@@ -62,7 +62,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** property reader instance */
     protected PropertyReader propertyReader;
-
 
     /**
      * Load.
@@ -107,8 +106,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
             // Set Index Manager
             indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                    luceneDirectoryPath));       
-            
+                    luceneDirectoryPath));
+
         }
     }
 
@@ -197,6 +196,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     private void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
-    }      
-    
+    }
+
 }

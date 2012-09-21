@@ -47,7 +47,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
@@ -64,7 +64,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public String toString(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }

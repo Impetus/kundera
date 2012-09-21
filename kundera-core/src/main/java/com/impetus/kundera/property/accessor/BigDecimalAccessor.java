@@ -41,11 +41,11 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         String s;
         try
         {
-            if(b == null)
+            if (b == null)
             {
                 return null;
             }
-            
+
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -64,7 +64,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
@@ -81,7 +81,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
     @Override
     public String toString(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
@@ -98,7 +98,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
     @Override
     public BigDecimal fromString(Class targetClass, String s)
     {
-        
+
         return s != null ? new BigDecimal(s) : null;
     }
 

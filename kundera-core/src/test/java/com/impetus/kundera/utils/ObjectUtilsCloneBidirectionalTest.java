@@ -115,12 +115,6 @@ public class ObjectUtilsCloneBidirectionalTest
         c13.setAlbum(b12);
         c14.setAlbum(b12);
 
-        // Create a deep copy using cloner
-        long t1 = System.currentTimeMillis();
-        PhotographerBi_1_M_1_M a3 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
-        long t2 = System.currentTimeMillis();
-        log.info("Time taken by Deep Cloner:" + (t2 - t1));
-
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
         metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
@@ -130,19 +124,15 @@ public class ObjectUtilsCloneBidirectionalTest
 
         // Check for reference inequality
         assertObjectReferenceInequality(a1, a2);
-        assertObjectReferenceInequality(a1, a3);
 
         // Check for deep clone object equality
         Assert.assertTrue(DeepEquals.deepEquals(a1, a2));
-        Assert.assertTrue(DeepEquals.deepEquals(a1, a3));
 
         // Change original object
         modifyPhotographer(a1);
 
         // Check whether clones are unaffected from change in original object
         assertOriginalObjectValues(a2);
-        assertOriginalObjectValues(a3);
-
     }
 
     private void modifyPhotographer(PhotographerBi_1_M_1_M p)

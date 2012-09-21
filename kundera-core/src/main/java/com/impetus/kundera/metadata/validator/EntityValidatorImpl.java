@@ -70,7 +70,7 @@ public class EntityValidatorImpl implements EntityValidator
         {
             throw new InvalidEntityDefinitionException(clazz.getName() + " is not annotated with @Entity");
         }
-        
+
         // Must be annotated with @Table
         if (!clazz.isAnnotationPresent(Table.class))
         {
@@ -86,7 +86,7 @@ public class EntityValidatorImpl implements EntityValidator
         {
             throw new InvalidEntityDefinitionException(clazz.getName()
                     + " must have a default no-argument constructor.");
-        }       
+        }
 
         // Check for @Key and ensure that there is just 1 @Key field of String
         // type.

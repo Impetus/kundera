@@ -49,10 +49,10 @@ public class ApplicationMetadata
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
-    
-//    private  MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
 
-    private  Map<String,MetaModelBuilder> metaModelBuilder = new ConcurrentHashMap<String, MetaModelBuilder>();
+    // private MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
+
+    private Map<String, MetaModelBuilder> metaModelBuilder = new ConcurrentHashMap<String, MetaModelBuilder>();
 
     /**
      * Collection instance to hold clazz's full name to persistence unit
@@ -362,10 +362,11 @@ public class ApplicationMetadata
     public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
     {
 
-        if(metaModelBuilder.containsKey(persistenceUnit))
+        if (metaModelBuilder.containsKey(persistenceUnit))
         {
-            return metaModelBuilder.get(persistenceUnit); 
-        } else
+            return metaModelBuilder.get(persistenceUnit);
+        }
+        else
         {
             MetaModelBuilder builder = new MetaModelBuilder();
             metaModelBuilder.put(persistenceUnit, builder);
@@ -373,5 +374,4 @@ public class ApplicationMetadata
         }
     }
 
-    
 }

@@ -46,7 +46,8 @@ import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
- * Implementation class for {@link EntityManagerFactory} 
+ * Implementation class for {@link EntityManagerFactory}
+ * 
  * @author animesh.kumar
  */
 public class EntityManagerFactoryImpl implements EntityManagerFactory
@@ -76,10 +77,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     // Transaction type
     PersistenceUnitTransactionType transactionType;
-    
-    
+
     private final KunderaPersistenceUnitUtil util;
-    
+
     private final PersistenceUtilHelper.MetadataCache cache = new PersistenceUtilHelper.MetadataCache();
 
     /**
@@ -129,7 +129,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(pu)
                     .getTransactionType();
-            txTypes.add(txType); 
+            txTypes.add(txType);
         }
 
         if (txTypes.size() != 1)
@@ -141,18 +141,19 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             this.transactionType = txTypes.iterator().next();
         }
-        
+
         this.util = new KunderaPersistenceUnitUtil(cache);
 
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
-    
+
     /**
      * Close the factory, releasing any resources that it holds. After a factory
      * instance has been closed, all methods invoked on it will throw the
      * IllegalStateException, except for isOpen, which will return false. Once
      * an EntityManagerFactory has been closed, all its entity managers are
-     * considered to be in the closed state. 
+     * considered to be in the closed state.
+     * 
      * @throws IllegalStateException
      *             if the entity manager factory has been closed
      * @see javax.persistence.EntityManagerFactory#close()
@@ -178,6 +179,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * Create a new application-managed EntityManager. This method returns a new
      * EntityManager instance each time it is invoked. The isOpen method will
      * return true on the returned instance.
+     * 
      * @return entity manager instance
      * @throws IllegalStateException
      *             if the entity manager factory has been closed
@@ -186,7 +188,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public final EntityManager createEntityManager()
     {
         // For Application managed persistence context, type is always EXTENDED
-        if(isOpen())
+        if (isOpen())
         {
             return new EntityManagerImpl(this, transactionType, PersistenceContextType.EXTENDED);
         }
@@ -196,7 +198,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /**
      * Create a new application-managed EntityManager with the specified Map of
      * properties. This method returns a new EntityManager instance each time it
-     * is invoked. The isOpen method will return true on the returned instance. 
+     * is invoked. The isOpen method will return true on the returned instance.
+     * 
      * @param map
      *            properties for entity manager
      * @return entity manager instance
@@ -207,33 +210,35 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public final EntityManager createEntityManager(Map map)
     {
         // For Application managed persistence context, type is always EXTENDED
-        if(isOpen())
+        if (isOpen())
         {
-        return new EntityManagerImpl(this, map, transactionType, PersistenceContextType.EXTENDED);
+            return new EntityManagerImpl(this, map, transactionType, PersistenceContextType.EXTENDED);
         }
         throw new IllegalStateException("entity manager factory has been closed");
     }
 
-   
     /**
-    * Indicates whether the factory is open. Returns true
-    * until the factory has been closed.
-    * @return boolean indicating whether the factory is open
-    * @see javax.persistence.EntityManagerFactory#isOpen()
-    */
+     * Indicates whether the factory is open. Returns true until the factory has
+     * been closed.
+     * 
+     * @return boolean indicating whether the factory is open
+     * @see javax.persistence.EntityManagerFactory#isOpen()
+     */
     @Override
     public final boolean isOpen()
     {
         return !closed;
     }
 
-   /**
-    * Return an instance of CriteriaBuilder for the creation of CriteriaQuery objects.
-    * @return CriteriaBuilder instance
-    * @throws IllegalStateException if the entity manager factory
-    * has been closed
-    * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
-    */
+    /**
+     * Return an instance of CriteriaBuilder for the creation of CriteriaQuery
+     * objects.
+     * 
+     * @return CriteriaBuilder instance
+     * @throws IllegalStateException
+     *             if the entity manager factory has been closed
+     * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
+     */
     @Override
     public CriteriaBuilder getCriteriaBuilder()
     {
@@ -243,6 +248,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /**
      * Return an instance of Metamodel interface for access to the metamodel of
      * the persistence unit.
+     * 
      * @return Metamodel instance
      * @throws IllegalStateException
      *             if the entity manager factory has been closed
@@ -254,11 +260,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
     }
 
-   
     /**
      * Get the properties and associated values that are in effect for the
      * entity manager factory. Changing the contents of the map does not change
-     * the configuration in effect. 
+     * the configuration in effect.
+     * 
      * @return properties
      * @throws IllegalStateException
      *             if the entity manager factory has been closed
@@ -269,11 +275,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         return properties;
     }
-    
-    
+
     /**
      * Access the cache that is associated with the entity manager factory (the
-     * "second level cache"). 
+     * "second level cache").
+     * 
      * @return instance of the Cache interface
      * @throws IllegalStateException
      *             if the entity manager factory has been closed
@@ -286,19 +292,21 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     }
 
     /**
-     * Return interface providing access to utility methods for the persistence unit. 
+     * Return interface providing access to utility methods for the persistence
+     * unit.
+     * 
      * @return PersistenceUnitUtil interface
      * @throws IllegalStateException
-     *             if the entity manager factory has been closed 
+     *             if the entity manager factory has been closed
      * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
      */
     @Override
     public PersistenceUnitUtil getPersistenceUnitUtil()
     {
-        if(! isOpen())
+        if (!isOpen())
         {
             throw new IllegalStateException("EntityManagerFactory is closed");
-        }        
+        }
         return this.util;
     }
 

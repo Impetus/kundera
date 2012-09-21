@@ -57,7 +57,7 @@ public class LongAccessor implements PropertyAccessor<Long>
     @Override
     public final byte[] toBytes(Object object)
     {
-        if(object != null)
+        if (object != null)
         {
             Long l = (Long) object;
             ByteBuffer buffer = ByteBuffer.allocate(8);
@@ -91,7 +91,7 @@ public class LongAccessor implements PropertyAccessor<Long>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

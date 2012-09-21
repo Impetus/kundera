@@ -40,9 +40,9 @@ public class KunderaPersistence implements PersistenceProvider
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
-    
+
     private final ProviderUtil providerUtil;
-    
+
     private final PersistenceUtilHelper.MetadataCache cache;
 
     /**
@@ -53,7 +53,7 @@ public class KunderaPersistence implements PersistenceProvider
         // Load Core
         logger.info("Loading Core");
         new CoreLoader().load();
-        
+
         this.providerUtil = new KunderaPersistenceProviderUtil(this);
         this.cache = new PersistenceUtilHelper.MetadataCache();
     }
@@ -105,7 +105,8 @@ public class KunderaPersistence implements PersistenceProvider
     }
 
     /**
-     * Returns Persistence Provider util 
+     * Returns Persistence Provider util
+     * 
      * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
      */
     @Override
@@ -121,7 +122,5 @@ public class KunderaPersistence implements PersistenceProvider
     {
         return cache;
     }
-    
-    
 
 }

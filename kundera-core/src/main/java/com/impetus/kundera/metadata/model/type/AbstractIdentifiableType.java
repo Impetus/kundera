@@ -26,13 +26,14 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Abstract implementation for <code>IdentifiableType</code>.
- *
- * @param <X> the generic type
+ * 
+ * @param <X>
+ *            the generic type
  * @author vivek.mishra
  */
 public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
 {
-    
+
     /** The id attribute. */
     private SingularAttribute<? super X, ?> idAttribute;
 
@@ -47,10 +48,13 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
 
     /**
      * Instantiates a new abstract identifiable type.
-     *
-     * @param clazz the clazz
-     * @param persistenceType the persistence type
-     * @param superClazzType the super clazz type
+     * 
+     * @param clazz
+     *            the clazz
+     * @param persistenceType
+     *            the persistence type
+     * @param superClazzType
+     *            the super clazz type
      */
     AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             AbstractIdentifiableType<? super X> superClazzType)
@@ -93,8 +97,6 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return null;
 
     }
-
-   
 
     /*
      * (non-Javadoc)
@@ -212,10 +214,13 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
 
     /**
      * Adds the id attribute.
-     *
-     * @param idAttribute the id attribute
-     * @param isIdClass the is id class
-     * @param idClassAttributes the id class attributes
+     * 
+     * @param idAttribute
+     *            the id attribute
+     * @param isIdClass
+     *            the is id class
+     * @param idClassAttributes
+     *            the id class attributes
      */
     public void addIdAttribute(SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
             Set<SingularAttribute<? super X, ?>> idClassAttributes)

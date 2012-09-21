@@ -110,19 +110,19 @@ public class MetadataBuilder
         for (MetadataProcessor processor : metadataProcessors)
         {
             // in case it is not intend for current persistence unit.
-                checkForRDBMS(metadata);
-                processor.process(clazz, metadata);
-                metadata = belongsToPersistenceUnit(metadata);
-                if (metadata == null)
-                {
-                    break;
-                }
+            checkForRDBMS(metadata);
+            processor.process(clazz, metadata);
+            metadata = belongsToPersistenceUnit(metadata);
+            if (metadata == null)
+            {
+                break;
+            }
         }
 
         return metadata;
     }
 
-    private void checkForRDBMS(EntityMetadata metadata )
+    private void checkForRDBMS(EntityMetadata metadata)
     {
         if (Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
         {

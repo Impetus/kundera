@@ -54,8 +54,8 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.api.Batcher;
-import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.CacheBase;
+import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
@@ -178,7 +178,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
     }
-    
+
     public <E> E findById(Class<E> entityClass, Object primaryKey)
     {
         E e = find(entityClass, primaryKey);
@@ -198,7 +198,6 @@ public class PersistenceDelegator
         // Return a deep copy of this entity
         return (E) ObjectUtils.deepCopy((Object) e);
     }
-    
 
     /**
      * Finds an entity from persistence cache, if not there, fetches from
@@ -401,8 +400,7 @@ public class PersistenceDelegator
                         node.setClient(getClient(metadata));
 
                         // if batch size is defined.
-                        if ((node.getClient() instanceof Batcher)
-                                && ((Batcher) (node.getClient())).getBatchSize() > 0)
+                        if ((node.getClient() instanceof Batcher) && ((Batcher) (node.getClient())).getBatchSize() > 0)
                         {
                             isBatch = true;
                             ((Batcher) (node.getClient())).addBatch(node);
@@ -614,8 +612,8 @@ public class PersistenceDelegator
         }
         EntityMetadata metadata = getMetadata(entity.getClass());
         Object primaryKey = getId(entity, metadata);
-        
-        if(primaryKey == null)
+
+        if (primaryKey == null)
         {
             throw new IllegalArgumentException("Primary key not set into entity");
         }
@@ -647,12 +645,12 @@ public class PersistenceDelegator
         }
 
         Object primaryKey = getId(entity, entityMetadata);
-        
-        if(primaryKey == null)
+
+        if (primaryKey == null)
         {
             throw new IllegalArgumentException("Primary key not set into entity");
         }
-        
+
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
 
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
@@ -791,13 +789,14 @@ public class PersistenceDelegator
      */
     public void doFlush()
     {
-            enableFlush = true;
-            flush();
-            execute();
-            enableFlush = false;
-            flushManager.commit();
-            flushManager.clearFlushStack();
+        enableFlush = true;
+        flush();
+        execute();
+        enableFlush = false;
+        flushManager.commit();
+        flushManager.clearFlushStack();
     }
+
     public void rollback()
     {
         isTransactionInProgress = false;
@@ -821,36 +820,35 @@ public class PersistenceDelegator
         return isTransactionInProgress;
     }
 
-    
     /**
      * Populates client specific properties.
      * 
-     * @param properties map of properties.
+     * @param properties
+     *            map of properties.
      */
     public void populateClientProperties(Map properties)
-    {       
-        if(properties != null && ! properties.isEmpty())
+    {
+        if (properties != null && !properties.isEmpty())
         {
             Map<String, Client> clientMap = getDelegate();
-            if(clientMap != null && ! clientMap.isEmpty())
+            if (clientMap != null && !clientMap.isEmpty())
             {
-                for(Client client : clientMap.values())
+                for (Client client : clientMap.values())
                 {
-                    if(client instanceof ClientPropertiesSetter)
+                    if (client instanceof ClientPropertiesSetter)
                     {
-                        ClientPropertiesSetter cps = (ClientPropertiesSetter) client;                   
+                        ClientPropertiesSetter cps = (ClientPropertiesSetter) client;
                         cps.populateClientProperties(client, properties);
                     }
-                    
-                                       
+
                 }
-            }            
-        } else {
+            }
+        }
+        else
+        {
             log.debug("Can't set Client properties as None/ Null was supplied");
         }
-    }   
-
-
+    }
 
     /**
      * Pre load client specific to persistence unit.
@@ -900,7 +898,7 @@ public class PersistenceDelegator
     }
 
     /**
-     *  On flusing join table data
+     * On flusing join table data
      */
     private void flushJoinTableData()
     {
@@ -928,7 +926,8 @@ public class PersistenceDelegator
     }
 
     /**
-     * Returns true, if flush mode is AUTO and not running within transaction || running within transaction and commit is invoked.
+     * Returns true, if flush mode is AUTO and not running within transaction ||
+     * running within transaction and commit is invoked.
      * 
      * @return boolean value.
      */

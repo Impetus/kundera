@@ -101,7 +101,7 @@ public abstract class AbstractPropertyReader
      */
     private Properties onParseProperties(String propertyFileName, PersistenceUnitMetadata puMetadata)
     {
-//        log.warn("Use of Properties file is Deprecated ,please use xml format instead ");
+        // log.warn("Use of Properties file is Deprecated ,please use xml format instead ");
         Properties properties = new Properties();
         InputStream inStream = propertyFileName != null ? puMetadata.getClassLoader().getResourceAsStream(
                 propertyFileName) : null;

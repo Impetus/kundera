@@ -21,11 +21,12 @@ import javax.persistence.metamodel.Type;
 /**
  * Default implementation of {@link BasicType}
  * 
- * <code> DefaultBasicType</code> implements <code>BasicType</code> interface, invokes constructor with
- * PersistenceType.BASIC. Default implementation of {@link Type} interface is provided by {@link AbstractType}
- *  
+ * <code> DefaultBasicType</code> implements <code>BasicType</code> interface,
+ * invokes constructor with PersistenceType.BASIC. Default implementation of
+ * {@link Type} interface is provided by {@link AbstractType}
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class DefaultBasicType<X> extends AbstractType<X> implements BasicType<X>
 {
@@ -33,7 +34,8 @@ public class DefaultBasicType<X> extends AbstractType<X> implements BasicType<X>
     /**
      * Constructor with arguments.
      * 
-     * @param clazz typed class.
+     * @param clazz
+     *            typed class.
      */
     public DefaultBasicType(Class<X> clazz)
     {

@@ -160,7 +160,7 @@ public class PersistenceUnitConfiguration implements Configuration
                 }
 
                 // add to check for duplicate persistence unit.
-                persistenceUnitNames.add(metadata.getPersistenceUnitName());                
+                persistenceUnitNames.add(metadata.getPersistenceUnitName());
             }
         }
         return persistenceUnitMap;

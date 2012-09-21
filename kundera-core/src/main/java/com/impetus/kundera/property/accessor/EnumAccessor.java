@@ -35,7 +35,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         String s = null;
         try
         {
-            if(b == null)
+            if (b == null)
             {
                 return null;
             }
@@ -65,7 +65,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     @Override
     public String toString(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }

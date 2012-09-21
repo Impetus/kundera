@@ -34,10 +34,9 @@ public final class Constants
 
     /** The Constant ENCODING. */
     public static final String ENCODING = "utf-8";
-    
+
     /** UTF-8 character set */
     public static final String CHARSET_UTF8 = "UTF-8";
-    
 
     /** The Constant SEPARATOR. */
     public final static String FOREIGN_KEY_SEPARATOR = "~";
@@ -77,7 +76,7 @@ public final class Constants
      * join columns.
      */
     public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
-    
+
     public final static String JOIN_COLUMN_NAME_SEPARATOR = "_";
 
     public final static String NODE_ID_SEPARATOR = "$";
@@ -92,23 +91,24 @@ public final class Constants
 
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
-//    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
+    // public final static String INVERTED_INDEXING_ENABLED =
+    // "inverted.indexing.enabled";
 
-//    public final static String ZOOKEEPER_PORT = "zookeeper_port";
-//
-//    public final static String ZOOKEEPER_HOST = "zookeeper_host";
+    // public final static String ZOOKEEPER_PORT = "zookeeper_port";
+    //
+    // public final static String ZOOKEEPER_HOST = "zookeeper_host";
 
-//    public final static String PLACEMENT_STRATEGY = "placement_strategy";
-//
-//    public final static String REPLICATION_FACTOR = "replication_factor";
-//
-//    public final static String CF_DEFS = "cf_defs";
-//
-//    public final static String DATA_CENTERS = "datacenters";
-//
-//    public final static String CONNECTIONS = "mongodb.servers";
-//
-//    public final static String SOCKET_TIMEOUT = "socket.timeout";
-//
-//    public final static String READ_PREFERENCE = "read.preference";
+    // public final static String PLACEMENT_STRATEGY = "placement_strategy";
+    //
+    // public final static String REPLICATION_FACTOR = "replication_factor";
+    //
+    // public final static String CF_DEFS = "cf_defs";
+    //
+    // public final static String DATA_CENTERS = "datacenters";
+    //
+    // public final static String CONNECTIONS = "mongodb.servers";
+    //
+    // public final static String SOCKET_TIMEOUT = "socket.timeout";
+    //
+    // public final static String READ_PREFERENCE = "read.preference";
 }

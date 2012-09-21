@@ -27,7 +27,7 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
@@ -35,17 +35,17 @@ public class OToMOwnerEntity
 {
 
     @Id
-    @Column(name="ROW_KEY")
+    @Column(name = "ROW_KEY")
     private byte rowKey;
-    
-    @Column(name="name")
+
+    @Column(name = "name")
     private String name;
-    
-    @Column(name="AMOUNT")
+
+    @Column(name = "AMOUNT")
     private int amount;
-    
-    @OneToMany(cascade=CascadeType.PERSIST,fetch=FetchType.EAGER)
-    @Column(name="Association_ID")
+
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @Column(name = "Association_ID")
     private Collection<AssociationEntity> association;
 
     /**
@@ -57,7 +57,8 @@ public class OToMOwnerEntity
     }
 
     /**
-     * @param rowKey the rowKey to set
+     * @param rowKey
+     *            the rowKey to set
      */
     public void setRowKey(byte rowKey)
     {
@@ -73,7 +74,8 @@ public class OToMOwnerEntity
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -89,7 +91,8 @@ public class OToMOwnerEntity
     }
 
     /**
-     * @param amount the amount to set
+     * @param amount
+     *            the amount to set
      */
     public void setAmount(int amount)
     {
@@ -105,12 +108,12 @@ public class OToMOwnerEntity
     }
 
     /**
-     * @param association the association to set
+     * @param association
+     *            the association to set
      */
     public void setAssociation(Collection<AssociationEntity> association)
     {
         this.association = association;
     }
-
 
 }

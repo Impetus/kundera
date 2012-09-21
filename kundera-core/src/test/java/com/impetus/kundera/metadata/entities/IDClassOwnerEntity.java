@@ -23,18 +23,20 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
-@IdClass(value=IDClassEntity.class)
+@IdClass(value = IDClassEntity.class)
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
 public class IDClassOwnerEntity
 {
 
-    @Id private String id;
-    
-    @Column private long logColumn;
-    
+    @Id
+    private String id;
+
+    @Column
+    private long logColumn;
+
     /**
      * @return the id
      */
@@ -42,13 +44,16 @@ public class IDClassOwnerEntity
     {
         return id;
     }
+
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(String id)
     {
         this.id = id;
     }
+
     /**
      * @return the logColumn
      */
@@ -56,8 +61,10 @@ public class IDClassOwnerEntity
     {
         return logColumn;
     }
+
     /**
-     * @param logColumn the logColumn to set
+     * @param logColumn
+     *            the logColumn to set
      */
     public void setLogColumn(long logColumn)
     {
