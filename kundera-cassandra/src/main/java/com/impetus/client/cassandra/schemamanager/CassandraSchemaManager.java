@@ -411,7 +411,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
-        boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
+        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() ||
+                CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName))
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
@@ -422,6 +423,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cassandra_client.system_add_column_family(cfDef);
         }
     }
+    
+    
 
     /**
      * @param tableInfo
@@ -431,7 +434,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void dropInvertedIndexTable(TableInfo tableInfo)
     {
-        boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
+        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() ||
+                CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName))
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {

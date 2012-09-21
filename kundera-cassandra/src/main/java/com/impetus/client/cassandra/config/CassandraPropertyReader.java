@@ -17,6 +17,7 @@ package com.impetus.client.cassandra.config;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -32,6 +33,7 @@ import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.PropertyReader;
 
 /**
@@ -88,7 +90,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
     {
         String cf_defs = properties.getProperty(CassandraConstants.CF_DEFS);
         csmd.addCf_defs(cf_defs);
-    }
+    }    
+    
 
     /**
      * loads keyspace specific properties
@@ -266,6 +269,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         /**
          * @return the invertedIndexingEnabled
          */
+        @Deprecated
         public boolean isInvertedIndexingEnabled()
         {
             return invertedIndexingEnabled;
@@ -275,6 +279,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
          * @param invertedIndexingEnabled
          *            the invertedIndexingEnabled to set
          */
+        @Deprecated
         public void setInvertedIndexingEnabled(boolean invertedIndexingEnabled)
         {
             this.invertedIndexingEnabled = invertedIndexingEnabled;
@@ -368,6 +373,20 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                 }
             }
             return null;
+        }
+        
+        public boolean isInvertedIndexingEnabled(String schemaName)
+        {
+            boolean result = false;
+            for(Schema schema : getDataStore().getSchemas())
+            {
+                if(schema != null && schemaName.equals(schema.getName()))
+                {
+                    result = Boolean.parseBoolean((String)schema.getSchemaProperties().get(CassandraConstants.INVERTED_INDEXING_ENABLED));
+                    break;
+                }
+            }
+            return result;
         }
     }
 }
