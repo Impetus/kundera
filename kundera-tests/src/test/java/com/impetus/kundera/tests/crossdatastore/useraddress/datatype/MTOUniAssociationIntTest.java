@@ -34,6 +34,7 @@ import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +51,8 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class MTOUniAssociationIntTest extends TwinAssociation
 {
     private static final Long ADDRESS_ID = new Long(123456);
+
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
 
     /**
      * Inits the.
@@ -90,7 +93,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -219,7 +222,8 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
+        truncateSchema();
     }
 
     /**

@@ -65,6 +65,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOUniAssociationIntTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
 
     private static final Integer ADDRESS_ID = new Integer(1234567);
 
@@ -76,8 +77,8 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            HBaseCli cli = new HBaseCli();
-//            cli.startCluster();
+            // HBaseCli cli = new HBaseCli();
+            // cli.startCluster();
         }
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FKInt.class);
@@ -105,7 +106,7 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            tryOperation();
+            tryOperation(ALL_PUs_UNDER_TEST);
         }
         catch (Exception e)
         {
@@ -240,7 +241,7 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
 
     }
 
@@ -255,7 +256,7 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            HBaseCli.stopCluster();
+            // HBaseCli.stopCluster();
         }
     }
 

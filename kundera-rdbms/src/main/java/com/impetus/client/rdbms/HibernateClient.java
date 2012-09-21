@@ -238,18 +238,22 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         s.createSQLQuery(updateSql).executeUpdate();
                     }
                 }
+                tx.commit();
             }
             else
             {
                 
                 s.update(entity);
+                tx.commit();
             }          
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
         // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
         {
+            s.update(entity);
             log.info(e.getMessage());
+            tx.commit();
         }
         catch (HibernateException e)
         {
@@ -257,7 +261,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         finally
         {            
-            tx.commit();
+          
         }
 
     }

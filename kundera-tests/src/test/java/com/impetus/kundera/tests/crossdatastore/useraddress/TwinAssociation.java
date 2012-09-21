@@ -55,17 +55,14 @@ public abstract class TwinAssociation extends AssociationBase
      */
     public static void init(List<Class> classes, String... persistenceUnits) throws Exception
     {
-        /*if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
+        /*
+         * if (RUN_IN_EMBEDDED_MODE) { CassandraCli.cassandraSetUp();
+         * 
+         * }
+         * 
+         * if (AUTO_MANAGE_SCHEMA) { CassandraCli.initClient(); }
+         */
 
-        }
-
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            CassandraCli.initClient();
-        }*/
-        
         // list of PUS with class.
         Map<Class, String> puClazzMapper = null;
 
@@ -87,32 +84,34 @@ public abstract class TwinAssociation extends AssociationBase
 
     /**
      * Try operation.
+     * 
+     * @param ALL_PUs_UNDER_TEST
      */
-    protected void tryOperation()
+    protected void tryOperation(String[] ALL_PUs_UNDER_TEST)
     {
         try
         {
             Metamodel metaModel = null;
-            for(int i = 0 ;i < ALL_PUs_UNDER_TEST.length ; i++)
+            for (int i = 0; i < ALL_PUs_UNDER_TEST.length; i++)
             {
                 metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i]);
-                
-                for(int i1=0;i1<ALL_PUs_UNDER_TEST.length ; i1++)
+
+                for (int i1 = 0; i1 < ALL_PUs_UNDER_TEST.length; i1++)
                 {
-                    if(i != i1)
+                    if (i != i1)
                     {
                         Map<Class<?>, EntityType<?>> original = getManagedTypes((MetamodelImpl) metaModel);
-                        
-                        Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i1]);
+
+                        Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                                ALL_PUs_UNDER_TEST[i1]);
                         Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
                         original.putAll(copy);
-                        
+
                     }
                 }
-                
+
             }
-           
-            
+
             for (Map<Class, String> c : combinations)
             {
                 switchPersistenceUnits(c);
@@ -124,7 +123,8 @@ public abstract class TwinAssociation extends AssociationBase
                 findAddressByStreet();
                 update();
                 remove();
-//                em.clear();
+                tearDownInternal(ALL_PUs_UNDER_TEST);
+                // em.clear();
             }
         }
         catch (Exception e)
@@ -140,27 +140,26 @@ public abstract class TwinAssociation extends AssociationBase
 
     /** Find person by ID */
     protected abstract void find();
-    
+
     /** Find person by ID using query */
     protected abstract void findPersonByIdColumn();
-    
+
     /** Find person by name using query */
     protected abstract void findPersonByName();
-    
+
     /** Find Address by ID using query */
     protected abstract void findAddressByIdColumn();
-    
-    /** Find Address by street using query */
-    protected abstract void findAddressByStreet();    
 
-    /** Update Person*/
+    /** Find Address by street using query */
+    protected abstract void findAddressByStreet();
+
+    /** Update Person */
     protected abstract void update();
 
     /** Remove Person */
     protected abstract void remove();
 
-
-    private Map<Class<?>, EntityType<?>> getManagedTypes(MetamodelImpl metaModel )
+    private Map<Class<?>, EntityType<?>> getManagedTypes(MetamodelImpl metaModel)
     {
         try
         {

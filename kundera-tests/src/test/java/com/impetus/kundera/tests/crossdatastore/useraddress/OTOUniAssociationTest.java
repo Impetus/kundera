@@ -57,20 +57,24 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
  * Note: To create as column family PERSONNEL use as given below: create column
  * family PERSONNEL with comparator=UTF8Type and column_metadata=[{column_name:
  * PERSON_NAME, validation_class: UTF8Type, index_type: KEYS}, {column_name:
- * AGE, validation_class: IntegerType, index_type: KEYS}];
- * PersonnelUni1ToM
+ * AGE, validation_class: IntegerType, index_type: KEYS}]; PersonnelUni1ToM
+ * 
  * @author vivek.mishra
  */
 
 public class OTOUniAssociationTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
+                                                                                               * "addHbase"
+                                                                                               * ,
+                                                                                               */"addMongo" };
 
     /**
      * Inits the.
      */
     @BeforeClass
     public static void init() throws Exception
-    {        
+    {
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FK.class);
         clazzz.add(HabitatUni1To1FK.class);
@@ -97,7 +101,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     {
         try
         {
-            tryOperation();
+            tryOperation(ALL_PUs_UNDER_TEST);
         }
         catch (Exception e)
         {
@@ -234,7 +238,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
 
     }
 
@@ -247,7 +251,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        
+
     }
 
     @Override
@@ -351,8 +355,8 @@ public class OTOUniAssociationTest extends TwinAssociation
      */
     private void assertPersonBeforeUpdate(PersonnelUni1To1FK p)
     {
-        Assert.assertNotNull(p);        
-        
+        Assert.assertNotNull(p);
+
         Assert.assertEquals("unionetoonefk_1", p.getPersonId());
         Assert.assertEquals("Amresh", p.getPersonName());
 
@@ -365,10 +369,10 @@ public class OTOUniAssociationTest extends TwinAssociation
     private void assertAddressBeforeUpdate(HabitatUni1To1FK add)
     {
         Assert.assertNotNull(add);
-        
+
         String addressId = add.getAddressId();
         String street = add.getStreet();
-        
+
         Assert.assertNotNull(addressId);
         Assert.assertEquals("unionetoonefk_a", addressId);
         Assert.assertEquals("123, New street", street);

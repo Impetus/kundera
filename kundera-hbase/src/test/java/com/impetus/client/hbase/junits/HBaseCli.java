@@ -195,6 +195,51 @@ public class HBaseCli
      */
     public static void stopCluster(String... tableName)
     {
+        // try
+        // {
+        // if (utility != null)
+        // {
+        // // utility.getMiniHBaseCluster().shutdown();
+        // // File workingDirectory = new File("./");
+        // // utility.closeRegion("localhost");
+        // utility.cleanupTestDir();
+        // // utility.cleanupTestDir(dir.getAbsolutePath());
+        // // ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir,
+        // // 2000);
+        // // ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
+        // // String path = (String)this.makeFullPath(null,bean);
+        //
+        // // MBeanS
+        // // MBeanRegistry.getInstance().unregister(bean);
+        // // MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        // // mbs.unregisterMBean(makeObjectName(path,bean));
+        // // utility.getHbaseCluster().shutdown();
+        // utility.shutdownMiniCluster();
+        // FileUtil.fullyDelete(zkDir);
+        // FileUtil.fullyDelete(masterDir);
+        // utility = null;
+        // isStarted = false;
+        // }
+        // }
+        // catch (IOException e)
+        // {
+        // logger.error(e.getMessage());
+        // }
+        // catch (NullPointerException e)
+        // {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        // catch (Exception e)
+        // {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        //
+    }
+
+    public static void cleanUp()
+    {
         try
         {
             if (utility != null)

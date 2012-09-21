@@ -48,6 +48,10 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
  */
 public class MTMUniAssociationTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
+         * "addHbase"
+         * ,
+         */"addMongo" };
     /**
      * Inits the.
      */
@@ -81,7 +85,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            tryOperation();
+            tryOperation(ALL_PUs_UNDER_TEST);
         }
         catch (Exception e)
         {
@@ -247,7 +251,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     /**

@@ -282,4 +282,46 @@ public final class CassandraCli
 
     }
 
+    public static void truncateColumnFamily(String keyspace, String... columns)
+    {
+        try
+        {
+            if (client != null)
+            {
+                client.set_keyspace(keyspace);
+                for (String column : columns)
+                {
+                    if (columnFamilyExist(column, keyspace))
+                    {
+                        client.truncate(column);
+                    }
+                }
+            }
+        }
+        catch (IllegalArgumentException iex)
+        {
+            // do nothing.
+        }
+        catch (InvalidRequestException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (UnavailableException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TimedOutException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 }

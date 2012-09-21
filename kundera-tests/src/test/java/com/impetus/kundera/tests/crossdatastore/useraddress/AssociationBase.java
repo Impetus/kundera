@@ -16,6 +16,8 @@
 package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,8 +37,12 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 
+import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -45,6 +51,8 @@ import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 /**
  * The Class AssociationBase.
@@ -57,7 +65,8 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addHbase","rdbms", "addCassandra", "addMongo" };
+    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -78,7 +87,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo";
 
     // private String persistenceUnits = "rdbms,addHbase";
 
@@ -221,17 +230,27 @@ public abstract class AssociationBase
     /**
      * Tear down internal.
      * 
+     * @param ALL_PUs_UNDER_TEST
+     * 
      * @throws InvalidRequestException
      *             the invalid request exception
      * @throws SchemaDisagreementException
      *             the schema disagreement exception
      */
-    protected void tearDownInternal() throws InvalidRequestException, SchemaDisagreementException
+    protected void tearDownInternal(String[] ALL_PUs_UNDER_TEST) throws InvalidRequestException,
+            SchemaDisagreementException
     {
+        if (!em.isOpen())
+        {
+            em = dao.getEntityManager(persistenceUnits);
+        }
+        truncateRdbms();
+
+        truncateMongo();
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            truncateSchema();
+            truncateColumnFamily();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
@@ -241,6 +260,94 @@ public abstract class AssociationBase
 
         dao.closeEntityManagerFactory();
 
+    }
+
+    /**
+     * 
+     */
+    private void truncateColumnFamily()
+    {
+        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS" };
+        CassandraCli.truncateColumnFamily("KunderaTests", columnFamily);
+    }
+
+    /**
+     * 
+     */
+    private void truncateMongo()
+    {
+        PersistenceUnitMetadata pUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata("addMongo");
+        String host = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
+        String port = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+        try
+        {
+            Mongo m = null;
+            if (host != null && port != null)
+            {
+                m = new Mongo(host, Integer.parseInt(port));
+                m.getDB(pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE)).dropDatabase();
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (UnknownHostException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (MongoException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 
+     */
+    private void truncateRdbms()
+    {
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        HibernateClient client = (HibernateClient) clients.get("rdbms");
+        try
+        {
+            Field sessionFactory = client.getClass().getDeclaredField("sf");
+            if (!sessionFactory.isAccessible())
+            {
+                sessionFactory.setAccessible(true);
+            }
+            SessionFactory sf = (SessionFactory) sessionFactory.get(client);
+            StatelessSession s = sf.openStatelessSession();
+            s.createSQLQuery("delete from ADDRESS").executeUpdate();
+            s.createSQLQuery("delete from PERSONNEL").executeUpdate();
+            s.createSQLQuery("delete from PERSONNEL_ADDRESS").executeUpdate();
+            s.close();
+            // sf.close();
+        }
+        catch (SecurityException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (NoSuchFieldException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,

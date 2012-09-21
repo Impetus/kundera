@@ -45,6 +45,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class MTOBiAssociationIntTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
 
     /**
      * Inits the.
@@ -73,7 +74,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -103,8 +104,8 @@ public class MTOBiAssociationIntTest extends TwinAssociation
         col.add(person2);
         col.add(address);
 
-    }   
-    
+    }
+
     @Override
     protected void find()
     {
@@ -118,13 +119,10 @@ public class MTOBiAssociationIntTest extends TwinAssociation
 
     }
 
-    
-    
-
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelBiMTo1Int p = (PersonnelBiMTo1Int) dao.findPersonByIdColumn(PersonnelBiMTo1Int.class, 12345);    
+        PersonnelBiMTo1Int p = (PersonnelBiMTo1Int) dao.findPersonByIdColumn(PersonnelBiMTo1Int.class, 12345);
         assertPerson1(p);
     }
 
@@ -147,7 +145,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     @Override
     protected void findAddressByStreet()
     {
-    }    
+    }
 
     @Override
     protected void update()
@@ -158,7 +156,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     protected void remove()
     {
     }
-    
+
     /**
      * @param p2
      */
@@ -206,7 +204,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override
