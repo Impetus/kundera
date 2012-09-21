@@ -40,6 +40,7 @@ import org.apache.thrift.TException;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 
+import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -51,6 +52,7 @@ import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
+import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -276,34 +278,46 @@ public abstract class AssociationBase
      */
     private void truncateMongo()
     {
-        PersistenceUnitMetadata pUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata("addMongo");
-        String host = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
-        String port = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
-        try
+        
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        MongoDBClient client = (MongoDBClient) clients.get("addMongo");
+        if(client != null)
         {
-            Mongo m = null;
-            if (host != null && port != null)
+            try
             {
-                m = new Mongo(host, Integer.parseInt(port));
-                m.getDB(pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE)).dropDatabase();
+                Field db = client.getClass().getDeclaredField("mongoDb");
+                if(!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                DB mongoDB =  (DB) db.get(client);
+                mongoDB.getCollection("PERSONNEL").drop();
+                mongoDB.getCollection("ADDRESS").drop();
+                mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
+                
+            }
+            catch (SecurityException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (NoSuchFieldException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IllegalArgumentException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IllegalAccessException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
         }
-        catch (NumberFormatException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (UnknownHostException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (MongoException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        
     }
 
     /**

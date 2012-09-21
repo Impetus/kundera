@@ -163,6 +163,7 @@ public class PersonHBaseTest extends BaseTest
         emf.close();
         if (cli != null && cli.isStarted())
         {
+            cli.dropTable("PERSON");
             cli.stopCluster("PERSON");
         }
         LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
