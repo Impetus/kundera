@@ -31,7 +31,24 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.0.7 is released tag.
+####Please Note: trunk is current development branch. 2.1 is released tag.
+
+#### 21-Sep-2012 - Kundera 2.1 released
+This release includes bug fixes, performance improvements and the following new features compared to version 2.0.7:
+
+* CQL Version configuration
+* Batch insert/update for Cassandra/MongoDB/HBase
+* JPA MetaModel and TypedQuery implementation
+* Raw thrift client support for Cassandra
+* Datastore specific XML configuration. (.properties file deprecated) 
+* Stronger query support:
+   - JPQL support over all data types and associations
+   - JPQL support to query using primary key alongwith other columns
+* JPA compliance
+   - EntityManager methods implementation (contains, refresh, detach, setProperty)
+   - EntityManagerFactory methods (getPersistenceUnitUtil)
+   - Persistence methods (getProviderUtil)
+
 
 #### 25-July-2012 - Kundera 2.0.7 released
 This release includes bug fixes, performance improvements and the following new features compared to version 2.0.6:
