@@ -216,58 +216,47 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
 
         Transaction tx = null;
+        s = getStatelessSession();
+        tx = s.beginTransaction();
         try
         {
-            s = getStatelessSession();
-            tx = s.beginTransaction();
-            s.insert(entity);
-//            tx.commit();
-            // Update foreign Keys
-            // for (RelationHolder rh : relationHolders)
-            // {
-            // String linkName = rh.getRelationName();
-            // Object linkValue = rh.getRelationValue();
-            // if (linkName != null && linkValue != null)
-            // {
-            //
-            // String updateSql = "Update " + metadata.getTableName() + " SET "
-            // + linkName + "= '" + linkValue
-            // + "' WHERE " + ((AbstractAttribute)
-            // metadata.getIdAttribute()).getJPAColumnName() + " = '"
-            // + id + "'";
-            // s.createSQLQuery(updateSql).executeUpdate();
-            // }
-            // }
-            // tx.commit();
+            if(!isUpdate)
+            {                
+                s.insert(entity);
+                
+                // Update foreign Keys
+                for (RelationHolder rh : relationHolders)
+                {
+                    String linkName = rh.getRelationName();
+                    Object linkValue = rh.getRelationValue();
+                    if (linkName != null && linkValue != null)
+                    {
+
+                        String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
+                                + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '"
+                                + id + "'";
+                        s.createSQLQuery(updateSql).executeUpdate();
+                    }
+                }
+            }
+            else
+            {
+                
+                s.update(entity);
+            }          
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
         // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
         {
             log.info(e.getMessage());
-            s.update(entity);
-//            tx.commit();
         }
         catch (HibernateException e)
         {
             log.info(e.getMessage());
         }
         finally
-        {
-            // Update foreign Keys
-            for (RelationHolder rh : relationHolders)
-            {
-                String linkName = rh.getRelationName();
-                Object linkValue = rh.getRelationValue();
-                if (linkName != null && linkValue != null)
-                {
-
-                    String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
-                            + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '"
-                            + id + "'";
-                    s.createSQLQuery(updateSql).executeUpdate();
-                }
-            }
+        {            
             tx.commit();
         }
 
