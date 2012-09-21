@@ -36,7 +36,7 @@ public class Album
     private String albumName;
 
     @Column(name = "ALBUM_DESC")
-    private String albumDescription;    
+    private String albumDescription;
 
     public Album()
     {
@@ -99,6 +99,6 @@ public class Album
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
-    }   
+    }
 
 }

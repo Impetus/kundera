@@ -34,7 +34,6 @@ import org.apache.thrift.TException;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
 
-
 /**
  * Utilities for Test setup
  * 
@@ -43,6 +42,7 @@ import com.impetus.kundera.tests.cli.CassandraCli;
 public class LazyTestSetup
 {
     private static final String COLUMN_FAMILY_PHOTOGRAPHER = "PHOTOGRAPHER";
+
     private static final String COLUMN_FAMILY_ALBUM = "ALBUM";
 
     private static final String KEYSPACE = "Pickr";
@@ -107,12 +107,11 @@ public class LazyTestSetup
                 ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTOGRAPHER_NAME".getBytes()), "UTF8Type");
                 columnDef2.index_type = IndexType.KEYS;
                 cfDefPhotographer.addToColumn_metadata(columnDef2);
-                
+
                 ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("ALBUM_ID".getBytes()), "UTF8Type");
                 columnDef3.index_type = IndexType.KEYS;
-                cfDefPhotographer.addToColumn_metadata(columnDef3);   
-                
-                
+                cfDefPhotographer.addToColumn_metadata(columnDef3);
+
                 CfDef cfDefAlbum = new CfDef();
                 cfDefAlbum.name = COLUMN_FAMILY_ALBUM;
                 cfDefAlbum.keyspace = KEYSPACE;
@@ -121,16 +120,15 @@ public class LazyTestSetup
                 ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("ALBUM_NAME".getBytes()), "UTF8Type");
                 columnDef4.index_type = IndexType.KEYS;
                 cfDefPhotographer.addToColumn_metadata(columnDef4);
-                
+
                 ColumnDef columnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_DESC".getBytes()), "UTF8Type");
                 columnDef5.index_type = IndexType.KEYS;
-                cfDefPhotographer.addToColumn_metadata(columnDef5); 
-                
+                cfDefPhotographer.addToColumn_metadata(columnDef5);
 
                 List<CfDef> cfDefs = new ArrayList<CfDef>();
                 cfDefs.add(cfDefPhotographer);
                 cfDefs.add(cfDefAlbum);
-                
+
                 try
                 {
                     CassandraCli.initClient();

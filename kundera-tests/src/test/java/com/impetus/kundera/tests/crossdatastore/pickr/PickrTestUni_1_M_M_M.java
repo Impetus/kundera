@@ -51,12 +51,11 @@ public class PickrTestUni_1_M_M_M extends PickrBaseTest
 {
     private static Log log = LogFactory.getLog(PhotographerUni_1_M_M_M.class);
 
-    
     @Before
     public void setUp() throws Exception
     {
-        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======" +
-        "==========================================================");
+        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======"
+                + "==========================================================");
         super.setUp();
     }
 
@@ -375,7 +374,7 @@ public class PickrTestUni_1_M_M_M extends PickrBaseTest
     @Override
     protected void stopServer()
     {
-        //HBaseCli.stopCluster();
+        // HBaseCli.stopCluster();
 
     }
 }

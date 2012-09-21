@@ -45,16 +45,17 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 public class MTOBiAssociationTest extends TwinAssociation
 {
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
-         * "addHbase"
-         * ,
-         */"addMongo" };
+                                                                                               * "addHbase"
+                                                                                               * ,
+                                                                                               */"addMongo" };
+
     /**
      * Inits the.
      */
     @BeforeClass
     public static void init() throws Exception
-    {       
-        
+    {
+
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMTo1.class);
         clazzz.add(HabitatBiMTo1.class);
@@ -106,8 +107,8 @@ public class MTOBiAssociationTest extends TwinAssociation
         col.add(person2);
         col.add(address);
 
-    }   
-    
+    }
+
     @Override
     protected void find()
     {
@@ -121,13 +122,10 @@ public class MTOBiAssociationTest extends TwinAssociation
 
     }
 
-    
-    
-
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelBiMTo1 p = (PersonnelBiMTo1) dao.findPersonByIdColumn(PersonnelBiMTo1.class, "bimanytoone_1");    
+        PersonnelBiMTo1 p = (PersonnelBiMTo1) dao.findPersonByIdColumn(PersonnelBiMTo1.class, "bimanytoone_1");
         assertPerson1(p);
     }
 
@@ -150,7 +148,7 @@ public class MTOBiAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByStreet()
     {
-    }    
+    }
 
     @Override
     protected void update()
@@ -161,7 +159,7 @@ public class MTOBiAssociationTest extends TwinAssociation
     protected void remove()
     {
     }
-    
+
     /**
      * @param p2
      */

@@ -65,7 +65,7 @@ public class PickrImpl implements Pickr
         EntityManager em = getEntityManager();
         Query q = em.createQuery("select p from " + className + " p");
         List<Object> photographers = q.getResultList();
-        // closeEntityManager();
+        closeEntityManager();
         return photographers;
     }
 

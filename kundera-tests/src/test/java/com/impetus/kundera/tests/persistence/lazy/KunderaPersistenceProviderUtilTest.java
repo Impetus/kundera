@@ -54,8 +54,6 @@ public class KunderaPersistenceProviderUtilTest
 
     KunderaPersistenceProviderUtil util = new KunderaPersistenceProviderUtil(kp);
 
-   
-    
     LazyTestSetup setup = new LazyTestSetup();
 
     /**
@@ -66,7 +64,7 @@ public class KunderaPersistenceProviderUtilTest
     {
 
         setup.startServer();
-        setup.createSchema();       
+        setup.createSchema();
 
         emf = Persistence.createEntityManagerFactory("piccandra");
         em = emf.createEntityManager();
@@ -77,11 +75,10 @@ public class KunderaPersistenceProviderUtilTest
      */
     @After
     public void tearDown() throws Exception
-    {       
+    {
         setup.deleteSchema();
         setup.stopServer();
-      
-        
+
         if (em != null)
         {
             em.close();
@@ -221,5 +218,4 @@ public class KunderaPersistenceProviderUtilTest
 
     }
 
-    
 }

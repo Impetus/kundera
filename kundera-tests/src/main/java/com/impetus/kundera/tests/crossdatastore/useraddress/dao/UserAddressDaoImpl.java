@@ -93,7 +93,7 @@ public class UserAddressDaoImpl extends BaseDao
         closeEntityManager();
         return persons;
     }
-    
+
     public Object findPersonByIdColumn(Class entityClass, Object personId)
     {
         EntityManager em = getEntityManager(persistenceUnit);
@@ -102,9 +102,9 @@ public class UserAddressDaoImpl extends BaseDao
         List persons = q.getResultList();
         closeEntityManager();
         assert persons != null;
-        assert ! persons.isEmpty();
+        assert !persons.isEmpty();
         assert persons.size() == 1;
-        
+
         return persons.get(0);
     }
 
@@ -114,11 +114,10 @@ public class UserAddressDaoImpl extends BaseDao
         String query = "Select p from " + entityClass.getSimpleName() + " p where p.personName = " + personName;
         Query q = em.createQuery(query);
         List persons = q.getResultList();
-        closeEntityManager();       
-        
+        closeEntityManager();
+
         return persons;
     }
-
 
     public Object findAddressByIdColumn(Class entityClass, Object addressId)
     {
@@ -128,12 +127,11 @@ public class UserAddressDaoImpl extends BaseDao
         List addresses = q.getResultList();
         closeEntityManager();
         assert addresses != null;
-        assert ! addresses.isEmpty();
+        assert !addresses.isEmpty();
         assert addresses.size() == 1;
-        
+
         return addresses.get(0);
     }
-
 
     public List findAddressByStreet(Class entityClass, String street)
     {
@@ -141,8 +139,8 @@ public class UserAddressDaoImpl extends BaseDao
         String query = "Select a from " + entityClass.getSimpleName() + " a where a.street = " + street;
         Query q = em.createQuery(query);
         List addresses = q.getResultList();
-        closeEntityManager();       
-        
+        closeEntityManager();
+
         return addresses;
     }
 

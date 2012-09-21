@@ -54,8 +54,8 @@ public class PickrTestBi_M_M_M_M extends PickrBaseTest
     @Before
     public void setUp() throws Exception
     {
-        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======" +
-        "==========================================================");
+        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======"
+                + "==========================================================");
         super.setUp();
     }
 
@@ -149,14 +149,6 @@ public class PickrTestBi_M_M_M_M extends PickrBaseTest
         PhotographerBi_M_M_M_M p1AfterDeletion = (PhotographerBi_M_M_M_M) pickr.getPhotographer(
                 PhotographerBi_M_M_M_M.class, 1);
         Assert.assertNull(p1AfterDeletion);
-
-        PhotographerBi_M_M_M_M p2 = (PhotographerBi_M_M_M_M) pickr.getPhotographer(PhotographerBi_M_M_M_M.class, 2);
-        Assert.assertNotNull(p2);
-        pickr.deletePhotographer(p2);
-
-        PhotographerBi_M_M_M_M p2AfterDeletion = (PhotographerBi_M_M_M_M) pickr.getPhotographer(
-                PhotographerBi_M_M_M_M.class, 2);
-        Assert.assertNull(p2AfterDeletion);
 
     }
 
@@ -486,7 +478,7 @@ public class PickrTestBi_M_M_M_M extends PickrBaseTest
     @Override
     protected void stopServer()
     {
-        //HBaseCli.stopCluster();
+        // HBaseCli.stopCluster();
 
     }
 }

@@ -49,15 +49,16 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
 public class OTMUniAssociationTest extends TwinAssociation
 {
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
-         * "addHbase"
-         * ,
-         */"addMongo" };
+                                                                                               * "addHbase"
+                                                                                               * ,
+                                                                                               */"addMongo" };
+
     /**
      * Inits the.
      */
     @BeforeClass
     public static void init() throws Exception
-    {      
+    {
 
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1ToM.class);

@@ -46,6 +46,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class OTMBiAssociationIntTest extends TwinAssociation
 {
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
+
     /**
      * Inits the.
      */
@@ -124,14 +125,12 @@ public class OTMBiAssociationIntTest extends TwinAssociation
         assertPerson(p);
 
     }
-    
-    
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelBi1ToMInt p = (PersonnelBi1ToMInt) dao.findPersonByIdColumn(PersonnelBi1ToMInt.class, 12345);    
-        assertPerson(p);  
+        PersonnelBi1ToMInt p = (PersonnelBi1ToMInt) dao.findPersonByIdColumn(PersonnelBi1ToMInt.class, 12345);
+        assertPerson(p);
     }
 
     @Override

@@ -16,6 +16,7 @@
 package com.impetus.kundera.tests.crossdatastore.pickr;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -26,11 +27,18 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.Pickr;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 /**
  * @author amresh.singh
@@ -46,6 +54,8 @@ public abstract class PickrBaseTest
     protected int photographerId;
 
     protected String pu = "piccandra,picmysql,picongo";
+
+    private static Log log = LogFactory.getLog(PickrBaseTest.class);
 
     protected void setUp() throws Exception
     {
@@ -73,10 +83,11 @@ public abstract class PickrBaseTest
         {
             stopServer();
         }
-        
-        if(AUTO_MANAGE_SCHEMA)
-        {           
-            CassandraCli.dropKeySpace("Pickr");           
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            CassandraCli.dropKeySpace("Pickr");
+            truncateMongo();
         }
     }
 
@@ -92,6 +103,38 @@ public abstract class PickrBaseTest
         // Set replication factor, the value MUST be an integer
         ksDef.strategy_options.put("replication_factor", "1");
         CassandraCli.client.system_add_keyspace(ksDef);
+    }
+
+    /**
+     * 
+     */
+    private void truncateMongo()
+    {
+        PersistenceUnitMetadata pUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata("picongo");
+        String host = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
+        String port = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+        try
+        {
+            Mongo m = null;
+            if (host != null && port != null)
+            {
+                m = new Mongo(host, Integer.parseInt(port));
+                m.getDB(pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE)).dropDatabase();
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (UnknownHostException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (MongoException e)
+        {
+            log.error(e.getMessage());
+        }
     }
 
     protected abstract void addPhotographer();

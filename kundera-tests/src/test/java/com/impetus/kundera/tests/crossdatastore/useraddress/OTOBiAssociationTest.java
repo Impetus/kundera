@@ -43,15 +43,16 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 public class OTOBiAssociationTest extends TwinAssociation
 {
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
-         * "addHbase"
-         * ,
-         */"addMongo" };
+                                                                                               * "addHbase"
+                                                                                               * ,
+                                                                                               */"addMongo" };
+
     /**
      * Inits the.
      */
     @BeforeClass
     public static void init() throws Exception
-    {        
+    {
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBi1To1FK.class);
         clazzz.add(HabitatBi1To1FK.class);
@@ -105,14 +106,12 @@ public class OTOBiAssociationTest extends TwinAssociation
         PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPerson(PersonnelBi1To1FK.class, "bionetoonefk_1");
         assertPersonnel(p);
     }
-    
-    
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPersonByIdColumn(PersonnelBi1To1FK.class, "bionetoonefk_1");    
-        assertPersonnel(p);   
+        PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPersonByIdColumn(PersonnelBi1To1FK.class, "bionetoonefk_1");
+        assertPersonnel(p);
     }
 
     @Override
@@ -128,19 +127,24 @@ public class OTOBiAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        /*HabitatBi1To1FK a = (HabitatBi1To1FK) dao.findAddressByIdColumn(HabitatBi1To1FK.class, "bionetoonefk_a");    
-        assertAddress(a);*/
+        /*
+         * HabitatBi1To1FK a = (HabitatBi1To1FK)
+         * dao.findAddressByIdColumn(HabitatBi1To1FK.class, "bionetoonefk_a");
+         * assertAddress(a);
+         */
     }
 
     @Override
     protected void findAddressByStreet()
     {
-        /*List<HabitatBi1To1FK> adds = dao.findAddressByStreet(HabitatBi1To1FK.class, "123, New street");  
-        Assert.assertNotNull(adds);
-        Assert.assertFalse(adds.isEmpty());
-        Assert.assertTrue(adds.size() == 1);
-        
-        assertAddress(adds.get(0));*/
+        /*
+         * List<HabitatBi1To1FK> adds =
+         * dao.findAddressByStreet(HabitatBi1To1FK.class, "123, New street");
+         * Assert.assertNotNull(adds); Assert.assertFalse(adds.isEmpty());
+         * Assert.assertTrue(adds.size() == 1);
+         * 
+         * assertAddress(adds.get(0));
+         */
     }
 
     @Override

@@ -43,7 +43,6 @@ import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatUniMToMBigInteger;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.PersonnelUniMToMInt;
-import com.sun.accessibility.internal.resources.accessibility;
 
 /**
  * @author vivek.mishra
@@ -58,6 +57,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     private BigInteger addressID3 = new BigInteger("1234567");
 
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
+
     /**
      * Inits the.
      */
@@ -104,7 +104,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-//            tryOperation(ALL_PUs_UNDER_TEST);
+            // tryOperation(ALL_PUs_UNDER_TEST);
         }
         catch (Exception e)
         {
