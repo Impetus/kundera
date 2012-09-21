@@ -207,7 +207,7 @@ public class MTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal(ALL_PUs_UNDER_TEST);
+//        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override
