@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>2.1</version>
+		<version>2.2-SNAPSHOT</version>
 	</parent>
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera-tests</artifactId>
-	<version>2.1</version>
+	<version>2.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>kundera-tests</name>
@@ -294,29 +294,29 @@
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.1</version>
+			<version>2.2-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
-			<version>2.1</version>
+			<version>2.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
-			<version>2.1</version>
+			<version>2.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
-			<version>2.1</version>
+			<version>2.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
-			<version>2.1</version>
+			<version>2.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
