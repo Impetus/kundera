@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.album.AlbumUni_M_1_1_M;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photo.PhotoUni_M_1_1_M;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.PhotographerUni_M_1_1_M;
@@ -55,6 +54,8 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
     @Before
     public void setUp() throws Exception
     {
+        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======" +
+        "==========================================================");
         super.setUp();
     }
 
@@ -435,23 +436,6 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
             {
                 log.error(e.getMessage());
             }
-
-            /**
-             * schema generation for HBase.
-             * */
-
-            // HBaseCli.createTable("PHOTOGRAPHER");
-            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
-            //
-            // HBaseCli.createTable("ALBUM");
-            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
-            //
-            // HBaseCli.createTable("PHOTO");
-            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-            // HBaseCli.addColumnFamily("PHOTO", "ALBUM_ID");
         }
     }
 
@@ -464,7 +448,6 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
     @Override
     protected void stopServer()
     {
-        HBaseCli.stopCluster();
 
     }
 

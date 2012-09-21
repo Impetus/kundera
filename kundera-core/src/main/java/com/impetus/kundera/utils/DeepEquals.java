@@ -29,6 +29,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.hibernate.collection.PersistentCollection;
+
 /**
  * Deeply compare two (2) objects. This method will call any overridden equals()
  * methods if they exist. If not, it will then proceed to do a field-by-field
@@ -306,6 +308,12 @@ public class DeepEquals
     {
         Collection col1 = (Collection) dualKey._key1;
         Collection col2 = (Collection) dualKey._key2;
+       
+        if(col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+        {
+            return false;
+        }
+        
         if (col1.size() != col2.size())
         {
             return false;
@@ -341,6 +349,11 @@ public class DeepEquals
      */
     private static boolean compareUnordered(Collection col1, Collection col2, Set visited)
     {
+        if(col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+        {
+            return false;
+        }
+        
         if (col1.size() != col2.size())
         {
             return false;
@@ -432,7 +445,7 @@ public class DeepEquals
                 continue;
             }
 
-            if (obj instanceof Collection)
+            if (obj instanceof Collection && !(obj instanceof PersistentCollection))
             {
                 stack.addAll(0, (Collection) obj);
                 continue;

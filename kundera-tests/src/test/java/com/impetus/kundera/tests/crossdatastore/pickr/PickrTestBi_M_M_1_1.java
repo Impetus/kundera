@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.album.AlbumBi_M_M_1_1;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photo.PhotoBi_M_M_1_1;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.PhotographerBi_M_M_1_1;
@@ -56,6 +55,8 @@ public class PickrTestBi_M_M_1_1 extends PickrBaseTest
     @Before
     public void setUp() throws Exception
     {
+        log.info("Executing PICKR Test: " + this.getClass().getSimpleName() + "\n======" +
+        "==========================================================");
         super.setUp();
     }
 
@@ -423,7 +424,7 @@ public class PickrTestBi_M_M_1_1 extends PickrBaseTest
     @Override
     protected void stopServer()
     {
-        HBaseCli.stopCluster();
+        //HBaseCli.stopCluster();
 
     }
 

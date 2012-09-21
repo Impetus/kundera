@@ -73,6 +73,11 @@ public abstract class PickrBaseTest
         {
             stopServer();
         }
+        
+        if(AUTO_MANAGE_SCHEMA)
+        {           
+            CassandraCli.dropKeySpace("Pickr");           
+        }
     }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,

@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hibernate.collection.PersistentCollection;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
@@ -178,6 +180,8 @@ public class ObjectGraphBuilder
                     // and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
+                    if(childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    
                     for (Object childObj : childrenObjects)
                     {
                         if (childObj != null)

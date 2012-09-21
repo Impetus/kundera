@@ -30,8 +30,6 @@ import org.junit.Assert;
 
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.type.AbstractManagedType;
-import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * The Class TwinAssociation.
