@@ -34,7 +34,7 @@ Recent Releases
 ####Please Note: trunk is current development branch. 2.1 is released tag.
 
 #### 21-Sep-2012 - Kundera 2.1 released
-This release includes bug fixes, performance improvements and the following new features compared to version 2.0.7:
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.0.7:
 
 * CQL Version configuration
 * Batch insert/update for Cassandra/MongoDB/HBase
