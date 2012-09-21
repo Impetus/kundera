@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.service.EmbeddedCassandraService;
@@ -97,8 +99,9 @@ public final class CassandraCli
      */
     public static void createKeySpace(String keyspaceName)
     {
-        String nativeSql = "CREATE KEYSPACE " + keyspaceName
-                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        // String nativeSql = "CREATE KEYSPACE " + keyspaceName
+        // +
+        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         try
         {
             KsDef ks_Def = client.describe_keyspace(keyspaceName);
@@ -107,7 +110,11 @@ public final class CassandraCli
         {
             List<CfDef> cfDefs = new ArrayList<CfDef>();
             KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);
-            ks_Def.setReplication_factor(1);
+
+            Map<String, String> strategy_options = new HashMap<String, String>();
+            strategy_options.put("replication_factor", "1");
+            ks_Def.setStrategy_options(strategy_options);
+//            ks_Def.setReplication_factor(1);
             try
             {
                 client.system_add_keyspace(ks_Def);
