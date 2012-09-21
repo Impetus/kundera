@@ -4,15 +4,17 @@ import javax.persistence.Column;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 public class RootMappedSuperClass
 {
 
-    @Column private String rootStr;
-    
-    @Column private Long rootLong;
+    @Column
+    private String rootStr;
+
+    @Column
+    private Long rootLong;
 
     /**
      * @return the rootStr
@@ -23,7 +25,8 @@ public class RootMappedSuperClass
     }
 
     /**
-     * @param rootStr the rootStr to set
+     * @param rootStr
+     *            the rootStr to set
      */
     public void setRootStr(String rootStr)
     {
@@ -39,12 +42,12 @@ public class RootMappedSuperClass
     }
 
     /**
-     * @param rootLong the rootLong to set
+     * @param rootLong
+     *            the rootLong to set
      */
     public void setRootLong(Long rootLong)
     {
         this.rootLong = rootLong;
     }
-    
-    
+
 }

@@ -26,44 +26,50 @@ import javax.persistence.metamodel.Type;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * Implementation class for <code> {@link SetAttribute} </code> interface.
- * Offers metadata information implementation for collection attribute as per jpa.
- *
+ * Offers metadata information implementation for collection attribute as per
+ * jpa.
+ * 
  * @author vivek.mishra
  * 
- * @param <X>     managed type.
- * @param <T>     attribute type.
+ * @param <X>
+ *            managed type.
+ * @param <T>
+ *            attribute type.
  */
 
 public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> implements SingularAttribute<X, T>
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(DefaultSingularAttribute.class);
-    
-    /** Attribute is an id?*/
+
+    /** Attribute is an id? */
     private boolean isId;
-   
-    
-    
+
     /**
-     * @param attribName                       attribute name.
-     * @param persistenceAttribType            persistent attribute type.
-     * @param member                           attribute's java member.. 
-     * @param attribType                       attribute type. 
-     * @param managedType                      managed type. 
+     * @param attribName
+     *            attribute name.
+     * @param persistenceAttribType
+     *            persistent attribute type.
+     * @param member
+     *            attribute's java member..
+     * @param attribType
+     *            attribute type.
+     * @param managedType
+     *            managed type.
      */
     public DefaultSingularAttribute(String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType, Field member,
             Type<T> attribType, ManagedType<X> managedType, boolean isId)
     {
-        super(attribType,attribName,persistenceAttribType,managedType,member);
+        super(attribType, attribName, persistenceAttribType, managedType, member);
         this.isId = isId;
     }
-    
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Attribute#isCollection()
      */
     @Override
@@ -72,7 +78,9 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Bindable#getBindableType()
      */
     @Override
@@ -81,9 +89,9 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
         return BindableType.SINGULAR_ATTRIBUTE;
     }
 
- 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.SingularAttribute#isId()
      */
     @Override
@@ -92,7 +100,9 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
         return isId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.SingularAttribute#isVersion()
      */
     @Override
@@ -102,45 +112,52 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.SingularAttribute#isOptional()
      */
     @Override
-   public boolean isOptional()
+    public boolean isOptional()
     {
-        boolean isNullable=true;
-        if(!isId())
+        boolean isNullable = true;
+        if (!isId())
         {
             Column anno = member.getAnnotation(Column.class);
-            if(anno != null)
+            if (anno != null)
             {
                 isNullable = anno.nullable();
             }
-        } else
+        }
+        else
         {
             isNullable = false;
         }
-        return isNullable ;
+        return isNullable;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.SingularAttribute#getType()
      */
     @Override
     public Type<T> getType()
     {
-        return attribType ;
+        return attribType;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getJavaType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getJavaType
+     * ()
      */
-    @Override 
+    @Override
     public Class<T> getJavaType()
     {
         return attribType.getJavaType();
     }
-
 
 }

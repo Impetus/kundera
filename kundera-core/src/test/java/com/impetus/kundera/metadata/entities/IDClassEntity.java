@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.entities;
 
-
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class IDClassEntity
 {
 
     private int key;
+
     private String str;
+
     /**
      * @return the key
      */
@@ -32,13 +33,16 @@ public class IDClassEntity
     {
         return key;
     }
+
     /**
-     * @param key the key to set
+     * @param key
+     *            the key to set
      */
     public void setKey(int key)
     {
         this.key = key;
     }
+
     /**
      * @return the str
      */
@@ -46,12 +50,14 @@ public class IDClassEntity
     {
         return str;
     }
+
     /**
-     * @param str the str to set
+     * @param str
+     *            the str to set
      */
     public void setStr(String str)
     {
         this.str = str;
     }
-    
+
 }

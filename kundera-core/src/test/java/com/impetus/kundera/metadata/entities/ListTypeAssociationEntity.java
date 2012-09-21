@@ -21,7 +21,7 @@ import javax.persistence.Id;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 public class ListTypeAssociationEntity
@@ -29,7 +29,7 @@ public class ListTypeAssociationEntity
 
     @Id
     private String listKey;
-    
+
     @Column
     private byte[] bytes;
 
@@ -42,7 +42,8 @@ public class ListTypeAssociationEntity
     }
 
     /**
-     * @param setKey the setKey to set
+     * @param setKey
+     *            the setKey to set
      */
     public void setSetKey(String setKey)
     {
@@ -58,13 +59,12 @@ public class ListTypeAssociationEntity
     }
 
     /**
-     * @param bytes the bytes to set
+     * @param bytes
+     *            the bytes to set
      */
     public void setBytes(byte[] bytes)
     {
         this.bytes = bytes;
     }
-
-
 
 }

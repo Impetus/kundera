@@ -35,7 +35,7 @@ public class DataGeneratorFactory
 {
     /** The map. */
     private static Map<Class<?>, DataGenerator<?>> map = new HashMap<Class<?>, DataGenerator<?>>();
-    
+
     static
     {
         // Premitive Type generators
@@ -75,13 +75,13 @@ public class DataGeneratorFactory
         map.put(UUID.class, new UUIDDataGenerator());
     }
 
-//    /**
-//     * Instantiates a new data generator factory.
-//     */
-//    private DataGeneratorFactory()
-//    {
-//
-//    }
+    // /**
+    // * Instantiates a new data generator factory.
+    // */
+    // private DataGeneratorFactory()
+    // {
+    //
+    // }
 
     public DataGenerator<?> getDataGenerator(Class<?> clazz)
     {

@@ -22,39 +22,48 @@ import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.Type;
 
-
-
 /**
  * Implementation class for <code> {@link SetAttribute} </code> interface.
- * Offers metadata information implementation for collection attribute as per jpa.
+ * Offers metadata information implementation for collection attribute as per
+ * jpa.
  * 
  * @author vivek.mishra
  * 
- * @param <X> managed type
- * @param <E> attribute type in set
+ * @param <X>
+ *            managed type
+ * @param <E>
+ *            attribute type in set
  */
 public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set<E>> implements SetAttribute<X, E>
 {
 
-    
     /**
      * Constructor using fields.
      * 
-     * @param attribType                       attribute type
-     * @param attribName                       attribute name   
-     * @param persistenceAttribType            persistent attribute type.
-     * @param managedType                      managed type
-     * @param member                           attribute's java member. 
+     * @param attribType
+     *            attribute type
+     * @param attribName
+     *            attribute name
+     * @param persistenceAttribType
+     *            persistent attribute type.
+     * @param managedType
+     *            managed type
+     * @param member
+     *            attribute's java member.
      */
-    public DefaultSetAttribute(Type<E> attribType, String attribName, 
-                               javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-                               ManagedType<X> managedType, Field member, Class<Set<E>> clazz)
+    public DefaultSetAttribute(Type<E> attribType, String attribName,
+            javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
+            ManagedType<X> managedType, Field member, Class<Set<E>> clazz)
     {
         super(attribType, attribName, persistenceAttribType, managedType, member, clazz);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute#getCollectionType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute
+     * #getCollectionType()
      */
     @Override
     public javax.persistence.metamodel.PluralAttribute.CollectionType getCollectionType()
@@ -62,8 +71,9 @@ public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set
         return CollectionType.SET;
     }
 
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.PluralAttribute#getElementType()
      */
     @Override
@@ -72,12 +82,14 @@ public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set
         return this.attribType;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Attribute#getJavaType()
      */
     @Override
     public Class<Set<E>> getJavaType()
     {
-        return  super.getBoundJavaType();
+        return super.getBoundJavaType();
     }
 }

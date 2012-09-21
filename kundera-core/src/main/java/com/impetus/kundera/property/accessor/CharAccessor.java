@@ -49,19 +49,20 @@ public class CharAccessor implements PropertyAccessor<Character>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
         Character data = null;
-        if(object.getClass().isAssignableFrom(String.class))
+        if (object.getClass().isAssignableFrom(String.class))
         {
-            data = ((String)object).charAt(0);
-        } else
+            data = ((String) object).charAt(0);
+        }
+        else
         {
             data = (Character) object;
         }
-        
+
         return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }
 
@@ -93,14 +94,17 @@ public class CharAccessor implements PropertyAccessor<Character>
             {
                 throw new PropertyAccessException("Can't convert String " + s + " to character");
             }
-            
+
             Character c = null;
-            if(s.length() == 1) {
+            if (s.length() == 1)
+            {
                 c = s.charAt(0);
-            } else {
+            }
+            else
+            {
                 c = Character.MIN_VALUE;
-            }          
-            
+            }
+
             return c;
         }
         catch (NumberFormatException e)

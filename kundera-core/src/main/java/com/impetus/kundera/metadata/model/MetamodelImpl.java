@@ -39,7 +39,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
  * 
  * @author vivek.mishra
  */
-@StaticMetamodel(value=MetamodelImpl.class)
+@StaticMetamodel(value = MetamodelImpl.class)
 public class MetamodelImpl implements Metamodel
 {
 
@@ -280,7 +280,6 @@ public class MetamodelImpl implements Metamodel
     {
         return getEntityNameToClassMap().get(className);
     }
-    
 
     /**
      * Assign to managedTypes.
@@ -302,6 +301,7 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Assign embeddables to embeddables collection.
+     * 
      * @param embeddables
      *            the embeddables to set
      */
@@ -319,6 +319,7 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Adds mapped super class to mapped super class collection.
+     * 
      * @param mappedSuperClass
      *            the mappedSuperClassTypes to set
      */
@@ -337,7 +338,8 @@ public class MetamodelImpl implements Metamodel
     /**
      * Returns true, if attribute is embeddable.
      * 
-     * @param embeddableClazz           class for embeddable type attribute.
+     * @param embeddableClazz
+     *            class for embeddable type attribute.
      * @return try, if paramterized class is of embeddable java type.
      */
     public boolean isEmbeddable(Class embeddableClazz)
@@ -348,9 +350,11 @@ public class MetamodelImpl implements Metamodel
     /**
      * Returns entity attribute for given managed entity class.
      * 
-     * @param clazz            Entity class
-     * @param fieldName        field name
-     * @return                 entity attribute
+     * @param clazz
+     *            Entity class
+     * @param fieldName
+     *            field name
+     * @return entity attribute
      */
     public Attribute getEntityAttribute(Class clazz, String fieldName)
     {
@@ -364,10 +368,13 @@ public class MetamodelImpl implements Metamodel
     }
 
     /**
-     * Custome implementation to offer map of embeddables available for given entityType.
+     * Custome implementation to offer map of embeddables available for given
+     * entityType.
      * 
-     * @param clazz entity class
-     * @return map of holding {@link EmbeddableType} as value and attribute name as key.
+     * @param clazz
+     *            entity class
+     * @return map of holding {@link EmbeddableType} as value and attribute name
+     *         as key.
      */
     public Map<String, EmbeddableType> getEmbeddables(Class clazz)
     {

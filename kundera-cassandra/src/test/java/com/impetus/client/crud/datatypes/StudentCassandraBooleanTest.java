@@ -28,8 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentCassandraBoolean;
-import com.impetus.client.crud.datatypes.entities.StudentCassandraBoolean;
-import com.impetus.client.crud.datatypes.entities.StudentCassandraboolean;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.query.QueryHandlerException;
 

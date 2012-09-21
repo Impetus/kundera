@@ -44,7 +44,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     {
         try
         {
-            if( b == null)
+            if (b == null)
             {
                 return null;
             }
@@ -67,7 +67,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
@@ -86,7 +86,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     @Override
     public String toString(Object object)
     {
-        return object != null? object.toString() : null;
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -101,7 +101,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

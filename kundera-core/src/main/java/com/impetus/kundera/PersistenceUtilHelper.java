@@ -33,10 +33,6 @@ import javax.persistence.spi.LoadState;
 
 import org.hibernate.collection.PersistentCollection;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializer;
 
@@ -44,21 +40,21 @@ import com.impetus.kundera.proxy.LazyInitializer;
  * Helper for {@link PersistenceUtil}
  */
 public class PersistenceUtilHelper
-{ 
+{
 
     public static LoadState isLoadedWithReference(Object proxy, String property, MetadataCache cache)
     {
         return isLoaded(get(proxy, property, cache));
     }
-    
+
     public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
-    {       
-        if(proxy == null || property == null)
+    {
+        if (proxy == null || property == null)
         {
             return LoadState.NOT_LOADED;
-        }        
-        
-        if(proxy instanceof KunderaProxy)
+        }
+
+        if (proxy instanceof KunderaProxy)
         {
             LazyInitializer li = ((KunderaProxy) proxy).getKunderaLazyInitializer();
             if (li.isUninitialized())
@@ -66,10 +62,11 @@ public class PersistenceUtilHelper
                 return LoadState.NOT_LOADED;
             }
             return LoadState.LOADED;
-        } else
+        }
+        else
         {
             return LoadState.LOADED;
-        } 
+        }
 
     }
 
@@ -99,8 +96,8 @@ public class PersistenceUtilHelper
         catch (InvocationTargetException e)
         {
             throw new PersistenceException("Unable to access field or method: " + clazz + "#" + property, e);
-        }  
-                
+        }
+
     }
 
     private static void setAccessibility(Member member)
@@ -109,11 +106,11 @@ public class PersistenceUtilHelper
     }
 
     public static LoadState isLoaded(Object o)
-    { 
-        if(o == null)
+    {
+        if (o == null)
         {
             return LoadState.NOT_LOADED;
-        }        
+        }
         else if (o instanceof KunderaProxy)
         {
             final boolean isInitialized = !((KunderaProxy) o).getKunderaLazyInitializer().isUninitialized();

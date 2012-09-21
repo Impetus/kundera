@@ -17,36 +17,40 @@ package com.impetus.kundera.metadata.model.type;
 
 import javax.persistence.metamodel.Type;
 
-
 /**
  * Implements <code> Type</code> interface of MetaModel API.
- *
- * @param <X> the generic type
+ * 
+ * @param <X>
+ *            the generic type
  * 
  * @author vivek.mishra
  */
 public abstract class AbstractType<X> implements Type<X>
 {
-    
+
     /** The clazz type. */
     private Class<X> clazzType;
-    
+
     /** The persistence type. */
     private PersistenceType persistenceType;
-    
+
     /**
      * Instantiates a new default type.
-     *
-     * @param clazz the clazz
-     * @param persistenceType the persistence type
+     * 
+     * @param clazz
+     *            the clazz
+     * @param persistenceType
+     *            the persistence type
      */
-    AbstractType(Class<X> clazz,PersistenceType persistenceType)
+    AbstractType(Class<X> clazz, PersistenceType persistenceType)
     {
         this.clazzType = clazz;
         this.persistenceType = persistenceType;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Type#getPersistenceType()
      */
     @Override
@@ -55,7 +59,9 @@ public abstract class AbstractType<X> implements Type<X>
         return this.persistenceType;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Type#getJavaType()
      */
     @Override

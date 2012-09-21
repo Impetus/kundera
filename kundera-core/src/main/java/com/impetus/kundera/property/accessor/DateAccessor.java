@@ -91,7 +91,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public /*final*/ Date fromBytes(Class targetClass, byte[] bytes)
+    public/* final */Date fromBytes(Class targetClass, byte[] bytes)
     {
         try
         {
@@ -126,7 +126,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public /*final*/ byte[] toBytes(Object date)
+    public/* final */byte[] toBytes(Object date)
     {
         try
         {
@@ -152,7 +152,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
-    public /*final*/ String toString(Object object)
+    public/* final */String toString(Object object)
     {
         return object != null ? object.toString() : null;
     }

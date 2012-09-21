@@ -17,7 +17,6 @@ package com.impetus.kundera.proxy;
 
 import java.lang.reflect.Method;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;

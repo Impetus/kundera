@@ -6,8 +6,8 @@ package com.impetus.kundera.datatypes.datagenerator;
 public class StringDataGenerator implements DataGenerator<String>
 {
 
-//    private static final String AMRESH = new String("Amresh");
-//    private static final String random = new String("Kuldeep");
+    // private static final String AMRESH = new String("Amresh");
+    // private static final String random = new String("Kuldeep");
 
     @Override
     public String randomValue()

@@ -33,13 +33,14 @@ import javax.persistence.metamodel.SingularAttribute;
 
 /**
  * Implementation for <code>ManagedType</code> interface.
- *
- * @param <X> the generic entity type.
+ * 
+ * @param <X>
+ *            the generic entity type.
  * @author vivek.mishra
  */
 public abstract class AbstractManagedType<X> extends AbstractType<X> implements ManagedType<X>
 {
-    
+
     /** The super clazz type. */
     private ManagedType<? super X> superClazzType;
 
@@ -51,12 +52,17 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Super constructor with arguments.
-     *
-     * @param clazz parameterised class.
-     * @param persistenceType persistenceType.
-     * @param superClazzType the super clazz type
-     * @param declaredSingluarAttribs the declared singluar attribs
-     * @param declaredPluralAttributes the declared plural attributes
+     * 
+     * @param clazz
+     *            parameterised class.
+     * @param persistenceType
+     *            persistenceType.
+     * @param superClazzType
+     *            the super clazz type
+     * @param declaredSingluarAttribs
+     *            the declared singluar attribs
+     * @param declaredPluralAttributes
+     *            the declared plural attributes
      */
     AbstractManagedType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             ManagedType<? super X> superClazzType)
@@ -120,7 +126,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public <Y> SingularAttribute<? super X, Y> getSingularAttribute(String paramString, Class<Y> paramClass)
     {
-        SingularAttribute<? super X, Y> attribute = getDeclaredSingularAttribute(paramString, paramClass,false);
+        SingularAttribute<? super X, Y> attribute = getDeclaredSingularAttribute(paramString, paramClass, false);
         if (superClazzType != null && attribute == null)
         {
             return superClazzType.getDeclaredSingularAttribute(paramString, paramClass);
@@ -455,7 +461,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public Attribute<? super X, ?> getAttribute(String paramName)
     {
-        Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName,false);
+        Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName, false);
         if (attribute == null && superClazzType != null)
         {
             attribute = superClazzType.getDeclaredAttribute(paramName);
@@ -514,8 +520,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return attribute;
     }
 
-    
-
     /*
      * (non-Javadoc)
      * 
@@ -530,8 +534,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         return attribute;
     }
-
-   
 
     /*
      * (non-Javadoc)
@@ -721,37 +723,36 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
                 "attribute of the given name and type is not present in the managed type, for name:" + paramName);
     }
 
-
     ManagedType<? super X> getSuperClazzType()
     {
         return superClazzType;
     }
-    
+
     public void addSingularAttribute(String attributeName, SingularAttribute<X, ?> attribute)
     {
-        if(declaredSingluarAttribs == null)
+        if (declaredSingluarAttribs == null)
         {
-            declaredSingluarAttribs = new HashMap<String, SingularAttribute<X,?>>();
+            declaredSingluarAttribs = new HashMap<String, SingularAttribute<X, ?>>();
         }
-        
+
         declaredSingluarAttribs.put(attributeName, attribute);
     }
-    
-    public void addPluralAttribute(String attributeName, PluralAttribute<X,?,?> attribute)
+
+    public void addPluralAttribute(String attributeName, PluralAttribute<X, ?, ?> attribute)
     {
-        if(declaredPluralAttributes== null)
+        if (declaredPluralAttributes == null)
         {
-            declaredPluralAttributes = new HashMap<String, PluralAttribute<X,?,?>>();
+            declaredPluralAttributes = new HashMap<String, PluralAttribute<X, ?, ?>>();
         }
-        
+
         declaredPluralAttributes.put(attributeName, attribute);
     }
-    
-    
+
     /**
      * Gets the declared plural attribute.
-     *
-     * @param paramName the param name
+     * 
+     * @param paramName
+     *            the param name
      * @return the declared plural attribute
      */
     private PluralAttribute<X, ?, ?> getDeclaredPluralAttribute(String paramName)
@@ -761,8 +762,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Gets the plural attriute.
-     *
-     * @param paramName the param name
+     * 
+     * @param paramName
+     *            the param name
      * @return the plural attriute
      */
     private PluralAttribute<? super X, ?, ?> getPluralAttriute(String paramName)
@@ -776,10 +778,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * On check collection attribute.
-     *
-     * @param <E> the element type
-     * @param pluralAttribute the plural attribute
-     * @param paramClass the param class
+     * 
+     * @param <E>
+     *            the element type
+     * @param pluralAttribute
+     *            the plural attribute
+     * @param paramClass
+     *            the param class
      * @return true, if successful
      */
     private <E> boolean onCheckCollectionAttribute(PluralAttribute<? super X, ?, ?> pluralAttribute, Class<E> paramClass)
@@ -798,10 +803,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * On check set attribute.
-     *
-     * @param <E> the element type
-     * @param pluralAttribute the plural attribute
-     * @param paramClass the param class
+     * 
+     * @param <E>
+     *            the element type
+     * @param pluralAttribute
+     *            the plural attribute
+     * @param paramClass
+     *            the param class
      * @return true, if successful
      */
     private <E> boolean onCheckSetAttribute(PluralAttribute<? super X, ?, ?> pluralAttribute, Class<E> paramClass)
@@ -820,10 +828,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * On check list attribute.
-     *
-     * @param <E> the element type
-     * @param pluralAttribute the plural attribute
-     * @param paramClass the param class
+     * 
+     * @param <E>
+     *            the element type
+     * @param pluralAttribute
+     *            the plural attribute
+     * @param paramClass
+     *            the param class
      * @return true, if successful
      */
     private <E> boolean onCheckListAttribute(PluralAttribute<? super X, ?, ?> pluralAttribute, Class<E> paramClass)
@@ -842,10 +853,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * On check map attribute.
-     *
-     * @param <V> the value type
-     * @param pluralAttribute the plural attribute
-     * @param valueClazz the value clazz
+     * 
+     * @param <V>
+     *            the value type
+     * @param pluralAttribute
+     *            the plural attribute
+     * @param valueClazz
+     *            the value clazz
      * @return true, if successful
      */
     private <V> boolean onCheckMapAttribute(PluralAttribute<? super X, ?, ?> pluralAttribute, Class<V> valueClazz)
@@ -864,8 +878,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks if is collection attribute.
-     *
-     * @param attribute the attribute
+     * 
+     * @param attribute
+     *            the attribute
      * @return true, if is collection attribute
      */
     private boolean isCollectionAttribute(PluralAttribute<? super X, ?, ?> attribute)
@@ -875,8 +890,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks if is list attribute.
-     *
-     * @param attribute the attribute
+     * 
+     * @param attribute
+     *            the attribute
      * @return true, if is list attribute
      */
     private boolean isListAttribute(PluralAttribute<? super X, ?, ?> attribute)
@@ -886,8 +902,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks if is sets the attribute.
-     *
-     * @param attribute the attribute
+     * 
+     * @param attribute
+     *            the attribute
      * @return true, if is sets the attribute
      */
     private boolean isSetAttribute(PluralAttribute<? super X, ?, ?> attribute)
@@ -897,8 +914,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks if is map attribute.
-     *
-     * @param attribute the attribute
+     * 
+     * @param attribute
+     *            the attribute
      * @return true, if is map attribute
      */
     private boolean isMapAttribute(PluralAttribute<? super X, ?, ?> attribute)
@@ -908,10 +926,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks if is bindable.
-     *
-     * @param <E> the element type
-     * @param attribute the attribute
-     * @param elementType the element type
+     * 
+     * @param <E>
+     *            the element type
+     * @param attribute
+     *            the attribute
+     * @param elementType
+     *            the element type
      * @return true, if is bindable
      */
     private <E> boolean isBindable(Bindable<?> attribute, Class<E> elementType)
@@ -921,9 +942,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Check for valid.
-     *
-     * @param paramName the param name
-     * @param attribute the attribute
+     * 
+     * @param paramName
+     *            the param name
+     * @param attribute
+     *            the attribute
      */
     private void checkForValid(String paramName, Attribute<? super X, ?> attribute)
     {
@@ -935,7 +958,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
-
     /**
      * @param paramName
      * @param checkValidity
@@ -943,20 +965,19 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      */
     private Attribute<X, ?> getDeclaredAttribute(String paramName, boolean checkValidity)
     {
-        Attribute<X, ?> attribute = (Attribute<X, ?>) getSingularAttribute(paramName,false);
+        Attribute<X, ?> attribute = (Attribute<X, ?>) getSingularAttribute(paramName, false);
 
         if (attribute == null)
         {
             attribute = (Attribute<X, ?>) getDeclaredPluralAttribute(paramName);
         }
 
-        if(checkValidity)
+        if (checkValidity)
         {
             checkForValid(paramName, attribute);
         }
         return attribute;
     }
-
 
     /**
      * Returns declared singular attribute.
@@ -967,7 +988,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * @param checkValidity
      * @return
      */
-    private <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass, boolean checkValidity)
+    private <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass,
+            boolean checkValidity)
     {
         SingularAttribute<X, ?> declaredAttrib = declaredSingluarAttribs.get(paramString);
 
@@ -976,11 +998,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             return (SingularAttribute<X, Y>) declaredAttrib;
         }
 
-        if(checkValidity)
+        if (checkValidity)
         {
             throw new IllegalArgumentException(
-                "attribute of the given name and type is not present in the managed type, for name:" + paramString
-                        + " , type:" + paramClass);
+                    "attribute of the given name and type is not present in the managed type, for name:" + paramString
+                            + " , type:" + paramClass);
         }
         return null;
     }
@@ -1000,26 +1022,26 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             attribute = declaredSingluarAttribs.get(paramString);
         }
 
-        if(checkValidity)
+        if (checkValidity)
         {
             checkForValid(paramString, attribute);
         }
         return attribute;
     }
 
-
     /**
      * On validity check
+     * 
      * @param paramString
      * @param checkValidity
      * @param attribute
      */
     private void onValidity(String paramString, boolean checkValidity, SingularAttribute<? super X, ?> attribute)
     {
-        if(checkValidity)
+        if (checkValidity)
         {
             checkForValid(paramString, attribute);
-            
+
         }
     }
 }

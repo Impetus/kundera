@@ -37,7 +37,7 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
  * @author amresh
  * 
  */
-public abstract class ClientBase 
+public abstract class ClientBase
 {
 
     /** The index manager. */
@@ -152,9 +152,8 @@ public abstract class ClientBase
             {
                 for (NodeLink parentNodeLink : parents.keySet())
                 {
-                    indexManager.update(entityMetadata, node.getData(),
-                            parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
-                            parents.get(parentNodeLink).getDataClass());
+                    indexManager.update(entityMetadata, node.getData(), parentNodeLink
+                            .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
                 }
 
             }
@@ -166,9 +165,8 @@ public abstract class ClientBase
                 {
                     if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
                     {
-                        indexManager.update(entityMetadata, node.getData(),
-                                childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
-                                children.get(childNodeLink).getDataClass());
+                        indexManager.update(entityMetadata, node.getData(), childNodeLink
+                                .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink).getDataClass());
                     }
                     else
                     {

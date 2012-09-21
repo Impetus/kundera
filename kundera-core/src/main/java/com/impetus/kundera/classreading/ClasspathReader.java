@@ -149,13 +149,13 @@ public class ClasspathReader extends Reader
 
             for (URL url : urls)
             {
-                if(AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
+                if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
                 {
                     try
                     {
                         JarFile jarFile = new JarFile(url.getFile());
-                        JarEntry present =  jarFile.getJarEntry(classRelativePath + ".class");
-                        if( present != null)
+                        JarEntry present = jarFile.getJarEntry(classRelativePath + ".class");
+                        if (present != null)
                         {
                             list.add(url);
                         }
@@ -164,8 +164,9 @@ public class ClasspathReader extends Reader
                     {
                         logger.warn("Error during loading from context , Caused by:" + e.getMessage());
                     }
-                    
-                } else if (url.getPath().endsWith("/"))
+
+                }
+                else if (url.getPath().endsWith("/"))
                 {
                     File file = new File(url.getPath() + classRelativePath + ".class");
                     if (file.exists())
@@ -202,10 +203,10 @@ public class ClasspathReader extends Reader
         {
             result = findResourcesByContextLoader();
         }
-//        else
-//        {
-//            result = findResourcesByClasspath();
-//        }
+        // else
+        // {
+        // result = findResourcesByClasspath();
+        // }
         return result;
     }
 

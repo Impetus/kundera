@@ -21,7 +21,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing. 
+ * Entity with singular attributes for meta model processing.
  * 
  * @author vivek.mishra
  * 
@@ -35,7 +35,7 @@ public class SingularEntity
     @Id
     private Integer key;
 
-    @Column(name = "field",nullable=false )
+    @Column(name = "field", nullable = false)
     private String field;
 
     @Column(name = "name")
@@ -84,7 +84,8 @@ public class SingularEntity
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {

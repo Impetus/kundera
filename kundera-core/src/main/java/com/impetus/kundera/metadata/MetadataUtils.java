@@ -348,9 +348,10 @@ public class MetadataUtils
                 // relation.getType().equals(ForeignKey.ONE_TO_MANY) ?
                 // parentMetadata.getIdColumn().getName()
                 // : metadata.getIdColumn().getName();
-                
-                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? ((AbstractAttribute)parentMetadata.getIdAttribute())
-                        .getJPAColumnName() : ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName();
+
+                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? ((AbstractAttribute) parentMetadata
+                        .getIdAttribute()).getJPAColumnName() : ((AbstractAttribute) metadata.getIdAttribute())
+                        .getJPAColumnName();
             }
             return joinColumn;
         }
@@ -374,20 +375,19 @@ public class MetadataUtils
         String enclosingEmbeddedFieldName = null;
 
         StringTokenizer strToken = new StringTokenizer(criteria, ".");
-        String embeddedFieldName=null;
+        String embeddedFieldName = null;
         String embeddableAttributeName = null;
-        
-        while(strToken.hasMoreElements())
+
+        while (strToken.hasMoreElements())
         {
             embeddableAttributeName = strToken.nextToken();
-            
-            if(strToken.countTokens() > 0)
+
+            if (strToken.countTokens() > 0)
             {
                 embeddedFieldName = strToken.nextToken();
             }
         }
-        
-        
+
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
 
@@ -395,9 +395,9 @@ public class MetadataUtils
         {
             Attribute attribute = entity.getAttribute(embeddableAttributeName);
 
-            if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute)attribute).getBindableJavaType()))
+            if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
             {
-                EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute)attribute).getBindableJavaType());
+                EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
                 Iterator<Attribute> iter = embeddable.getAttributes().iterator();
                 while (iter.hasNext())
                 {
@@ -472,7 +472,7 @@ public class MetadataUtils
         while (iter.hasNext())
         {
             Attribute attribute = iter.next();
-            if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute)attribute).getBindableJavaType()))
+            if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
             {
                 superColumnNameToFieldMap.put(((AbstractAttribute) attribute).getJPAColumnName(),
                         (Field) attribute.getJavaMember());
@@ -490,9 +490,10 @@ public class MetadataUtils
         }
     }
 
-    private static void getAttributeOfEmbedddable(Map<String, Field> columnNameToFieldMap, Metamodel metaModel, Attribute attribute)
+    private static void getAttributeOfEmbedddable(Map<String, Field> columnNameToFieldMap, Metamodel metaModel,
+            Attribute attribute)
     {
-        EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute)attribute).getBindableJavaType());
+        EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
 
         Iterator<Attribute> embeddableIter = embeddable.getAttributes().iterator();
         while (embeddableIter.hasNext())
@@ -503,8 +504,10 @@ public class MetadataUtils
             // embeddable.
             if (!((MetamodelImpl) metaModel).isEmbeddable(embedAttrib.getJavaType()))
             {
-                columnNameToFieldMap.put(((AbstractAttribute)embedAttrib).getJPAColumnName(), (Field) embedAttrib.getJavaMember());
-            } else
+                columnNameToFieldMap.put(((AbstractAttribute) embedAttrib).getJPAColumnName(),
+                        (Field) embedAttrib.getJavaMember());
+            }
+            else
             {
                 getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, embedAttrib);
             }

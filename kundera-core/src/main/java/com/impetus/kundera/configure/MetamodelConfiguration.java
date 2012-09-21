@@ -169,17 +169,17 @@ public class MetamodelConfiguration implements Configuration
         }
 
         URL[] managedClasses = reader.findResources();
-        if(managedClasses != null)
+        if (managedClasses != null)
         {
-            List<URL> managedResources =  Arrays.asList(managedClasses);
+            List<URL> managedResources = Arrays.asList(managedClasses);
             managedURLs.addAll(managedResources);
         }
-        
-      if (managedURLs != null)
-      {
-          resources = managedURLs.toArray(new URL[] {});
-      }
-        
+
+        if (managedURLs != null)
+        {
+            resources = managedURLs.toArray(new URL[] {});
+        }
+
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
 
@@ -220,15 +220,17 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
-        
+
         // assign JPA metamodel.
-        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
+        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
-        
-        
+
     }
 
     /**

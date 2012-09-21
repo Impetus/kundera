@@ -1,4 +1,5 @@
 package com.impetus.kundera.metadata.entities;
+
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -24,17 +25,20 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
 public class SubClassB extends MappedSuperClass
 {
-    @Id private String subClassBStr;
-    
-    @Column private Date subClassBDt;
-    
-    @Column private long subClassBLng;
+    @Id
+    private String subClassBStr;
+
+    @Column
+    private Date subClassBDt;
+
+    @Column
+    private long subClassBLng;
 
     /**
      * @return the subClassBStr
@@ -45,7 +49,8 @@ public class SubClassB extends MappedSuperClass
     }
 
     /**
-     * @param subClassBStr the subClassBStr to set
+     * @param subClassBStr
+     *            the subClassBStr to set
      */
     public void setSubClassBStr(String subClassBStr)
     {
@@ -61,7 +66,8 @@ public class SubClassB extends MappedSuperClass
     }
 
     /**
-     * @param subClassBDt the subClassBDt to set
+     * @param subClassBDt
+     *            the subClassBDt to set
      */
     public void setSubClassBDt(Date subClassBDt)
     {
@@ -77,12 +83,12 @@ public class SubClassB extends MappedSuperClass
     }
 
     /**
-     * @param subClassBLng the subClassBLng to set
+     * @param subClassBLng
+     *            the subClassBLng to set
      */
     public void setSubClassBLng(long subClassBLng)
     {
         this.subClassBLng = subClassBLng;
     }
-
 
 }

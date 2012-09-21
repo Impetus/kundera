@@ -12,11 +12,11 @@ import org.junit.Test;
 
 /**
  * @author impadmin
- *
+ * 
  */
 public class ShortAccessorTest
 {
-    
+
     ShortAccessor accessor;
 
     /**
@@ -37,16 +37,20 @@ public class ShortAccessorTest
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.ShortAccessor#fromBytes(java.lang.Class, byte[])}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.ShortAccessor#fromBytes(java.lang.Class, byte[])}
+     * .
      */
-    //@Test
+    // @Test
     public void testFromBytes()
     {
         fail("Not yet implemented");
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.ShortAccessor#toBytes(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.ShortAccessor#toBytes(java.lang.Object)}
+     * .
      */
     @Test
     public void testToBytes()
@@ -58,18 +62,22 @@ public class ShortAccessorTest
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.ShortAccessor#toString(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.ShortAccessor#toString(java.lang.Object)}
+     * .
      */
-    //@Test
+    // @Test
     public void testToStringObject()
     {
         fail("Not yet implemented");
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.ShortAccessor#fromString(java.lang.Class, java.lang.String)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.ShortAccessor#fromString(java.lang.Class, java.lang.String)}
+     * .
      */
-    //@Test
+    // @Test
     public void testFromString()
     {
         fail("Not yet implemented");

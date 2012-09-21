@@ -23,29 +23,37 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.Type;
 
-
 /**
- * Abstract class to provide generalisation to <code> {@link PluralAttribute} </code> interface.
+ * Abstract class to provide generalisation to
+ * <code> {@link PluralAttribute} </code> interface.
  * 
  * @author vivek.mishra
- *
- * @param <X>      managed entity java type.
- * @param <E>      attribute's java type.
- * @param <T>      Collection type of plural attributes.  
+ * 
+ * @param <X>
+ *            managed entity java type.
+ * @param <E>
+ *            attribute's java type.
+ * @param <T>
+ *            Collection type of plural attributes.
  */
-public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X,E>
+public abstract class AbstractPluralAttribute<X, E, T> extends AbstractAttribute<X, E>
 {
-    
+
     private Class<T> collectionClazz;
 
     /**
      * Constructor with fields.
      * 
-     * @param attribType                     attribute type
-     * @param attribName                     attribute field's name
-     * @param persistenceAttribType          persistent attribute type
-     * @param managedType                    type of managed entity.
-     * @param member                         java member.
+     * @param attribType
+     *            attribute type
+     * @param attribName
+     *            attribute field's name
+     * @param persistenceAttribType
+     *            persistent attribute type
+     * @param managedType
+     *            type of managed entity.
+     * @param member
+     *            java member.
      */
     AbstractPluralAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
@@ -55,17 +63,24 @@ public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X
         this.collectionClazz = clazz;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getBindableType()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#
+     * getBindableType()
      */
     @Override
     public javax.persistence.metamodel.Bindable.BindableType getBindableType()
     {
         return BindableType.PLURAL_ATTRIBUTE;
     }
-    
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#isCollection()
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.model.attributes.AbstractAttribute#isCollection
+     * ()
      */
     @Override
     public boolean isCollection()

@@ -22,7 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing. 
+ * Entity with singular attributes for meta model processing.
  * 
  * @author vivek.mishra
  * 
@@ -36,15 +36,15 @@ public class SingularEntityEmbeddable
     @Id
     private Integer key;
 
-    @Column(name = "field",nullable=false )
+    @Column(name = "field", nullable = false)
     private String field;
 
     @Column(name = "name")
     private String name;
-    
+
     @Embedded
     private EmbeddableEntity embeddableEntity;
-    
+
     @Embedded
     private EmbeddableEntityTwo embeddableEntityTwo;
 
@@ -91,7 +91,8 @@ public class SingularEntityEmbeddable
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -107,7 +108,8 @@ public class SingularEntityEmbeddable
     }
 
     /**
-     * @param embeddableEntity the embeddableEntity to set
+     * @param embeddableEntity
+     *            the embeddableEntity to set
      */
     public void setEmbeddableEntity(EmbeddableEntity embeddableEntity)
     {
@@ -123,7 +125,8 @@ public class SingularEntityEmbeddable
     }
 
     /**
-     * @param embeddableEntityTwo the embeddableEntityTwo to set
+     * @param embeddableEntityTwo
+     *            the embeddableEntityTwo to set
      */
     public void setEmbeddableEntityTwo(EmbeddableEntityTwo embeddableEntityTwo)
     {

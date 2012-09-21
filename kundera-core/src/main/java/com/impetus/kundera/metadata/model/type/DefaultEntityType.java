@@ -19,20 +19,22 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Type;
 
 /**
-* Default implementation of {@link EntityType}
+ * Default implementation of {@link EntityType}
  * 
- * <code> DefaultEmbeddableType</code> implements <code>EntityType</code> interface, invokes constructor with
- * PersistenceType.ENTITY. Default implementation of {@link Type} interface is provided by {@link AbstractType}
-
+ * <code> DefaultEmbeddableType</code> implements <code>EntityType</code>
+ * interface, invokes constructor with PersistenceType.ENTITY. Default
+ * implementation of {@link Type} interface is provided by {@link AbstractType}
+ * 
  * @author vivek.mishra
- * @param <X>  Entity generic java type.
+ * @param <X>
+ *            Entity generic java type.
  */
 
 public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements EntityType<X>
 {
 
     /**
-     * Default constructor using fields. 
+     * Default constructor using fields.
      */
     public DefaultEntityType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             AbstractIdentifiableType<? super X> superClazzType)
@@ -40,7 +42,9 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
         super(clazz, persistenceType, superClazzType);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Bindable#getBindableType()
      */
     @Override
@@ -49,7 +53,9 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
         return BindableType.ENTITY_TYPE;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Bindable#getBindableJavaType()
      */
     @Override
@@ -58,7 +64,9 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
         return super.getJavaType();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.EntityType#getName()
      */
     @Override

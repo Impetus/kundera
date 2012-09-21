@@ -34,7 +34,6 @@ import org.junit.Test;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;

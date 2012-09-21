@@ -42,7 +42,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     public Calendar fromBytes(Class targetClass, byte[] b)
     {
         Calendar cal = Calendar.getInstance();
-        Date d = new Date();        
+        Date d = new Date();
         if (b == null)
         {
             return null;

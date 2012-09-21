@@ -86,7 +86,7 @@ public class FlushManager
      */
     public void buildFlushStack(Node headNode, EventType eventType)
     {
-        if(headNode != null)
+        if (headNode != null)
         {
             headNode.setTraversed(false);
             addNodesToFlushStack(headNode, eventType);
@@ -172,8 +172,24 @@ public class FlushManager
                         {
                             String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
                             String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                            Object entityId = node.getEntityId(); /*ObjectGraphBuilder.getEntityId(node.getNodeId());*/
-                            Object childId = childNode.getEntityId();/*ObjectGraphBuilder.getEntityId(childNode.getNodeId());*/
+                            Object entityId = node.getEntityId(); /*
+                                                                   * ObjectGraphBuilder
+                                                                   * .
+                                                                   * getEntityId
+                                                                   * (
+                                                                   * node.getNodeId
+                                                                   * ());
+                                                                   */
+                            Object childId = childNode.getEntityId();/*
+                                                                      * ObjectGraphBuilder
+                                                                      * .
+                                                                      * getEntityId
+                                                                      * (
+                                                                      * childNode
+                                                                      * .
+                                                                      * getNodeId
+                                                                      * ());
+                                                                      */
 
                             Set<Object> childValues = new HashSet<Object>();
                             childValues.add(childId);
@@ -431,7 +447,8 @@ public class FlushManager
                     {
                         if (node.getOriginalNode() == null)
                         {
-//                            String entityId = ObjectGraphUtils.getEntityId(node.getNodeId());
+                            // String entityId =
+                            // ObjectGraphUtils.getEntityId(node.getNodeId());
                             Object entityId = node.getEntityId();
                             client.delete(node.getData(), entityId);
                         }
@@ -520,7 +537,8 @@ public class FlushManager
                 {
                     for (Object pk : jtData.getJoinTableRecords().keySet())
                     {
-//                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                        // client.deleteByColumn(jtData.getJoinTableName(),
+                        // m.getIdColumn().getName(), pk);
                         client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
                     }
                 }

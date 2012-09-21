@@ -105,7 +105,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

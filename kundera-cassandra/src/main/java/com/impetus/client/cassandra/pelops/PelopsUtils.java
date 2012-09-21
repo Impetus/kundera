@@ -17,7 +17,6 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;

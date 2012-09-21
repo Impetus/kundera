@@ -22,7 +22,7 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "asso_table", schema = "testSchema@keyspace")
@@ -30,13 +30,13 @@ public class AssociationEntity
 {
 
     @Id
-    @Column(name="Association_ID")
+    @Column(name = "Association_ID")
     private String assoRowKey;
-    
-    @Column(name="ADDRESS")
+
+    @Column(name = "ADDRESS")
     private String address;
-    
-    @Column(name="AGE")
+
+    @Column(name = "AGE")
     private int age;
 
     /**
@@ -48,7 +48,8 @@ public class AssociationEntity
     }
 
     /**
-     * @param rowKey the rowKey to set
+     * @param rowKey
+     *            the rowKey to set
      */
     public void setRowKey(String rowKey)
     {
@@ -64,7 +65,8 @@ public class AssociationEntity
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(String address)
     {
@@ -80,12 +82,12 @@ public class AssociationEntity
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
         this.age = age;
     }
 
-    
 }

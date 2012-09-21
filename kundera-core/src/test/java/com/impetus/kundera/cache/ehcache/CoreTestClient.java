@@ -38,14 +38,14 @@ public class CoreTestClient implements Client<LuceneQuery>
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void delete(Object entity, Object pKey)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -66,14 +66,14 @@ public class CoreTestClient implements Client<LuceneQuery>
     public void persist(Node node)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -94,7 +94,7 @@ public class CoreTestClient implements Client<LuceneQuery>
     @Override
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub        
+        // TODO Auto-generated method stub
     }
 
     @Override
@@ -116,6 +116,6 @@ public class CoreTestClient implements Client<LuceneQuery>
     {
         // TODO Auto-generated method stub
         return null;
-    }   
+    }
 
 }

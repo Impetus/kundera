@@ -19,7 +19,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * Entity with singular attributes for meta model processing. 
+ * Entity with singular attributes for meta model processing.
  * 
  * @author vivek.mishra
  * 
@@ -33,7 +33,6 @@ public class EmbeddableEntityTwo
 
     @Column(name = "name")
     private String embeddedName;
-
 
     /**
      * @return the field
@@ -61,7 +60,8 @@ public class EmbeddableEntityTwo
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {

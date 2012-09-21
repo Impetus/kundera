@@ -19,25 +19,28 @@ import com.impetus.kundera.graph.Node;
 
 /**
  * API to handler batch operations.
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public interface Batcher
 {
 
     /**
-     *  Adds node to batch collection.
-     *  
-     * @param node data node.
+     * Adds node to batch collection.
+     * 
+     * @param node
+     *            data node.
      */
     void addBatch(Node node);
-    
+
     /**
-     *  executes batch.
-     *  @return returns number of records persisted/update via batch.
+     * executes batch.
+     * 
+     * @return returns number of records persisted/update via batch.
      */
     int executeBatch();
-    
+
     /**
      * Returns batch size
      * 

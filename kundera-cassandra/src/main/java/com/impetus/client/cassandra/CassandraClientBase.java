@@ -64,6 +64,7 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -85,7 +86,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -123,7 +123,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
         batchSize = puMetadata.getBatchSize();
-
+        cqlVersion = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
+                : CassandraConstants.CQL_VERSION_2_0;
     }
 
     /**
@@ -833,13 +834,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             int maxResult, List<String> columns);
 
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
-            List<String> relations,List<String> columns,List<IndexExpression> conditions) throws Exception;
+            List<String> relations, List<String> columns, List<IndexExpression> conditions) throws Exception;
 
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue);
 
     public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames,
-            List<IndexClause> conditions, int maxResult,List<String> columns);
+            List<IndexClause> conditions, int maxResult, List<String> columns);
 
     protected abstract CassandraDataHandler getDataHandler();
 
@@ -978,7 +979,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             String columnFamily = entityMetadata.getTableName();
-            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);            
+            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);
         }
         catch (Exception e)
         {
@@ -987,7 +988,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         addRelationsToThriftRow(entityMetadata, tf, relationHolders);
-        
+
         String columnFamily = entityMetadata.getTableName();
         // Create Insertion List
         List<Mutation> insertion_list = new ArrayList<Mutation>();

@@ -33,7 +33,6 @@ import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.cloner.Cloner;
 import org.hibernate.collection.AbstractPersistentCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,21 +55,6 @@ public class ObjectUtils
 {
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
-
-    public static final Object deepCopyUsingCloner(Object objectToCopy)
-    {
-        Object destObject;
-        try
-        {
-            destObject = Cloner.deepClone(objectToCopy, objectToCopy.getClass());
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-        return destObject;
-
-    }
 
     public static final Object deepCopy(Object source)
     {
@@ -105,6 +89,11 @@ public class ObjectUtils
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
+            if (metaModel == null)
+            {
+                System.out.println(metaModel);
+            }
+
             EntityType entityType = metaModel.entity(sourceObjectClass);
 
             // May break for mapped super class.
@@ -280,12 +269,12 @@ public class ObjectUtils
 
                 if (sourceRelationObject != null && !(sourceRelationObject instanceof AbstractPersistentCollection))
                 {
-                    if(sourceRelationObject instanceof KunderaProxy)
+                    if (sourceRelationObject instanceof KunderaProxy)
                     {
                         PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
                         continue;
                     }
-                    
+
                     Object targetRelationObject = null;
 
                     Class<?> relationObjectClass = relation.getProperty().getType();

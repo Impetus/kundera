@@ -16,7 +16,7 @@
 package com.impetus.kundera.datatypes.datagenerator;
 
 public interface DataGenerator<T>
-{   
+{
     T randomValue();
 
     T maxValue();

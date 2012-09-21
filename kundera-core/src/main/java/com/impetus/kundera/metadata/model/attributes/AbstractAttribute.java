@@ -31,10 +31,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Abstract class for to provide generalisation, abstraction to <code>Type</code> hierarchy.
- *
- * @param <X> the generic mananged entitytype
- * @param <T> the generic attribute type
+ * Abstract class for to provide generalisation, abstraction to
+ * <code>Type</code> hierarchy.
+ * 
+ * @param <X>
+ *            the generic mananged entitytype
+ * @param <T>
+ *            the generic attribute type
  * @author vivek.mishra
  */
 public abstract class AbstractAttribute<X, T>
@@ -63,12 +66,17 @@ public abstract class AbstractAttribute<X, T>
 
     /**
      * Instantiates a new abstract attribute.
-     *
-     * @param attribType the attrib type
-     * @param attribName the attrib name
-     * @param persistenceAttribType the persistence attrib type
-     * @param managedType the managed type
-     * @param member the member
+     * 
+     * @param attribType
+     *            the attrib type
+     * @param attribName
+     *            the attrib name
+     * @param persistenceAttribType
+     *            the persistence attrib type
+     * @param managedType
+     *            the managed type
+     * @param member
+     *            the member
      */
     AbstractAttribute(Type<T> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
@@ -161,17 +169,15 @@ public abstract class AbstractAttribute<X, T>
                 || persistenceAttribType.equals(PersistentAttributeType.ONE_TO_ONE);
     }
 
-
     /**
      * Returns assigned jpa column name.
      * 
-     * @return column name        jpa column name.
+     * @return column name jpa column name.
      */
     public String getJPAColumnName()
     {
         return columnName;
     }
-
 
     /**
      * Gets the valid jpa column name.
@@ -200,26 +206,28 @@ public abstract class AbstractAttribute<X, T>
         {
             if (!member.getType().equals(Date.class))
             {
-                log.error("@Temporal must map to java.util.Date for @Entity(" + managedType.getJavaType() + "." + member.getName()
-                        + ")");
+                log.error("@Temporal must map to java.util.Date for @Entity(" + managedType.getJavaType() + "."
+                        + member.getName() + ")");
                 return name;
             }
-        } else if(member.isAnnotationPresent(JoinColumn.class))
+        }
+        else if (member.isAnnotationPresent(JoinColumn.class))
         {
             JoinColumn c = member.getAnnotation(JoinColumn.class);
-            if(!c.name().isEmpty())
-            {
-                name = c.name();
-            }
-        } else if(member.isAnnotationPresent(CollectionTable.class))
-        {
-            CollectionTable c = member.getAnnotation(CollectionTable.class);
-            if(!c.name().isEmpty())
+            if (!c.name().isEmpty())
             {
                 name = c.name();
             }
         }
-        return name == null ? getName(): name;
+        else if (member.isAnnotationPresent(CollectionTable.class))
+        {
+            CollectionTable c = member.getAnnotation(CollectionTable.class);
+            if (!c.name().isEmpty())
+            {
+                name = c.name();
+            }
+        }
+        return name == null ? getName() : name;
     }
 
 }

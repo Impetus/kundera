@@ -21,14 +21,14 @@ import javax.persistence.MappedSuperclass;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @MappedSuperclass
 public class MappedSuperClass extends RootMappedSuperClass
 {
     @Column
     private int mappedInt;
-    
+
     @Column
     private Float mappedFloat;
 
@@ -41,7 +41,8 @@ public class MappedSuperClass extends RootMappedSuperClass
     }
 
     /**
-     * @param mappedInt the mappedInt to set
+     * @param mappedInt
+     *            the mappedInt to set
      */
     public void setMappedInt(int mappedInt)
     {
@@ -57,12 +58,12 @@ public class MappedSuperClass extends RootMappedSuperClass
     }
 
     /**
-     * @param mappedFloat the mappedFloat to set
+     * @param mappedFloat
+     *            the mappedFloat to set
      */
     public void setMappedFloat(Float mappedFloat)
     {
         this.mappedFloat = mappedFloat;
     }
-    
-    
+
 }

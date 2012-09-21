@@ -62,7 +62,6 @@ public class ObjectGraphBuilder
         return objectGraph;
     }
 
-
     public static String getNodeId(Object pk, Object nodeData)
     {
         StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
@@ -83,7 +82,6 @@ public class ObjectGraphBuilder
         // pk.toString();
     }
 
-
     /**
      * Constructs and returns {@link Node} representation for a given entity
      * object. Output is fully constructed graph with relationships embedded.
@@ -94,6 +92,7 @@ public class ObjectGraphBuilder
      */
     private Node getNode(Object entity, ObjectGraph graph, NodeState initialNodeState)
     {
+
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (entityMetadata == null)
         {
@@ -130,7 +129,7 @@ public class ObjectGraphBuilder
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache,id);
+            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache, id);
 
         }
         else

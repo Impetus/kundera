@@ -19,13 +19,14 @@ import javax.persistence.spi.LoadState;
 import javax.persistence.spi.ProviderUtil;
 
 /**
- * {@link ProviderUtil} for {@link KunderaPersistence} 
+ * {@link ProviderUtil} for {@link KunderaPersistence}
+ * 
  * @author amresh.singh
  */
 public class KunderaPersistenceProviderUtil implements ProviderUtil
 {
     KunderaPersistence provider;
-    
+
     public KunderaPersistenceProviderUtil(KunderaPersistence provider)
     {
         this.provider = provider;
@@ -41,7 +42,9 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
      * If a provider cannot determine the load state, this method returns
      * LoadState.UNKNOWN. The provider's implementation of this method must not
      * obtain a reference to an attribute value, as this could trigger the
-     * loading of entity state if the entity has been provided by a different provider. 
+     * loading of entity state if the entity has been provided by a different
+     * provider.
+     * 
      * @param entity
      * @param attributeName
      *            name of attribute whose load status is to be determined
@@ -60,11 +63,12 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
      * has been provided by itself and that either the entity attributes with
      * FetchType EAGER have not been loaded or that the state of the specified
      * attribute has not been loaded, this method returns LoadState.NOT_LOADED.
-     * If the provider cannot determine the load state, this method returns LoadState.UNKNOWN.
-     * The provider's implementation of this method is permitted to obtain a reference to 
-     * the attribute value. (This access is safe because providers which might trigger the loading of
-     * the attribute state will have already been determined by
-     * isLoadedWithoutReference. ) 
+     * If the provider cannot determine the load state, this method returns
+     * LoadState.UNKNOWN. The provider's implementation of this method is
+     * permitted to obtain a reference to the attribute value. (This access is
+     * safe because providers which might trigger the loading of the attribute
+     * state will have already been determined by isLoadedWithoutReference. )
+     * 
      * @param entity
      * @param attributeName
      *            name of attribute whose load status is to be determined
@@ -88,6 +92,7 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
      * obtain a reference to any attribute value, as this could trigger the
      * loading of entity state if the entity has been provided by a different
      * provider.
+     * 
      * @param entity
      *            whose loaded status is to be determined
      * @return load status of the entity
@@ -96,6 +101,6 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
     public LoadState isLoaded(Object paramObject)
     {
         return PersistenceUtilHelper.isLoaded(paramObject);
-    }    
+    }
 
 }
