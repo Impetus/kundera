@@ -45,6 +45,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTMBiAssociationIntTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
     /**
      * Inits the.
      */
@@ -86,7 +87,7 @@ public class OTMBiAssociationIntTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -242,7 +243,7 @@ public class OTMBiAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override

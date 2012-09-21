@@ -50,8 +50,12 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class OTMUniAssociationIntTest extends TwinAssociation
 {
     private static final float _AID2 = 1235.143f;
+
     private static final float _AID1 = 1234.143f;
+
     private static final int _PID = 12345;
+
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
 
     /**
      * Inits the.
@@ -93,7 +97,7 @@ public class OTMUniAssociationIntTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -203,8 +207,7 @@ public class OTMUniAssociationIntTest extends TwinAssociation
             // PersonnelUni1ToMInt p = (PersonnelUni1ToMInt)
             // dao.findPerson(PersonnelUni1ToMInt.class, );
             dao.remove(_PID, PersonnelUni1ToMInt.class);
-            PersonnelUni1ToMInt pAfterRemoval = (PersonnelUni1ToMInt) dao
-                    .findPerson(PersonnelUni1ToMInt.class, _PID);
+            PersonnelUni1ToMInt pAfterRemoval = (PersonnelUni1ToMInt) dao.findPerson(PersonnelUni1ToMInt.class, _PID);
             Assert.assertNull(pAfterRemoval);
 
         }
@@ -224,7 +227,7 @@ public class OTMUniAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
 
     }
 

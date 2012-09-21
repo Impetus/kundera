@@ -44,6 +44,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOBiAssociationIntTest extends TwinAssociation
 {
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
 
     private static final BigDecimal ADDRESS_ID = new BigDecimal("123456");
 
@@ -81,7 +82,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -110,14 +111,12 @@ public class OTOBiAssociationIntTest extends TwinAssociation
         PersonnelBi1To1FKInt p = (PersonnelBi1To1FKInt) dao.findPerson(PersonnelBi1To1FKInt.class, 1234);
         assertPersonnel(p);
     }
-    
-    
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelBi1To1FKInt p = (PersonnelBi1To1FKInt) dao.findPersonByIdColumn(PersonnelBi1To1FKInt.class, 1234);    
-        assertPersonnel(p);   
+        PersonnelBi1To1FKInt p = (PersonnelBi1To1FKInt) dao.findPersonByIdColumn(PersonnelBi1To1FKInt.class, 1234);
+        assertPersonnel(p);
     }
 
     @Override
@@ -133,19 +132,24 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        /*HabitatBi1To1FK a = (HabitatBi1To1FK) dao.findAddressByIdColumn(HabitatBi1To1FK.class, ADDRESS_ID);    
-        assertAddress(a);*/
+        /*
+         * HabitatBi1To1FK a = (HabitatBi1To1FK)
+         * dao.findAddressByIdColumn(HabitatBi1To1FK.class, ADDRESS_ID);
+         * assertAddress(a);
+         */
     }
 
     @Override
     protected void findAddressByStreet()
     {
-        /*List<HabitatBi1To1FK> adds = dao.findAddressByStreet(HabitatBi1To1FK.class, "123, New street");  
-        Assert.assertNotNull(adds);
-        Assert.assertFalse(adds.isEmpty());
-        Assert.assertTrue(adds.size() == 1);
-        
-        assertAddress(adds.get(0));*/
+        /*
+         * List<HabitatBi1To1FK> adds =
+         * dao.findAddressByStreet(HabitatBi1To1FK.class, "123, New street");
+         * Assert.assertNotNull(adds); Assert.assertFalse(adds.isEmpty());
+         * Assert.assertTrue(adds.size() == 1);
+         * 
+         * assertAddress(adds.get(0));
+         */
     }
 
     @Override
@@ -166,8 +170,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
             p.getAddress().setStreet("Brand New Street");
             dao.merge(p);
 
-            PersonnelBi1To1FKInt pAfterMerge = (PersonnelBi1To1FKInt) dao.findPerson(PersonnelBi1To1FKInt.class,
-                    1234);
+            PersonnelBi1To1FKInt pAfterMerge = (PersonnelBi1To1FKInt) dao.findPerson(PersonnelBi1To1FKInt.class, 1234);
             assertPersonnelAfterUpdate(pAfterMerge);
 
         }
@@ -238,7 +241,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override

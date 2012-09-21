@@ -42,7 +42,10 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 
 public class OTOBiAssociationTest extends TwinAssociation
 {
-
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
+         * "addHbase"
+         * ,
+         */"addMongo" };
     /**
      * Inits the.
      */
@@ -73,7 +76,7 @@ public class OTOBiAssociationTest extends TwinAssociation
     @Test
     public void testCRUD()
     {
-        tryOperation();
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -230,7 +233,7 @@ public class OTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
+        tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override

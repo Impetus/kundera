@@ -377,7 +377,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         public boolean isInvertedIndexingEnabled(String schemaName)
         {
             boolean result = false;
-            if(schemaName != null && getDataStore() != null && getDataStore().getSchemas() != null)
+            if (schemaName != null && getDataStore() != null && getDataStore().getSchemas() != null)
             {
                 for (Schema schema : getDataStore().getSchemas())
                 {
@@ -389,7 +389,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            
+
             return result;
         }
 
@@ -402,7 +402,19 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
                 if (properties != null)
                 {
-                    return properties.getProperty(CassandraConstants.CQL_VERSION);
+                    String cqlVersion = properties.getProperty(CassandraConstants.CQL_VERSION);
+                    if (cqlVersion != null)
+                    {
+                        if (cqlVersion.equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
+                                || cqlVersion.equalsIgnoreCase(CassandraConstants.CQL_VERSION_2_0))
+                        {
+                            return cqlVersion;
+                        }
+                    }
+                    else
+                    {
+                        log.warn("This is not valid cql version type, please provide valid one");
+                    }
                 }
             }
             return CassandraConstants.CQL_VERSION_2_0;
