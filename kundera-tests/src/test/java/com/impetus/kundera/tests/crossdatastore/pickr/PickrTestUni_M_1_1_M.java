@@ -93,38 +93,34 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
     @Override
     protected void getPhotographer()
     {
-        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 1);
+        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 1);
         assertPhotographer(p1, 1);
 
-        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 2);
+        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 2);
         assertPhotographer(p2, 2);
     }
 
     @Override
     protected void updatePhotographer()
     {
-        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 1);
+        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 1);
         assertPhotographer(p1, 1);
         p1.setPhotographerName("Amresh2");
 
         pickr.mergePhotographer(p1);
 
         PhotographerUni_M_1_1_M p1Modified = (PhotographerUni_M_1_1_M) pickr.getPhotographer(
-                PhotographerUni_M_1_1_M.class, "" + 1);
+                PhotographerUni_M_1_1_M.class, 1);
         assertModifiedPhotographer(p1Modified, 1);
 
-        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 2);
+        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 2);
         assertPhotographer(p2, 2);
 
         p2.setPhotographerName("Vivek2");
         pickr.mergePhotographer(p2);
 
         PhotographerUni_M_1_1_M p2Modified = (PhotographerUni_M_1_1_M) pickr.getPhotographer(
-                PhotographerUni_M_1_1_M.class, "" + 2);
+                PhotographerUni_M_1_1_M.class, 2);
         assertModifiedPhotographer(p2Modified, 2);
     }
 
@@ -145,24 +141,22 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
     @Override
     protected void deletePhotographer()
     {
-        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 1);
+        PhotographerUni_M_1_1_M p1 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 1);
         assertModifiedPhotographer(p1, 1);
 
         pickr.deletePhotographer(p1);
 
         PhotographerUni_M_1_1_M p1AfterDeletion = (PhotographerUni_M_1_1_M) pickr.getPhotographer(
-                PhotographerUni_M_1_1_M.class, "" + 1);
+                PhotographerUni_M_1_1_M.class, 1);
         Assert.assertNull(p1AfterDeletion);
 
-        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class,
-                "" + 2);
+        PhotographerUni_M_1_1_M p2 = (PhotographerUni_M_1_1_M) pickr.getPhotographer(PhotographerUni_M_1_1_M.class, 2);
         Assert.assertNotNull(p2);
 
         pickr.deletePhotographer(p2);
 
         PhotographerUni_M_1_1_M p2AfterDeletion = (PhotographerUni_M_1_1_M) pickr.getPhotographer(
-                PhotographerUni_M_1_1_M.class, "" + 2);
+                PhotographerUni_M_1_1_M.class, 2);
         Assert.assertNull(p2AfterDeletion);
 
     }

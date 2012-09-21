@@ -410,7 +410,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             log.error("Error during persist, Caused by:" + e.getMessage());
             throw new KunderaException(e);
         }
-
         addRelationsToThriftRow(metadata, tf, rlHolders);
 
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
