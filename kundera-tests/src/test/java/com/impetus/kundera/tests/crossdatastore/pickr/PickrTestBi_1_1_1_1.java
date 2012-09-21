@@ -90,8 +90,8 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
     @Override
     protected void getPhotographer()
     {
-        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class, ""
-                + photographerId);
+        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class,
+                photographerId);
         assertPhotographer(p);
 
     }
@@ -99,15 +99,15 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
     @Override
     protected void updatePhotographer()
     {
-        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class, ""
-                + photographerId);
+        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class,
+                photographerId);
         assertPhotographer(p);
         p.setPhotographerName("Vivek");
 
         pickr.mergePhotographer(p);
 
-        PhotographerBi_1_1_1_1 p2 = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class, ""
-                + photographerId);
+        PhotographerBi_1_1_1_1 p2 = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class,
+                photographerId);
         assertModifiedPhotographer(p2);
     }
 
@@ -124,12 +124,12 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
     @Override
     protected void deletePhotographer()
     {
-        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class, ""
-                + photographerId);
+        PhotographerBi_1_1_1_1 p = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class,
+                photographerId);
         assertModifiedPhotographer(p);
         pickr.deletePhotographer(p);
-        PhotographerBi_1_1_1_1 p2 = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class, ""
-                + photographerId);
+        PhotographerBi_1_1_1_1 p2 = (PhotographerBi_1_1_1_1) pickr.getPhotographer(PhotographerBi_1_1_1_1.class,
+                photographerId);
         Assert.assertNull(p2);
 
     }
@@ -200,13 +200,6 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
         return p;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#startServer
-     * ()
-     */
     @Override
     protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
@@ -310,28 +303,9 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
             /**
              * schema generation for cassandra.
              * */
-
-            // HBaseCli.createTable("PHOTOGRAPHER");
-            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
-            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-            //
-            // HBaseCli.createTable("PHOTO");
-            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-            //
-            // HBaseCli.createTable("ALBUM");
-            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
-            // HBaseCli.addColumnFamily("ALBUM", "PHOTO_ID");
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#stopServer()
-     */
     @Override
     protected void stopServer()
     {

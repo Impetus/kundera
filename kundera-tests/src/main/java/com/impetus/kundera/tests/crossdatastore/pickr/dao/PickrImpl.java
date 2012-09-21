@@ -52,7 +52,7 @@ public class PickrImpl implements Pickr
     }
 
     @Override
-    public Object getPhotographer(Class<?> entityClass, String photographerId)
+    public Object getPhotographer(Class<?> entityClass, Integer photographerId)
     {
         EntityManager em = getEntityManager();
         Object p = em.find(entityClass, photographerId);

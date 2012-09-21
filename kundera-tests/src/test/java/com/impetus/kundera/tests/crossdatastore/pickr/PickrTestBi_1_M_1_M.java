@@ -89,8 +89,8 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
     @Override
     protected void getPhotographer()
     {
-        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class, ""
-                + photographerId);
+        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class,
+                photographerId);
         assertPhotographer(p);
 
     }
@@ -98,15 +98,15 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
     @Override
     protected void updatePhotographer()
     {
-        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class, ""
-                + photographerId);
+        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class,
+                photographerId);
         assertPhotographer(p);
         p.setPhotographerName("Vivek");
 
         pickr.mergePhotographer(p);
 
-        PhotographerBi_1_M_1_M p2 = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class, ""
-                + photographerId);
+        PhotographerBi_1_M_1_M p2 = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class,
+                photographerId);
         assertModifiedPhotographer(p2);
     }
 
@@ -123,12 +123,12 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
     @Override
     protected void deletePhotographer()
     {
-        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class, ""
-                + photographerId);
+        PhotographerBi_1_M_1_M p = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class,
+                photographerId);
         assertModifiedPhotographer(p);
         pickr.deletePhotographer(p);
-        PhotographerBi_1_M_1_M p2 = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class, ""
-                + photographerId);
+        PhotographerBi_1_M_1_M p2 = (PhotographerBi_1_M_1_M) pickr.getPhotographer(PhotographerBi_1_M_1_M.class,
+                photographerId);
         Assert.assertNull(p2);
 
     }

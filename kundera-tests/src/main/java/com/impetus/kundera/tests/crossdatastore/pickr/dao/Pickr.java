@@ -26,7 +26,7 @@ public interface Pickr
 {
     void addPhotographer(Object p);
 
-    Object getPhotographer(Class<?> entityClass, String photographerId);
+    Object getPhotographer(Class<?> entityClass, Integer photographerId);
 
     public List<Object> getAllPhotographers(String className);
 
