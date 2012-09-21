@@ -49,8 +49,8 @@ public class CrossDataStoreTransactionTest
         emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo");
         em = emf.createEntityManager();
 
-        // CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("KunderaTests");
+        CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaTests");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class CrossDataStoreTransactionTest
     @After
     public void tearDown() throws Exception
     {
-        // CassandraCli.dropKeySpace("KunderaExamples");
+        CassandraCli.dropKeySpace("KunderaExamples");
     }
 
 }
