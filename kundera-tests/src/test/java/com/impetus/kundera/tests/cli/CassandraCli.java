@@ -286,16 +286,19 @@ public final class CassandraCli
     {
         try
         {
-            client.set_keyspace(keyspace);
-            for (String column : columns)
+            if (client != null)
             {
-                if(columnFamilyExist(column, keyspace))
+                client.set_keyspace(keyspace);
+                for (String column : columns)
                 {
-                    client.truncate(column);
+                    if (columnFamilyExist(column, keyspace))
+                    {
+                        client.truncate(column);
+                    }
                 }
             }
         }
-        catch(IllegalArgumentException iex)
+        catch (IllegalArgumentException iex)
         {
             // do nothing.
         }
