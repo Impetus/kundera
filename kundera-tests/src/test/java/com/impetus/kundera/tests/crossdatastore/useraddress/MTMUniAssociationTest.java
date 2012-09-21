@@ -39,6 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUniMToM;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUniMToM;
 
@@ -53,7 +54,7 @@ public class MTMUniAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {        
+    {
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUniMToM.class);
         clazzz.add(HabitatUniMToM.class);
@@ -146,8 +147,7 @@ public class MTMUniAssociationTest extends TwinAssociation
 
         PersonnelUniMToM person2 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_2");
         assertPerson2(person2);
-    }    
-    
+    }
 
     @Override
     protected void findPersonByIdColumn()
@@ -164,7 +164,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @Override
     protected void findPersonByName()
     {
-        List<PersonnelUniMToM> persons = dao.findPersonByName(PersonnelUniMToM.class, "Amresh");    
+        List<PersonnelUniMToM> persons = dao.findPersonByName(PersonnelUniMToM.class, "Amresh");
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 1);
@@ -174,18 +174,18 @@ public class MTMUniAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        HabitatUniMToM a = (HabitatUniMToM) dao.findAddressByIdColumn(HabitatUniMToM.class, "unimanytomany_a");    
+        HabitatUniMToM a = (HabitatUniMToM) dao.findAddressByIdColumn(HabitatUniMToM.class, "unimanytomany_a");
         assertAddressForPerson1(a);
     }
 
     @Override
     protected void findAddressByStreet()
     {
-        List<HabitatUniMToM> adds = dao.findAddressByStreet(HabitatUniMToM.class, "AAAAAAAAAAAAA");  
+        List<HabitatUniMToM> adds = dao.findAddressByStreet(HabitatUniMToM.class, "AAAAAAAAAAAAA");
         Assert.assertNotNull(adds);
         Assert.assertFalse(adds.isEmpty());
         Assert.assertTrue(adds.size() == 1);
-        
+
         assertAddressForPerson1(adds.get(0));
     }
 
@@ -264,13 +264,12 @@ public class MTMUniAssociationTest extends TwinAssociation
         Assert.assertNotNull(addresses1);
         Assert.assertFalse(addresses1.isEmpty());
         Assert.assertEquals(2, addresses1.size());
-        HabitatUniMToM address11 = (HabitatUniMToM) addresses1.toArray()[0];        
+        HabitatUniMToM address11 = (HabitatUniMToM) addresses1.toArray()[0];
         assertAddressForPerson1(address11);
         HabitatUniMToM address12 = (HabitatUniMToM) addresses1.toArray()[1];
         assertAddressForPerson1(address12);
     }
-    
-    
+
     /**
      * @param person2
      */
@@ -290,8 +289,6 @@ public class MTMUniAssociationTest extends TwinAssociation
         HabitatUniMToM address22 = (HabitatUniMToM) addresses2.toArray()[1];
         assertAddressForPerson2(address22);
     }
-    
-    
 
     /**
      * @param address11
@@ -299,24 +296,24 @@ public class MTMUniAssociationTest extends TwinAssociation
     private void assertAddressForPerson1(HabitatUniMToM address)
     {
         Assert.assertNotNull(address);
-        Assert.assertTrue("unimanytomany_a".equals(address.getAddressId()) || "unimanytomany_b".equals(address.getAddressId()));
+        Assert.assertTrue("unimanytomany_a".equals(address.getAddressId())
+                || "unimanytomany_b".equals(address.getAddressId()));
         Assert.assertTrue("AAAAAAAAAAAAA".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));
-    } 
-    
+    }
+
     /**
      * @param address12
      */
     private void assertAddressForPerson2(HabitatUniMToM address)
     {
         Assert.assertNotNull(address);
-        
-        Assert.assertTrue(
-                "unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_c".equals(address.getAddressId()));
-        Assert.assertTrue("CCCCCCCCCCC".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));       
+
+        Assert.assertTrue("unimanytomany_b".equals(address.getAddressId())
+                || "unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_c".equals(address.getAddressId()));
+        Assert.assertTrue("CCCCCCCCCCC".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));
 
     }
-    
-  
+
     @Override
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
@@ -425,11 +422,11 @@ public class MTMUniAssociationTest extends TwinAssociation
             CfDef cfDef2 = new CfDef();
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
-            
+
             ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
             columnDef1.index_type = IndexType.KEYS;
             cfDef2.addToColumn_metadata(columnDef1);
-            
+
             ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
             columnDef2.index_type = IndexType.KEYS;
             cfDef2.addToColumn_metadata(columnDef2);

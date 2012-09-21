@@ -51,7 +51,7 @@ public class MTMBiAssociationTest extends TwinAssociation
      */
     @BeforeClass
     public static void init() throws Exception
-    {        
+    {
 
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMToM.class);
@@ -70,7 +70,6 @@ public class MTMBiAssociationTest extends TwinAssociation
     {
         setUpInternal();
     }
-
 
     @Test
     public void testCRUD()
@@ -138,9 +137,6 @@ public class MTMBiAssociationTest extends TwinAssociation
 
     }
 
-    
-    
-
     @Override
     protected void findPersonByIdColumn()
     {
@@ -156,7 +152,7 @@ public class MTMBiAssociationTest extends TwinAssociation
     @Override
     protected void findPersonByName()
     {
-        List<PersonnelBiMToM> persons = dao.findPersonByName(PersonnelBiMToM.class, "Amresh");    
+        List<PersonnelBiMToM> persons = dao.findPersonByName(PersonnelBiMToM.class, "Amresh");
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 1);
@@ -194,7 +190,7 @@ public class MTMBiAssociationTest extends TwinAssociation
     {
         tearDownInternal();
     }
-    
+
     /**
      * @param person2
      */
@@ -232,7 +228,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         Assert.assertNotNull(address11);
         HabitatBiMToM address12 = (HabitatBiMToM) addresses1.toArray()[1];
         Assert.assertNotNull(address12);
-    }   
+    }
 
     @Override
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
@@ -249,9 +245,11 @@ public class MTMBiAssociationTest extends TwinAssociation
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
+        columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
 
         // ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID"

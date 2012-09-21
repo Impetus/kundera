@@ -157,6 +157,6 @@ public interface DataHandler
      */
     void deleteRow(Object rowKey, String tableName) throws IOException;
 
-    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName)
+    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,Class rowKeyClazz)
             throws IOException;
 }

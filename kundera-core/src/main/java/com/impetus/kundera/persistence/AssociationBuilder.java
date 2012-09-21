@@ -98,7 +98,6 @@ final class AssociationBuilder
 
             if (isBidirectionalRelation && obj != null)
             {
-
                 Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
                 Object[] pKeys = pClient.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName,
                         columnValue, entityMetadata.getEntityClazz());
@@ -232,11 +231,18 @@ final class AssociationBuilder
 
                 // populateRelationFromValue(child, pd, reverseRelation,
                 // entityId, childMetadata);
-                PropertyAccessorHelper.set(child, reverseRelation.getProperty(), entity);
+//                reverseRelation.getProperty().getType()
+                List biDirectionEntities = new ArrayList(1);
+                biDirectionEntities.add(entity);
+                
+                setAssociatedEntities(child, reverseRelation.getProperty(), biDirectionEntities);
+                
+//                PropertyAccessorHelper.set(child, reverseRelation.getProperty(), entity);
             }
 
         }
 
+      
         if (associatedEntities != null)
         {
             // Save children entities to persistence cache
@@ -254,7 +260,7 @@ final class AssociationBuilder
                 mainCache.addNodeToCache(node);
             }
         }
-
+        
         // Recursively find associated entities
         if ((childMetadata.getRelationNames() == null || childMetadata.getRelationNames().isEmpty())
                 && !childMetadata.isRelationViaJoinTable())
@@ -273,6 +279,7 @@ final class AssociationBuilder
             }
         }
 
+    
     }
 
     /**

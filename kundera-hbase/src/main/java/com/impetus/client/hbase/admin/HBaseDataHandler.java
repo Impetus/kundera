@@ -861,7 +861,27 @@ public class HBaseDataHandler implements DataHandler
             throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, null, null);
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        Set<Attribute> attributes = entityType.getAttributes();
+        String[] columns = new String[attributes.size()];
+        int count = 0;
+        boolean isCollection=false;
+        for(Attribute attr : attributes)
+        {
+            if (!attr.isCollection())
+            {
+                
+                columns[count++] = ((AbstractAttribute) attr).getJPAColumnName();
+            } else
+            {
+                isCollection = true;
+                break;
+            }
+        }
+        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, isCollection?qualifier:null, !isCollection?columns:null);
         if (results != null)
         {
             for (HBaseData row : results)
@@ -875,12 +895,12 @@ public class HBaseDataHandler implements DataHandler
     }
 
     @Override
-    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName)
+    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName, final Class rowKeyClazz)
             throws IOException
     {
         HTable hTable = null;
         hTable = gethTable(tableName);
-        return hbaseReader.scanRowKeys(hTable, filterList, columnFamilyName, columnName);
+        return hbaseReader.scanRowKeys(hTable, filterList, columnFamilyName, columnName, rowKeyClazz);
     }
 
     private Object getObjectFromByteArray(EntityType entityType, byte[] value, String jpaColumnName, EntityMetadata m)

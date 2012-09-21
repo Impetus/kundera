@@ -254,7 +254,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(key)),
                     Arrays.asList(columns.toArray(new Column[0])));
         }
-
+        mutator.execute(getConsistencyLevel());
     }
 
     @Override
@@ -669,11 +669,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
         }
-        
-        KeyRange keyRange = selector.newKeyRange(
-                minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
+
+        KeyRange keyRange = selector.newKeyRange(minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
                 maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000);
-        if(conditions != null)
+        if (conditions != null)
         {
             keyRange.setRow_filter(conditions);
             keyRange.setRow_filterIsSet(true);

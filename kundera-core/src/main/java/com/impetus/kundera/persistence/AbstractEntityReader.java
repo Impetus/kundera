@@ -27,6 +27,9 @@ import javax.persistence.FetchType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.collection.PersistentCollection;
+import org.hibernate.collection.PersistentSet;
+import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -35,6 +38,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -108,9 +112,10 @@ public class AbstractEntityReader
             // proceeding further.
             Field f = relation.getProperty();
 
-            if (PropertyAccessorHelper.getObject(entity, f) == null)
+            Object object = PropertyAccessorHelper.getObject(entity, f);
+            
+            if (object == null || object instanceof HibernateProxy || object instanceof PersistentSet || object instanceof PersistentCollection)
             {
-
                 //If fetch type is LAZY, just populate proxy object
                 FetchType fetch = relation.getFetchType();
                 /*if (fetch.equals(FetchType.LAZY) )

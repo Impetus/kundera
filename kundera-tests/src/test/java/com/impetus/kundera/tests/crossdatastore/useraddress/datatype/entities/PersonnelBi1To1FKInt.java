@@ -25,12 +25,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
+@Table(name = "PERSONNEL", schema = "KunderaTests")
 public class PersonnelBi1To1FKInt
 {
     @Id
     @Column(name = "PERSON_ID")
-    private int personId;
+    private Integer personId;
 
     @Column(name = "PERSON_NAME")
     private String personName;

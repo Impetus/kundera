@@ -31,6 +31,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
@@ -465,7 +466,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
-        Filter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
+        SingleColumnValueFilter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
+//        f.setFilterIfMissing(true);
         try
         {
             return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
@@ -530,7 +532,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         try
         {
             return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME, columnName + "_"
-                    + columnValue);
+                    + columnValue, m.getIdAttribute().getBindableJavaType());
         }
         catch (IOException e)
         {

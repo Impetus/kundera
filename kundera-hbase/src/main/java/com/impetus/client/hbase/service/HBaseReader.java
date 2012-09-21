@@ -189,7 +189,7 @@ public class HBaseReader implements Reader
 
     @Override
     public Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
-            final String columnName) throws IOException
+            final String columnName,final Class rowKeyClazz) throws IOException
     {
         List<Object> rowKeys = new ArrayList<Object>();
         Scan s = new Scan();
@@ -200,9 +200,10 @@ public class HBaseReader implements Reader
 
         for (Result result : scanner)
         {
+            
             for (KeyValue keyValue : result.list())
             {
-                rowKeys.add(keyValue.getKey());
+                rowKeys.add(HBaseUtils.fromBytes(keyValue.getRow(), rowKeyClazz));
             }
         }
 

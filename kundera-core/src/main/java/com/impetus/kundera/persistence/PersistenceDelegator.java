@@ -53,6 +53,7 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.CacheBase;
@@ -918,7 +919,7 @@ public class PersistenceDelegator
             {
                 for (Object pk : jtData.getJoinTableRecords().keySet())
                 {
-                    client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
+                    client.deleteByColumn(jtData.getJoinTableName(), ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName(), pk);
 
                 }
             }

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +49,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -193,7 +196,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
-        String id = ((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName();
+        String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
 
         Criteria c = s.createCriteria(arg0);
 
@@ -218,7 +221,39 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             s = getStatelessSession();
             tx = s.beginTransaction();
             s.insert(entity);
-
+//            tx.commit();
+            // Update foreign Keys
+            // for (RelationHolder rh : relationHolders)
+            // {
+            // String linkName = rh.getRelationName();
+            // Object linkValue = rh.getRelationValue();
+            // if (linkName != null && linkValue != null)
+            // {
+            //
+            // String updateSql = "Update " + metadata.getTableName() + " SET "
+            // + linkName + "= '" + linkValue
+            // + "' WHERE " + ((AbstractAttribute)
+            // metadata.getIdAttribute()).getJPAColumnName() + " = '"
+            // + id + "'";
+            // s.createSQLQuery(updateSql).executeUpdate();
+            // }
+            // }
+            // tx.commit();
+        }
+        // TODO: Bad code, get rid of these exceptions, currently necessary for
+        // handling many to one case
+        catch (org.hibernate.exception.ConstraintViolationException e)
+        {
+            log.info(e.getMessage());
+            s.update(entity);
+//            tx.commit();
+        }
+        catch (HibernateException e)
+        {
+            log.info(e.getMessage());
+        }
+        finally
+        {
             // Update foreign Keys
             for (RelationHolder rh : relationHolders)
             {
@@ -228,23 +263,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 {
 
                     String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
-                            + "' WHERE " + ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
+                            + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '"
+                            + id + "'";
                     s.createSQLQuery(updateSql).executeUpdate();
                 }
             }
             tx.commit();
-        }
-        // TODO: Bad code, get rid of these exceptions, currently necessary for
-        // handling many to one case
-        catch (org.hibernate.exception.ConstraintViolationException e)
-        {
-            log.info(e.getMessage());
-            s.update(entity);
-            tx.commit();
-        }
-        catch (HibernateException e)
-        {
-            log.info(e.getMessage());
         }
 
     }
@@ -444,8 +468,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             for (String r : relations)
             {
+                Relation rel = m.getRelation(m.getFieldName(r));
                 String name = MetadataUtils.getMappedName(m, m.getRelation(r));
-                if (!((AbstractAttribute)m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(name != null ? name : r))
+                if (!((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(
+                        name != null ? name : r)
+                        && rel != null
+                        && !rel.getProperty().isAnnotationPresent(ManyToMany.class)
+                        && !rel.getProperty().isAnnotationPresent(OneToMany.class))
                 {
                     q.addScalar(name != null ? name : r);
                 }
@@ -575,5 +604,5 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
 
         return pKeys;
-    }    
+    }
 }

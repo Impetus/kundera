@@ -28,7 +28,7 @@ import com.impetus.kundera.annotations.Index;
 
 @Entity
 @Index(index = true, columns = { "PERSON_NAME" })
-@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
+@Table(name = "PERSONNEL", schema = "KunderaTests")
 public class PersonnelBiMTo1
 {
     @Id

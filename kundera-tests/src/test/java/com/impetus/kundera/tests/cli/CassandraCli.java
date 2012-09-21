@@ -197,8 +197,11 @@ public final class CassandraCli
     {
         try
         {
-            client.set_keyspace(keyspaceName);
-            client.system_add_column_family(new CfDef(keyspaceName, columnfamilyName));
+            if (client != null)
+            {
+                client.set_keyspace(keyspaceName);
+                client.system_add_column_family(new CfDef(keyspaceName, columnfamilyName));
+            }
         }
         catch (InvalidRequestException e)
         {

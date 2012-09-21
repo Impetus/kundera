@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -39,8 +41,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -250,10 +250,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 //            
 //        for (String column : entityMetadata.getColumnFieldNames())
         {
-            queryBuilder.append(", ");
-            queryBuilder.append(aliasName);
-            queryBuilder.append(".");
-            queryBuilder.append(((AbstractAttribute)field).getJPAColumnName());
+            if (!field.isAssociation() && !field.isCollection() && !((Field) field.getJavaMember()).isAnnotationPresent(ManyToMany.class))
+            {
+                queryBuilder.append(", ");
+                queryBuilder.append(aliasName);
+                queryBuilder.append(".");
+                queryBuilder.append(((AbstractAttribute) field).getJPAColumnName());
+            }
         }
 
         // Handle embedded columns, add them to list.
@@ -276,8 +279,14 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             for (String relation : relations)
             {
-                String r = MetadataUtils.getMappedName(entityMetadata, entityMetadata.getRelation(relation));
-                if (!((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(r != null ? r : relation))
+                
+                Relation rel = entityMetadata.getRelation(entityMetadata.getFieldName(relation));
+                String r = MetadataUtils.getMappedName(entityMetadata, rel);
+                if (!((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(
+                        r != null ? r : relation)
+                        && rel != null
+                        && !rel.getProperty().isAnnotationPresent(ManyToMany.class)
+                        && !rel.getProperty().isAnnotationPresent(OneToMany.class))
                 {
                     queryBuilder.append(", ");
                     queryBuilder.append(aliasName);
@@ -479,11 +488,15 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     private boolean isStringProperty(EntityType entityType, String jpaColumnName, EntityMetadata m)
     {
+        if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equals(jpaColumnName))
+        {
+            return ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType().isAssignableFrom(String.class);
+        }
         String fieldName = m.getFieldName(jpaColumnName);
         Attribute col = entityType.getAttribute(fieldName);
 //        Column col = m.getColumn(fieldName);
 
             Field f = (Field) col.getJavaMember();
-            return f != null ? f.getType().isAssignableFrom(String.class) : false;
+            return f != null ? ((AbstractAttribute)col).getBindableJavaType().isAssignableFrom(String.class) : false;
     }
 }

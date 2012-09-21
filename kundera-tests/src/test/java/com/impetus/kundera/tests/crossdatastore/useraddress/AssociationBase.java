@@ -57,8 +57,7 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo"/*, "addHbase"
-    /* , "rdbms" */};
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addHbase","rdbms", "addCassandra", "addMongo" };
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -79,9 +78,9 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    //private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo";
+    // private String persistenceUnits = "rdbms,addHbase";
 
     /**
      * Sets the up internal.
@@ -169,9 +168,9 @@ public abstract class AssociationBase
                     {
                         CassandraCli.cassandraSetUp();
                         CassandraCli.initClient();
-                        
-                        //HBaseCli cli = new HBaseCli();
-                        //cli.startCluster();
+
+                        // HBaseCli cli = new HBaseCli();
+                        // cli.startCluster();
                     }
 
                     if (AUTO_MANAGE_SCHEMA)
@@ -187,24 +186,24 @@ public abstract class AssociationBase
                     }
 
                 }
-                else if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory"))
+                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && !RUN_IN_EMBEDDED_MODE)
                 {
-                    if (!RUN_IN_EMBEDDED_MODE)
+                    if (!HBaseCli.isStarted())
                     {
-
-                        HBaseCli.createTable("PERSONNEL");
-                        HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
-                        HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
-
-                        HBaseCli.createTable("ADDRESS");
-                        HBaseCli.addColumnFamily("ADDRESS", "STREET");
-                        HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
-
-                        HBaseCli.createTable("PERSONNEL_ADDRESS");
-                        HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "ADDRESS_ID");
-                        HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
-                        HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
+                        HBaseCli.startCluster();
                     }
+                    HBaseCli.createTable("PERSONNEL");
+                    HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
+                    HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
+
+                    HBaseCli.createTable("ADDRESS");
+                    HBaseCli.addColumnFamily("ADDRESS", "STREET");
+                    HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
+
+                    HBaseCli.createTable("PERSONNEL_ADDRESS");
+                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "ADDRESS_ID");
+                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
+                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
                 }
 
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
@@ -233,8 +232,7 @@ public abstract class AssociationBase
         if (AUTO_MANAGE_SCHEMA)
         {
             truncateSchema();
-        }       
-        
+        }
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
@@ -269,8 +267,8 @@ public abstract class AssociationBase
      */
     protected void truncateSchema() throws InvalidRequestException, SchemaDisagreementException
     {
-        log.warn("Truncating....");        
-        
+        log.warn("Truncating....");
+
         CassandraCli.dropColumnFamily("PERSONNEL", "KunderaTests");
         CassandraCli.dropColumnFamily("ADDRESS", "KunderaTests");
         CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", "KunderaTests");

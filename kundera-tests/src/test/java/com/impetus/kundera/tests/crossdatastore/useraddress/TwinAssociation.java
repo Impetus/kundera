@@ -126,6 +126,7 @@ public abstract class TwinAssociation extends AssociationBase
                 findAddressByStreet();
                 update();
                 remove();
+//                em.clear();
             }
         }
         catch (Exception e)
