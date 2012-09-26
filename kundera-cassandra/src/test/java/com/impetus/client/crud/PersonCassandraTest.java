@@ -322,6 +322,28 @@ public class PersonCassandraTest extends BaseTest
         }
     }
 
+    @Test
+    public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        em.clear();
+        PersonCassandra person = em.find(PersonCassandra.class, "1");
+        em.remove(person);
+        em.clear(); // just to make sure that not to be picked up from cache.
+        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        
+        List<PersonCassandra> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        
+    }
     /**
      * Tear down.
      * 

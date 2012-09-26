@@ -220,7 +220,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-            entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            if( o != null)
+            {
+                entities.add(o);
+            }
 
         }
     }
