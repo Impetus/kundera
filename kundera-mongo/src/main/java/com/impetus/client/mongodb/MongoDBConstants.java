@@ -61,4 +61,6 @@ public interface MongoDBConstants
 //    public static final int DEFAULT_MAX_WAIT_TIME = 120000;
 //
 //    public static final int DEFAULT_TABCM = 5;
+    public final static String CAPPED = "capped";
+    
 }
