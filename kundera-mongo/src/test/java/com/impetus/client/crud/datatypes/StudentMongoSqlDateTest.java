@@ -35,25 +35,25 @@ public class StudentMongoSqlDateTest extends Base
         {
             createSchema();
         }
-        emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();
-        // em.remove(em.find(StudentMongoSqlDate.class,
-        // getMaxValue(Date.class)));
-        em.remove(em.find(StudentMongoSqlDate.class, getMinValue(Date.class)));
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
+//        EntityManager em = emf.createEntityManager();
+//        // em.remove(em.find(StudentMongoSqlDate.class,
+//        // getMaxValue(Date.class)));
+//        em.remove(em.find(StudentMongoSqlDate.class, getMinValue(Date.class)));
+//        if (AUTO_MANAGE_SCHEMA)
+//        {
             dropSchema();
-        }
+//        }
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
         }
+        emf.close();
     }
 
     @Test
@@ -574,6 +574,8 @@ public class StudentMongoSqlDateTest extends Base
 
     public void dropSchema()
     {
+        EntityManager em = emf.createEntityManager();
+        truncateMongo(em, PERSISTENCE_UNIT,"StudentMongoSqlDate");
     }
 
 }

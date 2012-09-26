@@ -576,8 +576,11 @@ public abstract class CassandraDataHandlerBase
 
             for (Column column : tr.getColumns())
             {
-                entity = initialize(tr, m, entity);
-                onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                if (column != null)
+                {
+                    entity = initialize(tr, m, entity);
+                    onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                }
             }
 
             // Add all super columns to entity
@@ -590,6 +593,8 @@ public abstract class CassandraDataHandlerBase
 
             for (SuperColumn superColumn : tr.getSuperColumns())
             {
+                if(superColumn != null)
+                {
                 entity = initialize(tr, m, entity);
 
                 String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
@@ -630,6 +635,7 @@ public abstract class CassandraDataHandlerBase
                     // Add this embedded object to cache
                     ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
                             embeddedObject, scName);
+                    
                 }
                 else
                 {
@@ -648,18 +654,24 @@ public abstract class CassandraDataHandlerBase
                     }
 
                 }
+                }
             }
 
             mappingProcessed = false;
 
             for (CounterColumn counterColumn : tr.getCounterColumns())
             {
-                entity = initialize(tr, m, entity);
-                onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
+                if (counterColumn != null)
+                {
+                    entity = initialize(tr, m, entity);
+                    onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
+                }
             }
 
             for (CounterSuperColumn counterSuperColumn : tr.getCounterSuperColumns())
             {
+                if(counterSuperColumn != null)
+                {
                 entity = initialize(tr, m, entity);
                 String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, counterSuperColumn.getName());
                 String scNamePrefix = null;
@@ -712,12 +724,14 @@ public abstract class CassandraDataHandlerBase
                                 counterSuperColumn, entity);
                     }
                 }
-            }
+                }
+           }
 
             if (embeddedCollection != null && !embeddedCollection.isEmpty())
             {
                 PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
             }
+            
         }
         catch (InstantiationException iex)
         {
