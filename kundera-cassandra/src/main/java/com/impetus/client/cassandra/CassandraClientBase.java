@@ -374,7 +374,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
             KsDef ksDef = api.describe_keyspace(keyspace);
             List<CfDef> cfDefs = ksDef.getCf_defs();
-
+            
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;

@@ -26,8 +26,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.impetus.kundera.annotations.Index;
+
 @Entity
 @Table(name = "STUDENT", schema = "KunderaExamples@mongoTest")
+@Index(index = true, columns = { "UNIQUE_ID", "STUDENT_NAME", "AGE" })
 public class StudentMongo implements StudentEntityDef
 {
     // Primitive Types
