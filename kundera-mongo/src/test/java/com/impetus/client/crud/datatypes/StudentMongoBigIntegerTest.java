@@ -36,23 +36,23 @@ public class StudentMongoBigIntegerTest extends Base
         {
             createSchema();
         }
-        emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();       
-        em.remove(em.find(StudentMongoBigInteger.class, getMinValue(BigInteger.class)));
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
+//        EntityManager em = emf.createEntityManager();       
+//        em.remove(em.find(StudentMongoBigInteger.class, getMinValue(BigInteger.class)));
+//        if (AUTO_MANAGE_SCHEMA)
+//        {
             dropSchema();
-        }
+//        }
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
         }
+        emf.close();
     }
 
     @Test
@@ -572,6 +572,8 @@ public class StudentMongoBigIntegerTest extends Base
 
     public void dropSchema()
     {
+        EntityManager em = emf.createEntityManager();
+        truncateMongo(em, PERSISTENCE_UNIT, "StudentMongoBigInteger");
     }
 
 }

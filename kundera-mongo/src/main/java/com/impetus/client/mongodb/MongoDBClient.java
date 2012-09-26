@@ -207,8 +207,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(
-                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+        query.put("_id",
+                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
                 key instanceof Calendar ? ((Calendar) key).getTime().toString() : handler.populateValue(key,
                         key.getClass()));
 
@@ -247,7 +247,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), new BasicDBObject("$in",
+        query.put("_id",
+                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/new BasicDBObject("$in",
                 keys));
 
         DBCursor cursor = dbCollection.find(query);
@@ -347,7 +348,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
-        query.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+        query.put("_id",
+                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
                 handler.populateValue(pKey, pKey.getClass()));
 
         dbCollection.remove(query);

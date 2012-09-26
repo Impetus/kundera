@@ -34,24 +34,18 @@ public class StudentMongoDoubleTest extends Base
         {
             createSchema();
         }
-        emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoDouble.class, getMaxValue(Double.class)));
-        em.remove(em.find(StudentMongoDouble.class, getMinValue(Double.class)));
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
+        dropSchema();
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
         }
+        emf.close();
     }
 
     @Test
@@ -571,6 +565,9 @@ public class StudentMongoDoubleTest extends Base
 
     public void dropSchema()
     {
+        EntityManager em = emf.createEntityManager();
+        truncateMongo(em, PERSISTENCE_UNIT, "StudentMongoDouble");
+
     }
 
 }

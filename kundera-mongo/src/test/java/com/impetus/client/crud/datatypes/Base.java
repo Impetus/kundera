@@ -1,7 +1,15 @@
 package com.impetus.client.crud.datatypes;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+
+import com.impetus.client.mongodb.MongoDBClient;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
+import com.mongodb.DB;
 
 public abstract class Base
 {
@@ -9,6 +17,8 @@ public abstract class Base
 
     public static final boolean AUTO_MANAGE_SCHEMA = false;
     
+    protected static final String PERSISTENCE_UNIT = "MongoDataTypeTest";
+
     DataGenerator<?> dataGenerator;
 
     DataGeneratorFactory factory = new DataGeneratorFactory();
@@ -36,6 +46,50 @@ public abstract class Base
         dataGenerator = factory.getDataGenerator(clazz);
         return dataGenerator.partialValue();
     }
+
+    /**
+     * 
+     */
+    protected void truncateMongo(EntityManager em, final String persistenceUnit, final String tableName)
+    {
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        MongoDBClient client = (MongoDBClient) clients.get(persistenceUnit);
+        if(client != null)
+        {
+            try
+            {
+                Field db = client.getClass().getDeclaredField("mongoDb");
+                if(!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                DB mongoDB =  (DB) db.get(client);
+                mongoDB.getCollection(tableName).drop();
+            }
+            catch (SecurityException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (NoSuchFieldException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IllegalArgumentException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IllegalAccessException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+    }
+
 
     protected abstract void startCluster();
 
