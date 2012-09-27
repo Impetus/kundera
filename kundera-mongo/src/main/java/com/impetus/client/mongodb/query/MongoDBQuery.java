@@ -189,6 +189,7 @@ public class MongoDBQuery extends QueryImpl
 
                 if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {
+                    property = "_id";
                     f = (Field) m.getIdAttribute().getJavaMember();
                 }
                 else

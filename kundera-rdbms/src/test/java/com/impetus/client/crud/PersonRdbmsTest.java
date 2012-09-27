@@ -37,7 +37,7 @@ public class PersonRdbmsTest extends BaseTest
     private static EntityManager em;
 
     private Map<Object, Object> col;
-
+    RDBMSCli cli;
     /**
      * Sets the up.
      * 
@@ -50,6 +50,10 @@ public class PersonRdbmsTest extends BaseTest
         emf = Persistence.createEntityManagerFactory("testHibernate");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
+//        cli = new RDBMSCli("testdb");
+//        cli.createSchema("testdb");
+//        cli.update("USE testdb");
+//        cli.update("CREATE TABLE PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
     }
 
     @Test
@@ -67,12 +71,12 @@ public class PersonRdbmsTest extends BaseTest
         PersonRDBMS personRDBMS = findById(PersonRDBMS.class, "1", em);
         Assert.assertNotNull(personRDBMS);
         Assert.assertEquals("vivek", personRDBMS.getPersonName());
+        assertFindWithoutWhereClause(em, "PersonRDBMS", PersonRDBMS.class);
         assertFindByName(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "personName");
         assertFindByNameAndAgeGTAndLT(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "20", "personName");
         assertFindByNameAndAgeBetween(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonRDBMS", PersonRDBMS.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(em, "PersonRDBMS", PersonRDBMS.class);
     }
 
     // @Test
@@ -112,9 +116,10 @@ public class PersonRdbmsTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-        for (Object val : col.values())
-        {
-            em.remove(val);
-        }
+//        cli.dropSchema("testdb");
+//        for (Object val : col.values())
+//        {
+//            em.remove(val);
+//        }
     }
 }

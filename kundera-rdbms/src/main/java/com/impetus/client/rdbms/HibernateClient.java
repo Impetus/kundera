@@ -220,10 +220,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         tx = s.beginTransaction();
         try
         {
-            if(!isUpdate)
-            {                
+            if (!isUpdate)
+            {
                 s.insert(entity);
-                
+
                 // Update foreign Keys
                 for (RelationHolder rh : relationHolders)
                 {
@@ -231,10 +231,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     Object linkValue = rh.getRelationValue();
                     if (linkName != null && linkValue != null)
                     {
-
                         String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
-                                + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '"
-                                + id + "'";
+                                + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()
+                                + " = '" + id + "'";
                         s.createSQLQuery(updateSql).executeUpdate();
                     }
                 }
@@ -242,10 +241,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             else
             {
-                
                 s.update(entity);
                 tx.commit();
-            }          
+            }
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
         // handling many to one case
@@ -260,8 +258,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             log.info(e.getMessage());
         }
         finally
-        {            
-          
+        {
+
         }
 
     }

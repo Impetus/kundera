@@ -1,6 +1,5 @@
 package com.impetus.client.crud.datatypes;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -14,12 +13,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentMongoBigInteger;
 import com.impetus.client.crud.datatypes.entities.StudentMongoboolean;
 import com.impetus.kundera.query.QueryHandlerException;
 
 public class StudentMongobooleanTest extends Base
 {
+
+    /**
+     * 
+     */
+    private static final String _PERSISTENCEUNIT = "MongoDataTypeTest";
 
     private static final String keyspace = "KunderaMongoDataType";
 
@@ -36,23 +39,18 @@ public class StudentMongobooleanTest extends Base
         {
             createSchema();
         }
-        emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
+        emf = Persistence.createEntityManagerFactory(_PERSISTENCEUNIT);
     }
 
     @After
     public void tearDown() throws Exception
     {
-//        EntityManager em = emf.createEntityManager();       
-//        em.remove(em.find(StudentMongoboolean.class, getMinValue(boolean.class)));
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
+        dropSchema();
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
         }
+        emf.close();
     }
 
     @Test
@@ -544,6 +542,8 @@ public class StudentMongobooleanTest extends Base
 
     public void dropSchema()
     {
+        EntityManager em = emf.createEntityManager();
+        truncateMongo(em,_PERSISTENCEUNIT,"StudentMongoboolean");
     }
 
 }

@@ -294,7 +294,6 @@ public abstract class AssociationBase
                 mongoDB.getCollection("PERSONNEL").drop();
                 mongoDB.getCollection("ADDRESS").drop();
                 mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
-                
             }
             catch (SecurityException e)
             {
