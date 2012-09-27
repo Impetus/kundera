@@ -22,13 +22,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.mongodb.MongoDBConstants;
+import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -43,7 +48,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
 {
 
     /** The m. */
-    private Mongo m;
+    private Mongo mongo;
 
     /** The db. */
     private DB db;
@@ -77,6 +82,43 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     protected void update(List<TableInfo> tableInfos)
     {
         // Do nothing as by default mongo handles it.
+        for (TableInfo tableInfo : tableInfos)
+        {
+            boolean isCappedTable = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.isCappedCollection(
+                    databaseName, tableInfo.getTableName()) : null;
+            DBObject options = new BasicDBObject();
+            options.put(MongoDBConstants.CAPPED, isCappedTable);
+            List<String> dbs = mongo.getDatabaseNames();
+            for (String dbName : dbs)
+            {
+                if (dbName.equalsIgnoreCase(databaseName))
+                {
+                    databaseName = dbName;
+                    break;
+                }
+            }
+            DB db = mongo.getDB(databaseName);
+            DBCollection collection = null;
+            if (!db.collectionExists(tableInfo.getTableName()))
+            {
+                collection = db.createCollection(tableInfo.getTableName(), options);
+            }
+            collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
+            DBObject keys = new BasicDBObject();
+            int count = 0;
+            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+            {
+                if (columnInfo.isIndexable())
+                {
+                    keys.put(columnInfo.getColumnName(), 1);
+                    count++;
+                }
+            }
+            if (keys != null && count > 0)
+            {
+                collection.ensureIndex(keys);
+            }
+        }
     }
 
     /**
@@ -88,6 +130,44 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     protected void create(List<TableInfo> tableInfos)
     {
         // Do nothing as by default mongo handles it.
+
+        for (TableInfo tableInfo : tableInfos)
+        {
+            boolean isCappedTable = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.isCappedCollection(
+                    databaseName, tableInfo.getTableName()) : null;
+            DBObject options = new BasicDBObject();
+            options.put(MongoDBConstants.CAPPED, isCappedTable);
+            List<String> dbs = mongo.getDatabaseNames();
+            for (String dbName : dbs)
+            {
+                if (dbName.equalsIgnoreCase(databaseName))
+                {
+                    databaseName = dbName;
+                    break;
+                }
+            }
+            DB db = mongo.getDB(databaseName);
+            if (db.collectionExists(tableInfo.getTableName()))
+            {
+                db.getCollection(tableInfo.getTableName()).drop();
+            }
+            DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
+
+            DBObject keys = new BasicDBObject();
+            int count = 0;
+            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+            {
+                if (columnInfo.isIndexable())
+                {
+                    keys.put(columnInfo.getColumnName(), 1);
+                    count++;
+                }
+            }
+            if (keys != null && count > 0)
+            {
+                collection.ensureIndex(keys);
+            }
+        }
     }
 
     /**
@@ -125,7 +205,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         // }
         // else
         // {
-        db = m.getDB(databaseName);
+        db = mongo.getDB(databaseName);
         // }
 
         if (db == null)
@@ -177,8 +257,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         int localport = Integer.parseInt(port);
         try
         {
-            m = new Mongo(host, localport);
-            db = m.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
+            mongo = new Mongo(host, localport);
+            db = mongo.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
         }
         catch (UnknownHostException e)
         {

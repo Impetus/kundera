@@ -29,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.mongodb.ReadPreference;
@@ -311,6 +313,33 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
                 }
             }
             return null;
+        }
+
+        /**
+         * @param databaseName
+         * @param tableName
+         * @return
+         */
+        public boolean isCappedCollection(String databaseName, String tableName)
+        {
+            List<Schema> schemas = getDataStore() != null ? getDataStore().getSchemas() : null;
+            if (schemas != null)
+            {
+                for (Schema schema : schemas)
+                {
+                    if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName))
+                    {
+                        for (Table table : schema.getTables())
+                        {
+                            if (table.getProperties() != null)
+                            {
+                                return Boolean.parseBoolean(table.getProperties().getProperty(MongoDBConstants.CAPPED));
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 }
