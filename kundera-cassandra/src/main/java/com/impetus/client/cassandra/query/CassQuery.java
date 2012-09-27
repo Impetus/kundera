@@ -105,18 +105,29 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
-                Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
-                boolean isRowKeyQuery = ixClause.keySet().iterator().next();
-                if (!isRowKeyQuery)
+                // Index in Inverted Index table if applicable
+                boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
+                if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
                 {
-                    result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null,
-                            maxResult, getColumnList(m, getKunderaQuery().getResult()));
+                    result = (List)((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery()
+                            .getFilterClauseQueue());
                 }
                 else
                 {
-                    result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
-                            isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult()));
-                }
+                    Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+                    boolean isRowKeyQuery = ixClause.keySet().iterator().next();
+                    if (!isRowKeyQuery)
+                    {                                
+                        result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null,
+                                maxResult, getColumnList(m, getKunderaQuery().getResult()));                       
+                    }
+                    else
+                    {
+                        result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
+                                isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult()));
+                    }
+                }               
+                
             }
             else
             {
