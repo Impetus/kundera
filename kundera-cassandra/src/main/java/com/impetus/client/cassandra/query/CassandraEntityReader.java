@@ -153,7 +153,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100,
+                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, m.getRelationNames(), 100,
                             null);
                 }
                 else
