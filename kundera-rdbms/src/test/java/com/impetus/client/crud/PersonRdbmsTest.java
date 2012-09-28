@@ -37,7 +37,9 @@ public class PersonRdbmsTest extends BaseTest
     private static EntityManager em;
 
     private Map<Object, Object> col;
-    RDBMSCli cli;
+
+    private RDBMSCli cli;
+
     /**
      * Sets the up.
      * 
@@ -50,15 +52,15 @@ public class PersonRdbmsTest extends BaseTest
         emf = Persistence.createEntityManagerFactory("testHibernate");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
-//        cli = new RDBMSCli("testdb");
-//        cli.createSchema("testdb");
-//        cli.update("USE testdb");
-//        cli.update("CREATE TABLE PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
     }
 
     @Test
-    public void onInsertRdbms()
+    public void onInsertRdbms() throws Exception
     {
+        cli = new RDBMSCli("testdb");
+        cli.createSchema("testdb");
+        // cli.update("USE testdb");
+        cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
         Object p1 = prepareRDBMSInstance("1", 10);
         Object p2 = prepareRDBMSInstance("2", 20);
         Object p3 = prepareRDBMSInstance("3", 15);
@@ -116,10 +118,14 @@ public class PersonRdbmsTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
+        for (Object val : col.values())
+        {
+            em.remove(val);
+        }
+        cli.update("DELETE FROM TESTDB.PERSON");
+        cli.update("DROP TABLE TESTDB.PERSON");
+        cli.update("DROP SCHEMA TESTDB");
+     //   cli.shutdown();
 //        cli.dropSchema("testdb");
-//        for (Object val : col.values())
-//        {
-//            em.remove(val);
-//        }
     }
 }

@@ -394,7 +394,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Retrieves column for a given primary key
      */
     @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
+    public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
 
         byte[] rowKey = pKeyColumnValue.toString().getBytes();
@@ -453,7 +453,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Retrieves IDs for a given column
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
@@ -638,7 +638,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
@@ -919,6 +919,38 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     protected CassandraDataHandler getDataHandler()
     {
         return dataHandler;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
+            Object pKeyColumnValue)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

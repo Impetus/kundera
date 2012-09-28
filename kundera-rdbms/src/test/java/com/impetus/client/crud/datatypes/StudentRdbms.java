@@ -27,7 +27,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "STUDENT")
+@Table(name = "STUDENT", schema = "testdb")
 public class StudentRdbms implements StudentEntityDef
 {
     // Primitive Types
@@ -102,6 +102,7 @@ public class StudentRdbms implements StudentEntityDef
     private BigDecimal bigDecimal;
 
     @Column(name = "CALENDAR")
+    @Temporal(TemporalType.TIMESTAMP)
     private Calendar calendar;
 
     /*

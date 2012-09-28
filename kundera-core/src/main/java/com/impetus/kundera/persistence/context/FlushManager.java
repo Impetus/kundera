@@ -204,8 +204,8 @@ public class FlushManager
                                 operation = OPERATION.DELETE;
                             }
 
-                            addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
-                                    inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+                            addJoinTableDataIntoMap(operation, jtmd.getJoinTableSchema(), jtmd.getJoinTableName(),
+                                    joinColumnName, inverseJoinColumnName, node.getDataClass(), entityId, childValues);
                         }
                     }
 
@@ -490,13 +490,15 @@ public class FlushManager
      * @param invJoinColumnValues
      *            the inv join column values
      */
-    private void addJoinTableDataIntoMap(OPERATION operation, String joinTableName, String joinColumnName,
-            String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
+    private void addJoinTableDataIntoMap(OPERATION operation, String schemaName, String joinTableName,
+            String joinColumnName, String invJoinColumnName, Class<?> entityClass, Object joinColumnValue,
+            Set<Object> invJoinColumnValues)
     {
         JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
         if (joinTableData == null)
         {
-            joinTableData = new JoinTableData(operation, joinTableName, joinColumnName, invJoinColumnName, entityClass);
+            joinTableData = new JoinTableData(operation, schemaName, joinTableName, joinColumnName, invJoinColumnName,
+                    entityClass);
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
             joinTableDataMap.put(joinTableName, joinTableData);
         }
@@ -539,7 +541,8 @@ public class FlushManager
                     {
                         // client.deleteByColumn(jtData.getJoinTableName(),
                         // m.getIdColumn().getName(), pk);
-                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
+                        client.deleteByColumn(jtData.getSchemaName(), jtData.getJoinTableName(), m.getIdAttribute()
+                                .getName(), pk);
                     }
                 }
                 else if (OPERATION.DELETE.equals(jtData.getOperation()))

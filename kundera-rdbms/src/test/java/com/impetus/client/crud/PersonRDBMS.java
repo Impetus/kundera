@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON")
+@Table(name = "PERSON", schema = "testdb")
 public class PersonRDBMS
 {
 

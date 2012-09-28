@@ -82,7 +82,8 @@ final class AssociationBuilder
 
         Client pClient = delegator.getClient(entityMetadata);
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName, entityId);
+        List<?> foreignKeys = pClient.getColumnsById(entityMetadata.getSchema(), joinTableName, joinColumnName,
+                inverseJoinColumnName, entityId);
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)
@@ -99,8 +100,8 @@ final class AssociationBuilder
             if (isBidirectionalRelation && obj != null)
             {
                 Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
-                Object[] pKeys = pClient.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName,
-                        columnValue, entityMetadata.getEntityClazz());
+                Object[] pKeys = pClient.findIdsByColumn(entityMetadata.getSchema(), joinTableName, joinColumnName,
+                        inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());
                 List parents = delegator.find(entity.getClass(), pKeys);
                 PropertyAccessorHelper.set(obj, biDirectionalField,
                         ObjectUtils.getFieldInstance(parents, biDirectionalField));
@@ -231,18 +232,18 @@ final class AssociationBuilder
 
                 // populateRelationFromValue(child, pd, reverseRelation,
                 // entityId, childMetadata);
-//                reverseRelation.getProperty().getType()
+                // reverseRelation.getProperty().getType()
                 List biDirectionEntities = new ArrayList(1);
                 biDirectionEntities.add(entity);
-                
+
                 setAssociatedEntities(child, reverseRelation.getProperty(), biDirectionEntities);
-                
-//                PropertyAccessorHelper.set(child, reverseRelation.getProperty(), entity);
+
+                // PropertyAccessorHelper.set(child,
+                // reverseRelation.getProperty(), entity);
             }
 
         }
 
-      
         if (associatedEntities != null)
         {
             // Save children entities to persistence cache
@@ -260,7 +261,7 @@ final class AssociationBuilder
                 mainCache.addNodeToCache(node);
             }
         }
-        
+
         // Recursively find associated entities
         if ((childMetadata.getRelationNames() == null || childMetadata.getRelationNames().isEmpty())
                 && !childMetadata.isRelationViaJoinTable())
@@ -279,7 +280,6 @@ final class AssociationBuilder
             }
         }
 
-    
     }
 
     /**

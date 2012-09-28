@@ -58,8 +58,8 @@ public class ThriftClientTest
 
     public void persistJoinTable()
     {
-        JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID",
-                PersonMToM.class);
+        JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, "KunderaExamples", "PERSON_ADDRESS",
+                "PERSON_ID", "ADDRESS_ID", PersonMToM.class);
 
         Set<Object> values1 = new HashSet<Object>();
         values1.add("A");
@@ -77,14 +77,14 @@ public class ThriftClientTest
 
     public void getColumnsById()
     {
-        List columns1 = client.getColumnsById("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "1");
+        List columns1 = client.getColumnsById("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "1");
         Assert.assertNotNull(columns1);
         Assert.assertFalse(columns1.isEmpty());
         Assert.assertEquals(2, columns1.size());
         Assert.assertTrue(columns1.contains("A"));
         Assert.assertTrue(columns1.contains("B"));
 
-        List columns2 = client.getColumnsById("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "2");
+        List columns2 = client.getColumnsById("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "2");
         Assert.assertNotNull(columns2);
         Assert.assertFalse(columns2.isEmpty());
         Assert.assertEquals(2, columns2.size());
@@ -95,22 +95,26 @@ public class ThriftClientTest
 
     public void findIdsByColumn()
     {
-        Object[] ids1 = client.findIdsByColumn("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "A", PersonMToM.class);
+        Object[] ids1 = client.findIdsByColumn("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "A",
+                PersonMToM.class);
         Assert.assertNotNull(ids1);
         Assert.assertTrue(ids1.length == 1);
         Assert.assertEquals("1", ids1[0]);
 
-        Object[] ids2 = client.findIdsByColumn("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "B", PersonMToM.class);
+        Object[] ids2 = client.findIdsByColumn("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "B",
+                PersonMToM.class);
         Assert.assertNotNull(ids2);
         Assert.assertTrue(ids2.length == 1);
         Assert.assertEquals("1", ids2[0]);
 
-        Object[] ids3 = client.findIdsByColumn("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "C", PersonMToM.class);
+        Object[] ids3 = client.findIdsByColumn("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "C",
+                PersonMToM.class);
         Assert.assertNotNull(ids3);
         Assert.assertTrue(ids3.length == 1);
         Assert.assertEquals("2", ids3[0]);
 
-        Object[] ids4 = client.findIdsByColumn("PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "D", PersonMToM.class);
+        Object[] ids4 = client.findIdsByColumn("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "D",
+                PersonMToM.class);
         Assert.assertNotNull(ids4);
         Assert.assertTrue(ids4.length == 1);
         Assert.assertEquals("2", ids4[0]);

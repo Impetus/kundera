@@ -29,6 +29,8 @@ public class JoinTableData
 {
     private String joinTableName;
 
+    private String schemaName;
+
     private Class<?> entityClass;
 
     private String joinColumnName;
@@ -55,10 +57,11 @@ public class JoinTableData
      */
     Map<Object, Set<Object>> joinTableRecords;
 
-    public JoinTableData(OPERATION operation, String joinTableName, String joinColumnName,
+    public JoinTableData(OPERATION operation, String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Class<?> entityClass)
     {
         this.operation = operation;
+        this.schemaName = schemaName;
         this.joinTableName = joinTableName;
         this.joinColumnName = joinColumnName;
         this.inverseJoinColumnName = inverseJoinColumnName;
@@ -194,6 +197,23 @@ public class JoinTableData
     public void setProcessed(boolean isProcessed)
     {
         this.isProcessed = isProcessed;
+    }
+
+    /**
+     * @return the schemaName
+     */
+    public String getSchemaName()
+    {
+        return schemaName;
+    }
+
+    /**
+     * @param schemaName
+     *            the schemaName to set
+     */
+    public void setSchemaName(String schemaName)
+    {
+        this.schemaName = schemaName;
     }
 
 }

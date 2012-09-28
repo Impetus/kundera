@@ -15,11 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.crud.datatypes;
 
+import java.sql.SQLException;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.impetus.client.crud.RDBMSCli;
 
 /**
  * The Class StudentDaoTest.
@@ -30,6 +34,8 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
 {
     String persistenceUnit = "testHibernate";
 
+    private RDBMSCli cli;
+
     /**
      * Sets the up.
      * 
@@ -39,6 +45,13 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
     @Before
     public void setUp() throws Exception
     {
+        cli = new RDBMSCli("testdb");
+        cli.createSchema("testdb");
+        // cli.update("USE testdb");
+        cli.update("CREATE TABLE TESTDB.STUDENT (STUDENT_ID BIGINT PRIMARY KEY,UNIQUE_ID BIGINT, STUDENT_NAME VARCHAR(256), AGE SMALLINT,IS_EXCEPTIONAL BOOLEAN,SEMESTER VARCHAR(4),DIGITAL_SIGNATURE TINYINT,CGPA SMALLINT,"
+                + "PERCENTAGE DECIMAL(10,1),HEIGHT DECIMAL(10,8) ,ENROLMENT_DATE DATE,ENROLMENT_TIME TIME,JOINING_DATE_TIME TIMESTAMP,YEARS_SPENT INTEGER,ROLL_NUMBER BIGINT"
+                + ",MONTHLY_FEE DECIMAL(10,2),SQL_DATE DATE,SQL_TIMESTAMP TIMESTAMP , SQL_TIME TIME,BIG_INT BIGINT,BIG_DECIMAL DECIMAL,CALENDAR TIMESTAMP)");
+
         setupInternal(persistenceUnit);
     }
 
@@ -52,6 +65,19 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
     public void tearDown() throws Exception
     {
         teardownInternal(persistenceUnit);
+        try
+        {
+            cli.update("DELETE FROM TESTDB.PERSON");
+            cli.update("DROP TABLE TESTDB.PERSON");
+            cli.update("DELETE FROM TESTDB.STUDENT");
+            cli.update("DROP TABLE TESTDB.STUDENT");
+            cli.update("DROP SCHEMA TESTDB");
+        }
+        catch (SQLException e)
+        {
+            // do nothing..weird!!
+        }
+        // cli.dropSchema("TESTDB");
     }
 
     @SuppressWarnings("deprecation")
@@ -78,6 +104,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
         try
         {
             onInsert(new StudentRdbms());
+            em.clear();
         }
         catch (InstantiationException e)
         {

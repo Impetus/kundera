@@ -216,7 +216,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
 
         Transaction tx = null;
-        s = getStatelessSession();
+        s = /*getStatelessSession()*/sf.openStatelessSession();
         tx = s.beginTransaction();
         try
         {
@@ -231,9 +231,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     Object linkValue = rh.getRelationValue();
                     if (linkName != null && linkValue != null)
                     {
-                        String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
-                                + "' WHERE " + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()
-                                + " = '" + id + "'";
+
+                        String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
+                        String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
+                                + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id
+                                + "'";
                         s.createSQLQuery(updateSql).executeUpdate();
                     }
                 }
@@ -241,6 +243,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             else
             {
+
                 s.update(entity);
                 tx.commit();
             }
@@ -256,6 +259,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         catch (HibernateException e)
         {
             log.info(e.getMessage());
+            throw new PersistenceException(e);
         }
         finally
         {
@@ -270,6 +274,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
+        String schemaName = joinTableData.getSchemaName();
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -279,18 +284,19 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
-            insertRecordInJoinTable(joinTableName, joinColumnName, invJoinColumnName, key, values);
+            insertRecordInJoinTable(schemaName, joinTableName, joinColumnName, invJoinColumnName, key, values);
         }
     }
 
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            Object parentId)
+    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Object parentId)
     {
 
         StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ").append(joinTableName)
-                .append(" WHERE ").append(joinColumnName).append("='").append(parentId).append("'");
+        sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ")
+                .append(getFromClause(schemaName, joinTableName)).append(" WHERE ").append(joinColumnName).append("='")
+                .append(parentId).append("'");
 
         Session s = sf.openSession();
         Transaction tx = s.beginTransaction();
@@ -313,14 +319,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
     {
         String childIdStr = (String) columnValue;
-
+        // EntityMetadata m =
+        // KunderaMetadataManager.getEntityMetadata(entityClazz);
         StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(tableName).append(" WHERE ")
-                .append(columnName).append("='").append(childIdStr).append("'");
+        sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(getFromClause(schemaName, tableName))
+                .append(" WHERE ").append(columnName).append("='").append(childIdStr).append("'");
 
         Session s = sf.openSession();
         Transaction tx = s.beginTransaction();
@@ -345,13 +352,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.Object)
      */
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
         StringBuffer query = new StringBuffer();
 
-        query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=").append("'")
-                .append(columnValue).append("'");
+        query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
+                .append("=").append("'").append(columnValue).append("'");
 
         s = getStatelessSession();
         Transaction tx = s.beginTransaction();
@@ -373,13 +380,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the rel metadata
      * @param parentId
      *            the parent id
+     * @param schema
      * @param child
      *            the child
      */
-    private void insertRecordInJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            Object parentId, Set<Object> childrenIds)
+    private void insertRecordInJoinTable(String schemaName, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Object parentId, Set<Object> childrenIds)
     {
-
         s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         for (Object childId : childrenIds)
@@ -387,7 +394,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             StringBuffer query = new StringBuffer();
 
             // write an update query
-            Object[] existingRowIds = findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName,
+            Object[] existingRowIds = findIdsByColumn(schemaName, joinTableName, joinColumnName, inverseJoinColumnName,
                     (String) childId, null);
 
             boolean joinTableRecordsExists = false;
@@ -407,9 +414,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             if (!joinTableRecordsExists)
             {
 
-                query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",")
-                        .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
-                        .append(childId).append("')");
+                query.append("INSERT INTO ").append(getFromClause(schemaName, joinTableName)).append("(")
+                        .append(joinColumnName).append(",").append(inverseJoinColumnName).append(")")
+                        .append(" VALUES('").append(parentId).append("','").append(childId).append("')");
 
                 s.createSQLQuery(query.toString()).executeUpdate();
             }
@@ -489,7 +496,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append(aliasName);
         queryBuilder.append(".*");
         queryBuilder.append("From ");
-        queryBuilder.append(tableName);
+        queryBuilder.append(getFromClause(m.getSchema(), tableName));
         queryBuilder.append(" ");
         queryBuilder.append(aliasName);
         queryBuilder.append(" Where ");
@@ -595,5 +602,59 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
 
         return pKeys;
+    }
+
+    /**
+     * @param metadata
+     * @return
+     */
+    private String getFromClause(String schemaName, String tableName)
+    {
+        String clause = tableName;
+        if (schemaName != null && !schemaName.isEmpty())
+        {
+            clause = schemaName + "." + tableName;
+        }
+        return clause;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
+        // TODO Auto-generated method stub
+
     }
 }

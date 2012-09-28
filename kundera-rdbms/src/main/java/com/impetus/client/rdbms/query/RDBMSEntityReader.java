@@ -242,15 +242,20 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
         queryBuilder.append(aliasName);
         queryBuilder.append(".");
-        queryBuilder.append(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName());
+        queryBuilder.append(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
         Set<Attribute> attributes = entityType.getAttributes();
-        for(Attribute field : attributes)
-//            
-//        for (String column : entityMetadata.getColumnFieldNames())
+        for (Attribute field : attributes)
+        //
+        // for (String column : entityMetadata.getColumnFieldNames())
         {
-            if (!field.isAssociation() && !field.isCollection() && !((Field) field.getJavaMember()).isAnnotationPresent(ManyToMany.class))
+            if (!field.isAssociation()
+                    && !field.isCollection()
+                    && !((Field) field.getJavaMember()).isAnnotationPresent(ManyToMany.class)
+                    && !((AbstractAttribute) field).getJPAColumnName().equals(
+                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
+                    && !((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) field).getBindableJavaType()))
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);
@@ -260,18 +265,20 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
 
         // Handle embedded columns, add them to list.
-//        List<EmbeddedColumn> embeddedColumns = entityMetadata.getEmbeddedColumnsAsList();
-        Map<String, EmbeddableType> embeddedColumns = ((MetamodelImpl)metaModel).getEmbeddables(entityMetadata.getEntityClazz());
+        // List<EmbeddedColumn> embeddedColumns =
+        // entityMetadata.getEmbeddedColumnsAsList();
+        Map<String, EmbeddableType> embeddedColumns = ((MetamodelImpl) metaModel).getEmbeddables(entityMetadata
+                .getEntityClazz());
         for (EmbeddableType embeddedCol : embeddedColumns.values())
         {
             Set<Attribute> embeddedAttributes = embeddedCol.getAttributes();
-//            for (Column column : embeddedCol.getColumns())
+            // for (Column column : embeddedCol.getColumns())
             for (Attribute column : embeddedAttributes)
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);
                 queryBuilder.append(".");
-                queryBuilder.append(((AbstractAttribute)column).getJPAColumnName());
+                queryBuilder.append(((AbstractAttribute) column).getJPAColumnName());
             }
         }
 
@@ -279,7 +286,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             for (String relation : relations)
             {
-                
+
                 Relation rel = entityMetadata.getRelation(entityMetadata.getFieldName(relation));
                 String r = MetadataUtils.getMappedName(entityMetadata, rel);
                 if (!((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(
@@ -307,6 +314,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
 
         queryBuilder.append(" From ");
+        if (entityMetadata.getSchema() != null && !entityMetadata.getSchema().isEmpty())
+        {
+            queryBuilder.append(entityMetadata.getSchema() + ".");
+        }
         queryBuilder.append(entityMetadata.getTableName());
         queryBuilder.append(" ");
         queryBuilder.append(aliasName);
@@ -359,7 +370,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
-            queryBuilder.append(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName());
+            queryBuilder.append(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName());
             queryBuilder.append(" ");
             queryBuilder.append("IN(");
             int count = 0;
@@ -494,9 +505,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         String fieldName = m.getFieldName(jpaColumnName);
         Attribute col = entityType.getAttribute(fieldName);
-//        Column col = m.getColumn(fieldName);
+        // Column col = m.getColumn(fieldName);
 
-            Field f = (Field) col.getJavaMember();
-            return f != null ? ((AbstractAttribute)col).getBindableJavaType().isAssignableFrom(String.class) : false;
+        Field f = (Field) col.getJavaMember();
+        return f != null ? ((AbstractAttribute) col).getBindableJavaType().isAssignableFrom(String.class) : false;
     }
 }
