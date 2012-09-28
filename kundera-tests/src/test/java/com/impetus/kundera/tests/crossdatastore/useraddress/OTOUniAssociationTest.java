@@ -16,6 +16,7 @@
 package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUni1To1FK;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
@@ -64,6 +66,10 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
 
 public class OTOUniAssociationTest extends TwinAssociation
 {
+    /**
+     * 
+     */
+    // private static final String KEYSPACE = "KUNDERATESTS";
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*
                                                                                                * "addHbase"
                                                                                                * ,
@@ -238,8 +244,8 @@ public class OTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-//        tearDownInternal(ALL_PUs_UNDER_TEST);
-
+        // tearDownInternal(ALL_PUs_UNDER_TEST);
+        shutDownRdbmsServer();
     }
 
     /**
@@ -400,6 +406,51 @@ public class OTOUniAssociationTest extends TwinAssociation
         Assert.assertTrue(persons.size() == 1);
         PersonnelUni1To1FK person = persons.get(0);
         assertPersonBeforeUpdate(person);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForPERSONNEL()
+     */
+    @Override
+    protected void createSchemaForPERSONNEL() throws SQLException
+    {
+        // cli.update("USE testdb");
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(150))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(150))");
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForHABITAT()
+     */
+    @Override
+    protected void createSchemaForHABITAT() throws SQLException
+    {
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+        }
     }
 
 }

@@ -17,7 +17,7 @@ package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -37,11 +37,9 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
-import org.hibernate.SessionFactory;
-import org.hibernate.StatelessSession;
 
+import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
-import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -53,8 +51,6 @@ import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
 import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 /**
  * The Class AssociationBase.
@@ -63,6 +59,9 @@ import com.mongodb.MongoException;
  */
 public abstract class AssociationBase
 {
+
+    private static final String KEYSPACE = "KunderaTests";
+
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
@@ -91,6 +90,8 @@ public abstract class AssociationBase
 
     private String persistenceUnits = "rdbms,addCassandra,addMongo";
 
+    protected RDBMSCli cli;
+
     // private String persistenceUnits = "rdbms,addHbase";
 
     /**
@@ -101,6 +102,16 @@ public abstract class AssociationBase
      */
     protected void setUpInternal(String... colFamilies)
     {
+        try
+        {
+            cli = new RDBMSCli(KEYSPACE);
+            cli.createSchema(KEYSPACE);
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
@@ -197,7 +208,7 @@ public abstract class AssociationBase
                     }
 
                 }
-                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && !RUN_IN_EMBEDDED_MODE)
+                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
                 {
                     if (!HBaseCli.isStarted())
                     {
@@ -216,9 +227,25 @@ public abstract class AssociationBase
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
                 }
+                if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory") /*
+                                                                                            * &&
+                                                                                            * RUN_IN_EMBEDDED_MODE
+                                                                                            */)
+                {
+                    try
+                    {
+                        createSchemaForPERSONNEL();
+                        createSchemaForHABITAT();
+                    }
+                    catch (Exception e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
+                }
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-                mAdd.setSchema(schema != null ? schema : "test");
+                mAdd.setSchema(schema != null ? schema : "KunderaTests");
                 // mAdd.setSchema(schema)
 
                 log.warn("persistence unit:" + pu + " and class:" + clazz.getCanonicalName());
@@ -278,19 +305,19 @@ public abstract class AssociationBase
      */
     private void truncateMongo()
     {
-        
+
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         MongoDBClient client = (MongoDBClient) clients.get("addMongo");
-        if(client != null)
+        if (client != null)
         {
             try
             {
                 Field db = client.getClass().getDeclaredField("mongoDb");
-                if(!db.isAccessible())
+                if (!db.isAccessible())
                 {
                     db.setAccessible(true);
                 }
-                DB mongoDB =  (DB) db.get(client);
+                DB mongoDB = (DB) db.get(client);
                 mongoDB.getCollection("PERSONNEL").drop();
                 mongoDB.getCollection("ADDRESS").drop();
                 mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
@@ -316,7 +343,7 @@ public abstract class AssociationBase
                 e.printStackTrace();
             }
         }
-        
+
     }
 
     /**
@@ -324,43 +351,21 @@ public abstract class AssociationBase
      */
     private void truncateRdbms()
     {
-        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        HibernateClient client = (HibernateClient) clients.get("rdbms");
         try
         {
-            Field sessionFactory = client.getClass().getDeclaredField("sf");
-            if (!sessionFactory.isAccessible())
-            {
-                sessionFactory.setAccessible(true);
-            }
-            SessionFactory sf = (SessionFactory) sessionFactory.get(client);
-            StatelessSession s = sf.openStatelessSession();
-            s.createSQLQuery("delete from ADDRESS").executeUpdate();
-            s.createSQLQuery("delete from PERSONNEL").executeUpdate();
-            s.createSQLQuery("delete from PERSONNEL_ADDRESS").executeUpdate();
-            s.close();
-            // sf.close();
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
+
         }
-        catch (SecurityException e)
+        catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // do nothing..weird!!
         }
-        catch (NoSuchFieldException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IllegalArgumentException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
     }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
@@ -401,4 +406,23 @@ public abstract class AssociationBase
     protected abstract void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException;
 
+    protected abstract void createSchemaForPERSONNEL() throws SQLException;
+
+    protected abstract void createSchemaForHABITAT() throws SQLException;
+
+    protected void shutDownRdbmsServer() throws SQLException
+    {
+        if (cli != null)
+        {
+            try
+            {
+                cli.dropSchema(KEYSPACE);
+            }
+            catch (Exception e)
+            {
+                cli.closeConnection();
+            }
+
+        }
+    }
 }

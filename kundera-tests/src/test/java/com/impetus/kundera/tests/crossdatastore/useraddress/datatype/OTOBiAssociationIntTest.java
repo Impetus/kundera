@@ -17,6 +17,7 @@ package com.impetus.kundera.tests.crossdatastore.useraddress.datatype;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -241,7 +242,8 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-//        tearDownInternal(ALL_PUs_UNDER_TEST);
+        shutDownRdbmsServer();
+        // tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -342,6 +344,33 @@ public class OTOBiAssociationIntTest extends TwinAssociation
             addKeyspace(ksDef, cfDefs);
         }
         CassandraCli.client.set_keyspace("KunderaTests");
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForPERSONNEL()
+     */
+    @Override
+    protected void createSchemaForPERSONNEL() throws SQLException
+    {
+//        cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID DECIMAL)");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForHABITAT()
+     */
+    @Override
+    protected void createSchemaForHABITAT() throws SQLException
+    {
+//        cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID DECIMAL PRIMARY KEY, STREET VARCHAR(256)");
 
     }
 }

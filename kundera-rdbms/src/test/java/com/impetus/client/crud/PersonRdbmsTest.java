@@ -125,7 +125,7 @@ public class PersonRdbmsTest extends BaseTest
         cli.update("DELETE FROM TESTDB.PERSON");
         cli.update("DROP TABLE TESTDB.PERSON");
         cli.update("DROP SCHEMA TESTDB");
-     //   cli.shutdown();
+        cli.closeConnection();
 //        cli.dropSchema("testdb");
     }
 }

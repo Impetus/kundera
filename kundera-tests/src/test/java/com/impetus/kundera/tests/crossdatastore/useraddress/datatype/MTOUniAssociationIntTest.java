@@ -16,6 +16,7 @@
 package com.impetus.kundera.tests.crossdatastore.useraddress.datatype;
 
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
 {
     private static final Long ADDRESS_ID = new Long(123456);
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"rdbms",*/ "addCassandra", "addMongo" };
 
     /**
      * Inits the.
@@ -221,8 +222,9 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-//        tearDownInternal(ALL_PUs_UNDER_TEST);
+        // tearDownInternal(ALL_PUs_UNDER_TEST);
         truncateSchema();
+        shutDownRdbmsServer();
     }
 
     /**
@@ -356,6 +358,50 @@ public class MTOUniAssociationIntTest extends TwinAssociation
         }
         CassandraCli.client.set_keyspace("KunderaTests");
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForPERSONNEL()
+     */
+    @Override
+    protected void createSchemaForPERSONNEL() throws SQLException
+    {
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+     * createSchemaForHABITAT()
+     */
+    @Override
+    protected void createSchemaForHABITAT() throws SQLException
+    {
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+        }
     }
 
 }

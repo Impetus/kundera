@@ -72,6 +72,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
             cli.update("DELETE FROM TESTDB.STUDENT");
             cli.update("DROP TABLE TESTDB.STUDENT");
             cli.update("DROP SCHEMA TESTDB");
+            cli.closeConnection();
         }
         catch (SQLException e)
         {

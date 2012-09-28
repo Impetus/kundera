@@ -66,7 +66,7 @@ public class RDBMSCli
         // of the db.
         // It can contain directory names relative to the
         // current working directory
-        conn = DriverManager.getConnection("jdbc:hsqldb:mem:testdb", // filenames
+        conn = DriverManager.getConnection("jdbc:hsqldb:mem:" + db_file_name_prefix, // filenames
                 "sa", // username
                 ""); // password
     }
@@ -80,7 +80,19 @@ public class RDBMSCli
         // otherwise there will be an unclean shutdown
         // when program ends
         st.execute("SHUTDOWN");
-        conn.close(); // if there are no other open connection
+        closeConnection();
+    }
+
+    /**
+     * @throws SQLException
+     */
+    public void closeConnection() throws SQLException
+    {
+        if (conn != null)
+        {
+            conn.close(); // if there are no other open connection
+            conn = null;
+        }
     }
 
     // use for SQL command SELECT
@@ -163,7 +175,7 @@ public class RDBMSCli
 
     public void dropSchema(final String schemaName) throws SQLException
     {
-        String sql = "drop schema " + schemaName ;
+        String sql = "drop schema " + schemaName;
         update(sql);
     }
 
