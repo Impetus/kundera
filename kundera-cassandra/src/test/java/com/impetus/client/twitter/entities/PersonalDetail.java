@@ -19,6 +19,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import com.impetus.client.twitter.utils.ExampleUtils;
+import com.impetus.kundera.annotations.Index;
 
 /**
  * Entity class for user's personal details
@@ -27,6 +28,7 @@ import com.impetus.client.twitter.utils.ExampleUtils;
  */
 
 @Embeddable
+@Index(index=true, columns={"name", "relationshipStatus"})
 public class PersonalDetail
 {
     @Column(name = "personal_detail_id")

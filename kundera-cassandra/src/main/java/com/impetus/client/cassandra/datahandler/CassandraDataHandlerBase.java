@@ -376,6 +376,13 @@ public abstract class CassandraDataHandlerBase
         for (String key : embeddables.keySet())
         {
             EmbeddableType embeddedColumn = embeddables.get(key);
+            
+            //Index embeddable only when specified by user 
+            Field embeddedField = (Field)entityType.getAttribute(key).getJavaMember();
+            if(! MetadataUtils.isEmbeddedAtributeIndexable(embeddedField))
+            {
+                continue;
+            }
 
             Object embeddedObject = PropertyAccessorHelper.getObject(e, (Field) entityType.getAttribute(key)
                     .getJavaMember());
@@ -393,6 +400,13 @@ public abstract class CassandraDataHandlerBase
                     // embeddedColumn.getColumns())
                     for (Object column : embeddedColumn.getAttributes())
                     {
+                        
+                        Attribute columnAttribute = (Attribute) column;
+                        String columnName = columnAttribute.getName();
+                        if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
+                        {
+                            continue;
+                        }
 
                         // Column Value
                         String id = CassandraUtilities.toUTF8(value);
@@ -401,7 +415,7 @@ public abstract class CassandraDataHandlerBase
                         byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
                                 .getBytes();
 
-                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, obj, (Attribute) column,
+                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, obj, columnAttribute,
                                 indexColumnValue);
                         if (tr != null)
                         {
@@ -418,6 +432,14 @@ public abstract class CassandraDataHandlerBase
                 // {
                 for (Object column : embeddedColumn.getAttributes())
                 {
+                    
+                    Attribute columnAttribute = (Attribute) column;
+                    String columnName = columnAttribute.getName();
+                    
+                    if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
+                    {
+                        continue;
+                    }                    
                     // ThriftRow tr = constructIndexTableThriftRow(columnFamily,
                     // embeddedColumn, embeddedObject, column,
                     // value);
@@ -427,10 +449,8 @@ public abstract class CassandraDataHandlerBase
                     {
                         indexThriftRows.add(tr);
                     }
-
                 }
             }
-
         }
 
         return indexThriftRows;

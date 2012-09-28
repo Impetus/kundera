@@ -17,6 +17,7 @@ package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -512,5 +514,34 @@ public class MetadataUtils
                 getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, embedAttrib);
             }
         }
+    }
+    
+    public static boolean isEmbeddedAtributeIndexable(Field embeddedField)
+    {
+        Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
+        Index indexAnn = embeddableClass.getAnnotation(Index.class);
+        if(indexAnn != null)
+        {
+            if(indexAnn.index())
+            {
+                return true;
+            }
+        }
+        return false;        
+    }
+    
+    public static boolean isColumnInEmbeddableIndexable(Field embeddedField, String columnFieldName)
+    {
+        Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
+        Index indexAnn = embeddableClass.getAnnotation(Index.class);
+        if(indexAnn != null && indexAnn.index())
+        {
+            String[] columnsToBeIndexed = indexAnn.columns();
+            if(columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
+            {
+                return true;
+            }
+        }
+        return false;        
     }
 }

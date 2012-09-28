@@ -228,6 +228,25 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         }
     }
+    
+    protected void computeEntityViaSuperColumns(EntityMetadata m, boolean isRelation, List<String> relations,
+            List<Object> entities, Map<Bytes, List<SuperColumn>> qResults)
+    {
+        for (Bytes key : qResults.keySet())
+        {
+            List<SuperColumn> superColumns = qResults.get(key);
+            
+            ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
+                    key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), superColumns, new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));            
+           
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            if( o != null)
+            {
+                entities.add(o);
+            }
+
+        }
+    }
 
     /**
      * Adds relation foreign key values as thrift column/ value to thrift row

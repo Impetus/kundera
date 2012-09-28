@@ -125,14 +125,13 @@ public abstract class TwitterTestBase
 
         // Queries
         getPersonalDetailByName();
-        // getAllUsers();
+        getAllUsers();
 
         getTweetsByBody();
         getTweetsByDevice();
 
         // Remove Users
         removeUser();
-
     }
 
     protected void addAllUserInfo()

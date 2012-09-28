@@ -594,16 +594,21 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 }
             }
             else
-            {
-
-                Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                        selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
-
-                entities = new ArrayList<Object>(qResults.size());
-
-                computeEntityViaColumns(m, isRelation, relations, entities, qResults);
-                // populateData(m, qResults, entities, isRelation, relations,
-                // dataHandler);
+            {                 
+                
+                if(m.getType().isSuperColumnFamilyMetadata())
+                {
+                    Map<Bytes, List<SuperColumn>> qResults = selector.getSuperColumnsFromRows(m.getTableName(),
+                            selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
+                    entities = new ArrayList<Object>(qResults.size());
+                    computeEntityViaSuperColumns(m, isRelation, relations, entities, qResults);
+                } else {
+                    Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
+                            selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
+                    entities = new ArrayList<Object>(qResults.size());
+                    //populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                    computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+                }
 
             }
         }
