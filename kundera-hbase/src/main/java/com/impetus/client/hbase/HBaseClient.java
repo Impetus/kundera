@@ -417,14 +417,14 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+    public <E> List<E> getColumnsById(String schemaName,String joinTableName, String joinColumnName, String inverseJoinColumnName,
             Object parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
     }
 
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         try
         {
@@ -448,8 +448,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getTableName(), ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(),
-                pKey);
+        deleteByColumn(metadata.getSchema(), metadata.getTableName(),
+                ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), pKey);
     }
 
     /*
@@ -466,8 +466,9 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
-        SingleColumnValueFilter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
-//        f.setFilterIfMissing(true);
+        SingleColumnValueFilter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName),
+                operator, valueInBytes);
+        // f.setFilterIfMissing(true);
         try
         {
             return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
@@ -518,8 +519,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
     {
         CompareOp operator = HBaseUtils.getOperator("=", false);
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
@@ -682,6 +683,38 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
+            Object pKeyColumnValue)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

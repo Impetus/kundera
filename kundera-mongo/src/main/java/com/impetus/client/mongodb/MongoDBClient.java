@@ -128,7 +128,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName, String inverseJoinColumnName,
             Object parentId)
     {
         List<E> foreignKeys = new ArrayList<E>();
@@ -157,7 +157,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
         String childIdStr = (String) columnValue;
@@ -469,7 +469,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.Object)
      */
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
@@ -647,5 +647,37 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             executeBatch();
             nodes.clear();
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
+            Object pKeyColumnValue)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }
