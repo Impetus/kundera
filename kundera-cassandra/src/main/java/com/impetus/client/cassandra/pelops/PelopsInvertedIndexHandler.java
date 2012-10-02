@@ -17,10 +17,12 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.scale7.cassandra.pelops.Bytes;
@@ -81,10 +83,10 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      * @return
      */
     @Override
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
-            ConsistencyLevel consistencyLevel)
+    public List<SearchResult> search(EntityMetadata m, String persistenceUnit,
+            ConsistencyLevel consistencyLevel, Map<Boolean, List<IndexClause>> indexClauseMap)
     {
-        return super.search(m, filterClauseQueue, persistenceUnit, consistencyLevel);
+        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
     }
 
     /**

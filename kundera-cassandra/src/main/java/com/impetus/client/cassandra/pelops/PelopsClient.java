@@ -616,7 +616,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             entities = new ArrayList<Object>();
             for (IndexClause ix : ixClause)
-            {
+            {                
                 Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                         getConsistencyLevel());
                 computeEntityViaColumns(m, isRelation, relations, entities, qResults);
@@ -695,10 +695,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
-            Queue<FilterClause> filterClauseQueue)
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
 
-        return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), getConsistencyLevel());
+        return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
     }
 
     /*

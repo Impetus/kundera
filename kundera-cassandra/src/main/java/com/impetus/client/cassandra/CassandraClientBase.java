@@ -860,7 +860,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List<String> relations, List<String> columns, List<IndexExpression> conditions) throws Exception;
 
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
-            Queue<FilterClause> filterClauseQueue);
+            Map<Boolean, List<IndexClause>> indexClauseMap);
 
     public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames,
             List<IndexClause> conditions, int maxResult, List<String> columns);

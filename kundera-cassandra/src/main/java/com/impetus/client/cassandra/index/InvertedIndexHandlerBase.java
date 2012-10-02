@@ -29,6 +29,9 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -55,143 +58,155 @@ public abstract class InvertedIndexHandlerBase
     /** log for this class. */
     private static Log log = LogFactory.getLog(InvertedIndexHandlerBase.class);
 
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
-            ConsistencyLevel consistencyLevel)
+    public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
-
-        for (FilterClause o : filterClauseQueue)
+        
+        boolean isRowKeyQuery = indexClauseMap.keySet().iterator().next();
+        for (IndexClause o : indexClauseMap.get(isRowKeyQuery))
         {
-            SearchResult searchResult = new SearchResult();
-
-            FilterClause clause = ((FilterClause) o);
-            String rowKey = clause.getProperty();
-            String columnName = clause.getValue().toString();
-
-            String condition = clause.getCondition();
-            log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
-
-            // TODO: Second check unnecessary but unavoidable as filter clause
-            // property is incorrectly passed as column name
-
-            // Search based on Primary key
-//            if (rowKey.equals(m.getIdAttribute()().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
-            if (rowKey.equals(m.getIdAttribute().getName()) || rowKey.equals(((DefaultSingularAttribute)m.getIdAttribute()).getJPAColumnName()))
-          {
-
-                searchResult.setPrimaryKey(columnName);
-
-            }
-            else
+                         
+            for(IndexExpression expression : o.getExpressions())
             {
-                // Search results in the form of thrift columns
-                List<Column> thriftColumns = new ArrayList<Column>();
-
-                // EQUAL Operator
-                if (condition.equals("="))
-                {
-                    Column thriftColumn = getColumnForRow(consistencyLevel, columnFamilyName, rowKey, columnName,
-                            persistenceUnit);
-                    thriftColumns.add(thriftColumn);
-                }
-
-                // LIKE operation
-                else if (condition.equalsIgnoreCase("LIKE"))
-                {
-
-                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, columnName.getBytes(), new byte[0]);
-                }
-
-                // Greater than operator
-                else if (condition.equals(">"))
-                {
-                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, columnName.getBytes(), new byte[0]);
-                }
-
-                // Less than Operator
-                else if (condition.equals("<"))
-                {
-                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, new byte[0], columnName.getBytes());
-                }
-
-                // Greater than-equals to operator
-                else if (condition.equals(">="))
-                {
-                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, columnName.getBytes(), new byte[0]);
-                }
-
-                // Less than equal to operator
-                else if (condition.equals("<="))
-                {
-                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, new byte[0], columnName.getBytes());
-                }
-                else
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-
-                // Construct search results out of these thrift columns
-                for (Column thriftColumn : thriftColumns)
-                {
-                    byte[] columnValue = thriftColumn.getValue();
-                    String columnValueStr = Bytes.toUTF8(columnValue);
-
-                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) m.getIdAttribute().getJavaMember());
-                    Object value = null;
-
-                    if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
-                    {
-                        String pk = columnValueStr.substring(0,
-                                columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
-                        String ecName = columnValueStr.substring(
-                                columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
-                                        + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
-
-                        searchResult.setPrimaryKey(pk);
-                        searchResult.setEmbeddedColumnName(rowKey.substring(0,
-                                rowKey.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER)));
-                        searchResult.addEmbeddedColumnValue(ecName);
-
-                    }
-                    else
-                    {
-                        value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
-                        searchResult.setPrimaryKey(value);
-                    }
-                    searchResults.add(searchResult);
-                }
-
-            }
+                searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression);
+            }    
 
         }
         return searchResults;
     }
 
+    /**
+     * Searches into inverted index based on <code>expression</code> and adds search result to <code>searchResults</code>
+     */
+    private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression)
+    {
+        SearchResult searchResult = new SearchResult();  
+        
+        String rowKey = Bytes.toUTF8(expression.getColumn_name());
+        String columnName = Bytes.toUTF8(expression.getValue());
+        IndexOperator condition = expression.getOp();                
+        
+        log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
+
+        // TODO: Second check unnecessary but unavoidable as filter clause
+        // property is incorrectly passed as column name
+
+        // Search based on Primary key            
+        if (rowKey.equals(m.getIdAttribute().getName())
+                || rowKey.equals(((DefaultSingularAttribute) m.getIdAttribute()).getJPAColumnName()))
+        {
+            searchResult.setPrimaryKey(columnName);
+        }
+        else
+        {
+            // Search results in the form of thrift columns
+            List<Column> thriftColumns = new ArrayList<Column>();
+
+            
+            switch(condition)
+            {
+                // EQUAL Operator
+                case EQ:
+                    Column thriftColumn = getColumnForRow(consistencyLevel, columnFamilyName, rowKey, columnName,
+                            persistenceUnit);
+                    thriftColumns.add(thriftColumn);
+                    break;
+                    
+                 // LIKE operation not available
+                /*case LIKE:
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                    break;*/
+                
+                 // Greater than operator
+                case GT:
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                    break;
+                 // Less than Operator
+                case LT:
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
+                            thriftColumns, new byte[0], columnName.getBytes());
+                    break;
+                 // Greater than-equals to operator   
+                case GTE:
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                    break;
+                 // Less than equal to operator    
+                case LTE:
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
+                            thriftColumns, new byte[0], columnName.getBytes());
+                    break;
+                        
+                default:
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");        
+            
+            }            
+
+
+            // Construct search results out of these thrift columns
+            for (Column thriftColumn : thriftColumns)
+            {
+                byte[] columnValue = thriftColumn.getValue();
+                String columnValueStr = Bytes.toUTF8(columnValue);
+
+                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) m
+                        .getIdAttribute().getJavaMember());
+                Object value = null;
+
+                if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
+                {
+                    String pk = columnValueStr.substring(0,
+                            columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
+                    String ecName = columnValueStr.substring(
+                            columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
+                                    + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
+
+                    searchResult.setPrimaryKey(pk);
+                    searchResult.setEmbeddedColumnName(rowKey.substring(0,
+                            rowKey.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER)));
+                    searchResult.addEmbeddedColumnValue(ecName);
+
+                }
+                else
+                {
+                    value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
+                    searchResult.setPrimaryKey(value);
+                }
+                searchResults.add(searchResult);
+            }
+
+        }
+    }
+
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
         if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
         {
 
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
-//            for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
+            // for (EmbeddedColumn embeddedColumn :
+            // metadata.getEmbeddedColumnsAsList())
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
-            for(String fieldName : embeddables.keySet())
+            for (String fieldName : embeddables.keySet())
             {
                 EmbeddableType embeddedColumn = embeddables.get(fieldName);
                 Attribute embeddedAttribute = entityType.getAttribute(fieldName);
-//                Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
-                Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) embeddedAttribute.getJavaMember());
-                
+                // Object embeddedObject =
+                // PropertyAccessorHelper.getObject(entity,
+                // embeddedColumn.getField());
+                Object embeddedObject = PropertyAccessorHelper.getObject(entity,
+                        (Field) embeddedAttribute.getJavaMember());
+
                 if (embeddedObject != null)
                 {
                     if (embeddedObject instanceof Collection)
@@ -199,13 +214,15 @@ public abstract class InvertedIndexHandlerBase
                         for (Object obj : (Collection) embeddedObject)
                         {
                             Iterator<Attribute> iter = embeddedColumn.getAttributes().iterator();
-                            while(iter.hasNext())
-//                            for(Attribute column : embeddedColumn.getAttributes())
-//                            for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                            while (iter.hasNext())
+                            // for(Attribute column :
+                            // embeddedColumn.getAttributes())
+                            // for (com.impetus.kundera.metadata.model.Column
+                            // column : embeddedColumn.getColumns())
                             {
                                 Attribute attrib = iter.next();
-                                String rowKey = embeddedAttribute.getName()
-                                        + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + attrib.getName();
+                                String rowKey = embeddedAttribute.getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                                        + attrib.getName();
                                 byte[] columnName = PropertyAccessorHelper.get(obj, (Field) attrib.getJavaMember());
                                 if (columnName != null)
                                 {
@@ -221,12 +238,13 @@ public abstract class InvertedIndexHandlerBase
                     {
 
                         Iterator<Attribute> iter = embeddedColumn.getAttributes().iterator();
-                        while(iter.hasNext())
+                        while (iter.hasNext())
                         {
                             Attribute attrib = iter.next();
-                            String rowKey = embeddedAttribute.getName()
-                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + attrib.getName();
-                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
+                            String rowKey = embeddedAttribute.getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                                    + attrib.getName();
+                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject,
+                                    (Field) attrib.getJavaMember());
                             if (columnName != null)
                             {
                                 deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),

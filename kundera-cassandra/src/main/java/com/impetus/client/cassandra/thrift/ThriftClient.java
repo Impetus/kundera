@@ -905,9 +905,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     @Override
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
-            Queue<FilterClause> filterClauseQueue)
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
-        return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), getConsistencyLevel());
+        return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
     }
 
     /*

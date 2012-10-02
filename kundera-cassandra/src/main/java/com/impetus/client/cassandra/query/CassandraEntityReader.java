@@ -246,14 +246,14 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         return result;
     }
 
-    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Queue<FilterClause> filterClauseQueue)
+    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Map<Boolean, List<IndexClause>> indexClauseMap)
     {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Object> primaryKeys = new ArrayList<Object>();
 
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
-        searchResults = ((CassandraClientBase) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
+        searchResults = ((CassandraClientBase) client).searchInInvertedIndex(columnFamilyName, m, indexClauseMap);
 
         Map<String, String> embeddedColumns = new HashMap<String, String>();
         for (SearchResult searchResult : searchResults)

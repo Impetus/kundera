@@ -40,7 +40,7 @@ public abstract class TwitterTestBase
 {
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = true;
+    public static final boolean AUTO_MANAGE_SCHEMA =  true;
 
     public static final String persistenceUnit = "twissandraTest";
 
@@ -126,8 +126,6 @@ public abstract class TwitterTestBase
         // Queries
         getPersonalDetailByName();
         getAllUsers();
-
-        getTweetsByBody();
         getTweetsByDevice();
 
         // Remove Users

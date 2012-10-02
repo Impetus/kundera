@@ -225,7 +225,7 @@ public class TwitterService extends SuperDao implements Twitter
     @Override
     public List<Tweet> findTweetByDevice(String deviceName)
     {
-        Query q = em.createQuery("select u.tweets.device from UserCassandra u where u.tweets.device like :device");
+        Query q = em.createQuery("select u.tweets.device from UserCassandra u where u.tweets.device =:device");
         q.setParameter("device", deviceName);
         List<Tweet> tweets = q.getResultList();
         return tweets;

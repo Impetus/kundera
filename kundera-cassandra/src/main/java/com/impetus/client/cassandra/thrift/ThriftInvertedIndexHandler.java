@@ -28,6 +28,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -156,11 +157,11 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     }
 
     @Override
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
-            ConsistencyLevel consistencyLevel)
+    public List<SearchResult> search(EntityMetadata m, String persistenceUnit,
+            ConsistencyLevel consistencyLevel, Map<Boolean, List<IndexClause>> indexClauseMap)
     {
 
-        return super.search(m, filterClauseQueue, persistenceUnit, consistencyLevel);
+        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
     }
 
     @Override

@@ -16,9 +16,11 @@
 package com.impetus.client.cassandra.index;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.kundera.db.SearchResult;
@@ -53,8 +55,7 @@ public interface InvertedIndexHandler
      * @param consistencyLevel
      * @return
      */
-    List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
-            ConsistencyLevel consistencyLevel);
+    List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel, Map<Boolean, List<IndexClause>> indexClauseMap);
 
     /**
      * Deletes a record from inverted index table.

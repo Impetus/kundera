@@ -16,7 +16,9 @@
 package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -47,6 +50,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -107,14 +111,13 @@ public class CassQuery extends QueryImpl implements Query
             {
                 // Index in Inverted Index table if applicable
                 boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
+                Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m, useInvertedIndex);
                 if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
                 {
-                    result = (List)((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery()
-                            .getFilterClauseQueue());
+                    result = (List)((CassandraEntityReader) getReader()).readFromIndexTable(m, client, ixClause);
                 }
                 else
-                {
-                    Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+                {                    
                     boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                     if (!isRowKeyQuery)
                     {                                
@@ -151,16 +154,15 @@ public class CassQuery extends QueryImpl implements Query
         {
             // Index in Inverted Index table if applicable
             boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
-
+            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m, useInvertedIndex)
+                    : null;
+            
             if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
             {
-                ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery()
-                        .getFilterClauseQueue());
+                ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, ixClause);
             }
             else
-            {
-                Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
-                        : null;
+            {                
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
                 ls = reader.populateRelation(m, client);
             }
@@ -226,11 +228,12 @@ public class CassQuery extends QueryImpl implements Query
      *            the m
      * @return the map
      */
-    private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
+    private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
     {
         IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
+        
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
         String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
@@ -248,23 +251,14 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     idPresent = true;
                 }
-//                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
-//                {
-//                    log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
-//                    throw new QueryHandlerException("unsupported query operation clause for cassandra");
-//
-//                }
+
                 String condition = clause.getCondition();
                 Object value = clause.getValue();
-                // value.e
-                /*
-                 * if(idPresent) { expr = null; } else {
-                 */
-                IndexExpression expression = Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                        getBytesValue(fieldName, m, value));
+                IndexOperator operator = getOperator(condition, idPresent);
+                
+                IndexExpression expression = Selector.newIndexExpression(fieldName, operator, getBytesValue(fieldName, m, value));                                           
+                
                 expr.add(expression);
-                // }
-
             }
             else
             {
@@ -322,6 +316,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
+            
             if (!idPresent)
             {
                 throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
@@ -375,16 +370,50 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            String fieldName = m.getFieldName(jpaFieldName);
-            Attribute col = entity.getAttribute(fieldName);
-            // Column col = m.getColumn(jpaFieldName);
-            if (col == null)
+            if(jpaFieldName != null && jpaFieldName.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER) > 0)
             {
-                throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+                String embeddedFieldName = jpaFieldName.substring(0, jpaFieldName.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER));
+                String columnFieldName = jpaFieldName.substring(jpaFieldName.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER) + 1, jpaFieldName.length());
+                
+                Attribute embeddedAttr = entity.getAttribute(embeddedFieldName);
+                try
+                {
+                    Class<?> embeddedClass = embeddedAttr.getJavaType();
+                    if(Collection.class.isAssignableFrom(embeddedClass)) {                        
+                        Class<?> genericClass = PropertyAccessorHelper.getGenericClass((Field)embeddedAttr.getJavaMember());
+                        f = genericClass.getDeclaredField(columnFieldName);                  
+                    }
+                    else
+                    {
+                        f = embeddedClass.getDeclaredField(columnFieldName);
+                    }                         
+                   
+                }
+                catch (SecurityException e)
+                {
+                    e.printStackTrace();
+                }
+                catch (NoSuchFieldException e)
+                {
+                    e.printStackTrace();
+                }
+               
             }
-            f = (Field) col.getJavaMember();
-        }
+            else
+            {
+                String fieldName = m.getFieldName(jpaFieldName);
 
+                Attribute col = entity.getAttribute(fieldName);
+                // Column col = m.getColumn(jpaFieldName);
+                if (col == null)
+                {
+                    throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+                }
+                f = (Field) col.getJavaMember();
+            }        
+            
+        }
+        
         // need to do integer.parseInt..as value will be string in case of
         // create query.
         if (f != null && f.getType() != null)
