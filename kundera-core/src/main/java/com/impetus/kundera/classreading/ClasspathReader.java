@@ -39,7 +39,8 @@ import java.util.jar.Manifest;
  *
  * @author animesh.kumar
  */
-public class ClasspathReader extends Reader {
+public class ClasspathReader extends Reader
+{
     private static Logger logger = LoggerFactory.getLogger(ClasspathReader.class);
 
     /**
@@ -47,41 +48,48 @@ public class ClasspathReader extends Reader {
      */
     private Filter filter;
 
-    /**
-     * The classes to scan.
-     */
+    /** The classes to scan. */
     private List<String> classesToScan;
 
     /**
      * Instantiates a new classpath reader.
      */
-    public ClasspathReader() {
+    public ClasspathReader()
+    {
         filter = new FilterImpl();
     }
 
     /**
      * Instantiates a new classpath reader.
      *
-     * @param classesToScan the classes to scan
+     * @param classesToScan
+     *            the classes to scan
      */
-    public ClasspathReader(List<String> classesToScan) {
+    public ClasspathReader(List<String> classesToScan)
+    {
         this();
         this.classesToScan = classesToScan;
     }
 
     @Override
-    public final void read() {
+    public final void read()
+    {
         URL[] resources = findResources();
-        for (URL resource : resources) {
+        for (URL resource : resources)
+        {
 
-            try {
+            try
+            {
                 ResourceIterator itr = getResourceIterator(resource, getFilter());
 
                 InputStream is = null;
-                while ((is = itr.next()) != null) {
+                while ((is = itr.next()) != null)
+                {
                     scanClass(is);
                 }
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 logger.error("Error during reading via classpath, Caused by:" + e.getMessage());
                 throw new ResourceReadingException(e);
             }
@@ -96,25 +104,31 @@ public class ClasspathReader extends Reader {
      */
     @SuppressWarnings("deprecation")
     @Override
-    public final URL[] findResourcesByClasspath() {
+    public final URL[] findResourcesByClasspath()
+    {
         List<URL> list = new ArrayList<URL>();
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
 
-        while (tokenizer.hasMoreTokens()) {
+        while (tokenizer.hasMoreTokens())
+        {
             String path = tokenizer.nextToken();
 
             File fp = new File(path);
             if (!fp.exists())
                 throw new ResourceReadingException("File in java.class.path does not exist: " + fp);
-            try {
+            try
+            {
                 list.add(fp.toURL());
-            } catch (MalformedURLException e) {
+            }
+            catch (MalformedURLException e)
+            {
                 throw new ResourceReadingException(e);
             }
         }
         return list.toArray(new URL[list.size()]);
     }
+
 
     /**
      * Scan class resource in the provided urls with the additional Class-Path of each jar checking
@@ -123,7 +137,8 @@ public class ClasspathReader extends Reader {
      * @param urls              urls to be checked
      * @return list of class path included in the base package
      */
-    private URL[] findResourcesInUrls(String classRelativePath, URL[] urls) {
+    private URL[] findResourcesInUrls(String classRelativePath, URL[] urls)
+    {
         List<URL> list = new ArrayList<URL>();
         for (URL url : urls) {
             if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar")) {
@@ -179,7 +194,8 @@ public class ClasspathReader extends Reader {
      */
 
     @Override
-    public final URL[] findResourcesByContextLoader() {
+    public final URL[] findResourcesByContextLoader()
+    {
         List<URL> list = new ArrayList<URL>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
@@ -195,14 +211,16 @@ public class ClasspathReader extends Reader {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override
-    public URL[] findResources() {
+    public URL[] findResources()
+    {
         URL[] result = null;
 
-        if (classesToScan != null && !classesToScan.isEmpty()) {
+        if (classesToScan != null && !classesToScan.isEmpty())
+        {
             result = findResourcesByContextLoader();
         }
         // else
@@ -214,20 +232,23 @@ public class ClasspathReader extends Reader {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.classreading.Reader#getFilter()
      */
 
-    public final Filter getFilter() {
+    public final Filter getFilter()
+    {
         return filter;
     }
 
     /**
      * Sets the filter.
      *
-     * @param filter the new filter
+     * @param filter
+     *            the new filter
      */
-    public final void setFilter(Filter filter) {
+    public final void setFilter(Filter filter)
+    {
         this.filter = filter;
     }
 }
