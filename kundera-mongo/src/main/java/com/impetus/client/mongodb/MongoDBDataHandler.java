@@ -317,12 +317,17 @@ final class MongoDBDataHandler
         {
             Collection collection = (Collection) PropertyAccessorHelper.getObject(entity,
                     (Field) column.getJavaMember());
-            BasicDBList basicDBList = new BasicDBList();
-            for (Object o : collection)
+            if (collection != null)
             {
-                basicDBList.add(o);
-            }
-            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
+                BasicDBList basicDBList = new BasicDBList();
+
+                for (Object o : collection)
+                {
+                    basicDBList.add(o);
+                }
+
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
+            }           
 
         }
         else if (column.getJavaType().isAssignableFrom(Map.class))
