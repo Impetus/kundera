@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.classreading;
 
+import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,23 +27,19 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
+import java.util.jar.Manifest;
 
 /**
  * The Class ClasspathReader.
- * 
+ *
  * @author animesh.kumar
  */
-public class ClasspathReader extends Reader
-{
+public class ClasspathReader extends Reader {
     private static Logger logger = LoggerFactory.getLogger(ClasspathReader.class);
 
     /**
@@ -46,48 +47,41 @@ public class ClasspathReader extends Reader
      */
     private Filter filter;
 
-    /** The classes to scan. */
+    /**
+     * The classes to scan.
+     */
     private List<String> classesToScan;
 
     /**
      * Instantiates a new classpath reader.
      */
-    public ClasspathReader()
-    {
+    public ClasspathReader() {
         filter = new FilterImpl();
     }
 
     /**
      * Instantiates a new classpath reader.
-     * 
-     * @param classesToScan
-     *            the classes to scan
+     *
+     * @param classesToScan the classes to scan
      */
-    public ClasspathReader(List<String> classesToScan)
-    {
+    public ClasspathReader(List<String> classesToScan) {
         this();
         this.classesToScan = classesToScan;
     }
 
     @Override
-    public final void read()
-    {
+    public final void read() {
         URL[] resources = findResources();
-        for (URL resource : resources)
-        {
+        for (URL resource : resources) {
 
-            try
-            {
+            try {
                 ResourceIterator itr = getResourceIterator(resource, getFilter());
 
                 InputStream is = null;
-                while ((is = itr.next()) != null)
-                {
+                while ((is = itr.next()) != null) {
                     scanClass(is);
                 }
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 logger.error("Error during reading via classpath, Caused by:" + e.getMessage());
                 throw new ResourceReadingException(e);
             }
@@ -97,30 +91,25 @@ public class ClasspathReader extends Reader
     /**
      * Uses the java.class.path system property to obtain a list of URLs that
      * represent the CLASSPATH
-     * 
+     *
      * @return the URl[]
      */
     @SuppressWarnings("deprecation")
     @Override
-    public final URL[] findResourcesByClasspath()
-    {
+    public final URL[] findResourcesByClasspath() {
         List<URL> list = new ArrayList<URL>();
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
 
-        while (tokenizer.hasMoreTokens())
-        {
+        while (tokenizer.hasMoreTokens()) {
             String path = tokenizer.nextToken();
 
             File fp = new File(path);
             if (!fp.exists())
                 throw new ResourceReadingException("File in java.class.path does not exist: " + fp);
-            try
-            {
+            try {
                 list.add(fp.toURL());
-            }
-            catch (MalformedURLException e)
-            {
+            } catch (MalformedURLException e) {
                 throw new ResourceReadingException(e);
             }
         }
@@ -128,62 +117,77 @@ public class ClasspathReader extends Reader
     }
 
     /**
+     * Scan class resource in the provided urls with the additional Class-Path of each jar checking
+     *
+     * @param classRelativePath relative path to a class resource
+     * @param urls              urls to be checked
+     * @return list of class path included in the base package
+     */
+    private URL[] findResourcesInUrls(String classRelativePath, URL[] urls) {
+        List<URL> list = new ArrayList<URL>();
+        for (URL url : urls) {
+            if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar")) {
+                try {
+                    JarFile jarFile = new JarFile(url.getFile());
+
+                    // Checking the dependencies of this jar file
+                    Manifest manifest = jarFile.getManifest();
+                    if (manifest != null) {
+                        String classPath = manifest.getMainAttributes().getValue("Class-Path");
+                        // Scan all entries in the classpath if they are specified in the jar
+                        if (!StringUtils.isEmpty(classPath)) {
+                            List<URL> subList = new ArrayList<URL>();
+                            for (String cpEntry : classPath.split(" ")) {
+                                try {
+                                    subList.add(new URL(cpEntry));
+                                } catch (MalformedURLException e) {
+                                    logger.warn("Incorrect URL in the classpath of a jar file [" + url.toString()
+                                            + "]: " + cpEntry);
+                                }
+                            }
+                            list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath,
+                                    subList.toArray(new URL[subList.size()]))));
+                        }
+                    }
+                    JarEntry present = jarFile.getJarEntry(classRelativePath + ".class");
+                    if (present != null) {
+                        list.add(url);
+                    }
+                } catch (IOException e) {
+                    logger.warn("Error during loading from context , Caused by:" + e.getMessage());
+                }
+
+            } else if (url.getPath().endsWith("/")) {
+                File file = new File(url.getPath() + classRelativePath + ".class");
+                if (file.exists()) {
+                    try {
+                        list.add(file.toURL());
+                    } catch (MalformedURLException e) {
+                        throw new ResourceReadingException(e);
+                    }
+                }
+            }
+
+        }
+        return list.toArray(new URL[list.size()]);
+    }
+
+    /**
      * Scan class resources into a basePackagetoScan path.
-     * 
+     *
      * @return list of class path included in the base package
      */
 
     @Override
-    public final URL[] findResourcesByContextLoader()
-    {
+    public final URL[] findResourcesByContextLoader() {
         List<URL> list = new ArrayList<URL>();
-
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
 
-        for (String fullyQualifiedClassName : classesToScan)
-        {
+        for (String fullyQualifiedClassName : classesToScan) {
             String classRelativePath = fullyQualifiedClassName.replace(".", "/");
-
             URL[] urls = ((URLClassLoader) classLoader).getURLs();
-
-            for (URL url : urls)
-            {
-                if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
-                {
-                    try
-                    {
-                        JarFile jarFile = new JarFile(url.getFile());
-                        JarEntry present = jarFile.getJarEntry(classRelativePath + ".class");
-                        if (present != null)
-                        {
-                            list.add(url);
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        logger.warn("Error during loading from context , Caused by:" + e.getMessage());
-                    }
-
-                }
-                else if (url.getPath().endsWith("/"))
-                {
-                    File file = new File(url.getPath() + classRelativePath + ".class");
-                    if (file.exists())
-                    {
-                        try
-                        {
-                            list.add(file.toURL());
-                        }
-                        catch (MalformedURLException e)
-                        {
-                            throw new ResourceReadingException(e);
-                        }
-                    }
-                }
-
-            }
-
+            list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath, urls)));
         }
 
         return list.toArray(new URL[list.size()]);
@@ -195,12 +199,10 @@ public class ClasspathReader extends Reader
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override
-    public URL[] findResources()
-    {
+    public URL[] findResources() {
         URL[] result = null;
 
-        if (classesToScan != null && !classesToScan.isEmpty())
-        {
+        if (classesToScan != null && !classesToScan.isEmpty()) {
             result = findResourcesByContextLoader();
         }
         // else
@@ -216,19 +218,16 @@ public class ClasspathReader extends Reader
      * @see com.impetus.kundera.classreading.Reader#getFilter()
      */
 
-    public final Filter getFilter()
-    {
+    public final Filter getFilter() {
         return filter;
     }
 
     /**
      * Sets the filter.
-     * 
-     * @param filter
-     *            the new filter
+     *
+     * @param filter the new filter
      */
-    public final void setFilter(Filter filter)
-    {
+    public final void setFilter(Filter filter) {
         this.filter = filter;
     }
 }
