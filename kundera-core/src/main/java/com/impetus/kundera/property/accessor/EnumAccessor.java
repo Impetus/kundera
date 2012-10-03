@@ -90,6 +90,15 @@ public class EnumAccessor implements PropertyAccessor<Enum>
 
         return null;
     }
+    
+    
+
+    @Override
+    public Enum getCopy(Object object)
+    {    
+       
+        return fromString(object.getClass(), toString(object));
+    }
 
     public Enum getInstance(Class<?> clazz)
     {

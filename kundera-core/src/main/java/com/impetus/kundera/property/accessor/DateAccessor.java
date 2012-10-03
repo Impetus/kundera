@@ -216,6 +216,15 @@ public class DateAccessor implements PropertyAccessor<Date>
 
         throw new PropertyAccessException("Required Date format is not supported!" + date);
     }
+    
+    
+
+    @Override
+    public Date getCopy(Object object)
+    {
+        Date d = (Date) object;
+        return d != null ? new Date(d.getTime()) : null;
+    }
 
     /**
      * Just to verify with supported types of date pattern. Get Date from given
@@ -231,6 +240,8 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         return date != null ? getDateByPattern(date).toString() : null;
     }
+    
+    
 
     public Date getInstance(Class<?> clazz)
     {

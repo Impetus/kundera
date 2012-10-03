@@ -130,6 +130,15 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         Timestamp t = Timestamp.valueOf(s);
         return t;
     }
+    
+    
+
+    @Override
+    public Timestamp getCopy(Object object)
+    {
+        Timestamp ts = (Timestamp) object;
+        return ts != null ? new Timestamp(ts.getTime()) : null;
+    }
 
     public Timestamp getInstance(Class<?> clazz)
     {

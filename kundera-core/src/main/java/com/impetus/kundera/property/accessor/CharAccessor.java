@@ -112,6 +112,14 @@ public class CharAccessor implements PropertyAccessor<Character>
             throw new PropertyAccessException(e);
         }
     }
+    
+    
+
+    @Override
+    public Character getCopy(Object object)
+    {
+        return object != null ? new Character((Character)object) : null;
+    }
 
     public Character getInstance(Class<?> clazz)
     {

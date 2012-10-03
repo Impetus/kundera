@@ -114,6 +114,15 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         Date d = Date.valueOf(s);
         return d;
     }
+    
+    
+
+    @Override
+    public Date getCopy(Object object)
+    {
+        Date d = (Date) object;
+        return d != null ? new Date(d.getTime()) : null;
+    }
 
     public Date getInstance(Class<?> clazz)
     {
