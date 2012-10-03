@@ -397,9 +397,9 @@ public abstract class TwitterTestBase
     
     public void getTweetsByRelationshipAndDevice() 
     {
+        //Positive scenario, record exists for user who is married and tweeted from Web
         twitter.createEntityManager();
-        List<UserCassandra> users = twitter.findByRelationshipAndDevice("married", "Web");       
-
+        List<UserCassandra> users = twitter.findByRelationshipAndDevice("married", "Web");
         twitter.closeEntityManager();
 
         Assert.assertNotNull(users);
@@ -416,6 +416,11 @@ public abstract class TwitterTestBase
         Assert.assertNotNull(tweet);
         Assert.assertEquals("Web", tweet.getDevice());
         
+        //Negative scenario, record doesn't exist for user who is single and tweeted from mobile
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findByRelationshipAndDevice("single", "Mobile");
+        twitter.closeEntityManager();        
+        Assert.assertTrue(users2 == null || users2.isEmpty());        
     }
 
     /**

@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -45,7 +44,6 @@ import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -179,7 +177,24 @@ public abstract class InvertedIndexHandlerBase
                     value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
                     searchResult.setPrimaryKey(value);
                 }
-                searchResults.add(searchResult);
+                
+                if(searchResults.isEmpty())
+                {
+                    searchResults.add(searchResult);
+                }
+                else
+                {
+                    SearchResult existing = searchResults.get(0);
+                    if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(searchResult.getPrimaryKey()))
+                    {
+                        searchResults.add(searchResult);
+                    }
+                    else
+                    {
+                        searchResults.remove(0);
+                    }
+                }
+                
             }
 
         }

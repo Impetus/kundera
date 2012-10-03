@@ -18,7 +18,6 @@ package com.impetus.client.cassandra.pelops;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -39,7 +38,6 @@ import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Pelops implementation of {@link InvertedIndexHandler}

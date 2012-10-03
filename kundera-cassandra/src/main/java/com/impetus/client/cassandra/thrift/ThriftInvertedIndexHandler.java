@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -54,7 +53,6 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Thrift implementation of {@link InvertedIndexHandler}

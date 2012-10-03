@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
@@ -89,7 +88,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to

@@ -17,7 +17,6 @@ package com.impetus.client.cassandra.index;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
@@ -26,7 +25,6 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * This interface defines methods for operation on inverted indexes
