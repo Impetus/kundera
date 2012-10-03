@@ -65,14 +65,14 @@ public abstract class InvertedIndexHandlerBase
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         
-        boolean isRowKeyQuery = indexClauseMap.keySet().iterator().next();
+        boolean isRowKeyQuery = indexClauseMap.keySet().iterator().next();        
+        
         for (IndexClause o : indexClauseMap.get(isRowKeyQuery))
-        {
-                         
-            for(IndexExpression expression : o.getExpressions())
+        {               
+            for (IndexExpression expression : o.getExpressions())
             {
                 searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression);
-            }    
+            }
 
         }
         return searchResults;

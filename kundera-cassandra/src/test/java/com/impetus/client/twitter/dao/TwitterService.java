@@ -230,4 +230,16 @@ public class TwitterService extends SuperDao implements Twitter
         List<Tweet> tweets = q.getResultList();
         return tweets;
     }
+
+    @Override
+    public List<UserCassandra> findByRelationshipAndDevice(String relationship, String device)
+    {
+        Query q = em.createQuery("select u.tweets.device from UserCassandra u where u.tweets.device=:device and u.personalDetail.relationshipStatus=:relation");
+        q.setParameter("device", device);
+        q.setParameter("relation", relationship);
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+    
+    
 }

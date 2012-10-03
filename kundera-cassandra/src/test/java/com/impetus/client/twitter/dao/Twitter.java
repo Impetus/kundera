@@ -127,6 +127,14 @@ public interface Twitter
     List<UserCassandra> getFollowers(String userId);
 
     List<UserCassandra> findPersonalDetailByName(String name);
+    
+    /**
+     * Find tweets tweeted by individual with certain marital status and using a certain device. 
+     * @param relationship
+     * @param device
+     * @return
+     */
+    List<UserCassandra> findByRelationshipAndDevice(String relationship, String device);
 
     /**
      * Find tweet by tweet body.

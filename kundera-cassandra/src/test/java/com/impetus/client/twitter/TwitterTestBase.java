@@ -127,6 +127,7 @@ public abstract class TwitterTestBase
         getPersonalDetailByName();
         getAllUsers();
         getTweetsByDevice();
+        getTweetsByRelationshipAndDevice();
 
         // Remove Users
         removeUser();
@@ -154,7 +155,6 @@ public abstract class TwitterTestBase
 
         UserCassandra user2 = twitter.findUserById(userId2);
         assertUser2(user2);
-
     }
 
     protected void updateUser()
@@ -393,6 +393,29 @@ public abstract class TwitterTestBase
         Assert.assertEquals(1, webTweets.size());
         Assert.assertEquals(1, mobileTweets.size());
 
+    }
+    
+    public void getTweetsByRelationshipAndDevice() 
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findByRelationshipAndDevice("married", "Web");       
+
+        twitter.closeEntityManager();
+
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        
+        Assert.assertFalse(user == null);
+        Assert.assertEquals("0001", user.getUserId());
+        List<Tweet> tweets = user.getTweets();
+        Assert.assertFalse(tweets == null);
+        Assert.assertTrue(tweets.size() == 1);
+        Tweet tweet = tweets.get(0);
+        Assert.assertNotNull(tweet);
+        Assert.assertEquals("Web", tweet.getDevice());
+        
     }
 
     /**
