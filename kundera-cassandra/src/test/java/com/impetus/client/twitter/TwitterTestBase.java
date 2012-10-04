@@ -128,6 +128,7 @@ public abstract class TwitterTestBase
         getAllUsers();
         getTweetsByDevice();
         getTweetsByRelationshipAndDevice();
+        getTweetsByUserIdAndDevice();
 
         // Remove Users
         removeUser();
@@ -421,6 +422,28 @@ public abstract class TwitterTestBase
         List<UserCassandra> users2 = twitter.findByRelationshipAndDevice("single", "Mobile");
         twitter.closeEntityManager();        
         Assert.assertTrue(users2 == null || users2.isEmpty());        
+    }
+    
+    
+    public void getTweetsByUserIdAndDevice()
+    {
+        //Positive scenario, record exists for user1 who tweeted from Web
+        twitter.createEntityManager();
+        UserCassandra user = twitter.findByUserIdAndTweetDevice(userId1, "Web");
+        twitter.closeEntityManager();
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        List<Tweet> tweets = user.getTweets();
+        Assert.assertNotNull(tweets);
+        Assert.assertFalse(tweets.isEmpty());
+        Assert.assertTrue(tweets.size() == 1);
+        Assert.assertEquals("Web", tweets.get(0).getDevice());
+        
+        //Negative scenario, User 2 never tweeted from Mobile
+        twitter.createEntityManager();
+        UserCassandra user2 = twitter.findByUserIdAndTweetDevice(userId2, "Mobile");
+        twitter.closeEntityManager();
+        Assert.assertNull(user2);        
     }
 
     /**

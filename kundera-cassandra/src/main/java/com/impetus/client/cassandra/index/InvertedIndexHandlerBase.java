@@ -69,7 +69,7 @@ public abstract class InvertedIndexHandlerBase
         {               
             for (IndexExpression expression : o.getExpressions())
             {
-                searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression);
+                searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression, isRowKeyQuery);
             }
 
         }
@@ -80,7 +80,7 @@ public abstract class InvertedIndexHandlerBase
      * Searches into inverted index based on <code>expression</code> and adds search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
     {
         SearchResult searchResult = new SearchResult();  
         
@@ -94,10 +94,26 @@ public abstract class InvertedIndexHandlerBase
         // property is incorrectly passed as column name
 
         // Search based on Primary key            
-        if (rowKey.equals(m.getIdAttribute().getName())
-                || rowKey.equals(((DefaultSingularAttribute) m.getIdAttribute()).getJPAColumnName()))
-        {
-            searchResult.setPrimaryKey(columnName);
+        if (isRowKeyQuery && (rowKey.equals(m.getIdAttribute().getName())
+                || rowKey.equals(((DefaultSingularAttribute) m.getIdAttribute()).getJPAColumnName())))
+        {            
+            if(searchResults.isEmpty())
+            {
+                searchResult.setPrimaryKey(columnName);
+                searchResults.add(searchResult);
+            }
+            else
+            {
+                SearchResult existing = searchResults.get(0);
+                if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(columnName))
+                {
+                    searchResults.add(searchResult);
+                }
+                else
+                {
+                    searchResults.remove(0);
+                }
+            }
         }
         else
         {
@@ -177,6 +193,7 @@ public abstract class InvertedIndexHandlerBase
                     value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
                     searchResult.setPrimaryKey(value);
                 }
+                
                 
                 if(searchResults.isEmpty())
                 {

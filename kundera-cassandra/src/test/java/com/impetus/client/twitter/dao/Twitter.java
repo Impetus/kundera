@@ -135,6 +135,14 @@ public interface Twitter
      * @return
      */
     List<UserCassandra> findByRelationshipAndDevice(String relationship, String device);
+    
+    /**
+     * Get me all tweets that I tweeted from a particular device
+     * @param userId
+     * @param device
+     * @return
+     */
+    UserCassandra findByUserIdAndTweetDevice(String userId, String device);   
 
     /**
      * Find tweet by tweet body.
