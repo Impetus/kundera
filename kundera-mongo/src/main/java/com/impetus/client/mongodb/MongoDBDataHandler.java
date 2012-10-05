@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -224,7 +225,7 @@ final class MongoDBDataHandler
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
             } else if(value instanceof BasicDBList)
             {
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((List) value));
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), Arrays.asList(((BasicDBList)value).toArray()));
             }
             else
             {
