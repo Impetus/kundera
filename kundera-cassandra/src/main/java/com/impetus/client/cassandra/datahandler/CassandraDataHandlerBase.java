@@ -362,15 +362,13 @@ public abstract class CassandraDataHandlerBase
     {
         List<ThriftRow> indexThriftRows = new ArrayList<ThriftRow>();
 
-        // byte[] value = PropertyAccessorHelper.get(e,
-        // m.getIdColumn().getField());
         byte[] value = PropertyAccessorHelper.get(e, (Field) m.getIdAttribute().getJavaMember());
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
-
+        
+        //Add thrift rows for embeddables
         Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
-
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         for (String key : embeddables.keySet())
@@ -451,8 +449,7 @@ public abstract class CassandraDataHandlerBase
                     }
                 }
             }
-        }
-
+        }        
         return indexThriftRows;
     }
 

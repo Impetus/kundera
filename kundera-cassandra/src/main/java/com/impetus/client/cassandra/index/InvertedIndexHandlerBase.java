@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -45,7 +44,6 @@ import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -65,14 +63,14 @@ public abstract class InvertedIndexHandlerBase
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         
-        boolean isRowKeyQuery = indexClauseMap.keySet().iterator().next();
+        boolean isRowKeyQuery = indexClauseMap.keySet().iterator().next();        
+        
         for (IndexClause o : indexClauseMap.get(isRowKeyQuery))
-        {
-                         
-            for(IndexExpression expression : o.getExpressions())
+        {               
+            for (IndexExpression expression : o.getExpressions())
             {
-                searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression);
-            }    
+                searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults, expression, isRowKeyQuery);
+            }
 
         }
         return searchResults;
@@ -82,7 +80,7 @@ public abstract class InvertedIndexHandlerBase
      * Searches into inverted index based on <code>expression</code> and adds search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
     {
         SearchResult searchResult = new SearchResult();  
         
@@ -96,10 +94,26 @@ public abstract class InvertedIndexHandlerBase
         // property is incorrectly passed as column name
 
         // Search based on Primary key            
-        if (rowKey.equals(m.getIdAttribute().getName())
-                || rowKey.equals(((DefaultSingularAttribute) m.getIdAttribute()).getJPAColumnName()))
-        {
-            searchResult.setPrimaryKey(columnName);
+        if (isRowKeyQuery && (rowKey.equals(m.getIdAttribute().getName())
+                || rowKey.equals(((DefaultSingularAttribute) m.getIdAttribute()).getJPAColumnName())))
+        {            
+            if(searchResults.isEmpty())
+            {
+                searchResult.setPrimaryKey(columnName);
+                searchResults.add(searchResult);
+            }
+            else
+            {
+                SearchResult existing = searchResults.get(0);
+                if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(columnName))
+                {
+                    searchResults.add(searchResult);
+                }
+                else
+                {
+                    searchResults.remove(0);
+                }
+            }
         }
         else
         {
@@ -179,7 +193,25 @@ public abstract class InvertedIndexHandlerBase
                     value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
                     searchResult.setPrimaryKey(value);
                 }
-                searchResults.add(searchResult);
+                
+                
+                if(searchResults.isEmpty())
+                {
+                    searchResults.add(searchResult);
+                }
+                else
+                {
+                    SearchResult existing = searchResults.get(0);
+                    if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(searchResult.getPrimaryKey()))
+                    {
+                        searchResults.add(searchResult);
+                    }
+                    else
+                    {
+                        searchResults.remove(0);
+                    }
+                }
+                
             }
 
         }

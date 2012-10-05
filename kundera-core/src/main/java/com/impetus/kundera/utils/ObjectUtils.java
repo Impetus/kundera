@@ -88,11 +88,7 @@ public class ObjectUtils
             }
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());
-            if (metaModel == null)
-            {
-                System.out.println(metaModel);
-            }
+                    metadata.getPersistenceUnit());            
 
             EntityType entityType = metaModel.entity(sourceObjectClass);
 
@@ -121,7 +117,6 @@ public class ObjectUtils
                 {
                     EmbeddableType embeddedColumn = metaModel.embeddable(((AbstractAttribute) attrib)
                             .getBindableJavaType());
-                    // Field em/beddedColumnField = embeddedColumn.get();
 
                     Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, columnField);
                     if (sourceEmbeddedObj != null)
@@ -135,11 +130,10 @@ public class ObjectUtils
                             Set<Attribute> columns = embeddedColumn.getAttributes();
                             for (Attribute column : columns)
                             {
-                                PropertyAccessorHelper.set(
-                                        targetEmbeddedObj,
-                                        (Field) column.getJavaMember(),
-                                        PropertyAccessorHelper.getObject(sourceEmbeddedObj,
-                                                (Field) column.getJavaMember()));
+                  
+                                
+                                PropertyAccessorHelper.set(targetEmbeddedObj, (Field) column.getJavaMember(),
+                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj, (Field) column.getJavaMember()));
                             }
 
                             PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
@@ -161,7 +155,7 @@ public class ObjectUtils
                                     for (Field f : genericClass.getDeclaredFields())
                                     {
                                         PropertyAccessorHelper.set(targetEcObj, f,
-                                                PropertyAccessorHelper.getObject(sourceEcObj, f));
+                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));                                       
 
                                     }
 
@@ -190,73 +184,12 @@ public class ObjectUtils
                     }
 
                 }
-                else
+                else if(attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
                 {
-                    PropertyAccessorHelper.set(target, columnField,
-                            PropertyAccessorHelper.getObject(source, columnField));
+                    
+                    PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObjectCopy(source, columnField));
                 }
-            }
-
-            // Copy Embedded Columns, Element Collections are columns (in a
-            // table that only has embedded objects)
-
-            // TODO: Above written code should be able to handle embedded
-            // attributes.
-            /*
-             * for (EmbeddedColumn embeddedColumn :
-             * metadata.getEmbeddedColumnsAsList()) { Field embeddedColumnField
-             * = embeddedColumn.getField();
-             * 
-             * Object sourceEmbeddedObj =
-             * PropertyAccessorHelper.getObject(source, embeddedColumnField); if
-             * (sourceEmbeddedObj != null) { if
-             * (embeddedColumnField.getAnnotation(Embedded.class) != null) { //
-             * Copy embedded objects Class<?> embeddedColumnClass =
-             * embeddedColumnField.getType(); Object targetEmbeddedObj =
-             * embeddedColumnClass.newInstance();
-             * 
-             * for (Column column : embeddedColumn.getColumns()) {
-             * PropertyAccessorHelper.set(targetEmbeddedObj, column.getField(),
-             * PropertyAccessorHelper.getObject(sourceEmbeddedObj,
-             * column.getField())); }
-             * 
-             * PropertyAccessorHelper.set(target, embeddedColumnField,
-             * targetEmbeddedObj); } else if
-             * (embeddedColumnField.getAnnotation(ElementCollection.class) !=
-             * null) { // Copy element collections if (sourceEmbeddedObj
-             * instanceof Collection) { Class<?> ecDeclaredClass =
-             * embeddedColumnField.getType(); Class<?> actualEcObjectClass =
-             * sourceEmbeddedObj.getClass(); Class<?> genericClass =
-             * PropertyAccessorHelper.getGenericClass(embeddedColumnField);
-             * 
-             * Object targetCollectionObject =
-             * actualEcObjectClass.newInstance();
-             * 
-             * for (Object sourceEcObj : (Collection) sourceEmbeddedObj) {
-             * Object targetEcObj = genericClass.newInstance(); for (Field f :
-             * genericClass.getDeclaredFields()) {
-             * PropertyAccessorHelper.set(targetEcObj, f,
-             * PropertyAccessorHelper.getObject(sourceEcObj, f));
-             * 
-             * }
-             * 
-             * if (List.class.isAssignableFrom(ecDeclaredClass)) { Method m =
-             * actualEcObjectClass.getMethod("add", Object.class);
-             * m.invoke(targetCollectionObject, targetEcObj);
-             * 
-             * } else if (Set.class.isAssignableFrom(ecDeclaredClass)) { Method
-             * m = actualEcObjectClass.getMethod("add", Object.class);
-             * m.invoke(targetCollectionObject, targetEcObj); }
-             * 
-             * } PropertyAccessorHelper.set(target, embeddedColumnField,
-             * targetCollectionObject); }
-             * 
-             * } else if
-             * (embeddedColumnField.getAnnotation(javax.persistence.Column
-             * .class) != null) { // Copy columns
-             * PropertyAccessorHelper.set(target, embeddedColumnField,
-             * sourceEmbeddedObj); } } }
-             */
+            }         
 
             // Put this object into copied object map
             copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
@@ -296,9 +229,6 @@ public class ObjectUtils
                             m.invoke(targetRelationObject, copyTargetRelObj);
                         }
                     }
-                    // Put this object into copied object map
-                    // copiedObjectMap.put(sourceObjectClass.getName() + "#" +
-                    // id, target);
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
 

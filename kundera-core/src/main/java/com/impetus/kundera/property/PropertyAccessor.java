@@ -74,11 +74,21 @@ public interface PropertyAccessor<T>
      *             When string can't be converted to specified type, usually as
      *             a result of NumberFormatException
      */
-    T fromString(Class targetClass, String s);
+    T fromString(Class targetClass, String s); 
+    
+    /**
+     * Gets copy of object
+     * @param object
+     * @return
+     */
+    T getCopy(Object object);
 
     /**
      * @param clazz
      * 
      */
     Object getInstance(Class<?> clazz);
+    
+    
+    
 }

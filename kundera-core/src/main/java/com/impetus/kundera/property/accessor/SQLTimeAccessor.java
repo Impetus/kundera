@@ -133,6 +133,15 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         Time t = Time.valueOf(s);
         return t;
     }
+    
+    
+
+    @Override
+    public Time getCopy(Object object)
+    {
+        Time t = (Time) object;
+        return t != null ? new Time(t.getTime()) : null;
+    }
 
     public Time getInstance(Class<?> clazz)
     {

@@ -28,7 +28,6 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class LongAccessor implements PropertyAccessor<Long>
 {
 
-    /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /*
      * (non-Javadoc)
      * 
@@ -44,10 +43,6 @@ public class LongAccessor implements PropertyAccessor<Long>
         return (ByteBuffer.wrap(bytes).getLong());
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-     */
     /*
      * (non-Javadoc)
      * 
@@ -102,6 +97,13 @@ public class LongAccessor implements PropertyAccessor<Long>
         {
             throw new PropertyAccessException(e);
         }
+    }
+    
+
+    @Override
+    public Long getCopy(Object object)
+    {
+        return object != null ? new Long((Long)object) : null;
     }
 
     public Long getInstance(Class<?> clazz)

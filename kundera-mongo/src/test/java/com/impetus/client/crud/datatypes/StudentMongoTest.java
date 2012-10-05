@@ -324,9 +324,12 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals((short) 8, results.get(0).getCgpa());
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-        Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
-
+        
+        for(StudentMongo student : results)
+        {
+            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L || student.getUniqueId() == 78575785899L);
+        }       
+        
         // query on cpga and semester.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.semester >= ?2 and s.semester < ?3";
         q = em.createQuery(query);
@@ -354,11 +357,15 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals((short) 8, results.get(0).getCgpa());
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-        Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
-        Assert.assertEquals(10, results.get(0).getAge());
-        Assert.assertEquals(20, results.get(1).getAge());
-        Assert.assertEquals(15, results.get(2).getAge());
+        
+        for(StudentMongo student : results)
+        {
+            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L || student.getUniqueId() == 78575785899L);
+        } 
+        for(StudentMongo student : results)
+        {
+            Assert.assertTrue(student.getAge() == 15 || student.getAge() == 20 || student.getAge() == 10);
+        } 
 
         // query on invalid cpga and uniqueId.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";

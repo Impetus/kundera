@@ -16,7 +16,6 @@
 package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

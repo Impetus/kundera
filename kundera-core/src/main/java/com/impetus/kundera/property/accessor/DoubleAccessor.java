@@ -121,6 +121,13 @@ public class DoubleAccessor implements PropertyAccessor<Double>
         {
             throw new PropertyAccessException(e);
         }
+    }  
+    
+
+    @Override
+    public Double getCopy(Object object)
+    {
+        return object != null ? new Double((Double)object) : null;
     }
 
     public Double getInstance(Class<?> clazz)

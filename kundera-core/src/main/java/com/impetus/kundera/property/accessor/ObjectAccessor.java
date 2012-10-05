@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -144,6 +145,23 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         catch (NumberFormatException e)
         {
             throw new PropertyAccessException(e);
+        }
+    }    
+
+    @Override
+    public Object getCopy(Object object)
+    {
+        if(object == null) return null;
+        
+        if(object instanceof byte[])
+        {
+            byte[] byteArr = (byte[]) object;
+            return byteArr.clone();
+        }
+        else 
+        {
+            log.warn("Object data other than byte[] can't be copied");
+            return null;
         }
     }
 

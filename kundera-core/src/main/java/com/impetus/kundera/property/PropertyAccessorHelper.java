@@ -145,6 +145,36 @@ public class PropertyAccessorHelper
             throw new PropertyAccessException(iacc);
         }
     }
+    
+    
+    /**
+     * Retutrns copy of object
+     * @param from
+     * @param field
+     * @return
+     */
+    public static Object getObjectCopy(Object from, Field field)
+    {
+
+        if (!field.isAccessible())
+        {
+            field.setAccessible(true);
+        }
+
+        try
+        {
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
+            return accessor.getCopy(field.get(from));
+        }
+        catch (IllegalArgumentException iarg)
+        {
+            throw new PropertyAccessException(iarg);
+        }
+        catch (IllegalAccessException iacc)
+        {
+            throw new PropertyAccessException(iacc);
+        }
+    }
 
     /**
      * Gets the string.
