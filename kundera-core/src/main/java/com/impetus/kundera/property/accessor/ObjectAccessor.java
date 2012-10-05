@@ -160,8 +160,8 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
         else 
         {
-            log.warn("Object data other than byte[] can't be copied");
-            return null;
+//            log.warn("Object data other than byte[] can't be copied");
+            return object;
         }
     }
 
