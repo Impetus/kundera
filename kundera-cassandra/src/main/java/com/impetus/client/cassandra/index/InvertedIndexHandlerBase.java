@@ -85,10 +85,11 @@ public abstract class InvertedIndexHandlerBase
         SearchResult searchResult = new SearchResult();  
         
         String rowKey = Bytes.toUTF8(expression.getColumn_name());
-        String columnName = Bytes.toUTF8(expression.getValue());
+        byte[] columnName = expression.getValue();
+        String columnNameStr = Bytes.toUTF8(expression.getValue());
         IndexOperator condition = expression.getOp();                
         
-        log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
+        log.debug("rowKey:" + rowKey + ";columnName:" + columnNameStr + ";condition:" + condition);
 
         // TODO: Second check unnecessary but unavoidable as filter clause
         // property is incorrectly passed as column name
@@ -99,13 +100,13 @@ public abstract class InvertedIndexHandlerBase
         {            
             if(searchResults.isEmpty())
             {
-                searchResult.setPrimaryKey(columnName);
+                searchResult.setPrimaryKey(columnNameStr);
                 searchResults.add(searchResult);
             }
             else
             {
                 SearchResult existing = searchResults.get(0);
-                if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(columnName))
+                if(existing.getPrimaryKey() != null && existing.getPrimaryKey().equals(columnNameStr))
                 {
                     searchResults.add(searchResult);
                 }
@@ -127,7 +128,8 @@ public abstract class InvertedIndexHandlerBase
                 case EQ:
                     Column thriftColumn = getColumnForRow(consistencyLevel, columnFamilyName, rowKey, columnName,
                             persistenceUnit);
-                    thriftColumns.add(thriftColumn);
+                    
+                    if(thriftColumn != null) thriftColumns.add(thriftColumn);
                     break;
                     
                  // LIKE operation not available
@@ -139,22 +141,22 @@ public abstract class InvertedIndexHandlerBase
                  // Greater than operator
                 case GT:
                     searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, columnName.getBytes(), new byte[0]);
+                            thriftColumns, columnName, new byte[0]);
                     break;
                  // Less than Operator
                 case LT:
                     searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, new byte[0], columnName.getBytes());
+                            thriftColumns, new byte[0], columnName);
                     break;
                  // Greater than-equals to operator   
                 case GTE:
                     searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, columnName.getBytes(), new byte[0]);
+                            thriftColumns, columnName, new byte[0]);
                     break;
                  // Less than equal to operator    
                 case LTE:
                     searchColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, columnName,
-                            thriftColumns, new byte[0], columnName.getBytes());
+                            thriftColumns, new byte[0], columnName);
                     break;
                         
                 default:
@@ -166,7 +168,7 @@ public abstract class InvertedIndexHandlerBase
 
             // Construct search results out of these thrift columns
             for (Column thriftColumn : thriftColumns)
-            {
+            {                
                 byte[] columnValue = thriftColumn.getValue();
                 String columnValueStr = Bytes.toUTF8(columnValue);
 
@@ -306,10 +308,10 @@ public abstract class InvertedIndexHandlerBase
      * @return
      */
     protected abstract Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName,
-            String rowKey, String columnName, String persistenceUnit);
+            String rowKey, byte[] columnName, String persistenceUnit);
 
     protected abstract void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
-            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            String persistenceUnit, String rowKey, byte[] searchColumnName, List<Column> thriftColumns, byte[] start,
             byte[] finish);
 
 }

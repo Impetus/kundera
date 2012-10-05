@@ -38,7 +38,6 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
-import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -164,7 +163,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     protected void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
-            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            String persistenceUnit, String rowKey, byte[] searchColumnName, List<Column> thriftColumns, byte[] start,
             byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
@@ -214,9 +213,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
         for (Column column : allThriftColumns)
         {
-            String colName = Bytes.toUTF8(column.getName());
-            // String colValue = Bytes.toUTF8(column.getValue());
-            if (colName.indexOf(searchString) >= 0)
+            if(column == null) continue;
+            
+            if (column.getName() == searchColumnName)
             {
                 thriftColumns.add(column);
             }
@@ -225,10 +224,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     protected Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
-            String columnName, String persistenceUnit)
+            byte[] columnName, String persistenceUnit)
     {
         ColumnPath cp = new ColumnPath(columnFamilyName);
-        cp.setColumn(columnName.getBytes());
+        cp.setColumn(columnName);
         ColumnOrSuperColumn cosc;
         
         IPooledConnection conn = null;

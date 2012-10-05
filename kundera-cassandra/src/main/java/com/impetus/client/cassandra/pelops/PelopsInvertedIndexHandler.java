@@ -108,7 +108,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      */
     @Override
     public void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
-            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            String persistenceUnit, String rowKey, byte[] searchColumnName, List<Column> thriftColumns, byte[] start,
             byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
@@ -123,10 +123,8 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
         for (Column column : allThriftColumns)
         {
-            String colName = Bytes.toUTF8(column.getName());
-            // String colValue = Bytes.toUTF8(column.getValue());
-            if (colName.indexOf(searchString) >= 0)
-            {
+            if(column == null) continue;            
+            if(column.getName() == searchColumnName) {
                 thriftColumns.add(column);
             }
         }
@@ -147,13 +145,14 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     public Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
-            String columnName, String persistenceUnit)
+            byte[] columnName, String persistenceUnit)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
         Column thriftColumn;
         try
         {
-            thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+            thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, Bytes.fromByteArray(columnName), consistencyLevel);           
+            
         }
         catch (NotFoundException e)
         {

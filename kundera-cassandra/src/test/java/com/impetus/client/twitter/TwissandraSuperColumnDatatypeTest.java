@@ -16,8 +16,12 @@
 package com.impetus.client.twitter;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -69,11 +73,30 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         
         //Queries for all data types
         getUserByProfessionId();
+        getUserByDepartmentName();
+        getExceptionalUsers();
         getUserByAge();
-        //getUserByHeight();
+        getUserByGrade();
+        getUserByDigitalSignature();
+        getUserByRating();
+        getUserByCompliance();
+        getUserByHeight();
+        getUserByEnrolmentDate();
+        getUserByEnrolmentTime();
+        getUserByJoiningDateAndTime();
+        
+        getUserByYearsSpent();
+        getUserByUniqueId();
+        getUserByMonthlySalary();
+        getUserByBirthday();
+        getUserByBirthtime();
+        getUserByAnniversary();
+        getUserByJobAttempts();
+        getUserByAccumulatedWealth();
+        getUserByGraduationDay();
         
         // Remove Users
-        removeUser();
+        removeUsers();
     }
 
     @After
@@ -147,6 +170,55 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         twitter.closeEntityManager();
     }
     
+    void getUserByDepartmentName()
+    {
+        //User 1
+        twitter.createEntityManager();        
+        List<UserCassandra> users = twitter.findUserByDepartment("Labs");
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals("Labs", pd.getDepartmentName());        
+        twitter.closeEntityManager();
+        
+        //User2
+        twitter.createEntityManager();        
+        List<UserCassandra> users2 = twitter.findUserByDepartment("ODC");
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals("ODC", pd2.getDepartmentName());        
+        twitter.closeEntityManager();  
+    }
+    
+    void getExceptionalUsers()
+    {
+        //User 1
+        twitter.createEntityManager();        
+        List<UserCassandra> users = twitter.findExceptionalUsers();
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId2, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(true, pd.isExceptional());        
+        twitter.closeEntityManager();  
+        
+    }
+    
     void getUserByAge() {
         twitter.createEntityManager();
         List<UserCassandra> users = twitter.findUserByAge(31);
@@ -175,6 +247,118 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         twitter.closeEntityManager();
     }
     
+    void getUserByGrade() {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByGrade('C');
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals('C', pd.getGrade());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByGrade('A');
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals('A', pd2.getGrade());          
+        twitter.closeEntityManager();
+    }
+    
+    void getUserByDigitalSignature() {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByDigitalSignature((byte)8);
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals((byte)8, pd.getDigitalSignature());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByDigitalSignature((byte)10);
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals((byte)10, pd2.getDigitalSignature());          
+        twitter.closeEntityManager();
+    }   
+    
+    void getUserByRating() {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByRating((short)5);
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals((short)5, pd.getRating());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByRating((short)8);
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals((short)8, pd2.getRating());          
+        twitter.closeEntityManager();
+    }   
+    
+    void getUserByCompliance() {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByCompliance((float)10.0);
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals((float)10.0, pd.getCompliance(), 0.0);          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByCompliance((float)9.80);
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals((float)9.80, pd2.getCompliance(), 0.0);          
+        twitter.closeEntityManager();
+    }  
+    
     void getUserByHeight()
     {
         twitter.createEntityManager();
@@ -187,7 +371,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         Assert.assertEquals(userId1, user.getUserId());
         ProfessionalDetail pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
-        Assert.assertEquals(163.12, pd.getHeight());          
+        Assert.assertEquals(163.12, pd.getHeight(), 0.0);          
         twitter.closeEntityManager();
         
         twitter.createEntityManager();
@@ -200,9 +384,363 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         Assert.assertEquals(userId2, user2.getUserId());
         ProfessionalDetail pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
-        Assert.assertEquals(323.3, pd2.getHeight());          
+        Assert.assertEquals(323.3, pd2.getHeight(), 0.0);          
         twitter.closeEntityManager();
         
+    }
+    
+    void getUserByEnrolmentDate()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByEnrolmentDate(new Date(Long.parseLong("1344079065781")));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Date(Long.parseLong("1344079065781")), pd.getEnrolmentDate());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByEnrolmentDate(new Date(Long.parseLong("1344079063412")));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Date(Long.parseLong("1344079063412")), pd2.getEnrolmentDate());          
+        twitter.closeEntityManager();
+        
+    }
+    
+    void getUserByEnrolmentTime()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByEnrolmentTime(new Date(Long.parseLong("1344079067623")));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Date(Long.parseLong("1344079067623")), pd.getEnrolmentTime());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByEnrolmentTime(new Date(Long.parseLong("1344079068266")));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Date(Long.parseLong("1344079068266")), pd2.getEnrolmentTime());          
+        twitter.closeEntityManager();
+        
+    }
+    
+    void getUserByJoiningDateAndTime()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByJoiningDateAndTime(new Date(Long.parseLong("1344079069105")));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Date(Long.parseLong("1344079069105")), pd.getJoiningDateAndTime());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByJoiningDateAndTime(new Date(Long.parseLong("1344079061078")));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Date(Long.parseLong("1344079061078")), pd2.getJoiningDateAndTime());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByYearsSpent()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByYearsSpent(new Integer(2));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Integer(2), pd.getYearsSpent());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByYearsSpent(new Integer(5));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Integer(5), pd2.getYearsSpent());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByUniqueId()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByUniqueId(new Long(3634521523423L));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Long(3634521523423L), pd.getUniqueId());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByUniqueId(new Long(25423452343L));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Long(25423452343L), pd2.getUniqueId());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByMonthlySalary()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByMonthlySalary(new Double(0.23452342343));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new Double(0.23452342343), pd.getMonthlySalary());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByMonthlySalary(new Double(0.76452343));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new Double(0.76452343), pd2.getMonthlySalary());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByBirthday()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByBirthday(new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), pd.getBirthday());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByBirthday(new java.sql.Date(new Date(Long.parseLong("1344079064444")).getTime()));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079064444")).getTime()), pd2.getBirthday());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByBirthtime()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByBirthtime(new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), pd.getBirthtime());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByBirthtime(new java.sql.Time(new Date(Long.parseLong("1344079065555")).getTime()));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079065555")).getTime()), pd2.getBirthtime());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByAnniversary()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByAnniversary(new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()), pd.getAnniversary());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByAnniversary(new java.sql.Timestamp(new Date(Long.parseLong("1344079066666")).getTime()));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("1344079066666")).getTime()), pd2.getAnniversary());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByJobAttempts()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByJobAttempts(new BigInteger("123456789"));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new BigInteger("123456789"), pd.getJobAttempts());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByJobAttempts(new BigInteger("123456790"));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new BigInteger("123456790"), pd2.getJobAttempts());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByAccumulatedWealth()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findUserByAccumulatedWealth(new BigDecimal(123456789));
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(new BigDecimal(123456789), pd.getAccumulatedWealth());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        List<UserCassandra> users2 = twitter.findUserByAccumulatedWealth(new BigDecimal(123456790));
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(new BigDecimal(123456790), pd2.getAccumulatedWealth());          
+        twitter.closeEntityManager();        
+    }
+    
+    void getUserByGraduationDay()
+    {
+        twitter.createEntityManager();
+        
+        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1344079067777l));
+        List<UserCassandra> users = twitter.findUserByGraduationDay(cal);
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        Assert.assertEquals(userId1, user.getUserId());
+        ProfessionalDetail pd = user.getProfessionalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertEquals(cal, pd.getGraduationDay());          
+        twitter.closeEntityManager();
+        
+        twitter.createEntityManager();
+        
+        Calendar cal2 = Calendar.getInstance(); cal2.setTime(new Date(1344079068888l));
+        List<UserCassandra> users2 = twitter.findUserByGraduationDay(cal2);
+        Assert.assertNotNull(users2);
+        Assert.assertFalse(users2.isEmpty());
+        Assert.assertTrue(users2.size() == 1);
+        UserCassandra user2 = users2.get(0);
+        Assert.assertNotNull(user2);
+        Assert.assertEquals(userId2, user2.getUserId());
+        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        Assert.assertNotNull(pd2);
+        Assert.assertEquals(cal2, pd2.getGraduationDay());          
+        twitter.closeEntityManager();        
     }
     
 

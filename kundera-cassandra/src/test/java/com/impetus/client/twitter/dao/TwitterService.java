@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.twitter.dao;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -259,17 +265,71 @@ public class TwitterService extends SuperDao implements Twitter
     @Override
     public List<UserCassandra> findUserByProfessionId(long professionId)
     {
-        Query q = em.createQuery("select u.professionalDetail.professionId from UserCassandra u where u.professionalDetail.professionId =:professionId");
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.professionId =:professionId");
         q.setParameter("professionId", professionId);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }    
+
+    @Override
+    public List<UserCassandra> findUserByDepartment(String departmentName)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.departmentName =:departmentName");
+        q.setParameter("departmentName", departmentName);        
         List<UserCassandra> users = q.getResultList();
         return users;
     }
 
     @Override
+    public List<UserCassandra> findExceptionalUsers()
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.isExceptional =:isExceptional");
+        q.setParameter("isExceptional", true);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+    
+    @Override
     public List<UserCassandra> findUserByAge(int age)
     {
-        Query q = em.createQuery("select u.professionalDetail.age from UserCassandra u where u.professionalDetail.age =:age");
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.age =:age");
         q.setParameter("age", age);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByGrade(char grade)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.grade =:grade");
+        q.setParameter("grade", grade);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByDigitalSignature(byte digitalSignature)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.digitalSignature =:digitalSignature");
+        q.setParameter("digitalSignature", digitalSignature);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByRating(short rating)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.rating =:rating");
+        q.setParameter("rating", rating);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByCompliance(float compliance)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.compliance =:compliance");
+        q.setParameter("compliance", compliance);        
         List<UserCassandra> users = q.getResultList();
         return users;
     }
@@ -277,13 +337,118 @@ public class TwitterService extends SuperDao implements Twitter
     @Override
     public List<UserCassandra> findUserByHeight(double height)
     {
-        Query q = em.createQuery("select u.professionalDetail.height from UserCassandra u where u.professionalDetail.height =:height");
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.height =:height");
         q.setParameter("height", height);        
         List<UserCassandra> users = q.getResultList();
         return users;
     }
-    
-    
-    
+
+    @Override
+    public List<UserCassandra> findUserByEnrolmentDate(Date enrolmentDate)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.enrolmentDate =:enrolmentDate");
+        q.setParameter("enrolmentDate", enrolmentDate);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByEnrolmentTime(Date enrolmentTime)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.enrolmentTime =:enrolmentTime");
+        q.setParameter("enrolmentTime", enrolmentTime);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByJoiningDateAndTime(Date joiningDateAndTime)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.joiningDateAndTime =:joiningDateAndTime");
+        q.setParameter("joiningDateAndTime", joiningDateAndTime);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByYearsSpent(Integer yearsSpent)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.yearsSpent =:yearsSpent");
+        q.setParameter("yearsSpent", yearsSpent);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByUniqueId(Long uniqueId)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.uniqueId =:uniqueId");
+        q.setParameter("uniqueId", uniqueId);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByMonthlySalary(Double monthlySalary)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.monthlySalary =:monthlySalary");
+        q.setParameter("monthlySalary", monthlySalary);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByBirthday(java.sql.Date birthday)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.birthday =:birthday");
+        q.setParameter("birthday", birthday);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByBirthtime(Time birthtime)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.birthtime =:birthtime");
+        q.setParameter("birthtime", birthtime);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByAnniversary(Timestamp anniversary)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.anniversary =:anniversary");
+        q.setParameter("anniversary", anniversary);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByJobAttempts(BigInteger jobAttempts)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.jobAttempts =:jobAttempts");
+        q.setParameter("jobAttempts", jobAttempts);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByAccumulatedWealth(BigDecimal accumulatedWealth)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.accumulatedWealth =:accumulatedWealth");
+        q.setParameter("accumulatedWealth", accumulatedWealth);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByGraduationDay(Calendar graduationDay)
+    {
+        Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.graduationDay =:graduationDay");
+        q.setParameter("graduationDay", graduationDay);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }   
     
 }

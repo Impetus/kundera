@@ -37,8 +37,17 @@ import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
 
 /**
- * Test case for MongoDB.
- * 
+ * Test case for Cassandra Cassandra-cli commands for running with standalone
+ * cassandra server:
+ * ********** Cassandra-cli commands *************
+ * drop keyspace KunderaExamples; create keyspace KunderaExamples;
+ * use KunderaExamples;
+ * create column family USER with column_type=Super and comparator=UTF8Type and subcomparator = AsciiType and key_validation_class=UTF8Type;
+ * create column family USER_INVRTD_IDX with key_validation_class=UTF8Type;
+ * create column family PREFERENCE;
+ * create column family EXTERNAL_LINK with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type
+ * and column_metadata=[{column_name: USER_ID, validation_class:UTF8Type, index_type: KEYS}]; 
+ * describe KunderaExamples; 
  * @author amresh.singh
  */
 public abstract class TwitterTestBase
@@ -136,7 +145,7 @@ public abstract class TwitterTestBase
         getTweetsByUserIdAndDevice();       
 
         // Remove Users
-        removeUser();
+        removeUsers();
     }
 
     protected void addAllUserInfo()
@@ -180,7 +189,7 @@ public abstract class TwitterTestBase
         twitter.closeEntityManager();
     }
 
-    protected void removeUser()
+    protected void removeUsers()
     {
         twitter.createEntityManager();
         UserCassandra user1 = twitter.findUserById(userId1);
@@ -477,11 +486,12 @@ public abstract class TwitterTestBase
     {
         UserCassandra user1 = new UserCassandra(userId1, "Amresh", "password1", "married");
         
-        
-        user1.setProfessionalDetail(new ProfessionalDetail(1234567, "Labs", false, 31, 'C', (byte)8, (short) 5,
-                (float)10.0, 163.12, new Date(Long.parseLong("1344079065781")), new Date(), new Date(), 2, 3634521523423L, 0.23452342343,
-                new java.sql.Date(new Date().getTime()), new java.sql.Timestamp(new Date().getTime()),
-                new java.sql.Time(new Date().getTime()), new BigInteger("123456789"), new BigDecimal(123456789), Calendar.getInstance()));
+        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1344079067777l));
+        user1.setProfessionalDetail(new ProfessionalDetail(1234567, "Labs", false, 31, 'C', (byte)8, (short) 5, (float)10.0, 163.12,
+                new Date(Long.parseLong("1344079065781")), new Date(Long.parseLong("1344079067623")), new Date(Long.parseLong("1344079069105")),
+                2, new Long(3634521523423L), new Double(0.23452342343),
+                new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),
+                new BigInteger("123456789"), new BigDecimal(123456789), cal));
         
         user1.setPreference(new PreferenceCassandra("P1", "Motif", "2"));
 
@@ -499,10 +509,13 @@ public abstract class TwitterTestBase
     private UserCassandra buildUser2()
     {
         UserCassandra user2 = new UserCassandra(userId2, "Saurabh", "password2", "single");
-        user2.setProfessionalDetail(new ProfessionalDetail(1234568, "ODC", true, 32, 'A', (byte)10, (short) 8,
-                (float)9.80, 323.3, new Date(Long.parseLong("1344079063412")), new Date(), new Date(), 5, 25423452343L, 0.76452343,
-                new java.sql.Date(new Date().getTime()), new java.sql.Timestamp(new Date().getTime()),
-                new java.sql.Time(new Date().getTime()), new BigInteger("123456790"), new BigDecimal(123456790), Calendar.getInstance()));
+        
+        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1344079068888l));
+        user2.setProfessionalDetail(new ProfessionalDetail(1234568, "ODC", true, 32, 'A', (byte)10, (short) 8, (float)9.80, 323.3,
+                new Date(Long.parseLong("1344079063412")), new Date(Long.parseLong("1344079068266")), new Date(Long.parseLong("1344079061078")),
+                5, new Long(25423452343L), new Double(0.76452343),
+                new java.sql.Date(new Date(Long.parseLong("1344079064444")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079065555")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("1344079066666")).getTime()), 
+                new BigInteger("123456790"), new BigDecimal(123456790), cal));
 
         user2.setPreference(new PreferenceCassandra("P2", "High Contrast", "3"));
 

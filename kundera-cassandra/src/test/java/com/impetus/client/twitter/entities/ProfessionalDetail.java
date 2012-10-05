@@ -38,8 +38,8 @@ import com.impetus.kundera.annotations.Index;
 @Index(index=true, columns={"professionId", "departmentName", "isExceptional"
         , "age", "grade", "digitalSignature", "rating", "compliance", "height",
         "enrolmentDate", "enrolmentTime", "joiningDateAndTime", "yearsSpent",
-        "uniqueId", "monthlySalary", "sqlDate", "sqlTimestamp", "sqlTime",
-        "bigInteger", "bigDecimal", "calendar"})
+        "uniqueId", "monthlySalary", "birthday", "birthtime", "anniversary",
+        "jobAttempts", "accumulatedWealth", "graduationDay"})
 public class ProfessionalDetail
 {
     // Primitive Types
@@ -93,34 +93,29 @@ public class ProfessionalDetail
     @Column(name = "MONTHLY_SALARY")
     private Double monthlySalary;
 
-    @Column(name = "SQL_DATE")
-    private java.sql.Date sqlDate;
+    @Column(name = "BIRTH_DAY")
+    private java.sql.Date birthday;   
 
-    @Column(name = "SQL_TIMESTAMP")
-    private java.sql.Timestamp sqlTimestamp;
-
-    @Column(name = "SQL_TIME")
-    private java.sql.Time sqlTime;
-
-    @Column(name = "BIG_INT")
-    private BigInteger bigInteger;
-
-    @Column(name = "BIG_DECIMAL")
-    private BigDecimal bigDecimal;
-
-    @Column(name = "CALENDAR")
-    private Calendar calendar;
+    @Column(name = "BIRTH_TIME")
+    private java.sql.Time birthtime;
     
-    public ProfessionalDetail()
-    {
-        
-    }    
+    @Column(name = "ANNIVERSARY")
+    private java.sql.Timestamp anniversary;
 
+    @Column(name = "JOB_ATTEMPTS")
+    private BigInteger jobAttempts;
+
+    @Column(name = "ACCUMULATED_WEALTH")
+    private BigDecimal accumulatedWealth;
+
+    @Column(name = "GRADUATION_DAY")
+    private Calendar graduationDay;
+    
     public ProfessionalDetail(long professionId, String departmentName, boolean isExceptional, int age, char grade,
             byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
             Date enrolmentTime, Date joiningDateAndTime, Integer yearsSpent, Long uniqueId, Double monthlySalary,
-            java.sql.Date sqlDate, Timestamp sqlTimestamp, Time sqlTime, BigInteger bigInteger, BigDecimal bigDecimal,
-            Calendar calendar)
+            java.sql.Date birthday, Time birthtime, Timestamp anniversary, BigInteger jobAttempts,
+            BigDecimal accumulatedWealth, Calendar graduationDay)
     {
         super();
         this.professionId = professionId;
@@ -138,12 +133,17 @@ public class ProfessionalDetail
         this.yearsSpent = yearsSpent;
         this.uniqueId = uniqueId;
         this.monthlySalary = monthlySalary;
-        this.sqlDate = sqlDate;
-        this.sqlTimestamp = sqlTimestamp;
-        this.sqlTime = sqlTime;
-        this.bigInteger = bigInteger;
-        this.bigDecimal = bigDecimal;
-        this.calendar = calendar;
+        this.birthday = birthday;
+        this.birthtime = birthtime;
+        this.anniversary = anniversary;
+        this.jobAttempts = jobAttempts;
+        this.accumulatedWealth = accumulatedWealth;
+        this.graduationDay = graduationDay;
+    }
+
+    public ProfessionalDetail()
+    {
+        
     }
 
     /**
@@ -161,7 +161,6 @@ public class ProfessionalDetail
     {
         this.professionId = professionId;
     }
-
 
     /**
      * @return the departmentName
@@ -388,99 +387,100 @@ public class ProfessionalDetail
     }
 
     /**
-     * @return the sqlDate
+     * @return the birthday
      */
-    public java.sql.Date getSqlDate()
+    public java.sql.Date getBirthday()
     {
-        return sqlDate;
+        return birthday;
     }
 
     /**
-     * @param sqlDate the sqlDate to set
+     * @param birthday the birthday to set
      */
-    public void setSqlDate(java.sql.Date sqlDate)
+    public void setBirthday(java.sql.Date birthday)
     {
-        this.sqlDate = sqlDate;
+        this.birthday = birthday;
     }
 
     /**
-     * @return the sqlTimestamp
+     * @return the birthtime
      */
-    public java.sql.Timestamp getSqlTimestamp()
+    public java.sql.Time getBirthtime()
     {
-        return sqlTimestamp;
+        return birthtime;
     }
 
     /**
-     * @param sqlTimestamp the sqlTimestamp to set
+     * @param birthtime the birthtime to set
      */
-    public void setSqlTimestamp(java.sql.Timestamp sqlTimestamp)
+    public void setBirthtime(java.sql.Time birthtime)
     {
-        this.sqlTimestamp = sqlTimestamp;
+        this.birthtime = birthtime;
     }
 
     /**
-     * @return the sqlTime
+     * @return the anniversary
      */
-    public java.sql.Time getSqlTime()
+    public java.sql.Timestamp getAnniversary()
     {
-        return sqlTime;
+        return anniversary;
     }
 
     /**
-     * @param sqlTime the sqlTime to set
+     * @param anniversary the anniversary to set
      */
-    public void setSqlTime(java.sql.Time sqlTime)
+    public void setAnniversary(java.sql.Timestamp anniversary)
     {
-        this.sqlTime = sqlTime;
+        this.anniversary = anniversary;
     }
 
     /**
-     * @return the bigInteger
+     * @return the jobAttempts
      */
-    public BigInteger getBigInteger()
+    public BigInteger getJobAttempts()
     {
-        return bigInteger;
+        return jobAttempts;
     }
 
     /**
-     * @param bigInteger the bigInteger to set
+     * @param jobAttempts the jobAttempts to set
      */
-    public void setBigInteger(BigInteger bigInteger)
+    public void setJobAttempts(BigInteger jobAttempts)
     {
-        this.bigInteger = bigInteger;
+        this.jobAttempts = jobAttempts;
     }
 
     /**
-     * @return the bigDecimal
+     * @return the accumulatedWealth
      */
-    public BigDecimal getBigDecimal()
+    public BigDecimal getAccumulatedWealth()
     {
-        return bigDecimal;
+        return accumulatedWealth;
     }
 
     /**
-     * @param bigDecimal the bigDecimal to set
+     * @param accumulatedWealth the accumulatedWealth to set
      */
-    public void setBigDecimal(BigDecimal bigDecimal)
+    public void setAccumulatedWealth(BigDecimal accumulatedWealth)
     {
-        this.bigDecimal = bigDecimal;
+        this.accumulatedWealth = accumulatedWealth;
     }
 
     /**
-     * @return the calendar
+     * @return the graduationDay
      */
-    public Calendar getCalendar()
+    public Calendar getGraduationDay()
     {
-        return calendar;
+        return graduationDay;
     }
 
     /**
-     * @param calendar the calendar to set
+     * @param graduationDay the graduationDay to set
      */
-    public void setCalendar(Calendar calendar)
+    public void setGraduationDay(Calendar graduationDay)
     {
-        this.calendar = calendar;
+        this.graduationDay = graduationDay;
     }    
+      
 
 }
