@@ -61,7 +61,7 @@ public class TwissandraTest extends TwitterTestBase
     @Test
     public void onExecute() throws Exception
     {
-        executeTestSuite();
+        executeTwissandraTest();
     }
 
     @After
@@ -118,13 +118,13 @@ public class TwissandraTest extends TwitterTestBase
         userCfDef.keyspace = keyspace;
         userCfDef.column_type = "Super";
         userCfDef.setComparator_type("UTF8Type");
-        userCfDef.setDefault_validation_class("UTF8Type");
+        userCfDef.setSubcomparator_type("AsciiType");
+        userCfDef.setKey_validation_class("UTF8Type");
 
         CfDef userIndexCfDef = new CfDef();
         userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
         userIndexCfDef.keyspace = keyspace;
-        userIndexCfDef.setComparator_type("UTF8Type");
-        userIndexCfDef.setDefault_validation_class("UTF8Type");
+        userCfDef.setKey_validation_class("AsciiType");
 
         CfDef prefrenceCfDef = new CfDef();
         prefrenceCfDef.name = "PREFERENCE";

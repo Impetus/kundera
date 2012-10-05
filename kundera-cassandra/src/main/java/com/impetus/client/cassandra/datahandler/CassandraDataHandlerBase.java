@@ -433,8 +433,8 @@ public abstract class CassandraDataHandlerBase
                     
                     Attribute columnAttribute = (Attribute) column;
                     String columnName = columnAttribute.getName();
-                    
-                    if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
+                    Class<?> columnClass = ((AbstractAttribute)columnAttribute).getBindableJavaType();
+                    if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName) || columnClass.equals(byte[].class))
                     {
                         continue;
                     }                    
@@ -476,7 +476,7 @@ public abstract class CassandraDataHandlerBase
         byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
 
         ThriftRow tr = null;
-        if (indexColumnName != null)
+        if (indexColumnName != null && indexColumnName.length != 0 && indexColumnValue != null)
         {
             // Construct Index Table Thrift Row
             tr = new ThriftRow();
@@ -1298,7 +1298,7 @@ public abstract class CassandraDataHandlerBase
             }
 
         }
-        else
+        else if(superColumnObject != null)
         {
             superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
             buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);

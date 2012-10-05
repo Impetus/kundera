@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.twitter.dao;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import com.impetus.client.twitter.entities.PreferenceCassandra;
@@ -125,6 +129,9 @@ public interface Twitter
      * @return list of all followers.
      */
     List<UserCassandra> getFollowers(String userId);
+    
+    
+    /************** Queries ***********************/
 
     List<UserCassandra> findPersonalDetailByName(String name);
     
@@ -170,5 +177,29 @@ public interface Twitter
     void createEntityManager();
 
     void closeEntityManager();
-
+    
+    
+    
+    /************** Queries on Professional Data ****************/
+    List<UserCassandra> findUserByProfessionId(long professionId);
+    List<UserCassandra> findUserByDepartment(String departmentName);
+    List<UserCassandra> findExceptionalUsers();
+    List<UserCassandra> findUserByAge(int age);
+    List<UserCassandra> findUserByGrade(char grade);
+    List<UserCassandra> findUserByDigitalSignature(byte digitalSignature);
+    List<UserCassandra> findUserByRating(short rating);
+    List<UserCassandra> findUserByCompliance(float compliance);
+    List<UserCassandra> findUserByHeight(double age);
+    List<UserCassandra> findUserByEnrolmentDate(Date enrolmentDate);
+    List<UserCassandra> findUserByEnrolmentTime(Date enrolmentTime);
+    List<UserCassandra> findUserByJoiningDateAndTime(Date joiningDateAndTime);
+    List<UserCassandra> findUserByYearsSpent(Integer yearsSpent);
+    List<UserCassandra> findUserByUniqueId(Long uniqueId);
+    List<UserCassandra> findUserByMonthlySalary(Double monthlySalary);
+    List<UserCassandra> findUserByBirthday(java.sql.Date birthday);
+    List<UserCassandra> findUserByBirthtime(java.sql.Time birthtime);
+    List<UserCassandra> findUserByAnniversary(java.sql.Timestamp anniversary);
+    List<UserCassandra> findUserByJobAttempts(BigInteger jobAttempts);
+    List<UserCassandra> findUserByAccumulatedWealth(BigDecimal accumulatedWealth);
+    List<UserCassandra> findUserByGraduationDay(Calendar graduationDay);
 }
