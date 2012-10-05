@@ -216,11 +216,15 @@ final class MongoDBDataHandler
     private void setColumnValue(DBObject document, Object entity, Attribute column)
     {
         Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
+//        BasicDBList
         if (value != null)
         {
             if (column.getJavaType().isAssignableFrom(Map.class))
             {
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
+            } else if(value instanceof BasicDBList)
+            {
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((List) value));
             }
             else
             {
