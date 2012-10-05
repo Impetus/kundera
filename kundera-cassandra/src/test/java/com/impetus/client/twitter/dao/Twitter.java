@@ -125,6 +125,9 @@ public interface Twitter
      * @return list of all followers.
      */
     List<UserCassandra> getFollowers(String userId);
+    
+    
+    /************** Queries ***********************/
 
     List<UserCassandra> findPersonalDetailByName(String name);
     
@@ -170,5 +173,12 @@ public interface Twitter
     void createEntityManager();
 
     void closeEntityManager();
+    
+    
+    
+    /************** Queries on Professional Data ****************/
+    List<UserCassandra> findUserByProfessionId(long professionId);
+    List<UserCassandra> findUserByAge(int age);
+    List<UserCassandra> findUserByHeight(double age);
 
 }

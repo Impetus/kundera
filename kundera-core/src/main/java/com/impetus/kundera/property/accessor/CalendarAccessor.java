@@ -113,6 +113,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public Calendar getCopy(Object object)
     {
+        if(object == null) return null;
         Calendar c = (Calendar) object;
         Calendar copy = Calendar.getInstance();
         copy.setTimeInMillis(c.getTimeInMillis());

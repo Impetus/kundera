@@ -253,6 +253,37 @@ public class TwitterService extends SuperDao implements Twitter
             return users.get(0);
         }
         return null;
-    }   
+    }  
+    
+    /************* Queries on Professional Details for all data types *************/
+    @Override
+    public List<UserCassandra> findUserByProfessionId(long professionId)
+    {
+        Query q = em.createQuery("select u.professionalDetail.professionId from UserCassandra u where u.professionalDetail.professionId =:professionId");
+        q.setParameter("professionId", professionId);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByAge(int age)
+    {
+        Query q = em.createQuery("select u.professionalDetail.age from UserCassandra u where u.professionalDetail.age =:age");
+        q.setParameter("age", age);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+
+    @Override
+    public List<UserCassandra> findUserByHeight(double height)
+    {
+        Query q = em.createQuery("select u.professionalDetail.height from UserCassandra u where u.professionalDetail.height =:height");
+        q.setParameter("height", height);        
+        List<UserCassandra> users = q.getResultList();
+        return users;
+    }
+    
+    
+    
     
 }

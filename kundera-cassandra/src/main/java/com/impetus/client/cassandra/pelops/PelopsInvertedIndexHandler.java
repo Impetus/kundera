@@ -24,10 +24,14 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.exceptions.NotFoundException;
+import org.scale7.cassandra.pelops.exceptions.PelopsException;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -46,6 +50,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
+    private static final Log log = LogFactory.getLog(PelopsInvertedIndexHandler.class);
+    
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
@@ -144,7 +150,21 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             String columnName, String persistenceUnit)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
-        Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+        Column thriftColumn;
+        try
+        {
+            thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+        }
+        catch (NotFoundException e)
+        {
+            log.error(e.getMessage());
+            return null;
+        }
+        catch (PelopsException e)
+        {
+            log.error(e.getMessage());
+            return null;
+        }
         return thriftColumn;
     }
 

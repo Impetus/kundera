@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.twitter;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -28,6 +32,7 @@ import com.impetus.client.twitter.dao.TwitterService;
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
 import com.impetus.client.twitter.entities.PersonalDetail;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
+import com.impetus.client.twitter.entities.ProfessionalDetail;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
 
@@ -116,7 +121,7 @@ public abstract class TwitterTestBase
     /**
      * Execute suite.
      */
-    protected void executeTestSuite()
+    protected void executeTwissandraTest()
     {
         // Insert, Find and Update
         addAllUserInfo();
@@ -128,7 +133,7 @@ public abstract class TwitterTestBase
         getAllUsers();
         getTweetsByDevice();
         getTweetsByRelationshipAndDevice();
-        getTweetsByUserIdAndDevice();
+        getTweetsByUserIdAndDevice();       
 
         // Remove Users
         removeUser();
@@ -471,7 +476,13 @@ public abstract class TwitterTestBase
     private UserCassandra buildUser1()
     {
         UserCassandra user1 = new UserCassandra(userId1, "Amresh", "password1", "married");
-
+        
+        
+        user1.setProfessionalDetail(new ProfessionalDetail(1234567, "Labs", false, 31, 'C', (byte)8, (short) 5,
+                (float)10.0, 163.12, new Date(Long.parseLong("1344079065781")), new Date(), new Date(), 2, 3634521523423L, 0.23452342343,
+                new java.sql.Date(new Date().getTime()), new java.sql.Timestamp(new Date().getTime()),
+                new java.sql.Time(new Date().getTime()), new BigInteger("123456789"), new BigDecimal(123456789), Calendar.getInstance()));
+        
         user1.setPreference(new PreferenceCassandra("P1", "Motif", "2"));
 
         user1.addExternalLink(new ExternalLinkCassandra("L1", "Facebook", "http://facebook.com/coolnerd"));
@@ -488,6 +499,10 @@ public abstract class TwitterTestBase
     private UserCassandra buildUser2()
     {
         UserCassandra user2 = new UserCassandra(userId2, "Saurabh", "password2", "single");
+        user2.setProfessionalDetail(new ProfessionalDetail(1234568, "ODC", true, 32, 'A', (byte)10, (short) 8,
+                (float)9.80, 323.3, new Date(Long.parseLong("1344079063412")), new Date(), new Date(), 5, 25423452343L, 0.76452343,
+                new java.sql.Date(new Date().getTime()), new java.sql.Timestamp(new Date().getTime()),
+                new java.sql.Time(new Date().getTime()), new BigInteger("123456790"), new BigDecimal(123456790), Calendar.getInstance()));
 
         user2.setPreference(new PreferenceCassandra("P2", "High Contrast", "3"));
 
@@ -555,5 +570,6 @@ public abstract class TwitterTestBase
     abstract void deleteSchema();
 
     abstract void createSchema() throws NotFoundException, InvalidRequestException, TException,
-            SchemaDisagreementException;
+            SchemaDisagreementException;   
+   
 }
