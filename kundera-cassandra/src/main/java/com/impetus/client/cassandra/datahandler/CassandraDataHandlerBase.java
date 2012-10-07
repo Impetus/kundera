@@ -362,7 +362,7 @@ public abstract class CassandraDataHandlerBase
     {
         List<ThriftRow> indexThriftRows = new ArrayList<ThriftRow>();
 
-        byte[] value = PropertyAccessorHelper.get(e, (Field) m.getIdAttribute().getJavaMember());
+        byte[] rowKey = PropertyAccessorHelper.get(e, (Field) m.getIdAttribute().getJavaMember());
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -371,18 +371,18 @@ public abstract class CassandraDataHandlerBase
         Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
-        for (String key : embeddables.keySet())
+        for (String embeddedFieldName : embeddables.keySet())
         {
-            EmbeddableType embeddedColumn = embeddables.get(key);
+            EmbeddableType embeddedColumn = embeddables.get(embeddedFieldName);
             
             //Index embeddable only when specified by user 
-            Field embeddedField = (Field)entityType.getAttribute(key).getJavaMember();
+            Field embeddedField = (Field)entityType.getAttribute(embeddedFieldName).getJavaMember();
             if(! MetadataUtils.isEmbeddedAtributeIndexable(embeddedField))
             {
                 continue;
             }
 
-            Object embeddedObject = PropertyAccessorHelper.getObject(e, (Field) entityType.getAttribute(key)
+            Object embeddedObject = PropertyAccessorHelper.getObject(e, (Field) entityType.getAttribute(embeddedFieldName)
                     .getJavaMember());
             if (embeddedObject == null)
             {
@@ -407,19 +407,15 @@ public abstract class CassandraDataHandlerBase
                         }
 
                         // Column Value
-                        String id = CassandraUtilities.toUTF8(value);
-
+                        String id = CassandraUtilities.toUTF8(rowKey);
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
-                        byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
-                                .getBytes();
-
-                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, obj, columnAttribute,
-                                indexColumnValue);
+                        
+                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, obj, columnAttribute,
+                                rowKey, superColumnName);
                         if (tr != null)
                         {
                             indexThriftRows.add(tr);
                         }
-
                     }
                 }
             }
@@ -438,11 +434,10 @@ public abstract class CassandraDataHandlerBase
                     {
                         continue;
                     }                    
-                    // ThriftRow tr = constructIndexTableThriftRow(columnFamily,
-                    // embeddedColumn, embeddedObject, column,
-                    // value);
-                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, embeddedObject, (Attribute) column,
-                            value);
+
+                    //No EC Name
+                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, embeddedObject, (Attribute) column,
+                            rowKey, "");
                     if (tr != null)
                     {
                         indexThriftRows.add(tr);
@@ -464,31 +459,38 @@ public abstract class CassandraDataHandlerBase
      *            Embedded Object instance
      * @param column
      *            Instance of {@link Column}
-     * @param indexColumnValue
+     * @param rowKey
      *            Name of Index Column
+     * @param ecValue Name of embeddable object in Element Collection cache 
+     *            (usually in the form of <element collection field name>#<integer counter>
      * @return Instance of {@link ThriftRow}
      */
     private ThriftRow constructIndexTableThriftRow(String columnFamily, String embeddedFieldName, Object obj,
-            Attribute column, byte[] indexColumnValue)
+            Attribute column, byte[] rowKey, String ecValue)
     {
         // Column Name
         Field columnField = (Field) column.getJavaMember();
         byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
 
         ThriftRow tr = null;
-        if (indexColumnName != null && indexColumnName.length != 0 && indexColumnValue != null)
+        if (indexColumnName != null && indexColumnName.length != 0 && rowKey != null)
         {
             // Construct Index Table Thrift Row
             tr = new ThriftRow();
             tr.setColumnFamilyName(columnFamily); // Index column-family name
             tr.setId(embeddedFieldName + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getName()); // Id
 
+            SuperColumn thriftSuperColumn = new SuperColumn();
+            thriftSuperColumn.setName(indexColumnName);         
+               
             Column thriftColumn = new Column();
-            thriftColumn.setName(indexColumnName);
-            thriftColumn.setValue(indexColumnValue);
+            thriftColumn.setName(rowKey);
+            thriftColumn.setValue(ecValue.getBytes());
             thriftColumn.setTimestamp(System.currentTimeMillis());
 
-            tr.addColumn(thriftColumn);
+            thriftSuperColumn.addToColumns(thriftColumn);
+            
+            tr.addSuperColumn(thriftSuperColumn);
         }
         return tr;
     }

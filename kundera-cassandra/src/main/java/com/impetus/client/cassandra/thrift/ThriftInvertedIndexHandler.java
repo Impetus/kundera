@@ -33,6 +33,7 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
@@ -100,12 +101,23 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                     List<Mutation> insertion_list = new ArrayList<Mutation>();
 
                     List<Column> thriftColumns = thriftRow.getColumns();
+                    List<SuperColumn> thriftSuperColumns = thriftRow.getSuperColumns();
                     if (thriftColumns != null && !thriftColumns.isEmpty())
                     {
                         for (Column column : thriftColumns)
                         {
                             Mutation mut = new Mutation();
                             mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
+                            insertion_list.add(mut);
+                        }
+                    }
+                    
+                    if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+                    {
+                        for (SuperColumn superColumn : thriftSuperColumns)
+                        {
+                            Mutation mut = new Mutation();
+                            mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
                             insertion_list.add(mut);
                         }
                     }
@@ -162,8 +174,8 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     }
 
     @Override
-    protected void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
-            String persistenceUnit, String rowKey, byte[] searchColumnName, List<Column> thriftColumns, byte[] start,
+    protected void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
+            String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns, byte[] start,
             byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
@@ -209,25 +221,25 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             PelopsUtils.releaseConnection(conn);
         }
 
-        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN,null);
+        List<SuperColumn> allThriftSuperColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.SUPER_COLUMN, null);
 
-        for (Column column : allThriftColumns)
+        for (SuperColumn superColumn : allThriftSuperColumns)
         {
-            if(column == null) continue;
+            if(superColumn == null) continue;
             
-            if (column.getName() == searchColumnName)
+            if (superColumn.getName() == searchSuperColumnName)
             {
-                thriftColumns.add(column);
+                thriftSuperColumns.add(superColumn);
             }
         }
     }
 
     @Override
-    protected Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
-            byte[] columnName, String persistenceUnit)
+    protected SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
+            byte[] superColumnName, String persistenceUnit)
     {
         ColumnPath cp = new ColumnPath(columnFamilyName);
-        cp.setColumn(columnName);
+        cp.setSuper_column(superColumnName);        
         ColumnOrSuperColumn cosc;
         
         IPooledConnection conn = null;
@@ -269,10 +281,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         finally
         {
             PelopsUtils.releaseConnection(conn);
-        }
-
-        Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN,null);
-        return thriftColumn;
+        }        
+        
+        SuperColumn thriftSuperColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.SUPER_COLUMN, null);
+        return thriftSuperColumn;
     }
 
     @Override

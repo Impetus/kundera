@@ -764,6 +764,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
 
         CfDef userIndexCfDef = new CfDef();
         userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
+        userIndexCfDef.column_type = "Super";
         userIndexCfDef.keyspace = keyspace;
         userIndexCfDef.setKey_validation_class("UTF8Type");
 

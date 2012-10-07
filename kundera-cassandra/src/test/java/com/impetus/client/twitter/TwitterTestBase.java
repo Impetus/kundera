@@ -43,7 +43,7 @@ import com.impetus.client.twitter.entities.UserCassandra;
  * drop keyspace KunderaExamples; create keyspace KunderaExamples;
  * use KunderaExamples;
  * create column family USER with column_type=Super and comparator=UTF8Type and subcomparator = AsciiType and key_validation_class=UTF8Type;
- * create column family USER_INVRTD_IDX with key_validation_class=UTF8Type;
+ * create column family USER_INVRTD_IDX with column_type=Super and key_validation_class=UTF8Type;
  * create column family PREFERENCE;
  * create column family EXTERNAL_LINK with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type
  * and column_metadata=[{column_name: USER_ID, validation_class:UTF8Type, index_type: KEYS}]; 
@@ -354,7 +354,7 @@ public abstract class TwitterTestBase
     public void getPersonalDetailByName()
     {
         twitter.createEntityManager();
-        List<UserCassandra> users = twitter.findPersonalDetailByName("Vivek");
+        List<UserCassandra> users = twitter.findPersonalDetailByName("Saurabh");
         Assert.assertNotNull(users);
         Assert.assertFalse(users.isEmpty());
         Assert.assertTrue(users.size() == 1);
@@ -364,9 +364,9 @@ public abstract class TwitterTestBase
         PersonalDetail pd = user.getPersonalDetail();
         Assert.assertNotNull(pd);
         Assert.assertTrue(pd.getPersonalDetailId() != null && !pd.getPersonalDetailId().trim().equals(""));
-        Assert.assertTrue("Vivek", pd.getName() != null);
-        Assert.assertEquals("unknown", pd.getPassword());
-        Assert.assertEquals("Married", pd.getRelationshipStatus());
+        Assert.assertTrue("Saurabh", pd.getName() != null);
+        Assert.assertEquals("password2", pd.getPassword());
+        Assert.assertEquals("single", pd.getRelationshipStatus());
 
         twitter.closeEntityManager();
     }

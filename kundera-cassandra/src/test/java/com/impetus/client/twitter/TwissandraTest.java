@@ -123,6 +123,7 @@ public class TwissandraTest extends TwitterTestBase
 
         CfDef userIndexCfDef = new CfDef();
         userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
+        userIndexCfDef.column_type = "Super";
         userIndexCfDef.keyspace = keyspace;
         userCfDef.setKey_validation_class("AsciiType");
 

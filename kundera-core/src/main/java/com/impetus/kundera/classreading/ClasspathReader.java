@@ -15,11 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.classreading;
 
-import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +28,12 @@ import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
 
 /**
  * The Class ClasspathReader.

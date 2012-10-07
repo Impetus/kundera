@@ -32,7 +32,6 @@ import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.album.AlbumBi_1_M_1_M;
-import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
 import com.impetus.kundera.entity.photo.PhotoBi_1_M_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_1_M;
 import com.impetus.kundera.graph.BillingCounter;
