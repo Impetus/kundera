@@ -619,7 +619,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 while (iter.hasNext())
                 {
                     CqlRow row = iter.next();
-                    String rowKey = Bytes.toUTF8(row.getKey());
+                    Object rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute().getBindableJavaType(),row.getKey());
+                 ///   String rowKey = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
                     if (entityMetadata.isCounterColumnType())
                     {
