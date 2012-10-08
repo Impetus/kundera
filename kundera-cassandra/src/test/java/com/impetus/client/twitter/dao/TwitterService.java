@@ -27,6 +27,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.Tweet;
@@ -39,6 +42,7 @@ import com.impetus.client.twitter.entities.UserCassandra;
  */
 public class TwitterService extends SuperDao implements Twitter
 {
+    private static final Log log = LogFactory.getLog(TwitterService.class);
     private EntityManager em;
 
     private EntityManagerFactory emf;
@@ -53,7 +57,7 @@ public class TwitterService extends SuperDao implements Twitter
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
 

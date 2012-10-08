@@ -296,11 +296,11 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     }
 
     @Override
-    protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit,
-            ConsistencyLevel consistencyLevel)
+    protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName, String persistenceUnit,
+            ConsistencyLevel consistencyLevel, byte[] columnName)
     {
         ColumnPath cp = new ColumnPath(indexColumnFamily);
-        cp.setColumn(columnName);
+        cp.setSuper_column(superColumnName);        
 
         IPooledConnection conn = null;
         try
@@ -308,11 +308,27 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
             
             conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-            Cassandra.Client cassandra_client = conn.getAPI();              
-            
+            Cassandra.Client cassandra_client = conn.getAPI();           
             cassandra_client.set_keyspace(keyspace);
+            
+            ColumnOrSuperColumn cosc;
+            try
+            {
+                cosc = cassandra_client.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
+            }
+            catch(NotFoundException e)
+            {
+                return;                
+            }
+            SuperColumn thriftSuperColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.SUPER_COLUMN, null);
+            
+            if(thriftSuperColumn != null && thriftSuperColumn.getColumns() != null && thriftSuperColumn.getColumns().size() > 1)
+            {                
+                cp.setColumn(columnName);
+            }
+            
             cassandra_client.remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
-                    consistencyLevel);
+                    consistencyLevel);            
         }
         catch (InvalidRequestException e)
         {
@@ -334,6 +350,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             log.error("Unable to delete data from inverted index. Details:" + e.getMessage());
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
+        
         finally
         {
             PelopsUtils.releaseConnection(conn);

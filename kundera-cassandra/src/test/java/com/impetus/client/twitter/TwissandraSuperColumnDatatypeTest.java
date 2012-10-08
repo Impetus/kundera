@@ -114,19 +114,19 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (TimedOutException e)
         {
@@ -134,7 +134,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
     

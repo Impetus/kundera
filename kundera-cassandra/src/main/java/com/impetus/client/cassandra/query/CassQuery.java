@@ -390,11 +390,11 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 catch (SecurityException e)
                 {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
                 catch (NoSuchFieldException e)
                 {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
                
             }

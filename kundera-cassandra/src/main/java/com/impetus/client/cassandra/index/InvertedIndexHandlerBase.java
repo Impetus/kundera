@@ -218,6 +218,9 @@ public abstract class InvertedIndexHandlerBase
             // for (EmbeddedColumn embeddedColumn :
             // metadata.getEmbeddedColumnsAsList())
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+            
+            byte[] columnName = PropertyAccessorHelper.get(entity, (Field)metadata.getIdAttribute().getJavaMember());
+            
             for (String fieldName : embeddables.keySet())
             {
                 EmbeddableType embeddedColumn = embeddables.get(fieldName);
@@ -240,11 +243,11 @@ public abstract class InvertedIndexHandlerBase
                                 Attribute attrib = iter.next();
                                 String rowKey = embeddedAttribute.getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
                                         + attrib.getName();
-                                byte[] columnName = PropertyAccessorHelper.get(obj, (Field) attrib.getJavaMember());
-                                if (columnName != null)
+                                byte[] superColumnName = PropertyAccessorHelper.get(obj, (Field) attrib.getJavaMember());
+                                if (superColumnName != null)
                                 {
-                                    deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
-                                            consistencyLevel);
+                                    deleteColumn(indexColumnFamily, rowKey, superColumnName, metadata.getPersistenceUnit(),
+                                            consistencyLevel, columnName);
                                 }
                             }
                         }
@@ -258,12 +261,12 @@ public abstract class InvertedIndexHandlerBase
                             Attribute attrib = iter.next();
                             String rowKey = embeddedAttribute.getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
                                     + attrib.getName();
-                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject,
+                            byte[] superColumnName = PropertyAccessorHelper.get(embeddedObject,
                                     (Field) attrib.getJavaMember());
-                            if (columnName != null)
+                            if (superColumnName != null)
                             {
-                                deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
-                                        consistencyLevel);
+                                deleteColumn(indexColumnFamily, rowKey, superColumnName, metadata.getPersistenceUnit(),
+                                        consistencyLevel, columnName);
                             }
 
                         }
@@ -276,10 +279,11 @@ public abstract class InvertedIndexHandlerBase
     /**
      * @param indexColumnFamily
      * @param rowKey
-     * @param columnName
+     * @param superColumnName
+     * @param columnName TODO
      */
-    protected abstract void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName,
-            String persistenceUnit, ConsistencyLevel consistencyLevel);
+    protected abstract void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName,
+            String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName);
 
     /**
      * @param consistencyLevel

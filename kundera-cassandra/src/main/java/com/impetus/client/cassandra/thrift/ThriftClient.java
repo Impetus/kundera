@@ -814,14 +814,21 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
 
                     List<KeySlice> keySlices = cassandra_client.get_range_slices(new ColumnParent(m.getTableName()),
-                            slicePredicate, keyRange, getConsistencyLevel());
-
-                    Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
-                            ColumnFamilyType.COLUMN, keySlices, null);
-
-                    entities = new ArrayList<Object>(qResults.size());
-
-                    computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+                            slicePredicate, keyRange, getConsistencyLevel());                    
+                    
+                    if(m.getType().isSuperColumnFamilyMetadata()) {
+                        Map<Bytes, List<SuperColumn>> qResults = ThriftDataResultHelper.transformThriftResult(
+                                ColumnFamilyType.SUPER_COLUMN, keySlices, null);
+                        entities = new ArrayList<Object>(qResults.size());
+                        computeEntityViaSuperColumns(m, isRelation, relations, entities, qResults);
+                    }
+                    else
+                    {
+                        Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
+                                ColumnFamilyType.COLUMN, keySlices, null);
+                        entities = new ArrayList<Object>(qResults.size());
+                        computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+                    }             
                 }
             }
             else

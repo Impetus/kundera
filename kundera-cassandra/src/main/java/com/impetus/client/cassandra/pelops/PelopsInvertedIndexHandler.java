@@ -175,13 +175,11 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (NotFoundException e)
         {
-            log.error(e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage());            
             return null;
         }
         catch (PelopsException e)
-        {
-            e.printStackTrace();
+        {            
             log.error(e.getMessage());
             return null;
         }
@@ -189,16 +187,16 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     }
 
     /**
-     * @param mutator
      * @param indexColumnFamily
      * @param rowKey
-     * @param columnName
+     * @param superColumnName
+     * @param mutator
      */
-    public void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit,
-            ConsistencyLevel consistencyLevel)
+    public void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName, String persistenceUnit,
+            ConsistencyLevel consistencyLevel, byte[] columnName)
     {
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit));
-        mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+        mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(superColumnName));
         mutator.execute(consistencyLevel);
     }
 
