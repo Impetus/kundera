@@ -41,8 +41,8 @@ public class StudentCassandraIntTest extends Base
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
+            startCluster();
             CassandraCli.initClient();
-//            startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -61,7 +61,7 @@ public class StudentCassandraIntTest extends Base
         }
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            stopCluster();
+            stopCluster();
         }
     }
 
@@ -329,6 +329,7 @@ public class StudentCassandraIntTest extends Base
         }
         studentMax = em.find(StudentCassandraInt.class, getMaxValue(int.class));
         Assert.assertNull(studentMax);
+        testPersist(useSameEm);
         em.close();
     }
 
