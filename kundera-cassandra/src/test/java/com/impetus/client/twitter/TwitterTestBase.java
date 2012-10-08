@@ -139,7 +139,7 @@ public abstract class TwitterTestBase
 
         // Queries
         getPersonalDetailByName();
-        getAllUsers();
+        //getAllUsers();
         getTweetsByDevice();
         getTweetsByRelationshipAndDevice();
         getTweetsByUserIdAndDevice();       

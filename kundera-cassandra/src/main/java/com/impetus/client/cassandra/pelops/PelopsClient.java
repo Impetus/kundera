@@ -256,8 +256,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public <E> List<E> getColumnsById(String schemaName,String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            Object parentId)
+    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Object parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         // List<Column> columns = selector.getColumnsFromRow(joinTableName,
@@ -272,8 +272,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public Object[] findIdsByColumn(String schemaName,String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
@@ -319,7 +319,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(tableName, columnValue.toString(), getConsistencyLevel());
+        // rowDeletor.deleteRow(tableName, columnValue.toString(),
+        // getConsistencyLevel());
+        rowDeletor.deleteRow(tableName, CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
+                getConsistencyLevel());
+
     }
 
     @Override
@@ -393,7 +397,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         // check for counter column
         if (isUpdate && metadata.isCounterColumnType())
         {
-            throw new UnsupportedOperationException(" Merge is not permitted on counter column! ");
+            throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
         }
 
         ThriftRow tf = null;
@@ -566,7 +570,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     IPooledConnection connection = thrift.getConnection();
                     org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
                     List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
-                            slicePredicate, selector.newKeyRange("", "", maxResult), getConsistencyLevel());
+                            slicePredicate, Selector.newKeyRange("", "", maxResult), getConsistencyLevel());
                     connection.release();
                     entities = onCounterColumn(m, isRelation, relations, ks);
                 }
@@ -592,19 +596,22 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 }
             }
             else
-            {                 
-                
-                if(m.getType().isSuperColumnFamilyMetadata())
+            {
+
+                if (m.getType().isSuperColumnFamilyMetadata())
                 {
                     Map<Bytes, List<SuperColumn>> qResults = selector.getSuperColumnsFromRows(m.getTableName(),
                             selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
                     entities = new ArrayList<Object>(qResults.size());
                     computeEntityViaSuperColumns(m, isRelation, relations, entities, qResults);
-                } else {
+                }
+                else
+                {
                     Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
                             selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
                     entities = new ArrayList<Object>(qResults.size());
-                    //populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                    // populateData(m, qResults, entities, isRelation,
+                    // relations, dataHandler);
                     computeEntityViaColumns(m, isRelation, relations, entities, qResults);
                 }
 
@@ -614,7 +621,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             entities = new ArrayList<Object>();
             for (IndexClause ix : ixClause)
-            {                
+            {
                 Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                         getConsistencyLevel());
                 computeEntityViaColumns(m, isRelation, relations, entities, qResults);
@@ -710,8 +717,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
@@ -720,8 +730,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
@@ -731,13 +744,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
     @Override
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
         // TODO Auto-generated method stub
-        
+
     }
 }

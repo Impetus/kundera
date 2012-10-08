@@ -163,19 +163,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             for (Bytes key : qCounterSuperColumnResults.keySet())
             {
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
-                try
-                {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),
-                            Charset.forName(Constants.CHARSET_UTF8)), m.getTableName(), new ArrayList<Column>(0),
-                            new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
-                    entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
-                }
-                catch (CharacterCodingException ccex)
-                {
-                    log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                    throw new PersistenceException(ccex);
-                }
-
+                ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
+                        key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
+                        new ArrayList<CounterColumn>(0), counterSuperColumns);
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
             }
 
         }
@@ -191,19 +182,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             for (Bytes key : qCounterColumnResults.keySet())
             {
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
-                try
-                {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),
-                            Charset.forName(Constants.CHARSET_UTF8)), m.getTableName(), new ArrayList<Column>(0),
-                            new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
-                    entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
-                }
-                catch (CharacterCodingException ccex)
-                {
-                    log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                    throw new PersistenceException(ccex);
-                }
-
+                ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
+                        key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
+                        counterColumns, new ArrayList<CounterSuperColumn>(0));
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
             }
         }
         return entities;
@@ -219,26 +201,27 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
             Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
-            if( o != null)
+            if (o != null)
             {
                 entities.add(o);
             }
 
         }
     }
-    
+
     protected void computeEntityViaSuperColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<SuperColumn>> qResults)
     {
         for (Bytes key : qResults.keySet())
         {
             List<SuperColumn> superColumns = qResults.get(key);
-            
+
             ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
-                    key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), superColumns, new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));            
-           
+                    key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), superColumns,
+                    new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
+
             Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
-            if( o != null)
+            if (o != null)
             {
                 entities.add(o);
             }
@@ -395,7 +378,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
             KsDef ksDef = api.describe_keyspace(keyspace);
             List<CfDef> cfDefs = ksDef.getCf_defs();
-            
+
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
@@ -619,8 +602,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 while (iter.hasNext())
                 {
                     CqlRow row = iter.next();
-                    Object rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute().getBindableJavaType(),row.getKey());
-                 ///   String rowKey = Bytes.toUTF8(row.getKey());
+                    Object rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute()
+                            .getBindableJavaType(), row.getKey());
+                    // / String rowKey = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
                     if (entityMetadata.isCounterColumnType())
                     {
@@ -994,7 +978,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         // check for counter column
         if (isUpdate && entityMetadata.isCounterColumnType())
         {
-            throw new UnsupportedOperationException("Merge is not permitted on counter column");
+            throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
         }
 
         ThriftRow tf = null;

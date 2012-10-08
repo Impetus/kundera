@@ -392,7 +392,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Retrieves column for a given primary key
      */
     @Override
-    public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
+    public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
+            Object pKeyColumnValue)
     {
 
         byte[] rowKey = pKeyColumnValue.toString().getBytes();
@@ -451,8 +452,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Retrieves IDs for a given column
      */
     @Override
-    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
     {
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
@@ -599,7 +600,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             {
                 ColumnPath path = new ColumnPath(metadata.getTableName());
 
-                cassandra_client.remove(ByteBuffer.wrap(pKey.toString().getBytes()), path, System.currentTimeMillis(),
+                cassandra_client.remove(ByteBuffer.wrap(CassandraUtilities.toBytes(pKey,
+                        metadata.getIdAttribute().getJavaType()).toByteArray()), path, System.currentTimeMillis(),
                         getConsistencyLevel());
             }
         }
@@ -656,8 +658,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             cassandra_client.set_keyspace(keyspace);
             ColumnPath path = new ColumnPath(tableName);
-            cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()), path,
-                    System.currentTimeMillis(), getConsistencyLevel());
+            // cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()),
+            // path,
+            // System.currentTimeMillis(), getConsistencyLevel());
+            cassandra_client.remove(
+                    ByteBuffer.wrap(CassandraUtilities.toBytes(columnValue, columnValue.getClass()).toByteArray()),
+                    path, System.currentTimeMillis(), getConsistencyLevel());
+
         }
         catch (InvalidRequestException e)
         {
@@ -742,9 +749,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     List<Column> columns = ThriftDataResultHelper.transformThriftResult(coscList,
                             ColumnFamilyType.COLUMN, null);
 
-                    Object e = dataHandler.populateEntity(new ThriftRow(Bytes.toUTF8(key), m.getTableName(), columns,
-                            new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
+                    Object e = dataHandler.populateEntity(
+                            new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key), m
+                                    .getTableName(), columns, new ArrayList<SuperColumn>(0),
+                                    new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0)), m,
+                            relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -778,11 +787,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             // ixClause can be 0,1 or more!
             SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-            if(columns != null && !columns.isEmpty())
+            if (columns != null && !columns.isEmpty())
             {
-                slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[]{}));
+                slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
             }
-            
+
             conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(m.getSchema());
@@ -880,13 +889,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         keyRange.setStart_key(minVal == null ? "".getBytes() : minVal);
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);
         ColumnParent cp = new ColumnParent(m.getTableName());
-        
-        if(conditions != null)
+
+        if (conditions != null)
         {
             keyRange.setRow_filter(conditions);
             keyRange.setRow_filterIsSet(true);
         }
-        
 
         IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
         Cassandra.Client cassandra_client = conn.getAPI();
@@ -923,36 +931,45 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName,
-            Object columnValue, Class entityClazz)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

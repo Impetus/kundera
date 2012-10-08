@@ -189,6 +189,8 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertNotNull(results);
             Assert.assertEquals(2, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
+            Assert.assertEquals(true, results.get(1).isExceptional());
+
             em.clear();
             // with false.
             query = "Select s from StudentCassandra s where s.isExceptional =?1";
@@ -250,8 +252,25 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(8, results.get(0).getCgpa());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                }
+            }
+
             em.clear();
             // query on yearsSpent.
             Integer i = new Integer(3);
@@ -261,8 +280,28 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(i, results.get(0).getYearsSpent());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+            }
+
             em.clear();
             // query on yearsSpent.
             query = "Select s from StudentCassandra s where s.yearsSpent =?1";
@@ -271,8 +310,27 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(new Integer(3), results.get(0).getYearsSpent());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+            }
             em.clear();
             // query on digitalSignature.
             query = "Select s from StudentCassandra s where s.digitalSignature =?1";
@@ -281,8 +339,21 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(2, results.size());
-            Assert.assertEquals(true, results.get(0).isExceptional());
-            Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                }
+            }
             em.clear();
             // query on cpga and digitalSignature.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.digitalSignature >= ?2 and s.digitalSignature <= ?3";
@@ -293,11 +364,31 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
-            Assert.assertEquals((short) 8, results.get(0).getCgpa());
-            Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 5, studentCassandra.getDigitalSignature());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                }
+            }
+
             em.clear();
             // query on cpga and digitalSignature.
             query = "Select s from StudentCassandra s where s.digitalSignature = ?2 and s.cgpa >= ?3 and s.cgpa <=?1";
@@ -346,11 +437,30 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
-            Assert.assertEquals((short) 8, results.get(0).getCgpa());
-            Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 5, studentCassandra.getDigitalSignature());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                }
+            }
             em.clear();
             // query on cpga and uniqueId.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
@@ -361,13 +471,33 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
-            Assert.assertEquals((short) 8, results.get(0).getCgpa());
-            Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-            Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-            Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 5, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785897L, studentCassandra.getUniqueId());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785898L, studentCassandra.getUniqueId());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785899L, studentCassandra.getUniqueId());
+                }
+            }
 
             // query on cpga and semester.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.semester >= ?2 and s.semester < ?3";
@@ -378,15 +508,36 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(2, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
-            Assert.assertEquals((short) 8, results.get(0).getCgpa());
-            Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-            Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-            Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
-            Assert.assertEquals(10, results.get(0).getAge());
-            Assert.assertEquals(20, results.get(1).getAge());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 5, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785897L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(10, studentCassandra.getAge());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785898L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(20, studentCassandra.getAge());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785899L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(15, studentCassandra.getAge());
+                }
+            }
 
             // query on cpga and semester with appending in string.
             query = "Select s from StudentCassandra s where s.cgpa = 8 and s.semester >= A and s.semester < C";
@@ -394,15 +545,37 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(2, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
-            Assert.assertEquals((short) 8, results.get(0).getCgpa());
-            Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-            Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-            Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
-            Assert.assertEquals(10, results.get(0).getAge());
-            Assert.assertEquals(20, results.get(1).getAge());
+            for (StudentCassandra studentCassandra : results)
+            {
+                if (studentCassandra.getStudentId() == studentId1)
+                {
+                    Assert.assertEquals(false, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 5, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785897L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(10, studentCassandra.getAge());
+                }
+                else if (studentCassandra.getStudentId() == studentId2)
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785898L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(20, studentCassandra.getAge());
+                }
+                else
+                {
+                    Assert.assertEquals(true, studentCassandra.isExceptional());
+                    Assert.assertEquals(8, studentCassandra.getCgpa());
+                    Assert.assertEquals(i, studentCassandra.getYearsSpent());
+                    Assert.assertEquals((byte) 50, studentCassandra.getDigitalSignature());
+                    Assert.assertEquals(78575785899L, studentCassandra.getUniqueId());
+                    Assert.assertEquals(15, studentCassandra.getAge());
+                }
+            }
+
             em.clear();
             // query on invalid cpga and uniqueId.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";

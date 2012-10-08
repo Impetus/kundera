@@ -50,13 +50,13 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     // /*"twissandra,twibase,twingo,picmysql"*/null;
 
     /** The student id1. */
-    protected Object studentId1;
+    protected long studentId1;
 
     /** The student id2. */
-    protected Object studentId2;
+    protected long studentId2;
 
     /** The student id3. */
-    protected Object studentId3;
+    protected long studentId3;
 
     /** The enrolment date. */
     protected Date enrolmentDate = new Date(Long.parseLong("1344079065781"));

@@ -159,7 +159,7 @@ public class SuperCountersTest
         }
         catch (UnsupportedOperationException uoe)
         {
-            Assert.assertEquals(" Merge is not permitted on counter column! ", uoe.getMessage());
+            Assert.assertEquals("Merge is not permitted on counter column! ", uoe.getMessage());
         }
         finally
         {
