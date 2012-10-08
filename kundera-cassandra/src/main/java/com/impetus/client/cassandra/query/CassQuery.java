@@ -390,11 +390,13 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 catch (SecurityException e)
                 {
-                    log.error(e.getMessage());
+                    log.error("Error while extrating " + jpaFieldName + ";Details:" + e.getMessage());
+                    throw new QueryHandlerException("Error while extrating " + jpaFieldName);
                 }
                 catch (NoSuchFieldException e)
                 {
-                    log.error(e.getMessage());
+                    log.error("Error while extrating " + jpaFieldName + ";Details:" + e.getMessage());
+                    throw new QueryHandlerException("Error while extrating " + jpaFieldName);
                 }
                
             }
