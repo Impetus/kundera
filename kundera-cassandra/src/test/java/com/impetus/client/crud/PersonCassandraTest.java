@@ -165,6 +165,47 @@ public class PersonCassandraTest extends BaseTest
     }
 
     @Test
+    public void onDeleteThenInsertCassandra() throws Exception
+    {
+        CassandraCli.cassandraSetUp();
+        CassandraCli.initClient();
+        loadData();
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        col.put("1", p1);
+        col.put("2", p2);
+        col.put("3", p3);
+        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("vivek", p.getPersonName());
+        em.remove(p1);
+        em.clear();
+
+        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+
+        List<PersonCassandra> results = query.getResultList();
+        Assert.assertNotNull(query);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        p1 = prepareData("1", 10);
+        em.persist(p1);
+        
+        query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+
+        results = query.getResultList();
+        Assert.assertNotNull(query);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        
+    }
+    @Test
     public void onRefreshCassandra() throws Exception
     {
         // cassandraSetUp();

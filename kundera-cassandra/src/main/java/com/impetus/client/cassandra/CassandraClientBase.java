@@ -1001,7 +1001,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             String columnFamily = entityMetadata.getTableName();
-            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);
+            tf = getDataHandler().toThriftRow(entity, id, entityMetadata, columnFamily);
         }
         catch (Exception e)
         {

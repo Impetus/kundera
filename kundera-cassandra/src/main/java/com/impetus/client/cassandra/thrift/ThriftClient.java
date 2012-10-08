@@ -778,7 +778,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             // ixClause can be 0,1 or more!
             SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-
+            if(columns != null && !columns.isEmpty())
+            {
+                slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[]{}));
+            }
+            
             conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(m.getSchema());
