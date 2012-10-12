@@ -25,9 +25,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 
 @Entity
-@Index(index = true, columns = { "PERSON_NAME" })
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName") })
 @Table(name = "PERSONNEL", schema = "KunderaTests")
 public class PersonnelBiMTo1
 {
