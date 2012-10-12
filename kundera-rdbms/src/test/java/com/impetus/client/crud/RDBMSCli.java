@@ -48,7 +48,8 @@ import java.sql.Statement;
 
 public class RDBMSCli
 {
-    Connection conn; // our connnection to the db - presist for life of program
+    static Connection conn; // our connnection to the db - presist for life of
+                            // program
 
     // we dont want this garbage collected until we are done
     public RDBMSCli(String db_file_name_prefix) throws Exception
@@ -96,7 +97,7 @@ public class RDBMSCli
     }
 
     // use for SQL command SELECT
-    public synchronized void query(String expression) throws SQLException
+    public synchronized static void query(String expression) throws SQLException
     {
 
         Statement st = null;

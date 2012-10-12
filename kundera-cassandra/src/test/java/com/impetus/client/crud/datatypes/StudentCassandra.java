@@ -26,8 +26,19 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
+
 @Entity
 @Table(name = "STUDENT", schema = "KunderaExamples@secIdxCassandraTest")
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "uniqueId"), @IndexedColumn(name = "studentName"),
+        @IndexedColumn(name = "isExceptional"), @IndexedColumn(name = "age"), @IndexedColumn(name = "semester"),
+        @IndexedColumn(name = "digitalSignature"), @IndexedColumn(name = "cgpa"), @IndexedColumn(name = "percentage"),
+        @IndexedColumn(name = "height"), @IndexedColumn(name = "enrolmentDate"),
+        @IndexedColumn(name = "enrolmentTime"), @IndexedColumn(name = "joiningDateAndTime"),
+        @IndexedColumn(name = "yearsSpent"), @IndexedColumn(name = "rollNumber"), @IndexedColumn(name = "monthlyFee"),
+        @IndexedColumn(name = "sqlDate"), @IndexedColumn(name = "sqlTimestamp"), @IndexedColumn(name = "sqlTime"),
+        @IndexedColumn(name = "bigInteger"), @IndexedColumn(name = "bigDecimal"), @IndexedColumn(name = "calendar") })
 public class StudentCassandra implements StudentEntityDef
 {
     // Primitive Types

@@ -143,8 +143,8 @@ public class MongoDBClientFactory extends GenericClientFactory
     private Mongo onSetMongoServerProperties(String contactNode, String defaultPort, String poolSize,
             List<ServerAddress> addrs) throws UnknownHostException
     {
-        Mongo mongo;
-        MongoOptions mo;
+        Mongo mongo = null;
+        MongoOptions mo = null;
         MongoDBSchemaMetadata metadata = MongoDBPropertyReader.msmd;
         ClientProperties cp = metadata != null ? metadata.getClientProperties() : null;
         if (cp != null)
@@ -158,8 +158,13 @@ public class MongoDBClientFactory extends GenericClientFactory
                 {
                     addrs.add(new ServerAddress(server.getHost(), Integer.parseInt(server.getPort())));
                 }
+                mongo = new Mongo(addrs);
             }
-            mongo = new Mongo(addrs);
+            else
+            {
+                logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
+                mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+            }
             mo = mongo.getMongoOptions();
             Properties p = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
                     .getProperties() : null;
@@ -168,6 +173,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
         else if (metadata != null && metadata.getConnections() != null && !metadata.getConnections().isEmpty())
         {
+            addrs = new ArrayList<ServerAddress>();
             for (MongoDBConnection connection : metadata.getConnections())
             {
                 logger.info("Connecting to mongodb at " + connection.getHost() + " on port " + connection.getPort());
@@ -182,9 +188,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
             mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
-            mo = mongo.getMongoOptions();
         }
-
         // setting server property.
 
         if (!StringUtils.isEmpty(poolSize))

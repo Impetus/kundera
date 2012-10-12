@@ -21,12 +21,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
+
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON_BATCH", schema = "KunderaExamples@secIdxBatchTest")
-@Index(index = true, columns = { "PERSON_NAME", "AGE" })
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName"), @IndexedColumn(name = "age") })
 public class PersonBatchCassandraEntity
 {
 

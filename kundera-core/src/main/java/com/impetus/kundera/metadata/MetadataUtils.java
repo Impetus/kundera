@@ -35,6 +35,7 @@ import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -515,33 +516,43 @@ public class MetadataUtils
             }
         }
     }
-    
+
     public static boolean isEmbeddedAtributeIndexable(Field embeddedField)
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
         Index indexAnn = embeddableClass.getAnnotation(Index.class);
-        if(indexAnn != null)
+        if (indexAnn != null)
         {
-            if(indexAnn.index())
+            if (indexAnn.index())
             {
                 return true;
             }
         }
-        return false;        
+        return false;
     }
-    
+
     public static boolean isColumnInEmbeddableIndexable(Field embeddedField, String columnFieldName)
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
         Index indexAnn = embeddableClass.getAnnotation(Index.class);
-        if(indexAnn != null && indexAnn.index())
+        if (indexAnn != null && indexAnn.index())
         {
-            String[] columnsToBeIndexed = indexAnn.columns();
-            if(columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
+            IndexedColumn[] columnsToBeIndexed = indexAnn.indexedColumns();
+            // if (columnFieldName != null &&
+            // Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
+            // {
+            // return true;
+            // }
+
+            for (IndexedColumn column : columnsToBeIndexed)
             {
-                return true;
+                if (columnFieldName != null && column.name() != null && column.name().equals(columnFieldName))
+                {
+                    return true;
+                }
             }
+
         }
-        return false;        
+        return false;
     }
 }

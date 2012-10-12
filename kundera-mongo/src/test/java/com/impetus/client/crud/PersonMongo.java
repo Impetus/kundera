@@ -30,6 +30,7 @@ import javax.persistence.Table;
 @NamedQueries(value = {
         @NamedQuery(name = "mongo.named.query", query = "Select p from PersonMongo p where p.personName = :name"),
         @NamedQuery(name = "mongo.position.query", query = "Select p from PersonMongo p where p.personName = ?1") })
+
 public class PersonMongo
 {
 

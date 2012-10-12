@@ -24,29 +24,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.annotations.Index;
-/**
- * The Class Person.
- */
+import com.impetus.kundera.annotations.IndexedColumn;
+
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
-@Index(index = true, columns = { "PERSON_NAME", "AGE" })
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName"), @IndexedColumn(name = "age") })
 public class PersonCassandra
 {
 
     private static final long serialVersionUID = 6068131491098913126L;
+
     private static final Logger LOG = LoggerFactory.getLogger(PersonCassandra.class);
 
     public static final String UID = "uid";
+
     public static final String EID = "eid";
+
     public static final String FIRST_NAME = "firstName";
+
     public static final String LAST_NAME = "lastName";
+
     public static final String CITY = "city";
+
     public static final String CREATED = "created";
+
     public static final String LAST_MODIFIED = "lastModified";
-    
+
     /** The person id. */
     @Id
-//    @Column(name = "PERSON_ID")
+    // @Column(name = "PERSON_ID")
     private String personId;
 
     /** The person name. */

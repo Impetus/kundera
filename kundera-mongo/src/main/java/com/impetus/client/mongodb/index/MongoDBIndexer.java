@@ -86,13 +86,15 @@ public class MongoDBIndexer implements Indexer
         String indexName = metadata.getIndexName(); // Index Name=Collection
         // name, not required
 
-        List<PropertyIndex> indexProperties = metadata.getIndexProperties();
+        // List<PropertyIndex> indexProperties = metadata.getIndexProperties();
+        Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
 
         List<String> columnList = new ArrayList<String>();
 
-        for (PropertyIndex propertyIndex : indexProperties)
+        for (String columnName : indexProperties.keySet())
         {
-            columnList.add(propertyIndex.getName());
+            indexProperties.get(columnName);
+            columnList.add(indexProperties.get(columnName).getName());
         }
 
         client.createIndex(metadata.getTableName(), columnList, 1); // 1=Ascending
