@@ -16,8 +16,6 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 
 import javassist.Modifier;
 
@@ -36,7 +34,6 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -107,16 +104,24 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
-        Index idx = clazz.getAnnotation(Index.class);
-        List<String> colToBeIndexed = null;
-        if (idx != null)
-        {
-            if (idx.columns() != null && idx.columns().length != 0)
-            {
-                colToBeIndexed = Arrays.asList(idx.columns());
-                metadata.setColToBeIndexed(colToBeIndexed);
-            }
-        }
+        // Index idx = clazz.getAnnotation(Index.class);
+        // List<String> colToBeIndexed = null;
+        // List<IndexedColumn> colToBeIndexed = null;
+        // if (idx != null)
+        // {
+        // if (idx.columns() != null && idx.columns().length != 0)
+        // {
+        // colToBeIndexed = Arrays.asList(idx.columns());
+        // metadata.setColToBeIndexed(colToBeIndexed);
+        // }
+
+        // if (idx.indexedColumns() != null && idx.indexedColumns().length != 0)
+        // {
+        // colToBeIndexed = Arrays.asList(idx.indexedColumns());
+        // metadata.setColToBeIndexed(colToBeIndexed);
+        // }
+
+        // }
 
         if (schemaStr == null)
         {

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
-
 /**
  * Holds constants for kundera-mongo module
  * 
@@ -58,9 +57,13 @@ public interface MongoDBConstants
 
     public static final String W_TIME_OUT = "w.timeout";
 
-//    public static final int DEFAULT_MAX_WAIT_TIME = 120000;
-//
-//    public static final int DEFAULT_TABCM = 5;
-    public final static String CAPPED = "capped";
-    
+    // public static final int DEFAULT_MAX_WAIT_TIME = 120000;
+    //
+    // public static final int DEFAULT_TABCM = 5;
+    public static final String CAPPED = "capped";
+
+    public static final String SIZE = "size";
+
+    public static final String MAX = "max";
+
 }

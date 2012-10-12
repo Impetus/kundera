@@ -129,8 +129,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     @Override
-    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            Object parentId)
+    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Object parentId)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -158,8 +158,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+            Object columnValue, Class entityClazz)
     {
         String childIdStr = (String) columnValue;
 
@@ -221,6 +221,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 key instanceof Calendar ? ((Calendar) key).getTime().toString() : handler.populateValue(key,
                         key.getClass()));
         }
+
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
 
@@ -257,8 +258,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         BasicDBObject query = new BasicDBObject();
 
         query.put("_id",
-                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/new BasicDBObject("$in",
-                keys));
+        /*
+         * ((AbstractAttribute)
+         * entityMetadata.getIdAttribute()).getJPAColumnName(),
+         */new BasicDBObject("$in", keys));
 
         DBCursor cursor = dbCollection.find(query);
 
@@ -678,35 +681,90 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+    @Deprecated
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
-        // TODO Auto-generated method stub
-        return null;
+
+        List<E> foreignKeys = new ArrayList<E>();
+
+        DBCollection dbCollection = mongoDb.getCollection(tableName);
+        BasicDBObject query = new BasicDBObject();
+
+        query.put(pKeyColumnName, pKeyColumnValue);
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            String foreignKey = (String) fetchedDocument.get(columnName);
+            foreignKeys.add((E) foreignKey);
+        }
+        return foreignKeys;
+
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName,
-            Object columnValue, Class entityClazz)
+    @Deprecated
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
-        // TODO Auto-generated method stub
+
+        String childIdStr = (String) columnValue;
+
+        List<Object> primaryKeys = new ArrayList<Object>();
+
+        DBCollection dbCollection = mongoDb.getCollection(tableName);
+        BasicDBObject query = new BasicDBObject();
+
+        query.put(columnName, childIdStr);
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            String primaryKey = (String) fetchedDocument.get(pKeyName);
+            primaryKeys.add(primaryKey);
+        }
+
+        if (primaryKeys != null && !primaryKeys.isEmpty())
+        {
+            return primaryKeys.toArray(new Object[0]);
+        }
         return null;
+
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
-        
+        DBCollection dbCollection = mongoDb.getCollection(tableName);
+        BasicDBObject query = new BasicDBObject();
+        query.put(columnName, columnValue);
+        dbCollection.remove(query);
     }
 }

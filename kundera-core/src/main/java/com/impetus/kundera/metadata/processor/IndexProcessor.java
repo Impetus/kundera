@@ -16,9 +16,8 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -27,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
@@ -46,7 +46,8 @@ public class IndexProcessor implements MetadataProcessor
     {
         metadata.setIndexName(clazz.getSimpleName());
         Index idx = clazz.getAnnotation(Index.class);
-        List<String> columnsToBeIndexed = new ArrayList<String>();
+        // List<String> columnsToBeIndexed = new ArrayList<String>();
+        Map<String, IndexedColumn> columnsToBeIndexed = new HashMap<String, IndexedColumn>();
 
         if (null != idx)
         {
@@ -63,9 +64,13 @@ public class IndexProcessor implements MetadataProcessor
                 metadata.setIndexName(clazz.getSimpleName());
             }
 
-            if (idx.columns() != null && idx.columns().length != 0)
+            if (idx.indexedColumns() != null && idx.indexedColumns().length != 0)
             {
-                columnsToBeIndexed = Arrays.asList(idx.columns());
+                for (IndexedColumn indexedColumn : idx.indexedColumns())
+                {
+                    columnsToBeIndexed.put(indexedColumn.name(), indexedColumn);
+                }
+                metadata.setColToBeIndexed(columnsToBeIndexed);
             }
 
             if (!isIndexable)
@@ -81,22 +86,15 @@ public class IndexProcessor implements MetadataProcessor
         // scan for fields
         for (Field f : clazz.getDeclaredFields())
         {
-            if (f.isAnnotationPresent(Id.class))
+            if (f.isAnnotationPresent(Column.class))
             {
-                String alias = f.getName();
-                alias = getIndexName(f, alias);
-                metadata.addIndexProperty(new PropertyIndex(f, alias));
-            }
-            else if (f.isAnnotationPresent(Column.class))
-            {
-                String alias = f.getName();
-                alias = getIndexName(f, alias);
+                String fieldName = f.getName();
+//                fieldName = getIndexName(f, fieldName);
 
-                if (columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias))
+                if (!columnsToBeIndexed.isEmpty() && columnsToBeIndexed.containsKey(fieldName))
                 {
-                    metadata.addIndexProperty(new PropertyIndex(f, alias));
+                    metadata.addIndexProperty(columnsToBeIndexed.get(fieldName), f);
                 }
-
             }
         }
     }

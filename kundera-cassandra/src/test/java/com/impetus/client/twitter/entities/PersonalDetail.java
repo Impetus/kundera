@@ -20,6 +20,7 @@ import javax.persistence.Embeddable;
 
 import com.impetus.client.twitter.utils.ExampleUtils;
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 
 /**
  * Entity class for user's personal details
@@ -28,7 +29,7 @@ import com.impetus.kundera.annotations.Index;
  */
 
 @Embeddable
-@Index(index=true, columns={"name", "relationshipStatus"})
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "name"), @IndexedColumn(name = "relationshipStatus") })
 public class PersonalDetail
 {
     @Column(name = "personal_detail_id")

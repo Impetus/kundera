@@ -22,11 +22,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
+
 /**
  * The Class CoreEntitySuper.
  */
 @Entity
 @Table(name = "CoreEntitySuper", schema = "KunderaCoreExmples@cassandra")
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName"), @IndexedColumn(name = "age") })
 public class CoreEntitySuper
 {
 

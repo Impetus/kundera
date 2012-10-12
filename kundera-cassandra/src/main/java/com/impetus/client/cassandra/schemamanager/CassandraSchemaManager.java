@@ -411,9 +411,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
-        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() ||
-                CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName))
-                && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
+        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() || CassandraPropertyReader.csmd
+                .isInvertedIndexingEnabled(databaseName)) && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
             CfDef cfDef = new CfDef();
@@ -423,8 +422,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cassandra_client.system_add_column_family(cfDef);
         }
     }
-    
-    
 
     /**
      * @param tableInfo
@@ -434,9 +431,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void dropInvertedIndexTable(TableInfo tableInfo)
     {
-        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() ||
-                CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName))
-                && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
+        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() || CassandraPropertyReader.csmd
+                .isInvertedIndexingEnabled(databaseName)) && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
             try
@@ -837,7 +833,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         ColumnDef columnDef = new ColumnDef();
                         if (columnInfo.isIndexable())
                         {
-                            columnDef.setIndex_type(IndexType.KEYS);
+                            columnDef.setIndex_type(getIndexType(columnInfo.getIndexType()));
                         }
                         columnDef.setName(columnInfo.getColumnName().getBytes());
                         columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
@@ -858,6 +854,26 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         setColumnFamilyProperties(cfDef, cFProperties);
         return cfDef;
+    }
+
+    /**
+     * @param indexType
+     * @return
+     */
+    private IndexType getIndexType(String indexType)
+    {
+        if (indexType != null)
+        {
+            if (indexType.equals(IndexType.KEYS))
+            {
+                return IndexType.KEYS;
+            }
+            else if (indexType.equals(IndexType.CUSTOM))
+            {
+                return IndexType.CUSTOM;
+            }
+        }
+        return IndexType.KEYS;
     }
 
     /**

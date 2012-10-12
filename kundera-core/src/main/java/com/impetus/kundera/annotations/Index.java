@@ -52,5 +52,7 @@ public @interface Index
      * 
      * @return the string[]
      */
-    String[] columns() default {};
+    // String[] columns() default {};
+
+    public abstract IndexedColumn[] indexedColumns();
 }

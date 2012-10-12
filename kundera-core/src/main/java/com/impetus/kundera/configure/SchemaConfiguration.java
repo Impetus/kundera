@@ -16,7 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
@@ -43,6 +44,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -259,7 +261,8 @@ public class SchemaConfiguration implements Configuration
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
-        List<String> columns = getIndexDefs(entityMetadata);
+        // List<IndexedColumn> columns = getIndexDefs(entityMetadata);
+        Map<String, IndexedColumn> columns = entityMetadata.getColToBeIndexed();
 
         Set attributes = entityType.getAttributes();
 
@@ -271,7 +274,8 @@ public class SchemaConfiguration implements Configuration
             {
                 EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
 
-                EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(), entityMetadata);
+                EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
+                        attr.getJavaType());
 
                 if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
                 {
@@ -280,19 +284,7 @@ public class SchemaConfiguration implements Configuration
             }
             else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
             {
-                ColumnInfo columnInfo = getColumn(attr,
-                        columns != null ? columns.contains(((AbstractAttribute) attr).getJPAColumnName()/*
-                                                                                                         * entityMetadata
-                                                                                                         * .
-                                                                                                         * isColumnIndexable
-                                                                                                         * (
-                                                                                                         * attr
-                                                                                                         * .
-                                                                                                         * getName
-                                                                                                         * (
-                                                                                                         * )
-                                                                                                         * )
-                                                                                                         */) : false);
+                ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(attr.getName()) : null);
                 if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                 {
                     tableInfo.addColumnInfo(columnInfo);
@@ -302,21 +294,50 @@ public class SchemaConfiguration implements Configuration
     }
 
     /**
+     * @param columns
+     * @param attr
+     * @return
+     */
+    private boolean isIndexable(List<IndexedColumn> columns, Attribute attr)
+    {
+        boolean isIndexable = false;
+        for (IndexedColumn column : columns)
+        {
+            if (column != null && column.name() != null
+                    && column.name().equals(((AbstractAttribute) attr).getJavaMember().getName()))
+            {
+                isIndexable = true;
+                break;
+            }
+            // isIndexable = column != null && column.name() != null ?
+            // column.name().equals(
+            // ((AbstractAttribute) attr).getJavaMember().getName()) : false;
+
+        }
+        return isIndexable;
+    }
+
+    /**
      * Returns list of indexed columns
      * 
      * @param entityMetadata
      *            entity metadata
      * @return list of indexed columns
      */
-    private List<String> getIndexDefs(EntityMetadata entityMetadata)
+    private Map<String, IndexedColumn> getIndexDefs(Class<?> entityClazz)
     {
-        List<String> columns = null;
-        if (entityMetadata.getEntityClazz().isAnnotationPresent(Index.class))
+        // List<String> columns = null;
+
+        Map<String, IndexedColumn> columns = new HashMap<String, IndexedColumn>();
+        if (entityClazz.isAnnotationPresent(Index.class))
         {
-            Index indexes = entityMetadata.getEntityClazz().getAnnotation(Index.class);
+            Index indexes = entityClazz.getAnnotation(Index.class);
             if (indexes.index())
             {
-                columns = Arrays.asList(indexes.columns());
+                for (IndexedColumn column : indexes.indexedColumns())
+                {
+                    columns.put(column.name(), column);
+                }
             }
         }
         return columns;
@@ -358,10 +379,11 @@ public class SchemaConfiguration implements Configuration
     }
 
     private EmbeddedColumnInfo getEmbeddedColumn(EmbeddableType embeddableType, String embeddableColName,
-            EntityMetadata entityMetadata)
+            Class embeddedEntityClass)
     {
         EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo();
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
+        Map<String, IndexedColumn> indexedColumns = getIndexDefs(embeddedEntityClass);
         List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
 
         Set attributes = embeddableType.getAttributes();
@@ -370,7 +392,7 @@ public class SchemaConfiguration implements Configuration
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            columns.add(getColumn(attr, entityMetadata.isColumnIndexable(attr.getName())));
+            columns.add(getColumn(attr, indexedColumns != null ? indexedColumns.get(attr.getName()) : null));
         }
         embeddedColumnInfo.setColumns(columns);
         return embeddedColumnInfo;
@@ -383,11 +405,15 @@ public class SchemaConfiguration implements Configuration
      *            of Column.
      * @return Object of ColumnInfo.
      */
-    private ColumnInfo getColumn(Attribute column, boolean isIndexable)
+    private ColumnInfo getColumn(Attribute column, IndexedColumn indexedColumn)
     {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(((AbstractAttribute) column).getJPAColumnName());
-        columnInfo.setIndexable(isIndexable);
+        if (indexedColumn != null && indexedColumn.name() != null)
+        {
+            columnInfo.setIndexable(true);
+            columnInfo.setIndexType(indexedColumn.type());
+        }
         columnInfo.setType(column.getJavaType());
         return columnInfo;
     }
@@ -417,9 +443,10 @@ public class SchemaConfiguration implements Configuration
      */
     private String getSchemaProperty(String persistenceUnit)
     {
-        String KUNDERA_DDL_AUTO_PREPARE = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit)
-                .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String KUNDERA_DDL_AUTO_PREPARE = persistenceUnitMetadata != null ? persistenceUnitMetadata
+                .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
 
         return KUNDERA_DDL_AUTO_PREPARE;
     }

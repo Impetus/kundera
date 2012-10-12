@@ -20,6 +20,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,10 +161,47 @@ public class ObjectAccessor implements PropertyAccessor<Object>
             byte[] byteArr = (byte[]) object;
             return byteArr.clone();
         }
-        else 
+        else if(object instanceof Cloneable)
         {
-//            log.warn("Object data other than byte[] can't be copied");
-            return object;
+            Class<?> clazz = object.getClass();            
+            
+            Object o = null;
+            try
+            {
+                Method m = clazz.getMethod("clone");
+                o = m.invoke(clazz);
+            }
+            catch (SecurityException e)
+            {
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                return object;
+            }
+            catch (IllegalArgumentException e)
+            {
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                return object;
+            }
+            catch (NoSuchMethodException e)
+            {
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                return object;
+            }
+            catch (IllegalAccessException e)
+            {
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                return object;
+            }
+            catch (InvocationTargetException e)
+            {
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                return object;
+            }
+            return o;
+        }
+        else
+        {        
+          log.warn("Object of class " + object.getClass() + " can't be cloned");
+          return object;
         }
     }
 

@@ -29,6 +29,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
@@ -69,7 +71,9 @@ public final class EntityMetadata
 
     private SingularAttribute idAttribute;
 
-    private List<String> colToBeIndexed;
+    // private List<String> colToBeIndexed;
+    // private List<IndexedColumn> colToBeIndexed;
+    private Map<String, IndexedColumn> colToBeIndexed;
 
     private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
 
@@ -80,7 +84,10 @@ public final class EntityMetadata
     private Method writeIdentifierMethod;
 
     /** The index prperties. */
-    private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
+    // private List<PropertyIndex> indexPrperties = new
+    // ArrayList<PropertyIndex>();
+
+    private Map<String, PropertyIndex> indexPrperties = new HashMap<String, PropertyIndex>();
 
     // entity listeners map
     // key=>ListenerAnnotations, like @PrePersist, @PreUpdate etc.;
@@ -331,7 +338,32 @@ public final class EntityMetadata
      */
     public void addIndexProperty(PropertyIndex index)
     {
-        indexPrperties.add(index);
+        indexPrperties.put(index.getName(), index);
+    }
+
+    public void addIndexProperty(IndexedColumn indexedColumn, Field f)
+    {
+        PropertyIndex pi = populatePropertyIndex(indexedColumn, f);
+
+        indexPrperties.put(indexedColumn.name(), pi);
+    }
+
+    /**
+     * @param indexedColumn
+     * @param f
+     * @return
+     */
+    private PropertyIndex populatePropertyIndex(IndexedColumn indexedColumn, Field f)
+    {
+        PropertyIndex pi = new PropertyIndex();
+
+        pi.setProperty(f);
+        pi.setName(indexedColumn.name());
+        pi.setIndexType(indexedColumn.type());
+        pi.setMax(indexedColumn.max());
+        pi.setMin(indexedColumn.min());
+
+        return pi;
     }
 
     /**
@@ -375,7 +407,7 @@ public final class EntityMetadata
      * 
      * @return the index properties
      */
-    public List<PropertyIndex> getIndexProperties()
+    public Map<String, PropertyIndex> getIndexProperties()
     {
         return indexPrperties;
     }
@@ -527,13 +559,13 @@ public final class EntityMetadata
 
             builder.append("\tIndexes (");
             start = 0;
-            for (PropertyIndex index : indexPrperties)
+            for (String indexColumnName : indexPrperties.keySet())
             {
                 if (start++ != 0)
                 {
                     builder.append(", ");
                 }
-                builder.append(index.getName());
+                builder.append(indexPrperties.get(indexColumnName));
             }
             builder.append("),\n");
         }
@@ -707,7 +739,7 @@ public final class EntityMetadata
     /**
      * @return the colToBeIndexed
      */
-    public List<String> getColToBeIndexed()
+    public Map<String, IndexedColumn> getColToBeIndexed()
     {
         return colToBeIndexed;
     }
@@ -716,7 +748,7 @@ public final class EntityMetadata
      * @param colToBeIndexed
      *            the colToBeIndexed to set
      */
-    public void setColToBeIndexed(List<String> colToBeIndexed)
+    public void setColToBeIndexed(Map<String, IndexedColumn> colToBeIndexed)
     {
         this.colToBeIndexed = colToBeIndexed;
     }
@@ -728,7 +760,7 @@ public final class EntityMetadata
      */
     public boolean isColumnIndexable(String columnName)
     {
-        return getColToBeIndexed() != null && getColToBeIndexed().contains(columnName);
+        return getColToBeIndexed() != null && getColToBeIndexed().get(columnName) != null;
     }
 
     public void addJPAColumnMapping(String jpaColumnName, String fieldName)
