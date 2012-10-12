@@ -417,8 +417,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getColumnsById(String schemaName,String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            Object parentId)
+    public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Object parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
@@ -685,36 +685,71 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         new HBaseClientProperties().populateClientProperties(client, properties);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+    @Deprecated
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return handler.getForeignKeysFromJoinTable(tableName, pKeyColumnValue, columnName);
+
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
+    @Deprecated
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
-        // TODO Auto-generated method stub
-        return null;
+        CompareOp operator = HBaseUtils.getOperator("=", false);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+
+        byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(columnName), Bytes.toBytes(columnName), operator,
+                valueInBytes);
+        KeyOnlyFilter keyFilter = new KeyOnlyFilter();
+        FilterList filterList = new FilterList(f, keyFilter);
+        try
+        {
+            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME, columnName + "_"
+                    + columnValue, m.getIdAttribute().getBindableJavaType());
+        }
+        catch (IOException e)
+        {
+            log.error("Error while executing findIdsByColumn(), Caused by: " + e.getMessage());
+            throw new KunderaException(e);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
-        
+        try
+        {
+            handler.deleteRow(columnValue, tableName);
+
+        }
+        catch (IOException e)
+        {
+            log.error("Error during delete by key. Caused by:" + e.getMessage());
+            throw new PersistenceException(e);
+        }
     }
 
 }

@@ -74,51 +74,19 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     }
 
     /**
-     * update method update schema and table for the list of tableInfos
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
+     * drop schema method drop the table
      */
-    protected void update(List<TableInfo> tableInfos)
+    public void dropSchema()
     {
-        // Do nothing as by default mongo handles it.
-        for (TableInfo tableInfo : tableInfos)
+        if (operation != null && operation.equalsIgnoreCase("create-drop"))
         {
-            boolean isCappedTable = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.isCappedCollection(
-                    databaseName, tableInfo.getTableName()) : null;
-            DBObject options = new BasicDBObject();
-            options.put(MongoDBConstants.CAPPED, isCappedTable);
-            List<String> dbs = mongo.getDatabaseNames();
-            for (String dbName : dbs)
+            for (TableInfo tableInfo : tableInfos)
             {
-                if (dbName.equalsIgnoreCase(databaseName))
-                {
-                    databaseName = dbName;
-                    break;
-                }
-            }
-            DB db = mongo.getDB(databaseName);
-            DBCollection collection = null;
-            if (!db.collectionExists(tableInfo.getTableName()))
-            {
-                collection = db.createCollection(tableInfo.getTableName(), options);
-            }
-            collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
-            DBObject keys = new BasicDBObject();
-            int count = 0;
-            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-            {
-                if (columnInfo.isIndexable())
-                {
-                    keys.put(columnInfo.getColumnName(), 1);
-                    count++;
-                }
-            }
-            if (keys != null && count > 0)
-            {
-                collection.ensureIndex(keys);
+                coll = db.getCollection(tableInfo.getTableName());
+                coll.drop();
             }
         }
+        db = null;
     }
 
     /**
@@ -129,23 +97,10 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected void create(List<TableInfo> tableInfos)
     {
-        // Do nothing as by default mongo handles it.
-
         for (TableInfo tableInfo : tableInfos)
         {
-            boolean isCappedTable = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.isCappedCollection(
-                    databaseName, tableInfo.getTableName()) : null;
-            DBObject options = new BasicDBObject();
-            options.put(MongoDBConstants.CAPPED, isCappedTable);
-            List<String> dbs = mongo.getDatabaseNames();
-            for (String dbName : dbs)
-            {
-                if (dbName.equalsIgnoreCase(databaseName))
-                {
-                    databaseName = dbName;
-                    break;
-                }
-            }
+            DBObject options = setCollectionProperties(tableInfo);
+            getDBName();
             DB db = mongo.getDB(databaseName);
             if (db.collectionExists(tableInfo.getTableName()))
             {
@@ -153,20 +108,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
-            DBObject keys = new BasicDBObject();
-            int count = 0;
-            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-            {
-                if (columnInfo.isIndexable())
-                {
-                    keys.put(columnInfo.getColumnName(), 1);
-                    count++;
-                }
-            }
-            if (keys != null && count > 0)
-            {
-                collection.ensureIndex(keys);
-            }
+            createIndexes(tableInfo, collection);
         }
     }
 
@@ -182,6 +124,29 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     }
 
     /**
+     * update method update schema and table for the list of tableInfos
+     * 
+     * @param tableInfos
+     *            list of TableInfos.
+     */
+    protected void update(List<TableInfo> tableInfos)
+    {
+        for (TableInfo tableInfo : tableInfos)
+        {
+            DBObject options = setCollectionProperties(tableInfo);
+            getDBName();
+            DB db = mongo.getDB(databaseName);
+            DBCollection collection = null;
+            if (!db.collectionExists(tableInfo.getTableName()))
+            {
+                collection = db.createCollection(tableInfo.getTableName(), options);
+            }
+            collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
+            createIndexes(tableInfo, collection);
+        }
+    }
+
+    /**
      * validate method validate schema and table for the list of tableInfos.
      * 
      * @param tableInfos
@@ -189,60 +154,24 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected void validate(List<TableInfo> tableInfos)
     {
-        // List<String> dbNames = m.getDatabaseNames();
-        // boolean found = false;
-        // for (String dbName : dbNames)
-        // {
-        // if (dbName.equalsIgnoreCase(databaseName))
-        // {
-        // found = true;
-        // }
-        // }
-        // if (!found)
-        // {
-        // logger.error("database " + databaseName + "does not exist");
-        // throw new SchemaGenerationException("mongoDb", databaseName);
-        // }
-        // else
-        // {
         db = mongo.getDB(databaseName);
-        // }
-
         if (db == null)
         {
-
             logger.error("Database " + databaseName + "does not exist");
             throw new SchemaGenerationException("database " + databaseName + "does not exist", "mongoDb", databaseName);
         }
         else
         {
-
             for (TableInfo tableInfo : tableInfos)
             {
                 if (!db.collectionExists(tableInfo.getTableName()))
                 {
                     logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
                     throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
-                            + "does not exist in db " + db.getName(), "mongoDb", databaseName, tableInfo.getTableName());
+                            + " does not exist in db " + db.getName(), "mongoDb", databaseName, tableInfo.getTableName());
                 }
             }
         }
-    }
-
-    /**
-     * drop schema method drop the table
-     */
-    public void dropSchema()
-    {
-        if (operation != null && operation.equalsIgnoreCase("create-drop"))
-        {
-            for (TableInfo tableInfo : tableInfos)
-            {
-                coll = db.getCollection(tableInfo.getTableName());
-                coll.drop();
-            }
-        }
-        db = null;
     }
 
     /**
@@ -274,10 +203,113 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         return true;
     }
 
+    /**
+     * @param tableInfo
+     * @return
+     */
+    private DBObject setCollectionProperties(TableInfo tableInfo)
+    {
+        boolean isCappedCollection = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd
+                .isCappedCollection(databaseName, tableInfo.getTableName()) : false;
+        DBObject options = new BasicDBObject();
+        if (isCappedCollection)
+        {
+            int collectionSize = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.getCollectionSize(
+                    databaseName, tableInfo.getTableName()) : 100000;
+            int max = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.getMaxSize(databaseName,
+                    tableInfo.getTableName()) : 100;
+            options.put(MongoDBConstants.CAPPED, isCappedCollection);
+            options.put(MongoDBConstants.SIZE, collectionSize);
+            options.put(MongoDBConstants.MAX, max);
+        }
+        return options;
+    }
+
+    /**
+     * @param tableInfo
+     * @param collection
+     */
+    private void createIndexes(TableInfo tableInfo, DBCollection collection)
+    {
+        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+        {
+            if (columnInfo.isIndexable())
+            {
+                DBObject keys = new BasicDBObject();
+                keys.put(columnInfo.getColumnName(), getIndexType(columnInfo.getIndexType(), columnInfo.getType()));
+                collection.ensureIndex(keys);
+            }
+        }
+    }
+
+    /**
+     * @param indexType
+     * @param clazz
+     * @return
+     */
+    private String getIndexType(String indexType, Class clazz)
+    {
+        // TODO validation for indexType and attribute type
+
+        if (indexType != null)
+        {
+            if (indexType.equals(IndexType.ASC))
+            {
+                return IndexType.findByValue(IndexType.ASC);
+            }
+            else if (indexType.equals(IndexType.DSC))
+            {
+                return IndexType.findByValue(IndexType.DSC);
+            }
+            else if (indexType.equals(IndexType.GEO2D))
+            {
+                return IndexType.findByValue(IndexType.GEO2D);
+            }
+        }
+        return IndexType.findByValue(IndexType.ASC);
+    }
+
+    /**
+     * 
+     */
+    private void getDBName()
+    {
+        List<String> dbs = mongo.getDatabaseNames();
+        for (String dbName : dbs)
+        {
+            if (dbName.equalsIgnoreCase(databaseName))
+            {
+                databaseName = dbName;
+                break;
+            }
+        }
+    }
+
     @Override
     public boolean validateEntity(Class clazz)
     {
         // TODO Auto-generated method stub
         return true;
+    }
+
+    private enum IndexType
+    {
+        ASC, DSC, GEO2D;
+
+        public static String findByValue(IndexType value)
+        {
+            switch (value)
+            {
+            case ASC:
+                return "1";
+            case DSC:
+                return "-1";
+            case GEO2D:
+                return "2D";
+            default:
+                return "1";
+            }
+
+        }
     }
 }

@@ -28,18 +28,24 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.annotations.IndexedColumn;
 
 /**
- * Holds professional details of any user 
+ * Holds professional details of any user
+ * 
  * @author amresh.singh
  */
 
 @Embeddable
-@Index(index=true, columns={"professionId", "departmentName", "isExceptional"
-        , "age", "grade", "digitalSignature", "rating", "compliance", "height",
-        "enrolmentDate", "enrolmentTime", "joiningDateAndTime", "yearsSpent",
-        "uniqueId", "monthlySalary", "birthday", "birthtime", "anniversary",
-        "jobAttempts", "accumulatedWealth", "graduationDay"})
+@Index(index = true, indexedColumns = { @IndexedColumn(name = "professionId"), @IndexedColumn(name = "departmentName"),
+        @IndexedColumn(name = "isExceptional"), @IndexedColumn(name = "age"), @IndexedColumn(name = "grade"),
+        @IndexedColumn(name = "digitalSignature"), @IndexedColumn(name = "rating"),
+        @IndexedColumn(name = "compliance"), @IndexedColumn(name = "height"), @IndexedColumn(name = "enrolmentDate"),
+        @IndexedColumn(name = "enrolmentTime"), @IndexedColumn(name = "joiningDateAndTime"),
+        @IndexedColumn(name = "yearsSpent"), @IndexedColumn(name = "uniqueId"), @IndexedColumn(name = "monthlySalary"),
+        @IndexedColumn(name = "birthday"), @IndexedColumn(name = "birthtime"), @IndexedColumn(name = "anniversary"),
+        @IndexedColumn(name = "jobAttempts"), @IndexedColumn(name = "accumulatedWealth"),
+        @IndexedColumn(name = "graduationDay") })
 public class ProfessionalDetail
 {
     // Primitive Types
@@ -94,11 +100,11 @@ public class ProfessionalDetail
     private Double monthlySalary;
 
     @Column(name = "BIRTH_DAY")
-    private java.sql.Date birthday;   
+    private java.sql.Date birthday;
 
     @Column(name = "BIRTH_TIME")
     private java.sql.Time birthtime;
-    
+
     @Column(name = "ANNIVERSARY")
     private java.sql.Timestamp anniversary;
 
@@ -110,7 +116,7 @@ public class ProfessionalDetail
 
     @Column(name = "GRADUATION_DAY")
     private Calendar graduationDay;
-    
+
     public ProfessionalDetail(long professionId, String departmentName, boolean isExceptional, int age, char grade,
             byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
             Date enrolmentTime, Date joiningDateAndTime, Integer yearsSpent, Long uniqueId, Double monthlySalary,
@@ -143,7 +149,7 @@ public class ProfessionalDetail
 
     public ProfessionalDetail()
     {
-        
+
     }
 
     /**
@@ -155,7 +161,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param professionId the professionId to set
+     * @param professionId
+     *            the professionId to set
      */
     public void setProfessionId(long professionId)
     {
@@ -171,7 +178,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param departmentName the departmentName to set
+     * @param departmentName
+     *            the departmentName to set
      */
     public void setDepartmentName(String departmentName)
     {
@@ -187,7 +195,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param isExceptional the isExceptional to set
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
@@ -203,7 +212,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -219,7 +229,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param grade the grade to set
+     * @param grade
+     *            the grade to set
      */
     public void setGrade(char grade)
     {
@@ -235,7 +246,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param digitalSignature the digitalSignature to set
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
@@ -251,7 +263,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param rating the rating to set
+     * @param rating
+     *            the rating to set
      */
     public void setRating(short rating)
     {
@@ -267,7 +280,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param compliance the compliance to set
+     * @param compliance
+     *            the compliance to set
      */
     public void setCompliance(float compliance)
     {
@@ -283,7 +297,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param height the height to set
+     * @param height
+     *            the height to set
      */
     public void setHeight(double height)
     {
@@ -299,7 +314,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param enrolmentDate the enrolmentDate to set
+     * @param enrolmentDate
+     *            the enrolmentDate to set
      */
     public void setEnrolmentDate(java.util.Date enrolmentDate)
     {
@@ -315,7 +331,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param enrolmentTime the enrolmentTime to set
+     * @param enrolmentTime
+     *            the enrolmentTime to set
      */
     public void setEnrolmentTime(java.util.Date enrolmentTime)
     {
@@ -331,7 +348,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param joiningDateAndTime the joiningDateAndTime to set
+     * @param joiningDateAndTime
+     *            the joiningDateAndTime to set
      */
     public void setJoiningDateAndTime(java.util.Date joiningDateAndTime)
     {
@@ -347,7 +365,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param yearsSpent the yearsSpent to set
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
@@ -363,7 +382,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param uniqueId the uniqueId to set
+     * @param uniqueId
+     *            the uniqueId to set
      */
     public void setUniqueId(Long uniqueId)
     {
@@ -379,7 +399,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param monthlySalary the monthlySalary to set
+     * @param monthlySalary
+     *            the monthlySalary to set
      */
     public void setMonthlySalary(Double monthlySalary)
     {
@@ -395,7 +416,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param birthday the birthday to set
+     * @param birthday
+     *            the birthday to set
      */
     public void setBirthday(java.sql.Date birthday)
     {
@@ -411,7 +433,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param birthtime the birthtime to set
+     * @param birthtime
+     *            the birthtime to set
      */
     public void setBirthtime(java.sql.Time birthtime)
     {
@@ -427,7 +450,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param anniversary the anniversary to set
+     * @param anniversary
+     *            the anniversary to set
      */
     public void setAnniversary(java.sql.Timestamp anniversary)
     {
@@ -443,7 +467,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param jobAttempts the jobAttempts to set
+     * @param jobAttempts
+     *            the jobAttempts to set
      */
     public void setJobAttempts(BigInteger jobAttempts)
     {
@@ -459,7 +484,8 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param accumulatedWealth the accumulatedWealth to set
+     * @param accumulatedWealth
+     *            the accumulatedWealth to set
      */
     public void setAccumulatedWealth(BigDecimal accumulatedWealth)
     {
@@ -475,12 +501,12 @@ public class ProfessionalDetail
     }
 
     /**
-     * @param graduationDay the graduationDay to set
+     * @param graduationDay
+     *            the graduationDay to set
      */
     public void setGraduationDay(Calendar graduationDay)
     {
         this.graduationDay = graduationDay;
-    }    
-      
+    }
 
 }

@@ -33,6 +33,7 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.mongodb.ReadPreference;
 
 /**
@@ -340,6 +341,82 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
                 }
             }
             return false;
+        }
+
+        /**
+         * @param databaseName
+         * @param tableName
+         * @return
+         */
+        public int getCollectionSize(String databaseName, String tableName)
+        {
+            List<Schema> schemas = getDataStore() != null ? getDataStore().getSchemas() : null;
+            if (schemas != null)
+            {
+                for (Schema schema : schemas)
+                {
+                    if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName))
+                    {
+                        for (Table table : schema.getTables())
+                        {
+                            if (table.getProperties() != null)
+                            {
+                                try
+                                {
+                                    String size = table.getProperties().getProperty(MongoDBConstants.SIZE);
+                                    if (size != null && !size.isEmpty())
+                                    {
+                                        return Integer.parseInt(size);
+                                    }
+                                }
+                                catch (NumberFormatException nfe)
+                                {
+                                    throw new SchemaGenerationException(nfe);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return 100000;
+        }
+
+        /**
+         * @param databaseName
+         * @param tableName
+         * @return
+         */
+        public int getMaxSize(String databaseName, String tableName)
+        {
+            List<Schema> schemas = getDataStore() != null ? getDataStore().getSchemas() : null;
+            if (schemas != null)
+            {
+                for (Schema schema : schemas)
+                {
+                    if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName))
+                    {
+                        for (Table table : schema.getTables())
+                        {
+                            if (table.getProperties() != null)
+                            {
+                                try
+                                {
+                                    String max = table.getProperties().getProperty(MongoDBConstants.MAX);
+                                    if (max != null && !max.isEmpty())
+                                    {
+                                        return Integer.parseInt(max);
+                                    }
+                                }
+                                catch (NumberFormatException nfe)
+                                {
+                                    throw new SchemaGenerationException(nfe);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return 100;
         }
     }
 }

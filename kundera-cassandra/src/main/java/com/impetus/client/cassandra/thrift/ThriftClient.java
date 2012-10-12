@@ -814,9 +814,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
 
                     List<KeySlice> keySlices = cassandra_client.get_range_slices(new ColumnParent(m.getTableName()),
-                            slicePredicate, keyRange, getConsistencyLevel());                    
-                    
-                    if(m.getType().isSuperColumnFamilyMetadata()) {
+                            slicePredicate, keyRange, getConsistencyLevel());
+
+                    if (m.getType().isSuperColumnFamilyMetadata())
+                    {
                         Map<Bytes, List<SuperColumn>> qResults = ThriftDataResultHelper.transformThriftResult(
                                 ColumnFamilyType.SUPER_COLUMN, keySlices, null);
                         entities = new ArrayList<Object>(qResults.size());
@@ -828,7 +829,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                                 ColumnFamilyType.COLUMN, keySlices, null);
                         entities = new ArrayList<Object>(qResults.size());
                         computeEntityViaColumns(m, isRelation, relations, entities, qResults);
-                    }             
+                    }
                 }
             }
             else
@@ -945,10 +946,60 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
-        // TODO Auto-generated method stub
-        return null;
+
+        byte[] rowKey = pKeyColumnValue.toString().getBytes();
+
+        SlicePredicate predicate = new SlicePredicate();
+        SliceRange sliceRange = new SliceRange();
+        sliceRange.setStart(new byte[0]);
+        sliceRange.setFinish(new byte[0]);
+        predicate.setSlice_range(sliceRange);
+
+        ColumnParent parent = new ColumnParent(tableName);
+        List<ColumnOrSuperColumn> results;
+        IPooledConnection conn = null;
+        try
+        {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
+
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();
+            cassandra_client.set_keyspace(keyspace);
+            results = cassandra_client.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
+
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
+        }
+
+        List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN, null);
+
+        List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
+        return foreignKeys;
     }
 
     /*
@@ -959,10 +1010,63 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.Class)
      */
     @Override
+    @Deprecated
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
-        // TODO Auto-generated method stub
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        String childIdStr = (String) columnValue;
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
+                columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
+                .fromUTF8(childIdStr).getBytes());
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
+
+        List<Object> rowKeys = new ArrayList<Object>();
+        ColumnParent columnParent = new ColumnParent(tableName);
+        IPooledConnection conn = null;
+        try
+        {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
+
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();
+            cassandra_client.set_keyspace(keyspace);
+            List<KeySlice> keySlices = cassandra_client.get_indexed_slices(columnParent, ix, slicePredicate,
+                    getConsistencyLevel());
+
+            rowKeys = ThriftDataResultHelper.getRowKeys(keySlices, metadata);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            throw new KunderaException("Error while fetching key slices for index clause", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            throw new KunderaException("Error while fetching key slices for index clause", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            throw new KunderaException("Error while fetching key slices for index clause", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            throw new KunderaException("Error while fetching key slices for index clause", e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
+        }
+
+        if (rowKeys != null && !rowKeys.isEmpty())
+        {
+            return rowKeys.toArray(new Object[0]);
+        }
+
         return null;
     }
 
@@ -973,9 +1077,59 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
+
+        Properties props = persistenceUnitMetadata.getProperties();
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+
+        IPooledConnection conn = null;
+        try
+        {
+            conn = PelopsUtils.getCassandraConnection(persistenceUnitMetadata.getPersistenceUnitName());
+            Cassandra.Client cassandra_client = conn.getAPI();
+
+            cassandra_client.set_keyspace(keyspace);
+            ColumnPath path = new ColumnPath(tableName);
+            // cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()),
+            // path,
+            // System.currentTimeMillis(), getConsistencyLevel());
+            cassandra_client.remove(
+                    ByteBuffer.wrap(CassandraUtilities.toBytes(columnValue, columnValue.getClass()).toByteArray()),
+                    path, System.currentTimeMillis(), getConsistencyLevel());
+
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
+        }
 
     }
 

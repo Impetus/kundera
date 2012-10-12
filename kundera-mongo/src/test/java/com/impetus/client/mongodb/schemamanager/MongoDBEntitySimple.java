@@ -1,19 +1,7 @@
-/*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- ******************************************************************************/
-package com.impetus.client.crud;
+/**
+ * 
+ */
+package com.impetus.client.mongodb.schemamanager;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,14 +11,14 @@ import javax.persistence.Table;
 import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.annotations.IndexedColumn;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class Person.
+ * @author Kuldeep Mishra
+ * 
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaAuthentication@authenticationTest")
+@Table(name = "MongoDBEntitySimple", schema = "KunderaMongoSchemaGeneration@mongoSchemaGenerationTest")
 @Index(index = true, indexedColumns = { @IndexedColumn(name = "personName"), @IndexedColumn(name = "age") })
-public class PersonAuth
+public class MongoDBEntitySimple
 {
 
     /** The person id. */
@@ -44,27 +32,7 @@ public class PersonAuth
 
     /** The age. */
     @Column(name = "AGE")
-    private Integer age;
-
-    @Column(name = "AGEss")
-    private byte[] a;
-
-    /**
-     * @return the a
-     */
-    public byte[] getA()
-    {
-        return a;
-    }
-
-    /**
-     * @param a
-     *            the a to set
-     */
-    public void setA(byte[] a)
-    {
-        this.a = a;
-    }
+    private short age;
 
     /**
      * Gets the person id.
@@ -109,18 +77,22 @@ public class PersonAuth
     }
 
     /**
+     * Gets the age.
+     * 
      * @return the age
      */
-    public int getAge()
+    public short getAge()
     {
         return age;
     }
 
     /**
+     * Sets the age.
+     * 
      * @param age
      *            the age to set
      */
-    public void setAge(int age)
+    public void setAge(short age)
     {
         this.age = age;
     }

@@ -17,6 +17,7 @@ package com.impetus.kundera.index;
 
 import java.io.CharArrayReader;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
@@ -232,13 +233,22 @@ public abstract class DocumentIndexer implements Indexer
     {
         String indexName = metadata.getIndexName();
 
-        for (PropertyIndex index : metadata.getIndexProperties())
+        // for (PropertyIndex index : metadata.getIndexProperties())
+        // {
+        // java.lang.reflect.Field property = index.getProperty();
+        // String propertyName = index.getName();
+        // addFieldToDocument(object, document, property, propertyName,
+        // indexName);
+        // }
+
+        Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
+        for (String columnName : indexProperties.keySet())
         {
+            PropertyIndex index = indexProperties.get(columnName);
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
             addFieldToDocument(object, document, property, propertyName, indexName);
         }
-
     }
 
     /**

@@ -724,10 +724,19 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        // List<Column> columns = selector.getColumnsFromRow(joinTableName,
+        // Bytes.fromUTF8(parentId.toString()),
+        // Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+        List<Column> columns = selector.getColumnsFromRow(tableName,
+                Bytes.fromByteArray(PropertyAccessorHelper.getBytes(pKeyColumnValue)),
+                Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());
+
+        List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
+        return foreignKeys;
     }
 
     /*
@@ -737,10 +746,41 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
+    @Deprecated
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
-        // TODO Auto-generated method stub
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        String childIdStr = (String) columnValue;
+
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, Selector.newIndexExpression(columnName
+                + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
+                Bytes.fromByteArray(childIdStr.getBytes())));
+
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
+                getConsistencyLevel());
+
+        List<Object> rowKeys = new ArrayList<Object>();
+
+        // iterate through complete map and
+        Iterator<Bytes> rowIter = qResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata
+                    .getIdAttribute().getJavaMember());
+            Object value = accessor.fromBytes(metadata.getIdAttribute().getJavaType(), rowKey.toByteArray());
+
+            rowKeys.add(value);
+        }
+
+        if (rowKeys != null && !rowKeys.isEmpty())
+        {
+            return rowKeys.toArray(new Object[0]);
+        }
         return null;
     }
 
@@ -751,9 +791,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, java.lang.Object)
      */
     @Override
+    @Deprecated
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        // rowDeletor.deleteRow(tableName, columnValue.toString(),
+        // getConsistencyLevel());
+        rowDeletor.deleteRow(tableName, CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
+                getConsistencyLevel());
 
     }
 }

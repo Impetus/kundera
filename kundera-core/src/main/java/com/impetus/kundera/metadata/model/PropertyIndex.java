@@ -31,19 +31,30 @@ public final class PropertyIndex
     /** The property. */
     private Field property;
 
+    private String indexType;
+
     /** The boost. */
     private float boost = 1.0f;
 
-    /**
-     * The Constructor.
-     * 
-     * @param property
-     *            the property
-     */
-    public PropertyIndex(Field property)
+    private int max;
+
+    private int min;
+
+    // /**
+    // * The Constructor.
+    // *
+    // * @param property
+    // * the property
+    // */
+    // public PropertyIndex(Field property)
+    // {
+    // this.property = property;
+    // this.name = property.getName();
+    // }
+
+    public PropertyIndex()
     {
-        this.property = property;
-        this.name = property.getName();
+
     }
 
     /**
@@ -54,10 +65,11 @@ public final class PropertyIndex
      * @param name
      *            the name
      */
-    public PropertyIndex(Field property, String name)
+    public PropertyIndex(Field property, String name, String indexType)
     {
         this.property = property;
         this.name = name;
+        this.indexType = indexType;
     }
 
     /**
@@ -100,4 +112,74 @@ public final class PropertyIndex
     {
         this.boost = boost;
     }
+
+    /**
+     * @return the indexType
+     */
+    public String getIndexType()
+    {
+        return indexType;
+    }
+
+    /**
+     * @param indexType
+     *            the indexType to set
+     */
+    public void setIndexType(String indexType)
+    {
+        this.indexType = indexType;
+    }
+
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    /**
+     * @param property
+     *            the property to set
+     */
+    public void setProperty(Field property)
+    {
+        this.property = property;
+    }
+
+    /**
+     * @return the max
+     */
+    public int getMax()
+    {
+        return max;
+    }
+
+    /**
+     * @param max
+     *            the max to set
+     */
+    public void setMax(int max)
+    {
+        this.max = max;
+    }
+
+    /**
+     * @return the min
+     */
+    public int getMin()
+    {
+        return min;
+    }
+
+    /**
+     * @param min
+     *            the min to set
+     */
+    public void setMin(int min)
+    {
+        this.min = min;
+    }
+
 }

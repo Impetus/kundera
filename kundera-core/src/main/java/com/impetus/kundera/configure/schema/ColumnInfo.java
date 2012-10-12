@@ -36,6 +36,11 @@ public class ColumnInfo
     private Class type;
 
     /**
+     * The index type;
+     */
+    private String indexType;
+
+    /**
      * Instantiates a new column info.
      */
     public ColumnInfo()
@@ -147,5 +152,22 @@ public class ColumnInfo
     public void setType(Class type)
     {
         this.type = type;
+    }
+
+    /**
+     * @return the indexType
+     */
+    public String getIndexType()
+    {
+        return indexType;
+    }
+
+    /**
+     * @param indexType
+     *            the indexType to set
+     */
+    public void setIndexType(String indexType)
+    {
+        this.indexType = indexType;
     }
 }
