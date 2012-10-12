@@ -51,7 +51,7 @@ public class CoreEntityPersonUni1ToM
 
     /** The personal data. */
     @Embedded
-    private CorePersonalData personalData;
+    private PersonalData personalData;
 
     /** The addresses. */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -126,7 +126,7 @@ public class CoreEntityPersonUni1ToM
      * 
      * @return the personalData
      */
-    public CorePersonalData getPersonalData()
+    public PersonalData getPersonalData()
     {
         return personalData;
     }
@@ -137,7 +137,7 @@ public class CoreEntityPersonUni1ToM
      * @param personalData
      *            the personalData to set
      */
-    public void setPersonalData(CorePersonalData personalData)
+    public void setPersonalData(PersonalData personalData)
     {
         this.personalData = personalData;
     }

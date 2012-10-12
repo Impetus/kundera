@@ -22,7 +22,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests@addCassandra")
+@Table(name = "ADDRESS", schema = "KunderaTests")
 public class HabitatBi1To1FK
 {
     @Id

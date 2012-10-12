@@ -42,6 +42,7 @@ import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -115,6 +116,12 @@ public abstract class AssociationBase
 
         // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        KunderaMetadata.INSTANCE.setCoreMetadata(null);
+        em = null;
+        dao.closeEntityManager();
+        dao.closeEntityManagerFactory();
+
         em = dao.getEntityManager(persistenceUnits);
         this.colFamilies = colFamilies;
     }
@@ -184,7 +191,8 @@ public abstract class AssociationBase
                         .getPersistenceUnitMetadata(pu);
 
                 String client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
-                if (client.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory"))
+                if (client.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory")
+                        || client.equalsIgnoreCase("com.impetus.client.cassandra.thrift.ThriftClientFactory"))
                 {
                     if (RUN_IN_EMBEDDED_MODE)
                     {
@@ -227,10 +235,7 @@ public abstract class AssociationBase
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
                 }
-                if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory") /*
-                                                                                            * &&
-                                                                                            * RUN_IN_EMBEDDED_MODE
-                                                                                            */)
+                if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
                 {
                     try
                     {
@@ -245,7 +250,7 @@ public abstract class AssociationBase
 
                 }
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-                mAdd.setSchema(schema != null ? schema : "KunderaTests");
+                mAdd.setSchema(schema != null ? schema : KEYSPACE);
                 // mAdd.setSchema(schema)
 
                 log.warn("persistence unit:" + pu + " and class:" + clazz.getCanonicalName());
@@ -297,7 +302,7 @@ public abstract class AssociationBase
     private void truncateColumnFamily()
     {
         String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS" };
-        CassandraCli.truncateColumnFamily("KunderaTests", columnFamily);
+        CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
     }
 
     /**
@@ -371,7 +376,7 @@ public abstract class AssociationBase
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
-        ksDef = new KsDef("KunderaTests", SimpleStrategy.class.getSimpleName(), cfDefs);
+        ksDef = new KsDef(KEYSPACE, SimpleStrategy.class.getSimpleName(), cfDefs);
         // Set replication factor
         if (ksDef.strategy_options == null)
         {
@@ -394,10 +399,10 @@ public abstract class AssociationBase
     {
         log.warn("Truncating....");
 
-        CassandraCli.dropColumnFamily("PERSONNEL", "KunderaTests");
-        CassandraCli.dropColumnFamily("ADDRESS", "KunderaTests");
-        CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", "KunderaTests");
-        CassandraCli.dropKeySpace("KunderaTests");
+        CassandraCli.dropColumnFamily("PERSONNEL", KEYSPACE);
+        CassandraCli.dropColumnFamily("ADDRESS", KEYSPACE);
+        CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", KEYSPACE);
+        CassandraCli.dropKeySpace(KEYSPACE);
     }
 
     protected abstract void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
@@ -419,6 +424,10 @@ public abstract class AssociationBase
                 cli.dropSchema(KEYSPACE);
             }
             catch (Exception e)
+            {
+                cli.closeConnection();
+            }
+            finally
             {
                 cli.closeConnection();
             }

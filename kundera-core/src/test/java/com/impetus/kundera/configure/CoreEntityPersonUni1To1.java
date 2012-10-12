@@ -49,7 +49,7 @@ public class CoreEntityPersonUni1To1
 
     /** The personal data. */
     @Embedded
-    private CorePersonalData personalData;
+    private PersonalData personalData;
 
     /** The address. */
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -124,7 +124,7 @@ public class CoreEntityPersonUni1To1
      * 
      * @return the personalData
      */
-    public CorePersonalData getPersonalData()
+    public PersonalData getPersonalData()
     {
         return personalData;
     }
@@ -135,7 +135,7 @@ public class CoreEntityPersonUni1To1
      * @param personalData
      *            the personalData to set
      */
-    public void setPersonalData(CorePersonalData personalData)
+    public void setPersonalData(PersonalData personalData)
     {
         this.personalData = personalData;
     }

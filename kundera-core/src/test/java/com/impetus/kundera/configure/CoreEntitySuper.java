@@ -49,7 +49,7 @@ public class CoreEntitySuper
 
     /** The personal data. */
     @Embedded
-    private CorePersonalData personalData;
+    private PersonalData personalData;
 
     /**
      * Gets the person id.
@@ -119,7 +119,7 @@ public class CoreEntitySuper
      * 
      * @return the personalData
      */
-    public CorePersonalData getPersonalData()
+    public PersonalData getPersonalData()
     {
         return personalData;
     }
@@ -130,7 +130,7 @@ public class CoreEntitySuper
      * @param personalData
      *            the personalData to set
      */
-    public void setPersonalData(CorePersonalData personalData)
+    public void setPersonalData(PersonalData personalData)
     {
         this.personalData = personalData;
     }

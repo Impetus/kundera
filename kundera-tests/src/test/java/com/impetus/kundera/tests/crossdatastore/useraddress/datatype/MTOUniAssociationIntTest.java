@@ -223,7 +223,6 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     public void tearDown() throws Exception
     {
         // tearDownInternal(ALL_PUs_UNDER_TEST);
-        truncateSchema();
         shutDownRdbmsServer();
     }
 

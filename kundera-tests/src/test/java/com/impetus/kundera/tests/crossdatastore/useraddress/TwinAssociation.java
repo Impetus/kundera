@@ -105,11 +105,12 @@ public abstract class TwinAssociation extends AssociationBase
                         Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                                 ALL_PUs_UNDER_TEST[i1]);
                         Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
-                        original.putAll(copy);
-
+                        if (original != null && copy != null)
+                        {
+                            original.putAll(copy);
+                        }
                     }
                 }
-
             }
 
             for (Map<Class, String> c : combinations)
@@ -163,13 +164,15 @@ public abstract class TwinAssociation extends AssociationBase
     {
         try
         {
-            Field managedTypesFields = metaModel.getClass().getDeclaredField("entityTypes");
-            if (!managedTypesFields.isAccessible())
+            Field managedTypesFields = null;
+            if (metaModel != null)
+                managedTypesFields = metaModel.getClass().getDeclaredField("entityTypes");
+            if (managedTypesFields != null && !managedTypesFields.isAccessible())
             {
                 managedTypesFields.setAccessible(true);
-            }
 
-            return ((Map<Class<?>, EntityType<?>>) managedTypesFields.get(metaModel));
+                return ((Map<Class<?>, EntityType<?>>) managedTypesFields.get(metaModel));
+            }
         }
         catch (SecurityException e)
         {
