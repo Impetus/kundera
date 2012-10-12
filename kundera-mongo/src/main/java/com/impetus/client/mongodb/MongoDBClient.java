@@ -36,8 +36,9 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -206,12 +207,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
 
+        if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            handler.populateCompoundKey(query, entityMetadata, metaModel, key);
+        } else
+        {
         query.put("_id",
                 /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
                 key instanceof Calendar ? ((Calendar) key).getTime().toString() : handler.populateValue(key,
                         key.getClass()));
-
+        }
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
 
@@ -348,10 +357,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            handler.populateCompoundKey(query, entityMetadata, metaModel, pKey);
+        } else
+        {
+        
         query.put("_id",
                 /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
                 handler.populateValue(pKey, pKey.getClass()));
-
+        }
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
 
@@ -603,15 +622,25 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         document = new BasicDBObject();
 
         document = handler.getDocumentFromEntity(document, metadata, entity, relationHolders);
+
         if (isUpdate)
         {
             BasicDBObject query = new BasicDBObject();
 
-            // Why can't we put "_id" here?
+            
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+
+            if(metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            {
+                handler.populateCompoundKey(query, metadata, metaModel, id);
+            } else
+            {
             query.put(
                     "_id",
                     id instanceof Calendar ? ((Calendar) id).getTime().toString() : handler.populateValue(id,
                             id.getClass()));
+            }
             DBCollection dbCollection = mongoDb.getCollection(documentName);
             dbCollection.findAndModify(query, document);
         }

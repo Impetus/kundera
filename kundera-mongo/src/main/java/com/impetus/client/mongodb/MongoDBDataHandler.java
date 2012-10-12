@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,13 +102,30 @@ final class MongoDBDataHandler
 
             rowKey = populateValue(rowKey, idClass);
 
-            rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
-            PropertyAccessorHelper.setId(entity, m, rowKey);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+
+            if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+            {
+                EmbeddableType embeddable = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                Iterator<Attribute> iter = embeddable.getAttributes().iterator();
+                Object compoundKey = m.getIdAttribute().getBindableJavaType().newInstance();
+                while (iter.hasNext())
+                {
+                    AbstractAttribute compositeAttrib = (AbstractAttribute) iter.next();
+                    Object value = ((BasicDBObject) rowKey).get(compositeAttrib.getJPAColumnName());
+                    PropertyAccessorHelper.set(compoundKey, (Field) compositeAttrib.getJavaMember(), value);
+                }
+                PropertyAccessorHelper.setId(entity, m, compoundKey);
+            }
+            else
+            {
+                rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
+                PropertyAccessorHelper.setId(entity, m, rowKey);
+            }            
 
             // Populate entity columns
             // List<Column> columns = m.getColumnsAsList();
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    m.getPersistenceUnit());
             EntityType entityType = metaModel.entity(entityClass);
 
             Set<Attribute> columns = entityType.getAttributes();
@@ -261,9 +279,16 @@ final class MongoDBDataHandler
         // Populate Row Key
 
         Object id = PropertyAccessorHelper.getId(entity, m);
-        dbObj.put("_id",
-                id instanceof Calendar ? ((Calendar) id).getTime().toString() : populateValue(id, id.getClass()));
-
+       
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            populateCompoundKey(dbObj, m, metaModel, id);
+        }
+        else
+        {
+            dbObj.put("_id",
+                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : populateValue(id, id.getClass()));
+        }
         // Populate columns
         // for (Column column : columns)
         Set<Attribute> columns = entityType.getAttributes();
@@ -586,4 +611,22 @@ final class MongoDBDataHandler
                     embeddable.getAttributes()));
         }
     }
+
+
+    void populateCompoundKey(DBObject dbObj, EntityMetadata m, MetamodelImpl metaModel, Object id)
+    {
+        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+        Iterator<Attribute> iter = compoundKey.getAttributes().iterator();
+        BasicDBObject compoundKeyObj = new BasicDBObject();
+        while (iter.hasNext())
+        {
+            Attribute compositeColumn = iter.next();
+
+            compoundKeyObj.put(((AbstractAttribute) compositeColumn).getJPAColumnName(),
+                    populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()), ((AbstractAttribute)compositeColumn).getBindableJavaType()));
+        }
+
+        dbObj.put("_id", compoundKeyObj);
+    }
+
 }
