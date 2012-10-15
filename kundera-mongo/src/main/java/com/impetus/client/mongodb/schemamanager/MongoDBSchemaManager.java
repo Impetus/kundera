@@ -108,7 +108,10 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
-            createIndexes(tableInfo, collection);
+            if (tableInfo.isIndexable())
+            {
+                createIndexes(tableInfo, collection);
+            }
         }
     }
 
@@ -168,7 +171,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 {
                     logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
                     throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
-                            + " does not exist in db " + db.getName(), "mongoDb", databaseName, tableInfo.getTableName());
+                            + " does not exist in db " + db.getName(), "mongoDb", databaseName,
+                            tableInfo.getTableName());
                 }
             }
         }
@@ -237,7 +241,10 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 DBObject keys = new BasicDBObject();
                 keys.put(columnInfo.getColumnName(), getIndexType(columnInfo.getIndexType(), columnInfo.getType()));
-                collection.ensureIndex(keys);
+                DBObject options = new BasicDBObject();
+                options.put("min", columnInfo.getMinValue());
+                options.put("max", columnInfo.getMaxValue());
+                collection.ensureIndex(keys, options);
             }
         }
     }

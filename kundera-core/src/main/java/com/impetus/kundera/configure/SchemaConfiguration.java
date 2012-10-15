@@ -47,7 +47,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.newannotations.Index;
 
 /**
  * Schema configuration implementation to support ddl_schema_creation
@@ -365,6 +364,10 @@ public class SchemaConfiguration implements Configuration
         {
             columnInfo.setIndexable(true);
             columnInfo.setIndexType(indexedColumn.getIndexType());
+            columnInfo.setMaxValue(indexedColumn.getMax());
+            columnInfo.setMinValue(indexedColumn.getMin());
+            
+            //Add more if required
         }
         columnInfo.setType(column.getJavaType());
         return columnInfo;

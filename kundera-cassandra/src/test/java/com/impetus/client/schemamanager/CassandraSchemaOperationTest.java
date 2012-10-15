@@ -52,6 +52,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -123,9 +124,19 @@ public class CassandraSchemaOperationTest
             columns.add("PERSON_NAME");
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertFalse(columnDef.isSetIndex_type());
-                Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNull(columnDef.index_name);
+                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                }
+                else
+                {
+
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                }
             }
         }
     }
@@ -155,9 +166,18 @@ public class CassandraSchemaOperationTest
 
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertFalse(columnDef.isSetIndex_type());
-                Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNull(columnDef.index_name);
+                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                }
+                else
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                }
             }
         }
         schemaManager.dropSchema();
@@ -202,9 +222,9 @@ public class CassandraSchemaOperationTest
 
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertFalse(columnDef.isSetIndex_type());
+                Assert.assertTrue(columnDef.isSetIndex_type());
                 Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNull(columnDef.index_name);
+                Assert.assertNotNull(columnDef.index_name);
             }
         }
     }
@@ -465,6 +485,9 @@ public class CassandraSchemaOperationTest
 
         TableProcessor processor = new TableProcessor();
         processor.process(CassandraEntitySimple.class, m);
+
+        IndexProcessor indexProcessor = new IndexProcessor();
+        indexProcessor.process(CassandraEntitySimple.class, m);
 
         m.setPersistenceUnit(persistenceUnit);
 

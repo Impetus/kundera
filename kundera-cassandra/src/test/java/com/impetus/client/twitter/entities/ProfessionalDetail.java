@@ -27,8 +27,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.newannotations.Index;
-import com.impetus.kundera.newannotations.IndexCollection;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Holds professional details of any user

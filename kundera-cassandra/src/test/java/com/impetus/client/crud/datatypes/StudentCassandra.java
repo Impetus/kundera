@@ -26,8 +26,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.newannotations.Index;
-import com.impetus.kundera.newannotations.IndexCollection;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "STUDENT", schema = "KunderaExamples@secIdxCassandraTest")

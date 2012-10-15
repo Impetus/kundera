@@ -19,8 +19,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import com.impetus.client.twitter.utils.ExampleUtils;
-import com.impetus.kundera.newannotations.Index;
-import com.impetus.kundera.newannotations.IndexCollection;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Entity class for user's personal details

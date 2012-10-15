@@ -864,11 +864,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         if (indexType != null)
         {
-            if (indexType.equals(IndexType.KEYS))
+            if (indexType.equals(IndexType.KEYS.name()))
             {
                 return IndexType.KEYS;
             }
-            else if (indexType.equals(IndexType.CUSTOM))
+            else if (indexType.equals(IndexType.CUSTOM.name()))
             {
                 return IndexType.CUSTOM;
             }

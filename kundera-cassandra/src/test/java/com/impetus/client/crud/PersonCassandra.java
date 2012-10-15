@@ -23,12 +23,12 @@ import javax.persistence.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.newannotations.Index;
-import com.impetus.kundera.newannotations.IndexCollection;
+import com.impetus.kundera.annotations.Index;
+
 
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
+@Index(index = true,columns = { "personName","age" })
 public class PersonCassandra
 {
 

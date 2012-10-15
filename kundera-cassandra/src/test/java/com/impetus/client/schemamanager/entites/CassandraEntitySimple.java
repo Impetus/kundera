@@ -20,11 +20,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * The Class CassandraEntitySimple.
  */
 @Entity
 @Table(name = "CassandraEntitySimple", schema = "KunderaCoreExmples@CassandraSchemaOperationTest")
+@IndexCollection(columns = { @Index(name = "personName",type = "KEYS"), @Index(name = "age",type = "KEYS") })
 public class CassandraEntitySimple
 {
 
