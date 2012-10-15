@@ -53,10 +53,11 @@ public class IndexProcessor implements MetadataProcessor
         IndexCollection indexes = clazz.getAnnotation(IndexCollection.class);
 
         List<String> columnsNameToBeIndexed;
-        Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed = null;
+        Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed = new HashMap<String, com.impetus.kundera.newannotations.Index>();
+        ;
         if (null != indexes)
         {
-            columnsToBeIndexed = new HashMap<String, com.impetus.kundera.newannotations.Index>();
+
             // metadata.setIndexName(clazz.getSimpleName());
             if (indexes.columns() != null && indexes.columns().length != 0)
             {
