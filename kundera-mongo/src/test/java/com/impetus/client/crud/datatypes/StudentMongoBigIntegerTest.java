@@ -1,6 +1,5 @@
 package com.impetus.client.crud.datatypes;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentMongoBigDecimal;
 import com.impetus.client.crud.datatypes.entities.StudentMongoBigInteger;
 
 public class StudentMongoBigIntegerTest extends Base

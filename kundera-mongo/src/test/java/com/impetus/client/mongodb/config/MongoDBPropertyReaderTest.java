@@ -34,7 +34,6 @@ import org.junit.Test;
 
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.configure.PropertyReader;

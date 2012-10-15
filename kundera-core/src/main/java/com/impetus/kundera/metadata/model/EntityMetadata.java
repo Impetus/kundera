@@ -29,8 +29,6 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
@@ -73,7 +71,8 @@ public final class EntityMetadata
 
     // private List<String> colToBeIndexed;
     // private List<IndexedColumn> colToBeIndexed;
-    private Map<String, IndexedColumn> colToBeIndexed;
+    // private Map<String, com.impetus.kundera.newannotations.Index>
+    // colToBeIndexed;
 
     private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
 
@@ -339,31 +338,6 @@ public final class EntityMetadata
     public void addIndexProperty(PropertyIndex index)
     {
         indexPrperties.put(index.getName(), index);
-    }
-
-    public void addIndexProperty(IndexedColumn indexedColumn, Field f)
-    {
-        PropertyIndex pi = populatePropertyIndex(indexedColumn, f);
-
-        indexPrperties.put(indexedColumn.name(), pi);
-    }
-
-    /**
-     * @param indexedColumn
-     * @param f
-     * @return
-     */
-    private PropertyIndex populatePropertyIndex(IndexedColumn indexedColumn, Field f)
-    {
-        PropertyIndex pi = new PropertyIndex();
-
-        pi.setProperty(f);
-        pi.setName(indexedColumn.name());
-        pi.setIndexType(indexedColumn.type());
-        pi.setMax(indexedColumn.max());
-        pi.setMin(indexedColumn.min());
-
-        return pi;
     }
 
     /**
@@ -736,32 +710,35 @@ public final class EntityMetadata
         this.idAttribute = idAttribute;
     }
 
-    /**
-     * @return the colToBeIndexed
-     */
-    public Map<String, IndexedColumn> getColToBeIndexed()
-    {
-        return colToBeIndexed;
-    }
+    // /**
+    // * @return the colToBeIndexed
+    // */
+    // public Map<String, com.impetus.kundera.newannotations.Index>
+    // getColToBeIndexed()
+    // {
+    // return colToBeIndexed;
+    // }
+    //
+    // /**
+    // * @param colToBeIndexed
+    // * the colToBeIndexed to set
+    // */
+    // public void setColToBeIndexed(Map<String,
+    // com.impetus.kundera.newannotations.Index> colToBeIndexed)
+    // {
+    // this.colToBeIndexed = colToBeIndexed;
+    // }
 
-    /**
-     * @param colToBeIndexed
-     *            the colToBeIndexed to set
-     */
-    public void setColToBeIndexed(Map<String, IndexedColumn> colToBeIndexed)
-    {
-        this.colToBeIndexed = colToBeIndexed;
-    }
-
-    /**
-     * Checks if is indexable.
-     * 
-     * @return true, if is indexable
-     */
-    public boolean isColumnIndexable(String columnName)
-    {
-        return getColToBeIndexed() != null && getColToBeIndexed().get(columnName) != null;
-    }
+    // /**
+    // * Checks if is indexable.
+    // *
+    // * @return true, if is indexable
+    // */
+    // public boolean isColumnIndexable(String columnName)
+    // {
+    // return getColToBeIndexed() != null && getColToBeIndexed().get(columnName)
+    // != null;
+    // }
 
     public void addJPAColumnMapping(String jpaColumnName, String fieldName)
     {

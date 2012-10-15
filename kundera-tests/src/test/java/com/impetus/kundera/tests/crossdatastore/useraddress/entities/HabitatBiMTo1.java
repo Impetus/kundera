@@ -24,11 +24,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 @Entity
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "street") })
+@IndexCollection(columns = { @Index(name = "street") })
 @Table(name = "ADDRESS", schema = "KunderaTests")
 public class HabitatBiMTo1
 {

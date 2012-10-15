@@ -16,20 +16,21 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 /**
  * The Class BaseMetadataProcessor.
@@ -44,13 +45,33 @@ public class IndexProcessor implements MetadataProcessor
 
     public final void process(final Class<?> clazz, EntityMetadata metadata)
     {
-        metadata.setIndexName(clazz.getSimpleName());
+        if (clazz != null)
+        {
+            metadata.setIndexName(clazz.getSimpleName());
+        }
         Index idx = clazz.getAnnotation(Index.class);
-        // List<String> columnsToBeIndexed = new ArrayList<String>();
-        Map<String, IndexedColumn> columnsToBeIndexed = new HashMap<String, IndexedColumn>();
+        IndexCollection indexes = clazz.getAnnotation(IndexCollection.class);
 
+        List<String> columnsNameToBeIndexed;
+        Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed = null;
+        if (null != indexes)
+        {
+            columnsToBeIndexed = new HashMap<String, com.impetus.kundera.newannotations.Index>();
+            // metadata.setIndexName(clazz.getSimpleName());
+            if (indexes.columns() != null && indexes.columns().length != 0)
+            {
+                metadata.setIndexable(true);
+
+                for (com.impetus.kundera.newannotations.Index indexedColumn : indexes.columns())
+                {
+                    columnsToBeIndexed.put(indexedColumn.name(), indexedColumn);
+                }
+                // metadata.setColToBeIndexed(columnsToBeIndexed);
+            }
+        }
         if (null != idx)
         {
+            columnsNameToBeIndexed = new ArrayList<String>();
             boolean isIndexable = idx.index();
             metadata.setIndexable(isIndexable);
 
@@ -59,26 +80,34 @@ public class IndexProcessor implements MetadataProcessor
             {
                 metadata.setIndexName(indexName);
             }
-            else
-            {
-                metadata.setIndexName(clazz.getSimpleName());
-            }
+            // else
+            // {
+            // metadata.setIndexName(clazz.getSimpleName());
+            // }
 
-            if (idx.indexedColumns() != null && idx.indexedColumns().length != 0)
+            if (idx.columns() != null && idx.columns().length != 0)
             {
-                for (IndexedColumn indexedColumn : idx.indexedColumns())
+                for (String indexedColumn : idx.columns())
                 {
-                    columnsToBeIndexed.put(indexedColumn.name(), indexedColumn);
+                    columnsNameToBeIndexed.add(indexedColumn);
                 }
-                metadata.setColToBeIndexed(columnsToBeIndexed);
+                // metadata.setColToBeIndexed(columnsToBeIndexed);
             }
-
-            if (!isIndexable)
-            {
-                log.debug("@Entity " + clazz.getName() + " will not be indexed for "
-                        + (columnsToBeIndexed.isEmpty() ? "all columns" : columnsToBeIndexed));
-                return;
-            }
+            //
+            // if (!isIndexable)
+            // {
+            // log.debug("@Entity " + clazz.getName() +
+            // " will not be indexed for "
+            // + (columnsToBeIndexed.isEmpty() ? "all columns" :
+            // columnsToBeIndexed));
+            // return;
+            // }
+        }
+        else
+        {
+            log.debug("@Entity " + clazz.getName() + " will not be indexed for "
+                    + (columnsToBeIndexed.isEmpty() ? "all columns" : columnsToBeIndexed));
+            return;
         }
 
         log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
@@ -89,14 +118,41 @@ public class IndexProcessor implements MetadataProcessor
             if (f.isAnnotationPresent(Column.class))
             {
                 String fieldName = f.getName();
-//                fieldName = getIndexName(f, fieldName);
+                // fieldName = getIndexName(f, fieldName);
 
-                if (!columnsToBeIndexed.isEmpty() && columnsToBeIndexed.containsKey(fieldName))
+                if (columnsToBeIndexed != null && !columnsToBeIndexed.isEmpty()
+                        && columnsToBeIndexed.containsKey(fieldName))
                 {
-                    metadata.addIndexProperty(columnsToBeIndexed.get(fieldName), f);
+                    com.impetus.kundera.newannotations.Index indexedColumn = columnsToBeIndexed.get(fieldName);
+                    metadata.addIndexProperty(populatePropertyIndex(indexedColumn.name(), indexedColumn.type(),
+                            indexedColumn.max(), indexedColumn.max(), f));
+                }
+                else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
+                        && columnsNameToBeIndexed.contains(fieldName))
+                {
+                    metadata.addIndexProperty(populatePropertyIndex(fieldName, null, null, null, f));
                 }
             }
         }
+    }
+
+    /**
+     * @param indexedColumn
+     * @param f
+     * @return
+     */
+    private static PropertyIndex populatePropertyIndex(String columnName, String indexType, Integer max, Integer min,
+            Field f)
+    {
+        PropertyIndex pi = new PropertyIndex();
+
+        pi.setProperty(f);
+        pi.setName(columnName);
+        pi.setIndexType(indexType);
+        pi.setMax(max);
+        pi.setMin(min);
+
+        return pi;
     }
 
     /**
@@ -121,4 +177,77 @@ public class IndexProcessor implements MetadataProcessor
         }
         return alias;
     }
+
+    /**
+     * Returns list of indexed columns
+     * 
+     * @param entityMetadata
+     *            entity metadata
+     * @return list of indexed columns
+     */
+    public static Map<String, PropertyIndex> getIndexesOfEmbeddable(Class<?> entityClazz)
+    {
+        Map<String, PropertyIndex> pis = new HashMap<String, PropertyIndex>();
+        Index idx = entityClazz.getAnnotation(Index.class);
+        IndexCollection indexes = entityClazz.getAnnotation(IndexCollection.class);
+        List<String> columnsNameToBeIndexed = null;
+        Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed = null;
+        if (null != indexes)
+        {
+            columnsToBeIndexed = new HashMap<String, com.impetus.kundera.newannotations.Index>();
+            if (indexes.columns() != null && indexes.columns().length != 0)
+            {
+                for (com.impetus.kundera.newannotations.Index indexedColumn : indexes.columns())
+                {
+                    columnsToBeIndexed.put(indexedColumn.name(), indexedColumn);
+                }
+            }
+        }
+        if (null != idx)
+        {
+            columnsNameToBeIndexed = new ArrayList<String>();
+            if (idx.columns() != null && idx.columns().length != 0)
+            {
+                for (String indexedColumn : idx.columns())
+                {
+                    columnsNameToBeIndexed.add(indexedColumn);
+                }
+            }
+        }
+        getPropertyIndexes(entityClazz, pis, columnsNameToBeIndexed, columnsToBeIndexed);
+        return pis;
+    }
+
+    /**
+     * @param entityClazz
+     * @param pis
+     * @param columnsNameToBeIndexed
+     * @param columnsToBeIndexed
+     */
+    private static void getPropertyIndexes(Class<?> entityClazz, Map<String, PropertyIndex> pis,
+            List<String> columnsNameToBeIndexed,
+            Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed)
+    {
+        for (Field f : entityClazz.getDeclaredFields())
+        {
+            if (f.isAnnotationPresent(Column.class))
+            {
+                String fieldName = f.getName();
+                if (columnsToBeIndexed != null && !columnsToBeIndexed.isEmpty()
+                        && columnsToBeIndexed.containsKey(fieldName))
+                {
+                    com.impetus.kundera.newannotations.Index indexedColumn = columnsToBeIndexed.get(fieldName);
+                    pis.put(indexedColumn.name(),
+                            populatePropertyIndex(indexedColumn.name(), indexedColumn.type(), indexedColumn.max(),
+                                    indexedColumn.max(), f));
+                }
+                else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
+                        && columnsNameToBeIndexed.contains(fieldName))
+                {
+                    pis.put(fieldName, populatePropertyIndex(fieldName, null, null, null, f));
+                }
+            }
+        }
+    }
+
 }

@@ -27,6 +27,7 @@ import java.lang.annotation.Target;
  * @author animesh.kumar
  * @since 0.1
  */
+@Deprecated
 @Target({ ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -52,7 +53,7 @@ public @interface Index
      * 
      * @return the string[]
      */
-    // String[] columns() default {};
+    String[] columns() default {};
 
-    public abstract IndexedColumn[] indexedColumns();
+    // public abstract IndexedColumn[] columns();
 }

@@ -19,8 +19,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import com.impetus.client.twitter.utils.ExampleUtils;
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 /**
  * Class for Tweets
@@ -29,7 +29,7 @@ import com.impetus.kundera.annotations.IndexedColumn;
  */
 
 @Embeddable
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "body"), @IndexedColumn(name = "device") })
+@IndexCollection(columns = { @Index(name = "body"), @Index(name = "device") })
 public class Tweet
 {
 

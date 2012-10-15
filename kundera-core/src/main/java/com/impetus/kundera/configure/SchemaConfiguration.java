@@ -16,7 +16,6 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
@@ -45,9 +42,12 @@ import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.processor.IndexProcessor;
+import com.impetus.kundera.newannotations.Index;
 
 /**
  * Schema configuration implementation to support ddl_schema_creation
@@ -262,7 +262,9 @@ public class SchemaConfiguration implements Configuration
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
         // List<IndexedColumn> columns = getIndexDefs(entityMetadata);
-        Map<String, IndexedColumn> columns = entityMetadata.getColToBeIndexed();
+        // Map<String, com.impetus.kundera.newannotations.Index> columns =
+        // entityMetadata.getColToBeIndexed();
+        Map<String, PropertyIndex> columns = entityMetadata.getIndexProperties();
 
         Set attributes = entityType.getAttributes();
 
@@ -293,55 +295,28 @@ public class SchemaConfiguration implements Configuration
         }
     }
 
-    /**
-     * @param columns
-     * @param attr
-     * @return
-     */
-    private boolean isIndexable(List<IndexedColumn> columns, Attribute attr)
-    {
-        boolean isIndexable = false;
-        for (IndexedColumn column : columns)
-        {
-            if (column != null && column.name() != null
-                    && column.name().equals(((AbstractAttribute) attr).getJavaMember().getName()))
-            {
-                isIndexable = true;
-                break;
-            }
-            // isIndexable = column != null && column.name() != null ?
-            // column.name().equals(
-            // ((AbstractAttribute) attr).getJavaMember().getName()) : false;
-
-        }
-        return isIndexable;
-    }
-
-    /**
-     * Returns list of indexed columns
-     * 
-     * @param entityMetadata
-     *            entity metadata
-     * @return list of indexed columns
-     */
-    private Map<String, IndexedColumn> getIndexDefs(Class<?> entityClazz)
-    {
-        // List<String> columns = null;
-
-        Map<String, IndexedColumn> columns = new HashMap<String, IndexedColumn>();
-        if (entityClazz.isAnnotationPresent(Index.class))
-        {
-            Index indexes = entityClazz.getAnnotation(Index.class);
-            if (indexes.index())
-            {
-                for (IndexedColumn column : indexes.indexedColumns())
-                {
-                    columns.put(column.name(), column);
-                }
-            }
-        }
-        return columns;
-    }
+//    /**
+//     * @param columns
+//     * @param attr
+//     * @return
+//     */
+//    private boolean isIndexable(List<Index> columns, Attribute attr)
+//    {
+//        boolean isIndexable = false;
+//        for (Index column : columns)
+//        {
+//            if (column != null && column.name() != null
+//                    && column.name().equals(((AbstractAttribute) attr).getJavaMember().getName()))
+//            {
+//                isIndexable = true;
+//                break;
+//            }
+//            isIndexable = column != null && column.name() != null ? column.name().equals(
+//                    ((AbstractAttribute) attr).getJavaMember().getName()) : false;
+//
+//        }
+//        return isIndexable;
+//    }
 
     /**
      * Returns list of configured table/column families.
@@ -383,7 +358,7 @@ public class SchemaConfiguration implements Configuration
     {
         EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo();
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
-        Map<String, IndexedColumn> indexedColumns = getIndexDefs(embeddedEntityClass);
+        Map<String, PropertyIndex> indexedColumns = IndexProcessor.getIndexesOfEmbeddable(embeddedEntityClass);
         List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
 
         Set attributes = embeddableType.getAttributes();
@@ -392,7 +367,7 @@ public class SchemaConfiguration implements Configuration
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            columns.add(getColumn(attr, indexedColumns != null ? indexedColumns.get(attr.getName()) : null));
+            columns.add(getColumn(attr, indexedColumns.get(attr.getName())));
         }
         embeddedColumnInfo.setColumns(columns);
         return embeddedColumnInfo;
@@ -405,14 +380,14 @@ public class SchemaConfiguration implements Configuration
      *            of Column.
      * @return Object of ColumnInfo.
      */
-    private ColumnInfo getColumn(Attribute column, IndexedColumn indexedColumn)
+    private ColumnInfo getColumn(Attribute column, PropertyIndex indexedColumn)
     {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(((AbstractAttribute) column).getJPAColumnName());
-        if (indexedColumn != null && indexedColumn.name() != null)
+        if (indexedColumn != null && indexedColumn.getName() != null)
         {
             columnInfo.setIndexable(true);
-            columnInfo.setIndexType(indexedColumn.type());
+            columnInfo.setIndexType(indexedColumn.getIndexType());
         }
         columnInfo.setType(column.getJavaType());
         return columnInfo;

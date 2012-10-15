@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoFloat;
-import com.impetus.client.crud.datatypes.entities.StudentMongofloat;
 
 public class StudentMongoFloatTest extends Base
 {

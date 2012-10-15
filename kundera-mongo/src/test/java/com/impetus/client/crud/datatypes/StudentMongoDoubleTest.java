@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoDouble;
-import com.impetus.client.crud.datatypes.entities.StudentMongodouble;
 
 public class StudentMongoDoubleTest extends Base
 {

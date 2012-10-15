@@ -24,8 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import sun.security.util.BigInt;
-
 import junit.framework.Assert;
 
 import com.impetus.client.crud.BaseTest;

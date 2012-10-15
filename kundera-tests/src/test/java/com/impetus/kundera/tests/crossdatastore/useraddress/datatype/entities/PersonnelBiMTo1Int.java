@@ -24,11 +24,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 @Entity
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName") })
+@IndexCollection(columns = { @Index(name = "personName") })
 @Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
 public class PersonnelBiMTo1Int
 {

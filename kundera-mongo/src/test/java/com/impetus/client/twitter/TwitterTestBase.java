@@ -17,9 +17,9 @@ package com.impetus.client.twitter;
 
 import java.util.List;
 
-import org.junit.Assert;
-
 import junit.framework.TestCase;
+
+import org.junit.Assert;
 
 import com.impetus.client.twitter.dao.Twitter;
 import com.impetus.client.twitter.dao.TwitterService;

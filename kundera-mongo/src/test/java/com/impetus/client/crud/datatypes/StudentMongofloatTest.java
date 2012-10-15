@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentMongodouble;
 import com.impetus.client.crud.datatypes.entities.StudentMongofloat;
 
 public class StudentMongofloatTest extends Base

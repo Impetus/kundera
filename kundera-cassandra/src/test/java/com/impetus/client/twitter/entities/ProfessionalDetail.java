@@ -27,8 +27,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 /**
  * Holds professional details of any user
@@ -37,15 +37,15 @@ import com.impetus.kundera.annotations.IndexedColumn;
  */
 
 @Embeddable
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "professionId"), @IndexedColumn(name = "departmentName"),
-        @IndexedColumn(name = "isExceptional"), @IndexedColumn(name = "age"), @IndexedColumn(name = "grade"),
-        @IndexedColumn(name = "digitalSignature"), @IndexedColumn(name = "rating"),
-        @IndexedColumn(name = "compliance"), @IndexedColumn(name = "height"), @IndexedColumn(name = "enrolmentDate"),
-        @IndexedColumn(name = "enrolmentTime"), @IndexedColumn(name = "joiningDateAndTime"),
-        @IndexedColumn(name = "yearsSpent"), @IndexedColumn(name = "uniqueId"), @IndexedColumn(name = "monthlySalary"),
-        @IndexedColumn(name = "birthday"), @IndexedColumn(name = "birthtime"), @IndexedColumn(name = "anniversary"),
-        @IndexedColumn(name = "jobAttempts"), @IndexedColumn(name = "accumulatedWealth"),
-        @IndexedColumn(name = "graduationDay") })
+@IndexCollection(columns = { @Index(name = "professionId"), @Index(name = "departmentName"),
+        @Index(name = "isExceptional"), @Index(name = "age"), @Index(name = "grade"),
+        @Index(name = "digitalSignature"), @Index(name = "rating"),
+        @Index(name = "compliance"), @Index(name = "height"), @Index(name = "enrolmentDate"),
+        @Index(name = "enrolmentTime"), @Index(name = "joiningDateAndTime"),
+        @Index(name = "yearsSpent"), @Index(name = "uniqueId"), @Index(name = "monthlySalary"),
+        @Index(name = "birthday"), @Index(name = "birthtime"), @Index(name = "anniversary"),
+        @Index(name = "jobAttempts"), @Index(name = "accumulatedWealth"),
+        @Index(name = "graduationDay") })
 public class ProfessionalDetail
 {
     // Primitive Types

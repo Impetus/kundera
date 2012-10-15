@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoString;
-import com.impetus.client.crud.datatypes.entities.StudentMongolong;
 
 public class StudentMongoStringTest extends Base
 {

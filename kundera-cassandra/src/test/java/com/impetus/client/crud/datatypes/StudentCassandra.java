@@ -26,19 +26,18 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 @Entity
 @Table(name = "STUDENT", schema = "KunderaExamples@secIdxCassandraTest")
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "uniqueId"), @IndexedColumn(name = "studentName"),
-        @IndexedColumn(name = "isExceptional"), @IndexedColumn(name = "age"), @IndexedColumn(name = "semester"),
-        @IndexedColumn(name = "digitalSignature"), @IndexedColumn(name = "cgpa"), @IndexedColumn(name = "percentage"),
-        @IndexedColumn(name = "height"), @IndexedColumn(name = "enrolmentDate"),
-        @IndexedColumn(name = "enrolmentTime"), @IndexedColumn(name = "joiningDateAndTime"),
-        @IndexedColumn(name = "yearsSpent"), @IndexedColumn(name = "rollNumber"), @IndexedColumn(name = "monthlyFee"),
-        @IndexedColumn(name = "sqlDate"), @IndexedColumn(name = "sqlTimestamp"), @IndexedColumn(name = "sqlTime"),
-        @IndexedColumn(name = "bigInteger"), @IndexedColumn(name = "bigDecimal"), @IndexedColumn(name = "calendar") })
+@IndexCollection(columns = { @Index(name = "uniqueId"), @Index(name = "studentName"), @Index(name = "isExceptional"),
+        @Index(name = "age"), @Index(name = "semester"), @Index(name = "digitalSignature"), @Index(name = "cgpa"),
+        @Index(name = "percentage"), @Index(name = "height"), @Index(name = "enrolmentDate"),
+        @Index(name = "enrolmentTime"), @Index(name = "joiningDateAndTime"), @Index(name = "yearsSpent"),
+        @Index(name = "rollNumber"), @Index(name = "monthlyFee"), @Index(name = "sqlDate"),
+        @Index(name = "sqlTimestamp"), @Index(name = "sqlTime"), @Index(name = "bigInteger"),
+        @Index(name = "bigDecimal"), @Index(name = "calendar") })
 public class StudentCassandra implements StudentEntityDef
 {
     // Primitive Types

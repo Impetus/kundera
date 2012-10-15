@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoSqlDate;
-import com.impetus.client.crud.datatypes.entities.StudentMongolong;
 
 public class StudentMongoSqlDateTest extends Base
 {

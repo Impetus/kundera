@@ -1,6 +1,5 @@
 package com.impetus.client.crud.datatypes;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentMongoTimestamp;
 import com.impetus.client.crud.datatypes.entities.StudentMongoUUID;
 
 public class StudentMongoUUIDTest extends Base

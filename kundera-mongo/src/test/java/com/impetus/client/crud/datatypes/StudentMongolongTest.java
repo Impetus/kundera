@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentMongoInteger;
 import com.impetus.client.crud.datatypes.entities.StudentMongolong;
 
 public class StudentMongolongTest extends Base

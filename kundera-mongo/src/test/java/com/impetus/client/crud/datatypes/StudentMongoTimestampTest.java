@@ -1,6 +1,5 @@
 package com.impetus.client.crud.datatypes;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoTimestamp;
-import com.impetus.client.crud.datatypes.entities.StudentMongolong;
 
 public class StudentMongoTimestampTest extends Base
 {

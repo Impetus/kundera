@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Provides utility methods for all Kundera Examples test cases

@@ -20,8 +20,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -29,7 +29,7 @@ import com.impetus.kundera.annotations.IndexedColumn;
  */
 @Entity
 @Table(name = "PERSON", schema = "KunderaAuthentication@authenticationTest")
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "personName"), @IndexedColumn(name = "age") })
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonAuth
 {
 

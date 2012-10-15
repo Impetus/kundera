@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoLong;
-import com.impetus.client.crud.datatypes.entities.StudentMongolong;
 
 public class StudentMongoLongTest extends Base
 {

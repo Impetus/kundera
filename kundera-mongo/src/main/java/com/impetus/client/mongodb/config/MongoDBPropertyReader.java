@@ -29,10 +29,10 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
-import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.mongodb.ReadPreference;
 

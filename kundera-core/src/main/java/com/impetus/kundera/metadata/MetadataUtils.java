@@ -35,7 +35,6 @@ import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -44,6 +43,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.newannotations.IndexCollection;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -537,21 +537,23 @@ public class MetadataUtils
         Index indexAnn = embeddableClass.getAnnotation(Index.class);
         if (indexAnn != null && indexAnn.index())
         {
-            IndexedColumn[] columnsToBeIndexed = indexAnn.indexedColumns();
-            // if (columnFieldName != null &&
-            // Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
-            // {
-            // return true;
-            // }
-
-            for (IndexedColumn column : columnsToBeIndexed)
+            String[] columnsToBeIndexed = indexAnn.columns();
+            if (columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
             {
-                if (columnFieldName != null && column.name() != null && column.name().equals(columnFieldName))
+                return true;
+            }
+        }
+        IndexCollection indexCollection = embeddableClass.getAnnotation(IndexCollection.class);
+        if (indexCollection != null && indexCollection.columns() != null)
+        {
+            for (com.impetus.kundera.newannotations.Index column : indexCollection.columns())
+            {
+                if (columnFieldName != null && column != null && column.name() != null
+                        && column.name().equals(columnFieldName))
                 {
                     return true;
                 }
             }
-
         }
         return false;
     }

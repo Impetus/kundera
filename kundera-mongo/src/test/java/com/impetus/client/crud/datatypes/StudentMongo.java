@@ -26,13 +26,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.annotations.Index;
-import com.impetus.kundera.annotations.IndexedColumn;
+import com.impetus.kundera.newannotations.Index;
+import com.impetus.kundera.newannotations.IndexCollection;
 
 @Entity
 @Table(name = "STUDENT", schema = "KunderaExamples@mongoTest")
-@Index(index = true, indexedColumns = { @IndexedColumn(name = "uniqueId"), @IndexedColumn(name = "studentName"),
-        @IndexedColumn(name = "age") })
+@IndexCollection(columns = { @Index(name = "uniqueId"), @Index(name = "studentName"), @Index(name = "age") })
 public class StudentMongo implements StudentEntityDef
 {
     // Primitive Types

@@ -90,11 +90,11 @@
 		</dependency>
 
 		<!-- JTS Topology Suite -->
-	<!-- 	<dependency>
+		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
 			<version>1.11</version>
-		</dependency> -->
+		</dependency>
 
 	</dependencies>
 	<build>
