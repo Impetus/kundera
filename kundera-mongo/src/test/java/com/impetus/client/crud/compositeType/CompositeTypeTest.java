@@ -17,12 +17,14 @@ package com.impetus.client.crud.compositeType;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -67,7 +69,7 @@ public class CompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -78,7 +80,7 @@ public class CompositeTypeTest
         PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
-        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
         em.clear();// optional,just to clear persistence cache.
@@ -91,7 +93,7 @@ public class CompositeTypeTest
         result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
-        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
         em.remove(result);
@@ -102,6 +104,88 @@ public class CompositeTypeTest
         Assert.assertNull(result);
     }
 
+    @Test
+    public void onQuery()
+    {
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        Date currentDate = new Date();
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        PrimeUser user = new PrimeUser(key);
+        user.setTweetBody("my first tweet");
+        user.setTweetDate(new Date());
+        em.persist(user);
+
+        em.clear(); // optional,just to clear persistence cache.
+        final String noClause = "Select u from PrimeUser u";
+        
+        final String withFirstCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId";
+
+        final String withClauseOnNoncomposite = "Select u from PrimeUser u where u.tweetDate = ?1";
+        
+        // NOSQL Intelligence to teach that query is invalid because partition key is not present?
+        final String withSecondCompositeColClause = "Select u from PrimeUser u where u.key.tweetId = :tweetId";
+        final String withBothCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
+        final String withAllCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String withLastCompositeColGTClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
+    
+        // query over 1 composite and 1 non-column
+        
+        // query with no clause.
+        Query q = em.createQuery(noClause);
+        List<PrimeUser> results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+     
+
+        // Query with composite key clause.
+        q = em.createQuery(withFirstCompositeColClause);
+        q.setParameter("userId", "mevivs");
+        results = q.getResultList();
+        Assert.assertNull(results);
+
+        // Query with composite key clause.
+        q = em.createQuery(withClauseOnNoncomposite);
+        q.setParameter(1, currentDate);
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+
+        // Query with composite key clause.
+        q = em.createQuery(withSecondCompositeColClause);
+        q.setParameter("tweetId", 1);
+        results = q.getResultList();
+        Assert.assertNull(results);
+        
+     // Query with composite key clause.
+        q = em.createQuery(withBothCompositeColClause);
+        q.setParameter("userId", "mevivs");
+        q.setParameter("tweetId", 1);
+        results = q.getResultList();
+        Assert.assertNull(results);
+        
+        
+        
+       // Query with composite key clause.
+        q = em.createQuery(withAllCompositeColClause);
+        q.setParameter("userId", "mevivs");
+        q.setParameter("tweetId", 1);
+        q.setParameter("timeLineId", timeLineId.toString());
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+
+        // Query with composite key clause.
+        q = em.createQuery(withLastCompositeColGTClause);
+        q.setParameter("userId", "mevivs");
+        q.setParameter("tweetId", 1);
+        q.setParameter("timeLineId", timeLineId.toString());
+        results = q.getResultList();
+        //TODO::
+//        Assert.assertEquals(1, results.size());
+        
+        em.remove(user);
+
+        em.clear();// optional,just to clear persistence cache.
+    }
     /**
      * @throws java.lang.Exception
      */

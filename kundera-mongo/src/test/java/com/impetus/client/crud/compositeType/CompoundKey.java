@@ -28,7 +28,7 @@ public class CompoundKey
 {
     @Column private String userId;
     @Column private int tweetId;
-    @Column private UUID timeLineId;
+    @Column private String timeLineId;
 
     
     
@@ -44,7 +44,7 @@ public class CompoundKey
      * @param tweetId
      * @param timeLineId
      */
-    public CompoundKey(String userId, int tweetId, UUID timeLineId)
+    public CompoundKey(String userId, int tweetId, String timeLineId)
     {
         this.userId = userId;
         this.tweetId = tweetId;
@@ -70,7 +70,7 @@ public class CompoundKey
     /**
      * @return the timeLineId
      */
-    public UUID getTimeLineId()
+    public String getTimeLineId()
     {
         return timeLineId;
     }

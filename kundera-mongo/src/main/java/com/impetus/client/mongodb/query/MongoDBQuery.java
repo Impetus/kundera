@@ -23,11 +23,13 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Queue;
+import java.util.StringTokenizer;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -171,8 +173,15 @@ public class MongoDBQuery extends QueryImpl
     private BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
     {
         BasicDBObject query = new BasicDBObject();
+        BasicDBObject compositeColumns = new BasicDBObject();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
         for (Object object : filterClauseQueue)
         {
+            boolean isCompositeColumn = false;
+
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
@@ -187,20 +196,30 @@ public class MongoDBQuery extends QueryImpl
 
                 Field f = null;
 
+                // if alias is still present .. means it is an enclosing document search.
+                // 
+                
                 if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {
                     property = "_id";
                     f = (Field) m.getIdAttribute().getJavaMember();
+                } else if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()) && StringUtils.contains(property, '.'))
+                {
+                    // Means it is a case of composite column.
+                    property = property.substring(property.indexOf(".")+1);
+                    isCompositeColumn =  true;
+//                    compositeColumns.add(new BasicDBObject(compositeColumn,value));
                 }
                 else
                 {
-                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                            .getMetamodel(m.getPersistenceUnit());
+//                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+//                            .getMetamodel(m.getPersistenceUnit());
 
                     EntityType entity = metaModel.entity(m.getEntityClazz());
                     String fieldName = m.getFieldName(property);
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
                 }
+                
                 if (value.getClass().isAssignableFrom(String.class) && f != null
                         && !f.getType().equals(value.getClass()))
                 {
@@ -226,66 +245,116 @@ public class MongoDBQuery extends QueryImpl
 
                 if (condition.equals("="))
                 {
-                    query.append(property, value);
+                    if(isCompositeColumn)
+                    {
+                        compositeColumns.put(property,value);
+                    } else
+                    {
+                        query.append(property, value);    
+                    }
+                    
                 }
                 else if (condition.equalsIgnoreCase("like"))
                 {
                     // query.append(property, Pattern.compile(value));
-                    query.append(property, value);
+                    if(isCompositeColumn)
+                    {
+                        compositeColumns.put(property,value);
+                    } else
+                    {
+                        query.append(property, value);    
+                    }
                 }
                 else if (condition.equalsIgnoreCase(">"))
                 {
-                    if (query.containsField(property))
+                    if (isCompositeColumn)
                     {
-                        query.get(property);
-                        query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
+                        compositeColumns.put(property, new BasicDBObject("$gt", value));
+
                     }
                     else
                     {
-                        query.append(property, new BasicDBObject("$gt", value));
+                        if (query.containsField(property))
+                        {
+                            query.get(property);
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
+                        }
+                        else
+                        {
+                            query.append(property, new BasicDBObject("$gt", value));
+                        }
                     }
 
                 }
                 else if (condition.equalsIgnoreCase(">="))
                 {
-                    if (query.containsField(property))
+                    if (isCompositeColumn)
                     {
-                        query.get(property);
-                        query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
+                        compositeColumns.put(property, new BasicDBObject("$gte", value));
+
                     }
                     else
                     {
-                        query.append(property, new BasicDBObject("$gte", value));
-                    }
+                        if (query.containsField(property))
 
+                        {
+                            query.get(property);
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
+                        }
+                        else
+                        {
+                            query.append(property, new BasicDBObject("$gte", value));
+                        }
+                    }
                 }
                 else if (condition.equalsIgnoreCase("<"))
                 {
-                    if (query.containsField(property))
+                    if (isCompositeColumn)
                     {
-                        query.get(property);
-                        query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
+                        compositeColumns.put(property, new BasicDBObject("$lt", value));
+
                     }
                     else
                     {
-                        query.append(property, new BasicDBObject("$lt", value));
+                        if (query.containsField(property))
+                        {
+                            query.get(property);
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
+                        }
+                        else
+                        {
+                            query.append(property, new BasicDBObject("$lt", value));
+                        }
                     }
                 }
                 else if (condition.equalsIgnoreCase("<="))
                 {
-                    if (query.containsField(property))
+                    if (isCompositeColumn)
                     {
-                        query.get(property);
-                        query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
+                        compositeColumns.put(property, new BasicDBObject("$lte", value));
+
                     }
                     else
                     {
-                        query.append(property, new BasicDBObject("$lte", value));
+                        if (query.containsField(property))
+                        {
+                            query.get(property);
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
+                        }
+                        else
+                        {
+                            query.append(property, new BasicDBObject("$lte", value));
+                        }
                     }
                 }
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
+        }
+        
+        if(!compositeColumns.isEmpty())
+        {
+            query.append("_id", compositeColumns);
         }
         return query;
     }
