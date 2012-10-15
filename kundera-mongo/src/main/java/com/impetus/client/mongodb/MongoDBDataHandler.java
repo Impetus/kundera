@@ -616,11 +616,15 @@ final class MongoDBDataHandler
     void populateCompoundKey(DBObject dbObj, EntityMetadata m, MetamodelImpl metaModel, Object id)
     {
         EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-        Iterator<Attribute> iter = compoundKey.getAttributes().iterator();
+//        Iterator<Attribute> iter = compoundKey.getAttributes().iterator();
         BasicDBObject compoundKeyObj = new BasicDBObject();
-        while (iter.hasNext())
+        
+        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+        
+        // To ensure order.
+        for(Field f : fields)
         {
-            Attribute compositeColumn = iter.next();
+            Attribute compositeColumn = compoundKey.getAttribute(f.getName());
 
             compoundKeyObj.put(((AbstractAttribute) compositeColumn).getJPAColumnName(),
                     populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()), ((AbstractAttribute)compositeColumn).getBindableJavaType()));
