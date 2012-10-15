@@ -36,9 +36,9 @@ public final class PropertyIndex
     /** The boost. */
     private float boost = 1.0f;
 
-    private int max;
+    private Integer max;
 
-    private int min;
+    private Integer min;
 
     // /**
     // * The Constructor.
@@ -151,7 +151,7 @@ public final class PropertyIndex
     /**
      * @return the max
      */
-    public int getMax()
+    public Integer getMax()
     {
         return max;
     }
@@ -160,7 +160,7 @@ public final class PropertyIndex
      * @param max
      *            the max to set
      */
-    public void setMax(int max)
+    public void setMax(Integer max)
     {
         this.max = max;
     }
@@ -168,7 +168,7 @@ public final class PropertyIndex
     /**
      * @return the min
      */
-    public int getMin()
+    public Integer getMin()
     {
         return min;
     }
@@ -177,7 +177,7 @@ public final class PropertyIndex
      * @param min
      *            the min to set
      */
-    public void setMin(int min)
+    public void setMin(Integer min)
     {
         this.min = min;
     }
