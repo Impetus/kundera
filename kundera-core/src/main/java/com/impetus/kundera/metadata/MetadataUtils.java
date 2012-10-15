@@ -521,7 +521,12 @@ public class MetadataUtils
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
         Index indexAnn = embeddableClass.getAnnotation(Index.class);
-        if (indexAnn != null)
+        IndexCollection indexCollection = embeddableClass.getAnnotation(IndexCollection.class);
+        if (indexCollection != null && indexCollection.columns() != null)
+        {
+            return true;
+        }
+        else if (indexAnn != null)
         {
             if (indexAnn.index())
             {
@@ -535,14 +540,6 @@ public class MetadataUtils
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
         Index indexAnn = embeddableClass.getAnnotation(Index.class);
-        if (indexAnn != null && indexAnn.index())
-        {
-            String[] columnsToBeIndexed = indexAnn.columns();
-            if (columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
-            {
-                return true;
-            }
-        }
         IndexCollection indexCollection = embeddableClass.getAnnotation(IndexCollection.class);
         if (indexCollection != null && indexCollection.columns() != null)
         {
@@ -555,6 +552,15 @@ public class MetadataUtils
                 }
             }
         }
+        else if (indexAnn != null && indexAnn.index())
+        {
+            String[] columnsToBeIndexed = indexAnn.columns();
+            if (columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 }
