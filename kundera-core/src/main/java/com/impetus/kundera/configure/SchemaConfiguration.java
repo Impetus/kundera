@@ -295,29 +295,6 @@ public class SchemaConfiguration implements Configuration
         }
     }
 
-//    /**
-//     * @param columns
-//     * @param attr
-//     * @return
-//     */
-//    private boolean isIndexable(List<Index> columns, Attribute attr)
-//    {
-//        boolean isIndexable = false;
-//        for (Index column : columns)
-//        {
-//            if (column != null && column.name() != null
-//                    && column.name().equals(((AbstractAttribute) attr).getJavaMember().getName()))
-//            {
-//                isIndexable = true;
-//                break;
-//            }
-//            isIndexable = column != null && column.name() != null ? column.name().equals(
-//                    ((AbstractAttribute) attr).getJavaMember().getName()) : false;
-//
-//        }
-//        return isIndexable;
-//    }
-
     /**
      * Returns list of configured table/column families.
      * 
@@ -358,7 +335,7 @@ public class SchemaConfiguration implements Configuration
     {
         EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo();
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
-        Map<String, PropertyIndex> indexedColumns = IndexProcessor.getIndexesOfEmbeddable(embeddedEntityClass);
+        Map<String, PropertyIndex> indexedColumns = IndexProcessor.getIndexesOnEmbeddable(embeddedEntityClass);
         List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
 
         Set attributes = embeddableType.getAttributes();

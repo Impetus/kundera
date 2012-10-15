@@ -52,7 +52,8 @@ public class IndexProcessor implements MetadataProcessor
         Index idx = clazz.getAnnotation(Index.class);
         IndexCollection indexes = clazz.getAnnotation(IndexCollection.class);
 
-        List<String> columnsNameToBeIndexed;
+        List<String> columnsNameToBeIndexed = new ArrayList<String>();
+        ;
         Map<String, com.impetus.kundera.newannotations.Index> columnsToBeIndexed = new HashMap<String, com.impetus.kundera.newannotations.Index>();
         ;
         if (null != indexes)
@@ -70,9 +71,9 @@ public class IndexProcessor implements MetadataProcessor
                 // metadata.setColToBeIndexed(columnsToBeIndexed);
             }
         }
-        if (null != idx)
+        else if (null != idx)
         {
-            columnsNameToBeIndexed = new ArrayList<String>();
+
             boolean isIndexable = idx.index();
             metadata.setIndexable(isIndexable);
 
@@ -186,7 +187,7 @@ public class IndexProcessor implements MetadataProcessor
      *            entity metadata
      * @return list of indexed columns
      */
-    public static Map<String, PropertyIndex> getIndexesOfEmbeddable(Class<?> entityClazz)
+    public static Map<String, PropertyIndex> getIndexesOnEmbeddable(Class<?> entityClazz)
     {
         Map<String, PropertyIndex> pis = new HashMap<String, PropertyIndex>();
         Index idx = entityClazz.getAnnotation(Index.class);
