@@ -240,10 +240,16 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             if (columnInfo.isIndexable())
             {
                 DBObject keys = new BasicDBObject();
-                keys.put(columnInfo.getColumnName(), getIndexType(columnInfo.getIndexType(), columnInfo.getType()));
+                getIndexType(columnInfo.getIndexType(), keys, columnInfo.getColumnName());
                 DBObject options = new BasicDBObject();
-                options.put("min", columnInfo.getMinValue());
-                options.put("max", columnInfo.getMaxValue());
+                if (columnInfo.getMinValue() != null)
+                {
+                    options.put("min", columnInfo.getMinValue());
+                }
+                if (columnInfo.getMaxValue() != null)
+                {
+                    options.put("max", columnInfo.getMaxValue());
+                }
                 collection.ensureIndex(keys, options);
             }
         }
@@ -254,26 +260,30 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      * @param clazz
      * @return
      */
-    private String getIndexType(String indexType, Class clazz)
+    private void getIndexType(String indexType, DBObject keys, String columnName)
     {
         // TODO validation for indexType and attribute type
 
         if (indexType != null)
         {
-            if (indexType.equals(IndexType.ASC))
+            if (indexType.equals(IndexType.ASC.name()))
             {
-                return IndexType.findByValue(IndexType.ASC);
+                keys.put(columnName, 1);
+                return;
             }
-            else if (indexType.equals(IndexType.DSC))
+            else if (indexType.equals(IndexType.DSC.name()))
             {
-                return IndexType.findByValue(IndexType.DSC);
+                keys.put(columnName, -1);
+                return;
             }
-            else if (indexType.equals(IndexType.GEO2D))
+            else if (indexType.equals(IndexType.GEO2D.name()))
             {
-                return IndexType.findByValue(IndexType.GEO2D);
+                keys.put(columnName, 2d);
+                return;
             }
         }
-        return IndexType.findByValue(IndexType.ASC);
+        keys.put(columnName, 1);
+        return;
     }
 
     /**
@@ -302,21 +312,5 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     private enum IndexType
     {
         ASC, DSC, GEO2D;
-
-        public static String findByValue(IndexType value)
-        {
-            switch (value)
-            {
-            case ASC:
-                return "1";
-            case DSC:
-                return "-1";
-            case GEO2D:
-                return "2D";
-            default:
-                return "1";
-            }
-
-        }
     }
 }

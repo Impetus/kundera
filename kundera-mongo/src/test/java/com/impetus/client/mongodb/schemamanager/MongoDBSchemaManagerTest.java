@@ -17,8 +17,10 @@ import org.junit.Test;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
 
 /**
@@ -68,7 +70,33 @@ public class MongoDBSchemaManagerTest
         Assert.assertTrue(collection.isCapped());
         Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
-        Assert.assertEquals(2, collection.getIndexInfo().size());
+        Assert.assertEquals(3, collection.getIndexInfo().size());
+        int count = 0;
+        for (DBObject dbObject : collection.getIndexInfo())
+        {
+            if (dbObject.get("name").equals("PERSON_NAME_1"))
+            {
+                Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
+                Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
+                count++;
+            }
+            else if (dbObject.get("name").equals("AGE_-1"))
+            {
+                Assert.assertEquals(new Integer(100), dbObject.get("min"));
+                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
+                count++;
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(-100), dbObject.get("min"));
+                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", 2d)));
+                count++;
+            }
+        }
+        Assert.assertEquals(3, count);
     }
 
     /**

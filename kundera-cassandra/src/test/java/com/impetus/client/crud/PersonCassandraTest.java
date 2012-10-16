@@ -103,8 +103,8 @@ public class PersonCassandraTest extends BaseTest
     {
         // cassandraSetUp();
         // CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         // KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
         Object p1 = prepareData("1", 10);
@@ -195,7 +195,7 @@ public class PersonCassandraTest extends BaseTest
 
         p1 = prepareData("1", 10);
         em.persist(p1);
-        
+
         query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
 
         results = query.getResultList();
@@ -203,8 +203,8 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
 
-        
     }
+
     @Test
     public void onRefreshCassandra() throws Exception
     {
@@ -364,7 +364,8 @@ public class PersonCassandraTest extends BaseTest
     }
 
     @Test
-    public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
+            SchemaDisagreementException
     {
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
@@ -379,12 +380,13 @@ public class PersonCassandraTest extends BaseTest
         em.remove(person);
         em.clear(); // just to make sure that not to be picked up from cache.
         TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
-        
+
         List<PersonCassandra> results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        
+
     }
+
     /**
      * Tear down.
      * 
