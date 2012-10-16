@@ -32,110 +32,103 @@ import org.junit.Test;
 
 import com.impetus.client.twitter.entities.Role;
 import com.impetus.client.twitter.entities.User;
+import com.impetus.client.utils.MongoUtils;
 
 /**
  * The Class UserRoleTest.
  */
-public class UserRoleTest
-{
+public class UserRoleTest {
 
-    /** The em. */
-    private EntityManager em;
+	EntityManagerFactory emf;
+	/** The em. */
+	private EntityManager em;
 
-    /**
-     * Sets the up.
-     */
-    @Before
-    public void setUp()
-    {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("mongoTest");
-        em = emf.createEntityManager();
-    }
+	/**
+	 * Sets the up.
+	 */
+	@Before
+	public void setUp() {
+		emf = Persistence.createEntityManagerFactory("mongoTest");
+		em = emf.createEntityManager();
+	}
 
-    /**
-     * Test association.
-     */
-    @Test
-    public void testPersist()
-    {
-        Role rol = new Role();
-        rol.setRolId(1);
-        rol.setName("Administrador");
-        User u = new User();
-        u.setAge(15);
-        u.setEmail("usuario1@infos.com");
-        u.setName("usuario1");
-        u.setUserId(1);
-        u.setLastName("apellido1");
-        User u2 = new User();
-        u2.setAge(17);
-        u2.setEmail("usuario2@infos.com");
-        u2.setName("usuario2");
-        u2.setUserId(2);
-        u2.setLastName("apellido2");
-        u.setUserRol(rol);
-        u2.setUserRol(rol);
-        List<User> users = new ArrayList<User>();
-        users.add(u);
-        users.add(u2);
-        rol.setSegUsuarioList(users);
-        em.persist(rol);
+	/**
+	 * Test association.
+	 */
+	@Test
+	public void testPersist() {
+		Role rol = new Role();
+		rol.setRolId(1);
+		rol.setName("Administrador");
+		User u = new User();
+		u.setAge(15);
+		u.setEmail("usuario1@infos.com");
+		u.setName("usuario1");
+		u.setUserId(1);
+		u.setLastName("apellido1");
+		User u2 = new User();
+		u2.setAge(17);
+		u2.setEmail("usuario2@infos.com");
+		u2.setName("usuario2");
+		u2.setUserId(2);
+		u2.setLastName("apellido2");
+		u.setUserRol(rol);
+		u2.setUserRol(rol);
+		List<User> users = new ArrayList<User>();
+		users.add(u);
+		users.add(u2);
+		rol.setSegUsuarioList(users);
+		em.persist(rol);
 
-    }
+	}
 
-    /**
-     * Test findby role.
-     */
-    @Test
-    public void testFindbyRole()
-    {
-        testPersist();
-        String query = "Select r from Role r";
-        Query q = em.createQuery(query);
-        List<Role> roles = q.getResultList();
-        Assert.assertNotNull(roles);
-        Assert.assertEquals(1, roles.size());
-    }
+	/**
+	 * Test findby role.
+	 */
+	@Test
+	public void testFindbyRole() {
+		testPersist();
+		String query = "Select r from Role r";
+		Query q = em.createQuery(query);
+		List<Role> roles = q.getResultList();
+		Assert.assertNotNull(roles);
+		Assert.assertEquals(1, roles.size());
+	}
 
-    /**
-     * Test findby user.
-     */
-    @Test
-    public void testFindbyUser()
-    {
-        testPersist();
-        List<User> users = getAllUsers();
-        Assert.assertNotNull(users);
-        Assert.assertEquals(2, users.size());
-    }
+	/**
+	 * Test findby user.
+	 */
+	@Test
+	public void testFindbyUser() {
+		testPersist();
+		List<User> users = getAllUsers();
+		Assert.assertNotNull(users);
+		Assert.assertEquals(2, users.size());
+	}
 
-    /**
-     * Tear down.
-     */
-    @After
-    public void tearDown()
-    {
-        Role rol = em.find(Role.class, 1);
-        if (rol != null)
-        {
-            em.remove(rol);
-        }
+	/**
+	 * Tear down.
+	 */
+	@After
+	public void tearDown() {
+		Role rol = em.find(Role.class, 1);
+		if (rol != null) {
+			em.remove(rol);
+		}
 
+		MongoUtils.dropDatabase(emf, "mongoTest");
+		em.close();
 
-        em.close();
+		em = null;
+	}
 
-        em = null;
-    }
-
-
-    /**
-     * @return
-     */
-    private List<User> getAllUsers()
-    {
-        String query = "Select u from User u";
-        Query q = em.createQuery(query);
-        List<User> users = q.getResultList();
-        return users;
-    }
+	/**
+	 * @return
+	 */
+	private List<User> getAllUsers() {
+		String query = "Select u from User u";
+		Query q = em.createQuery(query);
+		List<User> users = q.getResultList();
+		return users;
+	}
 }

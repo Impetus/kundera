@@ -10,14 +10,12 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.commons.collections.MapUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoUUID;
 import com.impetus.client.utils.MongoUtils;
-import com.mongodb.Mongo;
 
 public class StudentMongoUUIDTest extends Base
 {

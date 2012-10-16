@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Queue;
-import java.util.StringTokenizer;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;

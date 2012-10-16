@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 
 /**
@@ -34,6 +35,9 @@ import com.impetus.kundera.loader.KunderaAuthenticationException;
  */
 public class MongoAuthenticationTest extends BaseTest
 {
+    private EntityManagerFactory emf;
+
+    private String pu;
 
     /**
      * Sets the up.
@@ -55,7 +59,8 @@ public class MongoAuthenticationTest extends BaseTest
     {
         try
         {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("validAuthenticationMongoPu");
+            pu = "validAuthenticationMongoPu";
+            emf = Persistence.createEntityManagerFactory(pu);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -73,11 +78,11 @@ public class MongoAuthenticationTest extends BaseTest
     @Test
     public void authenticateWithInValidCredentials()
     {
-        EntityManagerFactory emf = null;
         EntityManager em = null;
         try
         {
-            emf = Persistence.createEntityManagerFactory("invalidAuthenticationMongoPu");
+            pu = "invalidAuthenticationMongoPu";
+            emf = Persistence.createEntityManagerFactory(pu);
             em = emf.createEntityManager();
             Assert.fail("Shouldn't be called");
         }
@@ -98,7 +103,8 @@ public class MongoAuthenticationTest extends BaseTest
     {
         try
         {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("mongoTest");
+            pu = "mongoTest";
+            emf = Persistence.createEntityManagerFactory(pu);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -119,6 +125,6 @@ public class MongoAuthenticationTest extends BaseTest
     @After
     public void tearDown() throws Exception
     {
-        // Do nothing.
+//        MongoUtils.dropDatabase(emf, pu);
     }
 }

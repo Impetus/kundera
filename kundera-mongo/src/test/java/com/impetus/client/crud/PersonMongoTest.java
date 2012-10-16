@@ -30,10 +30,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.utils.MongoUtils;
+
 public class PersonMongoTest extends BaseTest
 {
 
-    /** The emf. */
+    private static final String _PU = "mongoTest";
+
+	/** The emf. */
     private static EntityManagerFactory emf;
 
     /** The em. */
@@ -50,7 +54,7 @@ public class PersonMongoTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("mongoTest");
+        emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -201,5 +205,6 @@ public class PersonMongoTest extends BaseTest
         {
             em.remove(val);
         }
+        MongoUtils.dropDatabase(emf, _PU);
     }
 }
