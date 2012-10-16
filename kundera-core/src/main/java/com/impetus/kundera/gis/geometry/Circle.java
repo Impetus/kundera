@@ -16,48 +16,58 @@
 package com.impetus.kundera.gis.geometry;
 
 /**
- * Geometric Coordinate implementation 
+ * Geometric class representing circle 
  * @author amresh.singh
  */
-public class Coordinate extends com.vividsolutions.jts.geom.Coordinate 
+public class Circle
 {
-    /**
-     * 
-     */
-    public Coordinate()
+    private Coordinate centre;
+    
+    private double radius;
+    
+    public Circle(double x, double y, double r)
     {
-        super();
-        
+        setCentre(new Coordinate(x, y));
+        setRadius(r);
+    }
+    
+    public Circle(Coordinate centre, double radius)
+    {
+        this.centre = centre;
+        this.radius = radius;
+    }  
+  
+
+    /**
+     * @return the centre
+     */
+    public Coordinate getCentre()
+    {
+        return centre;
     }
 
     /**
-     * @param c
+     * @param centre the centre to set
      */
-    public Coordinate(com.vividsolutions.jts.geom.Coordinate c)
+    public void setCentre(Coordinate centre)
     {
-        super(c);
-        
+        this.centre = centre;
     }
 
     /**
-     * @param x
-     * @param y
-     * @param z
+     * @return the radius
      */
-    public Coordinate(double x, double y, double z)
+    public double getRadius()
     {
-        super(x, y, z);
-        
+        return radius;
     }
 
     /**
-     * @param x
-     * @param y
+     * @param radius the radius to set
      */
-    public Coordinate(double x, double y)
+    public void setRadius(double radius)
     {
-        super(x, y);
-        
-    }    
+        this.radius = radius;
+    }  
 
 }

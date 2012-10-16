@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
+import com.impetus.client.mongodb.index.IndexType;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -308,9 +309,5 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         // TODO Auto-generated method stub
         return true;
     }
-
-    private enum IndexType
-    {
-        ASC, DSC, GEO2D;
-    }
+   
 }

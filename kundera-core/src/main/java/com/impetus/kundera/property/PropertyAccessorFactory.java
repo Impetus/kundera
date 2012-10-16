@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.property.accessor.BigDecimalAccessor;
 import com.impetus.kundera.property.accessor.BigIntegerAccessor;
 import com.impetus.kundera.property.accessor.BooleanAccessor;
@@ -40,6 +41,7 @@ import com.impetus.kundera.property.accessor.FloatAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.property.accessor.PointAccessor;
 import com.impetus.kundera.property.accessor.SQLDateAccessor;
 import com.impetus.kundera.property.accessor.SQLTimeAccessor;
 import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
@@ -103,6 +105,9 @@ public class PropertyAccessorFactory
         map.put(Enum.class, new EnumAccessor());
 
         map.put(UUID.class, new UUIDAccessor());
+        
+        //Accessor for Geolocation classes
+        map.put(Point.class, new PointAccessor());
     }
 
     /** Making String Accessor easy to access. */

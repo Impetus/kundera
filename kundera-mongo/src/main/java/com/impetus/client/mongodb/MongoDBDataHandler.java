@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -241,10 +242,20 @@ final class MongoDBDataHandler
             if (column.getJavaType().isAssignableFrom(Map.class))
             {
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
-            } else if(value instanceof BasicDBList)
+            } 
+            
+            else if (column.getJavaType().isAssignableFrom(Point.class))
+            {
+                BasicDBList list = (BasicDBList) value;
+                double x = Double.parseDouble(list.get(0).toString());
+                double y = Double.parseDouble(list.get(1).toString());
+                Point point = new Point(x, y);
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);              
+            }
+            else if(value instanceof BasicDBList)
             {
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), Arrays.asList(((BasicDBList)value).toArray()));
-            }
+            }            
             else
             {
                 value = populateValue(value, value.getClass());
@@ -359,20 +370,27 @@ final class MongoDBDataHandler
                 dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
             }           
 
-        }
-        else if (column.getJavaType().isAssignableFrom(Map.class))
+        }  
+        else if(column.getJavaType().isAssignableFrom(Map.class))
         {
             Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
             dbObj.put(((AbstractAttribute) column).getJPAColumnName(), builder.get());
         }
+        
+        else if(column.getJavaType().isAssignableFrom(Point.class))
+        {           
+            Point p = (Point) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+            double[] coordinate = new double[] { p.getX(), p.getY() };
+            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);           
+        }     
+        
         else
         {
             // TODO : this should have been handled by DocumentObjectMapper.
             Object valObj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             if (valObj != null)
             {
-
                 dbObj.put(
                         ((AbstractAttribute) column).getJPAColumnName(),
                         valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString() : populateValue(valObj,

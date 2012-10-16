@@ -24,8 +24,19 @@ import com.vividsolutions.jts.geom.PrecisionModel;
  * Geometric Point implementation 
  * @author amresh.singh
  */
-public class Point extends com.vividsolutions.jts.geom.Point
-{  
+public class Point extends com.vividsolutions.jts.geom.Point 
+{     
+    
+    public Point(com.vividsolutions.jts.geom.Point point)
+    {
+        super(point.getCoordinate(), point.getPrecisionModel(), point.getSRID());
+    }    
+    
+    public Point(double x, double y)
+    {       
+        super(new Coordinate(x, y), new PrecisionModel(), 0);
+    }
+    
     
     /**
      * @param coordinates
@@ -47,6 +58,5 @@ public class Point extends com.vividsolutions.jts.geom.Point
         super(coordinate, precisionModel, SRID);
         
     }   
-    
    
 }

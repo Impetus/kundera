@@ -15,6 +15,8 @@
  */
 package com.impetus.client.cassandra.index;
 
+import org.apache.cassandra.thrift.IndexType;
+
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -53,6 +55,26 @@ public class CassandraIndexHelper
                 && m.getType().isSuperColumnFamilyMetadata() && !m.isCounterColumnType();       
 
         return invertedIndexingApplicable;
+    }
+    
+    /**
+     * @param indexType
+     * @return
+     */
+    public static IndexType getIndexType(String indexType)
+    {
+        if (indexType != null)
+        {
+            if (indexType.equals(IndexType.KEYS.name()))
+            {
+                return IndexType.KEYS;
+            }
+            else if (indexType.equals(IndexType.CUSTOM.name()))
+            {
+                return IndexType.CUSTOM;
+            }
+        }
+        return IndexType.KEYS;
     }
 
 }

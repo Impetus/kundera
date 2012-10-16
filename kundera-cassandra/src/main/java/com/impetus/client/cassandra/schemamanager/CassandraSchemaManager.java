@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
+import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.DataCenter;
@@ -832,8 +833,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         ColumnDef columnDef = new ColumnDef();
                         if (columnInfo.isIndexable())
-                        {
-                            columnDef.setIndex_type(getIndexType(columnInfo.getIndexType()));
+                        {                            
+                            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(columnInfo.getIndexType()));
                         }
                         columnDef.setName(columnInfo.getColumnName().getBytes());
                         columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
@@ -854,27 +855,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         setColumnFamilyProperties(cfDef, cFProperties);
         return cfDef;
-    }
-
-    /**
-     * @param indexType
-     * @return
-     */
-    private IndexType getIndexType(String indexType)
-    {
-        if (indexType != null)
-        {
-            if (indexType.equals(IndexType.KEYS.name()))
-            {
-                return IndexType.KEYS;
-            }
-            else if (indexType.equals(IndexType.CUSTOM.name()))
-            {
-                return IndexType.CUSTOM;
-            }
-        }
-        return IndexType.KEYS;
-    }
+    }    
 
     /**
      * @param tableInfo
