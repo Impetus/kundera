@@ -16,11 +16,11 @@
 package com.impetus.client.gis;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
@@ -31,7 +31,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 
 @Entity
-@Table(name="PERSON_LOCATIONS", schema = "KunderaExamples@mongoTest")
+@Table(name="PERSON_LOCATION", schema = "KunderaExamples@mongoTest")
 @IndexCollection(columns = { @Index(name = "currentLocation", type = "GEO2D")})
 public class Person
 {
@@ -45,6 +45,8 @@ public class Person
     @Column(name = "CURRENT_LOCATION")
     private Point currentLocation;
 
+    @Embedded
+    private Vehicle vehicleLocation;
     /**
      * @return the personId
      */
@@ -92,5 +94,22 @@ public class Person
     {
         this.currentLocation = currentLocation;
     } 
+
+    /**
+     * @return the vehicleLocation
+     */
+    public Vehicle getVehicleLocation()
+    {
+        return vehicleLocation;
+    }
+
+    /**
+     * @param vehicleLocation
+     *            the vehicleLocation to set
+     */
+    public void setVehicleLocation(Vehicle vehicleLocation)
+    {
+        this.vehicleLocation = vehicleLocation;
+    }
 
 }

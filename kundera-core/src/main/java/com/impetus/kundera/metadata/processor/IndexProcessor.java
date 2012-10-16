@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -142,7 +143,7 @@ public class IndexProcessor implements MetadataProcessor
     }
 
     /**
-     * Returns list of indexed columns
+     * Returns list of indexed columns on {@code @Embeddable} entity
      * 
      * @param entityMetadata
      *            entity metadata

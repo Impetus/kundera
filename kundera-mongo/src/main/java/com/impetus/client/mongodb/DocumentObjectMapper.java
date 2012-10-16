@@ -28,6 +28,7 @@ import javax.persistence.metamodel.Attribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -58,12 +59,13 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static BasicDBObject getDocumentFromObject(Object obj, Set<Attribute> columns) throws PropertyAccessException
+    public static BasicDBObject getDocumentFromObject(Object obj, Set<Attribute> columns)
+            throws PropertyAccessException
     {
         BasicDBObject dBObj = new BasicDBObject();
 
-//        for (Column column : columns)
-        for(Attribute column : columns)
+        // for (Column column : columns)
+        for (Attribute column : columns)
         {
             Field f = (Field) column.getJavaMember();
             // TODO: This is not a good logic and need to be modified
@@ -73,6 +75,15 @@ public class DocumentObjectMapper
             {
                 Object val = PropertyAccessorHelper.getObject(obj, f);
                 dBObj.put(column.getName(), val);
+            }
+            else if (f.getType().isAssignableFrom(Point.class))
+            {
+                Point p = (Point) PropertyAccessorHelper.getObject(obj, (Field) column.getJavaMember());
+                if (p != null)
+                {
+                    double[] coordinate = new double[] { p.getX(), p.getY() };
+                    dBObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);
+                }
             }
             else
             {
@@ -127,11 +138,26 @@ public class DocumentObjectMapper
         try
         {
             Object obj = clazz.newInstance();
-//            for (Column column : columns)
-            for(Attribute column : columns)
+            // for (Column column : columns)
+            for (Attribute column : columns)
             {
-                Object val = documentObj.get(((AbstractAttribute)column).getJPAColumnName());
-                PropertyAccessorHelper.set(obj, (Field) column.getJavaMember(), val);
+                Object val = documentObj.get(((AbstractAttribute) column).getJPAColumnName());
+                if (column.getJavaType().isAssignableFrom(Point.class))
+                {
+                    Point point = null;
+                    if(val != null)
+                    {
+                        BasicDBList list = (BasicDBList) val;
+                        double x = Double.parseDouble(list.get(0).toString());
+                        double y = Double.parseDouble(list.get(1).toString());
+                        point = new Point(x, y);
+                    }                    
+                    PropertyAccessorHelper.set(obj, (Field) column.getJavaMember(), point);
+                }
+                else
+                {
+                    PropertyAccessorHelper.set(obj, (Field) column.getJavaMember(), val);
+                }
             }
             return obj;
 

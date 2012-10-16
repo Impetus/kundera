@@ -10,30 +10,22 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.commons.collections.MapUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoUUID;
+import com.impetus.client.utils.MongoUtils;
+import com.mongodb.Mongo;
 
 public class StudentMongoUUIDTest extends Base
 {
-
-    private static final String keyspace = "KunderaMongoDataType";
-
     private EntityManagerFactory emf;
 
     @Before
     public void setUp() throws Exception
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            createSchema();
-        }
         emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
     }
 
@@ -41,17 +33,9 @@ public class StudentMongoUUIDTest extends Base
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoUUID.class, getMaxValue(UUID.class)));
         em.remove(em.find(StudentMongoUUID.class, getMinValue(UUID.class)));
+        MongoUtils.dropDatabase(emf, "MongoDataTypeTest");
         emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            stopCluster();
-        }
     }
 
     @Test

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 

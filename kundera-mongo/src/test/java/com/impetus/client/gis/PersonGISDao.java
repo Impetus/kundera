@@ -19,19 +19,25 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import com.impetus.client.utils.MongoUtils;
+
 /**
- * DAO for Geolocation processing for {@link Person} entity 
+ * DAO for Geolocation processing for {@link Person} entity
+ * 
  * @author amresh.singh
  */
 public class PersonGISDao
 {
-    
+
     private EntityManager em;
 
     private EntityManagerFactory emf;
 
+    private String pu;
+
     public PersonGISDao(String persistenceUnitName)
     {
+        this.pu = persistenceUnitName;
         if (emf == null)
         {
             try
@@ -67,6 +73,7 @@ public class PersonGISDao
     {
         if (emf != null)
         {
+            MongoUtils.dropDatabase(emf, pu);
             emf.close();
         }
     }
@@ -74,11 +81,21 @@ public class PersonGISDao
     public void addPerson(Person person)
     {
         em.persist(person);
-    }   
-    
+    }
+
     public Person findPerson(int personId)
     {
         return em.find(Person.class, 1);
+    }
+
+    public void removePerson(Person person)
+    {
+        em.remove(person);
+    }
+
+    public void mergePerson(Person person)
+    {
+        em.merge(person);
     }
 
 }

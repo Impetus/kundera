@@ -246,11 +246,29 @@ final class MongoDBDataHandler
             
             else if (column.getJavaType().isAssignableFrom(Point.class))
             {
-                BasicDBList list = (BasicDBList) value;
-                double x = Double.parseDouble(list.get(0).toString());
-                double y = Double.parseDouble(list.get(1).toString());
-                Point point = new Point(x, y);
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);              
+                BasicDBList list = (BasicDBList) value;                
+                
+                Object xObj = list.get(0);
+                Object yObj = list.get(1);
+                
+                if(xObj != null && yObj != null)
+                {
+                    try
+                    {
+                        double x = Double.parseDouble(xObj.toString());
+                        double y = Double.parseDouble(yObj.toString());
+                        
+                        Point point = new Point(x, y);
+                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);   
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        log.warn("Error while reading geolocation data for column " + column 
+                                + ";Reason - possible corrupt data. " + e.getMessage());
+                    }      
+                    
+                }
+                           
             }
             else if(value instanceof BasicDBList)
             {
@@ -381,10 +399,12 @@ final class MongoDBDataHandler
         else if(column.getJavaType().isAssignableFrom(Point.class))
         {           
             Point p = (Point) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-            double[] coordinate = new double[] { p.getX(), p.getY() };
-            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);           
-        }     
-        
+            if(p != null)
+            {
+                double[] coordinate = new double[] { p.getX(), p.getY() };
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);
+            }                      
+        }       
         else
         {
             // TODO : this should have been handled by DocumentObjectMapper.

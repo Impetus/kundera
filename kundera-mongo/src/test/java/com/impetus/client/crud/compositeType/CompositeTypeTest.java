@@ -96,6 +96,7 @@ public class CompositeTypeTest
         Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
+        // deleting composite 
         em.remove(result);
 
         em.clear();// optional,just to clear persistence cache.
