@@ -129,7 +129,9 @@ public class CompositeTypeTest
         final String withBothCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
         final String withAllCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         final String withLastCompositeColGTClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
-    
+
+        final String withSelectiveCompositeColClause = "Select u.key from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+
         // query over 1 composite and 1 non-column
         
         // query with no clause.
@@ -181,7 +183,16 @@ public class CompositeTypeTest
         results = q.getResultList();
         //TODO::
 //        Assert.assertEquals(1, results.size());
-        
+
+        // Query with composite key with selective clause.
+        q = em.createQuery(withSelectiveCompositeColClause);
+        q.setParameter("userId", "mevivs");
+        q.setParameter("tweetId", 1);
+        q.setParameter("timeLineId", timeLineId.toString());
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getTweetBody());
+
         em.remove(user);
 
         em.clear();// optional,just to clear persistence cache.
