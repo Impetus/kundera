@@ -103,8 +103,8 @@ public class PersonCassandraTest extends BaseTest
     {
         // cassandraSetUp();
         // CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
 
         // KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
         Object p1 = prepareData("1", 10);
