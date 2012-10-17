@@ -50,7 +50,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
  */
 public class KunderaQuery
 {
-
     /** The Constant SINGLE_STRING_KEYWORDS. */
     public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM",
             "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
@@ -59,7 +58,7 @@ public class KunderaQuery
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN" };
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
-    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", ">", ">=", "<", "<=" };
+    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b",

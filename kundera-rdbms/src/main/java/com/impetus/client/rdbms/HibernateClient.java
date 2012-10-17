@@ -28,6 +28,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -243,7 +244,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             else
             {
-
                 s.update(entity);
                 tx.commit();
             }
@@ -472,7 +472,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         name != null ? name : r)
                         && rel != null
                         && !rel.getProperty().isAnnotationPresent(ManyToMany.class)
-                        && !rel.getProperty().isAnnotationPresent(OneToMany.class))
+                        && !rel.getProperty().isAnnotationPresent(OneToMany.class)
+                        && (rel.getProperty().isAnnotationPresent(OneToOne.class) && StringUtils.isBlank(rel
+                                .getMappedBy())))
                 {
                     q.addScalar(name != null ? name : r);
                 }

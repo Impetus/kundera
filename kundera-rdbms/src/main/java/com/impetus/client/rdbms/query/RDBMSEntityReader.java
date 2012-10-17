@@ -294,7 +294,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                         r != null ? r : relation)
                         && rel != null
                         && !rel.getProperty().isAnnotationPresent(ManyToMany.class)
-                        && !rel.getProperty().isAnnotationPresent(OneToMany.class))
+                        && !rel.getProperty().isAnnotationPresent(OneToMany.class)
+                        && (rel.getProperty().isAnnotationPresent(OneToOne.class) && StringUtils.isBlank(rel
+                                .getMappedBy())))
                 {
                     queryBuilder.append(", ");
                     queryBuilder.append(aliasName);

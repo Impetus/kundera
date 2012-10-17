@@ -89,7 +89,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
 
     protected RDBMSCli cli;
 
@@ -217,23 +217,22 @@ public abstract class AssociationBase
 
                 }
                 if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
-                {
-                    if (!HBaseCli.isStarted())
-                    {
-                        HBaseCli.startCluster();
-                    }
-                    HBaseCli.createTable("PERSONNEL");
-                    HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
-                    HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
-
-                    HBaseCli.createTable("ADDRESS");
-                    HBaseCli.addColumnFamily("ADDRESS", "STREET");
-                    HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
-
-                    HBaseCli.createTable("PERSONNEL_ADDRESS");
-                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "ADDRESS_ID");
-                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
-                    HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
+                {/*
+                  * if (!HBaseCli.isStarted()) { HBaseCli.startCluster(); }
+                  * HBaseCli.createTable("PERSONNEL");
+                  * HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
+                  * HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
+                  * 
+                  * HBaseCli.createTable("ADDRESS");
+                  * HBaseCli.addColumnFamily("ADDRESS", "STREET");
+                  * HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
+                  * 
+                  * HBaseCli.createTable("PERSONNEL_ADDRESS");
+                  * HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "ADDRESS_ID");
+                  * HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
+                  * HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
+                  * "JoinColumns");
+                  */
                 }
                 if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
                 {
