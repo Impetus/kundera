@@ -15,14 +15,18 @@
  */
 package com.impetus.kundera.gis.geometry;
 
-
-
 /**
- * Geometric Triangle implementation 
+ * Geometric Triangle implementation
+ * 
  * @author amresh.singh
  */
 public class Triangle extends com.vividsolutions.jts.geom.Triangle
 {
+
+    public Triangle(double x1, double y1, double x2, double y2, double x3, double y3)
+    {
+        super(new Coordinate(x1, y1), new Coordinate(x2, y2), new Coordinate(x3, y3));
+    }
 
     /**
      * @param p0
