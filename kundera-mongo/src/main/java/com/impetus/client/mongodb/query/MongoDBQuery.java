@@ -36,6 +36,7 @@ import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.client.mongodb.query.gis.GeospatialQuery;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
+import com.impetus.client.mongodb.query.gis.NearQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Circle;
@@ -245,120 +246,135 @@ public class MongoDBQuery extends QueryImpl
                 // property = enclosingDocumentName + "." + property;
                 // }
 
-                if (condition.equals("="))
-                {
-                    if(isCompositeColumn)
-                    {
-                        compositeColumns.put(property,value);
-                    } else
-                    {
-                        query.append(property, value);    
-                    }
                     
-                }
-                else if (condition.equalsIgnoreCase("like"))
+                // Query could be geospatial in nature
+                if (f.getType().equals(Point.class))
                 {
-                    // query.append(property, Pattern.compile(value));
-                    if(isCompositeColumn)
-                    {
-                        compositeColumns.put(property,value);
-                    } else
-                    {
-                        query.append(property, value);    
-                    }
-                }
-                else if (condition.equalsIgnoreCase(">"))
-                {
-                    if (isCompositeColumn)
-                    {
-                        compositeColumns.put(property, new BasicDBObject("$gt", value));
 
-                    }
-                    else
+                    if (condition.equalsIgnoreCase("in"))
                     {
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gt", value));
-                        }
-                    }
-
-                }
-                else if (condition.equalsIgnoreCase(">="))
-                {
-                    if (isCompositeColumn)
-                    {
-                        compositeColumns.put(property, new BasicDBObject("$gte", value));
-
-                    }
-                    else
-                    {
-                        if (query.containsField(property))
-
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gte", value));
-                        }
-                    }
-                }
-                else if (condition.equalsIgnoreCase("<"))
-                {
-                    if (isCompositeColumn)
-                    {
-                        compositeColumns.put(property, new BasicDBObject("$lt", value));
-
-                    }
-                    else
-                    {
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lt", value));
-                        }
-                    }
-                }
-                else if (condition.equalsIgnoreCase("<="))
-                {
-                    if (isCompositeColumn)
-                    {
-                        compositeColumns.put(property, new BasicDBObject("$lte", value));
-
-                    }
-                    else
-                    {
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lte", value));
-                        }
-                    }
-                }
-                else if (condition.equalsIgnoreCase("in"))
-                {                   
-                    //Query could be geospatial in nature
-                    if(f.getType().equals(Point.class))
-                    {
-                        GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(value);
+                        GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory
+                                .getGeospatialQueryImplementor(value);
                         query = geospatialQueryimpl.createGeospatialQuery(property, value);
-                    }           
-                    
+                    }
+                    else if(condition.equals(">") || condition.equals(">=") || condition.equals("<")
+                            || condition.equals("<="))
+                    {
+                        query = new NearQuery().createNearQuery(property, value, query);
+                    }
+
+                } 
+                else
+                {
+                    if (condition.equals("="))
+                    {
+                        if(isCompositeColumn)
+                        {
+                            compositeColumns.put(property,value);
+                        } else
+                        {
+                            query.append(property, value);    
+                        }
+                        
+                    }
+                    else if (condition.equalsIgnoreCase("like"))
+                    {
+                        // query.append(property, Pattern.compile(value));
+                        if(isCompositeColumn)
+                        {
+                            compositeColumns.put(property,value);
+                        } else
+                        {
+                            query.append(property, value);    
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase(">"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$gt", value));
+
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$gt", value));
+                            }
+                        }
+
+                    }
+                    else if (condition.equalsIgnoreCase(">="))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$gte", value));
+
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$gte", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$lt", value));
+
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$lt", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<="))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$lte", value));
+
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$lte", value));
+                            }
+                        }
+                    }
                 }
+                
+                
+                
+                
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }

@@ -54,11 +54,15 @@ public class MongoGISTest
         addPersons();
         findPerson();
 
+        //Within Queries
         findWithinCircle();
         findWithinTriangle();
         findWithinPolygon();
         findWithinRectangle();
 
+        //Near Queries
+        findNear();
+        
         updatePerson();
         removePerson();
     }
@@ -145,8 +149,6 @@ public class MongoGISTest
     {
         dao.createEntityManager();
 
-        System.out.println("findWithinPolygon\n----------------------\n");
-
         GeometryFactory factory = new GeometryFactory();
 
         Coordinate[] coordinates = new Coordinate[6];
@@ -191,6 +193,17 @@ public class MongoGISTest
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 4);
+        dao.closeEntityManager();
+    }
+    
+    private void findNear()
+    {
+        dao.createEntityManager();
+        
+        List<Person> persons = dao.findNear(5.0, 5.0, 2.0);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 13);
         dao.closeEntityManager();
     }
 

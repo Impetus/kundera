@@ -26,6 +26,7 @@ import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.gis.geometry.Circle;
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Envelope;
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
 import com.impetus.kundera.gis.geometry.Triangle;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -169,6 +170,17 @@ public class PersonGISDao
         Envelope envelope = new Envelope(x1, x2, y1, y2);
         Query q = em.createQuery("Select p from Person p where p.currentLocation IN :envelope");
         q.setParameter("envelope", envelope);
+        List<Person> persons = q.getResultList();
+        return persons;
+    }
+    
+    public List<Person> findNear(double x, double y, double maxDistance)
+    {
+        Point point = new Point(x, y);
+        
+        Query q = em.createQuery("Select p from Person p where p.currentLocation > :point AND p.currentLocation < :maxDistance");
+        q.setParameter("point", point);
+        q.setParameter("maxDistance", maxDistance);
         List<Person> persons = q.getResultList();
         return persons;
     }
