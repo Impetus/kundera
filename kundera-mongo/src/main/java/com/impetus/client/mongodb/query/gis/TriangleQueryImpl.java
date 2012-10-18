@@ -29,7 +29,7 @@ public class TriangleQueryImpl implements GeospatialQuery
 {
 
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape)
+    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
     {
         List triangleList = new ArrayList();
         
@@ -39,8 +39,9 @@ public class TriangleQueryImpl implements GeospatialQuery
         triangleList.add(new double[]{triangle.p1.x, triangle.p1.y}); // B
         triangleList.add(new double[]{triangle.p2.x, triangle.p2.y}); // C
         
-        BasicDBObject query = new BasicDBObject(geolocationColumnName, new BasicDBObject("$within",
-                new BasicDBObject("$polygon", triangleList)));  
+        if(query == null) query = new BasicDBObject();       
+        
+        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));  
         
         return query;
     }

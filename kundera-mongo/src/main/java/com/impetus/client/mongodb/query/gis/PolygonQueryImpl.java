@@ -29,7 +29,7 @@ import com.mongodb.BasicDBObject;
 public class PolygonQueryImpl implements GeospatialQuery
 {
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape)
+    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
     {
         List polygonList = new ArrayList();
         
@@ -40,8 +40,9 @@ public class PolygonQueryImpl implements GeospatialQuery
             polygonList.add(new double[] {c.x, c.y});
         }       
         
-        BasicDBObject query = new BasicDBObject(geolocationColumnName, new BasicDBObject("$within",
-                new BasicDBObject("$polygon", polygonList)));  
+        if(query == null) query = new BasicDBObject();       
+        
+        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", polygonList)));  
         
         return query;
     }

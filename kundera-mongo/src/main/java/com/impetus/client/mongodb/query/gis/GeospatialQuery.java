@@ -23,6 +23,6 @@ import com.mongodb.BasicDBObject;
  */
 public interface GeospatialQuery
 {
-    BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape);
+    BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query);
 
 }

@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.gis.geometry;
 
+import com.impetus.kundera.gis.SurfaceType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -26,6 +27,9 @@ import com.vividsolutions.jts.geom.PrecisionModel;
  */
 public class Point extends com.vividsolutions.jts.geom.Point 
 {   
+    /** Surface type on which this point is based*/
+    private SurfaceType surfaceType  = SurfaceType.FLAT;   
+    
     public Point(com.vividsolutions.jts.geom.Point point)
     {
         super(point.getCoordinate(), point.getPrecisionModel(), point.getSRID());
@@ -56,6 +60,22 @@ public class Point extends com.vividsolutions.jts.geom.Point
     {
         super(coordinate, precisionModel, SRID);
         
-    }   
+    }
+
+    /**
+     * @return the surfaceType
+     */
+    public SurfaceType getSurfaceType()
+    {
+        return surfaceType;
+    }
+
+    /**
+     * @param surfaceType the surfaceType to set
+     */
+    public void setSurfaceType(SurfaceType surfaceType)
+    {
+        this.surfaceType = surfaceType;
+    }  
    
 }

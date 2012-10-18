@@ -18,6 +18,7 @@ package com.impetus.client.mongodb.query.gis;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Circle;
 import com.mongodb.BasicDBObject;
 
@@ -28,16 +29,27 @@ import com.mongodb.BasicDBObject;
 public class CircleQueryImpl implements GeospatialQuery
 {
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape)
+    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
     {
         Circle circle = (Circle) shape;
         List circleList = new ArrayList();
         
         circleList.add(new double[] { circle.getCentre().x, circle.getCentre().y }); //Centre of circle 
         circleList.add(circle.getRadius()); // Radius
-        BasicDBObject query = new BasicDBObject(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$center",
-                circleList)));        
-     
+        
+        if(query == null)  query = new BasicDBObject();
+       
+        
+        if(circle.getSurfaceType().equals(SurfaceType.SPHERICAL)) {
+            query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$centerSphere",
+                    circleList)));            
+        }
+        else
+        {
+            query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$center",
+                    circleList)));
+        }
+            
         return query;        
     } 
 

@@ -15,8 +15,10 @@
  */
 package com.impetus.kundera.gis.geometry;
 
+import com.impetus.kundera.gis.SurfaceType;
+
 /**
- * Geometric class representing circle 
+ * Geometric class representing circle shape
  * @author amresh.singh
  */
 public class Circle
@@ -24,6 +26,10 @@ public class Circle
     private Coordinate centre;
     
     private double radius;
+    
+    /** Surface type on which this circle is based*/
+    private SurfaceType surfaceType = SurfaceType.FLAT;
+    
     
     public Circle(double x, double y, double r)
     {
@@ -68,6 +74,22 @@ public class Circle
     public void setRadius(double radius)
     {
         this.radius = radius;
-    }  
+    }
+
+    /**
+     * @return the surfaceType
+     */
+    public SurfaceType getSurfaceType()
+    {
+        return surfaceType;
+    }
+
+    /**
+     * @param surfaceType the surfaceType to set
+     */
+    public void setSurfaceType(SurfaceType surfaceType)
+    {
+        this.surfaceType = surfaceType;
+    }   
 
 }

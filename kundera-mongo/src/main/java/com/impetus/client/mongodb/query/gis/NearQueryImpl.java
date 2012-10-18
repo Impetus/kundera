@@ -15,6 +15,7 @@
  */
 package com.impetus.client.mongodb.query.gis;
 
+import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Point;
 import com.mongodb.BasicDBObject;
 
@@ -22,53 +23,53 @@ import com.mongodb.BasicDBObject;
  * <Prove description of functionality provided by this Type> 
  * @author amresh.singh
  */
-public class NearQuery  
+public class NearQueryImpl implements GeospatialQuery
 {
     
-    public BasicDBObject createNearQuery(String geolocationColumnName, Object shape, BasicDBObject query)
+    @Override
+    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
     {
         
         if(query == null)
         {
             query = new BasicDBObject();
-        }
-       
+        }       
+        
+        //Set point in query which is involved in near search
         if(shape != null && shape.getClass().isAssignableFrom(Point.class))
         {
             Point point = (Point) shape;
             BasicDBObject filter = (BasicDBObject)query.get(geolocationColumnName); 
                 
-            if(filter == null)
+            if(filter == null) filter = new BasicDBObject(); 
+            
+            if(point.getSurfaceType().equals(SurfaceType.SPHERICAL)) 
             {
-                filter = new BasicDBObject("$near", new double[] {point.getX(), point.getY()});
-            } 
-            else 
+                filter.put("$nearSphere", new double[] {point.getX(), point.getY()});
+            }
+            else
             {
                 filter.put("$near", new double[] {point.getX(), point.getY()});
-            }
+            }           
             
             query.put(geolocationColumnName, filter);
         }
         
+        //Set maximum distance from the given point
         if(shape != null && (shape.getClass().isAssignableFrom(Double.class) ||shape.getClass().isAssignableFrom(double.class)))
         {
             Double maxDistance = (Double) shape;
             
             BasicDBObject filter = (BasicDBObject)query.get(geolocationColumnName); 
             
-            if(filter == null)
-            {
-                filter = new BasicDBObject("$maxDistance", maxDistance);
-            }   
-            else
-            {
-                filter.put("$maxDistance", maxDistance);
-            }
+            if(filter == null) filter = new BasicDBObject();   
+            
+            filter.put("$maxDistance", maxDistance);
+           
             query.put(geolocationColumnName, filter);
         }
         
         return query;
-    }  
-    
+    }      
 
 }

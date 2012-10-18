@@ -36,7 +36,7 @@ import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.client.mongodb.query.gis.GeospatialQuery;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
-import com.impetus.client.mongodb.query.gis.NearQuery;
+import com.impetus.client.mongodb.query.gis.NearQueryImpl;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Circle;
@@ -255,12 +255,12 @@ public class MongoDBQuery extends QueryImpl
                     {
                         GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory
                                 .getGeospatialQueryImplementor(value);
-                        query = geospatialQueryimpl.createGeospatialQuery(property, value);
+                        query = geospatialQueryimpl.createGeospatialQuery(property, value, query);
                     }
                     else if(condition.equals(">") || condition.equals(">=") || condition.equals("<")
                             || condition.equals("<="))
                     {
-                        query = new NearQuery().createNearQuery(property, value, query);
+                        query = new NearQueryImpl().createGeospatialQuery(property, value, query);
                     }
 
                 } 

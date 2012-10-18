@@ -17,6 +17,7 @@ package com.impetus.client.mongodb.query.gis;
 
 import com.impetus.kundera.gis.geometry.Circle;
 import com.impetus.kundera.gis.geometry.Envelope;
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
 import com.impetus.kundera.gis.geometry.Triangle;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -43,6 +44,10 @@ public class GeospatialQueryFactory
         else if(shape.getClass().isAssignableFrom(Polygon.class))
         {
             return new PolygonQueryImpl();
+        }
+        else if(shape.getClass().isAssignableFrom(Point.class))
+        {
+            return new NearQueryImpl();
         }
         else {
             throw new QueryHandlerException("Shape " + shape.getClass() + " is not supported"

@@ -29,7 +29,7 @@ public class EnvelopeQueryImpl implements GeospatialQuery
 {
 
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape)
+    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
     {
         List boxList = new ArrayList();
         
@@ -38,8 +38,9 @@ public class EnvelopeQueryImpl implements GeospatialQuery
         boxList.add(new double[] {box.getMinX(), box.getMinY()}); //Starting coordinate
         boxList.add(new double[]{box.getMaxX(),box.getMaxY()}); // Ending coordinate
         
-        BasicDBObject query = new BasicDBObject(geolocationColumnName, new BasicDBObject("$within",
-                new BasicDBObject("$box", boxList)));
+        if(query == null) query = new BasicDBObject();        
+        
+        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$box", boxList)));
         
         return query;
     }

@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
@@ -62,7 +63,8 @@ public class MongoGISTest
 
         //Near Queries
         findNear();
-        
+        findNearSphere();
+      
         updatePerson();
         removePerson();
     }
@@ -127,7 +129,7 @@ public class MongoGISTest
     {
         dao.createEntityManager();
 
-        List<Person> persons = dao.findWithinCircle(5.0, 5.0, 2.0);
+        List<Person> persons = dao.findWithinCircle(5.0, 5.0, 2.0, SurfaceType.FLAT);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 13);
@@ -198,15 +200,35 @@ public class MongoGISTest
     
     private void findNear()
     {
-        dao.createEntityManager();
-        
-        List<Person> persons = dao.findNear(5.0, 5.0, 2.0);
+        dao.createEntityManager();        
+        List<Person> persons = dao.findNear(5.0, 5.0, 2.0, SurfaceType.FLAT);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 13);
         dao.closeEntityManager();
     }
+    
+    private void findNearSphere()
+    {
+        dao.createEntityManager();        
+        List<Person> persons = dao.findNear(5.0, 5.0, (2.0*2.0*3.1416/360.0), SurfaceType.SPHERICAL);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 13);
+        dao.closeEntityManager();
+    }
+    
+    private void findCentreSphere()
+    {
+        dao.createEntityManager();
 
+        List<Person> persons = dao.findWithinCircle(5.0, 5.0, (2.0*2.0*3.1416/360.0), SurfaceType.SPHERICAL);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 13);
+        dao.closeEntityManager();
+    }
+    
     /**
      * 
      */
