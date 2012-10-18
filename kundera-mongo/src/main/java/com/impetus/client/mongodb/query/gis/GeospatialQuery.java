@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.gis.geometry;
+package com.impetus.client.mongodb.query.gis;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Triangle;
+import com.mongodb.BasicDBObject;
 
 /**
- * Geometric Triangle implementation 
+ * Provides methods related to Geospatial Queries  
  * @author amresh.singh
  */
-public class Traiangle extends Triangle
+public interface GeospatialQuery
 {
-
-    /**
-     * @param p0
-     * @param p1
-     * @param p2
-     */
-    public Traiangle(Coordinate p0, Coordinate p1, Coordinate p2)
-    {
-        super(p0, p1, p2);
-
-    }
+    BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape);
 
 }

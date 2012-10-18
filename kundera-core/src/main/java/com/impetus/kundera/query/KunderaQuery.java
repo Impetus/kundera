@@ -59,14 +59,14 @@ public class KunderaQuery
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN" };
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
-    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", ">", ">=", "<", "<=" };
+    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b",
             Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|>=|>|<=|<",
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|\\bin\\b|>=|>|<=|<",
             Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
@@ -413,6 +413,7 @@ public class KunderaQuery
         // parse and structure for "between" clause , if present, else it will
         // return original clause
         clauses = parseFilterForBetweenClause(clauses, indexName);
+        //clauses = parseFilterForInClause(clauses, indexName);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
@@ -1033,7 +1034,7 @@ public class KunderaQuery
         }
 
         return tokens;
-    }
+    }   
 
     private class TypedParameter
     {

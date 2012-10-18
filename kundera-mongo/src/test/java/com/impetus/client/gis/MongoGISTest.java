@@ -15,6 +15,8 @@
  */
 package com.impetus.client.gis;
 
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -44,8 +46,11 @@ public class MongoGISTest
     @Test
     public void executeTests() throws Exception
     {
-        addPerson();
+        addPersons();
         findPerson();
+        
+        findWithinCircle();
+        
         updatePerson();
         removePerson();
     }
@@ -56,47 +61,66 @@ public class MongoGISTest
         dao.close();
     }
 
-    private void addPerson()
+    private void addPersons()
     {
-        Person person = new Person();
-        person.setPersonId(1);
-        person.setName("Amresh");
-        person.setCurrentLocation(new Point(6.3, 2.8));
-
-        Vehicle vehicleLocation = new Vehicle();
-        vehicleLocation.setCurrentLocation(new Point(10.67, 16.59));
-        vehicleLocation.setPreviousLocation(new Point(15.67, 21.59));
-
-        person.setVehicleLocation(vehicleLocation);
-
         dao.createEntityManager();
-        dao.addPerson(person);
+        for (int i = 0; i < 100; i++)
+        {
+            double x = i % 10;
+            double y = Math.floor(i / 10);      
+            
+            
+            Person person = new Person();
+            person.setPersonId(i + 1);
+            person.setName("Amresh_" + (i + 1));
+            person.setCurrentLocation(new Point(x, y));
+
+            Vehicle vehicle = new Vehicle();
+            vehicle.setCurrentLocation(new Point(x + 1.0, y + 1.0));
+            vehicle.setPreviousLocation(new Point(x + 2.0, y + 2.0));
+
+            person.setVehicle(vehicle);
+            
+            
+            dao.addPerson(person);
+        }
         dao.closeEntityManager();
     }
-
+    
     private void findPerson()
     {
         dao.createEntityManager();
-        Person person = dao.findPerson(1);
+        Person person = dao.findPerson(4);
 
         Assert.assertNotNull(person);
-        Assert.assertEquals(1, person.getPersonId());
-        Assert.assertEquals("Amresh", person.getName());
+        Assert.assertEquals(4, person.getPersonId());
+        Assert.assertEquals("Amresh_4", person.getName());
 
         Point currentLocation = person.getCurrentLocation();
         Assert.assertNotNull(currentLocation);
-        Assert.assertEquals(6.3, currentLocation.getX());
-        Assert.assertEquals(2.8, currentLocation.getY());
+        Assert.assertEquals(3.0, currentLocation.getX());
+        Assert.assertEquals(0.0, currentLocation.getY());
 
-        Vehicle vehicleLocation = person.getVehicleLocation();
+        Vehicle vehicleLocation = person.getVehicle();
         Assert.assertNotNull(vehicleLocation);
         Assert.assertNotNull(vehicleLocation.getCurrentLocation());
-        Assert.assertEquals(10.67, vehicleLocation.getCurrentLocation().getX());
-        Assert.assertEquals(16.59, vehicleLocation.getCurrentLocation().getY());
+        Assert.assertEquals(4.0, vehicleLocation.getCurrentLocation().getX());
+        Assert.assertEquals(1.0, vehicleLocation.getCurrentLocation().getY());
         Assert.assertNotNull(vehicleLocation.getPreviousLocation());
-        Assert.assertEquals(15.67, vehicleLocation.getPreviousLocation().getX());
-        Assert.assertEquals(21.59, vehicleLocation.getPreviousLocation().getY());
+        Assert.assertEquals(5.0, vehicleLocation.getPreviousLocation().getX());
+        Assert.assertEquals(2.0, vehicleLocation.getPreviousLocation().getY());
 
+        dao.closeEntityManager();
+    }
+    
+    private void findWithinCircle()
+    {
+        dao.createEntityManager();
+        
+        List<Person> persons = dao.findWithinCircle(5.0, 5.0, 2.0);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 13);
         dao.closeEntityManager();
     }
 
@@ -106,34 +130,35 @@ public class MongoGISTest
     private void updatePerson()
     {
         dao.createEntityManager();
-        Person person = dao.findPerson(1);
+        Person person = dao.findPerson(4);
 
         Assert.assertNotNull(person);
-        Assert.assertEquals(1, person.getPersonId());
-        Assert.assertEquals("Amresh", person.getName());
+        Assert.assertEquals(4, person.getPersonId());
+        Assert.assertEquals("Amresh_4", person.getName());
 
         person.setCurrentLocation(new Point(9.3, 5.8));
 
-        Vehicle vehicle = person.getVehicleLocation();
+        Vehicle vehicle = person.getVehicle();
         vehicle.setCurrentLocation(new Point(5.67, 11.59));
+        vehicle.setPreviousLocation(new Point(15.67, 21.59));
 
-        person.setVehicleLocation(vehicle);
+        person.setVehicle(vehicle);
 
         dao.mergePerson(person);
         dao.closeEntityManager();
         dao.createEntityManager();
 
-        person = dao.findPerson(1);
+        person = dao.findPerson(4);
 
         Assert.assertNotNull(person);
-        Assert.assertEquals(1, person.getPersonId());
-        Assert.assertEquals("Amresh", person.getName());
+        Assert.assertEquals(4, person.getPersonId());
+        Assert.assertEquals("Amresh_4", person.getName());
         Point currentLocation = person.getCurrentLocation();
         Assert.assertNotNull(currentLocation);
         Assert.assertEquals(9.3, currentLocation.getX());
         Assert.assertEquals(5.8, currentLocation.getY());
 
-        vehicle = person.getVehicleLocation();
+        vehicle = person.getVehicle();
         Assert.assertNotNull(vehicle);
         Assert.assertNotNull(vehicle.getCurrentLocation());
         Assert.assertEquals(5.67, vehicle.getCurrentLocation().getX());

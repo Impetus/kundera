@@ -25,7 +25,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 public class Polygon extends com.vividsolutions.jts.geom.Polygon
 {
 
-   /**
+    /**
      * @param shell
      * @param holes
      * @param factory
@@ -33,6 +33,21 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon
     public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory)
     {
         super(shell, holes, factory);
+    }  
+    
+    @Override
+    public Coordinate[] getCoordinates()
+    {
+        com.vividsolutions.jts.geom.Coordinate[] coordinates = super.getCoordinates();
+        
+        Coordinate[] cs = new Coordinate[coordinates.length];     
+        
+        int count = 0;
+        for(com.vividsolutions.jts.geom.Coordinate c : coordinates)
+        {
+            cs[count++] = new Coordinate(c);
+        }
+        
+        return cs;
     }
-
 }

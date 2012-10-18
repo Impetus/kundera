@@ -35,8 +35,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
+import com.impetus.client.mongodb.query.gis.GeospatialQuery;
+import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.gis.geometry.Circle;
+import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -226,7 +230,6 @@ public class MongoDBQuery extends QueryImpl
                     value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
                             value.toString());
                 }
-
                 value = populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
@@ -346,6 +349,16 @@ public class MongoDBQuery extends QueryImpl
                             query.append(property, new BasicDBObject("$lte", value));
                         }
                     }
+                }
+                else if (condition.equalsIgnoreCase("in"))
+                {                   
+                    //Query could be geospatial in nature
+                    if(f.getType().equals(Point.class))
+                    {
+                        GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(value);
+                        query = geospatialQueryimpl.createGeospatialQuery(property, value);
+                    }           
+                    
                 }
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc

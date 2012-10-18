@@ -15,11 +15,15 @@
  */
 package com.impetus.client.gis;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import com.impetus.client.utils.MongoUtils;
+import com.impetus.kundera.gis.geometry.Circle;
 
 /**
  * DAO for Geolocation processing for {@link Person} entity
@@ -85,17 +89,27 @@ public class PersonGISDao
 
     public Person findPerson(int personId)
     {
-        return em.find(Person.class, 1);
-    }
-
-    public void removePerson(Person person)
+        return em.find(Person.class, personId);
+    }   
+    
+    public List<Person> findWithinCircle(double x, double y, double r)
     {
-        em.remove(person);
+        Circle circle = new Circle(x, y, r); 
+        
+        Query q = em.createQuery("Select p from Person p where p.currentLocation IN :circle");
+        q.setParameter("circle", circle);
+        List<Person> persons = q.getResultList();
+        return persons;
     }
 
     public void mergePerson(Person person)
     {
         em.merge(person);
+    }
+    
+    public void removePerson(Person person)
+    {
+        em.remove(person);
     }
 
 }

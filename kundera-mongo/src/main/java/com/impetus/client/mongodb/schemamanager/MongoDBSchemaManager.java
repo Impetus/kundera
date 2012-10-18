@@ -279,7 +279,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             else if (indexType.equals(IndexType.GEO2D.name()))
             {
-                keys.put(columnName, 2d);
+                keys.put(columnName, "2d");
                 return;
             }
         }

@@ -46,7 +46,7 @@ public class Person
     private Point currentLocation;
 
     @Embedded
-    private Vehicle vehicleLocation;
+    private Vehicle vehicle;
     /**
      * @return the personId
      */
@@ -93,23 +93,22 @@ public class Person
     public void setCurrentLocation(Point currentLocation)
     {
         this.currentLocation = currentLocation;
-    } 
-
-    /**
-     * @return the vehicleLocation
-     */
-    public Vehicle getVehicleLocation()
-    {
-        return vehicleLocation;
     }
 
     /**
-     * @param vehicleLocation
-     *            the vehicleLocation to set
+     * @return the vehicle
      */
-    public void setVehicleLocation(Vehicle vehicleLocation)
+    public Vehicle getVehicle()
     {
-        this.vehicleLocation = vehicleLocation;
+        return vehicle;
     }
 
+    /**
+     * @param vehicle the vehicle to set
+     */
+    public void setVehicle(Vehicle vehicle)
+    {
+        this.vehicle = vehicle;
+    }   
+    
 }
