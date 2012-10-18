@@ -68,7 +68,7 @@ public class CompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -79,7 +79,7 @@ public class CompositeTypeTest
         PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
-        Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
         em.clear();// optional,just to clear persistence cache.
@@ -92,7 +92,7 @@ public class CompositeTypeTest
         result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
-        Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
         // deleting composite
@@ -111,7 +111,7 @@ public class CompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -169,15 +169,16 @@ public class CompositeTypeTest
         q = em.createQuery(withAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId.toString());
+        q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
+        Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withLastCompositeColGTClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId.toString());
+        q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         // TODO::
         // Assert.assertEquals(1, results.size());
@@ -186,7 +187,7 @@ public class CompositeTypeTest
         q = em.createQuery(withSelectiveCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId.toString());
+        q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
@@ -196,7 +197,7 @@ public class CompositeTypeTest
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId.toString());
+        q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
@@ -207,7 +208,7 @@ public class CompositeTypeTest
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId.toString());
+        q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(currentDate.getTime(), results.get(0).getTweetDate().getTime());
@@ -237,7 +238,7 @@ public class CompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -253,7 +254,7 @@ public class CompositeTypeTest
         PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("after merge", result.getTweetBody());
-        Assert.assertEquals(timeLineId.toString(), result.getKey().getTimeLineId().toString());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
         em.close();
     }
@@ -265,7 +266,7 @@ public class CompositeTypeTest
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From PrimeUser u where u.tweetBody= :tweetBody";
         EntityManager em = emf.createEntityManager();

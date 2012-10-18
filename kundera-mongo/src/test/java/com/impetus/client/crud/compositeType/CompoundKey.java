@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -26,7 +28,7 @@ public class CompoundKey
 {
     @Column private String userId;
     @Column private int tweetId;
-    @Column private String timeLineId;
+    @Column private UUID timeLineId;
 
     
     
@@ -42,7 +44,7 @@ public class CompoundKey
      * @param tweetId
      * @param timeLineId
      */
-    public CompoundKey(String userId, int tweetId, String timeLineId)
+    public CompoundKey(String userId, int tweetId, UUID timeLineId)
     {
         this.userId = userId;
         this.tweetId = tweetId;
@@ -68,7 +70,7 @@ public class CompoundKey
     /**
      * @return the timeLineId
      */
-    public String getTimeLineId()
+    public UUID getTimeLineId()
     {
         return timeLineId;
     }

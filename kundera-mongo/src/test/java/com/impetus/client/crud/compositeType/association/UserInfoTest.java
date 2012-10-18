@@ -69,7 +69,7 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser timeLine = new PrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
@@ -82,7 +82,7 @@ public class UserInfoTest
         UserInfo result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
         Assert.assertEquals("Vivek", result.getFirstName());
         Assert.assertEquals(31, result.getAge());
 
@@ -98,7 +98,7 @@ public class UserInfoTest
         result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getFirstName());
         Assert.assertEquals(23, result.getAge());
 
@@ -118,7 +118,7 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser timeLine = new PrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
@@ -146,7 +146,7 @@ public class UserInfoTest
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
         Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
@@ -158,7 +158,7 @@ public class UserInfoTest
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
         Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
@@ -170,7 +170,7 @@ public class UserInfoTest
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
         Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
 
         final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.firstName from UserInfo u where u.userInfoId = :id";
         // Query with composite key clause.
@@ -187,8 +187,6 @@ public class UserInfoTest
         // Query with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
         q.setParameter("id", "mevivs_info");
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(0, results.get(0).getAge());
@@ -219,7 +217,7 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser timeLine = new PrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
@@ -237,7 +235,7 @@ public class UserInfoTest
         UserInfo result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId.toString(), result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getFirstName());
         Assert.assertEquals(31, result.getAge());
         em.close();
@@ -250,7 +248,7 @@ public class UserInfoTest
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId.toString());
+        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From UserInfo u where u.firstName= :firstName";
         EntityManager em = emf.createEntityManager();

@@ -42,7 +42,6 @@ import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -60,7 +59,6 @@ import com.mongodb.DB;
  */
 public abstract class AssociationBase
 {
-
     private static final String KEYSPACE = "KunderaTests";
 
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
@@ -110,8 +108,7 @@ public abstract class AssociationBase
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error in RDBMS cli ", e);
         }
 
         // String persistenceUnits = "rdbms,twissandra";
@@ -245,8 +242,7 @@ public abstract class AssociationBase
                     }
                     catch (Exception e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        log.error("error during creating table in HSQLDB", e);
                     }
 
                 }
@@ -330,23 +326,19 @@ public abstract class AssociationBase
             }
             catch (SecurityException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e);
             }
             catch (NoSuchFieldException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e);
             }
             catch (IllegalArgumentException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e);
             }
             catch (IllegalAccessException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error(e);
             }
         }
 
