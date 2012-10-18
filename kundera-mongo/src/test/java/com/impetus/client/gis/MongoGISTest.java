@@ -23,7 +23,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
+import com.impetus.kundera.gis.geometry.Polygon;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 
 /**
  * Test case for GIS
@@ -48,9 +53,12 @@ public class MongoGISTest
     {
         addPersons();
         findPerson();
-        
+
         findWithinCircle();
-        
+        findWithinTriangle();
+        findWithinPolygon();
+        findWithinRectangle();
+
         updatePerson();
         removePerson();
     }
@@ -67,9 +75,8 @@ public class MongoGISTest
         for (int i = 0; i < 100; i++)
         {
             double x = i % 10;
-            double y = Math.floor(i / 10);      
-            
-            
+            double y = Math.floor(i / 10);
+
             Person person = new Person();
             person.setPersonId(i + 1);
             person.setName("Amresh_" + (i + 1));
@@ -80,13 +87,12 @@ public class MongoGISTest
             vehicle.setPreviousLocation(new Point(x + 2.0, y + 2.0));
 
             person.setVehicle(vehicle);
-            
-            
+
             dao.addPerson(person);
         }
         dao.closeEntityManager();
     }
-    
+
     private void findPerson()
     {
         dao.createEntityManager();
@@ -112,15 +118,79 @@ public class MongoGISTest
 
         dao.closeEntityManager();
     }
-    
+
     private void findWithinCircle()
     {
         dao.createEntityManager();
-        
+
         List<Person> persons = dao.findWithinCircle(5.0, 5.0, 2.0);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 13);
+        dao.closeEntityManager();
+    }
+
+    private void findWithinTriangle()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.findWithinTriangle(5.0, 5.0, 6.0, 6.0, 7.0, 7.0);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 3);
+        dao.closeEntityManager();
+    }
+
+    private void findWithinPolygon()
+    {
+        dao.createEntityManager();
+
+        System.out.println("findWithinPolygon\n----------------------\n");
+
+        GeometryFactory factory = new GeometryFactory();
+
+        Coordinate[] coordinates = new Coordinate[6];
+        coordinates[0] = new Coordinate(1.0, 1.0);
+        coordinates[1] = new Coordinate(1.0, 2.0);
+        coordinates[2] = new Coordinate(3.0, 4, 0);
+        coordinates[3] = new Coordinate(4.0, 3.0);
+        coordinates[4] = new Coordinate(4.0, 1.0);
+        coordinates[5] = new Coordinate(1.0, 1.0);
+
+        CoordinateSequence points = factory.getCoordinateSequenceFactory().create(coordinates);
+
+        LinearRing shell = new LinearRing(points, factory);
+        LinearRing[] holes = new LinearRing[0];
+        // holes[0] = shell;
+
+        Polygon polygon = new Polygon(shell, holes, factory);
+        List<Person> persons = dao.findWithinPolygon(polygon);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 11);
+        dao.closeEntityManager();
+
+        dao.createEntityManager();
+
+        holes = new LinearRing[1];
+        holes[0] = shell;
+        polygon = new Polygon(shell, holes, factory);
+        persons = dao.findWithinPolygon(polygon);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 8);
+        dao.closeEntityManager();
+
+    }
+
+    private void findWithinRectangle()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.findWithinRectangle(5.0, 5.0, 6.0, 6.0);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 4);
         dao.closeEntityManager();
     }
 

@@ -24,6 +24,12 @@ import javax.persistence.Query;
 
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.gis.geometry.Circle;
+import com.impetus.kundera.gis.geometry.Coordinate;
+import com.impetus.kundera.gis.geometry.Envelope;
+import com.impetus.kundera.gis.geometry.Polygon;
+import com.impetus.kundera.gis.geometry.Triangle;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 
 /**
  * DAO for Geolocation processing for {@link Person} entity
@@ -90,12 +96,12 @@ public class PersonGISDao
     public Person findPerson(int personId)
     {
         return em.find(Person.class, personId);
-    }   
-    
+    }
+
     public List<Person> findWithinCircle(double x, double y, double r)
     {
-        Circle circle = new Circle(x, y, r); 
-        
+        Circle circle = new Circle(x, y, r);
+
         Query q = em.createQuery("Select p from Person p where p.currentLocation IN :circle");
         q.setParameter("circle", circle);
         List<Person> persons = q.getResultList();
@@ -106,10 +112,65 @@ public class PersonGISDao
     {
         em.merge(person);
     }
-    
+
     public void removePerson(Person person)
     {
         em.remove(person);
+    }
+
+    /**
+     * @param d
+     * @param e
+     * @param f
+     * @param i
+     * @param h
+     * @param g
+     * @return
+     */
+    public List<Person> findWithinTriangle(double x1, double y1, double x2, double y2, double x3, double y3)
+    {
+
+        Triangle triangle = new Triangle(x1, y1, x2, y2, x3, y3);
+
+        Query q = em.createQuery("Select p from Person p where p.currentLocation IN :triangle");
+        q.setParameter("triangle", triangle);
+        List<Person> persons = q.getResultList();
+        return persons;
+    }
+
+    /**
+     * 
+     * @param shell
+     * @param holes
+     * @param factory
+     * @return
+     */
+    public List<Person> findWithinPolygon(Polygon polygon)
+    {
+        Query q = em.createQuery("Select p from Person p where p.currentLocation IN :polygon");
+        q.setParameter("polygon", polygon);
+        List<Person> persons = q.getResultList();
+        return persons;
+    }
+
+    /**
+     * @param d
+     * @param e
+     * @param f
+     * @param g
+     * @param h
+     * @param i
+     * @param j
+     * @param k
+     * @return
+     */
+    public List<Person> findWithinRectangle(double x1, double y1, double x2, double y2)
+    {
+        Envelope envelope = new Envelope(x1, x2, y1, y2);
+        Query q = em.createQuery("Select p from Person p where p.currentLocation IN :envelope");
+        q.setParameter("envelope", envelope);
+        List<Person> persons = q.getResultList();
+        return persons;
     }
 
 }
