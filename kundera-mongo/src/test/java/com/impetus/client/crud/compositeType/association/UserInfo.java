@@ -119,4 +119,21 @@ public class UserInfo
         return timeLine;
     }
 
+
+    /**
+     * @param firstName the firstName to set
+     */
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
+
+
+    /**
+     * @param age the age to set
+     */
+    public void setAge(int age)
+    {
+        this.age = age;
+    }
 }

@@ -50,7 +50,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
  */
 public class KunderaQuery
 {
-
     /** The Constant SINGLE_STRING_KEYWORDS. */
     public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM",
             "WHERE", "GROUP BY", "HAVING", "ORDER BY" };

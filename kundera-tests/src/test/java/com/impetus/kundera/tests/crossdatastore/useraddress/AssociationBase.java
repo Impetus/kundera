@@ -89,7 +89,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
 
     protected RDBMSCli cli;
 
@@ -234,6 +234,7 @@ public abstract class AssociationBase
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "ADDRESS_ID");
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "PERSON_ID");
                     HBaseCli.addColumnFamily("PERSONNEL_ADDRESS", "JoinColumns");
+
                 }
                 if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
                 {

@@ -25,6 +25,7 @@ import com.impetus.client.twitter.entities.ExternalLinkMongo;
 import com.impetus.client.twitter.entities.PreferenceMongo;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserMongo;
+import com.impetus.client.utils.MongoUtils;
 
 /**
  * Data access object class for implementation of twitter.
@@ -37,8 +38,11 @@ public class TwitterService extends SuperDao implements Twitter
 
     private EntityManagerFactory emf;
 
+    private String pu;
+
     public TwitterService(String persistenceUnitName)
     {
+        this.pu = persistenceUnitName;
         if (emf == null)
         {
             try
@@ -77,6 +81,7 @@ public class TwitterService extends SuperDao implements Twitter
     {
         if (emf != null)
         {
+            MongoUtils.dropDatabase(emf, pu);
             emf.close();
         }
     }

@@ -37,17 +37,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatBi1To1FK;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi1To1FK;
 
 public class OTOBiAssociationTest extends TwinAssociation
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"rdbms",*/ "addCassandra", /*
-                                                                                               * "addHbase"
-                                                                                               * ,
-                                                                                               */"addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra","addHbase","addMongo" };
 
     /**
      * Inits the.

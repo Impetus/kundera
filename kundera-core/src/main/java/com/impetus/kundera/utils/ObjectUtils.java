@@ -84,7 +84,8 @@ public class ObjectUtils
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
             if (metadata == null)
             {
-                return null;
+                
+                return source;
             }
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
