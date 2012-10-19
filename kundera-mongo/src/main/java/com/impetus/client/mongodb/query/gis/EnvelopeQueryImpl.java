@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.impetus.kundera.gis.geometry.Envelope;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -29,7 +30,7 @@ public class EnvelopeQueryImpl implements GeospatialQuery
 {
 
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
+    public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List boxList = new ArrayList();
         
@@ -38,11 +39,14 @@ public class EnvelopeQueryImpl implements GeospatialQuery
         boxList.add(new double[] {box.getMinX(), box.getMinY()}); //Starting coordinate
         boxList.add(new double[]{box.getMaxX(),box.getMaxY()}); // Ending coordinate
         
-        if(query == null) query = new BasicDBObject();        
+        BasicDBObject q = (BasicDBObject) query;
         
-        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$box", boxList)));
+        if(q == null) q = new BasicDBObject();       
         
-        return query;
+        
+        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$box", boxList)));
+        
+        return q;
     }
     
 

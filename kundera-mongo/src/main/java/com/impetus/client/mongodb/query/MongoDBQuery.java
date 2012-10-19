@@ -34,12 +34,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
-import com.impetus.client.mongodb.query.gis.GeospatialQuery;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
 import com.impetus.client.mongodb.query.gis.NearQueryImpl;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Point;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -253,18 +253,8 @@ public class MongoDBQuery extends QueryImpl
                 // Query could be geospatial in nature
                 if (f != null && f.getType().equals(Point.class))
                 {
-
-                    if (condition.equalsIgnoreCase("in"))
-                    {
-                        GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory
-                                .getGeospatialQueryImplementor(value);
-                        query = geospatialQueryimpl.createGeospatialQuery(property, value, query);
-                    }
-                    else if (condition.equals(">") || condition.equals(">=") || condition.equals("<")
-                            || condition.equals("<="))
-                    {
-                        query = new NearQueryImpl().createGeospatialQuery(property, value, query);
-                    }
+                    GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(condition, value);
+                    query = (BasicDBObject)geospatialQueryimpl.createGeospatialQuery(property, value, query);      
 
                 }
                 else

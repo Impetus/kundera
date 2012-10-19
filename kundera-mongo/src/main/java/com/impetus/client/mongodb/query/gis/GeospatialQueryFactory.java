@@ -20,39 +20,60 @@ import com.impetus.kundera.gis.geometry.Envelope;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
 import com.impetus.kundera.gis.geometry.Triangle;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
- * Factory for {@link GeospatialQuery} 
+ * Factory for {@link GeospatialQuery}
+ * 
  * @author amresh.singh
  */
 public class GeospatialQueryFactory
 {
-    public static GeospatialQuery getGeospatialQueryImplementor(Object shape)
+    public static GeospatialQuery getGeospatialQueryImplementor(String operator, Object shape)
     {
-        if(shape.getClass().isAssignableFrom(Circle.class)) {
-            return new CircleQueryImpl();
-        }
-        else if(shape.getClass().isAssignableFrom(Envelope.class))
+        if (operator.equalsIgnoreCase("in"))
         {
-            return new EnvelopeQueryImpl();
+            if (shape.getClass().isAssignableFrom(Circle.class))
+            {
+                return new CircleQueryImpl();
+            }
+            else if (shape.getClass().isAssignableFrom(Envelope.class))
+            {
+                return new EnvelopeQueryImpl();
+            }
+            else if (shape.getClass().isAssignableFrom(Triangle.class))
+            {
+                return new TriangleQueryImpl();
+            }
+            else if (shape.getClass().isAssignableFrom(Polygon.class))
+            {
+                return new PolygonQueryImpl();
+            }
+            else
+            {
+                throw new QueryHandlerException("Shape " + shape.getClass() + " is not supported"
+                        + " in JPA queries for operator " + operator + " in Kundera currently");
+            }
         }
-        else if(shape.getClass().isAssignableFrom(Triangle.class))
+        else if (operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
         {
-            return new TriangleQueryImpl();
+            if (shape.getClass().isAssignableFrom(Point.class))
+            {
+                return new NearQueryImpl();
+            }
+            else
+            {
+                throw new QueryHandlerException("Shape " + shape.getClass() + " is not supported"
+                        + " in JPA queries for operator " + operator + " in Kundera currently");
+            }
         }
-        else if(shape.getClass().isAssignableFrom(Polygon.class))
+        else
         {
-            return new PolygonQueryImpl();
-        }
-        else if(shape.getClass().isAssignableFrom(Point.class))
-        {
-            return new NearQueryImpl();
-        }
-        else {
             throw new QueryHandlerException("Shape " + shape.getClass() + " is not supported"
-                    + " in JPA queries in Kundera currently");
+                    + " in JPA queries for operator " + operator + " in Kundera currently");
         }
-    }
+    }  
+    
 
 }

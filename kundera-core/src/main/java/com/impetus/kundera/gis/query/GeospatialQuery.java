@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.mongodb.query.gis;
+package com.impetus.kundera.gis.query;
 
-import com.mongodb.BasicDBObject;
 
 /**
  * Provides methods related to Geospatial Queries  
@@ -23,6 +22,6 @@ import com.mongodb.BasicDBObject;
  */
 public interface GeospatialQuery
 {
-    BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query);
+    Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query);
 
 }
