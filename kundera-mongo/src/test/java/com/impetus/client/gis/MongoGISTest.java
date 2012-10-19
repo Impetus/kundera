@@ -66,7 +66,7 @@ public class MongoGISTest
         findNearSphere();
         findCentreSphere();
 
-        findUsingCLWithEQ();
+        findUsingExactCurrentLocation();
         findWithinCircleAndName();
 
         // Update/Delete Queries
@@ -238,7 +238,7 @@ public class MongoGISTest
         dao.closeEntityManager();
     }
 
-    private void findUsingCLWithEQ()
+    private void findUsingExactCurrentLocation()
     {
         dao.createEntityManager();
 
