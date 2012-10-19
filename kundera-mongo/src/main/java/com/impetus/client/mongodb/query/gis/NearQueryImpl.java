@@ -17,6 +17,7 @@ package com.impetus.client.mongodb.query.gis;
 
 import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Point;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -27,19 +28,17 @@ public class NearQueryImpl implements GeospatialQuery
 {
     
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
+    public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
+        BasicDBObject q = (BasicDBObject) query;
         
-        if(query == null)
-        {
-            query = new BasicDBObject();
-        }       
+        if(q == null) q = new BasicDBObject();        
         
         //Set point in query which is involved in near search
         if(shape != null && shape.getClass().isAssignableFrom(Point.class))
         {
             Point point = (Point) shape;
-            BasicDBObject filter = (BasicDBObject)query.get(geolocationColumnName); 
+            BasicDBObject filter = (BasicDBObject)q.get(geolocationColumnName); 
                 
             if(filter == null) filter = new BasicDBObject(); 
             
@@ -52,7 +51,7 @@ public class NearQueryImpl implements GeospatialQuery
                 filter.put("$near", new double[] {point.getX(), point.getY()});
             }           
             
-            query.put(geolocationColumnName, filter);
+            q.put(geolocationColumnName, filter);
         }
         
         //Set maximum distance from the given point
@@ -60,16 +59,16 @@ public class NearQueryImpl implements GeospatialQuery
         {
             Double maxDistance = (Double) shape;
             
-            BasicDBObject filter = (BasicDBObject)query.get(geolocationColumnName); 
+            BasicDBObject filter = (BasicDBObject)q.get(geolocationColumnName); 
             
             if(filter == null) filter = new BasicDBObject();   
             
             filter.put("$maxDistance", maxDistance);
            
-            query.put(geolocationColumnName, filter);
+            q.put(geolocationColumnName, filter);
         }
         
-        return query;
+        return q;
     }      
 
 }

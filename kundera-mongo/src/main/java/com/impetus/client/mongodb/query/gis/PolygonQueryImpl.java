@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Polygon;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -29,7 +30,7 @@ import com.mongodb.BasicDBObject;
 public class PolygonQueryImpl implements GeospatialQuery
 {
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
+    public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List polygonList = new ArrayList();
         
@@ -40,11 +41,13 @@ public class PolygonQueryImpl implements GeospatialQuery
             polygonList.add(new double[] {c.x, c.y});
         }       
         
-        if(query == null) query = new BasicDBObject();       
+        BasicDBObject q = (BasicDBObject) query;
         
-        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", polygonList)));  
+        if(q == null) q = new BasicDBObject();       
         
-        return query;
+        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", polygonList)));  
+        
+        return q;
     }
     
 }

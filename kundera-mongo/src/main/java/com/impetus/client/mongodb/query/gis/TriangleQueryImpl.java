@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.impetus.kundera.gis.geometry.Triangle;
+import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -29,7 +30,7 @@ public class TriangleQueryImpl implements GeospatialQuery
 {
 
     @Override
-    public BasicDBObject createGeospatialQuery(String geolocationColumnName, Object shape, BasicDBObject query)
+    public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List triangleList = new ArrayList();
         
@@ -39,11 +40,13 @@ public class TriangleQueryImpl implements GeospatialQuery
         triangleList.add(new double[]{triangle.p1.x, triangle.p1.y}); // B
         triangleList.add(new double[]{triangle.p2.x, triangle.p2.y}); // C
         
-        if(query == null) query = new BasicDBObject();       
+        BasicDBObject q = (BasicDBObject) query;
         
-        query.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));  
+        if(q == null) q = new BasicDBObject();       
         
-        return query;
+        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));  
+        
+        return q;
     }
     
 
