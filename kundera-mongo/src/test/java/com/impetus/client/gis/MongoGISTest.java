@@ -65,9 +65,13 @@ public class MongoGISTest
         findNear();
         findNearSphere();
         findCentreSphere();
-        
+
         findUsingCLWithEQ();
         findWithinCircleAndName();
+
+        // Update/Delete Queries
+        updateNameWithinCircle();
+        deleteNameWithinCircle();
 
         updatePerson();
         removePerson();
@@ -249,13 +253,50 @@ public class MongoGISTest
     {
         dao.createEntityManager();
 
-        List<Person> persons = dao.findWithinCircleAndName(5.0, 5.0, 2.0, SurfaceType.FLAT,"Amresh_45");
+        List<Person> persons = dao.findWithinCircleAndName(5.0, 5.0, 2.0, SurfaceType.FLAT, "Amresh_45");
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 1);
         dao.closeEntityManager();
     }
-    
+
+    private void updateNameWithinCircle()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.updateNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertEquals("Kuldeep", persons.get(0).getName());
+        dao.closeEntityManager();
+
+        dao.createEntityManager();
+        persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertEquals("Kuldeep", persons.get(0).getName());
+        dao.closeEntityManager();
+    }
+
+    private void deleteNameWithinCircle()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.deleteNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        Assert.assertEquals("Kuldeep", persons.get(0).getName());
+        dao.closeEntityManager();
+
+        dao.createEntityManager();
+        persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertNull(persons);
+        dao.closeEntityManager();
+    }
+
     /**
      * 
      */

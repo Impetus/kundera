@@ -214,6 +214,14 @@ public class CompositeTypeTest
         Assert.assertEquals(currentDate.getTime(), results.get(0).getTweetDate().getTime());
         Assert.assertNull(results.get(0).getTweetBody());
 
+        final String withCompositeKeyClause = "Select u from PrimeUser u where u.key = :key";
+        // Query with composite key clause.
+        q = em.createQuery(withCompositeKeyClause);
+        q.setParameter("key", key);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
         em.remove(user);
 
         em.clear();// optional,just to clear persistence cache.

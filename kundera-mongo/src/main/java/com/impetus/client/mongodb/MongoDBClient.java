@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
@@ -207,19 +208,24 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
-        if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            handler.populateCompoundKey(query, entityMetadata, metaModel, key);
-        } else
+            MongoDBUtils.populateCompoundKey(query, entityMetadata, metaModel, key);
+        }
+        else
         {
-        query.put("_id",
-                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
-                key instanceof Calendar ? ((Calendar) key).getTime().toString() : handler.populateValue(key,
-                        key.getClass()));
+            query.put(
+                    "_id",
+                    /*
+                     * ((AbstractAttribute)
+                     * entityMetadata.getIdAttribute()).getJPAColumnName(),
+                     */
+                    key instanceof Calendar ? ((Calendar) key).getTime().toString() : MongoDBUtils.populateValue(key,
+                            key.getClass()));
         }
 
         DBCursor cursor = dbCollection.find(query);
@@ -360,19 +366,22 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
-        
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
-        if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            handler.populateCompoundKey(query, entityMetadata, metaModel, pKey);
-        } else
+            MongoDBUtils.populateCompoundKey(query, entityMetadata, metaModel, pKey);
+        }
+        else
         {
-        
-        query.put("_id",
-                /*((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),*/
-                handler.populateValue(pKey, pKey.getClass()));
+
+            query.put("_id",
+            /*
+             * ((AbstractAttribute)
+             * entityMetadata.getIdAttribute()).getJPAColumnName(),
+             */
+            MongoDBUtils.populateValue(pKey, pKey.getClass()));
         }
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -459,7 +468,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(colName, handler.populateValue(colValue, colValue.getClass()));
+        query.put(colName, MongoDBUtils.populateValue(colValue, colValue.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -630,19 +639,19 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             BasicDBObject query = new BasicDBObject();
 
-            
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
-            if(metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
-                handler.populateCompoundKey(query, metadata, metaModel, id);
-            } else
+                MongoDBUtils.populateCompoundKey(query, metadata, metaModel, id);
+            }
+            else
             {
-            query.put(
-                    "_id",
-                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : handler.populateValue(id,
-                            id.getClass()));
+                query.put(
+                        "_id",
+                        id instanceof Calendar ? ((Calendar) id).getTime().toString() : MongoDBUtils.populateValue(id,
+                                id.getClass()));
             }
             DBCollection dbCollection = mongoDb.getCollection(documentName);
             dbCollection.findAndModify(query, document);

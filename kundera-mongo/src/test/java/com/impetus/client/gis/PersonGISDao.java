@@ -197,4 +197,37 @@ public class PersonGISDao
 
     }
 
+    /**
+     * @param d
+     * @param e
+     * @param f
+     * @param flat
+     * @return
+     */
+    public List<Person> updateNameWithinCircle(double x, double y, double r, SurfaceType surfaceType)
+    {
+        Circle circle = new Circle(x, y, r);
+        circle.setSurfaceType(surfaceType);
+        Query q = em.createQuery("Update Person p SET p.name=Kuldeep where p.currentLocation IN ?1");
+        q.setParameter(1, circle);
+        List<Person> persons = q.getResultList();
+        return persons;
+    }
+
+    /**
+     * @param d
+     * @param e
+     * @param f
+     * @param flat
+     * @return
+     */
+    public List<Person> deleteNameWithinCircle(double x, double y, double r, SurfaceType surfaceType)
+    {
+        Circle circle = new Circle(x, y, r);
+        circle.setSurfaceType(surfaceType);
+        Query q = em.createQuery("Delete From Person p where p.currentLocation IN ?1");
+        q.setParameter(1, circle);
+        List<Person> persons = q.getResultList();
+        return persons;
+    }
 }

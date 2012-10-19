@@ -26,6 +26,7 @@ import java.util.Queue;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +38,7 @@ import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.client.mongodb.query.gis.GeospatialQuery;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
 import com.impetus.client.mongodb.query.gis.NearQueryImpl;
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Point;
@@ -207,6 +209,14 @@ public class MongoDBQuery extends QueryImpl
                 {
                     property = "_id";
                     f = (Field) m.getIdAttribute().getJavaMember();
+                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                            && value.getClass().isAssignableFrom(f.getType()))
+                    {
+                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
+                        isCompositeColumn = true;
+                        continue;
+                    }
                 }
                 else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                         && StringUtils.contains(property, '.'))

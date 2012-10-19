@@ -39,6 +39,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.gis.geometry.Point;
@@ -102,7 +103,7 @@ final class MongoDBDataHandler
 
             Map<String, Object> relationValue = null;
 
-            rowKey = populateValue(rowKey, idClass);
+            rowKey = MongoDBUtils.populateValue(rowKey, idClass);
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
@@ -124,7 +125,7 @@ final class MongoDBDataHandler
             {
                 rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
                 PropertyAccessorHelper.setId(entity, m, rowKey);
-            }            
+            }
 
             // Populate entity columns
             // List<Column> columns = m.getColumnsAsList();
@@ -242,43 +243,44 @@ final class MongoDBDataHandler
             if (column.getJavaType().isAssignableFrom(Map.class))
             {
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
-            } 
-            
+            }
+
             else if (column.getJavaType().isAssignableFrom(Point.class))
             {
-                BasicDBList list = (BasicDBList) value;                
-                
+                BasicDBList list = (BasicDBList) value;
+
                 Object xObj = list.get(0);
                 Object yObj = list.get(1);
-                
-                if(xObj != null && yObj != null)
+
+                if (xObj != null && yObj != null)
                 {
                     try
                     {
                         double x = Double.parseDouble(xObj.toString());
                         double y = Double.parseDouble(yObj.toString());
-                        
+
                         Point point = new Point(x, y);
-                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);   
+                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);
                     }
                     catch (NumberFormatException e)
                     {
-                        log.error("Error while reading geolocation data for column " + column 
+                        log.error("Error while reading geolocation data for column " + column
                                 + ";Reason - possible corrupt data. " + e.getMessage());
-                        throw new EntityReaderException("Error while reading geolocation data for column " + column 
-                                + ";Reason - possible corrupt data.", e); 
-                    }      
-                    
+                        throw new EntityReaderException("Error while reading geolocation data for column " + column
+                                + ";Reason - possible corrupt data.", e);
+                    }
+
                 }
-                           
+
             }
-            else if(value instanceof BasicDBList)
+            else if (value instanceof BasicDBList)
             {
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), Arrays.asList(((BasicDBList)value).toArray()));
-            }            
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(),
+                        Arrays.asList(((BasicDBList) value).toArray()));
+            }
             else
             {
-                value = populateValue(value, value.getClass());
+                value = MongoDBUtils.populateValue(value, value.getClass());
                 value = getTranslatedObject(value, value.getClass(), column.getJavaType());
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
             }
@@ -310,15 +312,17 @@ final class MongoDBDataHandler
         // Populate Row Key
 
         Object id = PropertyAccessorHelper.getId(entity, m);
-       
+
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
-            populateCompoundKey(dbObj, m, metaModel, id);
+            MongoDBUtils.populateCompoundKey(dbObj, m, metaModel, id);
         }
         else
         {
-            dbObj.put("_id",
-                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : populateValue(id, id.getClass()));
+            dbObj.put(
+                    "_id",
+                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : MongoDBUtils.populateValue(id,
+                            id.getClass()));
         }
         // Populate columns
         // for (Column column : columns)
@@ -351,7 +355,8 @@ final class MongoDBDataHandler
         {
             for (RelationHolder rh : relations)
             {
-                dbObj.put(rh.getRelationName(), populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
+                dbObj.put(rh.getRelationName(),
+                        MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
 
@@ -388,25 +393,25 @@ final class MongoDBDataHandler
                 }
 
                 dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
-            }           
+            }
 
-        }  
-        else if(column.getJavaType().isAssignableFrom(Map.class))
+        }
+        else if (column.getJavaType().isAssignableFrom(Map.class))
         {
             Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
             dbObj.put(((AbstractAttribute) column).getJPAColumnName(), builder.get());
         }
-        
-        else if(column.getJavaType().isAssignableFrom(Point.class))
-        {           
+
+        else if (column.getJavaType().isAssignableFrom(Point.class))
+        {
             Point p = (Point) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-            if(p != null)
+            if (p != null)
             {
                 double[] coordinate = new double[] { p.getX(), p.getY() };
                 dbObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);
-            }                      
-        }       
+            }
+        }
         else
         {
             // TODO : this should have been handled by DocumentObjectMapper.
@@ -415,30 +420,10 @@ final class MongoDBDataHandler
             {
                 dbObj.put(
                         ((AbstractAttribute) column).getJPAColumnName(),
-                        valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString() : populateValue(valObj,
-                                column.getJavaType()));
+                        valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString() : MongoDBUtils
+                                .populateValue(valObj, column.getJavaType()));
             }
         }
-    }
-
-    /**
-     * @param valObj
-     * @return
-     */
-    Object populateValue(Object valObj, Class clazz)
-    {
-        if (isUTF8Value(clazz))
-        {
-            return valObj.toString();
-        }
-        return valObj;
-    }
-
-    private boolean isUTF8Value(Class<?> clazz)
-    {
-        return (clazz.isAssignableFrom(BigDecimal.class))
-                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
     }
 
     /**
@@ -650,27 +635,6 @@ final class MongoDBDataHandler
                     (BasicDBObject) embeddedDocumentObject, ((AbstractAttribute) column).getBindableJavaType(),
                     embeddable.getAttributes()));
         }
-    }
-
-
-    void populateCompoundKey(DBObject dbObj, EntityMetadata m, MetamodelImpl metaModel, Object id)
-    {
-        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-//        Iterator<Attribute> iter = compoundKey.getAttributes().iterator();
-        BasicDBObject compoundKeyObj = new BasicDBObject();
-        
-        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-        
-        // To ensure order.
-        for(Field f : fields)
-        {
-            Attribute compositeColumn = compoundKey.getAttribute(f.getName());
-
-            compoundKeyObj.put(((AbstractAttribute) compositeColumn).getJPAColumnName(),
-                    populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()), ((AbstractAttribute)compositeColumn).getBindableJavaType()));
-        }
-
-        dbObj.put("_id", compoundKeyObj);
     }
 
 }
