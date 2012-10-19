@@ -39,7 +39,6 @@ import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
 import com.impetus.client.mongodb.query.gis.NearQueryImpl;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.gis.geometry.Circle;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
