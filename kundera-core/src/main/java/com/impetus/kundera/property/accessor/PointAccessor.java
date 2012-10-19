@@ -89,7 +89,7 @@ public class PointAccessor implements PropertyAccessor<Point>
         WKTReader reader = new WKTReader();
         try
         {
-            return new Point((Point)reader.read(s));
+            return new Point((com.vividsolutions.jts.geom.Point)reader.read(s));
         }
         catch (ParseException e)
         {
