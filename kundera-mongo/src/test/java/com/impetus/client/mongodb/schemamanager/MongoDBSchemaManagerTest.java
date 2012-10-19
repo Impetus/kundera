@@ -104,7 +104,7 @@ public class MongoDBSchemaManagerTest
             {
                 Assert.assertEquals(new Integer(-100), dbObject.get("min"));
                 Assert.assertEquals(new Integer(500), dbObject.get("max"));
-                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", 2d)));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", "2d")));
                 count++;
             }
         }

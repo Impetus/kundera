@@ -47,6 +47,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
@@ -236,7 +237,6 @@ final class MongoDBDataHandler
     private void setColumnValue(DBObject document, Object entity, Attribute column)
     {
         Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
-//        BasicDBList
         if (value != null)
         {
             if (column.getJavaType().isAssignableFrom(Map.class))
@@ -263,8 +263,10 @@ final class MongoDBDataHandler
                     }
                     catch (NumberFormatException e)
                     {
-                        log.warn("Error while reading geolocation data for column " + column 
+                        log.error("Error while reading geolocation data for column " + column 
                                 + ";Reason - possible corrupt data. " + e.getMessage());
+                        throw new EntityReaderException("Error while reading geolocation data for column " + column 
+                                + ";Reason - possible corrupt data.", e); 
                     }      
                     
                 }

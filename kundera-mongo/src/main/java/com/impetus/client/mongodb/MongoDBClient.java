@@ -327,7 +327,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 }
             }
         }
-
+        // else
+        // {
         log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
@@ -338,6 +339,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
             entities.add(entity);
         }
+        // }
 
         return entities;
     }
