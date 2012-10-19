@@ -178,7 +178,7 @@ public class MongoDBQuery extends QueryImpl
     {
         BasicDBObject query = new BasicDBObject();
         BasicDBObject compositeColumns = new BasicDBObject();
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -200,30 +200,35 @@ public class MongoDBQuery extends QueryImpl
 
                 Field f = null;
 
-                // if alias is still present .. means it is an enclosing document search.
-                // 
-                
+                // if alias is still present .. means it is an enclosing
+                // document search.
+                //
+
                 if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {
                     property = "_id";
                     f = (Field) m.getIdAttribute().getJavaMember();
-                } else if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()) && StringUtils.contains(property, '.'))
+                }
+                else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                        && StringUtils.contains(property, '.'))
                 {
                     // Means it is a case of composite column.
-                    property = property.substring(property.indexOf(".")+1);
-                    isCompositeColumn =  true;
-//                    compositeColumns.add(new BasicDBObject(compositeColumn,value));
+                    property = property.substring(property.indexOf(".") + 1);
+                    isCompositeColumn = true;
+                    // compositeColumns.add(new
+                    // BasicDBObject(compositeColumn,value));
                 }
                 else
                 {
-//                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-//                            .getMetamodel(m.getPersistenceUnit());
+                    // MetamodelImpl metaModel = (MetamodelImpl)
+                    // KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    // .getMetamodel(m.getPersistenceUnit());
 
                     EntityType entity = metaModel.entity(m.getEntityClazz());
                     String fieldName = m.getFieldName(property);
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
                 }
-                
+
                 if (value.getClass().isAssignableFrom(String.class) && f != null
                         && !f.getType().equals(value.getClass()))
                 {
@@ -246,9 +251,8 @@ public class MongoDBQuery extends QueryImpl
                 // property = enclosingDocumentName + "." + property;
                 // }
 
-                    
                 // Query could be geospatial in nature
-                if (f.getType().equals(Point.class))
+                if (f != null && f.getType().equals(Point.class))
                 {
 
                     if (condition.equalsIgnoreCase("in"))
@@ -257,35 +261,37 @@ public class MongoDBQuery extends QueryImpl
                                 .getGeospatialQueryImplementor(value);
                         query = geospatialQueryimpl.createGeospatialQuery(property, value, query);
                     }
-                    else if(condition.equals(">") || condition.equals(">=") || condition.equals("<")
+                    else if (condition.equals(">") || condition.equals(">=") || condition.equals("<")
                             || condition.equals("<="))
                     {
                         query = new NearQueryImpl().createGeospatialQuery(property, value, query);
                     }
 
-                } 
+                }
                 else
                 {
                     if (condition.equals("="))
                     {
-                        if(isCompositeColumn)
+                        if (isCompositeColumn)
                         {
-                            compositeColumns.put(property,value);
-                        } else
-                        {
-                            query.append(property, value);    
+                            compositeColumns.put(property, value);
                         }
-                        
+                        else
+                        {
+                            query.append(property, value);
+                        }
+
                     }
                     else if (condition.equalsIgnoreCase("like"))
                     {
                         // query.append(property, Pattern.compile(value));
-                        if(isCompositeColumn)
+                        if (isCompositeColumn)
                         {
-                            compositeColumns.put(property,value);
-                        } else
+                            compositeColumns.put(property, value);
+                        }
+                        else
                         {
-                            query.append(property, value);    
+                            query.append(property, value);
                         }
                     }
                     else if (condition.equalsIgnoreCase(">"))
@@ -371,16 +377,13 @@ public class MongoDBQuery extends QueryImpl
                         }
                     }
                 }
-                
-                
-                
-                
+
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
         }
-        
-        if(!compositeColumns.isEmpty())
+
+        if (!compositeColumns.isEmpty())
         {
             query.append("_id", compositeColumns);
         }
