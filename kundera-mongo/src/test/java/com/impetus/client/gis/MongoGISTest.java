@@ -55,16 +55,20 @@ public class MongoGISTest
         addPersons();
         findPerson();
 
-        //Within Queries
+        // Within Queries
         findWithinCircle();
         findWithinTriangle();
         findWithinPolygon();
         findWithinRectangle();
 
-        //Near Queries
+        // Near Queries
         findNear();
         findNearSphere();
-      
+        findCentreSphere();
+        
+        findUsingCLWithEQ();
+        findWithinCircleAndName();
+
         updatePerson();
         removePerson();
     }
@@ -197,35 +201,58 @@ public class MongoGISTest
         Assert.assertTrue(persons.size() == 4);
         dao.closeEntityManager();
     }
-    
+
     private void findNear()
     {
-        dao.createEntityManager();        
+        dao.createEntityManager();
         List<Person> persons = dao.findNear(5.0, 5.0, 2.0, SurfaceType.FLAT);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 13);
         dao.closeEntityManager();
     }
-    
+
     private void findNearSphere()
     {
-        dao.createEntityManager();        
-        List<Person> persons = dao.findNear(5.0, 5.0, (2.0*2.0*3.1416/360.0), SurfaceType.SPHERICAL);
+        dao.createEntityManager();
+        List<Person> persons = dao.findNear(5.0, 5.0, (2.0 * 2.0 * 3.1416 / 360.0), SurfaceType.SPHERICAL);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 13);
         dao.closeEntityManager();
     }
-    
+
     private void findCentreSphere()
     {
         dao.createEntityManager();
 
-        List<Person> persons = dao.findWithinCircle(5.0, 5.0, (2.0*2.0*3.1416/360.0), SurfaceType.SPHERICAL);
+        // List<Person> persons = dao.findWithinCircle(5.0, 5.0,
+        // (2.0*2.0*3.1416/360.0), SurfaceType.SPHERICAL);
+        // Assert.assertNotNull(persons);
+        // Assert.assertFalse(persons.isEmpty());
+        // Assert.assertTrue(persons.size() == 13);
+        dao.closeEntityManager();
+    }
+
+    private void findUsingCLWithEQ()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.findUsingCLWithEQ(5.0, 5.0);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
-        Assert.assertTrue(persons.size() == 13);
+        Assert.assertTrue(persons.size() == 1);
+        dao.closeEntityManager();
+    }
+
+    private void findWithinCircleAndName()
+    {
+        dao.createEntityManager();
+
+        List<Person> persons = dao.findWithinCircleAndName(5.0, 5.0, 2.0, SurfaceType.FLAT,"Amresh_45");
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
         dao.closeEntityManager();
     }
     
