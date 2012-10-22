@@ -6,12 +6,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "StudentCassandraLong", schema = "KunderaCassandraDataType@CassandraDataTypeTest")
+@Table(name = "StudentCassandralong", schema = "KunderaCassandraDataType@CassandraDataTypeTest")
 public class StudentCassandraLong
 {
 
     @Id
-    private Long id;
+    private long id;
 
     @Column(name = "AGE")
     private short age;
@@ -31,7 +31,7 @@ public class StudentCassandraLong
      * @param id
      *            the id to set
      */
-    public void setId(Long id)
+    public void setId(long id)
     {
         this.id = id;
     }
@@ -69,6 +69,5 @@ public class StudentCassandraLong
     {
         this.name = name;
     }
-
 
 }

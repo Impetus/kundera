@@ -27,7 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandrabyte;
+import com.impetus.client.crud.datatypes.entities.StudentCassandraByte;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandrabyteTest extends Base
@@ -92,21 +92,21 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of byte
-        StudentCassandrabyte studentMax = new StudentCassandrabyte();
+        StudentCassandraByte studentMax = new StudentCassandraByte();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Byte) getMaxValue(byte.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of byte
-        StudentCassandrabyte studentMin = new StudentCassandrabyte();
+        StudentCassandraByte studentMin = new StudentCassandraByte();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Byte) getMinValue(byte.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of byte
-        StudentCassandrabyte student = new StudentCassandrabyte();
+        StudentCassandraByte student = new StudentCassandraByte();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((Byte) getRandomValue(byte.class));
         student.setName((String) getRandomValue(String.class));
@@ -118,7 +118,7 @@ public class StudentCassandrabyteTest extends Base
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandrabyte studentMax = em.find(StudentCassandrabyte.class, getMaxValue(byte.class));
+        StudentCassandraByte studentMax = em.find(StudentCassandraByte.class, getMaxValue(byte.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -128,7 +128,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandrabyte studentMin = em.find(StudentCassandrabyte.class, getMinValue(byte.class));
+        StudentCassandraByte studentMin = em.find(StudentCassandraByte.class, getMinValue(byte.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -138,7 +138,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandrabyte student = em.find(StudentCassandrabyte.class, getRandomValue(byte.class));
+        StudentCassandraByte student = em.find(StudentCassandraByte.class, getRandomValue(byte.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -148,7 +148,7 @@ public class StudentCassandrabyteTest extends Base
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandrabyte student = em.find(StudentCassandrabyte.class, getMaxValue(byte.class));
+        StudentCassandraByte student = em.find(StudentCassandraByte.class, getMaxValue(byte.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -160,7 +160,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandrabyte newStudent = em.find(StudentCassandrabyte.class, getMaxValue(byte.class));
+        StudentCassandraByte newStudent = em.find(StudentCassandraByte.class, getMaxValue(byte.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -185,17 +185,17 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentCassandraByte s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getMinValue(byte.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -213,9 +213,9 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.id between ?1 and ?2";     
+        query = "Select s From StudentCassandraByte s where s.id between ?1 and ?2";     
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(byte.class));
         q.setParameter(2, getMaxValue(byte.class));
@@ -223,7 +223,7 @@ public class StudentCassandrabyteTest extends Base
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             if (student.getId() == ((Byte) getMaxValue(byte.class)).byteValue())
             {
@@ -254,16 +254,16 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getMaxValue(byte.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -280,17 +280,17 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getMaxValue(byte.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -317,7 +317,7 @@ public class StudentCassandrabyteTest extends Base
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandrabyte studentMax = em.find(StudentCassandrabyte.class, getMaxValue(byte.class));
+        StudentCassandraByte studentMax = em.find(StudentCassandraByte.class, getMaxValue(byte.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -327,7 +327,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandrabyte.class, getMaxValue(byte.class));
+        studentMax = em.find(StudentCassandraByte.class, getMaxValue(byte.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -338,7 +338,7 @@ public class StudentCassandrabyteTest extends Base
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandrabyte s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentCassandraByte s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -347,7 +347,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandrabyte newStudent = em.find(StudentCassandrabyte.class, getRandomValue(byte.class));
+        StudentCassandraByte newStudent = em.find(StudentCassandraByte.class, getRandomValue(byte.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -358,7 +358,7 @@ public class StudentCassandrabyteTest extends Base
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandrabyte s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentCassandraByte s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -366,7 +366,7 @@ public class StudentCassandrabyteTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandrabyte newStudent = em.find(StudentCassandrabyte.class, getRandomValue(byte.class));
+        StudentCassandraByte newStudent = em.find(StudentCassandraByte.class, getRandomValue(byte.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -378,17 +378,17 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Amresh and s.age between "
+        query = "Select s From StudentCassandraByte s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getRandomValue(byte.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -405,17 +405,17 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentCassandraByte s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getRandomValue(byte.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -433,17 +433,17 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             if (student.getId() == ((Byte) getMaxValue(byte.class)).byteValue())
             {
@@ -470,16 +470,16 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentCassandraByte s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             Assert.assertEquals(getRandomValue(byte.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -498,16 +498,16 @@ public class StudentCassandrabyteTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandrabyte> students;
+        List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.name = Kuldeep";
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             if (student.getId() == ((Byte) getMaxValue(byte.class)).byteValue())
             {
@@ -534,13 +534,13 @@ public class StudentCassandrabyteTest extends Base
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandrabyte s ";
+        String query = "Select s From StudentCassandraByte s ";
         Query q = em.createQuery(query);
-        List<StudentCassandrabyte> students = q.getResultList();
+        List<StudentCassandraByte> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandrabyte student : students)
+        for (StudentCassandraByte student : students)
         {
             if (student.getId() == ((Byte) getMaxValue(byte.class)).byteValue())
             {
@@ -611,7 +611,7 @@ public class StudentCassandrabyteTest extends Base
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandrabyte";
+            cfDef.name = "StudentCassandraByte";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("BytesType");
 
@@ -634,10 +634,10 @@ public class StudentCassandrabyteTest extends Base
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandrabyte"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraByte"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandrabyte");
+                        CassandraCli.client.system_drop_column_family("StudentCassandraByte");
 
                     }
                 }
