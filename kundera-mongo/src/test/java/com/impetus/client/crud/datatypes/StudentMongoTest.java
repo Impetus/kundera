@@ -126,11 +126,11 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals(3, results.size());
 
         // Query on long.
-        /* String */query = "Select s from StudentMongo s where s.uniqueId =?1";
-        /* Query */q = em.createQuery(query);
+        query = "Select s from StudentMongo s where s.uniqueId =?1";
+        q = em.createQuery(query);
         q.setParameter(1, 78575785897L);
 
-        /* List<StudentMongo> */results = q.getResultList();
+        results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
@@ -142,7 +142,18 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        Assert.assertEquals(true, results.get(0).isExceptional());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+            }
+
+        }
 
         // with false.
         query = "Select s from StudentMongo s where s.isExceptional =?1";
@@ -204,8 +215,29 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(8, results.get(0).getCgpa());
+
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+            }
+
+        }
 
         // query on yearsSpent.
         Integer i = new Integer(3);
@@ -215,8 +247,31 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(i, results.get(0).getYearsSpent());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+
+        }
 
         // query on yearsSpent.
         query = "Select s from StudentMongo s where s.yearsSpent =?1";
@@ -225,8 +280,31 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(new Integer(3), results.get(0).getYearsSpent());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+            }
+
+        }
 
         // query on digitalSignature.
         query = "Select s from StudentMongo s where s.digitalSignature =?1";
@@ -235,8 +313,25 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        Assert.assertEquals(true, results.get(0).isExceptional());
-        Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
+            }
+        }
 
         // query on cpga and digitalSignature.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.digitalSignature >= ?2 and s.digitalSignature <= ?3";
@@ -247,11 +342,33 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(true, results.get(1).isExceptional());
-        Assert.assertEquals((short) 8, results.get(0).getCgpa());
-        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+        }
 
         // query on cpga and digitalSignature parameter appended with String
         // .
@@ -260,11 +377,33 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(true, results.get(1).isExceptional());
-        Assert.assertEquals((short) 8, results.get(0).getCgpa());
-        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+        }
 
         // query on cpga and digitalSignature.
         query = "Select s from StudentMongo s where s.digitalSignature >= ?2 and s.digitalSignature <= ?3 and s.cgpa =?1";
@@ -275,11 +414,33 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(true, results.get(1).isExceptional());
-        Assert.assertEquals((short) 8, results.get(0).getCgpa());
-        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+        for (StudentMongo studentMongo : results)
+        {
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+        }
 
         // query on percentage and height.
         query = "Select s from StudentMongo s where s.percentage >= ?2 and s.percentage <= ?3 and s.height =?1";
@@ -295,8 +456,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals(61.6f, results.get(0).getPercentage());
         Assert.assertEquals(163.76765654, results.get(0).getHeight());
-        
-        
+
         // query on percentage and height parameter appended in string.
         query = "Select s from StudentMongo s where s.percentage >= 61.6 and s.percentage <= 69.6 and s.height = 163.76765654";
         q = em.createQuery(query);
@@ -308,8 +468,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals(61.6f, results.get(0).getPercentage());
         Assert.assertEquals(163.76765654, results.get(0).getHeight());
-        
-        
+
         // query on cpga and uniqueId.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
         q = em.createQuery(query);
@@ -319,17 +478,40 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(true, results.get(1).isExceptional());
-        Assert.assertEquals((short) 8, results.get(0).getCgpa());
-        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-        
-        for(StudentMongo student : results)
+        for (StudentMongo studentMongo : results)
         {
-            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L || student.getUniqueId() == 78575785899L);
-        }       
-        
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+        }
+
+        for (StudentMongo student : results)
+        {
+            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L
+                    || student.getUniqueId() == 78575785899L);
+        }
+
         // query on cpga and semester.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.semester >= ?2 and s.semester < ?3";
         q = em.createQuery(query);
@@ -339,12 +521,11 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());        
+        Assert.assertEquals(false, results.get(0).isExceptional());
         Assert.assertEquals((short) 8, results.get(0).getCgpa());
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
         Assert.assertEquals(10, results.get(0).getAge());
-
 
         // query on cpga and semester with appending in string.
         query = "Select s from StudentMongo s where s.cgpa = 8 and s.semester >= A and s.semester <= C";
@@ -352,20 +533,43 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(false, results.get(0).isExceptional());
-        Assert.assertEquals(true, results.get(1).isExceptional());
-        Assert.assertEquals((short) 8, results.get(0).getCgpa());
-        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-        
-        for(StudentMongo student : results)
+        for (StudentMongo studentMongo : results)
         {
-            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L || student.getUniqueId() == 78575785899L);
-        } 
-        for(StudentMongo student : results)
+            if (studentMongo.getStudentId() == (Long) studentId1)
+            {
+                Assert.assertEquals(10, studentMongo.getAge());
+                Assert.assertEquals(false, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+            }
+            else if (studentMongo.getStudentId() == (Long) studentId2)
+            {
+                Assert.assertEquals(20, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+            else
+            {
+                Assert.assertEquals(15, studentMongo.getAge());
+                Assert.assertEquals(true, studentMongo.isExceptional());
+                Assert.assertEquals(8, studentMongo.getCgpa());
+                Assert.assertEquals(i, studentMongo.getYearsSpent());
+                Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+            }
+        }
+
+        for (StudentMongo student : results)
+        {
+            Assert.assertTrue(student.getUniqueId() == 78575785897L || student.getUniqueId() == 78575785898L
+                    || student.getUniqueId() == 78575785899L);
+        }
+        for (StudentMongo student : results)
         {
             Assert.assertTrue(student.getAge() == 15 || student.getAge() == 20 || student.getAge() == 10);
-        } 
+        }
 
         // query on invalid cpga and uniqueId.
         query = "Select s from StudentMongo s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";

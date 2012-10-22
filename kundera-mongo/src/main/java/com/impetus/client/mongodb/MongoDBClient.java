@@ -218,14 +218,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         else
         {
-            query.put(
-                    "_id",
-                    /*
-                     * ((AbstractAttribute)
-                     * entityMetadata.getIdAttribute()).getJPAColumnName(),
-                     */
-                    key instanceof Calendar ? ((Calendar) key).getTime().toString() : MongoDBUtils.populateValue(key,
-                            key.getClass()));
+            query.put("_id", MongoDBUtils.populateValue(key, key.getClass()));
         }
 
         DBCursor cursor = dbCollection.find(query);
@@ -376,12 +369,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         else
         {
 
-            query.put("_id",
-            /*
-             * ((AbstractAttribute)
-             * entityMetadata.getIdAttribute()).getJPAColumnName(),
-             */
-            MongoDBUtils.populateValue(pKey, pKey.getClass()));
+            query.put("_id", MongoDBUtils.populateValue(pKey, pKey.getClass()));
         }
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -648,10 +636,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             }
             else
             {
-                query.put(
-                        "_id",
-                        id instanceof Calendar ? ((Calendar) id).getTime().toString() : MongoDBUtils.populateValue(id,
-                                id.getClass()));
+                query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
             }
             DBCollection dbCollection = mongoDb.getCollection(documentName);
             dbCollection.findAndModify(query, document);

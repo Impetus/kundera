@@ -319,10 +319,7 @@ final class MongoDBDataHandler
         }
         else
         {
-            dbObj.put(
-                    "_id",
-                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : MongoDBUtils.populateValue(id,
-                            id.getClass()));
+            dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
         }
         // Populate columns
         // for (Column column : columns)
@@ -418,10 +415,8 @@ final class MongoDBDataHandler
             Object valObj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             if (valObj != null)
             {
-                dbObj.put(
-                        ((AbstractAttribute) column).getJPAColumnName(),
-                        valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString() : MongoDBUtils
-                                .populateValue(valObj, column.getJavaType()));
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
+                        MongoDBUtils.populateValue(valObj, column.getJavaType()));
             }
         }
     }

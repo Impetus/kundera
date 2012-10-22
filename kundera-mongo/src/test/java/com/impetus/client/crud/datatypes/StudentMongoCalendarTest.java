@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoCalendar;
+import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.query.QueryHandlerException;
 
 public class StudentMongoCalendarTest extends Base
@@ -24,38 +25,17 @@ public class StudentMongoCalendarTest extends Base
     @Before
     public void setUp() throws Exception
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            createSchema();
-        }
         emf = Persistence.createEntityManagerFactory("MongoDataTypeTest");
     }
 
     @After
     public void tearDown() throws Exception
     {
+        MongoUtils.dropDatabase(emf, "MongoDataTypeTest");
         emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            stopCluster();
-        }
     }
 
     @Test
-    public void dummyTest()
-    {
-
-    }
-
-    // @Test
     public void testExecuteUseSameEm()
     {
         testPersist(true);
@@ -66,7 +46,7 @@ public class StudentMongoCalendarTest extends Base
         testDelete(true);
     }
 
-    // @Test
+    @Test
     public void testExecute()
     {
         testPersist(false);
@@ -480,7 +460,7 @@ public class StudentMongoCalendarTest extends Base
         int count = 0;
         for (StudentMongoCalendar student : students)
         {
-            if (student.getId().equals(getMaxValue(Calendar.class)))
+            if (student.getId().equals(((Calendar) getMaxValue(Calendar.class))))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());

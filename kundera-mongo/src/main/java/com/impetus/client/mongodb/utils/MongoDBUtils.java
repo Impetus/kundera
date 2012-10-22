@@ -71,6 +71,10 @@ public class MongoDBUtils
         {
             return valObj.toString();
         }
+        else if ((valObj instanceof Calendar) || (valObj instanceof GregorianCalendar))
+        {
+            return ((Calendar) valObj).getTime();
+        }
         return valObj;
     }
 
@@ -78,7 +82,10 @@ public class MongoDBUtils
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
                 || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
+                /*
+                 * || (clazz.isAssignableFrom(Calendar.class)) ||
+                 * (clazz.isAssignableFrom(GregorianCalendar.class))
+                 */);
     }
 
 }
