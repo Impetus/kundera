@@ -674,7 +674,8 @@ public class PersistenceDelegator
      */
     public EntityMetadata getMetadata(Class<?> clazz)
     {
-        return KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata  metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        return metadata;
     }
 
     /**

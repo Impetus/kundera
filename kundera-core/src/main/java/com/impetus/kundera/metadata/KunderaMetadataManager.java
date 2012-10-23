@@ -133,7 +133,7 @@ public class KunderaMetadataManager
             {
                 MetamodelImpl metamodel = getMetamodel(pu);
                 EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
-                if (metadata != null)
+                if (metadata != null && metadata.getPersistenceUnit().equals(pu))
                 {
                     return metadata;
                 }
