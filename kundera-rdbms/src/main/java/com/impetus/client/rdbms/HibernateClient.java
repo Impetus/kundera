@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
@@ -473,11 +474,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         && rel != null
                         && !rel.getProperty().isAnnotationPresent(ManyToMany.class)
                         && !rel.getProperty().isAnnotationPresent(OneToMany.class)
-                        && (rel.getProperty().isAnnotationPresent(OneToOne.class) && StringUtils.isBlank(rel
-                                .getMappedBy())))
-                {
-                    q.addScalar(name != null ? name : r);
-                }
+                        && (rel.getProperty().isAnnotationPresent(OneToOne.class)
+                                && StringUtils.isBlank(rel.getMappedBy()) || rel.getProperty().isAnnotationPresent(
+                                ManyToOne.class)))
+                    {
+                        q.addScalar(name != null ? name : r);
+                    }
+//                }
             }
         }
         return q.list();

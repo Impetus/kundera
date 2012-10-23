@@ -311,23 +311,19 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // do nothing.
         }
         catch (UnavailableException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // do nothing.
         }
         catch (TimedOutException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // do nothing.
         }
         catch (TException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // do nothing.
         }
     }
 

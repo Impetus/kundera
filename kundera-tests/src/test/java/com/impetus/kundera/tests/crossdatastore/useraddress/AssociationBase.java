@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -173,17 +175,27 @@ public abstract class AssociationBase
                 // .getEntityMetadata(clazz);
 
                 Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
-                EntityMetadata mAdd = null;
-                for (Metamodel m : metaModels.values())
+               
+                EntityMetadata mAdd =  KunderaMetadataManager.getEntityMetadata(clazz);
+                /*for (Metamodel m : metaModels.values())
                 {
                     mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz);
                     if (mAdd != null)
                     {
                         break;
                     }
-                }
+                }*/
                 mAdd.setPersistenceUnit(pu);
-
+                Map<String,List<String>> clazzToPu = new HashMap<String, List<String>>(1);
+                List<String> pus = new ArrayList<String>(1);
+                pus.add(pu);
+                clazzToPu.put(clazz.getName(), pus);
+                KunderaMetadata.INSTANCE.getApplicationMetadata().setClazzToPuMap(clazzToPu);
+                
+                Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu);
+                ((MetamodelImpl)metaModel).addEntityMetadata(clazz, mAdd);
+                KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().put(pu, metaModel);
+//                KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu, clazz, mAdd);
                 PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getPersistenceUnitMetadata(pu);
 

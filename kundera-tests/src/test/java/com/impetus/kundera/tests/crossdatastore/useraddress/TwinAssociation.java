@@ -55,6 +55,9 @@ public abstract class TwinAssociation extends AssociationBase
      */
     public static void init(List<Class> classes, String... persistenceUnits) throws Exception
     {
+        combinations = null;
+        combinations = new ArrayList<Map<Class, String>>();
+        
         /*
          * if (RUN_IN_EMBEDDED_MODE) { CassandraCli.cassandraSetUp();
          * 
