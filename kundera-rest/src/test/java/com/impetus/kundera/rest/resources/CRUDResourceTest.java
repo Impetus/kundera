@@ -45,6 +45,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.kundera.rest.common.Book;
 import com.impetus.kundera.rest.common.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.HabitatUni1ToM;
@@ -193,18 +194,41 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
         String jpaQuery = "select b from Book b";
-        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery);
         log.debug("Query Result:" + queryResult);
 
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
         Assert.assertNotNull(allBooks);
         Assert.assertTrue(allBooks.indexOf("books") > 0);
+        Assert.assertTrue(allBooks.indexOf("Saurabh") > 0);
+        Assert.assertTrue(allBooks.indexOf("Vivek") > 0);
         log.debug(allBooks);
-
+        
+        //Get books for a specific author
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("author", "Saurabh");
+        String booksByAuthor = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(), "findByAuthor", params);
+        Assert.assertNotNull(booksByAuthor);
+        Assert.assertTrue(booksByAuthor.indexOf("books") > 0);
+        Assert.assertTrue(booksByAuthor.indexOf("Saurabh") > 0);
+        Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
+        log.debug(booksByAuthor);
+        
+        //Get books for a specific publication
+        Map<String, Object> paramsPublication = new HashMap<String, Object>();
+        paramsPublication.put("1", "Willey");
+        String booksByPublication = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(), "findByPublication", paramsPublication);
+        Assert.assertNotNull(booksByPublication);
+        Assert.assertTrue(booksByAuthor.indexOf("books") > 0);
+        Assert.assertTrue(booksByAuthor.indexOf("Saurabh") > 0);
+        Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
+        Assert.assertTrue(booksByAuthor.indexOf("Willey") > 0);
+        log.debug(booksByAuthor);
+        
         // Delete Records
-        // restClient.deleteBook(sessionToken, updatedBook, pk1);
-        // restClient.deleteBook(sessionToken, updatedBook, pk2);
+        restClient.deleteBook(sessionToken, updatedBook, pk1);
+        restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);
@@ -293,7 +317,7 @@ public class CRUDResourceTest extends JerseyTest
 
         // Run Query.
         String jpaQuery = "select p from PersonnelUni1ToM p where p.personId >= " + person1Pk;
-        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery);
         log.debug("Query Result:" + queryResult);
 
         // Delete person.

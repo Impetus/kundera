@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.rest.dao;
 
+import java.util.Map;
+
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -43,9 +45,11 @@ public interface RESTClient
 
     void deleteBook(String sessionToken, String updatedBook, String isbn);
 
-    String getAllBooks(String sessionToken);
-
-    String runQuery(String sessionToken, String jpaQuery);
+    String getAllBooks(String sessionToken);  
+    
+    String runJPAQuery(String sessionToken, String jpaQuery);
+    
+    String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params);
 
     String getSchemaList(String persistenceUnit);
 

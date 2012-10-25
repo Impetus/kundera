@@ -18,6 +18,7 @@ package com.impetus.kundera.rest.dao;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
@@ -170,7 +171,7 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public String runQuery(String sessionToken, String jpaQuery)
+    public String runJPAQuery(String sessionToken, String jpaQuery)
     {
         log.debug("\n\nRunning JPA Query... ");
         WebResource.Builder queryBuilder = webResource.path("kundera/api/query/" + jpaQuery).accept(mediaType)
@@ -185,6 +186,30 @@ public class RESTClientImpl implements RESTClient
 
         log.debug("Found Entities:" + allStr);
         return allStr;
+    }    
+
+    @Override
+    public String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params)
+    {
+        log.debug("\n\nRunning Named JPA Query " + namedQuery + "... ");
+        WebResource.Builder queryBuilder = webResource.path("kundera/api/query/" + entityClassName + "/" + namedQuery)
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        
+        if(params != null && ! params.isEmpty())
+        {
+            for(String paramName : params.keySet())
+            {
+                queryBuilder.header(Constants.QUERY_PARAMS_HEADER_NAME_PREFIX + paramName, params.get(paramName));
+            }
+        }
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        String allBookStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities for query " + namedQuery + ":" + allBookStr);
+        return allBookStr;
     }
 
     @Override

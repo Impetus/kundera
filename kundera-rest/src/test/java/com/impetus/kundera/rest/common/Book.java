@@ -18,6 +18,8 @@ package com.impetus.kundera.rest.common;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -29,6 +31,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "BOOK", schema = "KunderaExamples@twissandra")
+@NamedQueries(value = {
+        @NamedQuery(name = "findByAuthor", query = "Select b from Book b where b.author = :author"),
+        @NamedQuery(name = "findByPublication", query = "Select b from Book b where b.publication = ?1"),
+        @NamedQuery(name = "findAllBooks", query = "Select b from Book b")})
 @XmlRootElement
 public class Book
 {
