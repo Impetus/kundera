@@ -15,6 +15,7 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
@@ -40,11 +42,13 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -58,6 +62,7 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
+import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
@@ -71,6 +76,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
@@ -133,14 +139,37 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-            prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
-            // Write Mutation map to database
+            // if entity is embeddable...call cql translator to get cql string!
+            // use thrift client to execute cql query.
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
             cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
 
-            cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
+            if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                cassandra_client.set_cql_version(getCqlVersion());
+                CQLTranslator translator = new CQLTranslator();
+                String insert_Query = translator.INSERT_QUERY;
+                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
+                        translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+                HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity,
+                        entityMetadata, TranslationType.ALL);
+                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
+                        translation.get(TranslationType.VALUE));
+                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS,
+                        translation.get(TranslationType.COLUMN));
+                cassandra_client.execute_cql_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE);
+                
+            } else
+            {
+            prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
+            // Write Mutation map to database
 
+            cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
+            }
         }
         catch (InvalidRequestException e)
         {
@@ -158,6 +187,16 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        catch (UnsupportedEncodingException e)
         {
             log.error("Error while persisting record. Details: " + e.getMessage());
             throw new KunderaException(e);
