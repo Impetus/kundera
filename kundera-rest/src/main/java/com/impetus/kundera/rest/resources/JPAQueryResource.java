@@ -25,34 +25,32 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
-import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.converters.CollectionConverter;
-import com.impetus.kundera.rest.dto.QueryResult;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * REST based resource for JPA query
+ * REST based resource for JPA queries
  * 
  * @author amresh
  * 
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.QUERY_RESOURCE_PATH)
-public class QueryResource
+@Path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH)
+public class JPAQueryResource
 {
 
-    private static Log log = LogFactory.getLog(QueryResource.class);
+    private static Log log = LogFactory.getLog(JPAQueryResource.class);
 
     /**
      * Handler for GET method requests for this resource Retrieves all entities
@@ -66,13 +64,15 @@ public class QueryResource
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/all")
-    public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers)
+    @Path("/{entityClass}/{namedQueryName}")
+    public Response executeNamedQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,            
+            @PathParam("entityClass") String entityClassName,
+            @PathParam("namedQueryName") String namedQueryName,
+            @Context HttpHeaders headers)
     {
 
-        log.debug("GET: sessionToken:" + sessionToken);
-        log.debug("GET: entityClass:" + entityClassName);
+        log.debug("GET: sessionToken:" + sessionToken + ", entityClass:" + entityClassName + ", Named Query:" + namedQueryName);
+        
 
         List result = null;
         Class<?> entityClass = null;
@@ -82,22 +82,55 @@ public class QueryResource
             entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("GET: entityClass" + entityClass);
 
-            String alias = entityClassName.substring(0, 1).toLowerCase();
+            if(Constants.NAMED_QUERY_ALL.equalsIgnoreCase(namedQueryName))
+            {
+                String alias = entityClassName.substring(0, 1).toLowerCase();
 
-            StringBuilder sb = new StringBuilder().append("SELECT ").append(alias).append(" FROM ")
-                    .append(entityClassName).append(" ").append(alias);
+                StringBuilder sb = new StringBuilder().append("SELECT ").append(alias).append(" FROM ")
+                        .append(entityClassName).append(" ").append(alias);
 
-            Query q = em.createQuery(sb.toString());
-
-            result = q.getResultList();
+                Query q = em.createQuery(sb.toString());
+                result = q.getResultList(); 
+            }
+            else
+            {             
+                Query q = em.createNamedQuery(namedQueryName);
+                if(q == null)
+                {
+                    return Response.serverError().build();
+                }   
+                
+                for(String headerName : headers.getRequestHeaders().keySet())
+                {
+                    if(headerName != null && headerName.startsWith(Constants.QUERY_PARAMS_HEADER_NAME_PREFIX))
+                    {
+                        String paramName = headerName.substring(Constants.QUERY_PARAMS_HEADER_NAME_PREFIX.length());
+                        Object val = headers.getRequestHeaders().getFirst(headerName);
+                        
+                        if(StringUtils.isNumeric(paramName))
+                        {
+                            q.setParameter(Integer.parseInt(paramName), val);
+                        }
+                        else
+                        {
+                            q.setParameter(paramName, val);
+                        }
+                        
+                    }
+                }                
+                
+                result = q.getResultList();
+            }            
+            
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
+            e.printStackTrace();
             return Response.serverError().build();
         }
 
-        log.debug("GET: Find All Result: " + result);
+        log.debug("GET: Result of " + namedQueryName + " Query : " + result);
 
         if (result == null)
         {
@@ -130,8 +163,7 @@ public class QueryResource
             @PathParam("jpaQuery") String jpaQuery, @Context HttpHeaders headers)
     {
 
-        log.debug("GET: sessionToken:" + sessionToken);
-        log.debug("GET: jpaQuery:" + jpaQuery);
+        log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:" + jpaQuery);
 
         List result = null;
         Query q = null;
