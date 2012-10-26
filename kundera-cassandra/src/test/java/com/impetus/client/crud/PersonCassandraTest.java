@@ -131,6 +131,21 @@ public class PersonCassandraTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
+        
+        // perform merge after query.
+        for(PersonCassandra person : persons)
+        {
+            person.setPersonName("after merge");
+            em.merge(person);
+        }
+        
+        em.clear();
+        
+        
+        p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("after merge", p.getPersonName());
+        
     }
 
     /**
