@@ -26,6 +26,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -78,6 +80,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -630,18 +633,29 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(metadata.getSchema());
+            
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
 
-            if (metadata.isCounterColumnType())
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
-                deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
+                onDeleteQuery(metadata, metaModel, pKey);
             }
             else
             {
-                ColumnPath path = new ColumnPath(metadata.getTableName());
 
-                cassandra_client.remove(ByteBuffer.wrap(CassandraUtilities.toBytes(pKey,
-                        metadata.getIdAttribute().getJavaType()).toByteArray()), path, System.currentTimeMillis(),
-                        getConsistencyLevel());
+                if (metadata.isCounterColumnType())
+                {
+                    deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
+                }
+                else
+                {
+                    ColumnPath path = new ColumnPath(metadata.getTableName());
+
+                    cassandra_client.remove(ByteBuffer.wrap(CassandraUtilities.toBytes(pKey,
+                            metadata.getIdAttribute().getJavaType()).toByteArray()), path, System.currentTimeMillis(),
+                            getConsistencyLevel());
+                }
             }
         }
         catch (InvalidRequestException e)

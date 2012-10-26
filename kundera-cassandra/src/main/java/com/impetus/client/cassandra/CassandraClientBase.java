@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
@@ -86,6 +88,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -849,6 +852,37 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected ConsistencyLevel getConsistencyLevel()
     {
         return consistencyLevel;
+    }
+
+    protected void onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object compoundKeyObject)
+    {
+        CQLTranslator translator = new CQLTranslator();
+        String deleteQuery = CQLTranslator.DELETE_QUERY;
+        
+        deleteQuery = StringUtils.replace(deleteQuery, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
+
+        StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
+
+        Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+        EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+
+        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+
+        for (Field field : fields)
+        {
+            Attribute attribute = compoundKey.getAttribute(field.getName());
+            String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+            System.out.println("DD");
+            translator.buildWhereClause(deleteQueryBuilder,  columnName, field,
+                    compoundKeyObject);
+        }
+
+        // strip last "AND" clause.
+        deleteQueryBuilder.delete(deleteQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
+                deleteQueryBuilder.length());
+
+        executeQuery(deleteQueryBuilder.toString(), metadata.getEntityClazz(), null);
     }
 
     public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq,

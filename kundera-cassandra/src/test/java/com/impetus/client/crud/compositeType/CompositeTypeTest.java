@@ -105,16 +105,14 @@ public class CompositeTypeTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
-/*
- * TODO: Uncomment after delete is done.
- *         // deleting composite
+         // deleting composite
         em.remove(result);
 
         em.clear();// optional,just to clear persistence cache.
 
         result = em.find(PrimeUser.class, key);
         Assert.assertNull(result); 
-*/    }
+   }
 
 //    @Test
     public void onQuery()

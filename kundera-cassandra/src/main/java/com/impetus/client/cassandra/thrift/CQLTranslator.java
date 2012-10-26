@@ -61,7 +61,11 @@ public final class CQLTranslator
     public static final String COLUMNS = "$COLUMNS";
 
     public static final String COLUMN_VALUES = "$COLUMNVALUES";
+    
+    public static final String AND_CLAUSE = " AND ";
 
+    public static final String EQ_CLAUSE= "=";
+    
     public CQLTranslator()
     {
 
@@ -181,6 +185,16 @@ public final class CQLTranslator
         }
     }
 
+    public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
+    {
+                builder=ensureCase(builder,field);
+                builder.append(EQ_CLAUSE);
+                appendColumnValue(builder, entity, member);
+                builder.append(AND_CLAUSE);
+
+                //                builder.delete(builder.lastIndexOf(AND_CLAUSE),builder.length());
+//        return builder;
+    }
     /**
      * Ensures case for corresponding column name.
      * 
@@ -225,18 +239,23 @@ public final class CQLTranslator
         case ALL:
             if (appendColumnValue(builder, compoundKeyObj, compositeColumn))
             {
+                builder.append(",");
                 appendColumnName(columnBuilder, columnName);
+                columnBuilder.append(","); // because only key columns
             }
             break;
 
         case COLUMN:
 
             appendColumnName(columnBuilder, columnName);
+            columnBuilder.append(","); // because only key columns
             break;
 
         case VALUE:
 
             appendColumnValue(builder, compoundKeyObj, compositeColumn);
+            builder.append(","); // because only key columns
+
 
             break;
         }
@@ -280,7 +299,7 @@ public final class CQLTranslator
                 builder.append(value);
             }
 
-            builder.append(","); // because only key columns
+//            builder.append(","); // because only key columns
         }
 
         return isPresent;
@@ -297,7 +316,7 @@ public final class CQLTranslator
     private void appendColumnName(StringBuilder builder, String columnName)
     {
         ensureCase(builder, columnName);
-        builder.append(","); // because only key columns
+//        builder.append(","); // because only key columns
     }
 
     /**
