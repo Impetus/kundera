@@ -34,10 +34,10 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * CQL translator interface, to translate all CRUD operations into CQL queries.
  * In case compound primary key is boolean, we need to
- * $COLUMNS,$COLUMNFAMILY,$COLUMNVALUES : They need to be comma
- *         separated. $COLUMNVALUES : It has to be according to data type(add
- *         "'" only for text/string)
-
+ * $COLUMNS,$COLUMNFAMILY,$COLUMNVALUES : They need to be comma separated.
+ * $COLUMNVALUES : It has to be according to data type(add "'" only for
+ * text/string)
+ * 
  * @author vivek.mishra
  */
 public final class CQLTranslator
@@ -61,11 +61,11 @@ public final class CQLTranslator
     public static final String COLUMNS = "$COLUMNS";
 
     public static final String COLUMN_VALUES = "$COLUMNVALUES";
-    
+
     public static final String AND_CLAUSE = " AND ";
 
-    public static final String EQ_CLAUSE= "=";
-    
+    public static final String EQ_CLAUSE = "=";
+
     public CQLTranslator()
     {
 
@@ -187,14 +187,15 @@ public final class CQLTranslator
 
     public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
     {
-                builder=ensureCase(builder,field);
-                builder.append(EQ_CLAUSE);
-                appendColumnValue(builder, entity, member);
-                builder.append(AND_CLAUSE);
+        builder = ensureCase(builder, field);
+        builder.append(EQ_CLAUSE);
+        appendColumnValue(builder, entity, member);
+        builder.append(AND_CLAUSE);
 
-                //                builder.delete(builder.lastIndexOf(AND_CLAUSE),builder.length());
-//        return builder;
+        // builder.delete(builder.lastIndexOf(AND_CLAUSE),builder.length());
+        // return builder;
     }
+
     /**
      * Ensures case for corresponding column name.
      * 
@@ -256,7 +257,6 @@ public final class CQLTranslator
             appendColumnValue(builder, compoundKeyObj, compositeColumn);
             builder.append(","); // because only key columns
 
-
             break;
         }
     }
@@ -299,7 +299,7 @@ public final class CQLTranslator
                 builder.append(value);
             }
 
-//            builder.append(","); // because only key columns
+            // builder.append(","); // because only key columns
         }
 
         return isPresent;
@@ -316,7 +316,7 @@ public final class CQLTranslator
     private void appendColumnName(StringBuilder builder, String columnName)
     {
         ensureCase(builder, columnName);
-//        builder.append(","); // because only key columns
+        // builder.append(","); // because only key columns
     }
 
     /**

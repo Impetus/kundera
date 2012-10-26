@@ -639,7 +639,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
-                onDeleteQuery(metadata, metaModel, pKey);
+                EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+                onDeleteQuery(metadata, metaModel, pKey,compoundKey);
             }
             else
             {

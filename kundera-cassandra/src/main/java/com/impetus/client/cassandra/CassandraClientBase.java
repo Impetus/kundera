@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.ManagedType;
 
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
@@ -105,8 +106,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
 
+    /** The cql version. */
     private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
 
+    /** The consistency level. */
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
     /** The closed. */
@@ -115,11 +118,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
 
-    /** batch size */
+    /** batch size. */
     private int batchSize;
 
     /**
      * constructor using fields.
+     *
+     * @param persistenceUnit the persistence unit
      */
     protected CassandraClientBase(String persistenceUnit)
     {
@@ -151,6 +156,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return col;
     }
 
+    /**
+     * On counter column.
+     *
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param ks the ks
+     * @return the list
+     */
     protected List<Object> onCounterColumn(EntityMetadata m, boolean isRelation, List<String> relations,
             List<KeySlice> ks)
     {
@@ -195,6 +209,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return entities;
     }
 
+    /**
+     * Compute entity via columns.
+     *
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param entities the entities
+     * @param qResults the q results
+     */
     protected void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<Column>> qResults)
     {
@@ -213,6 +236,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Compute entity via super columns.
+     *
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param entities the entities
+     * @param qResults the q results
+     */
     protected void computeEntityViaSuperColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<SuperColumn>> qResults)
     {
@@ -234,11 +266,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Adds relation foreign key values as thrift column/ value to thrift row
-     * 
-     * @param metadata
-     * @param tf
-     * @param relations
+     * Adds relation foreign key values as thrift column/ value to thrift row.
+     *
+     * @param metadata the metadata
+     * @param tf the tf
+     * @param relations the relations
      */
     protected void addRelationsToThriftRow(EntityMetadata metadata, ThriftRow tf, List<RelationHolder> relations)
     {
@@ -304,9 +336,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param rlName
-     * @param rlValue
-     * @return
+     * Populate counter fkey.
+     *
+     * @param rlName the rl name
+     * @param rlValue the rl value
+     * @return the counter column
      */
     private CounterColumn populateCounterFkey(String rlName, Object rlValue)
     {
@@ -317,10 +351,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Deletes record for given primary key from counter column family
-     * 
-     * @param pKey
-     * @param metadata
+     * Deletes record for given primary key from counter column family.
+     *
+     * @param pKey the key
+     * @param metadata the metadata
+     * @param consistencyLevel the consistency level
      */
     protected void deleteRecordFromCounterColumnFamily(Object pKey, EntityMetadata metadata,
             ConsistencyLevel consistencyLevel)
@@ -485,11 +520,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Finds an entiry from database
-     * 
-     * @param entityClass
-     * @param rowId
-     * @return
+     * Finds an entiry from database.
+     *
+     * @param entityClass the entity class
+     * @param rowId the row id
+     * @return the object
      */
     public Object find(Class entityClass, Object rowId)
     {
@@ -499,12 +534,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Finds a {@link List} of entities from database
-     * 
-     * @param <E>
-     * @param entityClass
-     * @param rowIds
-     * @return
+     * Finds a {@link List} of entities from database.
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param rowIds the row ids
+     * @return the list
      */
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
@@ -536,14 +571,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
-            if(metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
                 CQLTranslator translator = new CQLTranslator();
                 String select_Query = translator.SELECTALL_QUERY;
                 select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                         translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
-                result = executeQuery(select_Query, metadata.getEntityClazz(), relationNames);
-            } else 
+                StringBuilder builder = new StringBuilder(select_Query);
+                EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+                onWhereClause(metadata, rowId, translator, builder, compoundKey);
+                result = executeQuery(builder.toString(), metadata.getEntityClazz(), relationNames);
+            }
+            else
             {
                 result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
             }
@@ -557,6 +596,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return result != null & !result.isEmpty() ? result.get(0) : null;
     }
 
+    /**
+     * Find.
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param superColumnMap the super column map
+     * @param dataHandler the data handler
+     * @return the list
+     */
     public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap, CassandraDataHandler dataHandler)
     {
         List<E> entities = null;
@@ -586,13 +634,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Executes Query
-     * 
-     * @param cqlQuery
-     * @param clazz
-     * @param relationalField
-     * @param dataHandler
-     * @return
+     * Executes Query.
+     *
+     * @param cqlQuery the cql query
+     * @param clazz the clazz
+     * @param relationalField the relational field
+     * @param dataHandler the data handler
+     * @return the list
      */
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
@@ -625,13 +673,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     CqlRow row = iter.next();
                     Object rowKey = null;
 
-                    if(!metaModel.isEmbeddable(entityMetadata.getIdAttribute()
-                            .getBindableJavaType()))
+                    if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
                     {
-                        rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute()
-                                .getBindableJavaType(), row.getKey());
+                        rowKey = PropertyAccessorHelper.getObject(
+                                entityMetadata.getIdAttribute().getBindableJavaType(), row.getKey());
                     }
-//                      String rowKeys = Bytes.toUTF8(row.getKey());
+                    // String rowKeys = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
                     if (entityMetadata.isCounterColumnType())
                     {
@@ -695,17 +742,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Populate data.
-     * 
-     * @param m
-     *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
-     * @param isRelational
-     *            the is relational
-     * @param relationNames
-     *            the relation names
+     *
+     * @param m the m
+     * @param qResults the q results
+     * @param entities the entities
+     * @param isRelational the is relational
+     * @param relationNames the relation names
+     * @param dataHandler the data handler
      */
     protected void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
@@ -766,12 +809,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param m
-     * @param isWrapReq
-     * @param relations
-     * @param keys
-     * @return
-     * @throws Exception
+     * Populate entities from key slices.
+     *
+     * @param m the m
+     * @param isWrapReq the is wrap req
+     * @param relations the relations
+     * @param keys the keys
+     * @param dataHandler the data handler
+     * @return the list
+     * @throws Exception the exception
      */
     protected List populateEntitiesFromKeySlices(EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<KeySlice> keys, CassandraDataHandler dataHandler) throws Exception
@@ -804,6 +850,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
+     * Gets the cql version.
+     *
      * @return the cqlVersion
      */
     protected String getCqlVersion()
@@ -812,14 +860,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param cqlVersion
-     *            the cqlVersion to set
+     * Sets the cql version.
+     *
+     * @param cqlVersion the cqlVersion to set
      */
     public void setCqlVersion(String cqlVersion)
     {
         this.cqlVersion = cqlVersion;
     }
 
+    /**
+     * Sets the consistency level.
+     *
+     * @param cLevel the new consistency level
+     */
     public void setConsistencyLevel(ConsistencyLevel cLevel)
     {
         if (cLevel != null)
@@ -832,6 +886,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Close.
+     */
     public void close()
     {
         nodes.clear();
@@ -849,65 +906,172 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return !closed;
     }
 
+    /**
+     * Gets the consistency level.
+     *
+     * @return the consistency level
+     */
     protected ConsistencyLevel getConsistencyLevel()
     {
         return consistencyLevel;
     }
 
-    protected void onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object compoundKeyObject)
+    /**
+     * On delete query.
+     *
+     * @param metadata the metadata
+     * @param metaModel the meta model
+     * @param compoundKeyObject the compound key object
+     * @param compoundKey the compound key
+     */
+    protected void onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object compoundKeyObject,
+            ManagedType compoundKey)
     {
         CQLTranslator translator = new CQLTranslator();
         String deleteQuery = CQLTranslator.DELETE_QUERY;
-        
+
         deleteQuery = StringUtils.replace(deleteQuery, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
 
-        Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
-        EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+        onWhereClause(metadata, compoundKeyObject, translator, deleteQueryBuilder, compoundKey);
 
-        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+        executeQuery(deleteQueryBuilder.toString(), metadata.getEntityClazz(), null);
+    }
+
+    /**
+     * On where clause.
+     *
+     * @param metadata the metadata
+     * @param compoundKeyObject the compound key object
+     * @param translator the translator
+     * @param queryBuilder the query builder
+     * @param compoundKey the compound key
+     */
+    private void onWhereClause(EntityMetadata metadata, Object compoundKeyObject, CQLTranslator translator,
+            StringBuilder queryBuilder, ManagedType compoundKey)
+    {
+        Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+        // EmbeddableType compoundKey =
+        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+
+        queryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
 
         for (Field field : fields)
         {
             Attribute attribute = compoundKey.getAttribute(field.getName());
             String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-            System.out.println("DD");
-            translator.buildWhereClause(deleteQueryBuilder,  columnName, field,
-                    compoundKeyObject);
+            // System.out.println("DD");
+            translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
         }
 
         // strip last "AND" clause.
-        deleteQueryBuilder.delete(deleteQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
-                deleteQueryBuilder.length());
-
-        executeQuery(deleteQueryBuilder.toString(), metadata.getEntityClazz(), null);
+        queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
     }
 
+    /**
+     * Find.
+     *
+     * @param entityClass the entity class
+     * @param relationNames the relation names
+     * @param isWrapReq the is wrap req
+     * @param metadata the metadata
+     * @param rowIds the row ids
+     * @return the list
+     */
     public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq,
             EntityMetadata metadata, Object... rowIds);
 
+    /**
+     * Load super columns.
+     *
+     * @param keyspace the keyspace
+     * @param columnFamily the column family
+     * @param rowId the row id
+     * @param superColumnNames the super column names
+     * @return the list
+     */
     protected abstract List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames);
 
-    /** Query related methods */
+    /**
+     * Query related methods.
+     *
+     * @param cqlQuery the cql query
+     * @param clazz the clazz
+     * @param relationalField the relational field
+     * @return the list
+     */
     public abstract List executeQuery(String cqlQuery, Class clazz, List<String> relationalField);
 
+    /**
+     * Find.
+     *
+     * @param ixClause the ix clause
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param maxResult the max result
+     * @param columns the columns
+     * @return the list
+     */
     public abstract List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns);
 
+    /**
+     * Find by range.
+     *
+     * @param muinVal the muin val
+     * @param maxVal the max val
+     * @param m the m
+     * @param isWrapReq the is wrap req
+     * @param relations the relations
+     * @param columns the columns
+     * @param conditions the conditions
+     * @return the list
+     * @throws Exception the exception
+     */
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
             List<String> relations, List<String> columns, List<IndexExpression> conditions) throws Exception;
 
+    /**
+     * Search in inverted index.
+     *
+     * @param columnFamilyName the column family name
+     * @param m the m
+     * @param indexClauseMap the index clause map
+     * @return the list
+     */
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap);
 
+    /**
+     * Find.
+     *
+     * @param m the m
+     * @param relationNames the relation names
+     * @param conditions the conditions
+     * @param maxResult the max result
+     * @param columns the columns
+     * @return the list
+     */
     public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames,
             List<IndexClause> conditions, int maxResult, List<String> columns);
 
+    /**
+     * Gets the data handler.
+     *
+     * @return the data handler
+     */
     protected abstract CassandraDataHandler getDataHandler();
 
+    /**
+     * Delete.
+     *
+     * @param entity the entity
+     * @param pKey the key
+     */
     protected abstract void delete(Object entity, Object pKey);
 
     /*
@@ -916,6 +1080,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @see
      * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
      * .graph.Node)
+     */
+    /**
+     * Adds the batch.
+     *
+     * @param node the node
      */
     public void addBatch(Node node)
     {
@@ -933,6 +1102,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
      */
+    /**
+     * Gets the batch size.
+     *
+     * @return the batch size
+     */
     public int getBatchSize()
     {
         return batchSize;
@@ -942,6 +1116,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
+    /**
+     * Execute batch.
+     *
+     * @return the int
      */
     public int executeBatch()
     {
@@ -1018,10 +1197,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param metadata
-     * @param entity
-     * @param id
-     * @param relationHolders
+     * Prepare mutation.
+     *
+     * @param entityMetadata the entity metadata
+     * @param entity the entity
+     * @param id the id
+     * @param relationHolders the relation holders
+     * @param mutationMap the mutation map
+     * @return the map
      */
     protected Map<ByteBuffer, Map<String, List<Mutation>>> prepareMutation(EntityMetadata entityMetadata,
             Object entity, Object id, List<RelationHolder> relationHolders,
@@ -1135,19 +1318,21 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties(com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new CassandraClientProperties().populateClientProperties(client, properties);
     }
 
-    
     /**
-     * Returns raw cassandra client from thrift connection pool
-     * 
-     * @param persistenceUnit  persistence unit.
-     * @param schema           schema or keyspace.
-     * @return                 raw cassandra client.
+     * Returns raw cassandra client from thrift connection pool.
+     *
+     * @param persistenceUnit persistence unit.
+     * @param schema schema or keyspace.
+     * @return raw cassandra client.
      */
     protected Cassandra.Client getRawClient(final String persistenceUnit, final String schema)
     {
@@ -1168,8 +1353,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             log.error("Error during borrowing a connection, Details:" + tex.getMessage());
             throw new KunderaException(tex);
         }
-        
+
         return client;
-        
+
     }
 }

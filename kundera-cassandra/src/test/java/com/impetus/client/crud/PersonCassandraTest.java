@@ -121,6 +121,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
 
+        em.clear();
         String qry = "Select p.personName from PersonCassandra p where p.personId >= 1";
         Query q = em.createQuery(qry);
         List<PersonCassandra> persons = q.getResultList();
