@@ -84,8 +84,6 @@ public class CompositeTypeTest
         user.setTweetDate(new Date());
         em.persist(user);
 
-        /*
-         * Uncomment it after work on DELETE/UPDATE/QUERY.
         em.clear(); // optional,just to clear persistence cache.
 
         PrimeUser result = em.find(PrimeUser.class, key);
@@ -107,14 +105,16 @@ public class CompositeTypeTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
-        // deleting composite
+/*
+ * TODO: Uncomment after delete is done.
+ *         // deleting composite
         em.remove(result);
 
         em.clear();// optional,just to clear persistence cache.
 
         result = em.find(PrimeUser.class, key);
-        Assert.assertNull(result); */
-    }
+        Assert.assertNull(result); 
+*/    }
 
 //    @Test
     public void onQuery()

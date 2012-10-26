@@ -366,24 +366,24 @@ public abstract class CassandraDataHandlerBase
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
-        
-        //Add thrift rows for embeddables
+
+        // Add thrift rows for embeddables
         Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         for (String embeddedFieldName : embeddables.keySet())
         {
             EmbeddableType embeddedColumn = embeddables.get(embeddedFieldName);
-            
-            //Index embeddable only when specified by user 
-            Field embeddedField = (Field)entityType.getAttribute(embeddedFieldName).getJavaMember();
-            if(! MetadataUtils.isEmbeddedAtributeIndexable(embeddedField))
+
+            // Index embeddable only when specified by user
+            Field embeddedField = (Field) entityType.getAttribute(embeddedFieldName).getJavaMember();
+            if (!MetadataUtils.isEmbeddedAtributeIndexable(embeddedField))
             {
                 continue;
             }
 
-            Object embeddedObject = PropertyAccessorHelper.getObject(e, (Field) entityType.getAttribute(embeddedFieldName)
-                    .getJavaMember());
+            Object embeddedObject = PropertyAccessorHelper.getObject(e,
+                    (Field) entityType.getAttribute(embeddedFieldName).getJavaMember());
             if (embeddedObject == null)
             {
                 continue;
@@ -398,10 +398,10 @@ public abstract class CassandraDataHandlerBase
                     // embeddedColumn.getColumns())
                     for (Object column : embeddedColumn.getAttributes())
                     {
-                        
+
                         Attribute columnAttribute = (Attribute) column;
                         String columnName = columnAttribute.getName();
-                        if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
+                        if (!MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
                         {
                             continue;
                         }
@@ -409,9 +409,9 @@ public abstract class CassandraDataHandlerBase
                         // Column Value
                         String id = CassandraUtilities.toUTF8(rowKey);
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
-                        
-                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, obj, columnAttribute,
-                                rowKey, superColumnName);
+
+                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, obj,
+                                columnAttribute, rowKey, superColumnName);
                         if (tr != null)
                         {
                             indexThriftRows.add(tr);
@@ -426,25 +426,26 @@ public abstract class CassandraDataHandlerBase
                 // {
                 for (Object column : embeddedColumn.getAttributes())
                 {
-                    
+
                     Attribute columnAttribute = (Attribute) column;
                     String columnName = columnAttribute.getName();
-                    Class<?> columnClass = ((AbstractAttribute)columnAttribute).getBindableJavaType();
-                    if(! MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName) || columnClass.equals(byte[].class))
+                    Class<?> columnClass = ((AbstractAttribute) columnAttribute).getBindableJavaType();
+                    if (!MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName)
+                            || columnClass.equals(byte[].class))
                     {
                         continue;
-                    }                    
+                    }
 
-                    //No EC Name
-                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, embeddedObject, (Attribute) column,
-                            rowKey, "");
+                    // No EC Name
+                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedFieldName, embeddedObject,
+                            (Attribute) column, rowKey, "");
                     if (tr != null)
                     {
                         indexThriftRows.add(tr);
                     }
                 }
             }
-        }        
+        }
         return indexThriftRows;
     }
 
@@ -461,8 +462,10 @@ public abstract class CassandraDataHandlerBase
      *            Instance of {@link Column}
      * @param rowKey
      *            Name of Index Column
-     * @param ecValue Name of embeddable object in Element Collection cache 
-     *            (usually in the form of <element collection field name>#<integer counter>
+     * @param ecValue
+     *            Name of embeddable object in Element Collection cache (usually
+     *            in the form of <element collection field name>#<integer
+     *            counter>
      * @return Instance of {@link ThriftRow}
      */
     private ThriftRow constructIndexTableThriftRow(String columnFamily, String embeddedFieldName, Object obj,
@@ -481,15 +484,15 @@ public abstract class CassandraDataHandlerBase
             tr.setId(embeddedFieldName + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getName()); // Id
 
             SuperColumn thriftSuperColumn = new SuperColumn();
-            thriftSuperColumn.setName(indexColumnName);         
-               
+            thriftSuperColumn.setName(indexColumnName);
+
             Column thriftColumn = new Column();
             thriftColumn.setName(rowKey);
             thriftColumn.setValue(ecValue.getBytes());
             thriftColumn.setTimestamp(System.currentTimeMillis());
 
             thriftSuperColumn.addToColumns(thriftColumn);
-            
+
             tr.addSuperColumn(thriftSuperColumn);
         }
         return tr;
@@ -570,8 +573,9 @@ public abstract class CassandraDataHandlerBase
         {
             // entity =m.getEntityClazz().newInstance();
 
-            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(m.getPersistenceUnit()).entity(m.getEntityClazz());
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entityType = metaModel.entity(m.getEntityClazz());
 
             for (Column column : tr.getColumns())
             {
@@ -592,67 +596,69 @@ public abstract class CassandraDataHandlerBase
 
             for (SuperColumn superColumn : tr.getSuperColumns())
             {
-                if(superColumn != null)
+                if (superColumn != null)
                 {
-                entity = initialize(tr, m, entity);
+                    entity = initialize(tr, m, entity);
 
-                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
-                String scNamePrefix = null;
+                    String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
+                    String scNamePrefix = null;
 
-                // Map to hold property-name=>foreign-entity relations
-                Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+                    // Map to hold property-name=>foreign-entity relations
+                    Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-                // Get a name->field map for super-columns
-                if (!mappingProcessed)
-                {
-                    MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
-                    mappingProcessed = true;
-                }
-
-                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
-                {
-                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                    if (embeddedCollection == null)
+                    // Get a name->field map for super-columns
+                    if (!mappingProcessed)
                     {
-                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap,
+                                superColumnNameToFieldMap);
+                        mappingProcessed = true;
                     }
 
-                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
-                    scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
-                            embeddedObject, columnNameToFieldMap);
-
-                    Collection collection = PropertyAccessorHelper.getCollectionInstance(embeddedCollectionField);
-                    collection.add(embeddedObject);
-
-                    PropertyAccessorHelper.set(entity, embeddedCollectionField, collection);
-
-                    embeddedCollection.add(embeddedObject);
-
-                    // Add this embedded object to cache
-                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                            embeddedObject, scName);
-                    
-                }
-                else
-                {
-                    if (superColumnNameToFieldMap.containsKey(scName))
+                    if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
                     {
-                        Field field = superColumnNameToFieldMap.get(scName);
-                        Object embeddedObj = field.getType().newInstance();
-                        // column
+                        scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                        embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                        if (embeddedCollection == null)
+                        {
+                            embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                        }
+
+                        Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
                         scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
-                                embeddedObj, columnNameToFieldMap);
-                        PropertyAccessorHelper.set(entity, field, embeddedObj);
+                                embeddedObject, columnNameToFieldMap);
+
+                        Collection collection = PropertyAccessorHelper.getCollectionInstance(embeddedCollectionField);
+                        collection.add(embeddedObject);
+
+                        PropertyAccessorHelper.set(entity, embeddedCollectionField, collection);
+
+                        embeddedCollection.add(embeddedObject);
+
+                        // Add this embedded object to cache
+                        ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                                embeddedObject, scName);
+
                     }
                     else
                     {
-                        scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
-                    }
+                        if (superColumnNameToFieldMap.containsKey(scName))
+                        {
+                            Field field = superColumnNameToFieldMap.get(scName);
+                            Object embeddedObj = field.getType().newInstance();
+                            // column
+                            scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
+                                    embeddedObj, columnNameToFieldMap);
+                            PropertyAccessorHelper.set(entity, field, embeddedObj);
+                        }
+                        else
+                        {
+                            scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
+                                    entity);
+                        }
 
-                }
+                    }
                 }
             }
 
@@ -669,68 +675,70 @@ public abstract class CassandraDataHandlerBase
 
             for (CounterSuperColumn counterSuperColumn : tr.getCounterSuperColumns())
             {
-                if(counterSuperColumn != null)
+                if (counterSuperColumn != null)
                 {
-                entity = initialize(tr, m, entity);
-                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, counterSuperColumn.getName());
-                String scNamePrefix = null;
+                    entity = initialize(tr, m, entity);
+                    String scName = PropertyAccessorFactory.STRING
+                            .fromBytes(String.class, counterSuperColumn.getName());
+                    String scNamePrefix = null;
 
-                // Map to hold property-name=>foreign-entity relations
-                Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+                    // Map to hold property-name=>foreign-entity relations
+                    Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-                // Get a name->field map for super-columns
-                // Get a name->field map for super-columns
-                if (!mappingProcessed)
-                {
-                    MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
-                    mappingProcessed = true;
-                }
-
-                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
-                {
-                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                    if (embeddedCollection == null)
+                    // Get a name->field map for super-columns
+                    // Get a name->field map for super-columns
+                    if (!mappingProcessed)
                     {
-                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap,
+                                superColumnNameToFieldMap);
+                        mappingProcessed = true;
                     }
 
-                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
-                    scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
-                            counterSuperColumn, embeddedObject, columnNameToFieldMap);
-                    embeddedCollection.add(embeddedObject);
-
-                    // Add this embedded object to cache
-                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                            embeddedObject, scName);
-                }
-                else
-                {
-                    if (superColumnNameToFieldMap.containsKey(scName))
+                    if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
                     {
-                        Field field = superColumnNameToFieldMap.get(scName);
-                        Object embeddedObj = field.getType().newInstance();
-                        // column
+                        scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                        embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                        if (embeddedCollection == null)
+                        {
+                            embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                        }
+
+                        Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
                         scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
-                                counterSuperColumn, embeddedObj, columnNameToFieldMap);
-                        PropertyAccessorHelper.set(entity, field, embeddedObj);
+                                counterSuperColumn, embeddedObject, columnNameToFieldMap);
+                        embeddedCollection.add(embeddedObject);
+
+                        // Add this embedded object to cache
+                        ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                                embeddedObject, scName);
                     }
                     else
                     {
-                        scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
-                                counterSuperColumn, entity);
+                        if (superColumnNameToFieldMap.containsKey(scName))
+                        {
+                            Field field = superColumnNameToFieldMap.get(scName);
+                            Object embeddedObj = field.getType().newInstance();
+                            // column
+                            scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
+                                    counterSuperColumn, embeddedObj, columnNameToFieldMap);
+                            PropertyAccessorHelper.set(entity, field, embeddedObj);
+                        }
+                        else
+                        {
+                            scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
+                                    counterSuperColumn, entity);
+                        }
                     }
                 }
-                }
-           }
+            }
 
             if (embeddedCollection != null && !embeddedCollection.isEmpty())
             {
                 PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
             }
-            
+
         }
         catch (InstantiationException iex)
         {
@@ -913,6 +921,9 @@ public abstract class CassandraDataHandlerBase
     private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
     {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
         populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
@@ -971,28 +982,53 @@ public abstract class CassandraDataHandlerBase
             {
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
-
                 if (attribute != null)
                 {
-                    try
+                    setFieldValue(entity, thriftColumnValue, attribute);
+                }
+                else
+                {
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(m.getPersistenceUnit());
+                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                     {
-                        if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        try
                         {
-                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                    (String) thriftColumnValue);
+                            Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m
+                                    .getIdAttribute().getJavaMember());
+                            if(compoundKeyObject == null)
+                            {
+                                compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
+                            }
+                            Attribute compoundAttribute = compoundKey.getAttribute(thriftColumnName);
+                            setFieldValue(compoundKeyObject, thriftColumnValue, compoundAttribute);
+                            PropertyAccessorHelper.set(entity, (Field) m
+                                    .getIdAttribute().getJavaMember(), compoundKeyObject);
+//                             setFieldValue(entity, ,
+//                             attribute)
+
                         }
-                        else
+                        catch (IllegalArgumentException iaex)
                         {
-                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                    (byte[]) thriftColumnValue);
+                            // ignore as it might not repesented within entity.
+                            // No
+                            // need for any logger message
                         }
-                    }
-                    catch (PropertyAccessException pae)
-                    {
-                        log.warn(pae.getMessage());
+                        catch (InstantiationException e)
+                        {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        catch (IllegalAccessException e)
+                        {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
+
+            } 
         }
         else
         {
@@ -1009,6 +1045,28 @@ public abstract class CassandraDataHandlerBase
                 // prepare EnhanceEntity and return it
             }
 
+        }
+    }
+
+    private void setFieldValue(Object entity, Object thriftColumnValue, Attribute attribute)
+    {
+        if (attribute != null)
+        {
+            try
+            {
+                if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                {
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (String) thriftColumnValue);
+                }
+                else
+                {
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (byte[]) thriftColumnValue);
+                }
+            }
+            catch (PropertyAccessException pae)
+            {
+                log.warn(pae.getMessage());
+            }
         }
     }
 
@@ -1300,7 +1358,7 @@ public abstract class CassandraDataHandlerBase
             }
 
         }
-        else if(superColumnObject != null)
+        else if (superColumnObject != null)
         {
             superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
             buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);

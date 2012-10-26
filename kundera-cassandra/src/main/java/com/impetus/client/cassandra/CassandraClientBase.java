@@ -33,6 +33,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
@@ -51,6 +52,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -64,8 +66,10 @@ import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
+import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -527,7 +531,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         List<Object> result = null;
         try
         {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            if(metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            {
+                CQLTranslator translator = new CQLTranslator();
+                String select_Query = translator.SELECTALL_QUERY;
+                select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
+                        translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
+                result = executeQuery(select_Query, metadata.getEntityClazz(), relationNames);
+            } else 
+            {
+                result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
+            }
         }
         catch (Exception e)
         {
@@ -583,12 +599,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         CqlResult result = null;
         List returnedEntities = null;
         IPooledConnection conn = null;
+        String persistenceUnit = entityMetadata.getPersistenceUnit();
+        String schema = entityMetadata.getSchema();
         try
         {
-            conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
             Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(entityMetadata.getSchema());
+            cassandra_client.set_keyspace(schema);
             cassandra_client.set_cql_version(getCqlVersion());
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
 
             result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
@@ -599,9 +620,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 while (iter.hasNext())
                 {
                     CqlRow row = iter.next();
-                    Object rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute()
-                            .getBindableJavaType(), row.getKey());
-                    // / String rowKey = Bytes.toUTF8(row.getKey());
+                    Object rowKey = null;
+
+                    if(!metaModel.isEmbeddable(entityMetadata.getIdAttribute()
+                            .getBindableJavaType()))
+                    {
+                        rowKey = PropertyAccessorHelper.getObject(entityMetadata.getIdAttribute()
+                                .getBindableJavaType(), row.getKey());
+                    }
+//                      String rowKeys = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
                     if (entityMetadata.isCounterColumnType())
                     {
@@ -1080,4 +1107,35 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         new CassandraClientProperties().populateClientProperties(client, properties);
     }
 
+    
+    /**
+     * Returns raw cassandra client from thrift connection pool
+     * 
+     * @param persistenceUnit  persistence unit.
+     * @param schema           schema or keyspace.
+     * @return                 raw cassandra client.
+     */
+    protected Cassandra.Client getRawClient(final String persistenceUnit, final String schema)
+    {
+        IPooledConnection connection = PelopsUtils.getCassandraConnection(persistenceUnit);
+        Cassandra.Client client = connection.getAPI();
+        try
+        {
+            client.set_keyspace(schema);
+            client.set_cql_version(getCqlVersion());
+        }
+        catch (InvalidRequestException irex)
+        {
+            log.error("Error during borrowing a connection, Details:" + irex.getMessage());
+            throw new KunderaException(irex);
+        }
+        catch (TException tex)
+        {
+            log.error("Error during borrowing a connection, Details:" + tex.getMessage());
+            throw new KunderaException(tex);
+        }
+        
+        return client;
+        
+    }
 }
