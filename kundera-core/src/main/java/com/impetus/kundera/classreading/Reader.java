@@ -22,8 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.thoughtworks.xstream.io.path.Path;
 
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
@@ -147,10 +151,11 @@ public abstract class Reader
                 File f = new File(url.getPath());
                 return new ClassFileIterator(f);
             }
-            else if (!urlString.endsWith("/"))
+            //This is redundant anyway.
+            /*else if (!urlString.endsWith("/"))
             {
                 return new JarFileIterator(url.openStream(), filter);
-            }
+            }*/
             else
             {
                 if (!url.getProtocol().equals("file"))
@@ -158,7 +163,7 @@ public abstract class Reader
                     throw new ResourceReadingException("Unable to understand protocol: " + url.getProtocol());
                 }
 
-                File f = new File(url.getPath());
+                File f = new File(url.getPath().trim().replace("%20", " "));
                 if (f.isDirectory())
                 {
                     return new ClassFileIterator(f, filter);

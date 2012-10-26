@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentCassandraLong;
+import com.impetus.client.crud.datatypes.entities.StudentCassandraLong;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraLongTest extends Base
