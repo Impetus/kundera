@@ -358,6 +358,11 @@ public class CRUDResourceTest extends JerseyTest
         user_Def.keyspace = _KEYSPACE;
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
+        
+        ColumnDef authorDef = new ColumnDef(ByteBuffer.wrap("AUTHOR".getBytes()), "UTF8Type"); authorDef.index_type = IndexType.KEYS;
+        ColumnDef publicationDef = new ColumnDef(ByteBuffer.wrap("PUBLICATION".getBytes()), "UTF8Type"); publicationDef.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(authorDef);
+        user_Def.addToColumn_metadata(publicationDef);      
 
         CfDef person_Def = new CfDef();
         person_Def.name = "PERSONNEL";
