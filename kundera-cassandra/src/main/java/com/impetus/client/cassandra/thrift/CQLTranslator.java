@@ -191,11 +191,15 @@ public final class CQLTranslator
         builder.append(EQ_CLAUSE);
         appendColumnValue(builder, entity, member);
         builder.append(AND_CLAUSE);
-
-        // builder.delete(builder.lastIndexOf(AND_CLAUSE),builder.length());
-        // return builder;
     }
-
+    
+    public void buildWhereClause(StringBuilder builder, String field, Object value, String clause)
+    {
+        builder = ensureCase(builder, field);
+        builder.append(clause);
+        appendValue(builder, value.getClass(), value, false);
+        builder.append(AND_CLAUSE);
+    }
     /**
      * Ensures case for corresponding column name.
      * 
@@ -274,16 +278,23 @@ public final class CQLTranslator
     {
         Object value = PropertyAccessorHelper.getObject(compoundKeyObj, compositeColumn);
         boolean isPresent = false;
+        isPresent = appendValue(builder, compositeColumn.getType(), value, isPresent);
+
+        return isPresent;
+    }
+
+    private boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
+    {
         if (value != null)
         {
             isPresent = true;
             // CQL can take string or date within single quotes.
 
-            if (compositeColumn.getType().isAssignableFrom(String.class) || isDate(compositeColumn.getType()))
+            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz))
             {
                 builder.append("'");
 
-                if (isDate(compositeColumn.getType())) // For CQL, date has to
+                if (isDate(fieldClazz)) // For CQL, date has to
                                                        // be in date.getTime()
                 {
                     builder.append(((Date) value).getTime());
@@ -301,7 +312,6 @@ public final class CQLTranslator
 
             // builder.append(","); // because only key columns
         }
-
         return isPresent;
     }
 
@@ -313,7 +323,7 @@ public final class CQLTranslator
      * @param columnName
      *            column name.
      */
-    private void appendColumnName(StringBuilder builder, String columnName)
+    public void appendColumnName(StringBuilder builder, String columnName)
     {
         ensureCase(builder, columnName);
         // builder.append(","); // because only key columns

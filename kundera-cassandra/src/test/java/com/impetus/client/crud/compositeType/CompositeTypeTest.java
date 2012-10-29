@@ -114,7 +114,7 @@ public class CompositeTypeTest
         Assert.assertNull(result); 
    }
 
-//    @Test
+    @Test
     public void onQuery()
     {
         EntityManager em = emf.createEntityManager();
@@ -122,6 +122,11 @@ public class CompositeTypeTest
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
+
+        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get("cass_pu");
+        ((ThriftClient)client).setCqlVersion("3.0.0");
+
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -132,10 +137,11 @@ public class CompositeTypeTest
 
         final String withFirstCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId";
 
-        final String withClauseOnNoncomposite = "Select u from PrimeUser u where u.tweetDate = ?1";
-
-        // NOSQL Intelligence to teach that query is invalid because partition
-        // key is not present?
+        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
+        
+//        final String withClauseOnNoncomposite = "Select u from PrimeUser u where u.tweetDate = ?1";
+//
+        
         final String withSecondCompositeColClause = "Select u from PrimeUser u where u.key.tweetId = :tweetId";
         final String withBothCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
         final String withAllCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
@@ -154,28 +160,30 @@ public class CompositeTypeTest
         q = em.createQuery(withFirstCompositeColClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertEquals(1, results.size());
+/*
+        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
         q.setParameter(1, currentDate);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
-
+*/
         // Query with composite key clause.
         q = em.createQuery(withSecondCompositeColClause);
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertEquals(1, results.size());
 
-        // Query with composite key clause.
+                // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
@@ -191,8 +199,9 @@ public class CompositeTypeTest
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         // TODO::
-        // Assert.assertEquals(1, results.size());
+         Assert.assertEquals(1, results.size());
 
+         
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -202,7 +211,7 @@ public class CompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        /*final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetBody with composite key clause.
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -232,7 +241,7 @@ public class CompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
 
-        em.remove(user);
+*/        em.remove(user);
 
         em.clear();// optional,just to clear persistence cache.
     }
