@@ -20,13 +20,13 @@ import java.util.Map;
 import com.sun.jersey.api.client.WebResource;
 
 /**
- * <Prove description of functionality provided by this Type>
- * 
+ * REST Client interface 
  * @author amresh.singh
  */
 public interface RESTClient
 {
-
+    
+    /** Handshake and metadata methods */
     void initialize(WebResource wr, String mediaType);
 
     String getApplicationToken(String persistenceUnit);
@@ -37,6 +37,9 @@ public interface RESTClient
 
     String closeSession(String sessionToken);
 
+    String getSchemaList(String persistenceUnit);
+    
+    /** Operations on Book entity */
     String insertBook(String sessionToken, String book);
 
     String findBook(String sessionToken, String isbn);
@@ -47,11 +50,15 @@ public interface RESTClient
 
     String getAllBooks(String sessionToken);  
     
-    String runJPAQuery(String sessionToken, String jpaQuery);
+    String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params);
     
     String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params);
+    
+    String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params);
+    
+    String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery, Map<String, Object> params);
 
-    String getSchemaList(String persistenceUnit);
+    /** Operations on Person entity*/
 
     String insertPerson(String sessionToken, String person);
 
@@ -62,6 +69,5 @@ public interface RESTClient
     String getAllPersons(String sessionToken);
 
     void deletePerson(String sessionToken, String updatedPerson, String isbn);
-
-    String executeNamedQuery();
+    
 }

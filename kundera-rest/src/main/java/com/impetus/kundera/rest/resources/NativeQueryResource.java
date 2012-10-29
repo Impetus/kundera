@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.rest.resources;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
@@ -31,6 +33,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.common.EntityUtils;
+import com.impetus.kundera.rest.converters.CollectionConverter;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
@@ -54,18 +58,48 @@ public class NativeQueryResource
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{nativeQuery}")
+    @Path("/{entityClassName}/{nativeQuery}")
     public Response executeNativeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+            @PathParam("entityClassName") String entityClassName,
             @PathParam("nativeQuery") String nativeQuery,
             @Context HttpHeaders headers)
     {
-        log.debug("Session Token:" + sessionToken + ", Native Query:" + nativeQuery);
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+        log.debug("GET:: Session Token:" + sessionToken + ", Native Query:" + nativeQuery);
         
-        //Query q = em.createNativeQuery(nativeQuery, paramClass)
+        List result = null;
+        Class<?> entityClass = null;
+        Query q;
+        try
+        {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            
+            entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            log.debug("GET: entityClass" + entityClass);
+            if(entityClass == null)
+            {
+                return Response.serverError().build();
+            }
+            
+            q = em.createNativeQuery(nativeQuery, entityClass);
+            result = q.getResultList();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
         
+        if (result == null)
+        {
+            return Response.noContent().build();
+        }
         
-        return null;
+        String mediaType = headers.getRequestHeader("accept").get(0);
+        log.debug("GET: Media Type:" + mediaType);
+
+        String output = CollectionConverter.toString(result, entityClass, mediaType);
+        return Response.ok(output).build(); 
+        
     }
     
     /**
@@ -78,7 +112,7 @@ public class NativeQueryResource
      * @return
      */
 
-    @GET
+   /* @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/{entityClass}/{namedNativeQueryName}")
     public Response executeNamedNativeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,            
@@ -88,6 +122,6 @@ public class NativeQueryResource
     {
         return null;
         
-    }
+    }*/
 
 }

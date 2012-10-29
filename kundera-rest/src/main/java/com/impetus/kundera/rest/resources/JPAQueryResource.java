@@ -15,9 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -32,7 +30,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -117,7 +114,6 @@ public class JPAQueryResource
         catch (Exception e)
         {
             log.error(e.getMessage());
-            e.printStackTrace();
             return Response.serverError().build();
         }
 

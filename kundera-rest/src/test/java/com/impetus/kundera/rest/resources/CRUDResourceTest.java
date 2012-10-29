@@ -193,8 +193,11 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertNotNull(updatedBook);
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
+        
+        /** JPA Queries */
+        //Get All books
         String jpaQuery = "select b from Book b";
-        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery);
+        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
 
         // Get All Books
@@ -225,6 +228,16 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
         Assert.assertTrue(booksByAuthor.indexOf("Willey") > 0);
         log.debug(booksByAuthor);
+        
+        /** Native Queries */
+        //Get All books
+        String nativeQuery = "Select * from BOOK";
+        String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery, new HashMap<String, Object>());
+        log.debug("Native Query Result:" + nativeQueryResult);
+        Assert.assertNotNull(nativeQueryResult);
+        Assert.assertTrue(nativeQueryResult.indexOf("books") > 0);
+        Assert.assertTrue(nativeQueryResult.indexOf("Saurabh") > 0);
+        Assert.assertTrue(nativeQueryResult.indexOf("Vivek") > 0);        
         
         // Delete Records
         restClient.deleteBook(sessionToken, updatedBook, pk1);
@@ -317,16 +330,13 @@ public class CRUDResourceTest extends JerseyTest
 
         // Run Query.
         String jpaQuery = "select p from PersonnelUni1ToM p where p.personId >= " + person1Pk;
-        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery);
+        String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
 
         // Delete person.
         restClient.deletePerson(sessionToken, updatedPerson, personPk);
         foundPerson = restClient.findPerson(sessionToken, personPk);
         Assert.assertEquals("", foundPerson);
-
-        // NamedQuery on person.
-        restClient.executeNamedQuery();
 
         // Close Session
         restClient.closeSession(sessionToken);

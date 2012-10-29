@@ -171,10 +171,12 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public String runJPAQuery(String sessionToken, String jpaQuery)
+    public String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params)
     {
         log.debug("\n\nRunning JPA Query... ");
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery).accept(mediaType)
+        
+        String paramsStr = buildParamString(params);
+        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery + paramsStr).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
@@ -193,23 +195,7 @@ public class RESTClientImpl implements RESTClient
     {
         log.debug("\n\nRunning Named JPA Query " + namedQuery + "... ");
         
-        String paramsStr = "";
-        if(params != null && ! params.isEmpty())
-        {
-            paramsStr += "?";
-            
-            for(String paramName : params.keySet())
-            {
-                if(paramsStr.length() == 1)
-                {
-                    paramsStr += (paramName + "=" +  params.get(paramName));
-                }
-                else
-                {
-                    paramsStr += ("&" + paramName + "=" +  params.get(paramName));
-                }         
-            }
-        }
+        String paramsStr = buildParamString(params);
         
         WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/" + namedQuery + paramsStr);       
         
@@ -222,6 +208,48 @@ public class RESTClientImpl implements RESTClient
         String allBookStr = StreamUtils.toString(is);
 
         log.debug("Found Entities for query " + namedQuery + ":" + allBookStr);
+        return allBookStr;
+    }   
+
+    @Override
+    public String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params)
+    {
+        log.debug("\n\nRunning Native Query... ");
+        
+        String paramsStr = buildParamString(params);
+        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/" + nativeQuery + paramsStr).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        
+
+        String allStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities:" + allStr);
+        return allStr;
+    }
+
+    @Override
+    public String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery,
+            Map<String, Object> params)
+    {
+        log.debug("\n\nRunning Named Native JPA Query " + namedNativeQuery + "... ");
+        
+        String paramsStr = buildParamString(params);
+        
+        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + "/" + entityClassName + "/" + namedNativeQuery + paramsStr);      
+        
+        WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);       
+        
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        String allBookStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities for query " + namedNativeQuery + ":" + allBookStr);
         return allBookStr;
     }
 
@@ -335,12 +363,32 @@ public class RESTClientImpl implements RESTClient
         ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
         log.debug("Delete Response:" + deleteResponse.getStatus());
     }
-
-    @Override
-    public String executeNamedQuery()
+    
+    
+    /**
+     * @param params
+     * @return
+     */
+    private String buildParamString(Map<String, Object> params)
     {
-        log.debug("\n\nExecuting named Query... ");
-
-        return null;
+        String paramsStr = "";
+        if(params != null && ! params.isEmpty())
+        {
+            paramsStr += "?";
+            
+            for(String paramName : params.keySet())
+            {
+                if(paramsStr.length() == 1)
+                {
+                    paramsStr += (paramName + "=" +  params.get(paramName));
+                }
+                else
+                {
+                    paramsStr += ("&" + paramName + "=" +  params.get(paramName));
+                }         
+            }
+        }
+        return paramsStr;
     }
+
 }
