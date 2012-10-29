@@ -589,8 +589,11 @@ public class CassQuery extends QueryImpl implements Query
                     fieldName = fieldName.substring(fieldName.indexOf(".") + 1);
                     // compositeColumns.add(new
                     // BasicDBObject(compositeColumn,value));
+                    translator.buildWhereClause(builder, fieldName, value, condition);
+                } else
+                {
+                    translator.buildWhereClause(builder, fieldName, value, condition);
                 }
-                translator.buildWhereClause(builder, fieldName, value, condition);
             }
         }
         return isPresent;
@@ -624,13 +627,15 @@ public class CassQuery extends QueryImpl implements Query
      */
     private StringBuilder appendColumns(StringBuilder builder, List<String> columns, String selectQuery, CQLTranslator translator)
     {
-        for (String column : columns)
+        if (columns != null)
         {
+            for (String column : columns)
+            {
 
-            translator.appendColumnName(builder, column);
-            builder.append(",");
+                translator.appendColumnName(builder, column);
+                builder.append(",");
+            }
         }
-
         if (builder.lastIndexOf(",") != -1)
         {
             builder.deleteCharAt(builder.length() - 1);

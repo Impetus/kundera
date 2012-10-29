@@ -211,7 +211,7 @@ public class CompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        /*final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetBody with composite key clause.
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -241,12 +241,12 @@ public class CompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
 
-*/        em.remove(user);
+        em.remove(user);
 
         em.clear();// optional,just to clear persistence cache.
     }
 
-//    @Test
+    @Test
     public void onNamedQueryTest()
     {
         updateNamed();
@@ -263,19 +263,26 @@ public class CompositeTypeTest
     {
         EntityManager em = emf.createEntityManager();
 
+        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get("cass_pu");
+        ((ThriftClient)client).setCqlVersion("3.0.0");
+
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get("cass_pu");
+        ((ThriftClient)client).setCqlVersion("3.0.0");
 
-        String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.tweetBody= :beforeUpdate";
+        String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
-        q.setParameter("beforeUpdate", "my first tweet");
+        q.setParameter("beforeUpdate", key);
         q.executeUpdate();
 
         PrimeUser result = em.find(PrimeUser.class, key);
@@ -295,10 +302,14 @@ public class CompositeTypeTest
         Date currentDate = new Date();
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
 
-        String deleteQuery = "Delete From PrimeUser u where u.tweetBody= :tweetBody";
+        String deleteQuery = "Delete From PrimeUser u where u.key= :key";
         EntityManager em = emf.createEntityManager();
+        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get("cass_pu");
+        ((ThriftClient)client).setCqlVersion("3.0.0");
+
         Query q = em.createQuery(deleteQuery);
-        q.setParameter("tweetBody", "after merge");
+        q.setParameter("key", key);
         q.executeUpdate();
 
         PrimeUser result = em.find(PrimeUser.class, key);
