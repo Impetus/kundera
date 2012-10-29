@@ -40,7 +40,7 @@ import com.impetus.kundera.rest.repository.EMFRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.APPLICATION_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.APPLICATION_RESOURCE_PATH)
 public class ApplicationResource
 {
     private static Log log = LogFactory.getLog(ApplicationResource.class);

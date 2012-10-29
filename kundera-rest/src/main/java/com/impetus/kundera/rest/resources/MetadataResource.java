@@ -43,7 +43,7 @@ import com.impetus.kundera.rest.dto.Table;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
 public class MetadataResource
 {
     private static Log log = LogFactory.getLog(MetadataResource.class);

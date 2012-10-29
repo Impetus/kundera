@@ -15,7 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.common;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 
@@ -36,5 +43,57 @@ public class EntityUtils
         MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         return entityClass;
+    }
+    
+    public static String getQueryPart(String fullQueryString)
+    {
+        if(fullQueryString.contains("?"))
+        {   
+            return fullQueryString.substring(0, fullQueryString.indexOf("?"));
+        }
+        else
+        {
+            return fullQueryString;
+        }        
+    }
+    
+    public static String getParameterPart(String fullQueryString)
+    {
+        if(fullQueryString.contains("?"))            
+        {     
+            return fullQueryString.substring(fullQueryString.indexOf("?") + 1, fullQueryString.length()); 
+        }
+        else
+        {
+            return "";
+        }
+    }
+    
+    /**
+     * @param queryString
+     * @param q
+     */
+    public static void setQueryParameters(String queryString, String parameterString, Query q)
+    {
+        Map<String, String> paramsMap = new HashMap<String, String>();               
+        
+        StringTokenizer st = new StringTokenizer(parameterString, "&");
+        while(st.hasMoreTokens()) {
+            String element = st.nextToken();
+            paramsMap.put(element.substring(0, element.indexOf("=")), element.substring(element.indexOf("=") + 1, element.length()));
+        }          
+
+        for(String paramName : paramsMap.keySet()) {
+            String value = paramsMap.get(paramName);
+            
+            if(StringUtils.isNumeric(paramName))
+            {
+                q.setParameter(Integer.parseInt(paramName), value);
+            }
+            else
+            {
+                q.setParameter(paramName, value);
+            }
+        }
     }
 }

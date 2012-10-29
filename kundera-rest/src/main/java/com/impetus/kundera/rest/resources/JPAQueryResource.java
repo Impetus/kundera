@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -28,6 +30,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -46,7 +49,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * 
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH)
 public class JPAQueryResource
 {
 
@@ -65,14 +68,16 @@ public class JPAQueryResource
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/{entityClass}/{namedQueryName}")
-    public Response executeNamedQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,            
-            @PathParam("entityClass") String entityClassName,
-            @PathParam("namedQueryName") String namedQueryName,
-            @Context HttpHeaders headers)
-    {
-
-        log.debug("GET: sessionToken:" + sessionToken + ", entityClass:" + entityClassName + ", Named Query:" + namedQueryName);
+    public Response executeNamedQuery(        
+            @Context HttpHeaders headers,
+            @Context UriInfo info)
+    {   
         
+        String entityClassName = info.getPathParameters().getFirst("entityClass");
+        String namedQueryName = info.getPathParameters().getFirst("namedQueryName");
+        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
+        
+        log.debug("GET: sessionToken:" + sessionToken + ", entityClass:" + entityClassName + ", Named Query:" + namedQueryName);
 
         List result = null;
         Class<?> entityClass = null;
@@ -93,31 +98,17 @@ public class JPAQueryResource
                 result = q.getResultList(); 
             }
             else
-            {             
-                Query q = em.createNamedQuery(namedQueryName);
+            {              
+                String queryPart = EntityUtils.getQueryPart(namedQueryName);
+                String paramPart = EntityUtils.getParameterPart(namedQueryName);
+                
+                Query q = em.createNamedQuery(queryPart);
                 if(q == null)
                 {
                     return Response.serverError().build();
-                }   
+                } 
                 
-                for(String headerName : headers.getRequestHeaders().keySet())
-                {
-                    if(headerName != null && headerName.startsWith(Constants.QUERY_PARAMS_HEADER_NAME_PREFIX))
-                    {
-                        String paramName = headerName.substring(Constants.QUERY_PARAMS_HEADER_NAME_PREFIX.length());
-                        Object val = headers.getRequestHeaders().getFirst(headerName);
-                        
-                        if(StringUtils.isNumeric(paramName))
-                        {
-                            q.setParameter(Integer.parseInt(paramName), val);
-                        }
-                        else
-                        {
-                            q.setParameter(paramName, val);
-                        }
-                        
-                    }
-                }                
+                EntityUtils.setQueryParameters(queryPart, paramPart, q);                                
                 
                 result = q.getResultList();
             }            
@@ -144,7 +135,8 @@ public class JPAQueryResource
 
         return Response.ok(output).build();
 
-    }
+    }   
+    
 
     /**
      * Handler for GET method requests for this resource Retrieves records from
@@ -171,8 +163,17 @@ public class JPAQueryResource
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-            q = em.createQuery(jpaQuery);
-
+            String queryPart = EntityUtils.getQueryPart(jpaQuery);
+            String paramPart = EntityUtils.getParameterPart(jpaQuery);
+            
+            q = em.createQuery(queryPart);
+            if(q == null)
+            {
+                return Response.serverError().build();
+            } 
+            
+            EntityUtils.setQueryParameters(queryPart, paramPart, q);          
+            
             result = q.getResultList();
         }
         catch (Exception e)
@@ -197,5 +198,8 @@ public class JPAQueryResource
 
         return Response.ok(output).build();
     }
+
+
+    
 
 }

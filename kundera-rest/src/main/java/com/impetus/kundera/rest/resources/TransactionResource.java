@@ -38,7 +38,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.TRANSACTION_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.TRANSACTION_RESOURCE_PATH)
 public class TransactionResource
 {
     private static Log log = LogFactory.getLog(TransactionResource.class);

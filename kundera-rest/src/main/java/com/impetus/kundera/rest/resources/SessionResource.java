@@ -41,7 +41,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.SESSION_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.SESSION_RESOURCE_PATH)
 public class SessionResource
 {
     private static Log log = LogFactory.getLog(SessionResource.class);

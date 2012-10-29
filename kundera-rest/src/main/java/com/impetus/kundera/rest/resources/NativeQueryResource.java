@@ -38,7 +38,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH)
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH)
 public class NativeQueryResource
 {
     private static Log log = LogFactory.getLog(NativeQueryResource.class);

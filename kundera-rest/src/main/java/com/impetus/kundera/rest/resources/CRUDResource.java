@@ -51,7 +51,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.CRUD_RESOURCE_PATH + "/{entityClass}")
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.CRUD_RESOURCE_PATH + "/{entityClass}")
 public class CRUDResource
 {
     /** log for this class. */
