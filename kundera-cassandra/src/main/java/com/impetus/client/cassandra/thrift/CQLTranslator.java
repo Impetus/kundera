@@ -283,6 +283,15 @@ public final class CQLTranslator
         return isPresent;
     }
 
+    /**
+     * Appends value to builder object for given class type
+     * 
+     * @param builder         string builder.
+     * @param fieldClazz      field class. 
+     * @param value           value to be appended.
+     * @param isPresent       if field is present.
+     * @return true, if value is not null else false.
+     */
     private boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
     {
         if (value != null)
