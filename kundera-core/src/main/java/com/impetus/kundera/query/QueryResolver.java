@@ -79,7 +79,7 @@ public class QueryResolver
         else
         {
             Class mappedClass = appMetadata.getMappedClass(jpaQuery);
-
+            
             pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
         }

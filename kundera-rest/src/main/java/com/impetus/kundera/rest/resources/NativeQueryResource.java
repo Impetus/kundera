@@ -58,13 +58,13 @@ public class NativeQueryResource
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClassName}/{nativeQuery}")
+    @Path("/{entityClassName}/query={nativeQuery}")
     public Response executeNativeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
             @PathParam("entityClassName") String entityClassName,
             @PathParam("nativeQuery") String nativeQuery,
             @Context HttpHeaders headers)
     {
-        log.debug("GET:: Session Token:" + sessionToken + ", Native Query:" + nativeQuery);
+        log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName + ", Native Query:" + nativeQuery);
         
         List result = null;
         Class<?> entityClass = null;
@@ -112,7 +112,7 @@ public class NativeQueryResource
      * @return
      */
 
-   /* @GET
+    @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/{entityClass}/{namedNativeQueryName}")
     public Response executeNamedNativeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,            
@@ -120,8 +120,43 @@ public class NativeQueryResource
             @PathParam("namedNativeQueryName") String namedNativeQueryName,
             @Context HttpHeaders headers)
     {
-        return null;
         
-    }*/
+        log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName + ", Named Native Query:" + namedNativeQueryName);
+        
+        Class<?> entityClass = null;
+        List result = null;
+        
+        try
+        {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            
+            entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            log.debug("GET: entityClass" + entityClass);
+            if(entityClass == null)
+            {
+                return Response.serverError().build();
+            }       
+            
+            Query q = em.createNamedQuery(namedNativeQueryName);
+            result = q.getResultList();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
+        
+        
+        if (result == null)
+        {
+            return Response.noContent().build();
+        }
+        
+        String mediaType = headers.getRequestHeader("accept").get(0);
+        log.debug("GET: Media Type:" + mediaType);
+
+        String output = CollectionConverter.toString(result, entityClass, mediaType);
+        return Response.ok(output).build();       
+    }
 
 }

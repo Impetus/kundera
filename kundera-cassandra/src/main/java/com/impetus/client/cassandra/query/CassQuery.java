@@ -118,7 +118,7 @@ public class CassQuery extends QueryImpl implements Query
 
             if (appMetadata.isNative(getJPAQuery()))
             {
-                result = ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+                result = ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()), m.getEntityClazz(), null);
             }
             else
             {
@@ -171,7 +171,7 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(),
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()), m.getEntityClazz(),
                     null);
         }
         else
@@ -206,7 +206,7 @@ public class CassQuery extends QueryImpl implements Query
         EntityMetadata m = getEntityMetadata();
         if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(),
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(KunderaMetadata.INSTANCE.getApplicationMetadata().getQuery(getJPAQuery()), m.getEntityClazz(),
                     null);
         }
         else if (kunderaQuery.isDeleteUpdate())

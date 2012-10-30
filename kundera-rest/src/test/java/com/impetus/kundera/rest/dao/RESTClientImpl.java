@@ -176,7 +176,7 @@ public class RESTClientImpl implements RESTClient
         log.debug("\n\nRunning JPA Query... ");
         
         String paramsStr = buildParamString(params);
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery + paramsStr).accept(mediaType)
+        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/query=" + jpaQuery + paramsStr).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
@@ -217,7 +217,7 @@ public class RESTClientImpl implements RESTClient
         log.debug("\n\nRunning Native Query... ");
         
         String paramsStr = buildParamString(params);
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/" + nativeQuery + paramsStr).accept(mediaType)
+        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/query=" + nativeQuery + paramsStr).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
@@ -239,7 +239,7 @@ public class RESTClientImpl implements RESTClient
         
         String paramsStr = buildParamString(params);
         
-        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + "/" + entityClassName + "/" + namedNativeQuery + paramsStr);      
+        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/" + namedNativeQuery + paramsStr);      
         
         WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);       
         

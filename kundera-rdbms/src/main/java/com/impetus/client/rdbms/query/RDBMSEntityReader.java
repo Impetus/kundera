@@ -235,7 +235,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
         if (appMetadata.isNative(jpaQuery))
         {
-            return jpaQuery;
+            return appMetadata.getQuery(jpaQuery);
         }
 
         String aliasName = "_" + entityMetadata.getTableName();

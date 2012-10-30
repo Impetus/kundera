@@ -146,7 +146,7 @@ public class JPAQueryResource
 
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{jpaQuery}")
+    @Path("/query={jpaQuery}")
     public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
             @PathParam("jpaQuery") String jpaQuery, @Context HttpHeaders headers)
     {

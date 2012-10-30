@@ -194,12 +194,13 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
         
-        /** JPA Queries */
+        /** JPA Query - Select */
         //Get All books
         String jpaQuery = "select b from Book b";
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
 
+        /** JPA Query - Select All*/
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
         Assert.assertNotNull(allBooks);
@@ -208,6 +209,7 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(allBooks.indexOf("Vivek") > 0);
         log.debug(allBooks);
         
+        /** Named JPA Query - Select */
         //Get books for a specific author
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("author", "Saurabh");
@@ -218,6 +220,7 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
         log.debug(booksByAuthor);
         
+        /** Named JPA Query - Select */
         //Get books for a specific publication
         Map<String, Object> paramsPublication = new HashMap<String, Object>();
         paramsPublication.put("1", "Willey");
@@ -229,15 +232,23 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(booksByAuthor.indexOf("Willey") > 0);
         log.debug(booksByAuthor);
         
-        /** Native Queries */
+        /** Native Query - Select */
         //Get All books
         String nativeQuery = "Select * from BOOK";
         String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery, new HashMap<String, Object>());
-        log.debug("Native Query Result:" + nativeQueryResult);
+        log.debug("Native Query Select Result:" + nativeQueryResult);
         Assert.assertNotNull(nativeQueryResult);
         Assert.assertTrue(nativeQueryResult.indexOf("books") > 0);
         Assert.assertTrue(nativeQueryResult.indexOf("Saurabh") > 0);
-        Assert.assertTrue(nativeQueryResult.indexOf("Vivek") > 0);        
+        Assert.assertTrue(nativeQueryResult.indexOf("Vivek") > 0); 
+        
+        /** Named Native Query - Select */
+        String namedNativeQuerySelectResult = restClient.runNamedNativeQuery(sessionToken, "Book", "findAllBooksNative", new HashMap<String, Object>());
+        log.debug("Named Native Query Select Result:" + namedNativeQuerySelectResult);
+        Assert.assertNotNull(namedNativeQuerySelectResult);
+        Assert.assertTrue(namedNativeQuerySelectResult.indexOf("books") > 0);
+        Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Saurabh") > 0);
+        Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Vivek") > 0); 
         
         // Delete Records
         restClient.deleteBook(sessionToken, updatedBook, pk1);

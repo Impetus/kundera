@@ -18,6 +18,8 @@ package com.impetus.kundera.rest.common;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -35,6 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
         @NamedQuery(name = "findByAuthor", query = "Select b from Book b where b.author = :author"),
         @NamedQuery(name = "findByPublication", query = "Select b from Book b where b.publication = ?1"),
         @NamedQuery(name = "findAllBooks", query = "Select b from Book b")})
+@NamedNativeQueries(value={@NamedNativeQuery(name="findAllBooksNative", query="select * from BOOK")})
 @XmlRootElement
 public class Book
 {
