@@ -35,6 +35,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
@@ -83,7 +85,7 @@ public class CompositeTypeTest
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((ThriftClient)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase)client).setCqlVersion("3.0.0");
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
@@ -130,7 +132,7 @@ public class CompositeTypeTest
 
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((ThriftClient)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase)client).setCqlVersion("3.0.0");
 
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
@@ -270,7 +272,7 @@ public class CompositeTypeTest
 
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((ThriftClient)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase)client).setCqlVersion("3.0.0");
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
@@ -283,7 +285,7 @@ public class CompositeTypeTest
         em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
-        ((ThriftClient)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase)client).setCqlVersion("3.0.0");
 
         String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
@@ -311,7 +313,7 @@ public class CompositeTypeTest
         EntityManager em = emf.createEntityManager();
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((ThriftClient)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase)client).setCqlVersion("3.0.0");
 
         Query q = em.createQuery(deleteQuery);
         q.setParameter("key", key);

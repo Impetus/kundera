@@ -153,18 +153,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
-                cassandra_client.set_cql_version(getCqlVersion());
-                CQLTranslator translator = new CQLTranslator();
-                String insert_Query = translator.INSERT_QUERY;
-                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
-                        translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
-                HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity,
-                        entityMetadata, TranslationType.ALL);
-                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
-                        translation.get(TranslationType.VALUE));
-                insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS,
-                        translation.get(TranslationType.COLUMN));
-                cassandra_client.execute_cql_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE);
+                onpersistOverCompositeKey(entityMetadata, entity, cassandra_client);
                 
             } else
             {
@@ -211,6 +200,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
 
     }
+
 
     /**
      * Persists a Join table record set into database

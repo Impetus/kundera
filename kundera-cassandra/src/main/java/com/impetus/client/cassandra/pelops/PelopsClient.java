@@ -16,6 +16,7 @@
 
 package com.impetus.client.cassandra.pelops;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.EmbeddableType;
 
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterColumn;
@@ -38,6 +41,7 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
@@ -70,6 +74,8 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -184,18 +190,31 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("PelopsClient is closed.");
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        if (metadata.isCounterColumnType())
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
-            deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
+            EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+            onDeleteQuery(metadata, metaModel, pKey, compoundKey);
         }
         else
         {
-            RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-            rowDeletor.deleteRow(metadata.getTableName(),
-                    CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()), getConsistencyLevel());
 
+            if (metadata.isCounterColumnType())
+            {
+                deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
+            }
+            else
+            {
+                RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                rowDeletor.deleteRow(metadata.getTableName(),
+                        CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()),
+                        getConsistencyLevel());
+
+            }
         }
-
         // Delete from Lucene if applicable
         getIndexManager().remove(metadata, entity, pKey.toString());
 
@@ -400,67 +419,114 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
         }
 
-        ThriftRow tf = null;
-        try
-        {
-            String columnFamily = metadata.getTableName();
-            tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
-            timestamp = System.currentTimeMillis();
-        }
-        catch (Exception e)
-        {
-            log.error("Error during persist, Caused by:" + e.getMessage());
-            throw new KunderaException(e);
-        }
-        addRelationsToThriftRow(metadata, tf, rlHolders);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
 
-        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        if (metadata.isCounterColumnType())
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
-            List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
-            List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
-            if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
+            Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
+            try
             {
-                mutator.writeCounterColumns(metadata.getTableName(),
-                        CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                        Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
+                client.set_cql_version(getCqlVersion());
+                client.set_keyspace(metadata.getSchema());
+                onpersistOverCompositeKey(metadata, entity, client);
+            }
+            catch (InvalidRequestException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            catch (TException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            catch (UnavailableException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            catch (TimedOutException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
             }
 
-            if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
-            {
-                for (CounterSuperColumn sc : thriftCounterSuperColumns)
-                {
-                    mutator.writeSubCounterColumns(metadata.getTableName(),
-                            CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                            Bytes.fromByteArray(sc.getName()), sc.getColumns());
-                }
-            }
         }
         else
         {
-            List<Column> thriftColumns = tf.getColumns();
-            List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-            if (thriftColumns != null && !thriftColumns.isEmpty())
+            ThriftRow tf = null;
+            try
             {
-                // Bytes.fromL
-                mutator.writeColumns(metadata.getTableName(),
-                        CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                        Arrays.asList(tf.getColumns().toArray(new Column[0])));
+                String columnFamily = metadata.getTableName();
+                tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
+                timestamp = System.currentTimeMillis();
             }
-
-            if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+            catch (Exception e)
             {
-                for (SuperColumn sc : thriftSuperColumns)
+                log.error("Error during persist, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+            addRelationsToThriftRow(metadata, tf, rlHolders);
+
+            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+            if (metadata.isCounterColumnType())
+            {
+                List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
+                List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
+                if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
                 {
-                    mutator.writeSubColumns(metadata.getTableName(),
+                    mutator.writeCounterColumns(metadata.getTableName(),
                             CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                            Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                            Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
+                }
+
+                if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+                {
+                    for (CounterSuperColumn sc : thriftCounterSuperColumns)
+                    {
+                        mutator.writeSubCounterColumns(metadata.getTableName(),
+                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                                Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                    }
                 }
             }
-        }
+            else
+            {
+                List<Column> thriftColumns = tf.getColumns();
+                List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+                if (thriftColumns != null && !thriftColumns.isEmpty())
+                {
+                    // Bytes.fromL
+                    mutator.writeColumns(metadata.getTableName(),
+                            CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                            Arrays.asList(tf.getColumns().toArray(new Column[0])));
+                }
 
-        mutator.execute(getConsistencyLevel());
-        tf = null;
+                if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+                {
+                    for (SuperColumn sc : thriftSuperColumns)
+                    {
+                        mutator.writeSubColumns(metadata.getTableName(),
+                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                                Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                    }
+                }
+            }
+
+            mutator.execute(getConsistencyLevel());
+            tf = null;
+        }
     }
 
     /**
