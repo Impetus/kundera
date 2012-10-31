@@ -80,7 +80,10 @@ public final class CQLTranslator
     public static final String AND_CLAUSE = " AND ";
 
     public static final String EQ_CLAUSE = "=";
+    
+    public static final String WITH_CLAUSE=" WITH ";
 
+    public static final String QUOTE_STR = "'";
     public CQLTranslator()
     {
 
@@ -139,12 +142,12 @@ public final class CQLTranslator
         return parsedColumnOrColumnValue;
     }
 
-    public String getCQLType(String internalClazz)
+    public static String getCQLType(String internalClazz)
     {
         return InternalToCQLMapper.getType(internalClazz);
     }
     
-    public String getKeyword(String property)
+    public static String getKeyword(String property)
     {
         return CQLKeywordMapper.getType(property);
     }
@@ -468,11 +471,6 @@ public final class CQLTranslator
             mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
             mapper.put(CassandraConstants.COMMENT, "comment");
             mapper.put(CassandraConstants.GC_GRACE_SECONDS, "gc_grace_seconds");
-            
-            
-            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
-            
-            
         }
         
         private static final String getType(final String propertyName)
