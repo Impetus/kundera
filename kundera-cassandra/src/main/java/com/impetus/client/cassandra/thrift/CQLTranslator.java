@@ -18,13 +18,28 @@ package com.impetus.client.cassandra.thrift;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.db.marshal.BooleanType;
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.CounterColumnType;
+import org.apache.cassandra.db.marshal.DateType;
+import org.apache.cassandra.db.marshal.DecimalType;
+import org.apache.cassandra.db.marshal.DoubleType;
+import org.apache.cassandra.db.marshal.FloatType;
+import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.db.marshal.UUIDType;
+
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -42,9 +57,9 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public final class CQLTranslator
 {
-    public static final String CREATE_COLUMNFAMILY_QUERY = "CREATE COLUMNFAMILY $COLUMNFAMILY ($COLUMNS)";
+    public static final String CREATE_COLUMNFAMILY_QUERY = "CREATE COLUMNFAMILY $COLUMNFAMILY ($COLUMNS";
 
-    public static final String ADD_PRIMARYKEY_CLAUSE = " PRIMARY KEY($COLUMNS)";
+    public static final String ADD_PRIMARYKEY_CLAUSE = " , PRIMARY KEY($COLUMNS))";
 
     public static final String SELECTALL_QUERY = "SELECT * FROM $COLUMNFAMILY";
 
@@ -124,6 +139,16 @@ public final class CQLTranslator
         return parsedColumnOrColumnValue;
     }
 
+    public String getCQLType(String internalClazz)
+    {
+        return InternalToCQLMapper.getType(internalClazz);
+    }
+    
+    public String getKeyword(String property)
+    {
+        return CQLKeywordMapper.getType(property);
+    }
+    
     /**
      * On translation to column name or column value based on translation type.
      * 
@@ -192,7 +217,7 @@ public final class CQLTranslator
         appendColumnValue(builder, entity, member);
         builder.append(AND_CLAUSE);
     }
-    
+
     public void buildWhereClause(StringBuilder builder, String field, Object value, String clause)
     {
         builder = ensureCase(builder, field);
@@ -200,6 +225,7 @@ public final class CQLTranslator
         appendValue(builder, value.getClass(), value, false);
         builder.append(AND_CLAUSE);
     }
+
     /**
      * Ensures case for corresponding column name.
      * 
@@ -286,10 +312,14 @@ public final class CQLTranslator
     /**
      * Appends value to builder object for given class type
      * 
-     * @param builder         string builder.
-     * @param fieldClazz      field class. 
-     * @param value           value to be appended.
-     * @param isPresent       if field is present.
+     * @param builder
+     *            string builder.
+     * @param fieldClazz
+     *            field class.
+     * @param value
+     *            value to be appended.
+     * @param isPresent
+     *            if field is present.
      * @return true, if value is not null else false.
      */
     private boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
@@ -304,7 +334,7 @@ public final class CQLTranslator
                 builder.append("'");
 
                 if (isDate(fieldClazz)) // For CQL, date has to
-                                                       // be in date.getTime()
+                                        // be in date.getTime()
                 {
                     builder.append(((Date) value).getTime());
                 }
@@ -338,6 +368,21 @@ public final class CQLTranslator
         // builder.append(","); // because only key columns
     }
 
+
+    /**
+     * Appends column name and data type also ensures case sensitivity.
+     *
+     * @param builder           string builder
+     * @param columnName        column name
+     * @param dataType          data type. 
+     */
+    public void appendColumnName(StringBuilder builder, String columnName, String dataType)
+    {
+        ensureCase(builder, columnName);
+         builder.append(" "); // because only key columns
+         builder.append(dataType);
+    }
+
     /**
      * Validates if input class is of type input.
      * 
@@ -350,5 +395,89 @@ public final class CQLTranslator
     {
         return clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(java.sql.Date.class)
                 || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class);
+    }
+
+    /**
+     * Maps internal data type of cassandra to CQL type representation.
+     * 
+     * @author vivek.mishra
+     */
+    private static class InternalToCQLMapper
+    {
+        /** The Mapper. */
+        private final static Map<String, String> mapper;
+
+        static
+        {
+            Map<String, String> validationClassMapper = new HashMap<String, String>();
+            // TODO: support for ascii is missing!
+
+            // putting possible combination into map.
+
+            validationClassMapper.put(UTF8Type.class.getSimpleName(),"text");
+
+            validationClassMapper.put(IntegerType.class.getSimpleName(),"int");
+
+            validationClassMapper.put( DoubleType.class.getSimpleName(),"double");
+
+            validationClassMapper.put(BooleanType.class.getSimpleName(),"boolean");
+
+            validationClassMapper.put(LongType.class.getSimpleName(),"bigint");
+
+            validationClassMapper.put(BytesType.class.getSimpleName(),"blob");
+
+            validationClassMapper.put(FloatType.class.getSimpleName(),"float");
+
+            // missing
+            validationClassMapper.put(CounterColumnType.class.getSimpleName(),"counter");
+
+            validationClassMapper.put(DecimalType.class.getSimpleName(),"decimal");
+
+            validationClassMapper.put(UUIDType.class.getSimpleName(),"uuid");
+
+            validationClassMapper.put(DateType.class.getSimpleName(),"timestamp");
+            
+            mapper = Collections.synchronizedMap(validationClassMapper);
+        }
+        
+        private static final String getType(final String internalClassName)
+        {
+            return mapper.get(internalClassName);
+        }
+    }
+
+    private static class CQLKeywordMapper
+    {
+        /** The Mapper. */
+        private final static Map<String, String> mapper = new HashMap<String, String>();
+        
+        // missing: compaction_strategy_options, compression_parameters,sstable_size_in_mb
+        static
+        {
+            mapper.put(CassandraConstants.READ_REPAIR_CHANCE, "read_repair_chance");
+            mapper.put(CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE, "dclocal_read_repair_chance");
+            mapper.put(CassandraConstants.BLOOM_FILTER_FP_CHANCE, "bloom_filter_fp_chance");
+            mapper.put(CassandraConstants.COMPACTION_STRATEGY, "compaction_strategy_class");
+            mapper.put(CassandraConstants.BLOOM_FILTER_FP_CHANCE, "bloom_filter_fp_chance");
+            
+//            mapper.put(CassandraConstants.COMPARATOR_TYPE, "comparator");
+            
+            mapper.put(CassandraConstants.REPLICATE_ON_WRITE, "replicate_on_write");
+            mapper.put(CassandraConstants.CACHING, "caching");
+            mapper.put(CassandraConstants.MAX_COMPACTION_THRESHOLD, "max_compaction_threshold");
+            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
+            mapper.put(CassandraConstants.COMMENT, "comment");
+            mapper.put(CassandraConstants.GC_GRACE_SECONDS, "gc_grace_seconds");
+            
+            
+            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
+            
+            
+        }
+        
+        private static final String getType(final String propertyName)
+        {
+            return mapper.get(propertyName);
+        }
     }
 }

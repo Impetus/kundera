@@ -35,7 +35,7 @@ public class TableInfo
     private List<ColumnInfo> columnMetadatas;
 
     /** The table id type. */
-    private Class tableIdType;
+    private Class idClazz;
 
     /** The type. */
     private String type;
@@ -63,7 +63,7 @@ public class TableInfo
         this.tableName = tableName;
         this.isIndexable = isIndexable;
         this.type = tableSchemaType;
-        this.tableIdType = idClassType;
+        this.idClazz = idClassType;
     }
 
     /**
@@ -101,7 +101,7 @@ public class TableInfo
     public String toString()
     {
         StringBuilder strBuilder = new StringBuilder("tableIdType:==> ");
-        strBuilder.append(tableIdType);
+        strBuilder.append(idClazz);
         strBuilder.append(" | tableName: ==>");
         strBuilder.append(tableName);
         strBuilder.append(" | type: ==>");
@@ -139,7 +139,7 @@ public class TableInfo
      */
     public Class getTableIdType()
     {
-        return tableIdType;
+        return idClazz;
     }
 
     /**
@@ -150,7 +150,7 @@ public class TableInfo
      */
     public void setTableIdType(Class tableIdType)
     {
-        this.tableIdType = tableIdType;
+        this.idClazz = tableIdType;
     }
 
     /**

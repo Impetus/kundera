@@ -332,7 +332,7 @@ public class SchemaConfiguration implements Configuration
     private EmbeddedColumnInfo getEmbeddedColumn(EmbeddableType embeddableType, String embeddableColName,
             Class embeddedEntityClass)
     {
-        EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo();
+        EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo(embeddableType);
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
         Map<String, PropertyIndex> indexedColumns = IndexProcessor.getIndexesOnEmbeddable(embeddedEntityClass);
         List<ColumnInfo> columns = new ArrayList<ColumnInfo>();

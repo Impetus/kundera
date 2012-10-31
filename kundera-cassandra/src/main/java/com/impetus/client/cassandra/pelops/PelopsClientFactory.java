@@ -99,6 +99,7 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         indexManager.close();
         getSchemaManager().dropSchema();
+        schemaManager = null;
         // Pelops.shutdown();
     }
 

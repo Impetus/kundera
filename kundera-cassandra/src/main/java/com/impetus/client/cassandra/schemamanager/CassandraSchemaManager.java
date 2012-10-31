@@ -16,6 +16,8 @@
 package com.impetus.client.cassandra.schemamanager;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -37,12 +40,16 @@ import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TBinaryProtocol;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -56,11 +63,13 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
+import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.DataCenter;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.ColumnInfo;
+import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -72,6 +81,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 
 /**
@@ -96,24 +106,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     // private static Map<String, String> dataCentersMap = new HashMap<String,
     // String>();
 
+    /** The csmd. */
     private CassandraSchemaMetadata csmd = CassandraPropertyReader.csmd;
 
+    /** The tables. */
     private List<Table> tables;
 
     /**
      * Instantiates a new cassandra schema manager.
-     * 
-     * @param client
-     *            the client
-     * 
-     * @param clientFactory
-     *            the configured client clientFactory
+     *
+     * @param clientFactory the configured client clientFactory
      */
     public CassandraSchemaManager(String clientFactory)
     {
         super(clientFactory);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#exportSchema()
+     */
     @Override
     /**
      * Export schema handles the handleOperation method.
@@ -133,9 +144,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             try
             {
-                cassandra_client.set_keyspace(databaseName);
                 for (TableInfo tableInfo : tableInfos)
                 {
+                    cassandra_client.set_keyspace(databaseName);
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                 }
             }
@@ -160,6 +171,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * validates entity for CounterColumnType.
+     *
+     * @param clazz the clazz
+     * @return true, if successful
      */
     @Override
     public boolean validateEntity(Class clazz)
@@ -232,7 +246,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException nfex)
         {
-            createKeyspaceAndTables(tableInfos);
+                createKeyspaceAndTables(tableInfos);
+            
         }
         catch (InvalidRequestException irex)
         {
@@ -261,10 +276,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * update method update schema and table for the list of tableInfos
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
+     * update method update schema and table for the list of tableInfos.
+     *
+     * @param tableInfos list of TableInfos.
      */
     protected void update(List<TableInfo> tableInfos)
     {
@@ -275,7 +289,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            createKeyspaceAndTables(tableInfos);
+                createKeyspaceAndTables(tableInfos);
         }
         catch (InvalidRequestException e)
         {
@@ -368,13 +382,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * add tables to given keyspace {@code ksDef}.
-     * 
-     * @param tableInfos
-     * @param ksDef
-     * @throws InvalidRequestException
-     * @throws SchemaDisagreementException
-     * @throws TException
-     * @throws InterruptedException
+     *
+     * @param tableInfos the table infos
+     * @param ksDef the ks def
+     * @throws InvalidRequestException the invalid request exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     * @throws TException the t exception
+     * @throws InterruptedException the interrupted exception
      */
 
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
@@ -397,17 +411,139 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
             }
 
-            cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
-            // Create Index Table if required
-            createInvertedIndexTable(tableInfo);
+            // TODO:: Add a place holder for CQL translation on compound key.
+            // validation on secondary indexes over compound key (NOSQL
+            // intelligence).
+            if (tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+            {
+                onCompoundKey(tableInfo);
+            }
+            else
+            {
+                cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+                // Create Index Table if required
+                createInvertedIndexTable(tableInfo);
+            }
         }
     }
 
     /**
-     * @param tableInfo
-     * @throws InvalidRequestException
-     * @throws SchemaDisagreementException
-     * @throws TException
+     * On compound key.
+     *
+     * @param tableInfo the table info
+     * @throws InvalidRequestException the invalid request exception
+     * @throws TException the t exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
+    private void onCompoundKey(TableInfo tableInfo) throws InvalidRequestException, TException,
+            SchemaDisagreementException
+    {
+        CQLTranslator translator = new CQLTranslator();
+        String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
+        columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), tableInfo.getTableName()).toString());
+
+        List<ColumnInfo> columns = tableInfo.getColumnMetadatas();
+        Properties props = getColumnFamilyProperties(tableInfo);
+
+        StringBuilder queryBuilder = new StringBuilder();
+
+        // TODO: need to call setColumnFamilyProperties.
+
+        // for normal columns
+        onCompositeColumns(translator, columns, queryBuilder);
+
+        // ideally it will always be one as more super column families
+        // are not allowed with compound/composite key.
+
+        List<EmbeddedColumnInfo> compositeColumns = tableInfo.getEmbeddedColumnMetadatas();
+        EmbeddableType compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
+
+        // for composite columns
+        onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder);
+
+        // strip last ",".
+        if (queryBuilder.length() > 0)
+        {
+            queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+
+            columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMNS, queryBuilder.toString());
+            queryBuilder = new StringBuilder(columnFamilyQuery);
+        }
+
+        // append primary key clause
+
+        queryBuilder.append(translator.ADD_PRIMARYKEY_CLAUSE);
+
+        Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
+
+        StringBuilder primaryKeyBuilder = new StringBuilder();
+
+        for (Field f : fields)
+        {
+            Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
+            translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+            primaryKeyBuilder.append(" ,");
+        }
+
+        // should not be null.
+        primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
+
+        queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
+                primaryKeyBuilder.toString()));
+
+        // TODO: has to be parameterized.
+        cassandra_client.set_cql_version("3.0.0");
+        try
+        {
+            cassandra_client.execute_cql_query(
+                    ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+    }
+
+    /**
+     * On composite columns.
+     *
+     * @param translator the translator
+     * @param columns the columns
+     * @param queryBuilder the query builder
+     */
+    private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> columns, StringBuilder queryBuilder)
+    {
+        for (ColumnInfo colInfo : columns)
+        {
+            String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
+            String cqlType = translator.getCQLType(dataType);
+            translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
+            queryBuilder.append(" , ");
+        }
+    }
+
+    /**
+     * Creates the inverted index table.
+     *
+     * @param tableInfo the table info
+     * @throws InvalidRequestException the invalid request exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     * @throws TException the t exception
      */
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
@@ -425,10 +561,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * @param tableInfo
-     * @throws InvalidRequestException
-     * @throws SchemaDisagreementException
-     * @throws TException
+     * Drop inverted index table.
+     *
+     * @param tableInfo the table info
      */
     private void dropInvertedIndexTable(TableInfo tableInfo)
     {
@@ -457,10 +592,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * check for Tables method check the existence of schema and table
-     * 
-     * @param tableInfos
-     *            list of TableInfos and ksDef object of KsDef
+     * check for Tables method check the existence of schema and table.
+     *
+     * @param tableInfos list of TableInfos and ksDef object of KsDef
+     * @param ksDef the ks def
      */
     private void onValidateTables(List<TableInfo> tableInfos, KsDef ksDef)
     {
@@ -543,11 +678,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * is metadata same method returns true if ColumnDef and columnInfo have
      * same metadata.
-     * 
-     * @param columnDef
-     * @param columnInfo
-     * @return
-     * @throws UnsupportedEncodingException
+     *
+     * @param columnDef the column def
+     * @param columnInfo the column info
+     * @return true, if is metadata same
+     * @throws UnsupportedEncodingException the unsupported encoding exception
      */
     private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo) throws UnsupportedEncodingException
     {
@@ -561,9 +696,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * add tables to Keyspace method add the table to given keyspace.
-     * 
-     * @param tableInfos
-     *            list of TableInfos and ksDef object of KsDef.
+     *
+     * @param tableInfos list of TableInfos and ksDef object of KsDef.
+     * @param ksDef the ks def
+     * @throws InvalidRequestException the invalid request exception
+     * @throws TException the t exception
+     * @throws SchemaDisagreementException the schema disagreement exception
      */
     private void updateTables(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException, TException,
             SchemaDisagreementException
@@ -605,10 +743,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * isInedexesPresent method return whether indexes present or not on
      * particular column.
-     * 
-     * @param columnInfo
-     * @param cfDef
-     * @return
+     *
+     * @param columnInfo the column info
+     * @param cfDef the cf def
+     * @return true, if is indexes present
      */
     private boolean isIndexesPresent(ColumnInfo columnInfo, CfDef cfDef)
     {
@@ -635,9 +773,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * getColumnMetadata use for getting column metadata for specific
      * columnInfo.
-     * 
-     * @param columnInfo
-     * @return
+     *
+     * @param columnInfo the column info
+     * @return the column metadata
      */
     private ColumnDef getColumnMetadata(ColumnInfo columnInfo)
     {
@@ -653,28 +791,43 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * create keyspace and table method create keyspace and table for the list
-     * of tableInfos
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
+     * of tableInfos.
+     *
+     * @param tableInfos list of TableInfos.
+     * @throws SchemaDisagreementException 
+     * @throws TException 
+     * @throws InvalidRequestException 
      */
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
         KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(), null);
         Map<String, String> strategy_options = new HashMap<String, String>();
         setProperties(ksDef, strategy_options);
-
-        ksDef.setStrategy_options(strategy_options);
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        for (TableInfo tableInfo : tableInfos)
-        {
-            cfDefs.add(getTableMetadata(tableInfo));
-        }
-        ksDef.setCf_defs(cfDefs);
         try
         {
-            createKeyspace(ksDef);
+        ksDef.setStrategy_options(strategy_options);
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        List<TableInfo> compoundColumnFamilies = new ArrayList<TableInfo>();
+        for (TableInfo tableInfo : tableInfos)
+        {
+            if ((tableInfo.getTableIdType() != null && !tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class)) || tableInfo.getTableIdType() == null)
+            {
+                cfDefs.add(getTableMetadata(tableInfo));
+            } else if(tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+            {
+                compoundColumnFamilies.add(tableInfo);
+            }
+        }
+        
+        ksDef.setCf_defs(cfDefs);
+        createKeyspace(ksDef);
 
+        for (TableInfo tableInfo : compoundColumnFamilies)
+        {
+            cassandra_client.set_keyspace(databaseName);
+                onCompoundKey(tableInfo);
+        }
+        
             // Recreate Inverted Index Table if applicable
             /*
              * for(TableInfo tableInfo : tableInfos) {
@@ -701,8 +854,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * @param ksDef
-     * @param strategy_options
+     * Sets the properties.
+     *
+     * @param ksDef the ks def
+     * @param strategy_options the strategy_options
      */
     private void setProperties(KsDef ksDef, Map<String, String> strategy_options)
     {
@@ -742,9 +897,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * @param ksDef
-     * @param schemaProperties
-     * @param strategyOptions
+     * Sets the keyspace properties.
+     *
+     * @param ksDef the ks def
+     * @param schemaProperties the schema properties
+     * @param strategyOptions the strategy options
+     * @param dcs the dcs
      */
     private void setKeyspaceProperties(KsDef ksDef, Properties schemaProperties, Map<String, String> strategyOptions,
             List<DataCenter> dcs)
@@ -786,9 +944,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * create keyspace method create keyspace for given ksDef.
-     * 
-     * @param ksDef
-     *            a Object of KsDef.
+     *
+     * @param ksDef a Object of KsDef.
+     * @throws InvalidRequestException the invalid request exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     * @throws TException the t exception
      */
     private void createKeyspace(KsDef ksDef) throws InvalidRequestException, SchemaDisagreementException, TException
     {
@@ -797,7 +957,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * get Table metadata method returns the metadata of table for given
-     * tableInfo
+     * tableInfo.
+     *
+     * @param tableInfo the table info
+     * @return the table metadata
      */
     /**
      * @param tableInfo
@@ -833,7 +996,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         ColumnDef columnDef = new ColumnDef();
                         if (columnInfo.isIndexable())
-                        {                            
+                        {
                             columnDef.setIndex_type(CassandraIndexHelper.getIndexType(columnInfo.getIndexType()));
                         }
                         columnDef.setName(columnInfo.getColumnName().getBytes());
@@ -855,12 +1018,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         setColumnFamilyProperties(cfDef, cFProperties);
         return cfDef;
-    }    
+    }
 
     /**
-     * @param tableInfo
-     * @param defaultValidationClass
-     * @return
+     * Checks if is counter column type.
+     *
+     * @param tableInfo the table info
+     * @param defaultValidationClass the default validation class
+     * @return true, if is counter column type
      */
     private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
     {
@@ -870,7 +1035,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * @param tableInfo
+     * Gets the column family properties.
+     *
+     * @param tableInfo the table info
+     * @return the column family properties
      */
     private Properties getColumnFamilyProperties(TableInfo tableInfo)
     {
@@ -895,8 +1063,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private enum ColumnFamilyType
     {
-        Standard, Super;
+        
+        /** The Standard. */
+        Standard, 
+ /** The Super. */
+ Super;
 
+        /**
+         * Gets the instance of.
+         *
+         * @param type the type
+         * @return the instance of
+         */
         private static ColumnFamilyType getInstanceOf(String type)
         {
             if (type.equals(Type.COLUMN_FAMILY.name()))
@@ -912,8 +1090,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * validates entity relations if any present.
-     * 
-     * @param metadata
+     *
+     * @param metadata the metadata
+     * @return true, if successful
      */
     private boolean validateRelations(EntityMetadata metadata)
     {
@@ -943,8 +1122,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * validate embedded column .
-     * 
-     * @param embeddedColumns
+     *
+     * @param embeddedColumns the embedded columns
+     * @return true, if successful
      */
     private boolean validateEmbeddedColumns(Collection<EmbeddableType> embeddedColumns)
     {
@@ -964,8 +1144,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * validate columns.
-     * 
-     * @param columns
+     *
+     * @param attributes the attributes
+     * @return true, if successful
      */
     private boolean validateColumns(Set<Attribute> attributes)
     {
@@ -983,8 +1164,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * validate a single column.
-     * 
-     * @param column
+     *
+     * @param clazz the clazz
+     * @return true, if successful
      */
     private boolean validateColumn(Class clazz)
     {
@@ -1000,8 +1182,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * @param cfDef
-     * @param cFProperties
+     * Sets the column family properties.
+     *
+     * @param cfDef the cf def
+     * @param cFProperties the c f properties
      */
     private void setColumnFamilyProperties(CfDef cfDef, Properties cFProperties)
     {

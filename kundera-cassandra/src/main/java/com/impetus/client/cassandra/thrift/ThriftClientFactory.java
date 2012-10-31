@@ -59,6 +59,7 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         indexManager.close();
         getSchemaManager().dropSchema();
+        schemaManager = null;
     }
 
     @Override

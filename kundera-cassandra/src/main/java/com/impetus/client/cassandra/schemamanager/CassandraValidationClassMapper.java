@@ -18,6 +18,7 @@ package com.impetus.client.cassandra.schemamanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.db.marshal.BooleanType;
@@ -80,7 +81,7 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(short.class, IntegerType.class.getSimpleName());
         validationClassMapper.put(java.math.BigDecimal.class, IntegerType.class.getSimpleName());
         validationClassMapper.put(java.sql.Date.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.util.Date.class, IntegerType.class.getSimpleName());
+        validationClassMapper.put(java.util.Date.class, DateType.class.getSimpleName());
         validationClassMapper.put(java.math.BigInteger.class, IntegerType.class.getSimpleName());
 
         validationClassMapper.put(java.lang.Double.class, DoubleType.class.getSimpleName());
@@ -94,6 +95,8 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(byte.class, BytesType.class.getSimpleName());
 
         validationClassMapper.put(float.class, FloatType.class.getSimpleName());
+        
+        validationClassMapper.put(UUID.class, UUIDType.class.getSimpleName());
     }
 
     /**

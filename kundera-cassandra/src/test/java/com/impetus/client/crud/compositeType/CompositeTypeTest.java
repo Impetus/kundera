@@ -48,6 +48,11 @@ import com.impetus.kundera.client.Client;
 public class CompositeTypeTest
 {
 
+    /**
+     * 
+     */
+    private static final String PERSISTENCE_UNIT = "composite_pu";
+
     private EntityManagerFactory emf;
 
     /** The Constant logger. */
@@ -61,8 +66,8 @@ public class CompositeTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        emf = Persistence.createEntityManagerFactory("cass_pu");
         loadData();
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
     /**
@@ -77,7 +82,7 @@ public class CompositeTypeTest
         Date currentDate = new Date();
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("cass_pu");
+        Client client = clients.get(PERSISTENCE_UNIT);
         ((ThriftClient)client).setCqlVersion("3.0.0");
         PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
@@ -124,7 +129,7 @@ public class CompositeTypeTest
         CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
 
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("cass_pu");
+        Client client = clients.get(PERSISTENCE_UNIT);
         ((ThriftClient)client).setCqlVersion("3.0.0");
 
         PrimeUser user = new PrimeUser(key);
@@ -198,8 +203,8 @@ public class CompositeTypeTest
         q.setParameter("tweetId", 1);
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
-        // TODO::
-         Assert.assertEquals(1, results.size());
+
+        Assert.assertEquals(1, results.size());
 
          
         // Query with composite key with selective clause.
@@ -264,7 +269,7 @@ public class CompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("cass_pu");
+        Client client = clients.get(PERSISTENCE_UNIT);
         ((ThriftClient)client).setCqlVersion("3.0.0");
 
         UUID timeLineId = UUID.randomUUID();
@@ -277,7 +282,7 @@ public class CompositeTypeTest
 
         em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
-        client = clients.get("cass_pu");
+        client = clients.get(PERSISTENCE_UNIT);
         ((ThriftClient)client).setCqlVersion("3.0.0");
 
         String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
@@ -305,7 +310,7 @@ public class CompositeTypeTest
         String deleteQuery = "Delete From PrimeUser u where u.key= :key";
         EntityManager em = emf.createEntityManager();
         Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("cass_pu");
+        Client client = clients.get(PERSISTENCE_UNIT);
         ((ThriftClient)client).setCqlVersion("3.0.0");
 
         Query q = em.createQuery(deleteQuery);
@@ -323,17 +328,21 @@ public class CompositeTypeTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("UUIDCassandra");
+        CassandraCli.dropKeySpace("CompositeCassandra");
+//        emf.close();
     }
-
+// DO NOT DELETE IT!! though it is automated with schema creation option.
+    /**
+     *  create column family script for compound key.
+     */
     private void loadData()
     {
-        CassandraCli.createKeySpace("UUIDCassandra");
-        String cql_Query = "create columnfamily \"User\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text," +
+        CassandraCli.createKeySpace("CompositeCassandra");
+        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text," +
         		    " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
         try
         {
-            CassandraCli.getClient().set_keyspace("UUIDCassandra");
+            CassandraCli.getClient().set_keyspace("CompositeCassandra");
         }
         catch (InvalidRequestException e)
         {
@@ -344,8 +353,6 @@ public class CompositeTypeTest
             logger.error(e.getMessage());
         }
         CassandraCli.executeCqlQuery(cql_Query);
-        
-        //Secondary indexing is not enabled, so i guess query over non primary column may not work!
         
         
     }

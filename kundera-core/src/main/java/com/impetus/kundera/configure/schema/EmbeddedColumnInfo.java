@@ -18,6 +18,8 @@ package com.impetus.kundera.configure.schema;
 
 import java.util.List;
 
+import javax.persistence.metamodel.EmbeddableType;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
@@ -33,6 +35,27 @@ public class EmbeddedColumnInfo
 
     /** The list of columns variable is columns . */
     private List<ColumnInfo> columns;
+
+    private EmbeddableType embeddable;
+    
+
+    /**
+     * @param metaModel
+     */
+    public EmbeddedColumnInfo(EmbeddableType metaModel)
+    {
+        this.embeddable = metaModel;
+    }
+    
+    
+    /**
+     * @return the embeddable
+     */
+    public EmbeddableType getEmbeddable()
+    {
+        return embeddable;
+    }
+
 
     /**
      * @return the embeddedColumnName

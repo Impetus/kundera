@@ -54,7 +54,7 @@ public class CQLTranslatorTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence.createEntityManagerFactory("cass_pu");
+        emf = Persistence.createEntityManagerFactory("composite_pu");
     }
     
     @Test

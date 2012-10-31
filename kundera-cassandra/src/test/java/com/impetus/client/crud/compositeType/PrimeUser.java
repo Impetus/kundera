@@ -30,7 +30,7 @@ import com.impetus.kundera.annotations.Index;
  */
 
 @Entity
-@Table(name="User", schema = "UUIDCassandra@cass_pu")
+@Table(name="CompositeUser", schema = "CompositeCassandra@composite_pu")
 //@Index(index = true,columns = { "tweetBody","tweetDate" })
 public class PrimeUser
 {
