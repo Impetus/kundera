@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.sql.Date;
 import java.sql.Time;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -129,6 +132,11 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         if (s == null)
         {
             return null;
+        }
+        
+        if(StringUtils.isNumeric(s))
+        {
+            return new Time(Long.parseLong(s));
         }
         Time t = Time.valueOf(s);
         return t;

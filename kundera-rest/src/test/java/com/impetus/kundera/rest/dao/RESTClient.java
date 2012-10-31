@@ -40,15 +40,15 @@ public interface RESTClient
     String getSchemaList(String persistenceUnit);
     
     /** Operations on Book entity */
-    String insertBook(String sessionToken, String book);
+    String insertEntity(String sessionToken, String entityStr, String entityClassName);
 
-    String findBook(String sessionToken, String isbn);
+    String findEntity(String sessionToken, String pk, String entityClassName);
 
-    String updateBook(String sessionToken, String oldBook);
+    String updateEntity(String sessionToken, String newEntityStr, String entityClassName);
 
-    void deleteBook(String sessionToken, String updatedBook, String isbn);
+    void deleteEntity(String sessionToken, String updatedBook, String pk, String entityClassName);
 
-    String getAllBooks(String sessionToken);  
+    String getAllEntities(String sessionToken, String entityClassName);  
     
     String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params);
     

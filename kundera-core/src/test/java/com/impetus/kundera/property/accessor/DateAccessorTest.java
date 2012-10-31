@@ -62,11 +62,13 @@ public class DateAccessorTest
         String dateInMMddYY = "02/01/2012";
         String dateInMMddYYDash = "02-01-2012";
         String dateInMMMddYYYY = "Feb/02/2012";
+        String dateInMilliSeconds = "1351667541111";
         Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYYDash));
         Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYYHHmmss));
         Assert.assertNotNull(accessor.fromString(Date.class, newDateAsStr));
         Assert.assertNotNull(accessor.fromString(Date.class, dateInMMMddYYYY));
         Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYY));
+        Assert.assertNotNull(accessor.fromString(Date.class, dateInMilliSeconds));
     }
 
     /**

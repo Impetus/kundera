@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -127,6 +130,10 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         {
             return null;
         }
+        if(StringUtils.isNumeric(s))
+        {
+            return new Timestamp(Long.parseLong(s));
+        }        
         Timestamp t = Timestamp.valueOf(s);
         return t;
     }

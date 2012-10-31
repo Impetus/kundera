@@ -16,8 +16,10 @@
 package com.impetus.kundera.rest.dao;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -26,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.common.JAXBUtils;
+import com.impetus.kundera.rest.common.Professional;
 import com.impetus.kundera.rest.common.StreamUtils;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
@@ -118,53 +120,60 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public String insertBook(String sessionToken, String bookStr)
+    public String insertEntity(String sessionToken, String entityStr, String entityClassName)
     {
         log.debug("\n\nInserting Entity...");
-        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/Book").type(mediaType)
+        
+        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1344079067777l));
+        Professional prof = new Professional("11111111111111", 34662345, false, 31, 'C', (byte)8, (short) 5, (float)10.0, 163.12,
+                new Date(Long.parseLong("1344079065781")), new Date(Long.parseLong("1344079067623")), new Date(Long.parseLong("1344079069105")),
+                2, new Long(3634521523423L), new Double(0.23452342343),
+                /*new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),*/
+                new BigInteger("123456789"), new BigDecimal(123456789), cal);
+        
+        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType)
                 .accept(MediaType.APPLICATION_OCTET_STREAM).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-        StringBuffer sb = new StringBuffer().append(bookStr);
+        StringBuffer sb = new StringBuffer().append(entityStr);
         ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
-        log.debug("Response From Insert Book: " + insertResponse);
+        log.debug("Response From Insert Entity: " + insertResponse);
         return insertResponse.toString();
     }
 
     @Override
-    public String findBook(String sessionToken, String isbn)
+    public String findEntity(String sessionToken, String pk, String entityClassName)
     {
         log.debug("\n\nFinding Entity...");
-        WebResource.Builder findBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/Book/" + isbn).accept(mediaType)
+        WebResource.Builder findBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/" + pk).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ;
 
         ClientResponse findResponse = (ClientResponse) findBuilder.get(ClientResponse.class);
 
         InputStream is = findResponse.getEntityInputStream();
-        String bookStr = StreamUtils.toString(is);
+        String entityStr = StreamUtils.toString(is);
 
-        log.debug("Found Entity:" + bookStr);
-        return bookStr;
+        log.debug("Found Entity:" + entityStr);
+        return entityStr;
     }
 
     @Override
-    public String updateBook(String sessionToken, String oldBookStr)
+    public String updateEntity(String sessionToken, String newEntityStr, String entityClassName)
     {
-        log.debug("\n\nUpdating Entity... " + oldBookStr);
-        oldBookStr = oldBookStr.replaceAll("Amresh", "Saurabh");
-        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/Book").type(mediaType).accept(mediaType)
+        log.debug("\n\nUpdating Entity... " + newEntityStr);        
+        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, oldBookStr);
+        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, newEntityStr);
         InputStream is = updateResponse.getEntityInputStream();
-        String updatedBookStr = StreamUtils.toString(is);
-        log.debug("Updated Book: " + updatedBookStr);
-        return updatedBookStr;
+        String updatedEntityStr = StreamUtils.toString(is);
+        log.debug("Updated Entity: " + updatedEntityStr);
+        return updatedEntityStr;
     }
 
     @Override
-    public void deleteBook(String sessionToken, String updatedBook, String isbn)
+    public void deleteEntity(String sessionToken, String entityStr, String pk, String entityClassName)
     {
-        log.debug("\n\nDeleting Entity... " + updatedBook);
-        WebResource.Builder deleteBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/Book/delete/" + isbn)
+        log.debug("\n\nDeleting Entity... " + entityStr);
+        WebResource.Builder deleteBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/delete/" + pk)
                 .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
         log.debug("Delete Response:" + deleteResponse.getStatus());
@@ -181,8 +190,7 @@ public class RESTClientImpl implements RESTClient
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
 
-        InputStream is = queryResponse.getEntityInputStream();
-        List records = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
+        InputStream is = queryResponse.getEntityInputStream();       
 
         String allStr = StreamUtils.toString(is);
 
@@ -254,10 +262,10 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public String getAllBooks(String sessionToken)
+    public String getAllEntities(String sessionToken, String entityClassName)
     {
         log.debug("\n\nFinding all Entities... ");
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/Book/all").accept(mediaType)
+        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/all").accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Find All Response:" + queryResponse.getStatus());
@@ -266,10 +274,10 @@ public class RESTClientImpl implements RESTClient
         // List books = (List) JAXBUtils.toObject(is, ArrayList.class,
         // MediaType.APPLICATION_XML);
 
-        String allBookStr = StreamUtils.toString(is);
+        String allEntitiesStr = StreamUtils.toString(is);
 
-        log.debug("Found All Entities:" + allBookStr);
-        return allBookStr;
+        log.debug("Found All Entities:" + allEntitiesStr);
+        return allEntitiesStr;
     }
 
     @Override

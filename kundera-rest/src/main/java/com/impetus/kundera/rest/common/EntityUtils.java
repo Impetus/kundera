@@ -17,14 +17,20 @@ package com.impetus.kundera.rest.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.QueryImpl;
 
 /**
  * @author amresh
@@ -86,13 +92,37 @@ public class EntityUtils
         for(String paramName : paramsMap.keySet()) {
             String value = paramsMap.get(paramName);
             
+            KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
+            Set<Parameter<?>> parameters = kq.getParameters();
+            
             if(StringUtils.isNumeric(paramName))
             {
-                q.setParameter(Integer.parseInt(paramName), value);
+                for(Parameter param : parameters)
+                {
+                    if(param.getPosition() == Integer.parseInt(paramName))
+                    {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value);                        
+                        q.setParameter(Integer.parseInt(paramName), paramValue);
+                        break;
+                    }
+                }               
             }
             else
             {
-                q.setParameter(paramName, value);
+                for(Parameter param : parameters)
+                {
+                    if(param.getName().equals(paramName))
+                    {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value); 
+                        q.setParameter(paramName, paramValue);
+                        break;
+                    }
+                }
+                
             }
         }
     }

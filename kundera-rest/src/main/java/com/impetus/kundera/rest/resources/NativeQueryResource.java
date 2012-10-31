@@ -85,7 +85,7 @@ public class NativeQueryResource
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return Response.serverError().build();
         }
         
@@ -142,10 +142,9 @@ public class NativeQueryResource
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return Response.serverError().build();
-        }
-        
+        }        
         
         if (result == null)
         {

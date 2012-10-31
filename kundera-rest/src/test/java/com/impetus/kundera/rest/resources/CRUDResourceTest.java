@@ -114,7 +114,7 @@ public class CRUDResourceTest extends JerseyTest
     @Before
     public void setup() throws Exception
     {
-
+        
     }
 
     @After
@@ -130,7 +130,13 @@ public class CRUDResourceTest extends JerseyTest
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace(_KEYSPACE);
+        }    
+        
+        if (USE_EMBEDDED_SERVER)
+        {
+            
         }
+        
     }
 
     @Test
@@ -171,8 +177,8 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(sessionToken.startsWith("ST_"));
 
         // Insert Record
-        String insertResponse1 = restClient.insertBook(sessionToken, bookStr1);
-        String insertResponse2 = restClient.insertBook(sessionToken, bookStr2);
+        String insertResponse1 = restClient.insertEntity(sessionToken, bookStr1, "Book");
+        String insertResponse2 = restClient.insertEntity(sessionToken, bookStr2, "Book");
 
         Assert.assertNotNull(insertResponse1);
         Assert.assertNotNull(insertResponse2);
@@ -180,7 +186,7 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(insertResponse2.indexOf("201") > 0);
 
         // Find Record
-        String foundBook = restClient.findBook(sessionToken, pk1);
+        String foundBook = restClient.findEntity(sessionToken, pk1, "Book");
         Assert.assertNotNull(foundBook);
         if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
@@ -189,7 +195,8 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(foundBook.indexOf("Amresh") > 0);
 
         // Update Record
-        String updatedBook = restClient.updateBook(sessionToken, foundBook);
+        foundBook = foundBook.replaceAll("Amresh", "Saurabh");
+        String updatedBook = restClient.updateEntity(sessionToken, foundBook, "Book");
         Assert.assertNotNull(updatedBook);
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
@@ -202,7 +209,7 @@ public class CRUDResourceTest extends JerseyTest
 
         /** JPA Query - Select All*/
         // Get All Books
-        String allBooks = restClient.getAllBooks(sessionToken);
+        String allBooks = restClient.getAllEntities(sessionToken, "Book");
         Assert.assertNotNull(allBooks);
         Assert.assertTrue(allBooks.indexOf("books") > 0);
         Assert.assertTrue(allBooks.indexOf("Saurabh") > 0);
@@ -251,8 +258,8 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Vivek") > 0); 
         
         // Delete Records
-        restClient.deleteBook(sessionToken, updatedBook, pk1);
-        restClient.deleteBook(sessionToken, updatedBook, pk2);
+        restClient.deleteEntity(sessionToken, updatedBook, pk1, "Book");
+        restClient.deleteEntity(sessionToken, updatedBook, pk2, "Book");
 
         // Close Session
         restClient.closeSession(sessionToken);

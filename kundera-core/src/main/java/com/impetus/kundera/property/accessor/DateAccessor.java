@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -193,8 +195,13 @@ public class DateAccessor implements PropertyAccessor<Date>
      */
     public static Date getDateByPattern(String date)
     {
-        for (String p : patterns)
+        if(StringUtils.isNumeric(date))
         {
+            return new Date(Long.parseLong(date));
+        }
+        
+        for (String p : patterns)
+        {           
             try
             {
                 DateFormat formatter = new SimpleDateFormat(p);
