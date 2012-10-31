@@ -59,7 +59,30 @@ import com.sun.jersey.test.framework.JerseyTest;
 
 /**
  * Test for all data types using {@link Professional} entity
- * 
+ * Cassandra-CLI Commands to run for non-embedded mode:
+    create keyspace KunderaExamples;
+    use KunderaExamples;
+    drop column family PROFESSIONAL;
+    create column family PROFESSIONAL with comparator=UTF8Type and key_validation_class=UTF8Type and column_metadata=[
+    {column_name: DEPARTMENT_ID, validation_class:LongType, index_type: KEYS},
+    {column_name: IS_EXCEPTIONAL, validation_class:BooleanType, index_type: KEYS},
+    {column_name: AGE, validation_class:IntegerType, index_type: KEYS},
+    {column_name: GRADE, validation_class:UTF8Type, index_type: KEYS},
+    {column_name: DIGITAL_SIGNATURE, validation_class:BytesType, index_type: KEYS},
+    {column_name: RATING, validation_class:IntegerType, index_type: KEYS},
+    {column_name: COMPLIANCE, validation_class:FloatType, index_type: KEYS},
+    {column_name: HEIGHT, validation_class:DoubleType, index_type: KEYS},
+    {column_name: ENROLMENT_DATE, validation_class:DateType, index_type: KEYS},
+    {column_name: ENROLMENT_TIME, validation_class:DateType, index_type: KEYS},
+    {column_name: JOINING_DATE_TIME, validation_class:DateType, index_type: KEYS},
+    {column_name: YEARS_SPENT, validation_class:IntegerType, index_type: KEYS},
+    {column_name: UNIQUE_ID, validation_class:LongType, index_type: KEYS},
+    {column_name: MONTHLY_SALARY, validation_class:DoubleType, index_type: KEYS},
+    {column_name: JOB_ATTEMPTS, validation_class:IntegerType, index_type: KEYS},
+    {column_name: ACCUMULATED_WEALTH, validation_class:DecimalType, index_type: KEYS},
+    {column_name: GRADUATION_DAY, validation_class:DateType, index_type: KEYS}
+    ];
+    describe KunderaExamples;
  * @author amresh.singh
  */
 public class DataTypeTest extends JerseyTest

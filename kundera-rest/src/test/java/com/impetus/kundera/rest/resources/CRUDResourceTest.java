@@ -58,7 +58,16 @@ import com.sun.jersey.test.framework.JerseyTest;
 
 /**
  * Test case for {@link CRUDResource}
- * 
+ * Cassandra-CLI Commands to run for non-embedded mode:
+ * create keyspace KunderaExamples;
+ * use KunderaExamples;
+ * drop column family BOOK;
+ * drop column family PERSONNEL;
+ * drop column family ADDRESS;
+ * create column family BOOK with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: AUTHOR, validation_class:UTF8Type, index_type: KEYS},{column_name: PUBLICATION, validation_class:UTF8Type, index_type: KEYS}];
+ * create column family PERSONNEL with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: PERSON_NAME, validation_class:UTF8Type, index_type: KEYS},{column_name: ADDRESS_ID, validation_class:UTF8Type, index_type: KEYS}];
+ * create column family ADDRESS with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: STREET, validation_class:UTF8Type, index_type: KEYS},{column_name: PERSON_ID, validation_class:UTF8Type, index_type: KEYS}];
+ * describe KunderaExamples;
  * @author amresh
  * 
  */
