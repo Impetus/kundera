@@ -424,12 +424,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
             }
 
-            // TODO:: Add a place holder for CQL translation on compound key.
-            // validation on secondary indexes over compound key (NOSQL
-            // intelligence).
             if (tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
             {
-                onCompoundKey(tableInfo);
+                if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+                {
+                    throw new SchemaGenerationException(
+                            "Composite/Compound columns are yet supported over Super column family by Cassandra",
+                            "cassandra", databaseName);
+                }
+                else
+                {
+                    onCompoundKey(tableInfo);
+                }
             }
             else
             {
@@ -464,8 +470,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         Properties props = getColumnFamilyProperties(tableInfo);
 
         StringBuilder queryBuilder = new StringBuilder();
-
-        // TODO: need to call setColumnFamilyProperties.
 
         // for normal columns
         onCompositeColumns(translator, columns, queryBuilder);
@@ -508,11 +512,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
                 primaryKeyBuilder.toString()));
-        
-        //set column family properties defined in configuration property/xml files.
+
+        // set column family properties defined in configuration property/xml
+        // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
-        // TODO: has to be parameterised, But how?
-        cassandra_client.set_cql_version("3.0.0");
+
+        cassandra_client.set_cql_version(CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
+                .getCqlVersion() : CassandraConstants.CQL_VERSION_3_0);
         try
         {
             cassandra_client.execute_cql_query(
@@ -555,7 +561,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
             String cqlType = translator.getCQLType(dataType);
             translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
-            queryBuilder.append(" , ");
+            queryBuilder.append(" ,");
         }
     }
 

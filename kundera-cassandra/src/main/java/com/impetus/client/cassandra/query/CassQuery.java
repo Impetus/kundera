@@ -108,7 +108,7 @@ public class CassQuery extends QueryImpl implements Query
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        if (!appMetadata.isNative(getJPAQuery()) && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
 
             result = onQueryOverCompositeColumns(m, client, metaModel);
