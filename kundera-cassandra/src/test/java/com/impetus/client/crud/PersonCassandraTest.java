@@ -147,6 +147,12 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("after merge", p.getPersonName());
         
+        // Delete without WHERE clause.
+        
+        String deleteQuery = "DELETE from PersonCassandra p";
+        q = em.createQuery(deleteQuery);
+        Assert.assertEquals(3, q.executeUpdate());
+        
     }
 
     /**
