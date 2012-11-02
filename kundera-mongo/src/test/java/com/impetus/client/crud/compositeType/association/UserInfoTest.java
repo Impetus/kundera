@@ -34,9 +34,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.compositeType.CompositeTypeTest;
-import com.impetus.client.crud.compositeType.CompoundKey;
-import com.impetus.client.crud.compositeType.PrimeUser;
+import com.impetus.client.crud.compositeType.MongoCompositeTypeTest;
+import com.impetus.client.crud.compositeType.MongoCompoundKey;
+import com.impetus.client.crud.compositeType.MongoPrimeUser;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
 import com.mongodb.DB;
@@ -50,7 +50,7 @@ public class UserInfoTest
 
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(CompositeTypeTest.class);
+    private static final Log logger = LogFactory.getLog(MongoCompositeTypeTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -69,8 +69,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser timeLine = new MongoPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -118,8 +118,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser timeLine = new MongoPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -217,8 +217,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser timeLine = new MongoPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -248,7 +248,7 @@ public class UserInfoTest
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From UserInfo u where u.firstName= :firstName";
         EntityManager em = emf.createEntityManager();

@@ -245,11 +245,11 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 DBObject options = new BasicDBObject();
                 if (columnInfo.getMinValue() != null)
                 {
-                    options.put("min", columnInfo.getMinValue());
+                    options.put(MongoDBConstants.MIN, columnInfo.getMinValue());
                 }
                 if (columnInfo.getMaxValue() != null)
                 {
-                    options.put("max", columnInfo.getMaxValue());
+                    options.put(MongoDBConstants.MAX, columnInfo.getMaxValue());
                 }
                 collection.ensureIndex(keys, options);
             }
@@ -309,5 +309,5 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         // TODO Auto-generated method stub
         return true;
     }
-   
+
 }

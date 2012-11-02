@@ -39,10 +39,16 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.kundera.rest.common.Book;
@@ -57,22 +63,33 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.test.framework.JerseyTest;
 
 /**
- * Test case for {@link CRUDResource}
- * Cassandra-CLI Commands to run for non-embedded mode:
- * create keyspace KunderaExamples;
- * use KunderaExamples;
- * drop column family BOOK;
- * drop column family PERSONNEL;
- * drop column family ADDRESS;
- * create column family BOOK with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: AUTHOR, validation_class:UTF8Type, index_type: KEYS},{column_name: PUBLICATION, validation_class:UTF8Type, index_type: KEYS}];
- * create column family PERSONNEL with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: PERSON_NAME, validation_class:UTF8Type, index_type: KEYS},{column_name: ADDRESS_ID, validation_class:UTF8Type, index_type: KEYS}];
- * create column family ADDRESS with comparator=UTF8Type and default_validation_class=UTF8Type and key_validation_class=UTF8Type and column_metadata=[{column_name: STREET, validation_class:UTF8Type, index_type: KEYS},{column_name: PERSON_ID, validation_class:UTF8Type, index_type: KEYS}];
+ * Test case for {@link CRUDResource} Cassandra-CLI Commands to run for
+ * non-embedded mode: create keyspace KunderaExamples; use KunderaExamples; drop
+ * column family BOOK; drop column family PERSONNEL; drop column family ADDRESS;
+ * create column family BOOK with comparator=UTF8Type and
+ * default_validation_class=UTF8Type and key_validation_class=UTF8Type and
+ * column_metadata=[{column_name: AUTHOR, validation_class:UTF8Type, index_type:
+ * KEYS},{column_name: PUBLICATION, validation_class:UTF8Type, index_type:
+ * KEYS}]; create column family PERSONNEL with comparator=UTF8Type and
+ * default_validation_class=UTF8Type and key_validation_class=UTF8Type and
+ * column_metadata=[{column_name: PERSON_NAME, validation_class:UTF8Type,
+ * index_type: KEYS},{column_name: ADDRESS_ID, validation_class:UTF8Type,
+ * index_type: KEYS}]; create column family ADDRESS with comparator=UTF8Type and
+ * default_validation_class=UTF8Type and key_validation_class=UTF8Type and
+ * column_metadata=[{column_name: STREET, validation_class:UTF8Type, index_type:
+ * KEYS},{column_name: PERSON_ID, validation_class:UTF8Type, index_type: KEYS}];
  * describe KunderaExamples;
+ * 
  * @author amresh
  * 
  */
 public class CRUDResourceTest extends JerseyTest
 {
+    // @Rule
+    // public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new
+    // CSVSummaryReportModule(),
+    // new HtmlReportModule() });
+
     private static final String _KEYSPACE = "KunderaExamples";
 
     private static Log log = LogFactory.getLog(CRUDResourceTest.class);
@@ -123,7 +140,7 @@ public class CRUDResourceTest extends JerseyTest
     @Before
     public void setup() throws Exception
     {
-        
+
     }
 
     @After
@@ -139,16 +156,17 @@ public class CRUDResourceTest extends JerseyTest
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace(_KEYSPACE);
-        }    
-        
+        }
+
         if (USE_EMBEDDED_SERVER)
         {
-            
+
         }
-        
+
     }
 
     @Test
+    // @PerfTest(invocations = 10)
     public void testCRUD()
     {
         WebResource webResource = resource();
@@ -209,14 +227,13 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertNotNull(updatedBook);
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
-        
         /** JPA Query - Select */
-        //Get All books
+        // Get All books
         String jpaQuery = "select b from Book b";
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
 
-        /** JPA Query - Select All*/
+        /** JPA Query - Select All */
         // Get All Books
         String allBooks = restClient.getAllEntities(sessionToken, "Book");
         Assert.assertNotNull(allBooks);
@@ -224,48 +241,52 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(allBooks.indexOf("Saurabh") > 0);
         Assert.assertTrue(allBooks.indexOf("Vivek") > 0);
         log.debug(allBooks);
-        
+
         /** Named JPA Query - Select */
-        //Get books for a specific author
+        // Get books for a specific author
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("author", "Saurabh");
-        String booksByAuthor = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(), "findByAuthor", params);
+        String booksByAuthor = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(), "findByAuthor",
+                params);
         Assert.assertNotNull(booksByAuthor);
         Assert.assertTrue(booksByAuthor.indexOf("books") > 0);
         Assert.assertTrue(booksByAuthor.indexOf("Saurabh") > 0);
         Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
         log.debug(booksByAuthor);
-        
+
         /** Named JPA Query - Select */
-        //Get books for a specific publication
+        // Get books for a specific publication
         Map<String, Object> paramsPublication = new HashMap<String, Object>();
         paramsPublication.put("1", "Willey");
-        String booksByPublication = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(), "findByPublication", paramsPublication);
+        String booksByPublication = restClient.runNamedJPAQuery(sessionToken, Book.class.getSimpleName(),
+                "findByPublication", paramsPublication);
         Assert.assertNotNull(booksByPublication);
         Assert.assertTrue(booksByAuthor.indexOf("books") > 0);
         Assert.assertTrue(booksByAuthor.indexOf("Saurabh") > 0);
         Assert.assertFalse(booksByAuthor.indexOf("Vivek") > 0);
         Assert.assertTrue(booksByAuthor.indexOf("Willey") > 0);
         log.debug(booksByAuthor);
-        
+
         /** Native Query - Select */
-        //Get All books
+        // Get All books
         String nativeQuery = "Select * from BOOK";
-        String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery, new HashMap<String, Object>());
+        String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery,
+                new HashMap<String, Object>());
         log.debug("Native Query Select Result:" + nativeQueryResult);
         Assert.assertNotNull(nativeQueryResult);
         Assert.assertTrue(nativeQueryResult.indexOf("books") > 0);
         Assert.assertTrue(nativeQueryResult.indexOf("Saurabh") > 0);
-        Assert.assertTrue(nativeQueryResult.indexOf("Vivek") > 0); 
-        
+        Assert.assertTrue(nativeQueryResult.indexOf("Vivek") > 0);
+
         /** Named Native Query - Select */
-        String namedNativeQuerySelectResult = restClient.runNamedNativeQuery(sessionToken, "Book", "findAllBooksNative", new HashMap<String, Object>());
+        String namedNativeQuerySelectResult = restClient.runNamedNativeQuery(sessionToken, "Book",
+                "findAllBooksNative", new HashMap<String, Object>());
         log.debug("Named Native Query Select Result:" + namedNativeQuerySelectResult);
         Assert.assertNotNull(namedNativeQuerySelectResult);
         Assert.assertTrue(namedNativeQuerySelectResult.indexOf("books") > 0);
         Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Saurabh") > 0);
-        Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Vivek") > 0); 
-        
+        Assert.assertTrue(namedNativeQuerySelectResult.indexOf("Vivek") > 0);
+
         // Delete Records
         restClient.deleteEntity(sessionToken, updatedBook, pk1, "Book");
         restClient.deleteEntity(sessionToken, updatedBook, pk2, "Book");
@@ -395,11 +416,13 @@ public class CRUDResourceTest extends JerseyTest
         user_Def.keyspace = _KEYSPACE;
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
-        
-        ColumnDef authorDef = new ColumnDef(ByteBuffer.wrap("AUTHOR".getBytes()), "UTF8Type"); authorDef.index_type = IndexType.KEYS;
-        ColumnDef publicationDef = new ColumnDef(ByteBuffer.wrap("PUBLICATION".getBytes()), "UTF8Type"); publicationDef.index_type = IndexType.KEYS;
+
+        ColumnDef authorDef = new ColumnDef(ByteBuffer.wrap("AUTHOR".getBytes()), "UTF8Type");
+        authorDef.index_type = IndexType.KEYS;
+        ColumnDef publicationDef = new ColumnDef(ByteBuffer.wrap("PUBLICATION".getBytes()), "UTF8Type");
+        publicationDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(authorDef);
-        user_Def.addToColumn_metadata(publicationDef);      
+        user_Def.addToColumn_metadata(publicationDef);
 
         CfDef person_Def = new CfDef();
         person_Def.name = "PERSONNEL";

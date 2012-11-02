@@ -15,64 +15,78 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
-import java.util.UUID;
+import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
+ *
  */
-@Embeddable
-public class CompoundKey
+
+@Entity
+@Table(name="User", schema="KunderaExamples@mongoTest")
+public class MongoPrimeUser
 {
-    @Column private String userId;
-    @Column private int tweetId;
-    @Column private UUID timeLineId;
+    
+    @EmbeddedId
+    private MongoCompoundKey key;
+    
+    @Column
+    private String tweetBody;
+    
+    @Column 
+    private Date tweetDate;
 
-    
-    
-    /**
-     * 
-     */
-    public CompoundKey()
+    public MongoPrimeUser()
     {
     }
-
-    /**
-     * @param userId
-     * @param tweetId
-     * @param timeLineId
-     */
-    public CompoundKey(String userId, int tweetId, UUID timeLineId)
+    
+    public MongoPrimeUser(MongoCompoundKey key)
     {
-        this.userId = userId;
-        this.tweetId = tweetId;
-        this.timeLineId = timeLineId;
+        this.key = key;
     }
     
     /**
-     * @return the userId
+     * @return the key
      */
-    public String getUserId()
+    public MongoCompoundKey getKey()
     {
-        return userId;
-    }
-    
-    /**
-     * @return the tweetId
-     */
-    public int getTweetId()
-    {
-        return tweetId;
-    }
-    
-    /**
-     * @return the timeLineId
-     */
-    public UUID getTimeLineId()
-    {
-        return timeLineId;
+        return key;
     }
 
+    /**
+     * @return the tweetBody
+     */
+    public String getTweetBody()
+    {
+        return tweetBody;
+    }
+
+    /**
+     * @return the tweetDate
+     */
+    public Date getTweetDate()
+    {
+        return tweetDate;
+    }
+
+    /**
+     * @param tweetBody the tweetBody to set
+     */
+    public void setTweetBody(String tweetBody)
+    {
+        this.tweetBody = tweetBody;
+    }
+
+    /**
+     * @param tweetDate the tweetDate to set
+     */
+    public void setTweetDate(Date tweetDate)
+    {
+        this.tweetDate = tweetDate;
+    }
 }

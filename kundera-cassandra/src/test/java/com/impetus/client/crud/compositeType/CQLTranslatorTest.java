@@ -45,7 +45,7 @@ public class CQLTranslatorTest
 {
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(CompositeTypeTest.class);
+    private static final Log logger = LogFactory.getLog(CassandraCompositeTypeTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -64,11 +64,11 @@ public class CQLTranslatorTest
         CQLTranslator translator = new CQLTranslator();
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser user = new PrimeUser(key);
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(PrimeUser.class);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(CassandraPrimeUser.class);
         String translatedSql = translator.prepareColumnOrColumnValues(user, entityMetadata,TranslationType.VALUE).get(TranslationType.VALUE);
         String columnAsCsv = "'mevivs',1,"+timeLineId+",'my first tweet','"+currentDate.getTime()+"'";
         Assert.assertEquals(columnAsCsv, translatedSql);

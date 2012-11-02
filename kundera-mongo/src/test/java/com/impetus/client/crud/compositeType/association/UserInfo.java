@@ -24,7 +24,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.impetus.client.crud.compositeType.PrimeUser;
+import com.impetus.client.crud.compositeType.MongoPrimeUser;
 
 /**
  * @author vivek.mishra
@@ -51,7 +51,7 @@ public class UserInfo
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private PrimeUser timeLine;
+    private MongoPrimeUser timeLine;
     
     /**
      * 
@@ -68,7 +68,7 @@ public class UserInfo
      * @param age
      * @param timeLine
      */
-    public UserInfo(String userInfoId, String firstName, String lastName, int age, PrimeUser timeLine)
+    public UserInfo(String userInfoId, String firstName, String lastName, int age, MongoPrimeUser timeLine)
     {
         super();
         this.userInfoId = userInfoId;
@@ -114,7 +114,7 @@ public class UserInfo
     /**
      * @return the timeLine
      */
-    public PrimeUser getTimeLine()
+    public MongoPrimeUser getTimeLine()
     {
         return timeLine;
     }

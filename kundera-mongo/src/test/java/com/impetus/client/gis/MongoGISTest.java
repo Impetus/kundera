@@ -19,14 +19,21 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
+import com.sun.swing.internal.plaf.synth.resources.synth;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -36,12 +43,35 @@ import com.vividsolutions.jts.geom.LinearRing;
  * 
  * @author amresh.singh
  */
+@PerfTest(invocations = 1000)
 public class MongoGISTest
 {
-
     String persistenceUnit = "mongoTest";
 
     PersonGISDao dao;
+
+    static Object testParameter;
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
+
+    /**
+     * @return the testParameter
+     */
+    public Object getTestParameter()
+    {
+        return testParameter;
+    }
+
+    /**
+     * @param testParameter
+     *            the testParameter to set
+     */
+    public static void setTestParameter(Object testParam)
+    {
+        testParameter = testParam;
+    }
 
     @Before
     public void setUp() throws Exception
@@ -50,7 +80,7 @@ public class MongoGISTest
     }
 
     @Test
-    public void executeTests() throws Exception
+    public synchronized void executeTests() throws Exception
     {
         addPersons();
         findPerson();
@@ -350,7 +380,7 @@ public class MongoGISTest
     private void removePerson()
     {
         dao.createEntityManager();
-        Person person = dao.findPerson(1);
+        Person person = dao.findPerson(4);
 
         Assert.assertNotNull(person);
 
@@ -359,7 +389,7 @@ public class MongoGISTest
         dao.closeEntityManager();
         dao.createEntityManager();
 
-        person = dao.findPerson(1);
+        person = dao.findPerson(4);
 
         Assert.assertNull(person);
         dao.closeEntityManager();

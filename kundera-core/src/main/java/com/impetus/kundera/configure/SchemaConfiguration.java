@@ -163,7 +163,8 @@ public class SchemaConfiguration implements Configuration
             ForeignKey relationType = relation.getType();
 
             // if relation type is one to many or join by primary key
-            if (relationType.equals(ForeignKey.ONE_TO_MANY) && relation.getJoinColumnName() != null)
+            if (targetEntityMetadata != null && relationType.equals(ForeignKey.ONE_TO_MANY)
+                    && relation.getJoinColumnName() != null)
             {
                 // if self association
                 if (targetEntityMetadata.equals(entityMetadata))
@@ -366,8 +367,8 @@ public class SchemaConfiguration implements Configuration
             columnInfo.setIndexType(indexedColumn.getIndexType());
             columnInfo.setMaxValue(indexedColumn.getMax());
             columnInfo.setMinValue(indexedColumn.getMin());
-            
-            //Add more if required
+
+            // Add more if required
         }
         columnInfo.setType(column.getJavaType());
         return columnInfo;
