@@ -863,6 +863,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity,
                 entityMetadata, TranslationType.ALL);
+        
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
                 translation.get(TranslationType.VALUE));
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS,

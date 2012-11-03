@@ -18,6 +18,7 @@ package com.impetus.client.cassandra.thrift;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -38,13 +40,17 @@ import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.ByteAccessor;
 
 /**
  * CQL translator interface, to translate all CRUD operations into CQL queries.
@@ -333,20 +339,31 @@ public final class CQLTranslator
             isPresent = true;
             // CQL can take string or date within single quotes.
 
-            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz))
+            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
+                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class) || fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class))
             {
                 builder.append("'");
 
                 if (isDate(fieldClazz)) // For CQL, date has to
                                         // be in date.getTime()
                 {
-                    builder.append(((Date) value).getTime());
+                    
+                    builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
                 }
                 else
                 {
                     builder.append(value);
                 }
                 builder.append("'");
+            } else if(fieldClazz.isAssignableFrom(byte.class))
+            {
+//                isPresent = false;
+                ByteAccessor accessor = new ByteAccessor();
+                builder.append(Hex.encodeHex(accessor.toBytes(value)));
+//                builder.append(Integer.toHexString(5));
+            /*    ByteAccessor accessor = new ByteAccessor();
+             * 
+                builder.append(accessor.toBytes(value));*/
             }
             else
             {
@@ -398,7 +415,7 @@ public final class CQLTranslator
     private boolean isDate(Class clazz)
     {
         return clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(java.sql.Date.class)
-                || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class);
+                || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class) || clazz.isAssignableFrom(Calendar.class);
     }
 
     /**

@@ -116,7 +116,14 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public String toString(Object object)
     {
-        return object != null ? object.toString() : null;
+        Time time = (Time) object;
+
+        if (time == null)
+        {
+            return null;
+        }
+        
+        return String.valueOf(time.getTime());
     }
 
     /*

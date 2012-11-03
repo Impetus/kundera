@@ -324,14 +324,14 @@ public class CompositeTypeTest
         em.close();
     }
 
-    /**
+    /**CompositeUserDataType
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("CompositeCassandra");
 //        emf.close();
+        CassandraCli.dropKeySpace("CompositeCassandra");
     }
 // DO NOT DELETE IT!! though it is automated with schema creation option.
     /**
@@ -339,24 +339,30 @@ public class CompositeTypeTest
      */
     private void loadData()
     {
-        CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text," +
-        		    " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
-        try
-        {
-            CassandraCli.getClient().set_keyspace("CompositeCassandra");
-        }
-        catch (InvalidRequestException e)
-        {
-            logger.error(e.getMessage());
-        }
-        catch (TException e)
-        {
-            logger.error(e.getMessage());
-        }
-        CassandraCli.executeCqlQuery(cql_Query);
-        
-        
+        /*if (!CassandraCli.keyspaceExist("CompositeCassandra"))
+        {*/
+            CassandraCli.createKeySpace("CompositeCassandra");
+
+            String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+                    + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+            try
+            {
+                CassandraCli.getClient().set_keyspace("CompositeCassandra");
+            }
+            catch (InvalidRequestException e)
+            {
+                logger.error(e.getMessage());
+            }
+            catch (TException e)
+            {
+                logger.error(e.getMessage());
+            }
+         /*   if (!CassandraCli.columnFamilyExist("CompositeCassandra", "CompositeUser"))
+            {*/
+                CassandraCli.executeCqlQuery(cql_Query);
+//            }
+//
+//        }
     }
 
 }

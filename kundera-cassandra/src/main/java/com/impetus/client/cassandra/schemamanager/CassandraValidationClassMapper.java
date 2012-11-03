@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.schemamanager;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -74,13 +75,13 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(java.lang.String.class, UTF8Type.class.getSimpleName());
         validationClassMapper.put(char.class, UTF8Type.class.getSimpleName());
 
-        validationClassMapper.put(java.sql.Time.class, IntegerType.class.getSimpleName());
+        validationClassMapper.put(java.sql.Time.class, DateType.class.getSimpleName());
         validationClassMapper.put(java.lang.Integer.class, IntegerType.class.getSimpleName());
         validationClassMapper.put(int.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.sql.Timestamp.class, IntegerType.class.getSimpleName());
+        validationClassMapper.put(java.sql.Timestamp.class, DateType.class.getSimpleName());
         validationClassMapper.put(short.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.math.BigDecimal.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.sql.Date.class, IntegerType.class.getSimpleName());
+        validationClassMapper.put(java.math.BigDecimal.class, DecimalType.class.getSimpleName());
+        validationClassMapper.put(java.sql.Date.class, DateType.class.getSimpleName());
         validationClassMapper.put(java.util.Date.class, DateType.class.getSimpleName());
         validationClassMapper.put(java.math.BigInteger.class, IntegerType.class.getSimpleName());
 
@@ -97,6 +98,8 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(float.class, FloatType.class.getSimpleName());
         
         validationClassMapper.put(UUID.class, UUIDType.class.getSimpleName());
+        
+        validationClassMapper.put(Calendar.class, DateType.class.getSimpleName());
     }
 
     /**

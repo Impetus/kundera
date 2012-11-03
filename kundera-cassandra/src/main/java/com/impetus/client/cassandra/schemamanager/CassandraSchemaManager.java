@@ -517,8 +517,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
 
-        cassandra_client.set_cql_version(CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
-                .getCqlVersion() : CassandraConstants.CQL_VERSION_3_0);
+        cassandra_client.set_cql_version(/*CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
+                .getCqlVersion() :*/ CassandraConstants.CQL_VERSION_3_0);
         try
         {
             cassandra_client.execute_cql_query(
