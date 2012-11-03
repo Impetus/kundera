@@ -28,12 +28,13 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name="User", schema="KunderaExamples@mongoTest")
-public class PrimeUser
+@Table(name="CompositeUser", schema = "CompositeCassandra@composite_pu")
+//@Index(index = true,columns = { "tweetBody","tweetDate" })
+public class CassandraPrimeUser
 {
     
     @EmbeddedId
-    private CompoundKey key;
+    private CassandraCompoundKey key;
     
     @Column
     private String tweetBody;
@@ -41,11 +42,11 @@ public class PrimeUser
     @Column 
     private Date tweetDate;
 
-    public PrimeUser()
+    public CassandraPrimeUser()
     {
     }
     
-    public PrimeUser(CompoundKey key)
+    public CassandraPrimeUser(CassandraCompoundKey key)
     {
         this.key = key;
     }
@@ -53,7 +54,7 @@ public class PrimeUser
     /**
      * @return the key
      */
-    public CompoundKey getKey()
+    public CassandraCompoundKey getKey()
     {
         return key;
     }

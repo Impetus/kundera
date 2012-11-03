@@ -24,7 +24,7 @@ import javax.persistence.Embeddable;
  * @author vivek.mishra
  */
 @Embeddable
-public class CompoundKey
+public class MongoCompoundKey
 {
     @Column private String userId;
     @Column private int tweetId;
@@ -35,7 +35,7 @@ public class CompoundKey
     /**
      * 
      */
-    public CompoundKey()
+    public MongoCompoundKey()
     {
     }
 
@@ -44,7 +44,7 @@ public class CompoundKey
      * @param tweetId
      * @param timeLineId
      */
-    public CompoundKey(String userId, int tweetId, UUID timeLineId)
+    public MongoCompoundKey(String userId, int tweetId, UUID timeLineId)
     {
         this.userId = userId;
         this.tweetId = tweetId;

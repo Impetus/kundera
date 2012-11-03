@@ -32,9 +32,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.compositeType.CompositeTypeTest;
-import com.impetus.client.crud.compositeType.CompoundKey;
-import com.impetus.client.crud.compositeType.PrimeUser;
+import com.impetus.client.crud.compositeType.CassandraCompositeTypeTest;
+import com.impetus.client.crud.compositeType.CassandraCompoundKey;
+import com.impetus.client.crud.compositeType.CassandraPrimeUser;
 
 /**
  * @author vivek.mishra
@@ -45,7 +45,7 @@ public class UserInfoTest
 
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(CompositeTypeTest.class);
+    private static final Log logger = LogFactory.getLog(CassandraCompositeTypeTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -53,12 +53,11 @@ public class UserInfoTest
     @Before
     public void setUp() throws Exception
     {
-//        emf = Persistence.createEntityManagerFactory("cass_pu");
+//        emf = Persistence.createEntityManagerFactory("composite_pu");
     }
 
     @Test
-    public void testDummy()
-    {
+    public void dummytest(){
         
     }
 //    @Test
@@ -69,8 +68,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -110,7 +109,7 @@ public class UserInfoTest
 
     }
 
-//    @Test
+    // @Test
     public void onQuery()
     {
         EntityManager em = emf.createEntityManager();
@@ -118,8 +117,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -199,7 +198,7 @@ public class UserInfoTest
         em.clear();// optional,just to clear persistence cache.
     }
 
-//    @Test
+    // @Test
     public void onNamedQueryTest()
     {
         updateNamed();
@@ -217,8 +216,8 @@ public class UserInfoTest
         // Persist
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser timeLine = new PrimeUser(key);
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -248,7 +247,7 @@ public class UserInfoTest
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From UserInfo u where u.firstName= :firstName";
         EntityManager em = emf.createEntityManager();

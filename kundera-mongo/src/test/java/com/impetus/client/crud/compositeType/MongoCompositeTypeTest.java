@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,38 +28,38 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.thrift.TException;
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.CassandraClientBase;
-import com.impetus.client.cassandra.pelops.PelopsClient;
-import com.impetus.client.cassandra.thrift.ThriftClient;
-import com.impetus.client.persistence.CassandraCli;
+import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
+import com.mongodb.DB;
 
 /**
- * Junit test case for Compound/Composite key.
- * 
  * @author vivek.mishra
  * 
  */
-public class CompositeTypeTest
+
+public class MongoCompositeTypeTest
 {
-
-    /**
-     * 
-     */
-    private static final String PERSISTENCE_UNIT = "composite_pu";
-
     private EntityManagerFactory emf;
 
-    /** The Constant logger. */
-    private static final Log logger = LogFactory.getLog(CompositeTypeTest.class);
+    private static final Log logger = LogFactory.getLog(MongoCompositeTypeTest.class);
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
+
+    private Date currentDate = new Date();
 
     /**
      * @throws java.lang.Exception
@@ -66,34 +67,29 @@ public class CompositeTypeTest
     @Before
     public void setUp() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        CassandraCli.initClient();
-        loadData();
-        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        emf = null;
+        emf = Persistence.createEntityManagerFactory("mongoTest");
     }
 
     /**
      * CRUD over Compound primary Key.
      */
     @Test
-    public void onCRUD()
+    @PerfTest(invocations = 1000)
+    public synchronized void onCRUD()
     {
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
-        PrimeUser user = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
 
-        PrimeUser result = em.find(PrimeUser.class, key);
+        MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -106,91 +102,83 @@ public class CompositeTypeTest
 
         em.clear();// optional,just to clear persistence cache.
 
-        result = em.find(PrimeUser.class, key);
+        result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
-         // deleting composite
+        // deleting composite
         em.remove(result);
 
         em.clear();// optional,just to clear persistence cache.
 
-        result = em.find(PrimeUser.class, key);
-        Assert.assertNull(result); 
-   }
+        result = em.find(MongoPrimeUser.class, key);
+        Assert.assertNull(result);
+    }
 
     @Test
-    public void onQuery()
+    public synchronized void onQuery()
     {
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
-
-        PrimeUser user = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(new Date());
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
-        final String noClause = "Select u from PrimeUser u";
+        final String noClause = "Select u from MongoPrimeUser u";
 
-        final String withFirstCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId";
+        final String withFirstCompositeColClause = "Select u from MongoPrimeUser u where u.key.userId = :userId";
 
-        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
-        
-//        final String withClauseOnNoncomposite = "Select u from PrimeUser u where u.tweetDate = ?1";
-//
-        
-        final String withSecondCompositeColClause = "Select u from PrimeUser u where u.key.tweetId = :tweetId";
-        final String withBothCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
-        final String withAllCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
-        final String withLastCompositeColGTClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
+        final String withClauseOnNoncomposite = "Select u from MongoPrimeUser u where u.tweetDate = ?1";
 
-        final String withSelectiveCompositeColClause = "Select u.key from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        // NOSQL Intelligence to teach that query is invalid because partition
+        // key is not present?
+        final String withSecondCompositeColClause = "Select u from MongoPrimeUser u where u.key.tweetId = :tweetId";
+        final String withBothCompositeColClause = "Select u from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
+        final String withAllCompositeColClause = "Select u from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String withLastCompositeColGTClause = "Select u from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
+
+        final String withSelectiveCompositeColClause = "Select u.key from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
 
         // query over 1 composite and 1 non-column
 
         // query with no clause.
         Query q = em.createQuery(noClause);
-        List<PrimeUser> results = q.getResultList();
+        List<MongoPrimeUser> results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withFirstCompositeColClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
-        Assert.assertEquals(1, results.size());
-/*
-        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
+        Assert.assertNull(results);
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
         q.setParameter(1, currentDate);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
-*/
+
         // Query with composite key clause.
         q = em.createQuery(withSecondCompositeColClause);
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertEquals(1, results.size());
+        Assert.assertNull(results);
 
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertEquals(1, results.size());
+        Assert.assertNull(results);
 
-                // Query with composite key clause.
+        // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
@@ -205,10 +193,9 @@ public class CompositeTypeTest
         q.setParameter("tweetId", 1);
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
+        // TODO::
+        // Assert.assertEquals(1, results.size());
 
-        Assert.assertEquals(1, results.size());
-
-         
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -218,7 +205,7 @@ public class CompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetBody with composite key clause.
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -229,7 +216,7 @@ public class CompositeTypeTest
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getTweetDate());
 
-        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from MongoPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetDate with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -240,7 +227,7 @@ public class CompositeTypeTest
         Assert.assertEquals(currentDate.getTime(), results.get(0).getTweetDate().getTime());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String withCompositeKeyClause = "Select u from PrimeUser u where u.key = :key";
+        final String withCompositeKeyClause = "Select u from MongoPrimeUser u where u.key = :key";
         // Query with composite key clause.
         q = em.createQuery(withCompositeKeyClause);
         q.setParameter("key", key);
@@ -254,7 +241,7 @@ public class CompositeTypeTest
     }
 
     @Test
-    public void onNamedQueryTest()
+    public synchronized void onNamedQueryTest()
     {
         updateNamed();
         deleteNamed();
@@ -270,29 +257,22 @@ public class CompositeTypeTest
     {
         EntityManager em = emf.createEntityManager();
 
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
-
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
-        PrimeUser user = new PrimeUser(key);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(currentDate);
+        user.setTweetDate(new Date());
         em.persist(user);
 
         em = emf.createEntityManager();
-        clients = (Map<String, Client>) em.getDelegate();
-        client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
 
-        String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
+        String updateQuery = "Update MongoPrimeUser u SET u.tweetBody=after merge where u.tweetBody= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
-        q.setParameter("beforeUpdate", key);
+        q.setParameter("beforeUpdate", "my first tweet");
         q.executeUpdate();
 
-        PrimeUser result = em.find(PrimeUser.class, key);
+        MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("after merge", result.getTweetBody());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -307,62 +287,67 @@ public class CompositeTypeTest
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKey key = new CompoundKey("mevivs", 1, timeLineId);
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
 
-        String deleteQuery = "Delete From PrimeUser u where u.key= :key";
+        String deleteQuery = "Delete From MongoPrimeUser u where u.tweetBody= :tweetBody";
         EntityManager em = emf.createEntityManager();
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
-
         Query q = em.createQuery(deleteQuery);
-        q.setParameter("key", key);
+        q.setParameter("tweetBody", "after merge");
         q.executeUpdate();
 
-        PrimeUser result = em.find(PrimeUser.class, key);
+        MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNull(result);
         em.close();
     }
 
-    /**CompositeUserDataType
+    /**
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-//        emf.close();
-        CassandraCli.dropKeySpace("CompositeCassandra");
+        truncateMongo();
     }
-// DO NOT DELETE IT!! though it is automated with schema creation option.
-    /**
-     *  create column family script for compound key.
-     */
-    private void loadData()
-    {
-        /*if (!CassandraCli.keyspaceExist("CompositeCassandra"))
-        {*/
-            CassandraCli.createKeySpace("CompositeCassandra");
 
-            String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
-                    + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+    /**
+     * 
+     */
+    private void truncateMongo()
+    {
+        EntityManager em = emf.createEntityManager();
+
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        MongoDBClient client = (MongoDBClient) clients.get("mongoTest");
+        if (client != null)
+        {
             try
             {
-                CassandraCli.getClient().set_keyspace("CompositeCassandra");
+                Field db = client.getClass().getDeclaredField("mongoDb");
+                if (!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                DB mongoDB = (DB) db.get(client);
+                mongoDB.dropDatabase();
             }
-            catch (InvalidRequestException e)
+            catch (SecurityException e)
             {
-                logger.error(e.getMessage());
+                logger.error(e);
             }
-            catch (TException e)
-            {
-                logger.error(e.getMessage());
-            }
-         /*   if (!CassandraCli.columnFamilyExist("CompositeCassandra", "CompositeUser"))
-            {*/
-                CassandraCli.executeCqlQuery(cql_Query);
-//            }
-//
-//        }
-    }
 
+            catch (NoSuchFieldException e)
+            {
+                logger.error(e);
+            }
+            catch (IllegalArgumentException e)
+            {
+                logger.error(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                logger.error(e);
+            }
+        }
+
+    }
 }

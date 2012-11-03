@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.5</version>
+			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -89,7 +89,7 @@
 			<version>1.4.3</version>
 		</dependency>
 
-		<!-- JTS Topology Suite -->
+				<!-- JTS Topology Suite -->
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
