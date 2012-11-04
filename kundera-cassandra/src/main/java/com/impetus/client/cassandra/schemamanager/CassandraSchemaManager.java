@@ -1261,7 +1261,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void setColumnFamilyProperties(CfDef cfDef, Properties cFProperties, StringBuilder builder)
     {
-        if (cfDef != null && cFProperties != null)
+        if ((cfDef != null && cFProperties != null) || (builder != null && cFProperties != null))
         {
             if (builder != null)
             {
@@ -1345,8 +1345,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     if (builder != null)
                     {
-                        appendPropertyToBuilder(builder, maxCompactionThreshold,
-                                CassandraConstants.MAX_COMPACTION_THRESHOLD);
+                        // Somehow these are not working for cassandra 1.1 though they claim it should work.
+//                        appendPropertyToBuilder(builder, maxCompactionThreshold,
+//                                CassandraConstants.MAX_COMPACTION_THRESHOLD);
                     }
                     else
                     {
@@ -1366,8 +1367,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     if (builder != null)
                     {
-                        appendPropertyToBuilder(builder, minCompactionThreshold,
-                                CassandraConstants.MIN_COMPACTION_THRESHOLD);
+                        // Somehow these are not working for cassandra 1.1 though they claim it should work.
+//                        appendPropertyToBuilder(builder, minCompactionThreshold,
+//                                CassandraConstants.MIN_COMPACTION_THRESHOLD);
                     }
                     else
                     {
@@ -1505,8 +1507,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         appendPropertyToBuilder(builder, dclocalReadRepairChance,
                                 CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
-                        // Strip last AND clause.
-                        builder.deleteCharAt(builder.length() - 2);
+                        
                     }
                     else
                     {
@@ -1519,6 +1520,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     throw new SchemaGenerationException(nfe);
                 }
             }
+            
+         // Strip last AND clause.
+           if(builder != null && StringUtils.contains(builder.toString(), CQLTranslator.AND_CLAUSE))
+           {
+               builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
+//               builder.deleteCharAt(builder.length() - 2);
+           }
         }
     }
 

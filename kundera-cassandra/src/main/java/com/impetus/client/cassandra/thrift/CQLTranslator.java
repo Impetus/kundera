@@ -485,8 +485,9 @@ public final class CQLTranslator
             
             mapper.put(CassandraConstants.REPLICATE_ON_WRITE, "replicate_on_write");
             mapper.put(CassandraConstants.CACHING, "caching");
-            mapper.put(CassandraConstants.MAX_COMPACTION_THRESHOLD, "max_compaction_threshold");
-            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
+            //TODO: these are not supported.
+//            mapper.put(CassandraConstants.MAX_COMPACTION_THRESHOLD, "max_compaction_threshold");
+//            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
             mapper.put(CassandraConstants.COMMENT, "comment");
             mapper.put(CassandraConstants.GC_GRACE_SECONDS, "gc_grace_seconds");
         }
