@@ -48,12 +48,12 @@ public class UserHBase
 
     // Embedded object, will persist co-located
     @Embedded
-    private PersonalDetail personalDetail;
+    private PersonalDetailHbase personalDetail;
 
     // Element collection, will persist co-located
     @ElementCollection
     @CollectionTable(name = "tweeted")
-    private List<Tweet> tweets;
+    private List<TweetHbase> tweets;
 
     // One to many, will be persisted separately
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
@@ -82,7 +82,7 @@ public class UserHBase
 
     public UserHBase(String userId, String name, String password, String relationshipStatus)
     {
-        PersonalDetail pd = new PersonalDetail(name, password, relationshipStatus);
+        PersonalDetailHbase pd = new PersonalDetailHbase(name, password, relationshipStatus);
         setUserId(userId);
         setPersonalDetail(pd);
     }
@@ -107,7 +107,7 @@ public class UserHBase
     /**
      * @return the personalDetail
      */
-    public PersonalDetail getPersonalDetail()
+    public PersonalDetailHbase getPersonalDetail()
     {
         return personalDetail;
     }
@@ -116,7 +116,7 @@ public class UserHBase
      * @param personalDetail
      *            the personalDetail to set
      */
-    public void setPersonalDetail(PersonalDetail personalDetail)
+    public void setPersonalDetail(PersonalDetailHbase personalDetail)
     {
         this.personalDetail = personalDetail;
     }
@@ -124,7 +124,7 @@ public class UserHBase
     /**
      * @return the tweets
      */
-    public List<Tweet> getTweets()
+    public List<TweetHbase> getTweets()
     {
         return tweets;
     }
@@ -133,11 +133,11 @@ public class UserHBase
      * @param tweets
      *            the tweets to set
      */
-    public void addTweet(Tweet tweet)
+    public void addTweet(TweetHbase tweet)
     {
         if (this.tweets == null || this.tweets.isEmpty())
         {
-            this.tweets = new ArrayList<Tweet>();
+            this.tweets = new ArrayList<TweetHbase>();
         }
         this.tweets.add(tweet);
     }

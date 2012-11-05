@@ -48,16 +48,16 @@ public class UserCassandra
 
     // Embedded object, will persist co-located
     @Embedded
-    private PersonalDetail personalDetail;
+    private PersonalDetailCassandra personalDetail;
     
     // Embedded object, will persist co-located
     @Embedded
-    private ProfessionalDetail professionalDetail;
+    private ProfessionalDetailCassandra professionalDetail;
 
     // Element collection, will persist co-located
     @ElementCollection
     @CollectionTable(name = "tweeted")
-    private List<Tweet> tweets;
+    private List<TweetCassandra> tweets;
 
     // One to many, will be persisted separately
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
@@ -86,7 +86,7 @@ public class UserCassandra
 
     public UserCassandra(String userId, String name, String password, String relationshipStatus)
     {
-        PersonalDetail pd = new PersonalDetail(name, password, relationshipStatus);
+        PersonalDetailCassandra pd = new PersonalDetailCassandra(name, password, relationshipStatus);
         setUserId(userId);
         setPersonalDetail(pd);
     }
@@ -111,7 +111,7 @@ public class UserCassandra
     /**
      * @return the personalDetail
      */
-    public PersonalDetail getPersonalDetail()
+    public PersonalDetailCassandra getPersonalDetail()
     {
         return personalDetail;
     }
@@ -120,7 +120,7 @@ public class UserCassandra
      * @param personalDetail
      *            the personalDetail to set
      */
-    public void setPersonalDetail(PersonalDetail personalDetail)
+    public void setPersonalDetail(PersonalDetailCassandra personalDetail)
     {
         this.personalDetail = personalDetail;
     }   
@@ -128,7 +128,7 @@ public class UserCassandra
     /**
      * @return the professionalDetail
      */
-    public ProfessionalDetail getProfessionalDetail()
+    public ProfessionalDetailCassandra getProfessionalDetail()
     {
         return professionalDetail;
     }
@@ -136,7 +136,7 @@ public class UserCassandra
     /**
      * @param professionalDetail the professionalDetail to set
      */
-    public void setProfessionalDetail(ProfessionalDetail professionalDetail)
+    public void setProfessionalDetail(ProfessionalDetailCassandra professionalDetail)
     {
         this.professionalDetail = professionalDetail;
     }
@@ -144,7 +144,7 @@ public class UserCassandra
     /**
      * @return the tweets
      */
-    public List<Tweet> getTweets()
+    public List<TweetCassandra> getTweets()
     {
         return tweets;
     }
@@ -153,11 +153,11 @@ public class UserCassandra
      * @param tweets
      *            the tweets to set
      */
-    public void addTweet(Tweet tweet)
+    public void addTweet(TweetCassandra tweet)
     {
         if (this.tweets == null || this.tweets.isEmpty())
         {
-            this.tweets = new ArrayList<Tweet>();
+            this.tweets = new ArrayList<TweetCassandra>();
         }
         this.tweets.add(tweet);
     }

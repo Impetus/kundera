@@ -17,7 +17,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentMongoUUID;
 import com.impetus.client.utils.MongoUtils;
 
-public class StudentMongoUUIDTest extends Base
+public class StudentMongoUUIDTest extends MongoBase
 {
     private EntityManagerFactory emf;
 

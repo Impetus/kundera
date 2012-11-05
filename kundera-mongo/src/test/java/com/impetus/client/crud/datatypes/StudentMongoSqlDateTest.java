@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongoSqlDate;
 
-public class StudentMongoSqlDateTest extends Base
+public class StudentMongoSqlDateTest extends MongoBase
 {
 
     private static final String keyspace = "KunderaMongoDataType";

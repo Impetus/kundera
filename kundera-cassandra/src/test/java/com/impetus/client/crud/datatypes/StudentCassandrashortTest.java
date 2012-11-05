@@ -30,7 +30,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentCassandrashort;
 import com.impetus.client.persistence.CassandraCli;
 
-public class StudentCassandrashortTest extends Base
+public class StudentCassandrashortTest extends CassandraBase
 {
 
     private static final String keyspace = "KunderaCassandraDataType";

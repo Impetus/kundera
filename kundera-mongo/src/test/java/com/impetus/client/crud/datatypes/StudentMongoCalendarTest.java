@@ -18,7 +18,7 @@ import com.impetus.client.crud.datatypes.entities.StudentMongoCalendar;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.query.QueryHandlerException;
 
-public class StudentMongoCalendarTest extends Base
+public class StudentMongoCalendarTest extends MongoBase
 {
     private EntityManagerFactory emf;
 

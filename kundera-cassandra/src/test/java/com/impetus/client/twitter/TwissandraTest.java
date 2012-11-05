@@ -34,8 +34,14 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
@@ -46,11 +52,15 @@ import com.impetus.kundera.Constants;
  * 
  * @author amresh.singh
  */
-public class TwissandraTest extends TwitterTestBase
+public class TwissandraTest extends TwitterTestBaseCassandra
 {
 
     /** The Constant LOG. */
     private static final Log log = LogFactory.getLog(TwissandraTest.class);
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
 
     @Before
     public void setUp() throws Exception
@@ -59,6 +69,7 @@ public class TwissandraTest extends TwitterTestBase
     }
 
     @Test
+    @PerfTest(invocations = 1000)
     public void onExecute() throws Exception
     {
         executeTwissandraTest();

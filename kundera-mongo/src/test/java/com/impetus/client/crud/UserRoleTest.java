@@ -30,7 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.twitter.entities.Role;
+import com.impetus.client.twitter.entities.RoleMongo;
 import com.impetus.client.twitter.entities.User;
 import com.impetus.client.utils.MongoUtils;
 
@@ -57,7 +57,7 @@ public class UserRoleTest {
 	 */
 	@Test
 	public void testPersist() {
-		Role rol = new Role();
+		RoleMongo rol = new RoleMongo();
 		rol.setRolId(1);
 		rol.setName("Administrador");
 		User u = new User();
@@ -90,7 +90,7 @@ public class UserRoleTest {
 		testPersist();
 		String query = "Select r from Role r";
 		Query q = em.createQuery(query);
-		List<Role> roles = q.getResultList();
+		List<RoleMongo> roles = q.getResultList();
 		Assert.assertNotNull(roles);
 		Assert.assertEquals(1, roles.size());
 	}
@@ -111,7 +111,7 @@ public class UserRoleTest {
 	 */
 	@After
 	public void tearDown() {
-		Role rol = em.find(Role.class, 1);
+		RoleMongo rol = em.find(RoleMongo.class, 1);
 		if (rol != null) {
 			em.remove(rol);
 		}

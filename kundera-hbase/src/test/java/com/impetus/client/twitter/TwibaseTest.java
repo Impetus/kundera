@@ -24,11 +24,12 @@ import com.impetus.client.hbase.junits.HBaseCli;
  * 
  * @author amresh.singh
  */
-public class TwibaseTest extends TwitterTestBase
+public class TwibaseTest extends TwitterTestBaseHbase
 {
 
     HBaseCli cli = new HBaseCli();
 
+    
     @Override
     protected void setUp() throws Exception
     {

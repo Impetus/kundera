@@ -36,8 +36,14 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
@@ -74,9 +80,13 @@ import com.impetus.client.persistence.CassandraCli;
  *      {column_name: CALENDAR, validation_class:UTF8Type, index_type: KEYS}];
  * @author Vivek Mishra
  */
-public class StudentCassandraTest extends StudentBase<StudentCassandra>
+public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
 {
     String persistenceUnit = "secIdxCassandraTest";
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
 
     /**
      * Sets the up.
@@ -103,6 +113,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
     }
 
     @Test
+    @PerfTest(invocations = 2)
     public void executeTests()
     {
         onInsert();

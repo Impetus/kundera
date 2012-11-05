@@ -29,7 +29,7 @@ public class User
     private String lastName;   
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="rolId")
-    private Role userRol;
+    private RoleMongo userRol;
   
     
     /**
@@ -111,14 +111,14 @@ public class User
     /**
      * @return the userRol
      */
-    public Role getUserRol()
+    public RoleMongo getUserRol()
     {
         return userRol;
     }
     /**
      * @param userRol the userRol to set
      */
-    public void setUserRol(Role userRol)
+    public void setUserRol(RoleMongo userRol)
     {
         this.userRol = userRol;
     }

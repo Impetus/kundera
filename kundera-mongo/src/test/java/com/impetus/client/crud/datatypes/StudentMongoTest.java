@@ -22,8 +22,14 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -31,9 +37,13 @@ import org.junit.Test;
  * 
  * @author Vivek Mishra
  */
-public class StudentMongoTest extends StudentBase<StudentMongo>
+public class StudentMongoTest extends StudentMongoBase<StudentMongo>
 {
     String persistenceUnit = "mongoTest";
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
 
     /**
      * Sets the up.
@@ -61,6 +71,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
 
     @SuppressWarnings("deprecation")
     @Test
+    @PerfTest(invocations = 1)
     public void executeTests()
     {
         onInsert();

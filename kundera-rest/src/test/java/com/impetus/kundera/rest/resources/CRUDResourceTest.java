@@ -85,10 +85,6 @@ import com.sun.jersey.test.framework.JerseyTest;
  */
 public class CRUDResourceTest extends JerseyTest
 {
-    // @Rule
-    // public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new
-    // CSVSummaryReportModule(),
-    // new HtmlReportModule() });
 
     private static final String _KEYSPACE = "KunderaExamples";
 
@@ -109,6 +105,10 @@ public class CRUDResourceTest extends JerseyTest
     String pk1;
 
     String pk2;
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
 
     private final static boolean USE_EMBEDDED_SERVER = true;
 
@@ -166,7 +166,7 @@ public class CRUDResourceTest extends JerseyTest
     }
 
     @Test
-    // @PerfTest(invocations = 10)
+    @PerfTest(invocations = 1000)
     public void testCRUD()
     {
         WebResource webResource = resource();
@@ -299,6 +299,7 @@ public class CRUDResourceTest extends JerseyTest
     }
 
     @Test
+    @PerfTest(invocations = 1000)
     public void testCRUDOnAssociation()
     {
         String personStr;

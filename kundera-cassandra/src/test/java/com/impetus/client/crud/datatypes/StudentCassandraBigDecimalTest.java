@@ -31,7 +31,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentCassandraBigDecimal;
 import com.impetus.client.persistence.CassandraCli;
 
-public class StudentCassandraBigDecimalTest extends Base
+public class StudentCassandraBigDecimalTest extends CassandraBase
 {
 
     private static final String keyspace = "KunderaCassandraDataType";

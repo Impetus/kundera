@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.twitter;
 
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.twitter.dao.Twitter;
@@ -24,7 +30,7 @@ import com.impetus.client.twitter.dao.Twitter;
  * 
  * @author amresh.singh
  */
-public class TwingoTest extends TwitterTestBase
+public class TwingoTest extends TwitterTestBaseMongo
 {
 
     /** The user id1. */
@@ -35,6 +41,10 @@ public class TwingoTest extends TwitterTestBase
 
     /** The twitter. */
     Twitter twitter;
+
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
 
     /*
      * (non-Javadoc)
@@ -52,6 +62,7 @@ public class TwingoTest extends TwitterTestBase
      */
 
     @Test
+    @PerfTest(invocations = 1000)
     public void testOnExecute()
     {
         executeTestSuite();

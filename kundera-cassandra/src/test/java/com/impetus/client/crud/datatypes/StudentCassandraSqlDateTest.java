@@ -31,7 +31,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentCassandraSqlDate;
 import com.impetus.client.persistence.CassandraCli;
 
-public class StudentCassandraSqlDateTest extends Base
+public class StudentCassandraSqlDateTest extends CassandraBase
 {
 
 

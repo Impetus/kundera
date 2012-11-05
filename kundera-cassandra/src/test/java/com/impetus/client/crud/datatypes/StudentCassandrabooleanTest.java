@@ -31,7 +31,7 @@ import com.impetus.client.crud.datatypes.entities.StudentCassandraboolean;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.query.QueryHandlerException;
 
-public class StudentCassandrabooleanTest extends Base
+public class StudentCassandrabooleanTest extends CassandraBase
 {
 
     private static final String keyspace = "KunderaCassandraDataType";

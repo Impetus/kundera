@@ -23,7 +23,7 @@ import javax.persistence.Query;
 
 import com.impetus.client.twitter.entities.ExternalLinkMongo;
 import com.impetus.client.twitter.entities.PreferenceMongo;
-import com.impetus.client.twitter.entities.Tweet;
+import com.impetus.client.twitter.entities.TweetMongo;
 import com.impetus.client.twitter.entities.UserMongo;
 import com.impetus.client.utils.MongoUtils;
 
@@ -122,7 +122,7 @@ public class TwitterService extends SuperDao implements Twitter
     public void addTweet(String userId, String tweetBody, String device)
     {
         UserMongo user = em.find(UserMongo.class, userId);
-        user.addTweet(new Tweet(tweetBody, device));
+        user.addTweet(new TweetMongo(tweetBody, device));
         em.persist(user);
     }
 
@@ -180,7 +180,7 @@ public class TwitterService extends SuperDao implements Twitter
     }
 
     @Override
-    public List<Tweet> getAllTweets(String userId)
+    public List<TweetMongo> getAllTweets(String userId)
     {
         Query q = em.createQuery("select u from UserMongo u where u.userId =:userId");
         q.setParameter("userId", userId);
@@ -209,20 +209,20 @@ public class TwitterService extends SuperDao implements Twitter
     }
 
     @Override
-    public List<Tweet> findTweetByBody(String tweetBody)
+    public List<TweetMongo> findTweetByBody(String tweetBody)
     {
         Query q = em.createQuery("select u.tweet_body from UserMongo u where u.tweet_body like :body");
         q.setParameter("body", tweetBody);
-        List<Tweet> tweets = q.getResultList();
+        List<TweetMongo> tweets = q.getResultList();
         return tweets;
     }
 
     @Override
-    public List<Tweet> findTweetByDevice(String deviceName)
+    public List<TweetMongo> findTweetByDevice(String deviceName)
     {
         Query q = em.createQuery("select u.tweeted_from from UserMongo u where u.tweeted_from like :device");
         q.setParameter("device", deviceName);
-        List<Tweet> tweets = q.getResultList();
+        List<TweetMongo> tweets = q.getResultList();
         return tweets;
     }
 }

@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentMongoBoolean;
 import com.impetus.kundera.query.QueryHandlerException;
 
-public class StudentMongoBooleanTest extends Base
+public class StudentMongoBooleanTest extends MongoBase
 {
 
     private static final String keyspace = "KunderaMongoDataType";

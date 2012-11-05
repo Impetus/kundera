@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.impetus.client.crud.datatypes.entities.StudentMongoboolean;
 import com.impetus.kundera.query.QueryHandlerException;
 
-public class StudentMongobooleanTest extends Base
+public class StudentMongobooleanTest extends MongoBase
 {
 
     /**

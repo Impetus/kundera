@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.twitter.entities.ProfessionalDetail;
+import com.impetus.client.twitter.entities.ProfessionalDetailCassandra;
 import com.impetus.client.twitter.entities.UserCassandra;
 import com.impetus.kundera.Constants;
 
@@ -52,7 +52,7 @@ import com.impetus.kundera.Constants;
  * Test case for data type compatibility testing for Twissandra
  * @author amresh.singh
  */
-public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
+public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
 {
     /** The Constant LOG. */
     private static final Log log = LogFactory.getLog(TwissandraSuperColumnDatatypeTest.class);
@@ -150,7 +150,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(1234567, pd.getProfessionId());        
         twitter.closeEntityManager();
@@ -164,7 +164,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(1234568, pd2.getProfessionId());        
         twitter.closeEntityManager();
@@ -181,7 +181,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals("Labs", pd.getDepartmentName());        
         twitter.closeEntityManager();
@@ -195,7 +195,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals("ODC", pd2.getDepartmentName());        
         twitter.closeEntityManager();  
@@ -212,7 +212,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId2, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(true, pd.isExceptional());        
         twitter.closeEntityManager();  
@@ -228,7 +228,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(31, pd.getAge());          
         twitter.closeEntityManager();
@@ -241,7 +241,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(32, pd2.getAge());          
         twitter.closeEntityManager();
@@ -256,7 +256,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals('C', pd.getGrade());          
         twitter.closeEntityManager();
@@ -269,7 +269,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals('A', pd2.getGrade());          
         twitter.closeEntityManager();
@@ -284,7 +284,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals((byte)8, pd.getDigitalSignature());          
         twitter.closeEntityManager();
@@ -297,7 +297,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals((byte)10, pd2.getDigitalSignature());          
         twitter.closeEntityManager();
@@ -312,7 +312,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals((short)5, pd.getRating());          
         twitter.closeEntityManager();
@@ -325,7 +325,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals((short)8, pd2.getRating());          
         twitter.closeEntityManager();
@@ -340,7 +340,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals((float)10.0, pd.getCompliance(), 0.0);          
         twitter.closeEntityManager();
@@ -353,7 +353,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals((float)9.80, pd2.getCompliance(), 0.0);          
         twitter.closeEntityManager();
@@ -369,7 +369,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(163.12, pd.getHeight(), 0.0);          
         twitter.closeEntityManager();
@@ -382,7 +382,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(323.3, pd2.getHeight(), 0.0);          
         twitter.closeEntityManager();
@@ -399,7 +399,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Date(Long.parseLong("1344079065781")), pd.getEnrolmentDate());          
         twitter.closeEntityManager();
@@ -412,7 +412,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Date(Long.parseLong("1344079063412")), pd2.getEnrolmentDate());          
         twitter.closeEntityManager();
@@ -429,7 +429,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Date(Long.parseLong("1344079067623")), pd.getEnrolmentTime());          
         twitter.closeEntityManager();
@@ -442,7 +442,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Date(Long.parseLong("1344079068266")), pd2.getEnrolmentTime());          
         twitter.closeEntityManager();
@@ -459,7 +459,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Date(Long.parseLong("1344079069105")), pd.getJoiningDateAndTime());          
         twitter.closeEntityManager();
@@ -472,7 +472,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Date(Long.parseLong("1344079061078")), pd2.getJoiningDateAndTime());          
         twitter.closeEntityManager();        
@@ -488,7 +488,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Integer(2), pd.getYearsSpent());          
         twitter.closeEntityManager();
@@ -501,7 +501,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Integer(5), pd2.getYearsSpent());          
         twitter.closeEntityManager();        
@@ -517,7 +517,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Long(3634521523423L), pd.getUniqueId());          
         twitter.closeEntityManager();
@@ -530,7 +530,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Long(25423452343L), pd2.getUniqueId());          
         twitter.closeEntityManager();        
@@ -546,7 +546,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new Double(0.23452342343), pd.getMonthlySalary());          
         twitter.closeEntityManager();
@@ -559,7 +559,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new Double(0.76452343), pd2.getMonthlySalary());          
         twitter.closeEntityManager();        
@@ -575,7 +575,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), pd.getBirthday());          
         twitter.closeEntityManager();
@@ -588,7 +588,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079064444")).getTime()), pd2.getBirthday());          
         twitter.closeEntityManager();        
@@ -604,7 +604,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), pd.getBirthtime());          
         twitter.closeEntityManager();
@@ -617,7 +617,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079065555")).getTime()), pd2.getBirthtime());          
         twitter.closeEntityManager();        
@@ -633,7 +633,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()), pd.getAnniversary());          
         twitter.closeEntityManager();
@@ -646,7 +646,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("1344079066666")).getTime()), pd2.getAnniversary());          
         twitter.closeEntityManager();        
@@ -662,7 +662,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new BigInteger("123456789"), pd.getJobAttempts());          
         twitter.closeEntityManager();
@@ -675,7 +675,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new BigInteger("123456790"), pd2.getJobAttempts());          
         twitter.closeEntityManager();        
@@ -691,7 +691,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(new BigDecimal(123456789), pd.getAccumulatedWealth());          
         twitter.closeEntityManager();
@@ -704,7 +704,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(new BigDecimal(123456790), pd2.getAccumulatedWealth());          
         twitter.closeEntityManager();        
@@ -722,7 +722,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         Assert.assertEquals(userId1, user.getUserId());
-        ProfessionalDetail pd = user.getProfessionalDetail();
+        ProfessionalDetailCassandra pd = user.getProfessionalDetail();
         Assert.assertNotNull(pd);
         Assert.assertEquals(cal, pd.getGraduationDay());          
         twitter.closeEntityManager();
@@ -737,7 +737,7 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBase
         UserCassandra user2 = users2.get(0);
         Assert.assertNotNull(user2);
         Assert.assertEquals(userId2, user2.getUserId());
-        ProfessionalDetail pd2 = user2.getProfessionalDetail();
+        ProfessionalDetailCassandra pd2 = user2.getProfessionalDetail();
         Assert.assertNotNull(pd2);
         Assert.assertEquals(cal2, pd2.getGraduationDay());          
         twitter.closeEntityManager();        

@@ -18,7 +18,7 @@ package com.impetus.client.twitter.dao;
 import java.util.List;
 
 import com.impetus.client.twitter.entities.PreferenceMongo;
-import com.impetus.client.twitter.entities.Tweet;
+import com.impetus.client.twitter.entities.TweetMongo;
 import com.impetus.client.twitter.entities.UserMongo;
 
 /**
@@ -115,7 +115,7 @@ public interface Twitter
      */
     List<UserMongo> getAllUsers();
 
-    List<Tweet> getAllTweets(String userId);
+    List<TweetMongo> getAllTweets(String userId);
 
     /**
      * Returns a list of followers for a given user.
@@ -133,7 +133,7 @@ public interface Twitter
      *            the tweet body
      * @return the list
      */
-    List<Tweet> findTweetByBody(String tweetBody);
+    List<TweetMongo> findTweetByBody(String tweetBody);
 
     /**
      * Find tweet by device.
@@ -142,7 +142,7 @@ public interface Twitter
      *            the device name
      * @return the list
      */
-    List<Tweet> findTweetByDevice(String deviceName);
+    List<TweetMongo> findTweetByDevice(String deviceName);
 
     /**
      * Close.

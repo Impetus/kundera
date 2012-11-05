@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import com.impetus.client.crud.datatypes.entities.StudentMongodouble;
 
-public class StudentMongodoubleTest extends Base
+public class StudentMongodoubleTest extends MongoBase
 {
 
     private static final String keyspace = "KunderaMongoDataType";
