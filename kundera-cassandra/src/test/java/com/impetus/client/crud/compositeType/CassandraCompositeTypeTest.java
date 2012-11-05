@@ -42,6 +42,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 
@@ -96,7 +97,7 @@ public class CassandraCompositeTypeTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);

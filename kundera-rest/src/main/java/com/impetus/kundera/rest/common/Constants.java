@@ -35,8 +35,6 @@ public interface Constants
     public static final String APPLICATION_TOKEN_HEADER_NAME = "x-at";
 
     public static final String SESSION_TOKEN_HEADER_NAME = "x-st";
-    
-   
 
     /** Resources */
     public static final String APPLICATION_RESOURCE_PATH = "/application";
@@ -48,11 +46,11 @@ public interface Constants
     public static final String CRUD_RESOURCE_PATH = "/crud";
 
     public static final String JPA_QUERY_RESOURCE_PATH = "/query/jpa";
-    
+
     public static final String NATIVE_QUERY_RESOURCE_PATH = "/query/native/";
 
     public static final String META_DATA_RESOURCE_PATH = "/metadata";
-    
+
     public static final String NAMED_QUERY_ALL = "all";
 
 }

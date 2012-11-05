@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -41,19 +39,7 @@ public class ListMessageBodyProvider implements MessageBodyWriter<ArrayList<Obje
     @Override
     public boolean isWriteable(Class<?> paramClass, Type paramType, Annotation[] paramArrayOfAnnotation,
             MediaType paramMediaType)
-    {
-        /*
-         * // Ensure that we're handling only List<GPSTrackerCollection>
-         * objects. boolean isWritable; if
-         * (List.class.isAssignableFrom(paramClass) && paramType instanceof
-         * ParameterizedType) { ParameterizedType parameterizedType =
-         * (ParameterizedType) paramType; Type[] actualTypeArgs =
-         * (parameterizedType.getActualTypeArguments()); isWritable =
-         * (actualTypeArgs.length == 1 && actualTypeArgs[0]
-         * .equals(GPSTrackerCollection.class)); } else { isWritable = false; }
-         * 
-         * return isWritable;
-         */
+    { 
         return true;
     }
 

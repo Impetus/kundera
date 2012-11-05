@@ -33,11 +33,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "BOOK", schema = "KunderaExamples@twissandra")
-@NamedQueries(value = {
-        @NamedQuery(name = "findByAuthor", query = "Select b from Book b where b.author = :author"),
+@NamedQueries(value = { @NamedQuery(name = "findByAuthor", query = "Select b from Book b where b.author = :author"),
         @NamedQuery(name = "findByPublication", query = "Select b from Book b where b.publication = ?1"),
-        @NamedQuery(name = "findAllBooks", query = "Select b from Book b")})
-@NamedNativeQueries(value={@NamedNativeQuery(name="findAllBooksNative", query="select * from BOOK")})
+        @NamedQuery(name = "findAllBooks", query = "Select b from Book b") })
+@NamedNativeQueries(value = { @NamedNativeQuery(name = "findAllBooksNative", query = "select * from BOOK") })
 @XmlRootElement
 public class Book
 {

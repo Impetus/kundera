@@ -58,37 +58,38 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.test.framework.JerseyTest;
 
 /**
- * Test for all data types using {@link Professional} entity
- * Cassandra-CLI Commands to run for non-embedded mode:
-    create keyspace KunderaExamples;
-    use KunderaExamples;
-    drop column family PROFESSIONAL;
-    create column family PROFESSIONAL with comparator=UTF8Type and key_validation_class=UTF8Type and column_metadata=[
-    {column_name: DEPARTMENT_ID, validation_class:LongType, index_type: KEYS},
-    {column_name: IS_EXCEPTIONAL, validation_class:BooleanType, index_type: KEYS},
-    {column_name: AGE, validation_class:IntegerType, index_type: KEYS},
-    {column_name: GRADE, validation_class:UTF8Type, index_type: KEYS},
-    {column_name: DIGITAL_SIGNATURE, validation_class:BytesType, index_type: KEYS},
-    {column_name: RATING, validation_class:IntegerType, index_type: KEYS},
-    {column_name: COMPLIANCE, validation_class:FloatType, index_type: KEYS},
-    {column_name: HEIGHT, validation_class:DoubleType, index_type: KEYS},
-    {column_name: ENROLMENT_DATE, validation_class:DateType, index_type: KEYS},
-    {column_name: ENROLMENT_TIME, validation_class:DateType, index_type: KEYS},
-    {column_name: JOINING_DATE_TIME, validation_class:DateType, index_type: KEYS},
-    {column_name: YEARS_SPENT, validation_class:IntegerType, index_type: KEYS},
-    {column_name: UNIQUE_ID, validation_class:LongType, index_type: KEYS},
-    {column_name: MONTHLY_SALARY, validation_class:DoubleType, index_type: KEYS},
-    {column_name: JOB_ATTEMPTS, validation_class:IntegerType, index_type: KEYS},
-    {column_name: ACCUMULATED_WEALTH, validation_class:DecimalType, index_type: KEYS},
-    {column_name: GRADUATION_DAY, validation_class:DateType, index_type: KEYS}
-    ];
-    describe KunderaExamples;
+ * Test for all data types using {@link Professional} entity Cassandra-CLI
+ * Commands to run for non-embedded mode: create keyspace KunderaExamples; use
+ * KunderaExamples; drop column family PROFESSIONAL; create column family
+ * PROFESSIONAL with comparator=UTF8Type and key_validation_class=UTF8Type and
+ * column_metadata=[ {column_name: DEPARTMENT_ID, validation_class:LongType,
+ * index_type: KEYS}, {column_name: IS_EXCEPTIONAL,
+ * validation_class:BooleanType, index_type: KEYS}, {column_name: AGE,
+ * validation_class:IntegerType, index_type: KEYS}, {column_name: GRADE,
+ * validation_class:UTF8Type, index_type: KEYS}, {column_name:
+ * DIGITAL_SIGNATURE, validation_class:BytesType, index_type: KEYS},
+ * {column_name: RATING, validation_class:IntegerType, index_type: KEYS},
+ * {column_name: COMPLIANCE, validation_class:FloatType, index_type: KEYS},
+ * {column_name: HEIGHT, validation_class:DoubleType, index_type: KEYS},
+ * {column_name: ENROLMENT_DATE, validation_class:DateType, index_type: KEYS},
+ * {column_name: ENROLMENT_TIME, validation_class:DateType, index_type: KEYS},
+ * {column_name: JOINING_DATE_TIME, validation_class:DateType, index_type:
+ * KEYS}, {column_name: YEARS_SPENT, validation_class:IntegerType, index_type:
+ * KEYS}, {column_name: UNIQUE_ID, validation_class:LongType, index_type: KEYS},
+ * {column_name: MONTHLY_SALARY, validation_class:DoubleType, index_type: KEYS},
+ * {column_name: JOB_ATTEMPTS, validation_class:IntegerType, index_type: KEYS},
+ * {column_name: ACCUMULATED_WEALTH, validation_class:DecimalType, index_type:
+ * KEYS}, {column_name: GRADUATION_DAY, validation_class:DateType, index_type:
+ * KEYS} ]; describe KunderaExamples;
+ * 
  * @author amresh.singh
  */
 public class DataTypeTest extends JerseyTest
-{    
+{
     private static final String _KEYSPACE = "KunderaExamples";
+
     private static final String COLUMN_FAMILY_PROFESSIONAL = "PROFESSIONAL";
+
     private static final String PROFESSIONAL_CLASS_NAME = "Professional";
 
     private static Log log = LogFactory.getLog(DataTypeTest.class);
@@ -102,12 +103,15 @@ public class DataTypeTest extends JerseyTest
     String sessionToken = null;
 
     String professionalStr1;
+
     String professionalStr2;
 
     String pk1;
+
     String pk2;
-    
+
     Professional prof1;
+
     Professional prof2;
 
     private final static boolean USE_EMBEDDED_SERVER = true;
@@ -155,8 +159,7 @@ public class DataTypeTest extends JerseyTest
             CassandraCli.dropKeySpace(_KEYSPACE);
         }
     }
-    
-    
+
     @Test
     public void testCRUD()
     {
@@ -168,7 +171,7 @@ public class DataTypeTest extends JerseyTest
         {
             buildProfessional1Str();
             buildProfessional2Str();
-            
+
         }
         else if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
@@ -189,7 +192,7 @@ public class DataTypeTest extends JerseyTest
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
         Assert.assertTrue(sessionToken.startsWith("ST_"));
-        
+
         // Insert Record
         String insertResponse1 = restClient.insertEntity(sessionToken, professionalStr1, PROFESSIONAL_CLASS_NAME);
         String insertResponse2 = restClient.insertEntity(sessionToken, professionalStr2, PROFESSIONAL_CLASS_NAME);
@@ -198,46 +201,48 @@ public class DataTypeTest extends JerseyTest
         Assert.assertNotNull(insertResponse2);
         Assert.assertTrue(insertResponse1.indexOf("201") > 0);
         Assert.assertTrue(insertResponse2.indexOf("201") > 0);
-        
+
         // Find Record
         String foundProfessional = restClient.findEntity(sessionToken, pk1, PROFESSIONAL_CLASS_NAME);
-        Assert.assertNotNull(foundProfessional);        
+        Assert.assertNotNull(foundProfessional);
         Assert.assertTrue(foundProfessional.indexOf(pk1) > 0);
-        
+
         // Update Record
         foundProfessional = foundProfessional.replaceAll("163.12", "165.21");
         String updatedProfessional = restClient.updateEntity(sessionToken, foundProfessional, PROFESSIONAL_CLASS_NAME);
         Assert.assertNotNull(updatedProfessional);
         Assert.assertTrue(updatedProfessional.indexOf("165.21") > 0);
-        
+
         /** JPA Query - Select */
-        //Get All Professionals
+        // Get All Professionals
         String jpaQuery = "select p from " + PROFESSIONAL_CLASS_NAME + " p";
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
         assertAllProfessionalsString(queryResult);
-        
-        /** JPA Query - Select All*/
+
+        /** JPA Query - Select All */
         // Get All Professionals
-        String allProfessionals = restClient.getAllEntities(sessionToken, PROFESSIONAL_CLASS_NAME);       
+        String allProfessionals = restClient.getAllEntities(sessionToken, PROFESSIONAL_CLASS_NAME);
         log.debug(allProfessionals);
         assertAllProfessionalsString(allProfessionals);
-        
+
         /** Named JPA Query - Select */
-        //Get Professionals for a specific department
+        // Get Professionals for a specific department
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("departmentId", 23456789);
-        String profByDepartment = restClient.runNamedJPAQuery(sessionToken, PROFESSIONAL_CLASS_NAME, "findByDepartment", params);
-        Assert.assertTrue(profByDepartment.indexOf(pk1) > 0);        
+        String profByDepartment = restClient.runNamedJPAQuery(sessionToken, PROFESSIONAL_CLASS_NAME,
+                "findByDepartment", params);
+        Assert.assertTrue(profByDepartment.indexOf(pk1) > 0);
         log.debug(profByDepartment);
-        
-        //Get Professionals for a specific Enrolment date
+
+        // Get Professionals for a specific Enrolment date
         Map<String, Object> params2 = new HashMap<String, Object>();
         params2.put("1", prof1.getEnrolmentDate().getTime());
-        String profByEnrolmentDate = restClient.runNamedJPAQuery(sessionToken, PROFESSIONAL_CLASS_NAME, "findByEnrolmentDate", params2);
-        Assert.assertTrue(profByEnrolmentDate.indexOf(pk1) > 0);        
+        String profByEnrolmentDate = restClient.runNamedJPAQuery(sessionToken, PROFESSIONAL_CLASS_NAME,
+                "findByEnrolmentDate", params2);
+        Assert.assertTrue(profByEnrolmentDate.indexOf(pk1) > 0);
         log.debug(profByEnrolmentDate);
-        
+
         // Delete Records
         restClient.deleteEntity(sessionToken, updatedProfessional, pk1, PROFESSIONAL_CLASS_NAME);
         restClient.deleteEntity(sessionToken, updatedProfessional, pk2, PROFESSIONAL_CLASS_NAME);
@@ -255,38 +260,50 @@ public class DataTypeTest extends JerseyTest
         Assert.assertTrue(queryResult.indexOf("professionals") > 0);
         Assert.assertTrue(queryResult.indexOf(pk1) > 0);
         Assert.assertTrue(queryResult.indexOf(pk2) > 0);
-    }   
-    
-   
- 
+    }
+
     private void buildProfessional1Str()
     {
-        pk1 = "1111111111111"; 
-        
-        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1351667547777l));
-        prof1 = new Professional(pk1, 23456789, true, 31, 'C', (byte)8, (short) 5, (float)10.0, 163.12,
-                new Date(Long.parseLong("1351667541111")), new Date(Long.parseLong("1351667542222")), new Date(Long.parseLong("1351667543333")),
-                2, new Long(3634521523423L), new Double(7.23452342343),
-                /*new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),*/
-                new BigInteger("123456789"), new BigDecimal(123456789), cal);
-        
-        professionalStr1 = JAXBUtils.toString(Professional.class, prof1, MediaType.APPLICATION_XML);       
-       
+        pk1 = "1111111111111";
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(1351667547777l));
+        prof1 = new Professional(pk1, 23456789, true, 31, 'C', (byte) 8, (short) 5, (float) 10.0, 163.12, new Date(
+                Long.parseLong("1351667541111")), new Date(Long.parseLong("1351667542222")), new Date(
+                Long.parseLong("1351667543333")), 2, new Long(3634521523423L), new Double(7.23452342343),
+        /*
+         * new java.sql.Date(new
+         * Date(Long.parseLong("1344079061111")).getTime()), new
+         * java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()),
+         * new java.sql.Timestamp(new
+         * Date(Long.parseLong("13440790653333")).getTime()),
+         */
+        new BigInteger("123456789"), new BigDecimal(123456789), cal);
+
+        professionalStr1 = JAXBUtils.toString(Professional.class, prof1, MediaType.APPLICATION_XML);
+
     }
-    
+
     private void buildProfessional2Str()
-    {      
+    {
         pk2 = "2222222222222";
-        
-        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1351667557777l));
-        prof2 = new Professional(pk2, 23456790, true, 33, 'A', (byte)9, (short) 3, (float)9.0, 167.75,
-                new Date(Long.parseLong("1351667551111")), new Date(Long.parseLong("1351667552222")), new Date(Long.parseLong("1351667553333")),
-                2, new Long(3634521523423L), new Double(7.23452342343),
-                /*new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),*/
-                new BigInteger("123456790"), new BigDecimal(123456790), cal);
-        
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(1351667557777l));
+        prof2 = new Professional(pk2, 23456790, true, 33, 'A', (byte) 9, (short) 3, (float) 9.0, 167.75, new Date(
+                Long.parseLong("1351667551111")), new Date(Long.parseLong("1351667552222")), new Date(
+                Long.parseLong("1351667553333")), 2, new Long(3634521523423L), new Double(7.23452342343),
+        /*
+         * new java.sql.Date(new
+         * Date(Long.parseLong("1344079061111")).getTime()), new
+         * java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()),
+         * new java.sql.Timestamp(new
+         * Date(Long.parseLong("13440790653333")).getTime()),
+         */
+        new BigInteger("123456790"), new BigDecimal(123456790), cal);
+
         professionalStr2 = JAXBUtils.toString(Professional.class, prof2, MediaType.APPLICATION_XML);
-        
+
     }
 
     private static void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
@@ -300,18 +317,18 @@ public class DataTypeTest extends JerseyTest
         professionalCfDef.setKey_validation_class("UTF8Type");
 
         ColumnDef departmentDef = new ColumnDef(ByteBuffer.wrap("DEPARTMENT_ID".getBytes()), "LongType");
-        departmentDef.index_type = IndexType.KEYS;        
+        departmentDef.index_type = IndexType.KEYS;
         ColumnDef exceptionalDef = new ColumnDef(ByteBuffer.wrap("IS_EXCEPTIONAL".getBytes()), "BooleanType");
         exceptionalDef.index_type = IndexType.KEYS;
         ColumnDef enrolmentDateDef = new ColumnDef(ByteBuffer.wrap("ENROLMENT_DATE".getBytes()), "DateType");
         enrolmentDateDef.index_type = IndexType.KEYS;
-        
+
         professionalCfDef.addToColumn_metadata(departmentDef);
         professionalCfDef.addToColumn_metadata(exceptionalDef);
-        professionalCfDef.addToColumn_metadata(enrolmentDateDef);  
+        professionalCfDef.addToColumn_metadata(enrolmentDateDef);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(professionalCfDef);        
+        cfDefs.add(professionalCfDef);
 
         try
         {
@@ -325,7 +342,7 @@ public class DataTypeTest extends JerseyTest
                 if (cfDef1.getName().equalsIgnoreCase(COLUMN_FAMILY_PROFESSIONAL))
                 {
                     CassandraCli.client.system_drop_column_family(COLUMN_FAMILY_PROFESSIONAL);
-                }                
+                }
             }
             CassandraCli.client.system_add_column_family(professionalCfDef);
         }

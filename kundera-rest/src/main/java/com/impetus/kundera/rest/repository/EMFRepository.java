@@ -91,10 +91,10 @@ public class EMFRepository
         if (emfMap != null)
         {
             EntityManagerFactory emf = emfMap.get(applicationToken);
-            if(emf != null)
+            if (emf != null)
             {
                 emf.close();
-            }            
+            }
             emfMap.remove(applicationToken);
         }
     }

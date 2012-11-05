@@ -93,7 +93,7 @@ public class EMRepository
         if (emMap != null)
         {
             EntityManager em = emMap.get(sessionToken);
-            if(em != null)
+            if (em != null)
             {
                 em.close();
             }
