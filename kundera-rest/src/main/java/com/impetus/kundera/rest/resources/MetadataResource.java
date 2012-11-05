@@ -48,6 +48,11 @@ public class MetadataResource
 {
     private static Log log = LogFactory.getLog(MetadataResource.class);
 
+    /**
+     * Handler for GET requests. Returns schema List and related metadata for the given list of persistence units.
+     * @param persistenceUnits
+     * @return
+     */
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/schemaList/{persistenceUnits}")

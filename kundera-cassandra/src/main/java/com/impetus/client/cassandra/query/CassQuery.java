@@ -587,9 +587,10 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     // Means it is a case of composite column.
                     fieldName = fieldName.substring(fieldName.indexOf(".") + 1);
+                    ((AbstractAttribute)compoundKey.getAttribute(fieldName)).getJPAColumnName();
                     // compositeColumns.add(new
                     // BasicDBObject(compositeColumn,value));
-                    translator.buildWhereClause(builder, fieldName, value, condition);
+                    translator.buildWhereClause(builder,((AbstractAttribute)compoundKey.getAttribute(fieldName)).getJPAColumnName(), value, condition);
                 } else
                 {
                     translator.buildWhereClause(builder, fieldName, value, condition);

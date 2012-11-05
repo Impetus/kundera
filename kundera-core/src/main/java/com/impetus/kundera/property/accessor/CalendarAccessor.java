@@ -82,8 +82,13 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public String toString(Object object)
     {
-
-        return object != null ? object.toString() : null;
+        Calendar calendar = (Calendar) object;
+        
+        if(calendar == null)
+        {
+            return null;
+        }
+        return String.valueOf(calendar.getTime().getTime());
     }
 
     /*

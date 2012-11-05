@@ -20,12 +20,13 @@ import java.util.Map;
 import com.sun.jersey.api.client.WebResource;
 
 /**
- * REST Client interface 
+ * REST Client interface
+ * 
  * @author amresh.singh
  */
 public interface RESTClient
 {
-    
+
     /** Handshake and metadata methods */
     void initialize(WebResource wr, String mediaType);
 
@@ -38,7 +39,7 @@ public interface RESTClient
     String closeSession(String sessionToken);
 
     String getSchemaList(String persistenceUnit);
-    
+
     /** Operations on Book entity */
     String insertEntity(String sessionToken, String entityStr, String entityClassName);
 
@@ -48,17 +49,18 @@ public interface RESTClient
 
     void deleteEntity(String sessionToken, String updatedBook, String pk, String entityClassName);
 
-    String getAllEntities(String sessionToken, String entityClassName);  
-    
-    String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params);
-    
-    String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params);
-    
-    String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params);
-    
-    String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery, Map<String, Object> params);
+    String getAllEntities(String sessionToken, String entityClassName);
 
-    /** Operations on Person entity*/
+    String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params);
+
+    String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params);
+
+    String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params);
+
+    String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery,
+            Map<String, Object> params);
+
+    /** Operations on Person entity */
 
     String insertPerson(String sessionToken, String person);
 
@@ -69,5 +71,5 @@ public interface RESTClient
     String getAllPersons(String sessionToken);
 
     void deletePerson(String sessionToken, String updatedPerson, String isbn);
-    
+
 }

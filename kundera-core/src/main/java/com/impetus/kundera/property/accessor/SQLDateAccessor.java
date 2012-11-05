@@ -95,7 +95,14 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
     @Override
     public String toString(Object object)
     {
-        return object != null ? object.toString() : null;
+        Date date = (Date) object;
+
+        if (date == null)
+        {
+            return null;
+        }
+        
+        return String.valueOf(date.getTime());
     }
 
     /*

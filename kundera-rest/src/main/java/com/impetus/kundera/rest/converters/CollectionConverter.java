@@ -34,7 +34,14 @@ import com.impetus.kundera.rest.common.StreamUtils;
 public class CollectionConverter
 {
     private static Log log = LogFactory.getLog(CollectionConverter.class);
-    
+
+    /**
+     * Converts a collection of <code>genericClass</code> objects to String representation
+     * @param input
+     * @param genericClass
+     * @param mediaType
+     * @return
+     */
     public static String toString(Collection<?> input, Class<?> genericClass, String mediaType)
     {
         if (MediaType.APPLICATION_XML.equals(mediaType))
@@ -63,6 +70,17 @@ public class CollectionConverter
         }
     }
 
+    
+    
+    
+    /**
+     * Converts a String representation to collection of <code>genericClass</code> objects
+     * @param input
+     * @param collectionClass
+     * @param genericClass
+     * @param mediaType
+     * @return
+     */
     public static Collection toCollection(String input, Class<?> collectionClass, Class<?> genericClass,
             String mediaType)
     {

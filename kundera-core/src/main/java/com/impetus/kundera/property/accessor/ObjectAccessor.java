@@ -197,8 +197,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
             return o;
         }
         else
-        {        
-          log.warn("Object of class " + object.getClass() + " can't be cloned");
+        {          
           return object;
         }
     }

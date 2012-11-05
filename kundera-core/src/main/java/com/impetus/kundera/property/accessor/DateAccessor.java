@@ -19,6 +19,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -156,7 +157,14 @@ public class DateAccessor implements PropertyAccessor<Date>
     @Override
     public/* final */String toString(Object object)
     {
-        return object != null ? object.toString() : null;
+        Date date = (Date) object;
+
+        if (date == null)
+        {
+            return null;
+        }
+        
+        return String.valueOf(date.getTime());
     }
 
     /*

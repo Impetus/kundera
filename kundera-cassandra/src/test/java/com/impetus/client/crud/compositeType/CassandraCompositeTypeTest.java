@@ -42,6 +42,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 
@@ -96,7 +97,7 @@ public class CassandraCompositeTypeTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
@@ -336,14 +337,14 @@ public class CassandraCompositeTypeTest
         em.close();
     }
 
-    /**
+    /**CompositeUserDataType
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
+//        emf.close();
         CassandraCli.dropKeySpace("CompositeCassandra");
-        emf.close();
     }
 
     // DO NOT DELETE IT!! though it is automated with schema creation option.
@@ -352,25 +353,30 @@ public class CassandraCompositeTypeTest
      */
     private void loadData()
     {
-        CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
-                + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
-        try
-        {
-            CassandraCli.getClient().set_keyspace("CompositeCassandra");
-        }
-        catch (InvalidRequestException e)
-        {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        }
-        CassandraCli.executeCqlQuery(cql_Query);
+        /*if (!CassandraCli.keyspaceExist("CompositeCassandra"))
+        {*/
+            CassandraCli.createKeySpace("CompositeCassandra");
 
+            String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+                    + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+            try
+            {
+                CassandraCli.getClient().set_keyspace("CompositeCassandra");
+            }
+            catch (InvalidRequestException e)
+            {
+                logger.error(e.getMessage());
+            }
+            catch (TException e)
+            {
+                logger.error(e.getMessage());
+            }
+         /*   if (!CassandraCli.columnFamilyExist("CompositeCassandra", "CompositeUser"))
+            {*/
+                CassandraCli.executeCqlQuery(cql_Query);
+//            }
+//
+//        }
     }
 
 }

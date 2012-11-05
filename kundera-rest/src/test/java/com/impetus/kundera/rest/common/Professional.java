@@ -17,8 +17,6 @@ package com.impetus.kundera.rest.common;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,21 +35,18 @@ import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "PROFESSIONAL", schema = "KunderaExamples@twissandra")
-@IndexCollection(columns = {@Index(name = "departmentId"),
-        @Index(name = "isExceptional"), @Index(name = "age"), @Index(name = "grade"),
-        @Index(name = "digitalSignature"), @Index(name = "rating"),
+@IndexCollection(columns = { @Index(name = "departmentId"), @Index(name = "isExceptional"), @Index(name = "age"),
+        @Index(name = "grade"), @Index(name = "digitalSignature"), @Index(name = "rating"),
         @Index(name = "compliance"), @Index(name = "height"), @Index(name = "enrolmentDate"),
-        @Index(name = "enrolmentTime"), @Index(name = "joiningDateAndTime"),
-        @Index(name = "yearsSpent"), @Index(name = "uniqueId"), @Index(name = "monthlySalary"),
-        @Index(name = "birthday"), @Index(name = "birthtime"), @Index(name = "anniversary"),
-        @Index(name = "jobAttempts"), @Index(name = "accumulatedWealth"),
-        @Index(name = "graduationDay") })
+        @Index(name = "enrolmentTime"), @Index(name = "joiningDateAndTime"), @Index(name = "yearsSpent"),
+        @Index(name = "uniqueId"), @Index(name = "monthlySalary"), @Index(name = "birthday"),
+        @Index(name = "birthtime"), @Index(name = "anniversary"), @Index(name = "jobAttempts"),
+        @Index(name = "accumulatedWealth"), @Index(name = "graduationDay") })
 @NamedQueries(value = {
         @NamedQuery(name = "findByDepartment", query = "Select p from Professional p where p.departmentId = :departmentId"),
-        @NamedQuery(name = "findByEnrolmentDate", query = "Select p from Professional p where p.enrolmentDate = ?1")
-        })
+        @NamedQuery(name = "findByEnrolmentDate", query = "Select p from Professional p where p.enrolmentDate = ?1") })
 @XmlRootElement
-public class Professional 
+public class Professional
 {
     // Primitive Types
     @Id
@@ -105,14 +100,13 @@ public class Professional
     @Column(name = "MONTHLY_SALARY")
     private Double monthlySalary;
 
- /*   @Column(name = "BIRTH_DAY")
-    private java.sql.Date birthday;
-
-    @Column(name = "BIRTH_TIME")
-    private java.sql.Time birthtime;
-
-    @Column(name = "ANNIVERSARY")
-    private java.sql.Timestamp anniversary;*/
+    /*
+     * @Column(name = "BIRTH_DAY") private java.sql.Date birthday;
+     * 
+     * @Column(name = "BIRTH_TIME") private java.sql.Time birthtime;
+     * 
+     * @Column(name = "ANNIVERSARY") private java.sql.Timestamp anniversary;
+     */
 
     @Column(name = "JOB_ATTEMPTS")
     private BigInteger jobAttempts;
@@ -122,16 +116,16 @@ public class Professional
 
     @Column(name = "GRADUATION_DAY")
     private Calendar graduationDay;
-    
+
     public Professional()
     {
-        
+
     }
-    
+
     public Professional(String professionId, long departmentId, boolean isExceptional, int age, char grade,
             byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
             Date enrolmentTime, Date joiningDateAndTime, Integer yearsSpent, Long uniqueId, Double monthlySalary,
-            /*java.sql.Date birthday, Time birthtime, Timestamp anniversary,*/ BigInteger jobAttempts,
+            /* java.sql.Date birthday, Time birthtime, Timestamp anniversary, */BigInteger jobAttempts,
             BigDecimal accumulatedWealth, Calendar graduationDay)
     {
         super();
@@ -150,9 +144,10 @@ public class Professional
         this.yearsSpent = yearsSpent;
         this.uniqueId = uniqueId;
         this.monthlySalary = monthlySalary;
-        /*this.birthday = birthday;
-        this.birthtime = birthtime;
-        this.anniversary = anniversary;*/
+        /*
+         * this.birthday = birthday; this.birthtime = birthtime;
+         * this.anniversary = anniversary;
+         */
         this.jobAttempts = jobAttempts;
         this.accumulatedWealth = accumulatedWealth;
         this.graduationDay = graduationDay;
@@ -167,7 +162,8 @@ public class Professional
     }
 
     /**
-     * @param professionId the professionId to set
+     * @param professionId
+     *            the professionId to set
      */
     public void setProfessionId(String professionId)
     {
@@ -183,7 +179,8 @@ public class Professional
     }
 
     /**
-     * @param departmentId the departmentId to set
+     * @param departmentId
+     *            the departmentId to set
      */
     public void setDepartmentId(long departmentId)
     {
@@ -199,7 +196,8 @@ public class Professional
     }
 
     /**
-     * @param isExceptional the isExceptional to set
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
@@ -215,7 +213,8 @@ public class Professional
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -231,7 +230,8 @@ public class Professional
     }
 
     /**
-     * @param grade the grade to set
+     * @param grade
+     *            the grade to set
      */
     public void setGrade(char grade)
     {
@@ -247,7 +247,8 @@ public class Professional
     }
 
     /**
-     * @param digitalSignature the digitalSignature to set
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
@@ -263,7 +264,8 @@ public class Professional
     }
 
     /**
-     * @param rating the rating to set
+     * @param rating
+     *            the rating to set
      */
     public void setRating(short rating)
     {
@@ -279,7 +281,8 @@ public class Professional
     }
 
     /**
-     * @param compliance the compliance to set
+     * @param compliance
+     *            the compliance to set
      */
     public void setCompliance(float compliance)
     {
@@ -295,7 +298,8 @@ public class Professional
     }
 
     /**
-     * @param height the height to set
+     * @param height
+     *            the height to set
      */
     public void setHeight(double height)
     {
@@ -311,7 +315,8 @@ public class Professional
     }
 
     /**
-     * @param enrolmentDate the enrolmentDate to set
+     * @param enrolmentDate
+     *            the enrolmentDate to set
      */
     public void setEnrolmentDate(java.util.Date enrolmentDate)
     {
@@ -327,7 +332,8 @@ public class Professional
     }
 
     /**
-     * @param enrolmentTime the enrolmentTime to set
+     * @param enrolmentTime
+     *            the enrolmentTime to set
      */
     public void setEnrolmentTime(java.util.Date enrolmentTime)
     {
@@ -343,7 +349,8 @@ public class Professional
     }
 
     /**
-     * @param joiningDateAndTime the joiningDateAndTime to set
+     * @param joiningDateAndTime
+     *            the joiningDateAndTime to set
      */
     public void setJoiningDateAndTime(java.util.Date joiningDateAndTime)
     {
@@ -359,7 +366,8 @@ public class Professional
     }
 
     /**
-     * @param yearsSpent the yearsSpent to set
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
@@ -375,7 +383,8 @@ public class Professional
     }
 
     /**
-     * @param uniqueId the uniqueId to set
+     * @param uniqueId
+     *            the uniqueId to set
      */
     public void setUniqueId(Long uniqueId)
     {
@@ -391,13 +400,14 @@ public class Professional
     }
 
     /**
-     * @param monthlySalary the monthlySalary to set
+     * @param monthlySalary
+     *            the monthlySalary to set
      */
     public void setMonthlySalary(Double monthlySalary)
     {
         this.monthlySalary = monthlySalary;
     }
-    
+
     /**
      * @return the jobAttempts
      */
@@ -407,7 +417,8 @@ public class Professional
     }
 
     /**
-     * @param jobAttempts the jobAttempts to set
+     * @param jobAttempts
+     *            the jobAttempts to set
      */
     public void setJobAttempts(BigInteger jobAttempts)
     {
@@ -423,7 +434,8 @@ public class Professional
     }
 
     /**
-     * @param accumulatedWealth the accumulatedWealth to set
+     * @param accumulatedWealth
+     *            the accumulatedWealth to set
      */
     public void setAccumulatedWealth(BigDecimal accumulatedWealth)
     {
@@ -439,14 +451,12 @@ public class Professional
     }
 
     /**
-     * @param graduationDay the graduationDay to set
+     * @param graduationDay
+     *            the graduationDay to set
      */
     public void setGraduationDay(Calendar graduationDay)
     {
         this.graduationDay = graduationDay;
-    }  
- 
-    
-    
+    }
 
 }

@@ -16,6 +16,7 @@
 package com.impetus.kundera.property.accessor;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.StringUtils;
@@ -113,7 +114,14 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public String toString(Object object)
     {
-        return object != null ? object.toString() : null;
+        Timestamp timeStamp = (Timestamp) object;
+
+        if (timeStamp == null)
+        {
+            return null;
+        }
+        
+        return String.valueOf(timeStamp.getTime());
     }
 
     /*

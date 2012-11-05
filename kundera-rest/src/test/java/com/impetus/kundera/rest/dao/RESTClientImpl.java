@@ -63,8 +63,8 @@ public class RESTClientImpl implements RESTClient
         try
         {
             log.debug("\n\nGetting Application Token...");
-            WebResource.Builder atBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/application/" + persistenceUnit).accept(
-                    MediaType.TEXT_PLAIN);
+            WebResource.Builder atBuilder = webResource.path(
+                    Constants.KUNDERA_API_PATH + "/application/" + persistenceUnit).accept(MediaType.TEXT_PLAIN);
             String atResponse = atBuilder.get(ClientResponse.class).toString();
             applicationToken = atBuilder.get(String.class);
             log.debug("Response: " + atResponse);
@@ -87,8 +87,8 @@ public class RESTClientImpl implements RESTClient
     public String closeApplication(String applicationToken)
     {
         log.debug("\n\nClosing Application for Token:" + applicationToken);
-        WebResource.Builder atBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/application").accept(MediaType.TEXT_PLAIN)
-                .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
+        WebResource.Builder atBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/application")
+                .accept(MediaType.TEXT_PLAIN).header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
         String response = atBuilder.delete(String.class);
         log.debug("Application Closure Response: " + response);
         return response;
@@ -98,8 +98,8 @@ public class RESTClientImpl implements RESTClient
     public String getSessionToken(String applicationToken)
     {
         log.debug("\n\nGetting Session Token...");
-        WebResource.Builder stBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/session").accept(MediaType.TEXT_PLAIN)
-                .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
+        WebResource.Builder stBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/session")
+                .accept(MediaType.TEXT_PLAIN).header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
 
         String sessionToken = stBuilder.get(String.class);
 
@@ -112,8 +112,8 @@ public class RESTClientImpl implements RESTClient
     {
 
         log.debug("\n\nClosing Session for Token:" + sessionToken);
-        WebResource.Builder stBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/session").accept(MediaType.TEXT_PLAIN)
-                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder stBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/session")
+                .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         String response = stBuilder.delete(String.class);
         log.debug("Session Deletion Response: " + response);
         return response;
@@ -123,16 +123,26 @@ public class RESTClientImpl implements RESTClient
     public String insertEntity(String sessionToken, String entityStr, String entityClassName)
     {
         log.debug("\n\nInserting Entity...");
-        
-        Calendar cal = Calendar.getInstance(); cal.setTime(new Date(1344079067777l));
-        Professional prof = new Professional("11111111111111", 34662345, false, 31, 'C', (byte)8, (short) 5, (float)10.0, 163.12,
-                new Date(Long.parseLong("1344079065781")), new Date(Long.parseLong("1344079067623")), new Date(Long.parseLong("1344079069105")),
-                2, new Long(3634521523423L), new Double(0.23452342343),
-                /*new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),*/
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(1344079067777l));
+        Professional prof = new Professional("11111111111111", 34662345, false, 31, 'C', (byte) 8, (short) 5,
+                (float) 10.0, 163.12, new Date(Long.parseLong("1344079065781")), new Date(
+                        Long.parseLong("1344079067623")), new Date(Long.parseLong("1344079069105")), 2, new Long(
+                        3634521523423L), new Double(0.23452342343),
+                /*
+                 * new java.sql.Date(new
+                 * Date(Long.parseLong("1344079061111")).getTime()), new
+                 * java.sql.Time(new
+                 * Date(Long.parseLong("1344079062222")).getTime()), new
+                 * java.sql.Timestamp(new
+                 * Date(Long.parseLong("13440790653333")).getTime()),
+                 */
                 new BigInteger("123456789"), new BigDecimal(123456789), cal);
-        
-        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType)
-                .accept(MediaType.APPLICATION_OCTET_STREAM).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+
+        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName)
+                .type(mediaType).accept(MediaType.APPLICATION_OCTET_STREAM)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         StringBuffer sb = new StringBuffer().append(entityStr);
         ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
         log.debug("Response From Insert Entity: " + insertResponse);
@@ -143,7 +153,8 @@ public class RESTClientImpl implements RESTClient
     public String findEntity(String sessionToken, String pk, String entityClassName)
     {
         log.debug("\n\nFinding Entity...");
-        WebResource.Builder findBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/" + pk).accept(mediaType)
+        WebResource.Builder findBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/" + pk).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ;
 
@@ -159,9 +170,9 @@ public class RESTClientImpl implements RESTClient
     @Override
     public String updateEntity(String sessionToken, String newEntityStr, String entityClassName)
     {
-        log.debug("\n\nUpdating Entity... " + newEntityStr);        
-        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType).accept(mediaType)
-                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        log.debug("\n\nUpdating Entity... " + newEntityStr);
+        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName)
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, newEntityStr);
         InputStream is = updateResponse.getEntityInputStream();
         String updatedEntityStr = StreamUtils.toString(is);
@@ -173,7 +184,8 @@ public class RESTClientImpl implements RESTClient
     public void deleteEntity(String sessionToken, String entityStr, String pk, String entityClassName)
     {
         log.debug("\n\nDeleting Entity... " + entityStr);
-        WebResource.Builder deleteBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/delete/" + pk)
+        WebResource.Builder deleteBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/delete/" + pk)
                 .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
         log.debug("Delete Response:" + deleteResponse.getStatus());
@@ -183,32 +195,36 @@ public class RESTClientImpl implements RESTClient
     public String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params)
     {
         log.debug("\n\nRunning JPA Query... ");
-        
+
         String paramsStr = buildParamString(params);
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/query=" + jpaQuery + paramsStr).accept(mediaType)
-                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder queryBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery + paramsStr)
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
 
-        InputStream is = queryResponse.getEntityInputStream();       
+        InputStream is = queryResponse.getEntityInputStream();
 
         String allStr = StreamUtils.toString(is);
 
         log.debug("Found Entities:" + allStr);
         return allStr;
-    }    
+    }
 
     @Override
-    public String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params)
+    public String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery,
+            Map<String, Object> params)
     {
         log.debug("\n\nRunning Named JPA Query " + namedQuery + "... ");
-        
+
         String paramsStr = buildParamString(params);
-        
-        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/" + namedQuery + paramsStr);       
-        
-        WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);       
-        
+
+        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/"
+                + entityClassName + "/" + namedQuery + paramsStr);
+
+        WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME,
+                sessionToken);
+
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
 
@@ -217,21 +233,23 @@ public class RESTClientImpl implements RESTClient
 
         log.debug("Found Entities for query " + namedQuery + ":" + allBookStr);
         return allBookStr;
-    }   
+    }
 
     @Override
-    public String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params)
+    public String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery,
+            Map<String, Object> params)
     {
         log.debug("\n\nRunning Native Query... ");
-        
+
         String paramsStr = buildParamString(params);
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/query=" + nativeQuery + paramsStr).accept(mediaType)
+        WebResource.Builder queryBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/q="
+                        + nativeQuery + paramsStr).accept(mediaType)
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
 
         InputStream is = queryResponse.getEntityInputStream();
-        
 
         String allStr = StreamUtils.toString(is);
 
@@ -244,13 +262,15 @@ public class RESTClientImpl implements RESTClient
             Map<String, Object> params)
     {
         log.debug("\n\nRunning Named Native JPA Query " + namedNativeQuery + "... ");
-        
+
         String paramsStr = buildParamString(params);
-        
-        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/" + namedNativeQuery + paramsStr);      
-        
-        WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);       
-        
+
+        WebResource wr = webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH
+                + entityClassName + "/" + namedNativeQuery + paramsStr);
+
+        WebResource.Builder queryBuilder = wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME,
+                sessionToken);
+
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Query Response:" + queryResponse.getStatus());
 
@@ -265,8 +285,9 @@ public class RESTClientImpl implements RESTClient
     public String getAllEntities(String sessionToken, String entityClassName)
     {
         log.debug("\n\nFinding all Entities... ");
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/all").accept(mediaType)
-                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder queryBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/all")
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Find All Response:" + queryResponse.getStatus());
 
@@ -284,8 +305,8 @@ public class RESTClientImpl implements RESTClient
     public String getSchemaList(String persistenceUnit)
     {
         log.debug("\n\nGetting Schema List for PU :" + persistenceUnit);
-        WebResource.Builder slBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/metadata/schemaList/" + persistenceUnit).accept(
-                mediaType);
+        WebResource.Builder slBuilder = webResource.path(
+                Constants.KUNDERA_API_PATH + "/metadata/schemaList/" + persistenceUnit).accept(mediaType);
         ClientResponse schemaResponse = (ClientResponse) slBuilder.get(ClientResponse.class);
 
         InputStream is = schemaResponse.getEntityInputStream();
@@ -300,8 +321,9 @@ public class RESTClientImpl implements RESTClient
     {
 
         log.debug("\n\nInserting Entity...");
-        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM").type(mediaType)
-                .accept(MediaType.APPLICATION_OCTET_STREAM).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder insertBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM")
+                .type(mediaType).accept(MediaType.APPLICATION_OCTET_STREAM)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         StringBuffer sb = new StringBuffer().append(personStr);
         ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
         log.debug("Response From Insert person: " + insertResponse);
@@ -314,8 +336,9 @@ public class RESTClientImpl implements RESTClient
     {
 
         log.debug("\n\nFinding Entity...");
-        WebResource.Builder findBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/" + isbn)
-                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder findBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/" + isbn).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ;
 
         ClientResponse findResponse = (ClientResponse) findBuilder.get(ClientResponse.class);
@@ -333,8 +356,8 @@ public class RESTClientImpl implements RESTClient
 
         log.debug("\n\nUpdating Entity... " + oldPersonStr);
         oldPersonStr = oldPersonStr.replaceAll("XXXXXXXXX", "YYYYYYYYY");
-        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM").type(mediaType)
-                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder updateBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM")
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, oldPersonStr);
         InputStream is = updateResponse.getEntityInputStream();
         String updatedPersonStr = StreamUtils.toString(is);
@@ -347,8 +370,9 @@ public class RESTClientImpl implements RESTClient
     public String getAllPersons(String sessionToken)
     {
         log.debug("\n\nFinding all Entities... ");
-        WebResource.Builder queryBuilder = webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/PersonnelUni1ToM/all").accept(mediaType)
-                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        WebResource.Builder queryBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/PersonnelUni1ToM/all")
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         log.debug("Find All Response:" + queryResponse.getStatus());
 
@@ -366,13 +390,13 @@ public class RESTClientImpl implements RESTClient
     public void deletePerson(String sessionToken, String updatedPerson, String isbn)
     {
         log.debug("\n\nDeleting Entity... " + updatedPerson);
-        WebResource.Builder deleteBuilder = webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/delete/" + isbn)
+        WebResource.Builder deleteBuilder = webResource
+                .path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/delete/" + isbn)
                 .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
         log.debug("Delete Response:" + deleteResponse.getStatus());
     }
-    
-    
+
     /**
      * @param params
      * @return
@@ -380,20 +404,20 @@ public class RESTClientImpl implements RESTClient
     private String buildParamString(Map<String, Object> params)
     {
         String paramsStr = "";
-        if(params != null && ! params.isEmpty())
+        if (params != null && !params.isEmpty())
         {
             paramsStr += "?";
-            
-            for(String paramName : params.keySet())
+
+            for (String paramName : params.keySet())
             {
-                if(paramsStr.length() == 1)
+                if (paramsStr.length() == 1)
                 {
-                    paramsStr += (paramName + "=" +  params.get(paramName));
+                    paramsStr += (paramName + "=" + params.get(paramName));
                 }
                 else
                 {
-                    paramsStr += ("&" + paramName + "=" +  params.get(paramName));
-                }         
+                    paramsStr += ("&" + paramName + "=" + params.get(paramName));
+                }
             }
         }
         return paramsStr;

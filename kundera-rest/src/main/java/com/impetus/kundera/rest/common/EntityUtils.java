@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
 import javax.persistence.Query;
+import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -33,11 +34,22 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
+ * Utility methods for handling entities passed in REST request
  * @author amresh
  * 
  */
 public class EntityUtils
 {
+    
+    public static Map<String, String> httpMethods = new HashMap<String, String>();
+
+    static
+    {
+        httpMethods.put(HttpMethod.GET, "SELECT");
+        httpMethods.put(HttpMethod.POST, "INSERT");
+        httpMethods.put(HttpMethod.PUT, "UPDATE");
+        httpMethods.put(HttpMethod.DELETE, "DELETE");
+    }
 
     /**
      * @param entityClassName
@@ -50,80 +62,105 @@ public class EntityUtils
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         return entityClass;
     }
-    
+
     public static String getQueryPart(String fullQueryString)
     {
-        if(fullQueryString.contains("?"))
-        {   
+        if (fullQueryString.contains("?"))
+        {
             return fullQueryString.substring(0, fullQueryString.indexOf("?"));
         }
         else
         {
             return fullQueryString;
-        }        
+        }
     }
-    
+
     public static String getParameterPart(String fullQueryString)
     {
-        if(fullQueryString.contains("?"))            
-        {     
-            return fullQueryString.substring(fullQueryString.indexOf("?") + 1, fullQueryString.length()); 
+        if (fullQueryString.contains("?"))
+        {
+            return fullQueryString.substring(fullQueryString.indexOf("?") + 1, fullQueryString.length());
         }
         else
         {
             return "";
         }
     }
-    
+
     /**
      * @param queryString
      * @param q
      */
     public static void setQueryParameters(String queryString, String parameterString, Query q)
     {
-        Map<String, String> paramsMap = new HashMap<String, String>();               
-        
-        StringTokenizer st = new StringTokenizer(parameterString, "&");
-        while(st.hasMoreTokens()) {
-            String element = st.nextToken();
-            paramsMap.put(element.substring(0, element.indexOf("=")), element.substring(element.indexOf("=") + 1, element.length()));
-        }          
+        Map<String, String> paramsMap = new HashMap<String, String>();
 
-        for(String paramName : paramsMap.keySet()) {
+        StringTokenizer st = new StringTokenizer(parameterString, "&");
+        while (st.hasMoreTokens())
+        {
+            String element = st.nextToken();
+            paramsMap.put(element.substring(0, element.indexOf("=")),
+                    element.substring(element.indexOf("=") + 1, element.length()));
+        }
+
+        for (String paramName : paramsMap.keySet())
+        {
             String value = paramsMap.get(paramName);
-            
+
             KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
             Set<Parameter<?>> parameters = kq.getParameters();
-            
-            if(StringUtils.isNumeric(paramName))
+
+            if (StringUtils.isNumeric(paramName))
             {
-                for(Parameter param : parameters)
+                for (Parameter param : parameters)
                 {
-                    if(param.getPosition() == Integer.parseInt(paramName))
+                    if (param.getPosition() == Integer.parseInt(paramName))
                     {
                         Class<?> paramClass = param.getParameterType();
                         PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
-                        Object paramValue = accessor.fromString(paramClass, value);                        
+                        Object paramValue = accessor.fromString(paramClass, value);
                         q.setParameter(Integer.parseInt(paramName), paramValue);
                         break;
                     }
-                }               
+                }
             }
             else
             {
-                for(Parameter param : parameters)
+                for (Parameter param : parameters)
                 {
-                    if(param.getName().equals(paramName))
+                    if (param.getName().equals(paramName))
                     {
                         Class<?> paramClass = param.getParameterType();
                         PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
-                        Object paramValue = accessor.fromString(paramClass, value); 
+                        Object paramValue = accessor.fromString(paramClass, value);
                         q.setParameter(paramName, paramValue);
                         break;
                     }
                 }
-                
+
             }
+        }
+    }
+    
+    public static boolean isValidQuery(String queryString, String httpMethod)
+    {
+        if(queryString == null || httpMethod == null)
+        {
+            return false;
+        }
+        queryString = queryString.trim();
+        if(queryString.length() < 6) return false;
+        String firstKeyword = queryString.substring(0, 6);        
+        String allowedKeyword = httpMethods.get(httpMethod);
+        
+        
+        
+        if(allowedKeyword != null && firstKeyword.equalsIgnoreCase(allowedKeyword)) {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }
