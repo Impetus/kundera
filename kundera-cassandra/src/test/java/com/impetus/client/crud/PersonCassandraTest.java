@@ -149,7 +149,7 @@ public class PersonCassandraTest extends BaseTest
         
         // Delete without WHERE clause.
         
-        String deleteQuery = "DELETE from PersonCassandra p";
+        String deleteQuery = "DELETE from PersonCassandra";
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
         

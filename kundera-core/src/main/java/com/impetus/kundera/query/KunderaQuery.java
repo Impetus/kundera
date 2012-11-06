@@ -342,14 +342,15 @@ public class KunderaQuery
         // String result = getResult();
         // String from = getFrom();
 
-        String fromArray[] = from.split(" ");
-        if (fromArray.length != 2)
-        {
-            throw new PersistenceException("Bad query format: " + from);
-        }
+        String fromArray[] = from.split(" ");        
 
-        if (!this.isDeleteUpdate)
+        if (!this.isDeleteUpdate)            
         {
+            if (fromArray.length != 2)
+            {
+                throw new JPQLParseException("Bad query format: " + from + ". Identification variable is mandatory in FROM clause for SELECT queries");
+            }            
+            
             // TODO
             StringTokenizer tokenizer = new StringTokenizer(getResult()[0], ",");
             while (tokenizer.hasMoreTokens())
@@ -361,12 +362,9 @@ public class KunderaQuery
                 }
             }
         }
-        /*
-         * if (!fromArray[1].equals(result)) { throw new
-         * PersistenceException("Bad query format: " + from); }
-         */
+
         this.entityName = fromArray[0];
-        this.entityAlias = fromArray[1];
+        if(fromArray.length == 2) this.entityAlias = fromArray[1];
 
         persistenceUnit = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityName);
 
