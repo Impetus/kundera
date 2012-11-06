@@ -88,7 +88,7 @@ public class UserRoleTest {
 	@Test
 	public void testFindbyRole() {
 		testPersist();
-		String query = "Select r from Role r";
+		String query = "Select r from RoleMongo r";
 		Query q = em.createQuery(query);
 		List<RoleMongo> roles = q.getResultList();
 		Assert.assertNotNull(roles);

@@ -88,7 +88,7 @@ public class CassandraCompositeTypeTest
      * CRUD over Compound primary Key.
      */
     @Test
-    @PerfTest(invocations = 1000)
+    @PerfTest(invocations = 10)
     public void onCRUD()
     {
         EntityManager em = emf.createEntityManager();
@@ -139,7 +139,7 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
 
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
@@ -148,7 +148,7 @@ public class CassandraCompositeTypeTest
 
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
@@ -288,7 +288,7 @@ public class CassandraCompositeTypeTest
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+  
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
@@ -319,7 +319,7 @@ public class CassandraCompositeTypeTest
     private void deleteNamed()
     {
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From CassandraPrimeUser u where u.key= :key";

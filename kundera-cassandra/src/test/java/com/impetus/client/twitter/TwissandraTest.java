@@ -69,7 +69,7 @@ public class TwissandraTest extends TwitterTestBaseCassandra
     }
 
     @Test
-    @PerfTest(invocations = 1000)
+    @PerfTest(invocations = 10)
     public void onExecute() throws Exception
     {
         executeTwissandraTest();

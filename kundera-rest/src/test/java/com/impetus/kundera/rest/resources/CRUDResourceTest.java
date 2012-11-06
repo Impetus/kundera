@@ -113,6 +113,9 @@ public class CRUDResourceTest extends JerseyTest
     private final static boolean USE_EMBEDDED_SERVER = true;
 
     private final static boolean AUTO_MANAGE_SCHEMA = true;
+    
+    WebResource webResource = resource();
+    
 
     public CRUDResourceTest() throws Exception
     {
@@ -131,22 +134,24 @@ public class CRUDResourceTest extends JerseyTest
         {
             CassandraCli.dropKeySpace(_KEYSPACE.toLowerCase());
             loadData();
-        }
+        }           
 
-        // Initialize REST Client
+        // Initialize REST Client        
+        restClient = new RESTClientImpl();        
 
     }
 
     @Before
     public void setup() throws Exception
-    {
-
+    {       
+        
+        restClient.initialize(webResource, mediaType);
     }
 
     @After
     public void tearDown() throws Exception
     {
-        super.tearDown();
+        super.tearDown();          
     }
 
     @AfterClass
@@ -166,12 +171,9 @@ public class CRUDResourceTest extends JerseyTest
     }
 
     @Test
-    @PerfTest(invocations = 1000)
+    @PerfTest(invocations = 10)
     public void testCRUD()
-    {
-        WebResource webResource = resource();
-        restClient = new RESTClientImpl();
-        restClient.initialize(webResource, mediaType);
+    {        
 
         if (MediaType.APPLICATION_XML.equals(mediaType))
         {
@@ -296,10 +298,15 @@ public class CRUDResourceTest extends JerseyTest
 
         // Close Application
         restClient.closeApplication(applicationToken);
+        
+        if(AUTO_MANAGE_SCHEMA)
+        {
+            truncateColumnFamily();
+        }
     }
 
     @Test
-    @PerfTest(invocations = 1000)
+    @PerfTest(invocations = 10)
     public void testCRUDOnAssociation()
     {
         String personStr;
@@ -392,6 +399,11 @@ public class CRUDResourceTest extends JerseyTest
 
         // Close Application
         restClient.closeApplication(applicationToken);
+        
+        if(AUTO_MANAGE_SCHEMA)
+        {
+            truncateColumnFamily();
+        }
     }
 
     /**
@@ -493,5 +505,11 @@ public class CRUDResourceTest extends JerseyTest
         }
 
         CassandraCli.client.set_keyspace(_KEYSPACE);
+    }
+    
+    private void truncateColumnFamily()
+    {
+        String[] columnFamily = new String[] { "BOOK", "PERSONNEL", "ADDRESS" };
+        CassandraCli.truncateColumnFamily(_KEYSPACE, columnFamily);
     }
 }

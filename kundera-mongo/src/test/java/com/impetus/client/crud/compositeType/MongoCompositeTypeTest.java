@@ -75,7 +75,7 @@ public class MongoCompositeTypeTest
      * CRUD over Compound primary Key.
      */
     @Test
-    @PerfTest(invocations = 1000)
+    @PerfTest(invocations = 10)
     public synchronized void onCRUD()
     {
         EntityManager em = emf.createEntityManager();
@@ -122,12 +122,11 @@ public class MongoCompositeTypeTest
     {
         EntityManager em = emf.createEntityManager();
 
-        UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+        UUID timeLineId = UUID.randomUUID();        
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
         MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
@@ -258,11 +257,11 @@ public class MongoCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+        
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
         MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em = emf.createEntityManager();
@@ -286,7 +285,7 @@ public class MongoCompositeTypeTest
     private void deleteNamed()
     {
         UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
+        
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From MongoPrimeUser u where u.tweetBody= :tweetBody";

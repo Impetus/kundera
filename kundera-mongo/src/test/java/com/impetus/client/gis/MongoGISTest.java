@@ -33,7 +33,6 @@ import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
-import com.sun.swing.internal.plaf.synth.resources.synth;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -43,7 +42,7 @@ import com.vividsolutions.jts.geom.LinearRing;
  * 
  * @author amresh.singh
  */
-@PerfTest(invocations = 1000)
+@PerfTest(invocations = 10)
 public class MongoGISTest
 {
     String persistenceUnit = "mongoTest";
