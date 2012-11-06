@@ -127,7 +127,7 @@ public class CompositeDataTypeTest
         ((CassandraClientBase)client).setCqlVersion("3.0.0");
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
