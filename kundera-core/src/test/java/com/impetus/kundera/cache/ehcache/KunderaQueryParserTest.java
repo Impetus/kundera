@@ -165,7 +165,7 @@ public class KunderaQueryParserTest
         }
         catch (JPQLParseException jpqlpe)
         {
-            Assert.assertEquals("Bad query format", jpqlpe.getMessage());
+            Assert.assertTrue(jpqlpe.getMessage().startsWith("Bad query format"));
         }
 
         kunderQuery = new KunderaQuery();
@@ -180,7 +180,7 @@ public class KunderaQueryParserTest
         }
         catch (JPQLParseException jpqlpe)
         {
-            Assert.assertEquals("Bad query format", jpqlpe.getMessage());
+            Assert.assertTrue(jpqlpe.getMessage().startsWith("Bad query format"));
         }
 
         kunderQuery = new KunderaQuery();
@@ -195,8 +195,8 @@ public class KunderaQueryParserTest
         }
         catch (JPQLParseException jpqlpe)
         {
-            Assert.assertEquals("You have not given any column name after . ,Column name should not be empty",
-                    jpqlpe.getMessage());
+           
+            Assert.assertTrue(jpqlpe.getMessage().startsWith("You have not given any column name after . ,Column name should not be empty"));
         }
     }
 
