@@ -145,6 +145,44 @@ public final class CassandraCli
 
     }
 
+    public static void truncateColumnFamily(String keyspace, String... columns)
+    {
+        try
+        {
+            if (client != null)
+            {
+                client.set_keyspace(keyspace);
+                for (String column : columns)
+                {
+                    if (columnFamilyExist(column, keyspace))
+                    {
+                        client.truncate(column);
+                    }
+                }
+            }
+        }
+        catch (IllegalArgumentException iex)
+        {
+            // do nothing.
+        }
+        catch (InvalidRequestException e)
+        {
+            // do nothing.
+        }
+        catch (UnavailableException e)
+        {
+            // do nothing.
+        }
+        catch (TimedOutException e)
+        {
+            // do nothing.
+        }
+        catch (TException e)
+        {
+            // do nothing.
+        }
+    }
+    
     /**
      * Drop out key space.
      * 

@@ -17,6 +17,8 @@ package com.impetus.client.crud;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -25,10 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.annotations.Index;
 
-
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
-@Index(index = true,columns = { "personName","age" })
+@Index(index = true, columns = { "personName", "age" })
 public class PersonCassandra
 {
 
@@ -65,6 +66,10 @@ public class PersonCassandra
 
     @Column(name = "AGEss")
     private byte[] a;
+
+    @Column(name = "ENUM")
+    @Enumerated(EnumType.STRING)
+    private Day day;
 
     /**
      * @return the a
@@ -140,6 +145,27 @@ public class PersonCassandra
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    /**
+     * @return the day
+     */
+    public Day getDay()
+    {
+        return day;
+    }
+
+    /**
+     * @param day the day to set
+     */
+    public void setDay(Day day)
+    {
+        this.day = day;
+    }
+
+    enum Day
+    {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
 }

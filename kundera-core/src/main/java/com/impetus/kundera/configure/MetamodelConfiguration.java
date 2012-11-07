@@ -304,7 +304,8 @@ public class MetamodelConfiguration implements Configuration
                 {
                     Class<?> clazz = Class.forName(className);
 
-                    if (entityNameToClassMap.containsKey(clazz.getSimpleName()))
+                    if (entityNameToClassMap.containsKey(clazz.getSimpleName())
+                            && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
                     {
                         throw new MetamodelLoaderException("Name conflict between classes "
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()

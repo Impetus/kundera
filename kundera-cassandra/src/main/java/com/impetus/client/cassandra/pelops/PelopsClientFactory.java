@@ -100,7 +100,8 @@ public class PelopsClientFactory extends GenericClientFactory
         indexManager.close();
         getSchemaManager().dropSchema();
         schemaManager = null;
-        // Pelops.shutdown();
+        Pelops.shutdown();
+        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit()));
     }
 
     @Override

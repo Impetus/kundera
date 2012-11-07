@@ -42,7 +42,7 @@ import com.vividsolutions.jts.geom.LinearRing;
  * 
  * @author amresh.singh
  */
-@PerfTest(invocations = 10)
+@PerfTest(invocations = 100000)
 public class MongoGISTest
 {
     String persistenceUnit = "mongoTest";

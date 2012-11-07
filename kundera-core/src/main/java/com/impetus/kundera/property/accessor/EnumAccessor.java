@@ -51,6 +51,10 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         String s = toString(object);
         try
         {
@@ -90,14 +94,15 @@ public class EnumAccessor implements PropertyAccessor<Enum>
 
         return null;
     }
-    
-    
 
     @Override
     public Enum getCopy(Object object)
-    {    
-       
-        return fromString(object.getClass(), toString(object));
+    {
+        if (object != null)
+        {
+            return fromString(object.getClass(), toString(object));
+        }
+        return null;
     }
 
     public Enum getInstance(Class<?> clazz)
