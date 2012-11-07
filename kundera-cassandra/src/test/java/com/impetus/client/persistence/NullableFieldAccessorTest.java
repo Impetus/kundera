@@ -137,7 +137,7 @@ public class NullableFieldAccessorTest
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        new ClientFactoryConfiguraton(persistenceUnit).configure();
+        new ClientFactoryConfiguraton(persistenceUnit).configure(null);
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

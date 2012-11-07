@@ -67,7 +67,7 @@ public class PersistenceCacheTest
 
         getEntityManagerFactory();
         // configurator.configure();
-        new PersistenceUnitConfiguration("kunderatest").configure();
+        new PersistenceUnitConfiguration("kunderatest").configure(null);
         // new MetamodelConfiguration("kunderatest").configure();
     }
 

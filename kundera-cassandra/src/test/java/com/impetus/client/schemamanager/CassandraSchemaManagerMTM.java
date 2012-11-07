@@ -161,8 +161,8 @@ public class CassandraSchemaManagerMTM
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
 
-        new ClientFactoryConfiguraton(pu).configure();
-        new SchemaConfiguration(pu).configure();
+        new ClientFactoryConfiguraton(pu).configure(null);
+        new SchemaConfiguration(pu).configure(null);
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

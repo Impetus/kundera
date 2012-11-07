@@ -73,7 +73,7 @@ public class PersistenceUnitConfiguration implements Configuration
      * @see com.impetus.kundera.configure.Configuration#configure()
      */
     @Override
-    public void configure()
+    public void configure(Map properties)
     {
         log.info("Loading Metadata from persistence.xml ...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -92,7 +92,11 @@ public class PersistenceUnitConfiguration implements Configuration
                             + " please validate with persistence.xml");
                     throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
-                metadatas.get(persistenceUnit);
+                PersistenceUnitMetadata pumd = metadatas.get(persistenceUnit);
+            	if (properties != null)
+            	{
+            		pumd.getProperties().putAll(properties);
+            	}
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);

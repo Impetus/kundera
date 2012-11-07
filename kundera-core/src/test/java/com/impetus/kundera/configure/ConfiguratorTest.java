@@ -73,7 +73,7 @@ public class ConfiguratorTest
         // configurator.configure();
         getEntityManagerFactory();
 
-        new PersistenceUnitConfiguration(_persistenceUnit).configure();
+        new PersistenceUnitConfiguration(_persistenceUnit).configure(null);
         // new MetamodelConfiguration(puName).configure();
 
         // Assert entity metadata
@@ -104,7 +104,7 @@ public class ConfiguratorTest
 
             // invoke configure.
             Configurator configurator = new Configurator(invalidPuName);
-            configurator.configure();
+            configurator.configure(null);
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(invalidPuName);
         }
         catch (IllegalArgumentException iex)

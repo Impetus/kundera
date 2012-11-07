@@ -204,7 +204,7 @@ public class CassandraPropertiesTest
         KunderaMetadata.INSTANCE.addClientMetadata(pu, clientMetadata);
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(pu);
-        configuration.configure();
+        configuration.configure(null);
         return null;
     }
 }

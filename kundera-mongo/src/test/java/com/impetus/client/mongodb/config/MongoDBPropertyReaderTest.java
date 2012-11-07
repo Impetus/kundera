@@ -66,7 +66,7 @@ public class MongoDBPropertyReaderTest
     @Before
     public void setUp() throws Exception
     {
-        new PersistenceUnitConfiguration(pu).configure();
+        new PersistenceUnitConfiguration(pu).configure(null);
     }
 
     /**

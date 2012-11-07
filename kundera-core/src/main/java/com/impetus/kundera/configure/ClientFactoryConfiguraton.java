@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +48,7 @@ public class ClientFactoryConfiguraton implements Configuration
     }
 
     @Override
-    public void configure()
+    public void configure(Map properties)
     {
         // Invoke Client Loaders
 

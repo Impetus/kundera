@@ -89,7 +89,7 @@ public class FlushStackManagerTest
     public void setUp() throws Exception
     {
         getEntityManagerFactory();
-        new PersistenceUnitConfiguration("kunderatest").configure();
+        new PersistenceUnitConfiguration("kunderatest").configure(null);
         // new MetamodelConfiguration("kunderatest").configure();
         pc = new PersistenceCache();
         graphBuilder = new ObjectGraphBuilder(pc);

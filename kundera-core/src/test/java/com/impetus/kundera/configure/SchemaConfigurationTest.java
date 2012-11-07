@@ -115,7 +115,7 @@ public class SchemaConfigurationTest
         intialize();
         try
         {
-            configuration.configure();
+            configuration.configure(null);
         }
         catch (ClientResolverException cre)
         {

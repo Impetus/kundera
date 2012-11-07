@@ -164,8 +164,8 @@ public class CassandraSchemaManagerMTMTest
 
         appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
 
-        new ClientFactoryConfiguraton(_persistenceUnit).configure();
-        configuration.configure();
+        new ClientFactoryConfiguraton(_persistenceUnit).configure(null);
+        configuration.configure(null);
         return null;
     }
 }

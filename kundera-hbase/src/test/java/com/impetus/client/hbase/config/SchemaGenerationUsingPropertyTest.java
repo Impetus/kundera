@@ -187,8 +187,8 @@ public class SchemaGenerationUsingPropertyTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
-        configuration.configure();
+        new ClientFactoryConfiguraton(persistenceUnits).configure(null);
+        configuration.configure(null);
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

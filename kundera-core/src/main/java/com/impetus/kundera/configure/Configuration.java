@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import java.util.Map;
+
 /**
  * Defines interface to configure metamodel and persistence unit based
  * configurations
@@ -27,7 +29,9 @@ interface Configuration
 
     /**
      * Configures and load meta-information for parameterised persistence units.
+     * @param properties TODO
+     * @param properties TODO
      */
-    void configure();
+    void configure(Map properties);
 
 }
