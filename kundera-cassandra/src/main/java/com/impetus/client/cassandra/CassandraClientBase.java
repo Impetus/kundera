@@ -98,7 +98,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
- * (bot not specific to) different Cassandra clients.
+ * (but not specific to) different Cassandra clients.
  * 
  * @author amresh.singh
  */

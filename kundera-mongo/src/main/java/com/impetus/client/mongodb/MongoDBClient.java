@@ -16,7 +16,6 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +30,7 @@ import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -47,14 +47,17 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
+import com.mongodb.DefaultDBEncoder;
+import com.mongodb.WriteConcern;
 
 /**
  * CLient class for MongoDB database.
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
 {
 
     /** The is connected. */
@@ -77,6 +80,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private List<Node> nodes = new ArrayList<Node>();
 
     private int batchSize;
+    
+    private WriteConcern writeConcern = null;
+    
+    private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();  
 
     /**
      * Instantiates a new mongo db client.
@@ -111,7 +118,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);
-        List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
+        List<DBObject> documents = new ArrayList<DBObject>();
 
         for (Object key : joinTableRecords.keySet())
         {
@@ -120,13 +127,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             for (Object childId : values)
             {
-                BasicDBObject dbObj = new BasicDBObject();
+                DBObject dbObj = new BasicDBObject();
                 dbObj.put(joinColumnName, joinColumnValue);
                 dbObj.put(invJoinColumnName, childId);
                 documents.add(dbObj);
             }
         }
-        dbCollection.insert(documents.toArray(new BasicDBObject[0]));
+        dbCollection.insert(documents.toArray(new BasicDBObject[0]), getWriteConcern(), encoder);
     }
 
     @Override
@@ -371,7 +378,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             query.put("_id", MongoDBUtils.populateValue(pKey, pKey.getClass()));
         }
-        dbCollection.remove(query);
+        dbCollection.remove(query, getWriteConcern(), encoder);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
 
     }
@@ -493,7 +500,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
         query.put(columnName, columnValue);
-        dbCollection.remove(query);
+        dbCollection.remove(query, getWriteConcern(), encoder);
 
     }
 
@@ -592,7 +599,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         for (String tableName : collections.keySet())
         {
             DBCollection dbCollection = mongoDb.getCollection(tableName);
-            dbCollection.insert(collections.get(tableName));
+            dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);            
         }
     }
 
@@ -743,15 +750,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             return primaryKeys.toArray(new Object[0]);
         }
         return null;
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
-     */
     @Override
     @Deprecated
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
@@ -759,6 +759,82 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
         query.put(columnName, columnValue);
-        dbCollection.remove(query);
+        dbCollection.remove(query, getWriteConcern(), encoder);        
+    }    
+    
+
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        new MongoDBClientProperties().populateClientProperties(client, properties);
     }
+    
+
+    /**
+     * @param mongoDb the mongoDb to set
+     */
+    public void setMongoDb(DB mongoDb)
+    {
+        this.mongoDb = mongoDb;
+    }
+
+    /**
+     * @param handler the handler to set
+     */
+    public void setHandler(MongoDBDataHandler handler)
+    {
+        this.handler = handler;
+    }
+
+    /**
+     * @param log the log to set
+     */
+    public static void setLog(Log log)
+    {
+        MongoDBClient.log = log;
+    }
+
+    /**
+     * @param nodes the nodes to set
+     */
+    public void setNodes(List<Node> nodes)
+    {
+        this.nodes = nodes;
+    }
+
+    /**
+     * @param writeConcern the writeConcern to set
+     */
+    public void setWriteConcern(WriteConcern writeConcern)
+    {
+        this.writeConcern = writeConcern;
+    }
+
+    /**
+     * @param encoder the encoder to set
+     */
+    public void setEncoder(DBEncoder encoder)
+    {
+        this.encoder = encoder;
+    }  
+    
+
+    /**
+     * @return the encoder
+     */
+    public DBEncoder getEncoder()
+    {
+        return encoder;
+    }
+
+    /**
+     * @return the writeConcern
+     */
+    public WriteConcern getWriteConcern()
+    {
+        if(writeConcern == null) {
+            return mongoDb.getWriteConcern();
+        }
+        return writeConcern;
+    }    
 }

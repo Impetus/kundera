@@ -13,51 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.cassandra;
+package com.impetus.client.mongodb;
 
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
+import com.mongodb.DBEncoder;
+import com.mongodb.WriteConcern;
 
 /**
- * Cassandra implementation of {@link ClientPropertiesSetter} 
+ * MongoDB implementation of {@link ClientPropertiesSetter} 
  * @author amresh.singh
  */
-class CassandraClientProperties
+public class MongoDBClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(CassandraClientProperties.class);
+    private static Log log = LogFactory.getLog(MongoDBClientProperties.class);
     
-    private static final String CONSISTENCY_LEVEL = "consistency.level";
-    private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
+    public static final String WRITE_CONCERN = "write.concern";
+    public static final String DB_ENCODER = "db.encoder";
     
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        CassandraClientBase cassandraClientBase = (CassandraClientBase) client;
+        MongoDBClient mongoDBClient = (MongoDBClient) client;
         
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(CONSISTENCY_LEVEL) && value instanceof ConsistencyLevel)
+                
+                if (key.equals(WRITE_CONCERN) && value instanceof WriteConcern)
                 {
-                    cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
+                    mongoDBClient.setWriteConcern((WriteConcern) value);
                 }
-                else if(key.equals(CQL_VERSION) && value instanceof String)
+                else if(key.equals(DB_ENCODER) && value instanceof DBEncoder)
                 {
-                    cassandraClientBase.setCqlVersion((String) value);
+                    mongoDBClient.setEncoder((DBEncoder) value);
                 }
 
                 // Add more properties as needed
-
                 
             }
         }

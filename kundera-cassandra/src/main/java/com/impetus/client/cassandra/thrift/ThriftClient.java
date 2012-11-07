@@ -152,10 +152,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 
             } else
             {
-            prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
-            // Write Mutation map to database
+                prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
+                // Write Mutation map to database
 
-            cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
+                cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
             }
         }
         catch (InvalidRequestException e)
