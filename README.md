@@ -38,6 +38,7 @@ This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera
 
 * Geospatial Persistence and Queries for MongoDB
 * Composite keys support for Cassandra and MongoDB
+* Cassandra 1.1.6 migration
 * Support for enum data type
 * Named and Native queries support for REST based access
 
