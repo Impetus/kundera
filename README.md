@@ -136,7 +136,7 @@ This release includes bug fixes and the following new features compared to initi
 * Search within embedded objects.
 * Selective index.
 
-[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
+[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Releases "Downloads")
 
 Builds
 ========
