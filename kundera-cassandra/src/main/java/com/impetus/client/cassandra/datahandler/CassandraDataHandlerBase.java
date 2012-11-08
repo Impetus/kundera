@@ -1101,6 +1101,13 @@ public abstract class CassandraDataHandlerBase
                     // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class))
+                {
+                    IntegerAccessor accessor = new IntegerAccessor();
+                    Integer value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                    // String value =
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
+                }
                 else
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (byte[]) thriftColumnValue);

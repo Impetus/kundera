@@ -187,22 +187,19 @@ public class CompositeDataTypeTest
         em.clear(); // optional,just to clear persistence cache.
         final String noClause = "Select u from PrimeUserDataType u";
 
-        final String withFirstCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId";
-
         // secondary index support over compound key is not enabled in cassandra
         // composite keys yet. DO NOT DELETE/UNCOMMENT.
 
         // final String withClauseOnNoncomposite =
         // "Select u from PrimeUserDataType u where u.tweetDate = ?1";
 
+        final String withFirstCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId";
         final String withSecondCompositeColClause = "Select u from PrimeUserDataType u where u.key.uniqueId = :uniqueId";
         final String withBothCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId";
-        // final String withAllCompositeColClause =
-        // "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
-        // final String withLastCompositeColGTClause =
-        // "Select u from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
-
         final String withSelectiveCompositeColClause = "Select u.key from PrimeUserDataType u where u.key = :key";
+
+        final String withAllCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
+        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
 
         // query over 1 composite and 1 non-column
 
@@ -240,32 +237,32 @@ public class CompositeDataTypeTest
         Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
-        // q = em.createQuery(withAllCompositeColClause);
-        // q.setParameter("studentId", new Long(12345677));
-        // q.setParameter("uniqueId", 78575785897L);
-        // q.setParameter("studentName", "Amresh");
-        // q.setParameter("isExceptional", false);
-        // q.setParameter("age", 10);
-        // q.setParameter("semester", 'A');
-        // q.setParameter("digitalSignature", new Byte((byte)5));
-        // q.setParameter("cgpa", (short) 8);
-        // q.setParameter("percentage", (float) 69.3);
-        // q.setParameter("height", 163.76765654);
-        // q.setParameter("enrolmentDate", enrolmentDate);
-        // q.setParameter("enrolmentTime", enrolmentTime);
-        // q.setParameter("joiningDateAndTime", joiningDateAndTime);
-        // q.setParameter("yearsSpent", new Integer(3));
-        // q.setParameter("rollNumber", new Long(978423946455l));
-        // q.setParameter("monthlyFee", 135434.89);
-        // q.setParameter("sqlDate", newSqlDate);
-        // q.setParameter("sqlTimestamp", sqlTimestamp);
-        // q.setParameter("sqlTime", sqlTime);
-        // q.setParameter("bigInteger", bigInteger);
-        // q.setParameter("calendar", calendar.getTime());
-        //
-        // results = q.getResultList();
-        // Assert.assertNotNull(results);
-        // Assert.assertEquals(1, results.size());
+        q = em.createQuery(withAllCompositeColClause);
+        q.setParameter("studentId", new Long(12345677));
+        q.setParameter("uniqueId", 78575785897L);
+        q.setParameter("studentName", "Amresh");
+        q.setParameter("isExceptional", false);
+        q.setParameter("age", 10);
+        q.setParameter("semester", 'A');
+        q.setParameter("digitalSignature", new Byte((byte) 5));
+        q.setParameter("cgpa", (short) 8);
+        q.setParameter("percentage", (float) 69.3);
+        q.setParameter("height", 163.76765654);
+        q.setParameter("enrolmentDate", enrolmentDate);
+        q.setParameter("enrolmentTime", enrolmentTime);
+        q.setParameter("joiningDateAndTime", joiningDateAndTime);
+        q.setParameter("yearsSpent", new Integer(3));
+        q.setParameter("rollNumber", new Long(978423946455l));
+        q.setParameter("monthlyFee", 135434.89);
+        q.setParameter("sqlDate", newSqlDate);
+        q.setParameter("sqlTimestamp", sqlTimestamp);
+        q.setParameter("sqlTime", sqlTime);
+        q.setParameter("bigInteger", bigInteger);
+        q.setParameter("calendar", calendar.getTime());
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);
@@ -274,36 +271,33 @@ public class CompositeDataTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        // final String selectiveColumnTweetBodyWithAllCompositeColClause =
-        // "Select u.tweetBody from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
         // // Query for selective column tweetBody with composite key clause.
-        // q =
-        // em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
-        // q.setParameter("studentId", new Long(12345677));
-        // q.setParameter("uniqueId", 78575785897L);
-        // q.setParameter("studentName", "Amresh");
-        // q.setParameter("isExceptional", false);
-        // q.setParameter("age", 10);
-        // q.setParameter("semester", 'A');
-        // q.setParameter("digitalSignature", (byte) 5);
-        // q.setParameter("cgpa", (short) 8);
-        // q.setParameter("percentage", (float) 69.3);
-        // q.setParameter("height", 163.76765654);
-        // q.setParameter("enrolmentDate", enrolmentDate);
-        // q.setParameter("enrolmentTime", enrolmentTime);
-        // q.setParameter("joiningDateAndTime", joiningDateAndTime);
-        // q.setParameter("yearsSpent", new Integer(3));
-        // q.setParameter("rollNumber", new Long(978423946455l));
-        // q.setParameter("monthlyFee", 135434.89);
-        // q.setParameter("sqlDate", newSqlDate);
-        // q.setParameter("sqlTimestamp", sqlTimestamp);
-        // q.setParameter("sqlTime", sqlTime);
-        // q.setParameter("bigInteger", bigInteger);
-        // q.setParameter("calendar", calendar);
-        // results = q.getResultList();
-        // Assert.assertEquals(1, results.size());
-        // Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        // Assert.assertNull(results.get(0).getTweetDate());
+        q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
+        q.setParameter("studentId", new Long(12345677));
+        q.setParameter("uniqueId", 78575785897L);
+        q.setParameter("studentName", "Amresh");
+        q.setParameter("isExceptional", false);
+        q.setParameter("age", 10);
+        q.setParameter("semester", 'A');
+        q.setParameter("digitalSignature", (byte) 5);
+        q.setParameter("cgpa", (short) 8);
+        q.setParameter("percentage", (float) 69.3);
+        q.setParameter("height", 163.76765654);
+        q.setParameter("enrolmentDate", enrolmentDate);
+        q.setParameter("enrolmentTime", enrolmentTime);
+        q.setParameter("joiningDateAndTime", joiningDateAndTime);
+        q.setParameter("yearsSpent", new Integer(3));
+        q.setParameter("rollNumber", new Long(978423946455l));
+        q.setParameter("monthlyFee", 135434.89);
+        q.setParameter("sqlDate", newSqlDate);
+        q.setParameter("sqlTimestamp", sqlTimestamp);
+        q.setParameter("sqlTime", sqlTime);
+        q.setParameter("bigInteger", bigInteger);
+        q.setParameter("calendar", calendar.getTime());
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertNull(results.get(0).getTweetDate());
 
         final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from PrimeUserDataType u where u.key = :key";
         // Query for selective column tweetDate with composite key clause.
