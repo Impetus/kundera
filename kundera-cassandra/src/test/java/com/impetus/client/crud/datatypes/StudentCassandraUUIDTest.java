@@ -73,8 +73,22 @@ public class StudentCassandraUUIDTest extends CassandraBase
         testFindById(true);
         testMerge(true);
         testFindByQuery(true);
+        testNativeQuery(true);
         testNamedQueryUseSameEm(true);
         testDelete(true);
+    }
+
+    /**
+     * @param b
+     */
+    private void testNativeQuery(boolean b)
+    {
+        String s = "Select * From StudentCassandraUUID";
+        EntityManager em = emf.createEntityManager();
+        Query q = em.createNativeQuery(s, StudentCassandraUUID.class);
+        List<StudentCassandraUUID> results = q.getResultList();
+        Assert.assertNotNull(results);
+
     }
 
     @Test
