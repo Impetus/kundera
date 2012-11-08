@@ -64,6 +64,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
 
     public void onXml(ClientProperties cp)
     {
+        hsmd.onInitialize();
         if (cp != null)
         {
             hsmd.setClientProperties(cp);
