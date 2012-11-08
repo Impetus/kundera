@@ -32,14 +32,8 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
-import org.databene.contiperf.PerfTest;
-import org.databene.contiperf.junit.ContiPerfRule;
-import org.databene.contiperf.report.CSVSummaryReportModule;
-import org.databene.contiperf.report.HtmlReportModule;
-import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
@@ -67,9 +61,6 @@ public class CountersTest
 
     private String keyspace = "KunderaCounterColumn";
 
-    @Rule
-    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
-            new HtmlReportModule() });
 
     /**
      * @throws java.lang.Exception
@@ -124,7 +115,6 @@ public class CountersTest
     }
 
     @Test
-    @PerfTest(threads = 2, invocations = 2)
     public void testCRUDOnCounter()
     {
         incrCounter();
