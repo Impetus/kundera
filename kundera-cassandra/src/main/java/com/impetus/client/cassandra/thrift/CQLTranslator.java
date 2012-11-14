@@ -355,16 +355,16 @@ public final class CQLTranslator
                     builder.append(value);
                 }
                 builder.append("'");
-            } else if(fieldClazz.isAssignableFrom(byte.class))
+            } /*else if(fieldClazz.isAssignableFrom(byte.class))
             {
 //                isPresent = false;
                 ByteAccessor accessor = new ByteAccessor();
                 builder.append(Hex.encodeHex(accessor.toBytes(value)));
 //                builder.append(Integer.toHexString(5));
-            /*    ByteAccessor accessor = new ByteAccessor();
+                ByteAccessor accessor = new ByteAccessor();
              * 
-                builder.append(accessor.toBytes(value));*/
-            }
+                builder.append(accessor.toBytes(value));
+            }*/
             else
             {
                 builder.append(value);

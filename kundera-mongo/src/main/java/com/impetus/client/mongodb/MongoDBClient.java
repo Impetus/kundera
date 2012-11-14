@@ -836,5 +836,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             return mongoDb.getWriteConcern();
         }
         return writeConcern;
-    }    
+    }
+
+    /**
+     * @param batchSize the batchSize to set
+     */
+    public void setBatchSize(int batchSize)
+    {
+        this.batchSize = batchSize;
+    }   
+    
+    
 }

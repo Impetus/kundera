@@ -36,6 +36,7 @@ public class MongoDBClientProperties
     
     public static final String WRITE_CONCERN = "write.concern";
     public static final String DB_ENCODER = "db.encoder";
+    public static final String BATCH_SIZE = "batch.size";
     
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
@@ -55,6 +56,11 @@ public class MongoDBClientProperties
                 else if(key.equals(DB_ENCODER) && value instanceof DBEncoder)
                 {
                     mongoDBClient.setEncoder((DBEncoder) value);
+                }
+                else if(key.equals(BATCH_SIZE) && value instanceof Integer)
+                {
+                    Integer batchSize = (Integer) value;
+                    mongoDBClient.setBatchSize(batchSize);
                 }
 
                 // Add more properties as needed

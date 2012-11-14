@@ -93,8 +93,8 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(java.lang.Long.class, LongType.class.getSimpleName());
         validationClassMapper.put(long.class, LongType.class.getSimpleName());
 
-        validationClassMapper.put(byte.class, BytesType.class.getSimpleName());
-
+        validationClassMapper.put(byte.class, IntegerType.class.getSimpleName());
+        
         validationClassMapper.put(float.class, FloatType.class.getSimpleName());
         
         validationClassMapper.put(UUID.class, UUIDType.class.getSimpleName());

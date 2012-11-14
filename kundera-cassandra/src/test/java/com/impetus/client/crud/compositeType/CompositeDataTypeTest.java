@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 
@@ -90,6 +91,7 @@ public class CompositeDataTypeTest
 
     /** The calendar. */
     protected Calendar calendar = Calendar.getInstance();
+
     /** The Constant logger. */
     private static final Log logger = LogFactory.getLog(CompositeDataTypeTest.class);
 
@@ -101,14 +103,15 @@ public class CompositeDataTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-//        loadData();
+        // loadData();
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
     /**
      * CRUD over Compound primary Key.
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
+     * 
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     @Test
     public void onCRUD() throws InstantiationException, IllegalAccessException
@@ -117,14 +120,14 @@ public class CompositeDataTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
-                (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
-                CompoundKeyDataType.class.newInstance());
-        
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5,
+                (short) 8, (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime,
+                new Integer(3), new Long(978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal,
+                bigInteger, calendar, CompoundKeyDataType.class.newInstance());
+
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
@@ -135,7 +138,7 @@ public class CompositeDataTypeTest
         PrimeUserDataType result = em.find(PrimeUserDataType.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
-//        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
         em.clear();// optional,just to clear persistence cache.
@@ -148,17 +151,17 @@ public class CompositeDataTypeTest
         result = em.find(PrimeUserDataType.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
-//        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
 
-         // deleting composite
+        // deleting composite
         em.remove(result);
 
         em.clear();// optional,just to clear persistence cache.
 
         result = em.find(PrimeUserDataType.class, key);
-        Assert.assertNull(result); 
-   }
+        Assert.assertNull(result);
+    }
 
     @Test
     public void onQuery() throws InstantiationException, IllegalAccessException
@@ -167,14 +170,14 @@ public class CompositeDataTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
-                (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
-                CompoundKeyDataType.class.newInstance());
+        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5,
+                (short) 8, (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime,
+                new Integer(3), new Long(978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal,
+                bigInteger, calendar, CompoundKeyDataType.class.newInstance());
 
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
@@ -184,20 +187,20 @@ public class CompositeDataTypeTest
         em.clear(); // optional,just to clear persistence cache.
         final String noClause = "Select u from PrimeUserDataType u";
 
+        // secondary index support over compound key is not enabled in cassandra
+        // composite keys yet. DO NOT DELETE/UNCOMMENT.
+
+        // final String withClauseOnNoncomposite =
+        // "Select u from PrimeUserDataType u where u.tweetDate = ?1";
+
         final String withFirstCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId";
+        final String withSecondCompositeColClause = "Select u from PrimeUserDataType u where u.key.uniqueId = :uniqueId";
+        final String withBothCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId";
+        final String withSelectiveCompositeColClause = "Select u.key from PrimeUserDataType u where u.key = :key";
 
-        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
-        
-/*//        final String withClauseOnNoncomposite = "Select u from PrimeUserDataType u where u.tweetDate = ?1";
-//
-        
-        final String withSecondCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId";
-        final String withBothCompositeColClause = "Select u from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId";
-        final String withAllCompositeColClause = "Select u from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
-        final String withLastCompositeColGTClause = "Select u from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
+        final String withAllCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
+        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId and u.key.studentName = :studentName and u.key.isExceptional = :isExceptional and u.key.age = :age and u.key.semester = :semester and u.key.digitalSignature = :digitalSignature and u.key.cgpa = :cgpa and u.key.percentage = :percentage and u.key.height = :height and u.key.enrolmentDate = :enrolmentDate and u.key.enrolmentTime = :enrolmentTime and u.key.joiningDateAndTime = :joiningDateAndTime and u.key.yearsSpent = :yearsSpent and u.key.rollNumber = :rollNumber and u.key.monthlyFee = :monthlyFee and u.key.sqlDate = :sqlDate and u.key.sqlTimestamp = :sqlTimestamp and u.key.sqlTime = :sqlTime and u.key.bigInteger = :bigInteger and u.key.calendar = :calendar";
 
-        final String withSelectiveCompositeColClause = "Select u.key from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
-*/
         // query over 1 composite and 1 non-column
 
         // query with no clause.
@@ -210,73 +213,96 @@ public class CompositeDataTypeTest
         q.setParameter("studentId", new Long(12345677));
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
-/*
-        // secondary index support over compound key is not enabled in cassandra composite keys yet. DO NOT DELETE/UNCOMMENT.
+
+        // secondary index support over compound key is not enabled in cassandra
+        // composite keys yet. DO NOT DELETE/UNCOMMENT.
 
         // Query with composite key clause.
-        q = em.createQuery(withClauseOnNoncomposite);
-        q.setParameter(1, currentDate);
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
+        // q = em.createQuery(withClauseOnNoncomposite);
+        // q.setParameter(1, currentDate);
+        // results = q.getResultList();
+        // Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withSecondCompositeColClause);
-        q.setParameter("tweetId", 1);
+        q.setParameter("uniqueId", 78575785897L);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
+        q.setParameter("studentId", new Long(12345677));
+        q.setParameter("uniqueId", 78575785897L);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
-                // Query with composite key clause.
+        // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("studentId", new Long(12345677));
+        q.setParameter("uniqueId", 78575785897L);
+        q.setParameter("studentName", "Amresh");
+        q.setParameter("isExceptional", false);
+        q.setParameter("age", 10);
+        q.setParameter("semester", 'A');
+        q.setParameter("digitalSignature", new Byte((byte) 5));
+        q.setParameter("cgpa", (short) 8);
+        q.setParameter("percentage", (float) 69.3);
+        q.setParameter("height", 163.76765654);
+        q.setParameter("enrolmentDate", enrolmentDate);
+        q.setParameter("enrolmentTime", enrolmentTime);
+        q.setParameter("joiningDateAndTime", joiningDateAndTime);
+        q.setParameter("yearsSpent", new Integer(3));
+        q.setParameter("rollNumber", new Long(978423946455l));
+        q.setParameter("monthlyFee", 135434.89);
+        q.setParameter("sqlDate", newSqlDate);
+        q.setParameter("sqlTimestamp", sqlTimestamp);
+        q.setParameter("sqlTime", sqlTime);
+        q.setParameter("bigInteger", bigInteger);
+        q.setParameter("calendar", calendar.getTime());
+
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
 
-        // Query with composite key clause.
-        q = em.createQuery(withLastCompositeColGTClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
-        results = q.getResultList();
-
-        Assert.assertEquals(1, results.size());
-
-         
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("key", key);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
-        // Query for selective column tweetBody with composite key clause.
+        // // Query for selective column tweetBody with composite key clause.
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("studentId", new Long(12345677));
+        q.setParameter("uniqueId", 78575785897L);
+        q.setParameter("studentName", "Amresh");
+        q.setParameter("isExceptional", false);
+        q.setParameter("age", 10);
+        q.setParameter("semester", 'A');
+        q.setParameter("digitalSignature", (byte) 5);
+        q.setParameter("cgpa", (short) 8);
+        q.setParameter("percentage", (float) 69.3);
+        q.setParameter("height", 163.76765654);
+        q.setParameter("enrolmentDate", enrolmentDate);
+        q.setParameter("enrolmentTime", enrolmentTime);
+        q.setParameter("joiningDateAndTime", joiningDateAndTime);
+        q.setParameter("yearsSpent", new Integer(3));
+        q.setParameter("rollNumber", new Long(978423946455l));
+        q.setParameter("monthlyFee", 135434.89);
+        q.setParameter("sqlDate", newSqlDate);
+        q.setParameter("sqlTimestamp", sqlTimestamp);
+        q.setParameter("sqlTime", sqlTime);
+        q.setParameter("bigInteger", bigInteger);
+        q.setParameter("calendar", calendar.getTime());
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getTweetDate());
 
-        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from PrimeUserDataType u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from PrimeUserDataType u where u.key = :key";
         // Query for selective column tweetDate with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
-        q.setParameter("userId", "mevivs");
-        q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("key", key);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(currentDate.getTime(), results.get(0).getTweetDate().getTime());
@@ -289,7 +315,7 @@ public class CompositeDataTypeTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-*/
+
         em.remove(user);
 
         em.clear();// optional,just to clear persistence cache.
@@ -307,23 +333,23 @@ public class CompositeDataTypeTest
      * Update by Named Query.
      * 
      * @return
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     private void updateNamed() throws InstantiationException, IllegalAccessException
     {
         EntityManager em = emf.createEntityManager();
 
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
-                (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
-                CompoundKeyDataType.class.newInstance());
+        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5,
+                (short) 8, (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime,
+                new Integer(3), new Long(978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal,
+                bigInteger, calendar, CompoundKeyDataType.class.newInstance());
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
@@ -332,7 +358,7 @@ public class CompositeDataTypeTest
         em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         String updateQuery = "Update PrimeUserDataType u SET u.tweetBody=after merge where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
@@ -342,30 +368,31 @@ public class CompositeDataTypeTest
         PrimeUserDataType result = em.find(PrimeUserDataType.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("after merge", result.getTweetBody());
-//        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
         em.close();
     }
 
     /**
      * delete by Named Query.
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
+     * 
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     private void deleteNamed() throws InstantiationException, IllegalAccessException
     {
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
-        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
-                (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
-                CompoundKeyDataType.class.newInstance());
+        CompoundKeyDataType key = prepareData(new Long(12345677), 78575785897L, "Amresh", false, 10, 'A', (byte) 5,
+                (short) 8, (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime,
+                new Integer(3), new Long(978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal,
+                bigInteger, calendar, CompoundKeyDataType.class.newInstance());
 
         String deleteQuery = "Delete From PrimeUserDataType u where u.key= :key";
         EntityManager em = emf.createEntityManager();
-        Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase)client).setCqlVersion("3.0.0");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         Query q = em.createQuery(deleteQuery);
         q.setParameter("key", key);
@@ -385,15 +412,16 @@ public class CompositeDataTypeTest
         CassandraCli.dropKeySpace("CompositeCassandra");
         emf.close();
     }
-// DO NOT DELETE IT!! though it is automated with schema creation option.
+
+    // DO NOT DELETE IT!! though it is automated with schema creation option.
     /**
-     *  create column family script for compound key.
+     * create column family script for compound key.
      */
     private void loadData()
     {
         CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text," +
-        		    " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+                + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
         try
         {
             CassandraCli.getClient().set_keyspace("CompositeCassandra");
@@ -407,8 +435,7 @@ public class CompositeDataTypeTest
             logger.error(e.getMessage());
         }
         CassandraCli.executeCqlQuery(cql_Query);
-        
-        
+
     }
 
     /**
@@ -462,11 +489,12 @@ public class CompositeDataTypeTest
      *            the o
      * @return the person
      */
-    private CompoundKeyDataType prepareData(long studentId, long uniqueId, String studentName, boolean isExceptional, int age,
-            char semester, byte digitalSignature, short cgpa, float percentage, double height,
+    private CompoundKeyDataType prepareData(long studentId, long uniqueId, String studentName, boolean isExceptional,
+            int age, char semester, byte digitalSignature, short cgpa, float percentage, double height,
             java.util.Date enrolmentDate, java.util.Date enrolmentTime, java.util.Date joiningDateAndTime,
             Integer yearsSpent, Long rollNumber, Double monthlyFee, java.sql.Date newSqlDate, java.sql.Time sqlTime,
-            java.sql.Timestamp sqlTimestamp, BigDecimal bigDecimal, BigInteger bigInteger, Calendar calendar, CompoundKeyDataType o)
+            java.sql.Timestamp sqlTimestamp, BigDecimal bigDecimal, BigInteger bigInteger, Calendar calendar,
+            CompoundKeyDataType o)
     {
         o.setStudentId((Long) studentId);
         o.setUniqueId(uniqueId);
@@ -489,9 +517,9 @@ public class CompositeDataTypeTest
         o.setSqlDate(newSqlDate);
         o.setSqlTime(sqlTime);
         o.setSqlTimestamp(sqlTimestamp);
-//        o.setBigDecimal(bigDecimal);
+        // o.setBigDecimal(bigDecimal);
         o.setBigInteger(bigInteger);
         o.setCalendar(calendar);
-        return  o;
+        return o;
     }
 }

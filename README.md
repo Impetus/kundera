@@ -8,7 +8,7 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 *	To make switching across data-stores as easy as changing a configuration.
 
 
-[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
+[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
 
 
 Up and running in 5 minutes
@@ -31,7 +31,16 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.1 is released tag.
+####Please Note: trunk is current development branch. 2.2 is released tag.
+
+#### 08-Nov-2012 - Kundera 2.2 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.1:
+
+* Geospatial Persistence and Queries for MongoDB
+* Composite keys support for Cassandra and MongoDB
+* Cassandra 1.1.6 migration
+* Support for enum data type
+* Named and Native queries support for REST based access
 
 #### 21-Sep-2012 - Kundera 2.1 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.0.7:
@@ -128,7 +137,7 @@ This release includes bug fixes and the following new features compared to initi
 * Search within embedded objects.
 * Selective index.
 
-[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
+[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
 
 Builds
 ========
