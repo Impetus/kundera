@@ -135,7 +135,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     .getMetaModelBuilder(metadata.getPersistenceUnit());
             metaModelBuilder.process(clazz);
 
-            for (Field f : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class))
+            for (Field f : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class, Inheritance.class))
             {
                 if (f != null && !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
                         && !f.isAnnotationPresent(Transient.class))

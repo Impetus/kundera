@@ -89,7 +89,7 @@ public class EntityValidatorImpl implements EntityValidator
         // Check for @Key and ensure that there is just 1 @Key field of String
         // type.
         List<Field> keys = new ArrayList<Field>();
-        for (Field field : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class))
+        for (Field field : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class, Inheritance.class))
         {
             if(field.isAnnotationPresent(Id.class) && field.isAnnotationPresent(EmbeddedId.class))
             {

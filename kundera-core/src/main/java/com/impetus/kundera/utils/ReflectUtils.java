@@ -194,20 +194,35 @@ public class ReflectUtils
 
 
     /**
+     * Checks if a class has one of the provided annotations
+     * @param clazz source class
+     * @param annotations annotations to be found
+     * @return true if class has at least one of the presented annotations
+     */
+    public static boolean isAnnotationPresent(final Class<?> clazz, Class<? extends Annotation>... annotations){
+        for(Class<? extends Annotation> annotation : annotations){
+            if(clazz.getAnnotation(annotation) != null){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Collects all the fields from classes within class hierarchy
      * Gets the fields from source class and its parents only if the specified annotation is present on the parent
      * classes
      *
      * @param sourceClass base class to start the fields collecting
-     * @param onlyWithAnnotation collects the fields from the parent classes only if this annotation is present
+     * @param onlyWithAnnotations collects the fields from the parent classes only if any of these annotations is present
      * @return all found fields
      */
     public static Field[] collectFieldsInClassHierarchy(final Class<?> sourceClass,
-                                                        Class<? extends Annotation> onlyWithAnnotation) {
+                                                        Class<? extends Annotation>... onlyWithAnnotations) {
         Field[] fields = {};
         Class<?> clazz = sourceClass;
         while (clazz != null) {
-            if (clazz == sourceClass || clazz.getAnnotation(onlyWithAnnotation) != null) {
+            if (clazz == sourceClass || isAnnotationPresent(clazz, onlyWithAnnotations)) {
                 fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
             }
             clazz = clazz.getSuperclass();
