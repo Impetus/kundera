@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.persistence.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import static com.impetus.kundera.utils.ReflectUtils.collectFieldsInClassHierarc
 
 /**
  * Validates entity for JPA rules.
- * 
+ *
  * @author animesh.kumar
  */
 public class EntityValidatorImpl implements EntityValidator
@@ -45,10 +46,10 @@ public class EntityValidatorImpl implements EntityValidator
 
     /**
      * Checks the validity of a class for Cassandra entity.
-     * 
+     *
      * @param clazz
      *            validates this class
-     * 
+     *
      * @return returns 'true' if valid
      */
     @Override
@@ -78,7 +79,9 @@ public class EntityValidatorImpl implements EntityValidator
         // must have a default no-argument constructor
         try
         {
-            clazz.getConstructor();
+            if(!Modifier.isAbstract(clazz.getModifiers())){
+                clazz.getConstructor();
+            }
         }
         catch (NoSuchMethodException nsme)
         {
@@ -95,7 +98,7 @@ public class EntityValidatorImpl implements EntityValidator
             {
                 throw new InvalidEntityDefinitionException(clazz.getName() + " must have either @Id field or @EmbeddedId field");
             }
-            
+
             if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class))
             {
                 keys.add(field);
