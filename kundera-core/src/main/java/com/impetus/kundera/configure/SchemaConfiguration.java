@@ -36,10 +36,12 @@ import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -97,50 +99,51 @@ public class SchemaConfiguration implements Configuration
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
+            log.info("Configuring schema export for: " + persistenceUnit);
+            List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
+
+            Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
+
+            // Iterate each entity metadata.
+            for (EntityMetadata entityMetadata : entityMetadataMap.values())
+            {
+                // get entity metadata(table info as well as columns)
+                // if table info exists, get it from map.
+                boolean found = false;
+                Type type = entityMetadata.getType();
+                // Class idClassName =
+                // entityMetadata.getIdColumn().getField().getType();
+                Class idClassName = entityMetadata.getIdAttribute().getJavaType();
+                TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
+                        type.name(), idClassName);
+
+                // check for tableInfos not empty and contains the present
+                // tableInfo.
+                if (!tableInfos.isEmpty() && tableInfos.contains(tableInfo))
+                {
+                    found = true;
+                    int idx = tableInfos.indexOf(tableInfo);
+                    tableInfo = tableInfos.get(idx);
+                    addColumnToTableInfo(entityMetadata, type, tableInfo);
+                }
+                else
+                {
+                    addColumnToTableInfo(entityMetadata, type, tableInfo);
+                }
+
+                List<Relation> relations = entityMetadata.getRelations();
+                parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
+
+                if (!found)
+                {
+                    tableInfos.add(tableInfo);
+                }
+            }
+            puToSchemaMetadata.put(persistenceUnit, tableInfos);
             if (getSchemaProperty(persistenceUnit) != null)
             {
-                log.info("Configuring schema export for: " + persistenceUnit);
-                List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
-
-                Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
-
-                // Iterate each entity metadata.
-                for (EntityMetadata entityMetadata : entityMetadataMap.values())
-                {
-                    // get entity metadata(table info as well as columns)
-                    // if table info exists, get it from map.
-                    boolean found = false;
-                    Type type = entityMetadata.getType();
-                    // Class idClassName =
-                    // entityMetadata.getIdColumn().getField().getType();
-                    Class idClassName = entityMetadata.getIdAttribute().getJavaType();
-                    TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
-                            type.name(), idClassName);
-
-                    // check for tableInfos not empty and contains the present
-                    // tableInfo.
-                    if (!tableInfos.isEmpty() && tableInfos.contains(tableInfo))
-                    {
-                        found = true;
-                        int idx = tableInfos.indexOf(tableInfo);
-                        tableInfo = tableInfos.get(idx);
-                        addColumnToTableInfo(entityMetadata, type, tableInfo);
-                    }
-                    else
-                    {
-                        addColumnToTableInfo(entityMetadata, type, tableInfo);
-                    }
-
-                    List<Relation> relations = entityMetadata.getRelations();
-                    parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
-
-                    if (!found)
-                    {
-                        tableInfos.add(tableInfo);
-                    }
-                }
-                puToSchemaMetadata.put(persistenceUnit, tableInfos);
-                SchemaManager schemaManager = ClientResolver.getClientFactory(persistenceUnit).getSchemaManager();
+                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
+                SchemaManager schemaManager = clientFactory != null ? clientFactory.getSchemaManager() : null;
                 if (schemaManager != null)
                 {
                     schemaManager.exportSchema();
@@ -212,11 +215,15 @@ public class SchemaConfiguration implements Configuration
             // if relation type is many to many and relation via join table.
             else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
             {
-                String joinTableName = relation.getJoinTableMetadata().getJoinTableName();
-                TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(), null);
-                if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
+                String joinTableName = joinTableMetadata != null ? joinTableMetadata.getJoinTableName() : null;
+                if (joinTableName != null)
                 {
-                    tableInfos.add(joinTableInfo);
+                    TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(), null);
+                    if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                    {
+                        tableInfos.add(joinTableInfo);
+                    }
                 }
             }
         }
@@ -408,7 +415,6 @@ public class SchemaConfiguration implements Configuration
                 .getPersistenceUnitMetadata(persistenceUnit);
         String KUNDERA_DDL_AUTO_PREPARE = persistenceUnitMetadata != null ? persistenceUnitMetadata
                 .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
-
         return KUNDERA_DDL_AUTO_PREPARE;
     }
 }

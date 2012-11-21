@@ -419,7 +419,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     // TimeUnit.SECONDS.sleep(5);
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     dropInvertedIndexTable(tableInfo);
-                    TimeUnit.SECONDS.sleep(3);
+                    TimeUnit.SECONDS.sleep(2);
                     break;
                 }
             }
@@ -517,8 +517,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
 
-        cassandra_client.set_cql_version(/*CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
-                .getCqlVersion() :*/ CassandraConstants.CQL_VERSION_3_0);
+        cassandra_client.set_cql_version(/*
+                                          * CassandraPropertyReader.csmd != null
+                                          * ? CassandraPropertyReader.csmd
+                                          * .getCqlVersion() :
+                                          */CassandraConstants.CQL_VERSION_3_0);
         try
         {
             cassandra_client.execute_cql_query(
@@ -1345,9 +1348,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     if (builder != null)
                     {
-                        // Somehow these are not working for cassandra 1.1 though they claim it should work.
-//                        appendPropertyToBuilder(builder, maxCompactionThreshold,
-//                                CassandraConstants.MAX_COMPACTION_THRESHOLD);
+                        // Somehow these are not working for cassandra 1.1
+                        // though they claim it should work.
+                        // appendPropertyToBuilder(builder,
+                        // maxCompactionThreshold,
+                        // CassandraConstants.MAX_COMPACTION_THRESHOLD);
                     }
                     else
                     {
@@ -1367,9 +1372,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     if (builder != null)
                     {
-                        // Somehow these are not working for cassandra 1.1 though they claim it should work.
-//                        appendPropertyToBuilder(builder, minCompactionThreshold,
-//                                CassandraConstants.MIN_COMPACTION_THRESHOLD);
+                        // Somehow these are not working for cassandra 1.1
+                        // though they claim it should work.
+                        // appendPropertyToBuilder(builder,
+                        // minCompactionThreshold,
+                        // CassandraConstants.MIN_COMPACTION_THRESHOLD);
                     }
                     else
                     {
@@ -1507,7 +1514,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         appendPropertyToBuilder(builder, dclocalReadRepairChance,
                                 CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
-                        
+
                     }
                     else
                     {
@@ -1520,13 +1527,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     throw new SchemaGenerationException(nfe);
                 }
             }
-            
-         // Strip last AND clause.
-           if(builder != null && StringUtils.contains(builder.toString(), CQLTranslator.AND_CLAUSE))
-           {
-               builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
-//               builder.deleteCharAt(builder.length() - 2);
-           }
+
+            // Strip last AND clause.
+            if (builder != null && StringUtils.contains(builder.toString(), CQLTranslator.AND_CLAUSE))
+            {
+                builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
+                // builder.deleteCharAt(builder.length() - 2);
+            }
         }
     }
 

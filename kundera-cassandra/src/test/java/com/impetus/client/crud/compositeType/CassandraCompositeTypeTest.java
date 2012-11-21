@@ -387,6 +387,11 @@ public class CassandraCompositeTypeTest
         }
         long t2 = System.currentTimeMillis();
         System.out.println("Total time taken = " + (t2 - t1));
+
+        em.clear();
+
+        CassandraPrimeUser u = em.find(CassandraPrimeUser.class, new CassandraCompoundKey("mevivs", 4999, timeLineId));
+        Assert.assertNotNull(u);
     }
 
     /**
