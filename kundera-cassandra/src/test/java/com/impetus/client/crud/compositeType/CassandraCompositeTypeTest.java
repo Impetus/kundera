@@ -102,13 +102,13 @@ public class CassandraCompositeTypeTest
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
-//        em.flush();
+        em.flush();
 
         // em.clear(); // optional,just to clear persistence cache.
 
-//        em = emf.createEntityManager();
+        // em = emf.createEntityManager();
         em.clear();
-        
+
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
@@ -172,7 +172,7 @@ public class CassandraCompositeTypeTest
         em.flush(); // optional,just to clear persistence cache.
 
         em.clear();
-        
+
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         final String noClause = "Select u from CassandraPrimeUser u";
 
@@ -365,6 +365,28 @@ public class CassandraCompositeTypeTest
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNull(result);
         em.close();
+    }
+
+    @Test
+    public void onBatchInsert()
+    {
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        long t1 = System.currentTimeMillis();
+        for (int i = 0; i < 5000; i++)
+        {
+            CassandraCompoundKey key = new CassandraCompoundKey("mevivs", i, timeLineId);
+            Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+            Client client = clients.get(PERSISTENCE_UNIT);
+            ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+            CassandraPrimeUser user = new CassandraPrimeUser(key);
+            user.setTweetBody("my first tweet");
+            user.setTweetDate(currentDate);
+            em.persist(user);
+        }
+        long t2 = System.currentTimeMillis();
+        System.out.println("Total time taken = " + (t2 - t1));
     }
 
     /**
