@@ -64,7 +64,7 @@
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="cassandra" />
-			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
 			<property name="kundera.cache.provider.class"
@@ -129,6 +129,7 @@
 			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
 			<property name="hibernate.current_session_context_class"
 				value="org.hibernate.context.ThreadLocalSessionContext" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 		</properties>
 	</persistence-unit>
 

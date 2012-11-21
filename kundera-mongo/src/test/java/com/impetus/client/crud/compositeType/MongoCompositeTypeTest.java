@@ -87,8 +87,9 @@ public class MongoCompositeTypeTest
         user.setTweetDate(currentDate);
         em.persist(user);
 
-        em.clear(); // optional,just to clear persistence cache.
+        em.close(); // optional,just to clear persistence cache.
 
+        em = emf.createEntityManager();
         MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
@@ -100,8 +101,9 @@ public class MongoCompositeTypeTest
         user.setTweetBody("After merge");
         em.merge(user);
 
-        em.clear();// optional,just to clear persistence cache.
+        em.close();// optional,just to clear persistence cache.
 
+        em = emf.createEntityManager();
         result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
@@ -111,8 +113,9 @@ public class MongoCompositeTypeTest
         // deleting composite
         em.remove(result);
 
-        em.clear();// optional,just to clear persistence cache.
+        em.close();// optional,just to clear persistence cache.
 
+        em = emf.createEntityManager();
         result = em.find(MongoPrimeUser.class, key);
         Assert.assertNull(result);
     }
@@ -122,14 +125,15 @@ public class MongoCompositeTypeTest
     {
         EntityManager em = emf.createEntityManager();
 
-        UUID timeLineId = UUID.randomUUID();        
+        UUID timeLineId = UUID.randomUUID();
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
         MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
 
-        em.clear(); // optional,just to clear persistence cache.
+        em.close(); // optional,just to clear persistence cache.
+        em = emf.createEntityManager();
         final String noClause = "Select u from MongoPrimeUser u";
 
         final String withFirstCompositeColClause = "Select u from MongoPrimeUser u where u.key.userId = :userId";
@@ -257,12 +261,14 @@ public class MongoCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        
+
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
         MongoPrimeUser user = new MongoPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
+
+        em.close();
 
         em = emf.createEntityManager();
 
@@ -270,6 +276,8 @@ public class MongoCompositeTypeTest
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", "my first tweet");
         q.executeUpdate();
+        em.close();
+        em = emf.createEntityManager();
 
         MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNotNull(result);
@@ -285,7 +293,7 @@ public class MongoCompositeTypeTest
     private void deleteNamed()
     {
         UUID timeLineId = UUID.randomUUID();
-        
+
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
 
         String deleteQuery = "Delete From MongoPrimeUser u where u.tweetBody= :tweetBody";
@@ -294,6 +302,8 @@ public class MongoCompositeTypeTest
         q.setParameter("tweetBody", "after merge");
         q.executeUpdate();
 
+        em.close();
+        em = emf.createEntityManager();
         MongoPrimeUser result = em.find(MongoPrimeUser.class, key);
         Assert.assertNull(result);
         em.close();

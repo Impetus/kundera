@@ -110,7 +110,7 @@ public class EmbeddedRDBMSUserTest
         // Persist user with tweets.
         persist(user, em);
         em.clear();
-        
+
         // Execute query.
         String query = "Select u from User u";
         findByQuery(em, query);
@@ -143,16 +143,17 @@ public class EmbeddedRDBMSUserTest
         tweet.setTweetId(tweetId);
         tweet.setBody(body);
         tweet.setTweetDate(tweetDate);
-        if(user.getTweets() == null)
+        if (user.getTweets() == null)
         {
-            Set<Tweets> tweets = new HashSet<Tweets>();  tweets.add(tweet);
+            Set<Tweets> tweets = new HashSet<Tweets>();
+            tweets.add(tweet);
             user.setTweets(tweets);
         }
         else
         {
             user.getTweets().add(tweet);
         }
-        
+
     }
 
     /**

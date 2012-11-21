@@ -102,8 +102,16 @@ public class CassandraCompositeTypeTest
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
+//        em.flush();
 
-        em.clear(); // optional,just to clear persistence cache.
+        // em.clear(); // optional,just to clear persistence cache.
+
+//        em = emf.createEntityManager();
+        em.clear();
+        
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
@@ -116,7 +124,12 @@ public class CassandraCompositeTypeTest
         user.setTweetBody("After merge");
         em.merge(user);
 
-        em.clear();// optional,just to clear persistence cache.
+        em.close();// optional,just to clear persistence cache.
+
+        em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
         result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
@@ -127,7 +140,12 @@ public class CassandraCompositeTypeTest
         // deleting composite
         em.remove(result);
 
-        em.clear();// optional,just to clear persistence cache.
+        em.close();// optional,just to clear persistence cache.
+
+        em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
         result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNull(result);
@@ -151,7 +169,11 @@ public class CassandraCompositeTypeTest
         user.setTweetDate(currentDate);
         em.persist(user);
 
-        em.clear(); // optional,just to clear persistence cache.
+        em.flush(); // optional,just to clear persistence cache.
+
+        em.clear();
+        
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         final String noClause = "Select u from CassandraPrimeUser u";
 
         final String withFirstCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId";
@@ -288,13 +310,14 @@ public class CassandraCompositeTypeTest
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         UUID timeLineId = UUID.randomUUID();
-  
+
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
 
+        em.close();
         em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
@@ -304,6 +327,13 @@ public class CassandraCompositeTypeTest
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", key);
         q.executeUpdate();
+
+        em.close(); // optional,just to clear persistence cache.
+
+        em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
@@ -337,13 +367,15 @@ public class CassandraCompositeTypeTest
         em.close();
     }
 
-    /**CompositeUserDataType
+    /**
+     * CompositeUserDataType
+     * 
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-//        emf.close();
+        // emf.close();
         CassandraCli.dropKeySpace("CompositeCassandra");
     }
 
@@ -353,30 +385,33 @@ public class CassandraCompositeTypeTest
      */
     private void loadData()
     {
-        /*if (!CassandraCli.keyspaceExist("CompositeCassandra"))
-        {*/
-            CassandraCli.createKeySpace("CompositeCassandra");
+        /*
+         * if (!CassandraCli.keyspaceExist("CompositeCassandra")) {
+         */
+        CassandraCli.createKeySpace("CompositeCassandra");
 
-            String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
-                    + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
-            try
-            {
-                CassandraCli.getClient().set_keyspace("CompositeCassandra");
-            }
-            catch (InvalidRequestException e)
-            {
-                logger.error(e.getMessage());
-            }
-            catch (TException e)
-            {
-                logger.error(e.getMessage());
-            }
-         /*   if (!CassandraCli.columnFamilyExist("CompositeCassandra", "CompositeUser"))
-            {*/
-                CassandraCli.executeCqlQuery(cql_Query);
-//            }
-//
-//        }
+        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+                + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+        try
+        {
+            CassandraCli.getClient().set_keyspace("CompositeCassandra");
+        }
+        catch (InvalidRequestException e)
+        {
+            logger.error(e.getMessage());
+        }
+        catch (TException e)
+        {
+            logger.error(e.getMessage());
+        }
+        /*
+         * if (!CassandraCli.columnFamilyExist("CompositeCassandra",
+         * "CompositeUser")) {
+         */
+        CassandraCli.executeCqlQuery(cql_Query);
+        // }
+        //
+        // }
     }
 
 }

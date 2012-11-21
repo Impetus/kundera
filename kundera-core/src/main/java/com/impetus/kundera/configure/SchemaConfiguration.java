@@ -35,6 +35,7 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.TableInfo;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -139,7 +140,11 @@ public class SchemaConfiguration implements Configuration
                     }
                 }
                 puToSchemaMetadata.put(persistenceUnit, tableInfos);
-                ClientResolver.getClientFactory(persistenceUnit).getSchemaManager().exportSchema();
+                SchemaManager schemaManager = ClientResolver.getClientFactory(persistenceUnit).getSchemaManager();
+                if (schemaManager != null)
+                {
+                    schemaManager.exportSchema();
+                }
             }
         }
     }
