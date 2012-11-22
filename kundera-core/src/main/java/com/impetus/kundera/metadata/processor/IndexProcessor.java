@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -118,7 +117,6 @@ public class IndexProcessor implements MetadataProcessor
                 else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
                         && columnsNameToBeIndexed.contains(colName))
                 {
-
                     metadata.addIndexProperty(populatePropertyIndex(fieldName, null, null, null, f));
                 }
             }

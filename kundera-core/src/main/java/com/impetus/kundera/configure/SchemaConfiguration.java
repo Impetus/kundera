@@ -140,7 +140,6 @@ public class SchemaConfiguration implements Configuration
                 }
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
-
         }
         for (String persistenceUnit : persistenceUnits)
         {
