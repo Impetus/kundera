@@ -140,6 +140,9 @@ public class SchemaConfiguration implements Configuration
                 }
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
+        }
+        for (String persistenceUnit : persistenceUnits)
+        {
             if (getSchemaProperty(persistenceUnit) != null)
             {
                 ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
