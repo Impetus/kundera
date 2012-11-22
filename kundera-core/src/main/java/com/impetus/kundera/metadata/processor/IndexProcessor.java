@@ -107,6 +107,7 @@ public class IndexProcessor implements MetadataProcessor
             if (f.isAnnotationPresent(Column.class))
             {
                 String fieldName = f.getName();
+                String colName = getIndexName(f, fieldName);
                 if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty()
                         && indexedColumnsMap.containsKey(fieldName))
                 {
@@ -115,8 +116,9 @@ public class IndexProcessor implements MetadataProcessor
                             indexedColumn.max(), indexedColumn.min(), f));
                 }
                 else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
-                        && columnsNameToBeIndexed.contains(fieldName))
+                        && columnsNameToBeIndexed.contains(colName))
                 {
+
                     metadata.addIndexProperty(populatePropertyIndex(fieldName, null, null, null, f));
                 }
             }
@@ -213,4 +215,26 @@ public class IndexProcessor implements MetadataProcessor
         }
     }
 
+    /**
+     * Gets the index name.
+     * 
+     * @param f
+     *            the f
+     * @param alias
+     *            the alias
+     * @return the index name
+     */
+    private String getIndexName(Field f, String alias)
+    {
+        if (f.isAnnotationPresent(Column.class))
+        {
+            Column c = f.getAnnotation(Column.class);
+            alias = c.name().trim();
+            if (alias.isEmpty())
+            {
+                alias = f.getName();
+            }
+        }
+        return alias;
+    }
 }
