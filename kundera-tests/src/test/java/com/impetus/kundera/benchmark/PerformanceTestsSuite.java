@@ -32,7 +32,6 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.impetus.client.crud.countercolumns.CountersTest;
 import com.impetus.client.gis.MongoGISTest;
 
 /**

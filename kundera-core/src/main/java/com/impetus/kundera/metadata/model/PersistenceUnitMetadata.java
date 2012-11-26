@@ -76,16 +76,19 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     private URL rootUrl;
 
     private String schemaVersion;
+    
+    private URL mappedUrl;
 
     public PersistenceUnitMetadata()
     {
 
     }
 
-    public PersistenceUnitMetadata(String xmlSchemaVersion, URL rootUrl)
+    public PersistenceUnitMetadata(String xmlSchemaVersion, URL rootUrl, URL mappingFileUrl)
     {
         this.schemaVersion = xmlSchemaVersion;
         this.rootUrl = rootUrl;
+        this.mappedUrl = mappingFileUrl;
     }
 
     /*
@@ -575,4 +578,14 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
         return 0;
     }
+
+    /**
+     * @return the mappedUrl
+     */
+    public URL getMappedUrl()
+    {
+        return mappedUrl;
+    }
+    
+    
 }

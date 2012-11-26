@@ -23,10 +23,9 @@
 		<class>com.impetus.client.crud.datatypes.StudentRdbms</class>
  		<exclude-unlisted-classes>true</exclude-unlisted-classes> -->
 		<properties>
-			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.current_session_context_class"
-				value="org.hibernate.context.ThreadLocalSessionContext" />
+				<property name="current_session_context_class" value="thread" />
 			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />

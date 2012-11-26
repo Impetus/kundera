@@ -264,7 +264,7 @@ public class PersistenceXMLLoader
      */
     private static PersistenceUnitMetadata parsePersistenceUnit(final URL url, Element top, final String versionName)
     {
-        PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(versionName, getPersistenceRootUrl(url));
+        PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(versionName, getPersistenceRootUrl(url), url);
 
         String puName = top.getAttribute("name");
         if (!isEmpty(puName))

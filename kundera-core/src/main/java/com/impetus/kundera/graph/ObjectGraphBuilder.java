@@ -19,8 +19,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hibernate.collection.PersistentCollection;
+//import org.hibernate.collection.PersistentCollection;
 
+import org.hibernate.collection.spi.PersistentCollection;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
