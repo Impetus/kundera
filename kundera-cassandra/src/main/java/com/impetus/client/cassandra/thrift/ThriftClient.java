@@ -146,17 +146,19 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
 
-            if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
                 onpersistOverCompositeKey(entityMetadata, entity, cassandra_client);
-                
-            } else
+
+            }
+            else
             {
                 prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
                 // Write Mutation map to database
 
                 cassandra_client.batch_mutate(mutationMap, getConsistencyLevel());
             }
+            mutationMap.clear();
         }
         catch (InvalidRequestException e)
         {
@@ -195,7 +197,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
 
     }
-
 
     /**
      * Persists a Join table record set into database
@@ -618,14 +619,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(metadata.getSchema());
-            
+
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
                 EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-                onDeleteQuery(metadata, metaModel, pKey,compoundKey);
+                onDeleteQuery(metadata, metaModel, pKey, compoundKey);
             }
             else
             {

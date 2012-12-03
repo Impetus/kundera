@@ -281,7 +281,7 @@ public class MetamodelConfiguration implements Configuration
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
-
+        PersistenceUnitMetadata puMetadata = null;
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
         try
@@ -296,13 +296,15 @@ public class MetamodelConfiguration implements Configuration
             reader.accumulateAnnotations(annotations,
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
 
+            puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+
             // iterate through all valid annotations
             for (String validAnn : reader.getValidAnnotations())
             {
                 // check if the current class has one?
-                if (annotations.contains(validAnn))
+                if (annotations.contains(validAnn) && puMetadata != null)
                 {
-                    Class<?> clazz = Class.forName(className);
+                    Class<?> clazz = puMetadata.getClassLoader().loadClass(className);
 
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName())
                             && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
