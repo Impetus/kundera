@@ -42,7 +42,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class EntityMetadataTest
 {
-     private String persistenceUnit = "metaDataTest";
+    private String persistenceUnit = "metaDataTest";
 
     /**
      * @throws java.lang.Exception
@@ -90,6 +90,15 @@ public class EntityMetadataTest
         Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());
     }
 
+    @Test
+    public void testEmbeddedCollection()
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(KunderaUser.class);
+        Assert.assertNotNull(entityMetadata);
+        Assert.assertTrue(entityMetadata.getIndexProperties().isEmpty());
+        Assert.assertEquals(EntityMetadata.Type.SUPER_COLUMN_FAMILY, entityMetadata.getType());
+    }
+
     /**
      * Gets the entity manager factory.
      * 
@@ -126,21 +135,26 @@ public class EntityMetadataTest
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
         clazzToPu.put(Employe.class.getName(), pus);
+        clazzToPu.put(KunderaUser.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(Employe.class);
+        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);
 
         TableProcessor processor = new TableProcessor();
         processor.process(Employe.class, m);
+        processor.process(KunderaUser.class, m1);
 
         IndexProcessor indexProcessor = new IndexProcessor();
         indexProcessor.process(Employe.class, m);
+        indexProcessor.process(KunderaUser.class, m1);
 
         m.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(Employe.class, m);
+        metaModel.addEntityMetadata(KunderaUser.class, m1);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
