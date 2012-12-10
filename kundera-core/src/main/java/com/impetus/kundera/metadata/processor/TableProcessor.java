@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 import javassist.Modifier;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
@@ -285,7 +286,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
         if (entityMetadata.getType() == null || !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
-            if (f.isAnnotationPresent(Embedded.class))
+            if (f.isAnnotationPresent(Embedded.class) || f.isAnnotationPresent(ElementCollection.class))
             {
                 entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
             }
