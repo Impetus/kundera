@@ -89,7 +89,7 @@ public class SchemaConfiguration implements Configuration
      * configure method responsible for creating pu to schema metadata map for each entity in class path.
      * 
      */
-    public void configure()
+    public void configure(Map properties)
     {
 
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

@@ -57,8 +57,8 @@ public class HBasePropertyReaderTest
     public void setUp() throws Exception
     {
         // Persistence.createEntityManagerFactory(pu);
-        new PersistenceUnitConfiguration(pu).configure();
-        new ClientFactoryConfiguraton(pu).configure();
+        new PersistenceUnitConfiguration(pu).configure(null);
+        new ClientFactoryConfiguraton(pu).configure(null);
     }
 
     @After

@@ -17,6 +17,7 @@ package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +55,15 @@ public final class Configurator
 
     /**
      * Invokes on each configuration object.
+     * @param properties TODO
      * 
      */
-    public final void configure()
+    public final void configure(Map properties)
     {
         for (Configuration conf : configurer)
         {
             logger.debug("Loading configuration for :" + conf.getClass().getSimpleName());
-            conf.configure();
+            conf.configure(null);
         }
     }
 }

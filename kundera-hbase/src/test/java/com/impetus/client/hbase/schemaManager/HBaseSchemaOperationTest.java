@@ -365,8 +365,8 @@ public class HBaseSchemaOperationTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
-        configuration.configure();
+        new ClientFactoryConfiguraton(persistenceUnits).configure(null);
+        configuration.configure(null);
         return null;
     }
 }

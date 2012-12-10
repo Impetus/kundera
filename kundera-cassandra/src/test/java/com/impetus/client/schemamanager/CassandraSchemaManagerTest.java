@@ -272,8 +272,8 @@ public class CassandraSchemaManagerTest
 
         appMetadata.getMetamodelMap().put(_PU, metaModel);
 
-        new ClientFactoryConfiguraton(_PU).configure();
-        new SchemaConfiguration(_PU).configure();
+        new ClientFactoryConfiguraton(_PU).configure(null);
+        new SchemaConfiguration(_PU).configure(null);
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

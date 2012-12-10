@@ -81,7 +81,7 @@ public class MetamodelConfiguration implements Configuration
      * @see com.impetus.kundera.configure.Configuration#configure()
      */
     @Override
-    public void configure()
+    public void configure(Map properties)
     {
         log.debug("Loading Entity Metadata...");
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

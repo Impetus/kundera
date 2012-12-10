@@ -168,7 +168,7 @@ public class UpdateDeleteNamedQueryTest
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(persistenceUnits).configure(null);
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

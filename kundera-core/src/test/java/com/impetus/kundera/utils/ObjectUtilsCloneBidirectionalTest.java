@@ -67,7 +67,7 @@ public class ObjectUtilsCloneBidirectionalTest
     {
         // configurator.configure();
         getEntityManagerFactory();
-        new PersistenceUnitConfiguration("kunderatest").configure();
+        new PersistenceUnitConfiguration("kunderatest").configure(null);
         // new MetamodelConfiguration("kunderatest").configure();
     }
 
