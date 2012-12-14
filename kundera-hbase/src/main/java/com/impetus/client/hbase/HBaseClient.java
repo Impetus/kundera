@@ -47,6 +47,7 @@ import com.impetus.client.hbase.query.HBaseQuery;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -86,6 +87,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     private int batchSize;
 
+    private Map<String, Object> puProperties;
+
     /**
      * Instantiates a new h base client.
      * 
@@ -99,18 +102,18 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the reader
      * @param persistenceUnit
      *            the persistence unit
+     * @param puProperties
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
-            String persistenceUnit)
+            String persistenceUnit, Map<String, Object> puProperties)
     {
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
+        this.puProperties = puProperties;
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        batchSize = puMetadata.getBatchSize();
-
+        getBatchSize(persistenceUnit, this.puProperties);
     }
 
     /*
@@ -678,77 +681,32 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
     }
 
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void getBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                : null;
+        if (batch_Size != null)
+        {
+            batchSize = Integer.valueOf(batch_Size);
+            if (batchSize == 0)
+            {
+                throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+            }
+        }
+        else
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
+    }
+
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
-    {
-        return handler.getForeignKeysFromJoinTable(tableName, pKeyColumnValue, columnName);
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
-     */
-    @Override
-    @Deprecated
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
-    {
-        CompareOp operator = HBaseUtils.getOperator("=", false);
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
-
-        byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
-        Filter f = new SingleColumnValueFilter(Bytes.toBytes(columnName), Bytes.toBytes(columnName), operator,
-                valueInBytes);
-        KeyOnlyFilter keyFilter = new KeyOnlyFilter();
-        FilterList filterList = new FilterList(f, keyFilter);
-        try
-        {
-            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME, columnName + "_"
-                    + columnValue, m.getIdAttribute().getBindableJavaType());
-        }
-        catch (IOException e)
-        {
-            log.error("Error while executing findIdsByColumn(), Caused by: " + e.getMessage());
-            throw new KunderaException(e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
-     * java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-        try
-        {
-            handler.deleteRow(columnValue, tableName);
-
-        }
-        catch (IOException e)
-        {
-            log.error("Error during delete by key. Caused by:" + e.getMessage());
-            throw new PersistenceException(e);
-        }
-    }
-
 }

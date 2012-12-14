@@ -27,8 +27,6 @@ import javax.persistence.FetchType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//import org.hibernate.collection.PersistentCollection;
-//import org.hibernate.collection.PersistentSet;
 import org.hibernate.collection.internal.PersistentSet;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;

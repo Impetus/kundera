@@ -57,7 +57,8 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
             }
             catch (Exception e)
             {
-                log.error(e.getMessage());
+                log.error(e);
+                e.printStackTrace();
             }
         }
 

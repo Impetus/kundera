@@ -62,14 +62,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -123,16 +121,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
+    protected Map<String, Object> externalProperties;
+
     /**
      * constructor using fields.
      * 
      * @param persistenceUnit
      *            the persistence unit
+     * @param externalProperties
      */
-    protected CassandraClientBase(String persistenceUnit)
+    protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        batchSize = puMetadata.getBatchSize();
+        this.externalProperties = externalProperties;
+        setBatchSize(persistenceUnit, this.externalProperties);
         cqlVersion = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
                 : CassandraConstants.CQL_VERSION_2_0;
     }
@@ -182,9 +183,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
             entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
 
-            // populateDataForSuperCounter(m, qCounterSuperColumnResults,
-            // entities, isRelation, relations);
-
             for (Bytes key : qCounterSuperColumnResults.keySet())
             {
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
@@ -202,8 +200,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     ColumnOrSuperColumnHelper.COUNTER_COLUMN);
             entities = new ArrayList<Object>(qCounterColumnResults.size());
 
-            // populateDataForCounter(m, qCounterColumnResults, entities,
-            // isRelation, relations, dataHandler);
             for (Bytes key : qCounterColumnResults.keySet())
             {
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
@@ -306,18 +302,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                 if (linkName != null && linkValue != null)
                 {
-                    // if (metadata.getEmbeddedColumnsAsList().isEmpty())
-                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty()/*
-                                                                                      * metadata
-                                                                                      * .
-                                                                                      * getEmbeddedColumnsAsList
-                                                                                      * (
-                                                                                      * )
-                                                                                      * .
-                                                                                      * isEmpty
-                                                                                      * (
-                                                                                      * )
-                                                                                      */)
+                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty())
                     {
                         if (metadata.isCounterColumnType())
                         {
@@ -387,40 +372,40 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         ColumnPath path = new ColumnPath(metadata.getTableName());
 
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
         try
         {
-            conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
-            Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(metadata.getSchema());
-            cassandra_client.remove_counter(
-                    (CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(), path,
-                    consistencyLevel);
+            pooledConnection = getPooledConection(metadata.getPersistenceUnit());
+            conn = getConnection(pooledConnection);
+
+            conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
+                    path, consistencyLevel);
 
         }
         catch (InvalidRequestException ire)
         {
-            log.error("Error during executing delete, Caused by :" + ire.getMessage());
+            log.error("Error during executing delete, Caused by :" + ire);
             throw new PersistenceException(ire);
         }
         catch (UnavailableException ue)
         {
-            log.error("Error during executing delete, Caused by :" + ue.getMessage());
+            log.error("Error during executing delete, Caused by :" + ue);
             throw new PersistenceException(ue);
         }
         catch (TimedOutException toe)
         {
-            log.error("Error during executing delete, Caused by :" + toe.getMessage());
+            log.error("Error during executing delete, Caused by :" + toe);
             throw new PersistenceException(toe);
         }
         catch (TException te)
         {
-            log.error("Error during executing delete, Caused by :" + te.getMessage());
+            log.error("Error during executing delete, Caused by :" + te);
             throw new PersistenceException(te);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
     }
 
@@ -434,13 +419,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param columns
      *            List of columns
      */
-    protected void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
+    protected void createIndexesOnColumns(String schemaName, String tableName, String poolName, List<Column> columns)
     {
-        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
+        Object pooledConnection = null;
         try
         {
-            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
-            KsDef ksDef = api.describe_keyspace(keyspace);
+            Cassandra.Client api = null;
+            pooledConnection = getPooledConection(persistenceUnit);
+            api = getConnection(pooledConnection);
+            KsDef ksDef = api.describe_keyspace(schemaName);
             List<CfDef> cfDefs = ksDef.getCf_defs();
 
             // Column family definition on which secondary index creation is
@@ -463,13 +450,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 throw new PersistenceException("Join table does not exist in database");
             }
-            // //create a column family, in case it is not already available.
-            // if(columnFamilyDefToUpdate == null)
-            // {
-            // isNew = true;
-            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
-            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
-            // }
+            // create a column family, in case it is not already available.
 
             // Get list of indexes already created
             List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
@@ -511,36 +492,37 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (isUpdatable)
             {
                 api.system_update_column_family(columnFamilyDefToUpdate);
-            }// } else
-             // {
-             // api.system_add_column_family(columnFamilyDefToUpdate);
-             // }
+            }
 
         }
         catch (InvalidRequestException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (SchemaDisagreementException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (TException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (NotFoundException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (PropertyAccessException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
+        }
+        finally
+        {
+            releaseConnection(pooledConnection);
         }
     }
 
@@ -619,7 +601,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval" + e.getMessage());
+            log.error("Error on retrieval ", e);
             throw new PersistenceException(e);
         }
 
@@ -687,20 +669,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
         CqlResult result = null;
         List returnedEntities = null;
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
         String persistenceUnit = entityMetadata.getPersistenceUnit();
-        String schema = entityMetadata.getSchema();
         try
         {
-            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-            Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(schema);
-            cassandra_client.set_cql_version(getCqlVersion());
+            pooledConnection = getPooledConection(persistenceUnit);
+            conn = getConnection(pooledConnection);
+            conn.set_cql_version(getCqlVersion());
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
-            result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+            result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
             {
@@ -742,38 +723,38 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             throw new PersistenceException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             throw new PersistenceException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             throw new PersistenceException(e);
         }
         catch (TException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             throw new PersistenceException(e);
         }
         catch (Exception e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" , e);
             e.printStackTrace();
             throw new PersistenceException(e);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
         return returnedEntities;
 
@@ -830,11 +811,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Object e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                             new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
-
-                    // Object e = dataHandler
-                    // .fromColumnThriftRow(m.getEntityClazz(), m, new
-                    // ThriftRow(id, m.getTableName(), columns,
-                    // null, null, null), relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -1244,7 +1220,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public int executeBatch()
     {
         String persistenceUnit = null;
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
 
         Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
 
@@ -1286,37 +1263,34 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (!mutationMap.isEmpty())
             {
-                conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-                PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getPersistenceUnitMetadata(persistenceUnit);
-                Cassandra.Client cassandra_client = conn.getAPI();
-                cassandra_client.set_keyspace(puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
-                cassandra_client.batch_mutate(mutationMap, consistencyLevel);
+                pooledConnection = getPooledConection(persistenceUnit);
+                conn = getConnection(pooledConnection);
+                conn.batch_mutate(mutationMap, consistencyLevel);
             }
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
 
         return mutationMap.size();
@@ -1361,7 +1335,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error during persisting record, Details:" + e.getMessage());
+            log.error("Error during persisting record, Details:" + e);
             throw new KunderaException(e);
         }
 
@@ -1472,25 +1446,78 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     protected Cassandra.Client getRawClient(final String persistenceUnit, final String schema)
     {
-        IPooledConnection connection = PelopsUtils.getCassandraConnection(persistenceUnit);
-        Cassandra.Client client = connection.getAPI();
+        Cassandra.Client client = null;
+        Object pooledConnection;
+        pooledConnection = getPooledConection(persistenceUnit);
+        client = getConnection(pooledConnection);
         try
         {
-            client.set_keyspace(schema);
             client.set_cql_version(getCqlVersion());
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error during borrowing a connection, Details:" + irex.getMessage());
+            log.error("Error during borrowing a connection, Details:" + irex);
             throw new KunderaException(irex);
         }
         catch (TException tex)
         {
-            log.error("Error during borrowing a connection, Details:" + tex.getMessage());
+            log.error("Error during borrowing a connection, Details:" + tex);
             throw new KunderaException(tex);
         }
-
+        finally
+        {
+            releaseConnection(pooledConnection);
+        }
         return client;
 
     }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = null;
+        if (puProperties != null)
+        {
+            batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                    : null;
+            if (batch_Size != null)
+            {
+                batchSize = Integer.valueOf(batch_Size);
+                if (batchSize == 0)
+                {
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                }
+            }
+        }
+        else if (batch_Size == null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
+    }
+
+    private Cassandra.Client getConnection(Object connection)
+    {
+        if (connection != null)
+        {
+            if (connection.getClass().isAssignableFrom(Cassandra.Client.class))
+            {
+                return (Cassandra.Client) connection;
+            }
+            else
+            {
+                return ((IPooledConnection) connection).getAPI();
+            }
+        }
+
+        throw new KunderaException("Invalid configuration!, no available pooled connection found for:"
+                + this.getClass().getSimpleName());
+    }
+
+    protected abstract Object getPooledConection(String persistenceUnit);
+
+    protected abstract void releaseConnection(Object conn);
 }

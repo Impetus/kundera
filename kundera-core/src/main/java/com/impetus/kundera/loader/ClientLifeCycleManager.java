@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import java.util.Map;
+
 /**
  * Interface to define for client life cycle manager.
  * 
@@ -27,7 +29,7 @@ public interface ClientLifeCycleManager
     /**
      * Initialize configured client.
      */
-    void initialize();
+    void initialize(Map<String, Object> puProperties);
 
     /**
      * Returns true if client is thread safe, else false.

@@ -71,14 +71,7 @@ public class KunderaPersistence implements PersistenceProvider
         // list may not be intended
         synchronized (persistenceUnit)
         {
-            // if (!loaded)
-            // {
-            // loaded = true;
-            // initializeKundera(persistenceUnit);
-
-            // }
-
-            initializeKundera(persistenceUnit);
+            initializeKundera(persistenceUnit, map);
 
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
@@ -92,7 +85,7 @@ public class KunderaPersistence implements PersistenceProvider
      * @param persistenceUnit
      *            Persistence Unit/ Comma separated persistence units
      */
-    private void initializeKundera(String persistenceUnit)
+    private void initializeKundera(String persistenceUnit, Map props)
     {
         // Invoke Application MetaData
         logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) "
@@ -100,7 +93,7 @@ public class KunderaPersistence implements PersistenceProvider
 
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
-        new Configurator(persistenceUnits).configure();
+        new Configurator(props, persistenceUnits).configure();
 
     }
 

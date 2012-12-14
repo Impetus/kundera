@@ -36,6 +36,7 @@ public interface InvertedIndexHandler
 
     /**
      * Writes a record into inverted index table.
+     * 
      * @param node
      * @param entityMetadata
      * @param persistenceUnit
@@ -47,16 +48,19 @@ public interface InvertedIndexHandler
 
     /**
      * Searches records from Inverted index table.
+     * 
      * @param m
      * @param filterClauseQueue
      * @param persistenceUnit
      * @param consistencyLevel
      * @return
      */
-    List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel, Map<Boolean, List<IndexClause>> indexClauseMap);
+    List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
+            Map<Boolean, List<IndexClause>> indexClauseMap);
 
     /**
      * Deletes a record from inverted index table.
+     * 
      * @param entity
      * @param metadata
      * @param consistencyLevel

@@ -19,9 +19,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-//import org.hibernate.collection.PersistentCollection;
-
 import org.hibernate.collection.spi.PersistentCollection;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
@@ -32,7 +31,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.DeepEquals;
-import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Responsible for generating {@link ObjectGraph} of nodes from a given entity
@@ -52,7 +50,7 @@ public class ObjectGraphBuilder
     {
         // Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();
-        this.persistenceCache = persistenceCache;
+//        this.persistenceCache = persistenceCache;
 
         // Recursively build object graph and get head node.
         Node headNode = getNode(entity, objectGraph, initialNodeState);
@@ -128,11 +126,11 @@ public class ObjectGraphBuilder
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
 
         // Make a deep copy of entity data
-        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
+//        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache, id);
+            node = new Node(nodeId, /*nodeDataCopy*/entity, initialNodeState, persistenceCache, id);
 
         }
         else
@@ -144,7 +142,7 @@ public class ObjectGraphBuilder
             // If dirty, set the entity data into node and mark it as dirty
             if (!DeepEquals.deepEquals(node.getData(), entity))
             {
-                node.setData(nodeDataCopy);
+                node.setData(/*nodeDataCopy*/entity);
                 node.setDirty(true);
             }
             else

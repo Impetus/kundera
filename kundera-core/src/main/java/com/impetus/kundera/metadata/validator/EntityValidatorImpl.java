@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.validator;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -45,6 +46,24 @@ public class EntityValidatorImpl implements EntityValidator
 
     /** cache for validated classes. */
     private List<Class<?>> classes = new ArrayList<Class<?>>();
+
+    private Map<String, Object> puProperties;
+
+    /**
+     * @param puPropertyMap
+     */
+    public EntityValidatorImpl(Map puPropertyMap)
+    {
+        this.puProperties = puPropertyMap;
+    }
+
+    /**
+     * @param externalPropertyMap
+     */
+    public EntityValidatorImpl()
+    {
+        this(null);
+    }
 
     /**
      * Checks the validity of a class for Cassandra entity.
@@ -94,11 +113,12 @@ public class EntityValidatorImpl implements EntityValidator
         List<Field> keys = new ArrayList<Field>();
         for (Field field : clazz.getDeclaredFields())
         {
-            if(field.isAnnotationPresent(Id.class) && field.isAnnotationPresent(EmbeddedId.class))
+            if (field.isAnnotationPresent(Id.class) && field.isAnnotationPresent(EmbeddedId.class))
             {
-                throw new InvalidEntityDefinitionException(clazz.getName() + " must have either @Id field or @EmbeddedId field");
+                throw new InvalidEntityDefinitionException(clazz.getName()
+                        + " must have either @Id field or @EmbeddedId field");
             }
-            
+
             if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class))
             {
                 keys.add(field);
@@ -131,8 +151,8 @@ public class EntityValidatorImpl implements EntityValidator
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         if (metadata != null)
         {
-            SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit())
-                    .getSchemaManager();
+            SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit(), puProperties)
+                    .getSchemaManager(puProperties);
             if (!schemaManager.validateEntity(clazz))
             {
                 log.warn("Validation for : " + clazz + " failed , any operation on this class will result in fail.");

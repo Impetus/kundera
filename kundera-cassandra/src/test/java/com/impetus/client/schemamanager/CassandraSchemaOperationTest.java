@@ -78,7 +78,7 @@ public class CassandraSchemaOperationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration("CassandraSchemaOperationTest");
+        configuration = new SchemaConfiguration(null, "CassandraSchemaOperationTest");
         CassandraCli.cassandraSetUp();
         CassandraCli cli = new CassandraCli();
         client = cli.getClient();
@@ -105,7 +105,7 @@ public class CassandraSchemaOperationTest
             UnsupportedEncodingException
     {
         getEntityManagerFactory("create");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -146,7 +146,7 @@ public class CassandraSchemaOperationTest
             UnsupportedEncodingException
     {
         getEntityManagerFactory("create-drop");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -204,7 +204,7 @@ public class CassandraSchemaOperationTest
         Assert.assertEquals(0, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
         getEntityManagerFactory("update");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -262,7 +262,7 @@ public class CassandraSchemaOperationTest
         Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
         getEntityManagerFactory("update");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -302,7 +302,7 @@ public class CassandraSchemaOperationTest
             client.system_add_column_family(cf_def);
 
             getEntityManagerFactory("validate");
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
             schemaManager.exportSchema();
 
             Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -393,7 +393,7 @@ public class CassandraSchemaOperationTest
             Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
             getEntityManagerFactory("validate");
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
             schemaManager.exportSchema();
 
             // Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));
@@ -483,7 +483,7 @@ public class CassandraSchemaOperationTest
 
         EntityMetadata m = new EntityMetadata(CassandraEntitySimple.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySimple.class, m);
 
         IndexProcessor indexProcessor = new IndexProcessor();
@@ -503,7 +503,7 @@ public class CassandraSchemaOperationTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
 
         configuration.configure();
         // EntityManagerFactoryImpl impl = new

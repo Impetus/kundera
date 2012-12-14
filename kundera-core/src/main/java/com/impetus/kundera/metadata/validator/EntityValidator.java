@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
+
 /**
  * Interface to validate an entity.
  * 
@@ -36,6 +37,7 @@ public interface EntityValidator
      * 
      * @param clazz
      *            the clazz
+     * @param puProperties
      */
     void validateEntity(Class<?> clazz);
 }

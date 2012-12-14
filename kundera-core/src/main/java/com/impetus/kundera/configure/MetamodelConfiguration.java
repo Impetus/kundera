@@ -48,6 +48,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Metamodel configurer: a) Configure application meta data b) loads entity
@@ -61,8 +62,11 @@ public class MetamodelConfiguration implements Configuration
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(MetamodelConfiguration.class);
 
-    /** Holding persistence unit instances. */
-    private String[] persistenceUnits;
+    /** Holding instance for persistence units. */
+    protected String[] persistenceUnits;
+
+    /** Holding persistenceUnit properties */
+    protected Map externalProperyMap;
 
     /**
      * Constructor using persistence units as parameter.
@@ -70,9 +74,10 @@ public class MetamodelConfiguration implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    public MetamodelConfiguration(String... persistenceUnits)
+    public MetamodelConfiguration(Map properties, String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
+        this.externalProperyMap = properties;
     }
 
     /*
@@ -249,7 +254,7 @@ public class MetamodelConfiguration implements Configuration
             {
                 pu = schema.substring(schema.indexOf("@") + 1, schema.length());
             }
-            EntityValidator validator = new EntityValidatorImpl();
+            EntityValidator validator = new EntityValidatorImpl(getExternalProperties(persistenceUnit));
             if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
                     && persistenceUnit.equalsIgnoreCase(pu))
             {
@@ -281,7 +286,6 @@ public class MetamodelConfiguration implements Configuration
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
-        PersistenceUnitMetadata puMetadata = null;
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
         try
@@ -296,15 +300,13 @@ public class MetamodelConfiguration implements Configuration
             reader.accumulateAnnotations(annotations,
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
 
-            puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
-
             // iterate through all valid annotations
             for (String validAnn : reader.getValidAnnotations())
             {
                 // check if the current class has one?
-                if (annotations.contains(validAnn) && puMetadata != null)
+                if (annotations.contains(validAnn))
                 {
-                    Class<?> clazz = puMetadata.getClassLoader().loadClass(className);
+                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
 
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName())
                             && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
@@ -330,7 +332,8 @@ public class MetamodelConfiguration implements Configuration
                         {
                             if (null == metadata)
                             {
-                                MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client);
+                                MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client,
+                                        getExternalProperties(persistenceUnit));
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
 
                                 // in case entity's pu does not belong to parse
@@ -413,4 +416,42 @@ public class MetamodelConfiguration implements Configuration
         return clazzToPuMap;
     }
 
+    /**
+     * @param puProperty
+     */
+    private Map<String, Object> getExternalProperties(String pu)
+    {
+        Map<String, Object> puProperty;
+        if (persistenceUnits.length > 1 && externalProperyMap != null)
+        {
+            puProperty = (Map<String, Object>) externalProperyMap.get(pu);
+
+            // if property found then return it, if it is null by pass it, else
+            // throw invalidConfiguration.
+            if (puProperty != null)
+            {
+                return fetchPropertyMap(puProperty);
+            }
+        }
+
+        return externalProperyMap;
+
+    }
+
+    /**
+     * @param puProperty
+     * @return
+     */
+    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
+    {
+        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
+        {
+            return puProperty;
+        }
+        else
+        {
+            throw new InvalidConfigurationException(
+                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
+        }
+    }
 }

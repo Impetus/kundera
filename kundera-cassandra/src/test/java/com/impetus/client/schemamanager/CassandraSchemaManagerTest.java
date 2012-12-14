@@ -210,7 +210,7 @@ public class CassandraSchemaManagerTest
         EntityMetadata m16 = new EntityMetadata(CassandraEntityPersonBi1ToM.class);
         EntityMetadata m17 = new EntityMetadata(CassandraEntityPersonBiMTo1.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySuper.class, m1);
         processor.process(CassandraEntityAddressUni1To1.class, m2);
         processor.process(CassandraEntityAddressUni1ToM.class, m3);
@@ -272,8 +272,8 @@ public class CassandraSchemaManagerTest
 
         appMetadata.getMetamodelMap().put(_PU, metaModel);
 
-        new ClientFactoryConfiguraton(_PU).configure();
-        new SchemaConfiguration(_PU).configure();
+        new ClientFactoryConfiguraton(null, _PU).configure();
+        new SchemaConfiguration(null, _PU).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

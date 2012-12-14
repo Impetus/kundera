@@ -17,6 +17,7 @@ package com.impetus.kundera.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
@@ -64,15 +65,15 @@ public class MetadataBuilder
      * 
      */
 
-    public MetadataBuilder(String puName, String client)
+    public MetadataBuilder(String puName, String client, Map puProperties)
     {
         this.persistenceUnit = puName;
         this.client = client;
-        validator = new EntityValidatorImpl();
+        validator = new EntityValidatorImpl(puProperties);
         metadataProcessors = new ArrayList<MetadataProcessor>();
 
         // add processors to chain.
-        metadataProcessors.add(new TableProcessor());
+        metadataProcessors.add(new TableProcessor(puProperties));
         metadataProcessors.add(new CacheableAnnotationProcessor());
         metadataProcessors.add(new IndexProcessor());
         metadataProcessors.add(new EntityListenersProcessor());
@@ -97,6 +98,7 @@ public class MetadataBuilder
      * 
      * @param clazz
      *            the clazz
+     * @param externalProperties
      * @return the entity metadata
      */
     public EntityMetadata buildEntityMetadata(Class<?> clazz)

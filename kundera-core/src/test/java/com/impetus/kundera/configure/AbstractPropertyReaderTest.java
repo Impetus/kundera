@@ -76,7 +76,7 @@ public class AbstractPropertyReaderTest
             if (store.getName().equalsIgnoreCase("HBase"))
             {
                 Assert.assertNotNull(store.getSchemas());
-                Assert.assertEquals(1, store.getSchemas().size());
+                Assert.assertEquals(2, store.getSchemas().size());
                 Assert.assertEquals("USERXYZ", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
                 Assert.assertEquals(2, store.getSchemas().get(0).getTables().size());
@@ -108,7 +108,7 @@ public class AbstractPropertyReaderTest
             else if (store.getName().equalsIgnoreCase("Cassandra"))
             {
                 Assert.assertNotNull(store.getSchemas());
-                Assert.assertEquals(1, store.getSchemas().size());
+                Assert.assertEquals(3, store.getSchemas().size());
                 Assert.assertEquals("KunderaCassandraXmlTest", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
                 Assert.assertEquals(1, store.getSchemas().get(0).getTables().size());
@@ -118,7 +118,7 @@ public class AbstractPropertyReaderTest
                 Assert.assertNotNull(store.getSchemas().get(0).getDataCenters());
                 Assert.assertEquals(2, store.getSchemas().get(0).getDataCenters().size());
                 Assert.assertNotNull(store.getSchemas().get(0).getSchemaProperties());
-                Assert.assertEquals(3, store.getSchemas().get(0).getSchemaProperties().size());
+                Assert.assertEquals(4, store.getSchemas().get(0).getSchemaProperties().size());
             }
         }
     }

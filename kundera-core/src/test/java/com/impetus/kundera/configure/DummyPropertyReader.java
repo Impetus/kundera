@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-import java.util.Properties;
 
 /**
  * Class Dummy Property Reader for test
@@ -50,21 +49,7 @@ public class DummyPropertyReader extends AbstractPropertyReader implements Prope
         }
 
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.configure.AbstractPropertyReader#onProperties(java
-     * .util.Properties)
-     */
-    @Override
-    public void onProperties(Properties props)
-    {
-        // TODO Auto-generated method stub
-
-    }
-
+   
     /**
      * Dummy schema metadata for test.
      * 

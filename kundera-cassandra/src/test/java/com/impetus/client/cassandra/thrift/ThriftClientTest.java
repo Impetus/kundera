@@ -1,5 +1,7 @@
 package com.impetus.client.cassandra.thrift;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,11 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
+import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +42,7 @@ public class ThriftClientTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        createSchema();
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
         em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
@@ -44,6 +52,7 @@ public class ThriftClientTest
     @After
     public void tearDown() throws Exception
     {
+        CassandraCli.dropKeySpace("KunderaExamples");
         em.close();
         emf.close();
     }
@@ -126,4 +135,15 @@ public class ThriftClientTest
         // fail("Not yet implemented");
     }
 
+    private void createSchema() throws InvalidRequestException, SchemaDisagreementException, TException
+    {
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        CfDef cfDef = new CfDef("KunderaExamples", "PERSON_ADDRESS");
+        cfDefs.add(cfDef);
+        KsDef ks_def = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+        Map<String, String> strategy_options = new HashMap<String, String>();
+        strategy_options.put("replication_factor", "1");
+        ks_def.setStrategy_options(strategy_options);
+        CassandraCli.client.system_add_keyspace(ks_def);
+    }
 }

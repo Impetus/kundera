@@ -15,8 +15,6 @@
  */
 package com.impetus.kundera.rest.common;
 
-import static org.junit.Assert.*;
-
 import javax.ws.rs.HttpMethod;
 
 import junit.framework.Assert;

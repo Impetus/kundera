@@ -84,12 +84,12 @@ public class ObjectUtils
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
             if (metadata == null)
             {
-                
+
                 return source;
             }
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());            
+                    metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(sourceObjectClass);
 
@@ -131,10 +131,12 @@ public class ObjectUtils
                             Set<Attribute> columns = embeddedColumn.getAttributes();
                             for (Attribute column : columns)
                             {
-                  
-                                
-                                PropertyAccessorHelper.set(targetEmbeddedObj, (Field) column.getJavaMember(),
-                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj, (Field) column.getJavaMember()));
+
+                                PropertyAccessorHelper.set(
+                                        targetEmbeddedObj,
+                                        (Field) column.getJavaMember(),
+                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj,
+                                                (Field) column.getJavaMember()));
                             }
 
                             PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
@@ -156,7 +158,7 @@ public class ObjectUtils
                                     for (Field f : genericClass.getDeclaredFields())
                                     {
                                         PropertyAccessorHelper.set(targetEcObj, f,
-                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));                                       
+                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
 
                                     }
 
@@ -185,12 +187,13 @@ public class ObjectUtils
                     }
 
                 }
-                else if(attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
+                else if (attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
                 {
-                    
-                    PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObjectCopy(source, columnField));
+
+                    PropertyAccessorHelper.set(target, columnField,
+                            PropertyAccessorHelper.getObjectCopy(source, columnField));
                 }
-            }         
+            }
 
             // Put this object into copied object map
             copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);

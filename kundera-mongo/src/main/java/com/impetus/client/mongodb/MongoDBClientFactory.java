@@ -18,6 +18,7 @@ package com.impetus.client.mongodb;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
-import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata.MongoDBConnection;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -61,11 +61,11 @@ public class MongoDBClientFactory extends GenericClientFactory
     private DB mongoDB;
 
     @Override
-    public void initialize()
+    public void initialize(Map<String, Object> externalProperty)
     {
         reader = new MongoEntityReader();
-        propertyReader = new MongoDBPropertyReader();
-        propertyReader.read(getPersistenceUnit());
+        initializePropertyReader();
+        setExternalProperties(externalProperty);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties);
     }
 
     /**
@@ -93,15 +93,37 @@ public class MongoDBClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
-        String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        String contactNode = null;
+        String defaultPort = null;
+        String keyspace = null;
+        String poolSize = null;
+        if (externalProperties != null)
+        {
+            contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            keyspace = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+            poolSize = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+        if (contactNode == null)
+        {
+            contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null)
+        {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (keyspace == null)
+        {
+            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+        if (poolSize == null)
+        {
+            poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
 
         List<ServerAddress> addrs = new ArrayList<ServerAddress>();
 
         Mongo mongo = null;
-        MongoOptions mo = null;
         try
         {
             mongo = onSetMongoServerProperties(contactNode, defaultPort, poolSize, addrs);
@@ -171,19 +193,22 @@ public class MongoDBClientFactory extends GenericClientFactory
 
             PopulateMongoOptions.populateMongoOptions(mo, p);
         }
-        else if (metadata != null && metadata.getConnections() != null && !metadata.getConnections().isEmpty())
-        {
-            addrs = new ArrayList<ServerAddress>();
-            for (MongoDBConnection connection : metadata.getConnections())
-            {
-                logger.info("Connecting to mongodb at " + connection.getHost() + " on port " + connection.getPort());
-                addrs.add(new ServerAddress(connection.getHost(), Integer.parseInt(connection.getPort())));
-            }
-            mongo = new Mongo(addrs);
-            mo = mongo.getMongoOptions();
-            mo.socketTimeout = metadata.getSocketTimeOut();
-            mongo.setReadPreference(metadata.getReadPreference());
-        }
+        // else if (metadata != null && metadata.getConnections() != null &&
+        // !metadata.getConnections().isEmpty())
+        // {
+        // addrs = new ArrayList<ServerAddress>();
+        // for (MongoDBConnection connection : metadata.getConnections())
+        // {
+        // logger.info("Connecting to mongodb at " + connection.getHost() +
+        // " on port " + connection.getPort());
+        // addrs.add(new ServerAddress(connection.getHost(),
+        // Integer.parseInt(connection.getPort())));
+        // }
+        // mongo = new Mongo(addrs);
+        // mo = mongo.getMongoOptions();
+        // mo.socketTimeout = metadata.getSocketTimeOut();
+        // mongo.setReadPreference(metadata.getReadPreference());
+        // }
         else
         {
             logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
@@ -208,7 +233,10 @@ public class MongoDBClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-        schemaManager.dropSchema();
+        if (schemaManager != null)
+        {
+            getSchemaManager(externalProperties).dropSchema();
+        }
         if (mongoDB != null)
         {
             logger.info("Closing connection to mongodb.");
@@ -219,16 +247,32 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             logger.warn("Can't close connection to MONGODB, it was already disconnected");
         }
+        externalProperties = null;
+        schemaManager = null;
     }
 
     @Override
-    public SchemaManager getSchemaManager()
+    public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
         if (schemaManager == null)
         {
-            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName());
+            initializePropertyReader();
+            setExternalProperties(externalProperty);
+            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;
+    }
+
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new MongoDBPropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
     }
 
     /**
@@ -244,8 +288,21 @@ public class MongoDBClientFactory extends GenericClientFactory
      */
     private void authenticate(Properties props, DB mongoDB)
     {
-        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        String password = null;
+        String userName = null;
+        if (externalProperties != null)
+        {
+            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+        }
+        if (userName == null)
+        {
+            userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+        }
+        if (password == null)
+        {
+            password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        }
         boolean authenticate = true;
         String errMsg = null;
         if (userName != null && password != null)

@@ -84,6 +84,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     private ServiceRegistry serviceRegistry;
 
+    private Map<String, Object> puProperties;
+
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(HibernateClient.class);
 
@@ -96,8 +98,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the index manager
      * @param reader
      *            the reader
+     * @param puProperties
      */
-    public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader)
+    public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
+            Map<String, Object> puProperties)
     {
         conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -120,6 +124,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.reader = reader;
+        this.puProperties = puProperties;
     }
 
     /*
@@ -635,93 +640,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             clause = schemaName + "." + tableName;
         }
         return clause;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
-    {
-
-        StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(columnName).append(" FROM ").append(getFromClause(null, tableName))
-                .append(" WHERE ").append(pKeyColumnName).append("='").append(pKeyColumnValue).append("'");
-
-        Session s = getSessionFactory().openSession();
-        Transaction tx = s.beginTransaction();
-
-        SQLQuery query = s.createSQLQuery(sqlQuery.toString());
-
-        List<E> foreignKeys = new ArrayList<E>();
-
-        foreignKeys = query.list();
-
-        // s.close();
-
-        return foreignKeys;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
-     */
-    @Override
-    @Deprecated
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
-    {
-        String childIdStr = (String) columnValue;
-        // EntityMetadata m =
-        // KunderaMetadataManager.getEntityMetadata(entityClazz);
-        StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(getFromClause(null, tableName))
-                .append(" WHERE ").append(columnName).append("='").append(childIdStr).append("'");
-
-        Session s = getSessionFactory().openSession();
-        Transaction tx = s.beginTransaction();
-
-        SQLQuery query = s.createSQLQuery(sqlQuery.toString());
-
-        List<Object> primaryKeys = new ArrayList<Object>();
-
-        primaryKeys = query.list();
-
-        // s.close();
-        if (primaryKeys != null && !primaryKeys.isEmpty())
-        {
-            return primaryKeys.toArray(new Object[0]);
-        }
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
-     * java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-
-        StringBuffer query = new StringBuffer();
-
-        query.append("DELETE FROM ").append(getFromClause(null, tableName)).append(" WHERE ").append(columnName)
-                .append("=").append("'").append(columnValue).append("'");
-
-        s = getSessionFactory().openStatelessSession();
-        Transaction tx = s.beginTransaction();
-        s.createSQLQuery(query.toString()).executeUpdate();
-        tx.commit();
-
     }
 
     private SessionFactory getSessionFactory()

@@ -61,7 +61,7 @@ public class ActorTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration("CassandraSchemaOperationTest");
+        configuration = new SchemaConfiguration(null, "CassandraSchemaOperationTest");
         CassandraCli.cassandraSetUp();
         CassandraCli cli = new CassandraCli();
         client = cli.getClient();
@@ -87,7 +87,7 @@ public class ActorTest
     public void test() throws NotFoundException, InvalidRequestException, TException, UnsupportedEncodingException
     {
         getEntityManagerFactory("create");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -155,7 +155,7 @@ public class ActorTest
 
         EntityMetadata m = new EntityMetadata(Actor.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Actor.class, m);
 
         IndexProcessor indexProcessor = new IndexProcessor();
@@ -175,7 +175,7 @@ public class ActorTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
 
         configuration.configure();
         // EntityManagerFactoryImpl impl = new

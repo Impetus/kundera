@@ -103,7 +103,7 @@ public class CompositeDataTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        // loadData();
+        loadData();
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
@@ -420,7 +420,7 @@ public class CompositeDataTypeTest
     private void loadData()
     {
         CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+        String cql_Query = "create columnfamily \"CompositeUserDataType\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
                 + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
         try
         {

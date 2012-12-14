@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import java.util.Map;
+
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
@@ -63,6 +65,9 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     /** property reader instance */
     protected PropertyReader propertyReader;
 
+    /** Holds persistence unit related property */
+    protected Map<String, Object> externalProperties;
+
     /**
      * Load.
      * 
@@ -70,18 +75,17 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      *            the persistence unit
      */
     @Override
-    public void load(String persistenceUnit)
+    public void load(String persistenceUnit, Map<String, Object> puProperties)
     {
-
         setPersistenceUnit(persistenceUnit);
 
         // Load Client Specific Stuff
         logger.info("Loading client metadata for persistence unit : " + persistenceUnit);
-        loadClientMetadata();
+        loadClientMetadata(puProperties);
 
         // initialize the client
         logger.info("Initializing client for persistence unit : " + persistenceUnit);
-        initialize();
+        initialize(puProperties);
 
         // Construct Pool
         logger.info("Constructing pool for persistence unit : " + persistenceUnit);
@@ -90,15 +94,22 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /**
      * Load client metadata.
+     * 
+     * @param puProperties
      */
-    protected void loadClientMetadata()
+    protected void loadClientMetadata(Map<String, Object> puProperties)
     {
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
             ClientMetadata clientMetadata = new ClientMetadata();
-            String luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit)
-                    .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+            String luceneDirectoryPath = puProperties != null ? (String) puProperties
+                    .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
+            if (luceneDirectoryPath != null)
+            {
+                luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getPersistenceUnitMetadata(persistenceUnit)
+                        .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+            }
 
             // Add client metadata
             clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
@@ -113,11 +124,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /**
      * Initialize client.
+     * 
+     * @param puProperties
      */
-    public abstract void initialize();
+    public abstract void initialize(Map<String, Object> puProperties);
 
     /**
      * Creates a new GenericClient object.
+     * 
+     * @param externalProperties
      * 
      * @return the object
      */
@@ -141,7 +156,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             {
                 client = instantiateClient(persistenceUnit);
             }
-
         }
         else
         {
@@ -150,7 +164,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         }
 
         return client;
-
     }
 
     /**
@@ -198,4 +211,14 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         this.persistenceUnit = persistenceUnit;
     }
 
+    /**
+     * @param puProperties
+     */
+    protected void setExternalProperties(Map<String, Object> puProperties)
+    {
+        if (this.externalProperties == null)
+        {
+            this.externalProperties = puProperties;
+        }
+    }
 }

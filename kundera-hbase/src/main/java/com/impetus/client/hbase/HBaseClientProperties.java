@@ -25,20 +25,21 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
 /**
- * HBase implementation of {@link ClientPropertiesSetter}  
+ * HBase implementation of {@link ClientPropertiesSetter}
+ * 
  * @author amresh.singh
  */
 class HBaseClientProperties
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(HBaseClientProperties.class);
-    
+
     private static final String FILTER = "hbase.filter";
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         HBaseClient hbaseClient = (HBaseClient) client;
-        
+
         if (properties != null)
         {
             for (String key : properties.keySet())
@@ -46,15 +47,11 @@ class HBaseClientProperties
                 Object value = properties.get(key);
                 if (key.equals(FILTER) && value instanceof Filter)
                 {
-                    hbaseClient.setFilter((Filter)value);
+                    hbaseClient.setFilter((Filter) value);
                 }
 
                 // Add more
-               
             }
         }
-        
     }
-    
-
 }

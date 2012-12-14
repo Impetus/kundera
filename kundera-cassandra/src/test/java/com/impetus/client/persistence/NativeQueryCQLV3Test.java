@@ -48,12 +48,13 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class NativeQueryCQLV3Test
 {
-    
+
     private final String schema = "kunderaexamples";
 
     /**
@@ -69,7 +70,7 @@ public class NativeQueryCQLV3Test
         CassandraCli.dropKeySpace("KunderaExamples");
         CassandraCli.createKeySpace(schema);
     }
-    
+
     /**
      * Test create insert column family query.
      */
@@ -77,7 +78,7 @@ public class NativeQueryCQLV3Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
-        
+
         // String nativeSql = "CREATE KEYSPACE " + schema
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
@@ -86,11 +87,11 @@ public class NativeQueryCQLV3Test
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-        
+
         Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-        PelopsClient pc = (PelopsClient)clientMap.get("cassandra");
+        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
         pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        
+
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntity.class);
         // // q.getResultList();
@@ -151,7 +152,7 @@ public class NativeQueryCQLV3Test
         Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
 
     }
-    
+
     /**
      * Gets the entity manager factory.
      * 
@@ -186,7 +187,7 @@ public class NativeQueryCQLV3Test
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntity.class);
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntity.class, m);
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
@@ -197,10 +198,10 @@ public class NativeQueryCQLV3Test
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         return emf;
     }
-    
+
     /**
      * Tear down.
      * 

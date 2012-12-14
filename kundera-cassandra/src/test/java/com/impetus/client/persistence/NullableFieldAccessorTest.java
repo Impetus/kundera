@@ -128,7 +128,7 @@ public class NullableFieldAccessorTest
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySample.class, m);
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
@@ -137,7 +137,7 @@ public class NullableFieldAccessorTest
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        new ClientFactoryConfiguraton(persistenceUnit).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnit).configure();
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

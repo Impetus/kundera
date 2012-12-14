@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.hbase;
 
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -49,14 +51,34 @@ public class HBaseClientFactory extends GenericClientFactory
     private int poolSize;
 
     @Override
-    public void initialize()
+    public void initialize(Map<String, Object> externalProperty)
     {
+        setExternalProperties(externalProperty);
+        initializePropertyReader();
         // Initialize HBase configuration
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
 
-        String node = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
-        String port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-        String poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        String node = null;
+        String port = null;
+        String poolSize = null;
+        if (externalProperty != null)
+        {
+            node = (String) externalProperty.get(PersistenceProperties.KUNDERA_NODES);
+            port = (String) externalProperty.get(PersistenceProperties.KUNDERA_PORT);
+            poolSize = (String) externalProperty.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+        if (node == null)
+        {
+            node = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (port == null)
+        {
+            port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (poolSize == null)
+        {
+            poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
 
         if (StringUtils.isEmpty(poolSize))
         {
@@ -66,9 +88,6 @@ public class HBaseClientFactory extends GenericClientFactory
         {
             this.poolSize = Integer.parseInt(poolSize);
         }
-
-        propertyReader = new HBasePropertyReader();
-        propertyReader.read(getPersistenceUnit());
 
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
@@ -84,8 +103,8 @@ public class HBaseClientFactory extends GenericClientFactory
         }
         else
         {
-            hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
-            hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
+            hadoopConf.set("hbase.zookeeper.quorum", node);
+            hadoopConf.set("hbase.zookeeper.property.clientPort", "2181");
         }
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
@@ -101,7 +120,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit);
+        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties);
     }
 
     @Override
@@ -116,17 +135,36 @@ public class HBaseClientFactory extends GenericClientFactory
         // TODO destroy pool
         // hTablePool = null;
 
-        indexManager.close();
-        getSchemaManager().dropSchema();
+        // indexManager.close();
+        if (schemaManager != null)
+        {
+            getSchemaManager(externalProperties).dropSchema();
+        }
+        externalProperties = null;
+        schemaManager = null;
     }
 
     @Override
-    public SchemaManager getSchemaManager()
+    public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
+        setExternalProperties(externalProperty);
         if (schemaManager == null)
         {
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+            initializePropertyReader();           
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;
+    }
+
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new HBasePropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
     }
 }

@@ -26,22 +26,23 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
 /**
- * Cassandra implementation of {@link ClientPropertiesSetter} 
+ * Cassandra implementation of {@link ClientPropertiesSetter}
+ * 
  * @author amresh.singh
  */
 class CassandraClientProperties
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientProperties.class);
-    
+
     private static final String CONSISTENCY_LEVEL = "consistency.level";
+
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
-    
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         CassandraClientBase cassandraClientBase = (CassandraClientBase) client;
-        
+
         if (properties != null)
         {
             for (String key : properties.keySet())
@@ -51,18 +52,13 @@ class CassandraClientProperties
                 {
                     cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
                 }
-                else if(key.equals(CQL_VERSION) && value instanceof String)
+                else if (key.equals(CQL_VERSION) && value instanceof String)
                 {
                     cassandraClientBase.setCqlVersion((String) value);
                 }
 
                 // Add more properties as needed
-
-                
             }
         }
-        
-        
     }
-
 }

@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -80,10 +81,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private List<Node> nodes = new ArrayList<Node>();
 
     private int batchSize;
-    
+
     private WriteConcern writeConcern = null;
-    
-    private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();  
+
+    private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();
+
+    private Map<String, Object> puProperties;
 
     /**
      * Instantiates a new mongo db client.
@@ -94,8 +97,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the mgr
      * @param reader
      *            the reader
+     * @param puProperties
      */
-    public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit)
+    public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit,
+            Map<String, Object> puProperties)
     {
         // TODO: This could be a constly call, see how connection pooling is
         // relevant here
@@ -103,10 +108,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.indexManager = mgr;
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
+        this.puProperties = puProperties;
         handler = new MongoDBDataHandler();
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        batchSize = puMetadata.getBatchSize();
+        populateBatchSize(persistenceUnit, this.puProperties);
+
     }
 
     @Override
@@ -599,7 +605,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         for (String tableName : collections.keySet())
         {
             DBCollection dbCollection = mongoDb.getCollection(tableName);
-            dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);            
+            dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);
         }
     }
 
@@ -682,96 +688,100 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
-    {
-
-        List<E> foreignKeys = new ArrayList<E>();
-
-        DBCollection dbCollection = mongoDb.getCollection(tableName);
-        BasicDBObject query = new BasicDBObject();
-
-        query.put(pKeyColumnName, pKeyColumnValue);
-
-        DBCursor cursor = dbCollection.find(query);
-        DBObject fetchedDocument = null;
-
-        while (cursor.hasNext())
-        {
-            fetchedDocument = cursor.next();
-            String foreignKey = (String) fetchedDocument.get(columnName);
-            foreignKeys.add((E) foreignKey);
-        }
-        return foreignKeys;
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
-     * java.lang.Class)
-     */
-    @Override
-    @Deprecated
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
-    {
-
-        String childIdStr = (String) columnValue;
-
-        List<Object> primaryKeys = new ArrayList<Object>();
-
-        DBCollection dbCollection = mongoDb.getCollection(tableName);
-        BasicDBObject query = new BasicDBObject();
-
-        query.put(columnName, childIdStr);
-
-        DBCursor cursor = dbCollection.find(query);
-        DBObject fetchedDocument = null;
-
-        while (cursor.hasNext())
-        {
-            fetchedDocument = cursor.next();
-            String primaryKey = (String) fetchedDocument.get(pKeyName);
-            primaryKeys.add(primaryKey);
-        }
-
-        if (primaryKeys != null && !primaryKeys.isEmpty())
-        {
-            return primaryKeys.toArray(new Object[0]);
-        }
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-        DBCollection dbCollection = mongoDb.getCollection(tableName);
-        BasicDBObject query = new BasicDBObject();
-        query.put(columnName, columnValue);
-        dbCollection.remove(query, getWriteConcern(), encoder);        
-    }    
-    
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+    // * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    // */
+    // @Override
+    // @Deprecated
+    // public <E> List<E> getColumnsById(String tableName, String
+    // pKeyColumnName, String columnName, Object pKeyColumnValue)
+    // {
+    //
+    // List<E> foreignKeys = new ArrayList<E>();
+    //
+    // DBCollection dbCollection = mongoDb.getCollection(tableName);
+    // BasicDBObject query = new BasicDBObject();
+    //
+    // query.put(pKeyColumnName, pKeyColumnValue);
+    //
+    // DBCursor cursor = dbCollection.find(query);
+    // DBObject fetchedDocument = null;
+    //
+    // while (cursor.hasNext())
+    // {
+    // fetchedDocument = cursor.next();
+    // String foreignKey = (String) fetchedDocument.get(columnName);
+    // foreignKeys.add((E) foreignKey);
+    // }
+    // return foreignKeys;
+    //
+    // }
+    //
+    // /*
+    // * (non-Javadoc)
+    // *
+    // * @see
+    // com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+    // * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+    // * java.lang.Class)
+    // */
+    // @Override
+    // @Deprecated
+    // public Object[] findIdsByColumn(String tableName, String pKeyName, String
+    // columnName, Object columnValue,
+    // Class entityClazz)
+    // {
+    //
+    // String childIdStr = (String) columnValue;
+    //
+    // List<Object> primaryKeys = new ArrayList<Object>();
+    //
+    // DBCollection dbCollection = mongoDb.getCollection(tableName);
+    // BasicDBObject query = new BasicDBObject();
+    //
+    // query.put(columnName, childIdStr);
+    //
+    // DBCursor cursor = dbCollection.find(query);
+    // DBObject fetchedDocument = null;
+    //
+    // while (cursor.hasNext())
+    // {
+    // fetchedDocument = cursor.next();
+    // String primaryKey = (String) fetchedDocument.get(pKeyName);
+    // primaryKeys.add(primaryKey);
+    // }
+    //
+    // if (primaryKeys != null && !primaryKeys.isEmpty())
+    // {
+    // return primaryKeys.toArray(new Object[0]);
+    // }
+    // return null;
+    // }
+    //
+    // @Override
+    // @Deprecated
+    // public void deleteByColumn(String tableName, String columnName, Object
+    // columnValue)
+    // {
+    // DBCollection dbCollection = mongoDb.getCollection(tableName);
+    // BasicDBObject query = new BasicDBObject();
+    // query.put(columnName, columnValue);
+    // dbCollection.remove(query, getWriteConcern(), encoder);
+    // }
+    //
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new MongoDBClientProperties().populateClientProperties(client, properties);
     }
-    
 
     /**
-     * @param mongoDb the mongoDb to set
+     * @param mongoDb
+     *            the mongoDb to set
      */
     public void setMongoDb(DB mongoDb)
     {
@@ -779,7 +789,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * @param handler the handler to set
+     * @param handler
+     *            the handler to set
      */
     public void setHandler(MongoDBDataHandler handler)
     {
@@ -787,7 +798,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * @param log the log to set
+     * @param log
+     *            the log to set
      */
     public static void setLog(Log log)
     {
@@ -795,7 +807,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * @param nodes the nodes to set
+     * @param nodes
+     *            the nodes to set
      */
     public void setNodes(List<Node> nodes)
     {
@@ -803,7 +816,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * @param writeConcern the writeConcern to set
+     * @param writeConcern
+     *            the writeConcern to set
      */
     public void setWriteConcern(WriteConcern writeConcern)
     {
@@ -811,13 +825,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * @param encoder the encoder to set
+     * @param encoder
+     *            the encoder to set
      */
     public void setEncoder(DBEncoder encoder)
     {
         this.encoder = encoder;
-    }  
-    
+    }
 
     /**
      * @return the encoder
@@ -832,19 +846,42 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     public WriteConcern getWriteConcern()
     {
-        if(writeConcern == null) {
+        if (writeConcern == null)
+        {
             return mongoDb.getWriteConcern();
         }
         return writeConcern;
     }
 
     /**
-     * @param batchSize the batchSize to set
+     * @param batchSize
+     *            the batchSize to set
      */
     public void setBatchSize(int batchSize)
     {
         this.batchSize = batchSize;
-    }   
-    
-    
+    }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void populateBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                : null;
+        if (batch_Size != null)
+        {
+            batchSize = Integer.valueOf(batch_Size);
+            if (batchSize == 0)
+            {
+                throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+            }
+        }
+        else
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
+    }
 }

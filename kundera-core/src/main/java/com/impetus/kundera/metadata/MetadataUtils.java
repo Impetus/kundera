@@ -34,6 +34,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
 import com.impetus.kundera.metadata.model.ClientMetadata;
@@ -270,13 +271,23 @@ public class MetadataUtils
      *            the m
      * @param schemaStr
      *            the schema str
+     * @param puProperties
      */
-    public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr)
+    public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr, Map puProperties)
     {
 
         if (schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR) > 0)
         {
-            m.setSchema(schemaStr.substring(0, schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR)));
+            String schemaName = null;
+            if (puProperties != null)
+            {
+                schemaName = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+            }
+            if (schemaName == null)
+            {
+                schemaName = schemaStr.substring(0, schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR));
+            }
+            m.setSchema(schemaName);
             m.setPersistenceUnit(schemaStr.substring(
                     schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR) + 1, schemaStr.length()));
         }

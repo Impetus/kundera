@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class KunderaMetadata
 {
-
     /* Metadata for Kundera core */
     /** The core metadata. */
     private CoreMetadata coreMetadata;

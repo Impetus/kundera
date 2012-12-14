@@ -145,7 +145,7 @@ public class CassandraSchemaManagerMTM
         EntityMetadata m = new EntityMetadata(CassandraEntityPersonnelUniMToM.class);
         EntityMetadata m1 = new EntityMetadata(CassandraEntityHabitatUniMToM.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntityPersonnelUniMToM.class, m);
         processor.process(CassandraEntityHabitatUniMToM.class, m1);
 
@@ -161,8 +161,8 @@ public class CassandraSchemaManagerMTM
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
 
-        new ClientFactoryConfiguraton(pu).configure();
-        new SchemaConfiguration(pu).configure();
+        new ClientFactoryConfiguraton(null,pu).configure();
+        new SchemaConfiguration(null,pu).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

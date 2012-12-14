@@ -15,9 +15,17 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
+import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.PersistenceException;
+
+import net.dataforte.cassandra.pool.ConnectionPool;
+import net.dataforte.cassandra.pool.PoolConfiguration;
+
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
@@ -43,17 +51,36 @@ public class PelopsUtils
      * 
      * @param persistenceUnit
      *            the persistence unit
+     * @param puProperties
      * @return the string
      */
-    public static String generatePoolName(String persistenceUnit)
+    public static String generatePoolName(String persistenceUnit, Map<String, Object> puProperties)
     {
         PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         Properties props = persistenceUnitMetadatata.getProperties();
-        String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        String contactNodes = null;
+        String defaultPort = null;
+        String keyspace = null;
+        if (puProperties != null)
+        {
+            contactNodes = (String) puProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) puProperties.get(PersistenceProperties.KUNDERA_PORT);
+            keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
 
+        if (contactNodes == null)
+        {
+            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null)
+        {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (keyspace == null)
+        {
+            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
         return contactNodes + ":" + defaultPort + ":" + keyspace;
     }
 
@@ -62,19 +89,43 @@ public class PelopsUtils
      * 
      * @param persistenceUnitMetadata
      *            the persistence unit metadata
+     * @param puProperties
      * @return the pool config policy
      */
-    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata)
+    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
+            Map<String, Object> puProperties)
     {
         Policy policy = new Policy();
 
         Properties props = persistenceUnitMetadata.getProperties();
+        String maxActivePerNode = null;
+        String maxIdlePerNode = null;
+        String minIdlePerNode = null;
+        String maxTotal = null;
+        if (puProperties != null)
+        {
+            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        }
 
-        String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-        String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-        String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-        String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-
+        if (maxActivePerNode == null)
+        {
+            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+        if (maxIdlePerNode == null)
+        {
+            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+        }
+        if (minIdlePerNode == null)
+        {
+            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+        }
+        if (maxTotal == null)
+        {
+            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        }
         try
         {
             if (!StringUtils.isEmpty(maxActivePerNode))
@@ -107,6 +158,78 @@ public class PelopsUtils
     }
 
     /**
+     * Gets the pool config policy.
+     * 
+     * @param persistenceUnitMetadata
+     *            the persistence unit metadata
+     * @param puProperties
+     * @return the pool config policy
+     */
+    public static PoolConfiguration setPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
+            PoolConfiguration prop, Map<String, Object> puProperties)
+    {
+        Properties props = persistenceUnitMetadata.getProperties();
+        String maxActivePerNode = null;
+        String maxIdlePerNode = null;
+        String minIdlePerNode = null;
+        String maxTotal = null;
+        if (puProperties != null)
+        {
+            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        }
+
+        if (maxActivePerNode == null)
+        {
+            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+        if (maxIdlePerNode == null)
+        {
+            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+        }
+        if (minIdlePerNode == null)
+        {
+            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+        }
+        if (maxTotal == null)
+        {
+            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        }
+
+        try
+        {
+            if (!StringUtils.isEmpty(maxActivePerNode))
+            {
+                prop.setInitialSize(Integer.parseInt(maxActivePerNode));
+            }
+
+            if (!StringUtils.isEmpty(maxIdlePerNode))
+            {
+                prop.setMaxIdle(Integer.parseInt(maxIdlePerNode));
+            }
+
+            if (!StringUtils.isEmpty(minIdlePerNode))
+            {
+                prop.setMinIdle(Integer.parseInt(minIdlePerNode));
+            }
+
+            if (!StringUtils.isEmpty(maxTotal))
+            {
+                prop.setMaxActive(Integer.parseInt(maxTotal));
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
+                    + " persistence unit couldn't be parsed. Default pool policy would be used");
+            prop = null;
+        }
+        return prop;
+    }
+
+    /**
      * If userName and password provided, Method prepares for
      * AuthenticationRequest.
      * 
@@ -131,22 +254,47 @@ public class PelopsUtils
     }
 
     /**
-     * Returns instance of {@link IPooledConnection} for a given persistence unit
+     * Returns instance of {@link IPooledConnection} for a given persistence
+     * unit
      * 
      * @param persistenceUnit
+     * @param puProperties
      * @return
      */
-    public static IPooledConnection getCassandraConnection(String persistenceUnit)
+    public static IPooledConnection getCassandraConnection(String persistenceUnit, Map<String, Object> puProperties)
     {
-        return Pelops.getDbConnPool(PelopsUtils.generatePoolName(persistenceUnit)).getConnection();       
+        return Pelops.getDbConnPool(generatePoolName(persistenceUnit, puProperties)).getConnection();
     }
-    
+
     public static void releaseConnection(IPooledConnection conn)
     {
-        if(conn != null) {
+        if (conn != null)
+        {
             conn.release();
         }
-    }  
-    
+    }
 
+    public static Cassandra.Client getCassandraConnection(ConnectionPool pool)
+    {
+        try
+        {
+            if (pool != null)
+            {
+                return pool.getConnection();
+            }
+        }
+        catch (TException te)
+        {
+            throw new PersistenceException(te);
+        }
+        return null;
+    }
+
+    public static void releaseConnection(ConnectionPool pool, Cassandra.Client conn)
+    {
+        if (pool != null && conn != null)
+        {
+            pool.release(conn);
+        }
+    }
 }

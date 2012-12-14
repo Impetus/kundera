@@ -87,6 +87,8 @@ public class PersonCassandraTest extends BaseTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -101,12 +103,6 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onInsertCassandra() throws Exception
     {
-        // cassandraSetUp();
-        // CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
-
-        // KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -132,27 +128,26 @@ public class PersonCassandraTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
-        
+
         // perform merge after query.
-        for(PersonCassandra person : persons)
+        for (PersonCassandra person : persons)
         {
             person.setPersonName("after merge");
             em.merge(person);
         }
-        
+
         em.clear();
-        
-        
+
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("after merge", p.getPersonName());
-        
+
         // Delete without WHERE clause.
-        
+
         String deleteQuery = "DELETE from PersonCassandra";
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
-        
+
     }
 
     /**
@@ -164,8 +159,8 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onMergeCassandra() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        loadData();
+        // CassandraCli.cassandraSetUp();
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -189,9 +184,9 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        CassandraCli.initClient();
-        loadData();
+        // CassandraCli.cassandraSetUp();
+        // CassandraCli.initClient();
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -232,9 +227,9 @@ public class PersonCassandraTest extends BaseTest
     {
         // cassandraSetUp();
         // CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
-
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
+        CassandraCli.client.set_keyspace("KunderaExamples");
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -302,8 +297,8 @@ public class PersonCassandraTest extends BaseTest
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -332,8 +327,8 @@ public class PersonCassandraTest extends BaseTest
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -363,8 +358,8 @@ public class PersonCassandraTest extends BaseTest
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -389,8 +384,8 @@ public class PersonCassandraTest extends BaseTest
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -425,7 +420,7 @@ public class PersonCassandraTest extends BaseTest
       * em = null; emf = null;
       */
         // emf.close();
-        CassandraCli.dropKeySpace("KunderaExamples");
+        // CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     /**
@@ -445,7 +440,6 @@ public class PersonCassandraTest extends BaseTest
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
         user_Def.name = "PERSON";

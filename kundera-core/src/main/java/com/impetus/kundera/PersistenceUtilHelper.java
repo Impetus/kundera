@@ -33,8 +33,6 @@ import javax.persistence.spi.LoadState;
 
 import org.hibernate.collection.spi.PersistentCollection;
 
-//import org.hibernate.collection.PersistentCollection;
-
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializer;
 

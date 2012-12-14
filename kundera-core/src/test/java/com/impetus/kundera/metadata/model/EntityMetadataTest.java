@@ -142,7 +142,7 @@ public class EntityMetadataTest
         EntityMetadata m = new EntityMetadata(Employe.class);
         EntityMetadata m1 = new EntityMetadata(KunderaUser.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Employe.class, m);
         processor.process(KunderaUser.class, m1);
 
@@ -165,9 +165,9 @@ public class EntityMetadataTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null,persistenceUnits).configure();
 
-        new SchemaConfiguration(persistenceUnits).configure();
+        new SchemaConfiguration(null,persistenceUnits).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

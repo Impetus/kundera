@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.cache.ehcache;
 
+import java.util.Map;
+
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -33,30 +35,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     }
 
     @Override
-    public SchemaManager getSchemaManager()
-    {
-        return null;
-    }
-
-    @Override
-    public void load(String persistenceUnit)
-    {
-        super.load(persistenceUnit);
-    }
-
-    @Override
-    protected void loadClientMetadata()
-    {
-        super.loadClientMetadata();
-    }
-
-    @Override
-    public void initialize()
-    {
-    }
-
-    @Override
-    protected Object createPoolOrConnection()
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
         return null;
     }
@@ -89,6 +68,46 @@ public class CoreTestClientFactory extends GenericClientFactory
     protected Object getConnectionPoolOrConnection()
     {
         return super.getConnectionPoolOrConnection();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.ClientFactory#load(java.lang.String,
+     * java.util.Map)
+     */
+    @Override
+    public void load(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+     */
+    @Override
+    public void initialize(Map<String, Object> puProperties)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection
+     * (java.util.Map)
+     */
+    @Override
+    protected Object createPoolOrConnection()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

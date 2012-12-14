@@ -17,6 +17,7 @@ package com.impetus.client.hbase.schemamanager;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
@@ -31,7 +32,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.hbase.config.HBaseColumnFamilyProperties;
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
@@ -71,9 +71,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      * @param clientFactory
      *            client factory.
      */
-    public HBaseSchemaManager(String clientFactory)
+    public HBaseSchemaManager(String clientFactory, Map<String, Object> puProperties)
     {
-        super(clientFactory);
+        super(clientFactory, puProperties);
     }
 
     @Override
@@ -349,9 +349,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         else
         {
-            hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
-            hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
-
+            hadoopConf.set("hbase.zookeeper.quorum", host);
+            hadoopConf.set("hbase.zookeeper.property.clientPort", "2181");
         }
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
@@ -446,16 +445,18 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
             }
         }
-        else if (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
-        {
-            HBaseColumnFamilyProperties familyProperties = HBasePropertyReader.hsmd.getColumnFamilyProperties().get(
-                    tableName);
-            hColumnDescriptor.setTimeToLive(familyProperties.getTtl());
-            hColumnDescriptor.setMaxVersions(familyProperties.getMaxVersion());
-            hColumnDescriptor.setMinVersions(familyProperties.getMinVersion());
-            hColumnDescriptor.setCompactionCompressionType(familyProperties.getAlgorithm());
-            hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
-        }
+        // else if
+        // (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
+        // {
+        // HBaseColumnFamilyProperties familyProperties =
+        // HBasePropertyReader.hsmd.getColumnFamilyProperties().get(
+        // tableName);
+        // hColumnDescriptor.setTimeToLive(familyProperties.getTtl());
+        // hColumnDescriptor.setMaxVersions(familyProperties.getMaxVersion());
+        // hColumnDescriptor.setMinVersions(familyProperties.getMinVersion());
+        // hColumnDescriptor.setCompactionCompressionType(familyProperties.getAlgorithm());
+        // hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
+        // }
 
     }
 

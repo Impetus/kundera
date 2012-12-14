@@ -103,7 +103,7 @@ public class ConfiguratorTest
         {
 
             // invoke configure.
-            Configurator configurator = new Configurator(invalidPuName);
+            Configurator configurator = new Configurator(null,invalidPuName);
             configurator.configure();
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(invalidPuName);
         }
@@ -147,7 +147,7 @@ public class ConfiguratorTest
 
         EntityMetadata m = new EntityMetadata(PersonnelDTO.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(PersonnelDTO.class, m);
 
         m.setPersistenceUnit(_persistenceUnit);

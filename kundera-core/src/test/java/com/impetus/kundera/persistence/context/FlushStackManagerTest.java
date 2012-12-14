@@ -574,7 +574,7 @@ public class FlushStackManagerTest
         EntityMetadata m24 = new EntityMetadata(AlbumUni_M_M_M_M.class);
         EntityMetadata m25 = new EntityMetadata(PhotoUni_M_M_M_M.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Store.class, m);
         processor.process(BillingCounter.class, m1);
         processor.process(PhotographerUni_1_1_1_1.class, m2);

@@ -54,7 +54,6 @@ public class CassandraSchemaGenerationUsingXmlTest
     {
         emf.close();
         CassandraCli.dropKeySpace(keyspaceName);
-
     }
 
     @Test

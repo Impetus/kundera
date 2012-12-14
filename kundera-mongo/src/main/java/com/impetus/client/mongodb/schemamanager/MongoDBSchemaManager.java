@@ -18,6 +18,7 @@ package com.impetus.client.mongodb.schemamanager;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.index.IndexType;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
@@ -60,9 +60,9 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
-    public MongoDBSchemaManager(String clientFactory)
+    public MongoDBSchemaManager(String clientFactory, Map<String, Object> externalProperties)
     {
-        super(clientFactory);
+        super(clientFactory, externalProperties);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         try
         {
             mongo = new Mongo(host, localport);
-            db = mongo.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
+            db = mongo.getDB(databaseName);
         }
         catch (UnknownHostException e)
         {

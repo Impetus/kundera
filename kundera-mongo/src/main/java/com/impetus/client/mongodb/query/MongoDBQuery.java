@@ -36,7 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
-import com.impetus.client.mongodb.query.gis.NearQueryImpl;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;

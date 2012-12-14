@@ -17,6 +17,7 @@ package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +45,12 @@ public final class Configurator
      * 
      * @param persistenceUnits
      */
-    public Configurator(String... persistenceUnits)
+    public Configurator(Map properties, String... persistenceUnits)
     {
         configurer.add(new PersistenceUnitConfiguration(persistenceUnits));
-        configurer.add(new ClientFactoryConfiguraton(persistenceUnits));
-        configurer.add(new MetamodelConfiguration(persistenceUnits));
-        configurer.add(new SchemaConfiguration(persistenceUnits));
+        configurer.add(new MetamodelConfiguration(properties,persistenceUnits));
+        configurer.add(new SchemaConfiguration(properties,persistenceUnits));
+        configurer.add(new ClientFactoryConfiguraton(properties,persistenceUnits));
     }
 
     /**

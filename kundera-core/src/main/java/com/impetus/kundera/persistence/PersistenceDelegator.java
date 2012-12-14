@@ -674,7 +674,7 @@ public class PersistenceDelegator
      */
     public EntityMetadata getMetadata(Class<?> clazz)
     {
-        EntityMetadata  metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         return metadata;
     }
 
@@ -842,7 +842,6 @@ public class PersistenceDelegator
                         ClientPropertiesSetter cps = (ClientPropertiesSetter) client;
                         cps.populateClientProperties(client, properties);
                     }
-
                 }
             }
         }

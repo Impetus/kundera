@@ -117,10 +117,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param clientFactory
      *            the configured client clientFactory
+     * @param puProperties
      */
-    public CassandraSchemaManager(String clientFactory)
+    public CassandraSchemaManager(String clientFactory, Map<String, Object> puProperties)
     {
-        super(clientFactory);
+        super(clientFactory, puProperties);
     }
 
     /*
@@ -184,13 +185,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     @Override
     public boolean validateEntity(Class clazz)
     {
-
         boolean isvalid = false;
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
         String tableName = metadata.getTableName();
-        if (csmd.isCounterColumn(tableName))
+        if (csmd.isCounterColumn(metadata.getSchema(), tableName))
         {
             metadata.setCounterColumnType(true);
             // List<EmbeddedColumn> embeddedColumns =
@@ -198,12 +198,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
             if (!embeddables.isEmpty())
             {
-                isvalid = validateEmbeddedColumns(embeddables.values()) ? true : false;
+                isvalid = validateEmbeddedColumns(metadata, embeddables.values()) ? true : false;
             }
             else
             {
                 EntityType entity = metaModel.entity(clazz);
-                isvalid = validateColumns(entity.getAttributes()) ? true : false;
+                isvalid = validateColumns(metadata, entity.getAttributes()) ? true : false;
             }
 
             // if (!embeddedColumns.isEmpty())
@@ -583,8 +583,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
-        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() || CassandraPropertyReader.csmd
-                .isInvertedIndexingEnabled(databaseName)) && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
+        boolean indexTableRequired = /*
+                                      * (CassandraPropertyReader.csmd.
+                                      * isInvertedIndexingEnabled() ||
+                                      */CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)/* ) */
+                && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
             CfDef cfDef = new CfDef();
@@ -603,8 +606,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void dropInvertedIndexTable(TableInfo tableInfo)
     {
-        boolean indexTableRequired = (CassandraPropertyReader.csmd.isInvertedIndexingEnabled() || CassandraPropertyReader.csmd
-                .isInvertedIndexingEnabled(databaseName)) && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
+        boolean indexTableRequired = /*
+                                      * (CassandraPropertyReader.csmd.
+                                      * isInvertedIndexingEnabled() ||
+                                      */CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)/* ) */
+                && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
             try
@@ -850,7 +856,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
-        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(), null);
+        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), null);
         Map<String, String> strategy_options = new HashMap<String, String>();
         setProperties(ksDef, strategy_options);
         try
@@ -917,39 +923,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void setProperties(KsDef ksDef, Map<String, String> strategy_options)
     {
-        dataStore = CassandraPropertyReader.csmd.getDataStore();
-        if (CassandraPropertyReader.csmd.getDataStore() != null)
+        Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
+        if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName)
+                && schema.getSchemaProperties() != null)
         {
-            schemas = dataStore.getSchemas();
-            conn = dataStore.getConnection();
-            if (schemas != null && !schemas.isEmpty())
-            {
-                for (Schema schema : schemas)
-                {
-                    if (schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName))
-                    {
-                        tables = schema.getTables();
-                        setKeyspaceProperties(ksDef, schema.getSchemaProperties(), strategy_options,
-                                schema.getDataCenters());
-                    }
-                }
-            }
+            tables = schema.getTables();
+            setKeyspaceProperties(ksDef, schema.getSchemaProperties(), strategy_options, schema.getDataCenters());
         }
         else
         {
-            if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName())
-                    || csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getSimpleName()))
-            {
-                strategy_options.put("replication_factor", csmd.getReplication_factor());
-            }
-            else
-            {
-                for (String dataCenterName : csmd.getDataCenters().keySet())
-                {
-                    strategy_options.put(dataCenterName, csmd.getDataCenters().get(dataCenterName));
-                }
-            }
+            setDefaultReplicationFactor(strategy_options);
         }
+    }
+
+    /**
+     * @param strategy_options
+     */
+    private void setDefaultReplicationFactor(Map<String, String> strategy_options)
+    {
+        strategy_options.put("replication_factor", CassandraConstants.DEFAULT_REPLICATION_FACTOR);
     }
 
     /**
@@ -967,39 +959,33 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void setKeyspaceProperties(KsDef ksDef, Properties schemaProperties, Map<String, String> strategyOptions,
             List<DataCenter> dcs)
     {
-        if (schemaProperties != null)
+        String placementStrategy = schemaProperties.getProperty(CassandraConstants.PLACEMENT_STRATEGY,
+                SimpleStrategy.class.getSimpleName());
+        if (placementStrategy.equalsIgnoreCase(SimpleStrategy.class.getSimpleName())
+                || placementStrategy.equalsIgnoreCase(SimpleStrategy.class.getName()))
         {
-            String placementStrategy = schemaProperties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
-            if (placementStrategy != null
-                    && (placementStrategy.equalsIgnoreCase(SimpleStrategy.class.getSimpleName()) || placementStrategy
-                            .equalsIgnoreCase(SimpleStrategy.class.getName())))
+            String replicationFactor = schemaProperties.getProperty(CassandraConstants.REPLICATION_FACTOR,
+                    CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+            strategyOptions.put("replication_factor", replicationFactor);
+        }
+        else if (placementStrategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getSimpleName())
+                || placementStrategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getName()))
+        {
+            if (dcs != null && !dcs.isEmpty())
             {
-                String replicationFactor = schemaProperties.getProperty(CassandraConstants.REPLICATION_FACTOR);
-                strategyOptions.put("replication_factor", replicationFactor != null ? replicationFactor
-                        : CassandraConstants.DEFAULT_REPLICATION_FACTOR);
-            }
-            else if (placementStrategy != null
-                    && (placementStrategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getSimpleName()) || placementStrategy
-                            .equalsIgnoreCase(NetworkTopologyStrategy.class.getName())))
-            {
-                if (dcs != null && !dcs.isEmpty())
+                for (DataCenter dc : dcs)
                 {
-                    for (DataCenter dc : dcs)
-                    {
-                        strategyOptions.put(dc.getName(), dc.getValue());
-                    }
+                    strategyOptions.put(dc.getName(), dc.getValue());
                 }
             }
-            else
-            {
-                placementStrategy = SimpleStrategy.class.getName();
-                strategyOptions.put("replication_factor", CassandraConstants.DEFAULT_REPLICATION_FACTOR);
-            }
-            ksDef.setStrategy_class(placementStrategy);
-
-            ksDef.setDurable_writes(Boolean.parseBoolean(schemaProperties
-                    .getProperty(CassandraConstants.DURABLE_WRITES)));
         }
+        else
+        {
+            strategyOptions.put("replication_factor", CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+        }
+
+        ksDef.setStrategy_class(placementStrategy);
+        ksDef.setDurable_writes(Boolean.parseBoolean(schemaProperties.getProperty(CassandraConstants.DURABLE_WRITES)));
     }
 
     /**
@@ -1096,7 +1082,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
     {
-        return (csmd != null && csmd.isCounterColumn(tableInfo.getTableName()))
+        return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
                 || (defaultValidationClass != null && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class
                         .getSimpleName()) || defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getName())));
     }
@@ -1181,7 +1167,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // if target entity is also counter column the validate source
                 // IdColumn
                 String targetTableName = targetEntityMetadata.getTableName();
-                if (csmd.isCounterColumn(targetTableName))
+                if (csmd.isCounterColumn(targetEntityMetadata.getSchema(), targetTableName))
                 {
                     isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
                 }
@@ -1193,17 +1179,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * validate embedded column .
      * 
+     * @param metadata
+     * 
      * @param embeddedColumns
      *            the embedded columns
      * @return true, if successful
      */
-    private boolean validateEmbeddedColumns(Collection<EmbeddableType> embeddedColumns)
+    private boolean validateEmbeddedColumns(EntityMetadata metadata, Collection<EmbeddableType> embeddedColumns)
     {
         boolean isValid = false;
         Iterator<EmbeddableType> iter = embeddedColumns.iterator();
         while (iter.hasNext())
         {
-            isValid = validateColumns(iter.next().getAttributes()) ? true : false;
+            isValid = validateColumns(metadata, iter.next().getAttributes()) ? true : false;
         }
         // for (EmbeddedColumn embeddedColumn : embeddedColumns)
         // {
@@ -1216,16 +1204,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * validate columns.
      * 
+     * @param metadata
+     * 
      * @param attributes
      *            the attributes
      * @return true, if successful
      */
-    private boolean validateColumns(Set<Attribute> attributes)
+    private boolean validateColumns(EntityMetadata metadata, Set<Attribute> attributes)
     {
         boolean isValid = true;
         for (Attribute column : attributes)
         {
-            if (!validateColumn(column.getJavaType()))
+            if (!metadata.getIdAttribute().equals(column) && !validateColumn(column.getJavaType()))
             {
                 isValid = false;
                 break;

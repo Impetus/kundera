@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.scale7.cassandra.pelops.Cluster;
@@ -39,19 +40,15 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class PelopsClientFactory extends GenericClientFactory
 {
-
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
 
     @Override
-    public void initialize()
+    public void initialize(Map<String, Object> externalProperty)
     {
         reader = new CassandraEntityReader();
-        propertyReader = new CassandraPropertyReader();
-        propertyReader.read(getPersistenceUnit());
-        // KunderaPropertyReader kunderaPropertyReader = new
-        // KunderaPropertyReader();
-        // kunderaPropertyReader.parseXML(getPersistenceUnit());
+        initializePropertyReader();
+        setExternalProperties(externalProperty);
     }
 
     @Override
@@ -61,17 +58,36 @@ public class PelopsClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+        String contactNodes = null;
+        String defaultPort = null;
+        String keyspace = null;
+        if (externalProperties != null)
+        {
+            contactNodes = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            keyspace = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+
+        if (contactNodes == null)
+        {
+            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null)
+        {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (keyspace == null)
+        {
+            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
 
         if (Pelops.getDbConnPool(poolName) == null)
         {
             Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
                     PelopsUtils.getAuthenticationRequest(props)), false);
 
-            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
+            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata, externalProperties);
 
             // Add pool with specified policy. null means default operand
             // policy.
@@ -85,7 +101,7 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new PelopsClient(indexManager, reader, persistenceUnit);
+        return new PelopsClient(indexManager, reader, persistenceUnit, externalProperties);
     }
 
     @Override
@@ -98,21 +114,38 @@ public class PelopsClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-        getSchemaManager().dropSchema();
+        if (schemaManager != null)
+        {
+            getSchemaManager(externalProperties).dropSchema();
+        }
         schemaManager = null;
         Pelops.shutdown();
-        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties));
+        externalProperties = null;
     }
 
     @Override
-    public SchemaManager getSchemaManager()
+    public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
         if (schemaManager == null)
         {
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+            initializePropertyReader();
+            setExternalProperties(externalProperty);
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), externalProperty);
         }
 
         return schemaManager;
     }
 
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new CassandraPropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
+    }
 }

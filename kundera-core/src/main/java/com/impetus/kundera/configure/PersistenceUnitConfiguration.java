@@ -54,7 +54,7 @@ public class PersistenceUnitConfiguration implements Configuration
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();
 
     /** Holding instance for persistence units. */
-    private String[] persistenceUnits;
+    protected String[] persistenceUnits;
 
     /**
      * Constructor parameterised with persistence units.

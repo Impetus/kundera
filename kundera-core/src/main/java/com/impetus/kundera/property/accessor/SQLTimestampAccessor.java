@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.StringUtils;
