@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
+
 /**
  * Contains all constants properties supported in persistence.xml
  * 
@@ -81,4 +82,6 @@ public interface PersistenceProperties
     public static final String KUNDERA_PASSWORD = "kundera.password";
 
     public static final String KUNDERA_BATCH_SIZE = "kundera.batch.size";
+
+    public static final String KUNDERA_TRANSACTION_TIMEOUT="kundera.transaction.timeout";
 }
