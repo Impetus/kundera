@@ -14,7 +14,7 @@
 			<property name="kundera.client" value="redis" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.redis.RedisClientFactory" />
-			<property name="kundera.password" value="Kundera@123" />
+			<!-- <property name="kundera.password" value="Kundera@123" /> -->
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />

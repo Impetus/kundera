@@ -153,7 +153,7 @@ public class EntityValidatorImpl implements EntityValidator
         {
             SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit(), puProperties)
                     .getSchemaManager(puProperties);
-            if (!schemaManager.validateEntity(clazz))
+            if (schemaManager != null &&  !schemaManager.validateEntity(clazz))
             {
                 log.warn("Validation for : " + clazz + " failed , any operation on this class will result in fail.");
             }

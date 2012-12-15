@@ -198,6 +198,23 @@ public class PropertyAccessorHelper
 
     }
 
+
+
+    
+/*
+    *//**
+     * Invokes corresponding accessor and returns string value for that object.
+     * 
+     * @param obj object.
+     * 
+     * @return string value for input object.
+     *//*
+    public static String getString(Object obj)
+    {
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(obj.getClass());
+        return accessor.toString(obj);
+        
+    }*/
     /**
      * Gets field value as byte-array.
      * 
@@ -496,6 +513,11 @@ public class PropertyAccessorHelper
     public static byte[] getBytes(Object o)
     {
         return PropertyAccessorFactory.getPropertyAccessor(o.getClass()).toBytes(o);
+    }
+
+    public static String getString(Object o)
+    {
+        return o != null ? PropertyAccessorFactory.getPropertyAccessor(o.getClass()).toString(o) : null;
     }
 
     public static Object getObject(Class clazz, byte[] b)

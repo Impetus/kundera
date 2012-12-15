@@ -16,6 +16,7 @@
 
 package com.impetus.client.redis;
 
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
@@ -53,7 +54,7 @@ public class RedisClientFactory extends GenericClientFactory
      * Initialize redis client factory.
      */
     @Override
-    public void initialize()
+    public void initialize(Map<String, Object> externalProperty)
     {
 
     }
@@ -124,8 +125,8 @@ public class RedisClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.ClientFactory#getSchemaManager()
      */
     @Override
-    public SchemaManager getSchemaManager()
-    {
+    public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
+     {
         // TODO Auto-generated method stub
         return null;
     }
