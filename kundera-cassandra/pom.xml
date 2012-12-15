@@ -97,8 +97,14 @@
 
 		<dependency>
 			<groupId>net.dataforte.cassandra</groupId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>0.7.1</version>
 			<artifactId>cassandra-connection-pool</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.cassandra</groupId>
+					<artifactId>cassandra-all</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
