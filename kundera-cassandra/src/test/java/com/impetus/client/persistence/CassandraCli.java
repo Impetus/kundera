@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -182,7 +183,7 @@ public final class CassandraCli
             // do nothing.
         }
     }
-    
+
     /**
      * Drop out key space.
      * 
@@ -194,6 +195,11 @@ public final class CassandraCli
         try
         {
             client.system_drop_keyspace(keyspaceName);
+            deleteCassandraFolders("/var/lib/cassandra/data/");
+            deleteCassandraFolders("/var/lib/cassandra/data/system/");
+            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
+            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
+            deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {
@@ -208,6 +214,23 @@ public final class CassandraCli
             log.error(e);
         }
 
+    }
+
+    private static void deleteCassandraFolders(String dir)
+    {
+        // System.out.println("Cleaning up folder " + dir);
+        File directory = new File(dir);
+        // Get all files in directory
+        File[] files = directory.listFiles();
+        for (File file : files)
+        {
+            // Delete each file
+            if (!file.delete())
+            {
+                // Failed to delete file
+                // System.out.println("Failed to delete " + file);
+            }
+        }
     }
 
     public static boolean keyspaceExist(String keySpaceName)
