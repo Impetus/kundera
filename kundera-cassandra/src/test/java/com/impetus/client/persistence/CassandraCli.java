@@ -121,26 +121,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error(e1.getMessage());
+                log.error(e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error(ess.getMessage());
+                log.error(ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error(sde.getMessage());
+                log.error(sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
 
     }
@@ -197,15 +197,15 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
 
     }
@@ -222,11 +222,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         return false;
     }

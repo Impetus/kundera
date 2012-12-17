@@ -92,7 +92,7 @@ public class PersistenceUnitConfiguration implements Configuration
                             + " please validate with persistence.xml");
                     throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
-                metadatas.get(persistenceUnit);
+//                metadatas.get(persistenceUnit);
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);

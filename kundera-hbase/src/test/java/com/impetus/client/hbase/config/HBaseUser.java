@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "USERXYZ", schema = "KunderaHbaseXmlTest@XmlPropertyTest")
+@Table(name = "HBASEUSERXYZ", schema = "KunderaHbaseXmlTest@XmlPropertyTest")
 public class HBaseUser
 {
 

@@ -187,7 +187,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected boolean initiateClient()
     {
-
         int localport = Integer.parseInt(port);
         try
         {

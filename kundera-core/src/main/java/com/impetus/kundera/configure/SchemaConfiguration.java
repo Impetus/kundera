@@ -197,7 +197,7 @@ public class SchemaConfiguration implements Configuration
                     Type targetEntityType = targetEntityMetadata.getType();
                     // Class idClass =
                     // targetEntityMetadata.getIdColumn().getField().getType();
-                    Class idClass = entityMetadata.getIdAttribute().getJavaType();
+                    Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
                     TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
                             targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass);
 

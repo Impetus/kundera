@@ -55,6 +55,8 @@ public class CassandraIdQueryTest extends BaseTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -90,9 +92,9 @@ public class CassandraIdQueryTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
-         findByIdGTAndAgeGTAndLT();
-         findByIdGTEAndAge();
-         findByIdLTEAndAge();
+        findByIdGTAndAgeGTAndLT();
+        findByIdGTEAndAge();
+        findByIdLTEAndAge();
     }
 
     /**
@@ -458,8 +460,6 @@ public class CassandraIdQueryTest extends BaseTest
     private void init() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);

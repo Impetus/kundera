@@ -193,8 +193,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         if (csmd.isCounterColumn(metadata.getSchema(), tableName))
         {
             metadata.setCounterColumnType(true);
-            // List<EmbeddedColumn> embeddedColumns =
-            // metadata.getEmbeddedColumnsAsList();
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
             if (!embeddables.isEmpty())
             {
@@ -205,17 +203,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 EntityType entity = metaModel.entity(clazz);
                 isvalid = validateColumns(metadata, entity.getAttributes()) ? true : false;
             }
-
-            // if (!embeddedColumns.isEmpty())
-            // {
-            // isvalid = validateEmbeddedColumns(embeddedColumns) ? true :
-            // false;
-            // }
-            // else
-            // {
-            // isvalid = validateColumns(metadata.getColumnsAsList()) ? true :
-            // false;
-            // }
             isvalid = isvalid && validateRelations(metadata) ? true : false;
         }
         else
@@ -382,9 +369,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
-            return true;
         }
-        return false;
+        return cassandra_client != null ? true : false;
     }
 
     /**
@@ -413,10 +399,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
-                // &&
-                // cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
-                    // TimeUnit.SECONDS.sleep(5);
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     dropInvertedIndexTable(tableInfo);
                     TimeUnit.SECONDS.sleep(2);
@@ -517,11 +500,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
 
-        cassandra_client.set_cql_version(/*
-                                          * CassandraPropertyReader.csmd != null
-                                          * ? CassandraPropertyReader.csmd
-                                          * .getCqlVersion() :
-                                          */CassandraConstants.CQL_VERSION_3_0);
+        cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
         try
         {
             cassandra_client.execute_cql_query(
@@ -583,10 +562,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
-        boolean indexTableRequired = /*
-                                      * (CassandraPropertyReader.csmd.
-                                      * isInvertedIndexingEnabled() ||
-                                      */CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)/* ) */
+        boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
@@ -606,10 +582,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void dropInvertedIndexTable(TableInfo tableInfo)
     {
-        boolean indexTableRequired = /*
-                                      * (CassandraPropertyReader.csmd.
-                                      * isInvertedIndexingEnabled() ||
-                                      */CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)/* ) */
+        boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)/* ) */
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
@@ -689,10 +662,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                             }
                             if (!columnfound)
                             {
-                                // logger.error("column " +
-                                // columnInfo.getColumnName()
-                                // + " does not exist in column family " +
-                                // tableInfo.getTableName() + "");
                                 throw new SchemaGenerationException("Column " + columnInfo.getColumnName()
                                         + " does not exist in column family " + tableInfo.getTableName() + "",
                                         "Cassandra", databaseName, tableInfo.getTableName());
@@ -709,9 +678,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             if (!tablefound)
             {
-                // logger.error("column family " + tableInfo.getTableName() +
-                // " does not exist in keyspace "
-                // + databaseName + "");
                 throw new SchemaGenerationException("Column family " + tableInfo.getTableName()
                         + " does not exist in keyspace " + databaseName + "", "Cassandra", databaseName,
                         tableInfo.getTableName());
@@ -779,8 +745,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         }
                     }
                     cassandra_client.system_update_column_family(cfDef);
-                    // cassandra_client.system_drop_column_family(tableInfo.getTableName());
-                    // cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
                     found = true;
                     break;
                 }
@@ -889,11 +853,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
 
             // Recreate Inverted Index Table if applicable
-            /*
-             * for(TableInfo tableInfo : tableInfos) {
-             * dropInvertedIndexTable(tableInfo);
-             * createInvertedIndexTable(tableInfo); }
-             */
         }
         catch (InvalidRequestException e)
         {
@@ -927,7 +886,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName)
                 && schema.getSchemaProperties() != null)
         {
-            tables = schema.getTables();
             setKeyspaceProperties(ksDef, schema.getSchemaProperties(), strategy_options, schema.getDataCenters());
         }
         else
@@ -1023,6 +981,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cfDef.setKeyspace(databaseName);
         cfDef.setName(tableInfo.getTableName());
         cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType()));
+
+        Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
+        tables = schema != null ? schema.getTables() : null;
 
         Properties cFProperties = getColumnFamilyProperties(tableInfo);
         String defaultValidationClass = null;

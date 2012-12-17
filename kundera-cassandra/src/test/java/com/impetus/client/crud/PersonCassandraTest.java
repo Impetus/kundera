@@ -129,6 +129,7 @@ public class PersonCassandraTest extends BaseTest
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
 
+        testCountResult();
         // perform merge after query.
         for (PersonCassandra person : persons)
         {
@@ -148,6 +149,14 @@ public class PersonCassandraTest extends BaseTest
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
 
+    }
+
+    private void testCountResult()
+    {/*
+      * String query = "select count(p.personId) from PersonCassandra"; Query q
+      * = em.createNativeQuery(query, PersonCassandra.class); int noOfRows =
+      * q.executeUpdate(); Assert.assertEquals(3, noOfRows);
+      */
     }
 
     /**

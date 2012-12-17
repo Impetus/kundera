@@ -75,7 +75,7 @@ public class CassandraSchemaGenerationUsingXmlTest
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 Assert.assertNotNull(cfDef);
-                Assert.assertEquals("USERXYZ", cfDef.getName());
+                Assert.assertEquals("CASSANDRAUSERXYZ", cfDef.getName());
                 Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
                 Assert.assertEquals("Standard", cfDef.getColumn_type());
                 Assert.assertEquals("User Column Family", cfDef.getComment());

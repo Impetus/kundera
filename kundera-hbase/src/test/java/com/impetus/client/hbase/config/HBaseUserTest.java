@@ -67,7 +67,7 @@ public class HBaseUserTest
         try
         {
             HTableDescriptor hTableDescriptor = HBaseCli.utility.getHBaseAdmin().getTableDescriptor(
-                    "USERXYZ".getBytes());
+                    "HBASEUSERXYZ".getBytes());
             int count = 0;
             for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
             {
@@ -104,8 +104,8 @@ public class HBaseUserTest
         finally
         {
             emf.close();
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("USERXYZ"));
-            cli.dropTable("USERXYZ");
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
+            cli.dropTable("HBASEUSERXYZ");
         }
     }
 
@@ -118,7 +118,7 @@ public class HBaseUserTest
         emf = Persistence.createEntityManagerFactory("XmlPropertyTest", puProperties);
         try
         {
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("USERXYZ"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
         }
         catch (TableNotFoundException tnfe)
         {

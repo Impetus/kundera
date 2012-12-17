@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "USERXYZ", schema = "KunderaCassandraXmlTest@CassandraXmlPropertyTest")
+@Table(name = "CASSANDRAUSERXYZ", schema = "KunderaCassandraXmlTest@CassandraXmlPropertyTest")
 public class CassandraUser
 {
 

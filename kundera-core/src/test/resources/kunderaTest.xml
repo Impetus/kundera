@@ -43,7 +43,7 @@
 					</dataCenters>
 					<tables>
 						<table>
-							<name>USERXYZ</name>
+							<name>CASSANDRAUSERXYZ</name>
 							<properties>
 								<property name="default.validation.class" value="UTF8Type"></property>
 								<property name="key.validation.class" value="UTF8Type"></property>
@@ -112,7 +112,7 @@
 			</connection>
 			<schemas>
 				<schema>
-					<name>USERXYZ</name>
+					<name>HBASEUSERXYZ</name>
 					<tables>
 						<table>
 							<name>age</name>
