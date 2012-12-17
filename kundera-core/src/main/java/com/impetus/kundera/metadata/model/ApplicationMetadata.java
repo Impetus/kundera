@@ -374,4 +374,16 @@ public class ApplicationMetadata
         }
     }
 
+    /**
+     * 
+     */
+    public void unloadApplicationMatadata(final String pu)
+    {
+        this.metamodelMap.remove(pu);
+        this.metaModelBuilder.clear();
+        this.namedNativeQueries = null;
+        this.clazzToPuMap = null;
+        this.persistenceUnitMetadataMap.remove(pu);
+        this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
+    }
 }
