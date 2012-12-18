@@ -40,99 +40,106 @@ import com.impetus.kundera.persistence.api.Batcher;
  * @author vivek.mishra
  * 
  */
-public class MongoBatchProcessorTest {
+public class MongoBatchProcessorTest
+{
 
-	/**
-	 * persistence unit.
-	 */
-	private static final String PERSISTENCE_UNIT = "MongoBatchTest";
+    /**
+     * persistence unit.
+     */
+    private static final String PERSISTENCE_UNIT = "MongoBatchTest";
 
-	/** The emf. */
-	private static EntityManagerFactory emf;
+    /** The emf. */
+    private static EntityManagerFactory emf;
 
-	/** The em. */
-	private static EntityManager em;
+    /** The em. */
+    private static EntityManager em;
 
-	private List<PersonBatchMongoEntity> rows;
+    private List<PersonBatchMongoEntity> rows;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
-		em = emf.createEntityManager();
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        em = emf.createEntityManager();
+    }
 
-	/**
-	 * Test case for batch operation.
-	 */
-	@Test
-	public void onBatch() {
-		int counter = 0;
-		rows = prepareData(10);
-		for (PersonBatchMongoEntity entity : rows) {
-			em.persist(entity);
+    /**
+     * Test case for batch operation.
+     */
+    @Test
+    public void onBatch()
+    {
+        int counter = 0;
+        rows = prepareData(10);
+        for (PersonBatchMongoEntity entity : rows)
+        {
+            em.persist(entity);
 
-			// check for implicit flush.
-			if (++counter == 5) {
-				Map<String, Client> clients = (Map<String, Client>) em
-						.getDelegate();
+            // check for implicit flush.
+            if (++counter == 5)
+            {
+                Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
 
-				Batcher client = (Batcher) clients.get(PERSISTENCE_UNIT);
-				Assert.assertEquals(5, client.getBatchSize());
-				em.clear();
-				for (int i = 0; i < 5; i++) {
+                Batcher client = (Batcher) clients.get(PERSISTENCE_UNIT);
+                Assert.assertEquals(5, client.getBatchSize());
+                em.clear();
+                for (int i = 0; i < 5; i++)
+                {
 
-					// assert on each batch size record
-					Assert.assertNotNull(em.find(PersonBatchMongoEntity.class,
-							rows.get(i).getPersonId()));
+                    // assert on each batch size record
+                    Assert.assertNotNull(em.find(PersonBatchMongoEntity.class, rows.get(i).getPersonId()));
 
-					// as batch size is 5.
-					Assert.assertNull(em.find(PersonBatchMongoEntity.class,
-							rows.get(6).getPersonId()));
-				}
-				// means implicit flush must happen
-			}
-		}
+                    // as batch size is 5.
+                    Assert.assertNull(em.find(PersonBatchMongoEntity.class, rows.get(6).getPersonId()));
+                }
+                // means implicit flush must happen
+            }
+        }
 
-		// flush all on close.
-		// explicit flush on close
-		em.clear();
-		em.flush();
+        // flush all on close.
+        // explicit flush on close
+        em.clear();
+        em.flush();
 
-		String sql = " Select p from PersonBatchMongoEntity p";
-		Query query = em.createQuery(sql);
-		List<PersonBatchMongoEntity> results = query.getResultList();
-		Assert.assertNotNull(results);
-		Assert.assertEquals(10, results.size());
-	}
+        String sql = " Select p from PersonBatchMongoEntity p";
+        Query query = em.createQuery(sql);
+        List<PersonBatchMongoEntity> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(10, results.size());
+    }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-		for (PersonBatchMongoEntity o : rows) {
-			em.remove(o);
-		}
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        for (PersonBatchMongoEntity o : rows)
+        {
+            em.remove(o);
+        }
 
-		MongoUtils.dropDatabase(emf, PERSISTENCE_UNIT);
-		em.close();
-		emf.close();
-	}
+        MongoUtils.dropDatabase(emf, PERSISTENCE_UNIT);
+        em.close();
+        emf.close();
+    }
 
-	private List<PersonBatchMongoEntity> prepareData(Integer noOfRecords) {
-		List<PersonBatchMongoEntity> persons = new ArrayList<PersonBatchMongoEntity>();
-		for (int i = 1; i <= noOfRecords; i++) {
-			PersonBatchMongoEntity o = new PersonBatchMongoEntity();
-			o.setPersonId(i + "");
-			o.setPersonName("vivek" + i);
-			o.setAge(10);
-			persons.add(o);
-		}
+    private List<PersonBatchMongoEntity> prepareData(Integer noOfRecords)
+    {
+        List<PersonBatchMongoEntity> persons = new ArrayList<PersonBatchMongoEntity>();
+        for (int i = 1; i <= noOfRecords; i++)
+        {
+            PersonBatchMongoEntity o = new PersonBatchMongoEntity();
+            o.setPersonId(i + "");
+            o.setPersonName("vivek" + i);
+            o.setAge(10);
+            persons.add(o);
+        }
 
-		return persons;
-	}
+        return persons;
+    }
 
 }

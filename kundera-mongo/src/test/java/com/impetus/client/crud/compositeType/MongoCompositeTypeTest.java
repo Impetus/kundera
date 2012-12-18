@@ -316,6 +316,7 @@ public class MongoCompositeTypeTest
     public void tearDown() throws Exception
     {
         truncateMongo();
+        emf.close();
     }
 
     /**

@@ -175,27 +175,28 @@ public abstract class AssociationBase
                 // .getEntityMetadata(clazz);
 
                 Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
-               
-                EntityMetadata mAdd =  KunderaMetadataManager.getEntityMetadata(clazz);
-                /*for (Metamodel m : metaModels.values())
+
+                EntityMetadata mAdd = KunderaMetadataManager.getEntityMetadata(clazz);
+                for (Metamodel m : metaModels.values())
                 {
                     mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz);
                     if (mAdd != null)
                     {
                         break;
                     }
-                }*/
+                }
                 mAdd.setPersistenceUnit(pu);
-                Map<String,List<String>> clazzToPu = new HashMap<String, List<String>>(1);
+                Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>(1);
                 List<String> pus = new ArrayList<String>(1);
                 pus.add(pu);
                 clazzToPu.put(clazz.getName(), pus);
                 KunderaMetadata.INSTANCE.getApplicationMetadata().setClazzToPuMap(clazzToPu);
-                
+
                 Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu);
-                ((MetamodelImpl)metaModel).addEntityMetadata(clazz, mAdd);
+                ((MetamodelImpl) metaModel).addEntityMetadata(clazz, mAdd);
                 KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().put(pu, metaModel);
-//                KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu, clazz, mAdd);
+                // KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu,
+                // clazz, mAdd);
                 PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getPersistenceUnitMetadata(pu);
 
@@ -304,7 +305,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-        dao.closeEntityManagerFactory();
+//        dao.closeEntityManagerFactory();
 
     }
 
