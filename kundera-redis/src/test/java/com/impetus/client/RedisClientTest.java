@@ -16,7 +16,11 @@
 
 package com.impetus.client;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -34,6 +38,8 @@ import com.impetus.client.entities.PersonRedis;
 import com.impetus.client.redis.RedisClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
  * Junit for {@link RedisClient}.
@@ -77,6 +83,48 @@ public class RedisClientTest
         em.close();
     }
 
+    @Test
+    public void testPersistJoinTableData()
+    {
+        final String schemaName = "redis";
+        final String tableName = "redisjointable";
+        final String joinColumn="joincolumn";
+        final String inverseJoinColumn="inverseJoinColumnName";
+        
+       JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, "redis", "redisjointable", "joincolumn","inverseJoinColumnName", null);
+       
+       UUID joinKey = UUID.randomUUID();
+       
+       Integer inverseJoinKey1 = new Integer(10);
+       Double  inverseJoinKey2 = new Double(12.23);
+       Set inverseJoinKeys = new HashSet();
+       inverseJoinKeys.add(inverseJoinKey1);
+       inverseJoinKeys.add(inverseJoinKey2);
+       
+       joinTableData.addJoinTableRecord(joinKey, inverseJoinKeys);
+       
+       EntityManager em = emf.createEntityManager();
+       Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+       RedisClient client = (RedisClient) clients.get(REDIS_PU);
+       client.persistJoinTable(joinTableData);
+       
+       List<String> columns =  client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey);
+       
+       Assert.assertNotNull(columns);
+       Assert.assertEquals(true, !columns.isEmpty());
+       Assert.assertEquals(2, columns.size());
+       Assert.assertEquals(true,columns.contains(inverseJoinKey1.toString()));
+       Assert.assertEquals(true, columns.contains(inverseJoinKey2.toString()));
+       
+       client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey1);
+       client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey2);
+       
+        columns =  client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey);
+       
+       Assert.assertTrue(columns.isEmpty());
+       
+    }
+    
     /**
      * Assertions on delete.
      * 
