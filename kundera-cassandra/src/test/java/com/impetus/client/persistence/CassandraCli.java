@@ -195,11 +195,11 @@ public final class CassandraCli
         try
         {
             client.system_drop_keyspace(keyspaceName);
-            deleteCassandraFolders("/var/lib/cassandra/data/");
-            deleteCassandraFolders("/var/lib/cassandra/data/system/");
-            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
-            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
-            deleteCassandraFolders("/var/log/cassandra/");
+//            deleteCassandraFolders("/var/lib/cassandra/data/");
+//            deleteCassandraFolders("/var/lib/cassandra/data/system/");
+//            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
+//            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
+//            deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {

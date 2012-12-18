@@ -220,7 +220,7 @@ public class UserInfoTest
         MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
         MongoPrimeUser timeLine = new MongoPrimeUser(key);
         timeLine.setTweetBody("my first tweet");
-        timeLine.setTweetDate(new Date());
+        timeLine.setTweetDate(currentDate);
 
         UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, timeLine);
         em.persist(userInfo);
@@ -268,6 +268,7 @@ public class UserInfoTest
     public void tearDown() throws Exception
     {
         truncateMongo();
+        emf.close();
     }
 
     /**

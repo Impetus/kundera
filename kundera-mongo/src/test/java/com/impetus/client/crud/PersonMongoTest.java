@@ -206,5 +206,6 @@ public class PersonMongoTest extends BaseTest
             em.remove(val);
         }
         MongoUtils.dropDatabase(emf, _PU);
+        emf.close();
     }
 }
