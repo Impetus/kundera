@@ -71,18 +71,8 @@ public class HBaseUserTest
             int count = 0;
             for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
             {
-                if (columnDescriptor.getNameAsString().equalsIgnoreCase("address"))
+                if (columnDescriptor.getNameAsString().equalsIgnoreCase("HBASEUSERXYZ"))
                 {
-                    Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompactionCompressionType());
-                    Assert.assertEquals(Integer.parseInt("1234567"), columnDescriptor.getTimeToLive());
-                    Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompressionType());
-                    Assert.assertEquals(Integer.parseInt("5"), columnDescriptor.getMaxVersions());
-                    Assert.assertEquals(Integer.parseInt("2"), columnDescriptor.getMinVersions());
-                    count++;
-                }
-                else
-                {
-                    Assert.assertEquals("age", columnDescriptor.getNameAsString());
                     Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompactionCompressionType());
                     Assert.assertEquals(Integer.parseInt("12345678"), columnDescriptor.getTimeToLive());
                     Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompressionType());
@@ -91,7 +81,7 @@ public class HBaseUserTest
                     count++;
                 }
             }
-            Assert.assertEquals(2, count);
+            Assert.assertEquals(1, count);
         }
         catch (TableNotFoundException tnfe)
         {

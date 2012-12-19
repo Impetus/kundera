@@ -375,7 +375,7 @@ public class HBaseQuery extends QueryImpl implements Query
             {
                 // Filter f = new SingleColumnValueFilter(name.getBytes(),
                 // name.getBytes(), operator, valueInBytes);
-                Filter f = new SingleColumnValueFilter(Bytes.toBytes(name), Bytes.toBytes(name), operator, valueInBytes);
+                Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator, valueInBytes);
                 addToFilter(f);
             }
             else

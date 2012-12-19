@@ -46,7 +46,8 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * The Class HBaseWriter responsible for all sort of get and put commands to be executed on a hTable.
+ * The Class HBaseWriter responsible for all sort of get and put commands to be
+ * executed on a hTable.
  * 
  * @author vivek.mishra
  */
@@ -55,8 +56,13 @@ public class HBaseWriter implements Writer
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseWriter.class);
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.Object, java.util.Set, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.String, java.lang.Object, java.util.Set,
+     * java.lang.Object)
      */
     @Override
     public void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns,
@@ -67,8 +73,13 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumn(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.Object, javax.persistence.metamodel.Attribute, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumn(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.Object,
+     * javax.persistence.metamodel.Attribute, java.lang.Object)
      */
     @Override
     public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
@@ -81,8 +92,12 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
     public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
@@ -98,7 +113,7 @@ public class HBaseWriter implements Writer
                 try
                 {
                     byte[] qualValInBytes = Bytes.toBytes(qualifier);
-                    p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils
+                    p.add(htable.getTableName(), qualValInBytes, System.currentTimeMillis(), HBaseUtils
                             .getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
                     present = true;
                 }
@@ -114,8 +129,12 @@ public class HBaseWriter implements Writer
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.Object, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.Object, java.util.Map)
      */
     @Override
     public void writeColumns(HTable htable, Object rowKey, Map<String, Object> columns) throws IOException
@@ -138,8 +157,12 @@ public class HBaseWriter implements Writer
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeRelations(org.apache.hadoop.hbase.client.HTable, java.lang.Object, boolean, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeRelations(org.apache.hadoop.hbase
+     * .client.HTable, java.lang.Object, boolean, java.util.List)
      */
     @Override
     public void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
@@ -178,8 +201,12 @@ public class HBaseWriter implements Writer
     }
 
     // TODO: Scope of performance improvement in this code
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeForeignKeys(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeForeignKeys(org.apache.hadoop.hbase
+     * .client.HTable, java.lang.String, java.util.Map)
      */
     @Override
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
@@ -228,10 +255,13 @@ public class HBaseWriter implements Writer
 
     /**
      * Support for delete over HBase.
-     *
-     * @param hTable the h table
-     * @param rowKey the row key
-     * @param columnFamily the column family
+     * 
+     * @param hTable
+     *            the h table
+     * @param rowKey
+     *            the row key
+     * @param columnFamily
+     *            the column family
      */
     /*
      * (non-Javadoc)
@@ -244,8 +274,6 @@ public class HBaseWriter implements Writer
     {
         try
         {
-            /* = Bytes.toBytes(rowKey) */;
-            // rowBytes = PropertyAccessorHelper.getBytes(rowKey);
             byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
 
@@ -257,37 +285,43 @@ public class HBaseWriter implements Writer
             throw new PersistenceException(e);
         }
     }
-   /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.client.hbase.Writer#persistRows(java.util.Map)
      */
     @Override
-    public void persistRows(Map<HTable,List<HBaseDataWrapper>> rows) throws IOException
+    public void persistRows(Map<HTable, List<HBaseDataWrapper>> rows) throws IOException
     {
         List<Put> dataSet = new ArrayList<Put>(rows.size());
-        for(HTable hTable : rows.keySet())
+        for (HTable hTable : rows.keySet())
         {
             List<HBaseDataWrapper> row = rows.get(hTable);
-            for(HBaseDataWrapper data : row)
+            for (HBaseDataWrapper data : row)
             {
                 dataSet.add(preparePut(data.getColumnFamily(), data.getRowKey(), data.getColumns(), data.getEntity()));
             }
             hTable.put(dataSet);
             dataSet.clear();
         }
-        
+
     }
-
-
 
     /**
      * Prepare put.
-     *
-     * @param columnFamily the column family
-     * @param rowKey the row key
-     * @param columns the columns
-     * @param columnFamilyObj the column family obj
+     * 
+     * @param columnFamily
+     *            the column family
+     * @param rowKey
+     *            the row key
+     * @param columns
+     *            the columns
+     * @param columnFamilyObj
+     *            the column family obj
      * @return the put
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     private Put preparePut(String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
             throws IOException
@@ -303,11 +337,10 @@ public class HBaseWriter implements Writer
                 {
                     Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
                     byte[] value = HBaseUtils.getBytes(o);
-                    if (value != null)
+                    if (value != null && columnFamily != null)
                     {
-                        p.add(Bytes.toBytes(columnFamily == null? qualifier:columnFamily), Bytes.toBytes(qualifier), value);
+                        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
                     }
-
                 }
                 catch (PropertyAccessException e1)
                 {
@@ -318,6 +351,4 @@ public class HBaseWriter implements Writer
         return p;
     }
 
-
- 
 }
