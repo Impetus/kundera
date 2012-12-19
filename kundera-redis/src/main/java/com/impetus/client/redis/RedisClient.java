@@ -18,7 +18,9 @@ package com.impetus.client.redis;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +50,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -56,6 +59,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  *         TODOOOOOOO ::: 1) Embedded handling 2) Composite key 3) Association
  *         handling
+ * 
  * 
  */
 public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher
@@ -97,7 +101,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
                     .getJavaMember());
 
-            String hashKey = getHashKey(entityMetadata, rowKey);
+            String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
             connection.hmset(getEncodedBytes(hashKey), wrapper.getColumns());
 
@@ -109,7 +113,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         finally
         {
-            factory.releaseConnection(connection);
+            onCleanup(connection);
         }
 
     }
@@ -136,7 +140,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         finally
         {
-            factory.releaseConnection(connection);
+            onCleanup(connection);
         }
 
         return result;
@@ -149,7 +153,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // byte[] rowKey = PropertyAccessorHelper.getBytes(key);
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        String rowKey = getHashKey(entityMetadata, PropertyAccessorHelper.getString(key));
+        String rowKey = getHashKey(entityMetadata.getTableName(), PropertyAccessorHelper.getString(key));
 
         try
         {
@@ -158,7 +162,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         catch (JedisConnectionException jedex)
         {
-            // Jedis is throwing runtime exception in case of no result found!!!!
+            // Jedis is throwing runtime exception in case of no result
+            // found!!!!
             return null;
         }
 
@@ -216,9 +221,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public void delete(Object entity, Object pKey)
     {
-        Jedis connection = factory.getConnection();
+        Jedis connection = null;
         try
         {
+            connection = factory.getConnection();
             Pipeline pipeLine = connection.pipelined();
 
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
@@ -231,7 +237,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             for (byte[] name : columnNames)
             {
-                connection.hdel(getHashKey(entityMetadata, rowKey), rowKey);
+                connection.hdel(getHashKey(entityMetadata.getTableName(), rowKey), rowKey);
             }
 
             // Delete inverted indexes.
@@ -241,62 +247,203 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         finally
         {
-            factory.releaseConnection(connection);
+            onCleanup(connection);
         }
     }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        // TODO Auto-generated method stub
+        String tableName = joinTableData.getJoinTableName();
+        String inverseJoinColumn = joinTableData.getInverseJoinColumnName();
+        String joinColumn = joinTableData.getJoinColumnName();
+
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+        Jedis connection = null;
+        /**
+         * Example: join table : PERSON_ADDRESS join column : PERSON_ID (1_p)
+         * inverse join column : ADDRESS_ID (1_a) store in REDIS:
+         * PERSON_ADDRESS:1_p_1_a PERSON_ID 1_p ADDRESS_ID 1_a
+         */
+        // String rowKey =
+        try
+        {
+            connection = factory.getConnection();
+            Pipeline pipeline = connection.pipelined();
+            Set<Object> joinKeys = joinTableRecords.keySet();
+            for (Object joinKey : joinKeys)
+            {
+                String joinKeyAsStr = PropertyAccessorHelper.getString(joinKey);
+
+                Set<Object> inverseKeys = joinTableRecords.get(joinKey);
+
+                for (Object inverseKey : inverseKeys)
+                {
+                    Map<byte[], byte[]> redisFields = new HashMap<byte[], byte[]>(1);
+                    String inverseJoinKeyAsStr = PropertyAccessorHelper.getString(inverseKey);
+                    String redisKey = getHashKey(tableName, joinKeyAsStr + "_" + inverseJoinKeyAsStr);
+                    redisFields.put(getEncodedBytes(joinColumn), getEncodedBytes(joinKeyAsStr)); // put
+                                                                                                 // join
+                                                                                                 // column
+                                                                                                 // field.
+                    redisFields.put(getEncodedBytes(inverseJoinColumn), getEncodedBytes(inverseJoinKeyAsStr)); // put
+                                                                                                               // inverse
+                                                                                                               // join
+                                                                                                               // column
+                                                                                                               // field
+
+                    // add to hash table.
+                    connection.hmset(getEncodedBytes(redisKey), redisFields);
+                    // add index
+                    connection.zadd(getHashKey(tableName, inverseJoinKeyAsStr),
+                            Double.parseDouble(((Integer) inverseJoinKeyAsStr.hashCode()).toString()), redisKey);
+                    connection.zadd(getHashKey(tableName, joinKeyAsStr),
+                            Double.parseDouble(((Integer) joinKeyAsStr.hashCode()).toString()), redisKey);
+                    redisFields.clear();
+                }
+
+            }
+        }
+        finally
+        {
+            onCleanup(connection);
+        }
 
     }
 
+    /**
+     * Returns collection of column values for given join table. 
+     * TODO: Method is very much tightly coupled with Join table implementation and does not serve purpose as it is meant for.
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue)
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        Jedis connection = null;
 
-    // @Override
-    // public Object[] findIdsByColumn(String tableName, String pKeyName, String
-    // columnName, Object columnValue,
-    // Class entityClazz)
-    // {
-    // // TODO Auto-generated method stub
-    // return null;
-    // }
+        List results = new ArrayList();
+
+        try
+        {
+            connection = factory.getConnection();
+
+            Pipeline pipeLine = connection.pipelined();
+            String valueAsStr = PropertyAccessorHelper.getString(pKeyColumnValue);
+
+            Double score = Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
+            Set<String> resultKeys = connection.zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
+
+            for (String hashKey : resultKeys)
+            {
+                List columnValues = connection.hmget(hashKey, columnName);
+
+                pipeLine.syncAndReturnAll();
+                if (columnValues != null && !columnValues.isEmpty())
+                {
+                    results.addAll(columnValues); // Currently returning list of
+                                                  // string as known issue with
+                                                  // joint table concept!
+                }
+
+            }
+
+            // return connection.hmget(getEncodedBytes(redisKey),
+            // getEncodedBytes(columnName));
+            return results;
+        }
+        finally
+        {
+            onCleanup(connection);
+        }
+    }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        // TODO Auto-generated method stub
+        Jedis connection = null;
+
+        try
+        {
+            connection = factory.getConnection();
+            String valueAsStr = PropertyAccessorHelper.getString(columnValue);
+
+            Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), valueAsStr.hashCode(),
+                    Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+            if (results != null)
+            {
+                return results.toArray(new Object[0]);
+            }
+
+        }
+        finally
+        {
+            onCleanup(connection);
+        }
+
         return null;
     }
-
-    // @Override
-    // public void deleteByColumn(String tableName, String columnName, Object
-    // columnValue)
-    // {
-    // // TODO Auto-generated method stub
-    //
-    // }
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
+        Jedis connection = null;
+        try
+        {
+            connection = factory.getConnection();
+            Pipeline pipeLine = connection.pipelined();
+            String valueAsStr = PropertyAccessorHelper.getString(columnValue);
+            Double score = Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
+            Set<String> results = connection.zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
 
+            if (results != null)
+            {
+                for (String rowKey : results)
+                {
+//                    byte[] hashKey = getEncodedBytes(getHashKey(tableName, rowKey));
+                    Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(rowKey));
+                    
+                    for (byte[] column : columns.keySet()) // delete each column(e.g.
+                                                  // field)
+                    {
+//                        connection.get(key)
+                        connection.hdel(getEncodedBytes(rowKey), column);   // delete record
+                        String colName = PropertyAccessorFactory.STRING.fromBytes(String.class, columns.get(column));
+                        connection.zrem(getHashKey(tableName, colName), rowKey); // delete
+                                                                                 // inverted
+                                                                                 // index.
+                    }
+                }
+
+            }
+            pipeLine.sync();
+        }
+        finally
+        {
+            onCleanup(connection);
+        }
     }
 
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        // TODO Auto-generated method stub
-        return null;
+
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        Object[] ids = findIdsByColumn(entityMetadata.getSchema(), entityMetadata.getTableName(),
+                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), colName, colValue,
+                entityClazz);
+        List<Object> resultSet = new ArrayList<Object>();
+        if (ids != null)
+        {
+            // just to insure uniqueness.
+
+            for (Object id : new HashSet(Arrays.asList(ids)))
+            {
+                resultSet.add(find(entityClazz, id));
+            }
+        }
+
+        return resultSet;
     }
 
     @Override
@@ -381,7 +528,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     // add column name as key and value as value
                     wrapper.addColumn(name, value);
                     // // {tablename:columnname,hashcode} for value
-                    wrapper.addIndex(getHashKey(entityMetadata, ((AbstractAttribute) attr).getJPAColumnName()),
+                    wrapper.addIndex(
+                            getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attr).getJPAColumnName()),
                             Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
                 }
             }
@@ -490,9 +638,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     }
 
-    private String getHashKey(final EntityMetadata entityMetadata, final String rowKey)
+    private String getHashKey(final String tableName, final String rowKey)
     {
-        StringBuilder builder = new StringBuilder(entityMetadata.getTableName());
+        StringBuilder builder = new StringBuilder(tableName);
         builder.append(":");
         builder.append(rowKey);
         return builder.toString();
@@ -527,12 +675,20 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
-    private void unIndex(final Jedis connection, final AttributeWrapper wrapper, final String rowKey)
+    private void unIndex(final Jedis connection, final AttributeWrapper wrapper, final String member)
     {
-        Set<String> members = wrapper.getIndexes().keySet();
-        for (String member : members)
+        Set<String> keys = wrapper.getIndexes().keySet();
+        for (String key : keys)
         {
-            connection.zrem(member, rowKey);
+            connection.zrem(key, member);
+        }
+    }
+
+    private void onCleanup(Jedis connection)
+    {
+        if (connection != null)
+        {
+            factory.releaseConnection(connection);
         }
     }
 
