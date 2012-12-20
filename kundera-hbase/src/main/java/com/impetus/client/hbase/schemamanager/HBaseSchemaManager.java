@@ -110,23 +110,19 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
                         if (tableInfo.getColumnMetadatas() != null)
                         {
-                            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+                            boolean found = false;
+                            HColumnDescriptor columnDescriptor = new HColumnDescriptor(tableInfo.getTableName());
+                            for (HColumnDescriptor hColumnDescriptor : descriptors)
                             {
-                                boolean found = false;
-                                HColumnDescriptor columnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
-                                for (HColumnDescriptor hColumnDescriptor : descriptors)
+                                if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                                 {
-                                    if (hColumnDescriptor.getNameAsString()
-                                            .equalsIgnoreCase(columnInfo.getColumnName()))
-                                    {
-                                        found = true;
-                                        break;
-                                    }
+                                    found = true;
+                                    break;
                                 }
-                                if (!found)
-                                {
-                                    admin.addColumn(tableInfo.getTableName(), columnDescriptor);
-                                }
+                            }
+                            if (!found)
+                            {
+                                admin.addColumn(tableInfo.getTableName(), columnDescriptor);
                             }
                         }
                         if (tableInfo.getEmbeddedColumnMetadatas() != null)
@@ -186,23 +182,20 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 hTableDescriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
                 if (tableInfo.getColumnMetadatas() != null)
                 {
-                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+                    boolean isColumnFound = false;
+                    for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
                     {
-                        boolean isColumnFound = false;
-                        for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
+                        if (columnDescriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                         {
-                            if (columnDescriptor.getNameAsString().equalsIgnoreCase(columnInfo.getColumnName()))
-                            {
-                                isColumnFound = true;
-                                break;
-                            }
+                            isColumnFound = true;
+                            break;
                         }
-                        if (!isColumnFound)
-                        {
-                            throw new SchemaGenerationException("column " + columnInfo.getColumnName()
-                                    + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
-                                    tableInfo.getTableName(), tableInfo.getTableName());
-                        }
+                    }
+                    if (!isColumnFound)
+                    {
+                        throw new SchemaGenerationException("column " + tableInfo.getTableName()
+                                + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
+                                tableInfo.getTableName(), tableInfo.getTableName());
                     }
                 }
                 if (tableInfo.getEmbeddedColumnMetadatas() != null)
@@ -378,7 +371,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     private HTableDescriptor getTableMetaData(TableInfo tableInfo)
     {
-        HTableDescriptor hTableDescriptor = new HTableDescriptor(tableInfo.getTableName());
+        HTableDescriptor tableDescriptor = new HTableDescriptor(tableInfo.getTableName());
         Properties tableProperties = null;
         schemas = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
                 .getSchemas() : null;
@@ -395,12 +388,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         if (tableInfo.getColumnMetadatas() != null)
         {
-            for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-            {
-                HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
-                setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
-                hTableDescriptor.addFamily(hColumnDescriptor);
-            }
+            HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(tableInfo.getTableName());
+            setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
+            tableDescriptor.addFamily(hColumnDescriptor);
         }
         if (tableInfo.getEmbeddedColumnMetadatas() != null)
         {
@@ -408,22 +398,20 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             {
                 HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
                 setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
-                hTableDescriptor.addFamily(hColumnDescriptor);
+                tableDescriptor.addFamily(hColumnDescriptor);
             }
         }
-
         if (tableProperties != null)
         {
             for (Object o : tableProperties.keySet())
             {
-                hTableDescriptor
-                        .setValue(Bytes.toBytes(o.toString()), Bytes.toBytes(tableProperties.get(o).toString()));
+                tableDescriptor.setValue(Bytes.toBytes(o.toString()), Bytes.toBytes(tableProperties.get(o).toString()));
             }
         }
-        return hTableDescriptor;
+        return tableDescriptor;
     }
 
-    private void setColumnFamilyProperties(HColumnDescriptor hColumnDescriptor, String tableName)
+    private void setColumnFamilyProperties(HColumnDescriptor columnDescriptor, String tableName)
     {
         dataStore = HBasePropertyReader.hsmd.getDataStore();
         if (dataStore != null)
@@ -433,31 +421,18 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 for (Table t : tables)
                 {
                     Properties columnProperties = t.getProperties();
-                    if (t.getName() != null && t.getName().equalsIgnoreCase(hColumnDescriptor.getNameAsString())
+                    if (t.getName() != null && t.getName().equalsIgnoreCase(columnDescriptor.getNameAsString())
                             && columnProperties != null)
                     {
                         for (Object o : columnProperties.keySet())
                         {
-                            hColumnDescriptor.setValue(Bytes.toBytes(o.toString()),
+                            columnDescriptor.setValue(Bytes.toBytes(o.toString()),
                                     Bytes.toBytes(columnProperties.get(o).toString()));
                         }
                     }
                 }
             }
         }
-        // else if
-        // (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
-        // {
-        // HBaseColumnFamilyProperties familyProperties =
-        // HBasePropertyReader.hsmd.getColumnFamilyProperties().get(
-        // tableName);
-        // hColumnDescriptor.setTimeToLive(familyProperties.getTtl());
-        // hColumnDescriptor.setMaxVersions(familyProperties.getMaxVersion());
-        // hColumnDescriptor.setMinVersions(familyProperties.getMinVersion());
-        // hColumnDescriptor.setCompactionCompressionType(familyProperties.getAlgorithm());
-        // hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
-        // }
-
     }
 
     @Override

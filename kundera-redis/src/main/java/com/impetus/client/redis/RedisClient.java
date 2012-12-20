@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import com.impetus.client.redis.query.RedisQuery;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -154,7 +156,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
         String rowKey = getHashKey(entityMetadata.getTableName(), PropertyAccessorHelper.getString(key));
-
+        
         try
         {
             Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(rowKey));
@@ -499,6 +501,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity)
     {
+        return wrap(entityMetadata, entity,null);
+    }
+
+    private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity, List<RelationHolder> relations)
+    {
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
@@ -532,7 +539,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                             getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attr).getJPAColumnName()),
                             Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
                 }
-            }
+            }            
             else if (attributes.size() == 1) // means it is only a key! weird
                                              // but possible negative scenario
             {
@@ -545,11 +552,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             }
         }
+        
+        for(RelationHolder relation : relations)
+        {
+            String name = relation.getRelationName();
+            Object value = relation.getRelationValue();
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(value);
+            byte[] nameInBytes = getEncodedBytes(name);
+            String valueAsStr = PropertyAccessorHelper.getString(value);
+            wrapper.addColumn(nameInBytes, valueInBytes);
+            wrapper.addIndex(getHashKey(entityMetadata.getTableName(),name), Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+        }
 
         return wrapper;
-
     }
 
+    
+    
     private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results) throws InstantiationException,
             IllegalAccessException
     {
@@ -560,10 +579,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         List<String> relationNames = entityMetadata.getRelationNames();
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
+        Map<String,Object> relations = new HashMap<String, Object>();
         Object entity = null;
+        
         // Set<Attribute> attributes = entityType.getAttributes();
 
         Set<byte[]> columnNames = results.keySet();
+        Object id=null;
         for (byte[] nameInByte : columnNames)
         {
             if (entity == null)
@@ -571,19 +593,39 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 entity = entityMetadata.getEntityClazz().newInstance();
             }
 
-            String columnName = new String(nameInByte);
+            
+            String columnName =  PropertyAccessorFactory.STRING.fromBytes(String.class,nameInByte);
+
             byte[] value = results.get(nameInByte);
             String fieldName = entityMetadata.getFieldName(columnName);
-
             Attribute attribute = entityType.getAttribute(fieldName);
+
+            // capture id attribute, if relations are available and attribute is not an association or collection
+            if(relationNames != null && !relationNames.isEmpty() &&  !attribute.isAssociation() && !attribute.isCollection() && ((SingularAttribute)attribute).isId())
+            {
+                id = PropertyAccessorHelper.getObject(((AbstractAttribute)attribute).getBindableJavaType(), value); 
+            }
+            
+            if(relationNames != null && relationNames.contains(columnName))
+            {
+                Field field = (Field) attribute.getJavaMember();
+                EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(((AbstractAttribute)attribute).getBindableJavaType());
+                relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute().getBindableJavaType(), value));
+            } else
+            {
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
+            }
 
             // this will set field into entity.
             // TODO: :: what about crap relation and embedded attribute
-            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
+        }
+        
+        if(!relations.isEmpty())
+        {
+            return new EnhanceEntity(entity, id, relations);
         }
 
         return entity;
-
     }
 
     // Indexer interface needs to be carved out for such stuff

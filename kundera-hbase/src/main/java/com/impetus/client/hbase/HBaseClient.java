@@ -363,7 +363,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         try
         {
             // Write data to HBase
-
             handler.writeData(tableName, entityMetadata, entity, id, relations);
         }
         catch (IOException e)
@@ -602,7 +601,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
 
                         HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
-                                new java.util.HashSet<Attribute>(), entity, null);
+                                new java.util.HashSet<Attribute>(), entity, metadata.getTableName());
 
                         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
                                 .getMetamodel(metadata.getPersistenceUnit());

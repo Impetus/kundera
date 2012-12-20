@@ -147,7 +147,7 @@ public class HBaseReader implements Reader
             {
                 if (columnName != null)
                 {
-                    s.addColumn(Bytes.toBytes(columnName), Bytes.toBytes(columnName));
+                    s.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName));
                 }
             }
         }

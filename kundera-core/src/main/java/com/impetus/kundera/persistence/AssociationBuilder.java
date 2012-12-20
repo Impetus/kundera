@@ -217,6 +217,8 @@ final class AssociationBuilder
 
         // If child has any bidirectional relationship, process them here
         Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
+        
+        boolean traversalRequired = true;
         boolean isBidirectionalRelation = (biDirectionalField != null);
 
         if (isBidirectionalRelation && associatedEntities != null)
@@ -241,6 +243,8 @@ final class AssociationBuilder
                 // PropertyAccessorHelper.set(child,
                 // reverseRelation.getProperty(), entity);
             }
+            
+            traversalRequired = reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) || reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE);
 
         }
 
@@ -270,11 +274,12 @@ final class AssociationBuilder
             log.info("Nothing to do, simply moving to next:");
         }
 
-        else if (associatedEntities != null)
+        else if ( traversalRequired && associatedEntities != null)
         {
             // These entities has associated entities, find them recursively.
             for (Object associatedEntity : associatedEntities)
             {
+                
                 associatedEntity = pd.getReader(childClient).recursivelyFindEntities(associatedEntity, null,
                         childMetadata, pd);
             }

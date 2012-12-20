@@ -247,7 +247,7 @@ public class HBaseDataHandler implements DataHandler
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, null, columns);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, m.getTableName(), columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -291,7 +291,6 @@ public class HBaseDataHandler implements DataHandler
         {
             hbaseWriter.writeColumns(hTable, wrapper.getColumnFamily(), wrapper.getRowKey(), wrapper.getColumns(),
                     wrapper.getEntity());
-
         }
 
         // Persist relationships as a column in newly created Column family by
@@ -614,7 +613,7 @@ public class HBaseDataHandler implements DataHandler
 
                     for (KeyValue colData : hbaseValues)
                     {
-                        String hbaseColumn = Bytes.toString(colData.getFamily());
+                        String hbaseColumn = Bytes.toString(colData.getQualifier());
                         // String colName = getColumnName(hbaseColumn);
                         String colName = hbaseColumn;
                         if (relationNames != null && relationNames.contains(colName))
@@ -963,8 +962,6 @@ public class HBaseDataHandler implements DataHandler
                 if (columnFamilyObject != null)
                 {
                     // continue;
-                    // }
-
                     Set<Attribute> columns = metaModel.embeddable(javaType).getAttributes();
                     if (column.isCollection())
                     {
@@ -983,7 +980,6 @@ public class HBaseDataHandler implements DataHandler
                                 persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
                                 count++;
                             }
-
                         }
                         else
                         {
@@ -1025,8 +1021,7 @@ public class HBaseDataHandler implements DataHandler
                         }
                         else
                         {
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject,
-                                    columnFamilyName));
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, tableName));
                         }
 
                     }
@@ -1035,7 +1030,6 @@ public class HBaseDataHandler implements DataHandler
             else if (!column.isAssociation())
             {
                 columnWrapper.addColumn(column);
-
             }
         }
 

@@ -59,7 +59,7 @@ public class RedisClientTest
     private EntityManagerFactory emf;
 
     /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(RedisClientFactoryTest.class);
+    private static Logger logger = LoggerFactory.getLogger(RedisClientTest.class);
 
     /**
      * @throws java.lang.Exception
