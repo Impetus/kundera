@@ -70,6 +70,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * Reference to redis client factory.
      */
     private RedisClientFactory factory;
+    
+    private EntityReader  reader;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
@@ -77,6 +79,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     RedisClient(final RedisClientFactory factory)
     {
         this.factory = factory;
+        reader = new RedisEntityReader();
     }
 
     /*
@@ -98,7 +101,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // Create a hashset and populate data into it
 
             Pipeline pipeLine = connection.pipelined();
-            AttributeWrapper wrapper = wrap(entityMetadata, entity);
+            AttributeWrapper wrapper = wrap(entityMetadata, entity,rlHolders);
 
             String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
                     .getJavaMember());
@@ -160,18 +163,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         try
         {
             Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(rowKey));
-            result = unwrap(entityMetadata, columns);
+            result = unwrap(entityMetadata, columns, key);
         }
         catch (JedisConnectionException jedex)
         {
             // Jedis is throwing runtime exception in case of no result
             // found!!!!
             return null;
-        }
-
-        if (result != null)
-        {
-            PropertyAccessorHelper.set(result, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
         }
 
         return result;
@@ -451,8 +449,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public EntityReader getReader()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return reader;
     }
 
     @Override
@@ -519,7 +516,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // PropertyAccessorHelper.get(entity,
         for (Attribute attr : attributes)
         {
-            if (!entityMetadata.getIdAttribute().equals(attr))
+            if (!entityMetadata.getIdAttribute().equals(attr) && !attr.isAssociation())
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
                 {
@@ -553,23 +550,26 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
         }
         
-        for(RelationHolder relation : relations)
+        if (relations != null)
         {
-            String name = relation.getRelationName();
-            Object value = relation.getRelationValue();
-            byte[] valueInBytes = PropertyAccessorHelper.getBytes(value);
-            byte[] nameInBytes = getEncodedBytes(name);
-            String valueAsStr = PropertyAccessorHelper.getString(value);
-            wrapper.addColumn(nameInBytes, valueInBytes);
-            wrapper.addIndex(getHashKey(entityMetadata.getTableName(),name), Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+            for (RelationHolder relation : relations)
+            {
+                String name = relation.getRelationName();
+                Object value = relation.getRelationValue();
+                byte[] valueInBytes = PropertyAccessorHelper.getBytes(value);
+                byte[] nameInBytes = getEncodedBytes(name);
+                String valueAsStr = PropertyAccessorHelper.getString(value);
+                wrapper.addColumn(nameInBytes, valueInBytes);
+                wrapper.addIndex(getHashKey(entityMetadata.getTableName(), name),
+                        Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+            }
         }
-
         return wrapper;
     }
 
     
     
-    private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results) throws InstantiationException,
+    private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results, Object key) throws InstantiationException,
             IllegalAccessException
     {
 
@@ -600,11 +600,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             String fieldName = entityMetadata.getFieldName(columnName);
             Attribute attribute = entityType.getAttribute(fieldName);
 
-            // capture id attribute, if relations are available and attribute is not an association or collection
-            if(relationNames != null && !relationNames.isEmpty() &&  !attribute.isAssociation() && !attribute.isCollection() && ((SingularAttribute)attribute).isId())
-            {
-                id = PropertyAccessorHelper.getObject(((AbstractAttribute)attribute).getBindableJavaType(), value); 
-            }
             
             if(relationNames != null && relationNames.contains(columnName))
             {
@@ -620,9 +615,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // TODO: :: what about crap relation and embedded attribute
         }
         
+
+        if (entity != null)
+        {
+            PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
+        }
         if(!relations.isEmpty())
         {
-            return new EnhanceEntity(entity, id, relations);
+            return new EnhanceEntity(entity, key, relations);
         }
 
         return entity;
