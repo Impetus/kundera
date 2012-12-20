@@ -861,27 +861,28 @@ public class HBaseDataHandler implements DataHandler
             throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         Set<Attribute> attributes = entityType.getAttributes();
         String[] columns = new String[attributes.size()];
         int count = 0;
-        boolean isCollection=false;
-        for(Attribute attr : attributes)
+        boolean isCollection = false;
+        for (Attribute attr : attributes)
         {
-            if (!attr.isCollection())
+            if (!attr.isCollection() && !attr.getName().equalsIgnoreCase(m.getIdAttribute().getName()))
             {
-                
                 columns[count++] = ((AbstractAttribute) attr).getJPAColumnName();
-            } else
+            }
+            else if (attr.isCollection())
             {
                 isCollection = true;
                 break;
             }
         }
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, isCollection?qualifier:null, !isCollection?columns:null);
+        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, isCollection ? qualifier
+                : null, !isCollection ? columns : null);
         if (results != null)
         {
             for (HBaseData row : results)
@@ -895,8 +896,8 @@ public class HBaseDataHandler implements DataHandler
     }
 
     @Override
-    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName, final Class rowKeyClazz)
-            throws IOException
+    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
+            final Class rowKeyClazz) throws IOException
     {
         HTable hTable = null;
         hTable = gethTable(tableName);
