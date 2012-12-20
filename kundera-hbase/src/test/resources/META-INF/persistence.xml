@@ -88,5 +88,6 @@
 			<property name="kundera.batch.size" value="5" />
 		</properties>
 	</persistence-unit>
+
 </persistence>
 
