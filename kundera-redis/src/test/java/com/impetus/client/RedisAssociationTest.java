@@ -59,11 +59,11 @@ public class RedisAssociationTest
         Assert.assertNotNull(p.getAddress());
         Assert.assertEquals(person.getAddress().getAddress(), p.getAddress().getAddress());
 
-        // TODO:: need to check
-//        em.remove(p);
-//        
-//        em.clear();
-//        Assert.assertNull(em.find(AddressOTORedis.class, 12.23));
+        // Remove
+        em.remove(p);
+        
+        em.clear(); // clear cache
+        Assert.assertNull(em.find(AddressOTORedis.class, 12.23));
     }
     
     
