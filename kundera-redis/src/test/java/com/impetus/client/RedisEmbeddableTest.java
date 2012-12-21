@@ -16,9 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.RedisCompoundKey;
+import com.impetus.client.entities.RedisEmbeddedUser;
 import com.impetus.client.entities.RedisPrimeUser;
 
-public class RedisCompositeKeyTest
+/**
+ * The Class RedisEmbeddableTest.
+ */
+public class RedisEmbeddableTest
 {
 
     /** The Constant REDIS_PU. */
@@ -30,12 +34,20 @@ public class RedisCompositeKeyTest
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisCompositeKeyTest.class);
 
+    /**
+     * Sets the up.
+     *
+     * @throws Exception the exception
+     */
     @Before
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
     }
 
+    /**
+     * Test crud.
+     */
     @Test
     public void testCRUD()
     {
@@ -45,27 +57,33 @@ public class RedisCompositeKeyTest
         final int tweetId = 12;
         final UUID timeLineId = UUID.randomUUID();
         final Date tweetDate = new Date();
-        RedisCompoundKey compoundKey = new RedisCompoundKey(userId, tweetId, timeLineId);
-        RedisPrimeUser user = new RedisPrimeUser(compoundKey);
+        RedisCompoundKey embeddable = new RedisCompoundKey(userId, tweetId, timeLineId);
+        RedisEmbeddedUser user = new RedisEmbeddedUser(userId);
         user.setTweetBody("My tweet");
         user.setTweetDate(tweetDate);
+        user.setEmbeddable(embeddable);
         em.persist(user);
 
         em.clear(); // clear cache.
 
-        RedisPrimeUser found = em.find(RedisPrimeUser.class, compoundKey);
+        RedisEmbeddedUser found = em.find(RedisEmbeddedUser.class, userId);
         Assert.assertNotNull(found);
-        Assert.assertNotNull(found.getKey());
-        Assert.assertEquals(userId, found.getKey().getUserId());
+        Assert.assertNotNull(found.getUserId());
+        Assert.assertEquals(userId, found.getEmbeddable().getUserId());
         Assert.assertEquals(tweetDate, found.getTweetDate());
         em.remove(found);
 
         em.clear(); // clear cache.
 
-        found = em.find(RedisPrimeUser.class, compoundKey);
+        found = em.find(RedisEmbeddedUser.class, userId);
         Assert.assertNull(found);
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws Exception the exception
+     */
     @After
     public void tearDown() throws Exception
     {
