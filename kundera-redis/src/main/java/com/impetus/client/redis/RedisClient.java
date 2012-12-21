@@ -27,8 +27,8 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +100,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // first open a pipeline
             // Create a hashset and populate data into it
 
+            // if
+            // (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            // {
+            //
+            /**
+             * 
+             */
+            // }
             Pipeline pipeLine = connection.pipelined();
             AttributeWrapper wrapper = wrap(entityMetadata, entity);
 
@@ -120,8 +128,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
             }
 
-            String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                    .getJavaMember());
+            // prepareCompositeKey
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            String rowKey = null;
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                rowKey = prepareCompositeKey(entityMetadata, metaModel, id);
+            }
+            else
+            {
+                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
+                        .getJavaMember());
+            }
 
             String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
@@ -175,11 +196,25 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // byte[] rowKey = PropertyAccessorHelper.getBytes(key);
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        String rowKey = getHashKey(entityMetadata.getTableName(), PropertyAccessorHelper.getString(key));
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        String rowKey = null;
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            rowKey = prepareCompositeKey(entityMetadata, metaModel, key);
+        }
+        else
+        {
+            rowKey = PropertyAccessorHelper.getString(key);
+        }
+
+        String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
         try
         {
-            Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(rowKey));
+            Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(hashKey));
             result = unwrap(entityMetadata, columns, key);
         }
         catch (JedisConnectionException jedex)
@@ -249,8 +284,24 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             Set<byte[]> columnNames = wrapper.columns.keySet();
 
-            String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                    .getJavaMember());
+
+            String rowKey = null;
+            
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                rowKey = prepareCompositeKey(entityMetadata, metaModel, pKey);
+            }
+            else
+            {
+                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
+                        .getJavaMember());
+            }
+
+//            String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
+//                    .getJavaMember());
 
             for (byte[] name : columnNames)
             {
@@ -758,4 +809,36 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
+    {
+        EmbeddableType keyObject = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+
+        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String seperator = "\001";
+        for (Field f : fields)
+        {
+            Attribute compositeColumn = keyObject.getAttribute(f.getName());
+            try
+            {
+                String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                                                                                       // value
+                stringBuilder.append(fieldValue);
+                stringBuilder.append(seperator);
+            }
+            catch (IllegalArgumentException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+        if (stringBuilder.length() > 0)
+        {
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(seperator));
+        }
+        return stringBuilder.toString();
+    }
 }
