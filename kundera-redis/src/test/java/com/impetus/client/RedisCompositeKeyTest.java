@@ -47,10 +47,11 @@ public class RedisCompositeKeyTest
         final String userId="1";
         final int tweetId = 12;
         final UUID timeLineId = UUID.randomUUID();
+        final Date tweetDate = new Date();
         RedisCompoundKey compoundKey = new RedisCompoundKey(userId,tweetId,timeLineId);
         RedisPrimeUser user = new RedisPrimeUser(compoundKey);
         user.setTweetBody("My tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(tweetDate);
         em.persist(user);
         
         em.clear(); // clear cache.
@@ -59,7 +60,7 @@ public class RedisCompositeKeyTest
         Assert.assertNotNull(found);
         Assert.assertNotNull(found.getKey());
         Assert.assertEquals(userId,found.getKey().getUserId());
-        
+        Assert.assertEquals(tweetDate,found.getTweetDate());
         em.remove(found);
 
         em.clear(); // clear cache.
