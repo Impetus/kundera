@@ -86,7 +86,7 @@
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
-			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.ddl.auto.prepare" value="create" />
 		</properties>
 	</persistence-unit>
 
@@ -112,7 +112,7 @@
 		<class>com.impetus.kundera.examples.crossdatastore.useraddress.entities.HabitatUni1To1FK</class>
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-				<property name="current_session_context_class" value="thread" />
+			<property name="current_session_context_class" value="thread" />
 			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
@@ -122,7 +122,8 @@
 			<property name="hibernate.connection.pool_size" value="10" />
 			<property name="hibernate.connection.autocommit" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
-			<property name="connection.provider_class" value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
+			<property name="connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
 		</properties>
 	</persistence-unit>
 
@@ -130,8 +131,8 @@
 	<persistence-unit name="picmysql">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-		<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-				<property name="current_session_context_class" value="thread" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
 			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
@@ -142,15 +143,12 @@
 			<property name="hibernate.connection.autocommit" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
 
-<!-- 			<property name="hibernate.c3p0.min_size" value="5" />
-			<property name="hibernate.c3p0.max_size" value="20" />
-			<property name="hibernate.c3p0.timeout" value="1800" />
-			<property name="hibernate.c3p0.max_statements" value="50" />
-			<property name="hibernate.connection.provider_class"
-				value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" />
-			<property name="hibernate.c3p0.idle_test_period" value="10" />
-			<property name="hibernate.c3p0.acquire_increment" value="5" />
- -->			<!-- <property name="index.home.dir" value="./lucene" /> -->
+			<!-- <property name="hibernate.c3p0.min_size" value="5" /> <property name="hibernate.c3p0.max_size" 
+				value="20" /> <property name="hibernate.c3p0.timeout" value="1800" /> <property 
+				name="hibernate.c3p0.max_statements" value="50" /> <property name="hibernate.connection.provider_class" 
+				value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" 
+				/> <property name="hibernate.c3p0.idle_test_period" value="10" /> <property 
+				name="hibernate.c3p0.acquire_increment" value="5" /> -->			<!-- <property name="index.home.dir" value="./lucene" /> -->
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="piccandra">

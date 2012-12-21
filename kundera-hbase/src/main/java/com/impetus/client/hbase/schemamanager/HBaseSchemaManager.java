@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.Embeddable;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -127,6 +129,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         }
                         if (tableInfo.getEmbeddedColumnMetadatas() != null)
                         {
+                         //    DO nothing as columns Embeddable entity would go into owners column family. 
+                            /*
                             for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
                             {
                                 boolean found = false;
@@ -146,7 +150,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                     admin.addColumn(tableInfo.getTableName(), columnDescriptor);
                                 }
                             }
-                        }
+                        */}
                     }
                 }
                 catch (IOException e)
@@ -200,7 +204,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 if (tableInfo.getEmbeddedColumnMetadatas() != null)
                 {
-                    for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+//                  DO nothing as columns Embeddable entity would go into owners column family. 
+                   /* for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
                     {
                         boolean isColumnFound = false;
                         for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
@@ -219,7 +224,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                     tableInfo.getTableName(), tableInfo.getTableName());
                         }
                     }
-                }
+                */}
             }
             catch (TableNotFoundException tnfex)
             {
@@ -394,13 +399,15 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         if (tableInfo.getEmbeddedColumnMetadatas() != null)
         {
+         //  DO nothing as columns Embeddable entity would go into owners column family.
+            /*
             for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
             {
                 HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
                 setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
                 tableDescriptor.addFamily(hColumnDescriptor);
             }
-        }
+        */}
         if (tableProperties != null)
         {
             for (Object o : tableProperties.keySet())

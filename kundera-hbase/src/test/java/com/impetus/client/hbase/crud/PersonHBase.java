@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaExamples@hbaseTest")
+@Table(name = "PERSON_HBASE", schema = "KunderaExamples@hbaseTest")
 public class PersonHBase
 {
 

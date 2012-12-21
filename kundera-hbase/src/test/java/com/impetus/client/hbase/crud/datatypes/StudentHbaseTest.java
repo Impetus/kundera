@@ -489,7 +489,8 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
                 "ROLL_NUMBER".getBytes(), "MONTHLY_FEE".getBytes(), "SQL_DATE".getBytes(), "SQL_TIMESTAMP".getBytes(),
                 "SQL_TIME".getBytes(), "SQL_TIMESTAMP".getBytes(), "SQL_TIME".getBytes(), "BIG_INT".getBytes(),
                 "BIG_DECIMAL".getBytes(), "CALENDAR".getBytes() };
-        cli.createTable("STUDENT".getBytes(), families);
+//        cli.createTable("STUDENT".getBytes(), families);
+        cli.createTable("STUDENT");
         // cli.addColumnFamily("STUDENT", "UNIQUE_ID");
         // cli.addColumnFamily("STUDENT", "STUDENT_NAME");
         // cli.addColumnFamily("STUDENT", "IS_EXCEPTIONAL");

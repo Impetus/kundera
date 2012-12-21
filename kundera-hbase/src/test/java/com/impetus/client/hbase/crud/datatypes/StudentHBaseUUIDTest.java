@@ -22,6 +22,7 @@ public class StudentHBaseUUIDTest extends Base
     private static final String table = "StudentHBaseUUID";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -166,7 +167,7 @@ public class StudentHBaseUUIDTest extends Base
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -370,8 +371,8 @@ public class StudentHBaseUUIDTest extends Base
         List<StudentHBaseUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseUUID s where s.name = Amresh and s.age between " + getPartialValue(short.class)
-                + " and " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseUUID s where s.name = Amresh and s.age between "
+                + getPartialValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -569,8 +570,7 @@ public class StudentHBaseUUIDTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        cli.addColumnFamily(table, "NAME");
-        cli.addColumnFamily(table, "AGE");
+        
     }
 
     public void dropSchema()

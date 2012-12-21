@@ -68,7 +68,13 @@ final class AssociationBuilder
             Relation relation)
     {
 
-        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
+        Client pClient = delegator.getClient(entityMetadata);
+        if(jtMetadata == null) {
+            EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
+            jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
+            pClient = delegator.getClient(owningEntityMetadata);
+        }
         String joinTableName = jtMetadata.getJoinTableName();
 
         Set<String> joinColumns = jtMetadata.getJoinColumns();
@@ -80,7 +86,7 @@ final class AssociationBuilder
         // EntityMetadata relMetadata =
         // delegator.getMetadata(relation.getTargetEntity());
 
-        Client pClient = delegator.getClient(entityMetadata);
+        
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
         List<?> foreignKeys = pClient.getColumnsById(entityMetadata.getSchema(), joinTableName, joinColumnName,
                 inverseJoinColumnName, entityId);

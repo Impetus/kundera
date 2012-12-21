@@ -37,9 +37,9 @@ import com.impetus.client.twitter.entities.UserHBase;
  */
 public abstract class TwitterTestBaseHbase extends TestCase
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     /** The user id1. */
     String userId1;

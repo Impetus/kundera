@@ -29,11 +29,10 @@ public class TwibaseTest extends TwitterTestBaseHbase
 
     HBaseCli cli = new HBaseCli();
 
-    
     @Override
     protected void setUp() throws Exception
     {
-//         setUpInternal("hbaseTest");
+        setUpInternal("hbaseTest");
     }
 
     /**
@@ -42,13 +41,13 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Test
     public void testOnExecute()
     {
-//        executeTestSuite();
+        executeTestSuite();
     }
 
     @Override
     protected void tearDown() throws Exception
     {
-//         tearDownInternal();
+        tearDownInternal();
     }
 
     @Override
@@ -74,20 +73,20 @@ public class TwibaseTest extends TwitterTestBaseHbase
     {
         if (AUTO_MANAGE_SCHEMA)
         {
-            cli.createTable("USER");
-            cli.addColumnFamily("USER", "PREFERENCE_ID");
-            cli.addColumnFamily("USER", "FRIEND_ID");
-            cli.addColumnFamily("USER", "FOLLOWER_ID");
-            cli.addColumnFamily("USER", "personalDetail");
+            // cli.createTable("USER");
+            // cli.addColumnFamily("USER", "PREFERENCE_ID");
+            // cli.addColumnFamily("USER", "FRIEND_ID");
+            // cli.addColumnFamily("USER", "FOLLOWER_ID");
+            // cli.addColumnFamily("USER", "personalDetail");
 
-            cli.createTable("PREFERENCE");
-            cli.addColumnFamily("PREFERENCE", "WEBSITE_THEME");
-            cli.addColumnFamily("PREFERENCE", "PRIVACY_LEVEL");
+            // cli.createTable("PREFERENCE");
+            // cli.addColumnFamily("PREFERENCE", "WEBSITE_THEME");
+            // cli.addColumnFamily("PREFERENCE", "PRIVACY_LEVEL");
 
-            cli.createTable("EXTERNAL_LINK");
-            cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
-            cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
-            cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
+            // cli.createTable("EXTERNAL_LINK");
+            // cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
+            // cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
+            // cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
         }
     }
 

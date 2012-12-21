@@ -718,37 +718,41 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     {
                         returnedEntities.add(entity);
                     }
+                    else
+                    {
+                        returnedEntities.add(row);
+                    }
                 }
             }
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (TException e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (Exception e)
         {
-            log.error("Error while executing native CQL query Caused by:" , e);
+            log.error("Error while executing native CQL query Caused by:", e);
             e.printStackTrace();
             throw new PersistenceException(e);
         }

@@ -147,7 +147,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         catch (IOException e)
         {
-            log.error("Error during find by id, Caused by:" + e.getMessage());
+            log.error("Error during find by id, Caused by:" + e);
             throw new KunderaException(e);
         }
         return enhancedEntity;
@@ -176,7 +176,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 if (rowKey != null)
                 {
                     List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                            entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
+                            entityMetadata, rowKey, entityMetadata.getRelationNames());
                     if (results != null)
                     {
                         e = (E) results.get(0);
@@ -186,7 +186,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             }
             catch (IOException ioex)
             {
-                log.error("Error during find All, Caused by:" + ioex.getMessage());
+                log.error("Error during find All, Caused by:" + ioex);
                 throw new KunderaException(ioex);
             }
 
@@ -225,7 +225,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 }
                 catch (IOException ioex)
                 {
-                    log.error("Error during find for embedded entities, Caused by:" + ioex.getMessage());
+                    log.error("Error during find for embedded entities, Caused by:" + ioex);
 
                     throw new KunderaException(ioex);
                 }
@@ -273,7 +273,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         catch (IOException ioex)
         {
-            log.error("Error during find All, Caused by:" + ioex.getMessage());
+            log.error("Error during find All, Caused by:" + ioex);
             throw new KunderaException(ioex);
         }
         return results;
@@ -313,7 +313,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         catch (IOException ioex)
         {
-            log.error("Error during find All, Caused by:" + ioex.getMessage());
+            log.error("Error during find All, Caused by:" + ioex);
             throw new KunderaException(ioex);
         }
         return results;
@@ -395,7 +395,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 try
                 {
-                    handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
+                    handler.createTableIfDoesNotExist(joinTableName, joinTableName);
                     handler.writeJoinTableData(joinTableName, joinColumnValue, columns);
                 }
                 catch (IOException e)
@@ -434,7 +434,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         catch (IOException e)
         {
-            log.error("Error during delete by key. Caused by:" + e.getMessage());
+            log.error("Error during delete by key. Caused by:" + e);
             throw new PersistenceException(e);
         }
     }
@@ -466,27 +466,32 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
+        String columnFamilyName = m.getTableName();
+
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
-        SingleColumnValueFilter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName),
-                operator, valueInBytes);
+        SingleColumnValueFilter f = null;
+        f = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName), Bytes.toBytes(colName), operator, valueInBytes);
+
         // f.setFilterIfMissing(true);
         try
         {
-            return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
+
+            return ((HBaseDataHandler) handler)
+                    .scanData(f, m.getTableName(), entityClazz, m, columnFamilyName, colName);
         }
         catch (IOException ioe)
         {
-            log.error("Error during find By Relation, Caused by:" + ioe.getMessage());
+            log.error("Error during find By Relation, Caused by:", ioe);
             throw new KunderaException(ioe);
         }
         catch (InstantiationException ie)
         {
-            log.error("Error during find By Relation, Caused by:" + ie.getMessage());
+            log.error("Error during find By Relation, Caused by:", ie);
             throw new KunderaException(ie);
         }
         catch (IllegalAccessException iae)
         {
-            log.error("Error during find By Relation, Caused by:" + iae.getMessage());
+            log.error("Error during find By Relation, Caused by:", iae);
             throw new KunderaException(iae);
         }
     }
@@ -527,18 +532,18 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
-        Filter f = new SingleColumnValueFilter(Bytes.toBytes(columnName), Bytes.toBytes(columnName), operator,
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(tableName), Bytes.toBytes(columnName), operator,
                 valueInBytes);
         KeyOnlyFilter keyFilter = new KeyOnlyFilter();
         FilterList filterList = new FilterList(f, keyFilter);
         try
         {
-            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME, columnName + "_"
+            return handler.scanRowyKeys(filterList, tableName, tableName, columnName + "_"
                     + columnValue, m.getIdAttribute().getBindableJavaType());
         }
         catch (IOException e)
         {
-            log.error("Error while executing findIdsByColumn(), Caused by: " + e.getMessage());
+            log.error("Error while executing findIdsByColumn(), Caused by: " + e);
             throw new KunderaException(e);
         }
     }
@@ -641,7 +646,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         catch (IOException e)
         {
-            log.error("Error while executing batch insert/update, Caused by: " + e.getMessage());
+            log.error("Error while executing batch insert/update, Caused by: " + e);
             throw new KunderaException(e);
         }
 
