@@ -43,7 +43,7 @@
 			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- Kundera Dependencies -->
 		<dependency>
 			<groupId>com.impetus.core</groupId>
@@ -69,7 +69,16 @@
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
 			<version>1.8</version>
-		</dependency>	
+		</dependency>
+
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>1.8</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

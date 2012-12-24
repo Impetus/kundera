@@ -18,19 +18,19 @@ package com.impetus.client.neo4j;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * Implementation of {@link Client} using Neo4J Native Java driver 
  * (see Embedded Java driver at http://www.neo4j.org/develop/drivers)  
  * @author amresh.singh
  */
-public class Neo4JClient extends Neo4JClientBase implements Client<LuceneQuery>
+public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
 {
 
     @Override
@@ -103,7 +103,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<LuceneQuery>
     }
 
     @Override
-    public Class<LuceneQuery> getQueryImplementor()
+    public Class<Neo4JQuery> getQueryImplementor()
     {
         return null;
     }
@@ -111,7 +111,6 @@ public class Neo4JClient extends Neo4JClientBase implements Client<LuceneQuery>
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-    } 
-    
+    }  
 
 }
