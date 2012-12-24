@@ -145,7 +145,7 @@ public class HBaseWriter implements Writer
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
+            p.add(htable.getTableName(), Bytes.toBytes(columnName),
                     HBaseUtils.getBytes(columns.get(columnName)));
             isPresent = true;
             // /* .getBytes() */);
@@ -183,8 +183,8 @@ public class HBaseWriter implements Writer
                 }
                 else
                 {
-                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
-                            System.currentTimeMillis(), PropertyAccessorHelper.getBytes(r.getRelationValue()));
+                    p.add(htable.getTableName(), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
+                            PropertyAccessorHelper.getBytes(r.getRelationValue()));
                     // p.add(Bytes.toBytes(r.getRelationName()),
                     // System.currentTimeMillis(),
                     // Bytes.toBytes(r.getRelationValue()));

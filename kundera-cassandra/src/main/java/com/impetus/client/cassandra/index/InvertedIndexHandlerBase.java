@@ -81,8 +81,7 @@ public abstract class InvertedIndexHandlerBase
      * search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression,
-            boolean isRowKeyQuery)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
     {
         SearchResult searchResult = new SearchResult();
 
@@ -92,7 +91,7 @@ public abstract class InvertedIndexHandlerBase
         Object pk = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), superColumnName);
         IndexOperator condition = expression.getOp();
 
-        log.debug("rowKey:" + rowKey + ";Super column Name:" + superColumnNameStr + ";condition:" + condition);
+        log.debug("rowKey: " + rowKey + "; Super column Name: " + superColumnNameStr + "; condition: " + condition);
 
         // TODO: Second check unnecessary but unavoidable as filter clause
         // property is incorrectly passed as column name
@@ -209,7 +208,6 @@ public abstract class InvertedIndexHandlerBase
                 }
 
             }
-
         }
     }
 

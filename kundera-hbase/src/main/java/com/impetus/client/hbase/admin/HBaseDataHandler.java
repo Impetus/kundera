@@ -247,7 +247,8 @@ public class HBaseDataHandler implements DataHandler
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, m.getTableName(), columns);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, m.getTableName(), null,
+                columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -342,7 +343,7 @@ public class HBaseDataHandler implements DataHandler
         {
             hTable = gethTable(joinTableName);
 
-            List<HBaseData> results = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey, filter);
+            List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, filter);
 
             // assuming rowKey is not null.
             if (results != null)
@@ -358,7 +359,7 @@ public class HBaseDataHandler implements DataHandler
                         String hbaseColumn = Bytes.toString(colData.getQualifier());
                         String hbaseColumnFamily = Bytes.toString(colData.getFamily());
 
-                        if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME)
+                        if (hbaseColumnFamily.equals(joinTableName)
                                 && hbaseColumn.startsWith(inverseJoinColumnName))
                         {
                             byte[] val = colData.getValue();
@@ -572,15 +573,15 @@ public class HBaseDataHandler implements DataHandler
                         {
                             String cfInHbase = Bytes.toString(colData.getFamily());
 
-                            if (!cfInHbase.equals(key))
+                            // if (!cfInHbase.equals(key))
+                            // {
+                            if (relationNames != null && relationNames.contains(cfInHbase))
                             {
-                                if (relationNames != null && relationNames.contains(cfInHbase))
-                                {
-                                    relations.put(cfInHbase,
-                                            getObjectFromByteArray(entityType, colData.getValue(), cfInHbase, m));
-                                }
-                                continue;
+                                relations.put(cfInHbase,
+                                        getObjectFromByteArray(entityType, colData.getValue(), cfInHbase, m));
                             }
+                            // continue;
+                            // }
                             // Set Hbase data into the column family object
 
                             String colName = Bytes.toString(colData.getQualifier());
@@ -856,8 +857,8 @@ public class HBaseDataHandler implements DataHandler
         }
     }
 
-    public List scanData(Filter f, final String tableName, Class clazz, EntityMetadata m, String qualifier)
-            throws IOException, InstantiationException, IllegalAccessException
+    public List scanData(Filter f, final String tableName, Class clazz, EntityMetadata m, String columnFamily,
+            String qualifier) throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
 
@@ -865,7 +866,7 @@ public class HBaseDataHandler implements DataHandler
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         Set<Attribute> attributes = entityType.getAttributes();
-        String[] columns = new String[attributes.size()];
+        String[] columns = new String[attributes.size()-1];
         int count = 0;
         boolean isCollection = false;
         for (Attribute attr : attributes)
@@ -880,8 +881,8 @@ public class HBaseDataHandler implements DataHandler
                 break;
             }
         }
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, isCollection ? qualifier
-                : null, !isCollection ? columns : null);
+        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, m.getTableName(),
+                isCollection ? qualifier : null, /*!isCollection ? columns :*/ null);
         if (results != null)
         {
             for (HBaseData row : results)
@@ -1016,8 +1017,7 @@ public class HBaseDataHandler implements DataHandler
                         // entity
                         if (columnFamilyField.isAnnotationPresent(Embedded.class))
                         {
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject,
-                                    columnFamilyName));
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, tableName));
                         }
                         else
                         {

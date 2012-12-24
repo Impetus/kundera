@@ -24,12 +24,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +58,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * @author vivek.mishra
- * 
- * 
- *         TODOOOOOOO ::: 1) Embedded handling 2) Composite key 3) Association
- *         handling
- * 
+ * Redis client implementation for REDIS.
  * 
  */
 public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher
@@ -99,7 +96,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             // first open a pipeline
             // Create a hashset and populate data into it
-
             Pipeline pipeLine = connection.pipelined();
             AttributeWrapper wrapper = wrap(entityMetadata, entity);
 
@@ -120,8 +116,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
             }
 
-            String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                    .getJavaMember());
+            // prepareCompositeKey
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            String rowKey = null;
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                rowKey = prepareCompositeKey(entityMetadata, metaModel, id);
+            }
+            else
+            {
+                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
+                        .getJavaMember());
+            }
 
             String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
@@ -175,11 +184,25 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // byte[] rowKey = PropertyAccessorHelper.getBytes(key);
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        String rowKey = getHashKey(entityMetadata.getTableName(), PropertyAccessorHelper.getString(key));
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        String rowKey = null;
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            rowKey = prepareCompositeKey(entityMetadata, metaModel, key);
+        }
+        else
+        {
+            rowKey = PropertyAccessorHelper.getString(key);
+        }
+
+        String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
         try
         {
-            Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(rowKey));
+            Map<byte[], byte[]> columns = connection.hgetAll(getEncodedBytes(hashKey));
             result = unwrap(entityMetadata, columns, key);
         }
         catch (JedisConnectionException jedex)
@@ -249,8 +272,24 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             Set<byte[]> columnNames = wrapper.columns.keySet();
 
-            String rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                    .getJavaMember());
+            String rowKey = null;
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                rowKey = prepareCompositeKey(entityMetadata, metaModel, pKey);
+            }
+            else
+            {
+                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
+                        .getJavaMember());
+            }
+
+            // String rowKey = PropertyAccessorHelper.getString(entity, (Field)
+            // entityMetadata.getIdAttribute()
+            // .getJavaMember());
 
             for (byte[] name : columnNames)
             {
@@ -536,135 +575,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return 0;
     }
 
-    private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity)
-    {
-
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
-
-        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
-        Set<Attribute> attributes = entityType.getAttributes();
-
-        // attributes can be null??? i guess NO
-        AttributeWrapper wrapper = new AttributeWrapper(attributes.size());
-
-        List<String> relationNames = entityMetadata.getRelationNames();
-
-        // PropertyAccessorHelper.get(entity,
-        for (Attribute attr : attributes)
-        {
-            if (!entityMetadata.getIdAttribute().equals(attr) && !attr.isAssociation())
-            {
-                if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
-                {
-                    // TODO:::::: process on embeddables.
-                }
-                else
-                {
-                    byte[] value = PropertyAccessorHelper.get(entity, (Field) attr.getJavaMember());
-                    String valueAsStr = PropertyAccessorHelper.getString(entity, (Field) attr.getJavaMember());
-                    byte[] name;
-                    name = getEncodedBytes(((AbstractAttribute) attr).getJPAColumnName());
-
-                    // add column name as key and value as value
-                    wrapper.addColumn(name, value);
-                    // // {tablename:columnname,hashcode} for value
-                    wrapper.addIndex(
-                            getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attr).getJPAColumnName()),
-                            Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
-                }
-            }
-            else if (attributes.size() == 1) // means it is only a key! weird
-                                             // but possible negative scenario
-            {
-                byte[] value = PropertyAccessorHelper.get(entity, (Field) attr.getJavaMember());
-                byte[] name;
-                name = getEncodedBytes(((AbstractAttribute) attr).getJPAColumnName());
-
-                // add column name as key and value as value
-                wrapper.addColumn(name, value);
-
-            }
-        }
-
-        return wrapper;
-    }
-
-    private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results, Object key)
-            throws InstantiationException, IllegalAccessException
-    {
-
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
-
-        List<String> relationNames = entityMetadata.getRelationNames();
-        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
-
-        Map<String, Object> relations = new HashMap<String, Object>();
-        Object entity = null;
-
-        // Set<Attribute> attributes = entityType.getAttributes();
-
-        Set<byte[]> columnNames = results.keySet();
-        Object id = null;
-        for (byte[] nameInByte : columnNames)
-        {
-            if (entity == null)
-            {
-                entity = entityMetadata.getEntityClazz().newInstance();
-            }
-
-            String columnName = PropertyAccessorFactory.STRING.fromBytes(String.class, nameInByte);
-
-            byte[] value = results.get(nameInByte);
-            String fieldName = entityMetadata.getFieldName(columnName);
-
-            if (fieldName != null)
-            {
-                Attribute attribute = entityType.getAttribute(fieldName);
-
-                if (relationNames != null && relationNames.contains(columnName))
-                {
-                    Field field = (Field) attribute.getJavaMember();
-                    EntityMetadata associationMetadata = KunderaMetadataManager
-                            .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
-                    relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
-                            .getBindableJavaType(), value));
-                }
-                else
-                {
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
-                }
-            }
-            // this will set field into entity.
-            // TODO: :: what about crap relation and embedded attribute
-        }
-
-        if (entity != null)
-        {
-            PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
-        }
-        if (!relations.isEmpty())
-        {
-            return new EnhanceEntity(entity, key, relations);
-        }
-
-        return entity;
-    }
-
-    // Indexer interface needs to be carved out for such stuff
-
-    private class RedisIndexer
-    {
-    }
-
+    /**
+     * Attribute wrapper.
+     * 
+     * @author vivek.mishra
+     * 
+     */
     private class AttributeWrapper
     {
         private Map<byte[], byte[]> columns;
 
         private Map<String, Double> indexes;
 
-        public AttributeWrapper()
+        private AttributeWrapper()
         {
             columns = new HashMap<byte[], byte[]>();
 
@@ -704,6 +627,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     }
 
+    /**
+     * Returns hash key.
+     * 
+     * @param tableName
+     *            table name
+     * @param rowKey
+     *            row key
+     * @return concatenated hash key
+     */
     private String getHashKey(final String tableName, final String rowKey)
     {
         StringBuilder builder = new StringBuilder(tableName);
@@ -712,6 +644,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return builder.toString();
     }
 
+    /**
+     * Returns encoded bytes.
+     * 
+     * @param name
+     *            field name.
+     * @return encoded byte array.
+     */
     private byte[] getEncodedBytes(final String name)
     {
         try
@@ -724,13 +663,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         catch (UnsupportedEncodingException e)
         {
-            // TODO :LOGGGINNNNNGGGGGGG!.
-            // throw an error.
+            logger.error("Error during persist, Caused by:", e);
+            throw new PersistenceException(e);
         }
 
         return null;
     }
 
+    /**
+     * Add inverted index in sorted set.
+     * 
+     * @param connection
+     *            redis connection instance
+     * @param wrapper
+     *            attribute wrapper.
+     * @param rowKey
+     *            row key to be stor
+     */
     private void addIndex(final Jedis connection, final AttributeWrapper wrapper, final String rowKey)
     {
         Set<String> indexKeys = wrapper.getIndexes().keySet();
@@ -741,6 +690,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Deletes inverted indexes from redis.
+     * 
+     * @param connection
+     *            redis instance.
+     * @param wrapper
+     *            attribute wrapper
+     * @param member
+     *            sorted set member name.
+     */
     private void unIndex(final Jedis connection, final AttributeWrapper wrapper, final String member)
     {
         Set<String> keys = wrapper.getIndexes().keySet();
@@ -750,12 +709,277 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * On release connection.
+     * 
+     * @param connection
+     *            redis connection instance.
+     */
     private void onCleanup(Jedis connection)
     {
         if (connection != null)
         {
             factory.releaseConnection(connection);
         }
+    }
+
+    /**
+     * Prepares composite key as a redis key.
+     * 
+     * @param m
+     *            entity metadata
+     * @param metaModel
+     *            meta model.
+     * @param compositeKey
+     *            composite key instance
+     * @return redis key
+     */
+    private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
+    {
+        EmbeddableType keyObject = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+
+        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String seperator = "\001";
+        for (Field f : fields)
+        {
+            Attribute compositeColumn = keyObject.getAttribute(f.getName());
+            try
+            {
+                String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                                                                                       // value
+                stringBuilder.append(fieldValue);
+                stringBuilder.append(seperator);
+            }
+            catch (IllegalArgumentException e)
+            {
+                logger.error("Error during persist, Caused by:", e);
+                throw new PersistenceException(e);
+            }
+
+        }
+
+        if (stringBuilder.length() > 0)
+        {
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(seperator));
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Wraps entity attributes into byte[] and return instance of attribute
+     * wrapper.
+     * 
+     * @param entityMetadata
+     * @param entity
+     * @return
+     */
+    private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity)
+    {
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        Set<Attribute> attributes = entityType.getAttributes();
+
+        // attributes can be null??? i guess NO
+        AttributeWrapper wrapper = new AttributeWrapper(attributes.size());
+
+        List<String> relationNames = entityMetadata.getRelationNames();
+
+        // PropertyAccessorHelper.get(entity,
+        for (Attribute attr : attributes)
+        {
+            if (!entityMetadata.getIdAttribute().equals(attr) && !attr.isAssociation())
+            {
+                if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
+                {
+                    EmbeddableType embeddableAttribute = metaModel.embeddable(((AbstractAttribute) attr)
+                            .getBindableJavaType());
+
+                    Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) attr.getJavaMember());
+
+                    Set<Attribute> embeddedAttributes = embeddableAttribute.getAttributes();
+
+                    for (Attribute attrib : embeddedAttributes)
+                    {
+                        addToWrapper(entityMetadata, wrapper, embeddedObject, attrib, attr);
+                    }
+
+                }
+                else
+                {
+                    addToWrapper(entityMetadata, wrapper, entity, attr);
+                }
+            }
+            else if (attributes.size() == 1) // means it is only a key! weird
+                                             // but possible negative scenario
+            {
+                byte[] value = PropertyAccessorHelper.get(entity, (Field) attr.getJavaMember());
+                byte[] name;
+                name = getEncodedBytes(((AbstractAttribute) attr).getJPAColumnName());
+
+                // add column name as key and value as value
+                wrapper.addColumn(name, value);
+
+            }
+        }
+
+        return wrapper;
+    }
+
+    /**
+     * Adds field to wrapper.
+     * 
+     * @param entityMetadata
+     * @param wrapper
+     * @param resultedObject
+     * @param attrib
+     */
+    private void addToWrapper(EntityMetadata entityMetadata, AttributeWrapper wrapper, Object resultedObject,
+            Attribute attrib)
+    {
+        addToWrapper(entityMetadata, wrapper, resultedObject, attrib, null);
+    }
+
+    /**
+     * Wraps entity attributes into redis format byte[]
+     * 
+     * @param entityMetadata
+     * @param wrapper
+     * @param embeddedObject
+     * @param attrib
+     * @param embeddedAttrib
+     */
+    private void addToWrapper(EntityMetadata entityMetadata, AttributeWrapper wrapper, Object embeddedObject,
+            Attribute attrib, Attribute embeddedAttrib)
+    {
+        byte[] value = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
+        String valueAsStr = PropertyAccessorHelper.getString(embeddedObject, (Field) attrib.getJavaMember());
+        byte[] name;
+        if (embeddedAttrib == null)
+        {
+            name = getEncodedBytes(((AbstractAttribute) attrib).getJPAColumnName());
+        }
+        else
+        {
+            name = getEncodedBytes(getHashKey(embeddedAttrib.getName(), ((AbstractAttribute) attrib).getJPAColumnName()));
+        }
+        // add column name as key and value as value
+        wrapper.addColumn(name, value);
+        // // {tablename:columnname,hashcode} for value
+        wrapper.addIndex(getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
+                Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+    }
+
+    /**
+     * Unwraps redis results into entity.
+     * 
+     * @param entityMetadata
+     * @param results
+     * @param key
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results, Object key)
+            throws InstantiationException, IllegalAccessException
+    {
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        List<String> relationNames = entityMetadata.getRelationNames();
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+
+        Map<String, Object> relations = new HashMap<String, Object>();
+        Object entity = null;
+
+        // Set<Attribute> attributes = entityType.getAttributes();
+
+        Set<byte[]> columnNames = results.keySet();
+        for (byte[] nameInByte : columnNames)
+        {
+            if (entity == null)
+            {
+                entity = entityMetadata.getEntityClazz().newInstance();
+            }
+
+            String columnName = PropertyAccessorFactory.STRING.fromBytes(String.class, nameInByte);
+
+            byte[] value = results.get(nameInByte);
+            String fieldName = entityMetadata.getFieldName(columnName);
+
+            if (fieldName != null)
+            {
+                Attribute attribute = entityType.getAttribute(fieldName);
+
+                if (relationNames != null && relationNames.contains(columnName))
+                {
+                    Field field = (Field) attribute.getJavaMember();
+                    EntityMetadata associationMetadata = KunderaMetadataManager
+                            .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
+                    relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
+                            .getBindableJavaType(), value));
+                }
+                else
+                {
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
+                }
+            }
+            else
+            {
+                // means it might be an embeddable field, if not simply omit
+                // this field.
+
+                if (StringUtils.contains(columnName, ":"))
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(columnName, ":");
+                    while (tokenizer.hasMoreTokens())
+                    {
+                        String embeddedFieldName = tokenizer.nextToken();
+                        String embeddedColumnName = tokenizer.nextToken();
+
+                        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata
+                                .getEntityClazz());
+
+                        EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
+
+                        Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
+
+                        Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
+                                .getAttribute(embeddedFieldName).getJavaMember());
+
+                        if (embeddedObject == null)
+                        {
+                            embeddedObject = ((AbstractAttribute) entityType.getAttribute(embeddedFieldName))
+                                    .getBindableJavaType().newInstance();
+                            PropertyAccessorHelper.set(entity, (Field) entityType.getAttribute(embeddedFieldName)
+                                    .getJavaMember(), embeddedObject);
+                        }
+
+                        PropertyAccessorHelper.set(embeddedObject, (Field) attrib.getJavaMember(), value);
+                        // PropertyAccessorHelper.
+
+                    }
+                }
+                // It might be a case of embeddable attribute.
+
+            }
+        }
+
+        if (entity != null)
+        {
+            PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
+        }
+        if (!relations.isEmpty())
+        {
+            return new EnhanceEntity(entity, key, relations);
+        }
+
+        return entity;
     }
 
 }

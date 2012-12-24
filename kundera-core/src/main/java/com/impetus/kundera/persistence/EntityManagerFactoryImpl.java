@@ -44,6 +44,7 @@ import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
@@ -172,11 +173,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         for (String pu : persistenceUnits)
         {
-            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu, /*
-                                                                           * getExternalProperties
-                                                                           * (
-                                                                           * pu)
-                                                                           */null)).destroy();
+            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu, getExternalProperties(pu))).destroy();
+            KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
         }
     }
 

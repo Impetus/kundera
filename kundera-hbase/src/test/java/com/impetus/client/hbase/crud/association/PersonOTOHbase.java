@@ -13,20 +13,26 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.hbase.crud;
+package com.impetus.client.hbase.crud.association;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-// TODO: Auto-generated Javadoc
+import com.impetus.client.twitter.entities.PersonalDetailHbase;
+
 /**
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON_HBASE", schema = "KunderaExamples@hbaseTest")
-public class PersonHBase
+@Table(name = "PERSON", schema = "KunderaExamples@hbaseTest")
+public class PersonOTOHbase
 {
 
     /** The person id. */
@@ -41,6 +47,23 @@ public class PersonHBase
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+
+    @Embedded
+    private PersonalDetailHbase personalDetail;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ADDRESS_ID")
+    private AddressOTOHbase address;
+
+    public PersonOTOHbase(String personId)
+    {
+        this.personId = personId;
+    }
+
+    public PersonOTOHbase()
+    {
+
+    }
 
     /**
      * Gets the person id.
@@ -99,6 +122,38 @@ public class PersonHBase
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    public AddressOTOHbase getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(AddressOTOHbase address)
+    {
+        this.address = address;
+    }
+
+    public void setAge(Integer age)
+    {
+        this.age = age;
+    }
+
+    /**
+     * @return the personalDetail
+     */
+    public PersonalDetailHbase getPersonalDetail()
+    {
+        return personalDetail;
+    }
+
+    /**
+     * @param personalDetail
+     *            the personalDetail to set
+     */
+    public void setPersonalDetail(PersonalDetailHbase personalDetail)
+    {
+        this.personalDetail = personalDetail;
     }
 
 }

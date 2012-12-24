@@ -22,7 +22,7 @@ public class StudentHBasebyteTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
-    
+
     private static final String table = "StudentHBasebyte";
 
     private HBaseCli cli;
@@ -220,12 +220,15 @@ public class StudentHBasebyteTest extends Base
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-//            else if (student.getId() == ((Byte) getMinValue(byte.class)).byteValue())
-//            {
-//                Assert.assertEquals(getPartialValue(short.class), student.getAge());
-//                Assert.assertEquals(getMinValue(String.class), student.getName());
-//                count++;
-//            }
+            // else if (student.getId() == ((Byte)
+            // getMinValue(byte.class)).byteValue())
+            // {
+            // Assert.assertEquals(getPartialValue(short.class),
+            // student.getAge());
+            // Assert.assertEquals(getMinValue(String.class),
+            // student.getName());
+            // count++;
+            // }
             else
             {
                 Assert.assertEquals(getRandomValue(byte.class), student.getId());
@@ -569,8 +572,8 @@ public class StudentHBasebyteTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        cli.addColumnFamily(table, "NAME");
-        cli.addColumnFamily(table, "AGE");
+        
+
     }
 
     public void dropSchema()

@@ -148,7 +148,7 @@ public class AbstractEntityReader
                      * 
                      * } else {
                      */
-                    if (relation.isRelatedViaJoinTable())
+                    if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
                         // M-M relationship. Relationship entities are always
                         // fetched
