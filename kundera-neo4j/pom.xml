@@ -1,18 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.impetus.neo4j.demo</groupId>
-	<artifactId>neo4j-demo</artifactId>
+	<parent>
+		<groupId>com.impetus</groupId>
+		<artifactId>kundera</artifactId>
+		<version>2.3-SNAPSHOT</version>
+	</parent>
+	<groupId>com.impetus.client</groupId>
+	<artifactId>kundera-neo4j</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>neo4j-demo</name>
+	<version>2.3-SNAPSHOT</version>
+	<name>kundera-neo4j</name>
 	<url>http://maven.apache.org</url>
-
-	<properties>
-		<spring.version>3.0.7.RELEASE</spring.version>
-	</properties>
-
-
 	<repositories>
 		<repository>
 			<id>neo4j-release-repository</id>
@@ -41,7 +40,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
 
