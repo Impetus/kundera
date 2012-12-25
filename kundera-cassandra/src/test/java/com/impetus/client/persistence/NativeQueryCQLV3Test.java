@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -74,7 +75,7 @@ public class NativeQueryCQLV3Test
     /**
      * Test create insert column family query.
      */
-    @Test
+     @Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
@@ -183,15 +184,22 @@ public class NativeQueryCQLV3Test
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
         clazzToPu.put(CassandraEntity.class.getName(), pus);
+        clazzToPu.put(CassandraBatchEntity.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntity.class);
+        EntityMetadata m1 = new EntityMetadata(CassandraBatchEntity.class);
+
         TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntity.class, m);
+        processor.process(CassandraBatchEntity.class, m1);
+
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntity.class, m);
+        metaModel.addEntityMetadata(CassandraBatchEntity.class, m1);
+
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
@@ -200,6 +208,40 @@ public class NativeQueryCQLV3Test
         String[] persistenceUnits = new String[] { persistenceUnit };
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         return emf;
+    }
+
+    @Test
+    public void testCQLBatch()
+    {
+        String useNativeSql = "USE " + schema;
+        EntityManagerFactory emf = getEntityManagerFactory();
+        String createColumnFamily = "CREATE TABLE CassandraBatchEntity ( user_name varchar PRIMARY KEY, password varchar, name varchar)";
+        String batchOps = "BEGIN BATCH USING CONSISTENCY QUORUM  INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user2', 'ch@ngem3b', 'second user') UPDATE CassandraBatchEntity SET password = 'ps22dhds' WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password) VALUES ('user3', 'ch@ngem3c') DELETE name FROM CassandraBatchEntity WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user4', 'ch@ngem3c', 'Andrew') APPLY BATCH";
+
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
+                PersistenceContextType.EXTENDED);
+
+        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
+        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        Query q = em.createNativeQuery(useNativeSql, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+
+        q = em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+
+        q = em.createNativeQuery(batchOps, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+        
+        q = em.createNativeQuery("select * from CassandraBatchEntity", CassandraBatchEntity.class);
+        List<CassandraBatchEntity> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
     }
 
     /**
