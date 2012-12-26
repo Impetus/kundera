@@ -47,7 +47,7 @@ public abstract class AbstractPropertyReader
      * 
      * @param pu
      */
-    public void read(String pu)
+    final public void read(String pu)
     {
         puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String propertyFileName = puMetadata != null ? puMetadata
