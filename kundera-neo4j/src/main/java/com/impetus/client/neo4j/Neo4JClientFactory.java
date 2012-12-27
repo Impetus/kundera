@@ -47,17 +47,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     private static Logger log = LoggerFactory.getLogger(Neo4JClientFactory.class);
 
     private GraphDatabaseService graphDb;
-
-    @Override
-    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
-    {
-        return null;
-    }
-
-    @Override
-    public void destroy()
-    {
-    }
+    
 
     @Override
     public void initialize(Map<String, Object> puProperties)
@@ -112,6 +102,17 @@ public class Neo4JClientFactory extends GenericClientFactory
     public boolean isThreadSafe()
     {
         return false;
+    }
+    
+    @Override
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
+    {
+        return null;
+    }
+
+    @Override
+    public void destroy()
+    {
     }
     
     /**
