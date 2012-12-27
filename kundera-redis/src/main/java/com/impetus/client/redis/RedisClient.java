@@ -39,6 +39,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
+import com.impetus.client.redis.RedisQueryInterpreter.Clause;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -111,7 +112,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     String valueAsStr = PropertyAccessorHelper.getString(value);
                     wrapper.addColumn(nameInBytes, valueInBytes);
                     wrapper.addIndex(getHashKey(entityMetadata.getTableName(), name),
-                            Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+                            getDouble(valueAsStr));
+
+                    // this index is required to work for UNION/INTERSECT
+                    // support.
+
+                    wrapper.addIndex(getHashKey(entityMetadata.getTableName(), getHashKey(name, valueAsStr)),
+                            getDouble(valueAsStr));
                 }
             }
 
@@ -134,6 +141,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
             connection.hmset(getEncodedBytes(hashKey), wrapper.getColumns());
+            
+            // Add row key.
+            connection.rpush(getHashKey(entityMetadata.getTableName(), entityMetadata.getIdAttribute().getName()), rowKey);
 
             // Add inverted indexes for column based search.
             addIndex(connection, wrapper, rowKey);
@@ -146,6 +156,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             onCleanup(connection);
         }
 
+    }
+
+    private double getDouble(String valueAsStr)
+    {
+        return StringUtils.isNumeric(valueAsStr)? Double.parseDouble(valueAsStr) : Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
     }
 
     @Override
@@ -286,10 +301,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         .getJavaMember());
             }
 
-            // String rowKey = PropertyAccessorHelper.getString(entity, (Field)
-            // entityMetadata.getIdAttribute()
-            // .getJavaMember());
-
             for (byte[] name : columnNames)
             {
                 connection.hdel(getHashKey(entityMetadata.getTableName(), rowKey),
@@ -303,6 +314,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // Delete inverted indexes.
             unIndex(connection, wrapper, rowKey);
 
+            connection.lrem(getHashKey(entityMetadata.getTableName(), entityMetadata.getIdAttribute().getName()), 0, rowKey);
+            
             pipeLine.sync();
         }
         finally
@@ -870,7 +883,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         wrapper.addColumn(name, value);
         // // {tablename:columnname,hashcode} for value
         wrapper.addIndex(getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
-                Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+                getDouble(valueAsStr));
+
+        wrapper.addIndex(
+                getHashKey(entityMetadata.getTableName(),
+                        getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
+                        getDouble(valueAsStr));
+
     }
 
     /**
@@ -981,4 +1000,102 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return entity;
     }
 
+    List onExecuteQuery(RedisQueryInterpreter queryParameter, Class entityClazz)
+    {
+
+        /**
+         * Find a list of id's and then call findById for each!
+         */
+        Jedis connection = null;
+        List<Object> results = new ArrayList<Object>();
+        try
+        {
+            connection = factory.getConnection();
+            Set<String> rowKeys = new HashSet<String>();
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+            if (queryParameter.getClause() != null && !queryParameter.isByRange())
+            {
+                String destStore = entityClazz.getSimpleName() + System.currentTimeMillis();
+
+                Map<String, Object> fieldSets = queryParameter.getFields();
+
+                Set<String> keySets = new HashSet<String>(fieldSets.size());
+                // byte[][] keys = new byte[][fieldSets.size()];
+                for (String column : fieldSets.keySet())
+                {
+                    String valueAsStr = PropertyAccessorHelper.getString(fieldSets.get(column));
+                    String key = getHashKey(entityMetadata.getTableName(), getHashKey(column, valueAsStr));
+                    keySets.add(key);
+                }
+
+                if (queryParameter.getClass().equals(Clause.INTERSECT))
+                {
+                    connection.zinterstore(getEncodedBytes(destStore), keySets.toArray(new byte[][] {}));
+                }
+                else
+                {
+                    connection.zunionstore(destStore, keySets.toArray(new String[] {}));
+                }
+
+                rowKeys = connection.zrange(destStore, 0, -1);
+
+                // delete intermediate store after find.
+                connection.del(destStore);
+                //
+                // means it is a query over sorted set.
+            }
+            else if (queryParameter.isByRange())
+            {
+                // means query over a single sorted set with range
+                Map<String, Double> minimum = queryParameter.getMin();
+                Map<String, Double> maximum = queryParameter.getMax();
+
+                String column = minimum.keySet().iterator().next();
+
+                rowKeys = connection.zrangeByScore(getHashKey(entityMetadata.getTableName(), column),
+                        minimum.get(column), maximum.get(column));
+
+            }
+            else if (queryParameter.isById())
+            {
+                Map<String, Object> fieldSets = queryParameter.getFields();
+                results = findAll(entityClazz, fieldSets.values().toArray());
+            } else 
+            {
+                rowKeys = new HashSet<String>(connection.lrange(getHashKey(entityMetadata.getTableName(), entityMetadata.getIdAttribute().getName()), 0, -1));
+            }
+
+            if (!queryParameter.isById())
+            {
+                for (String k : rowKeys)
+                {
+                    Object record = fetch(entityClazz, k, connection);
+                    if (record != null)
+                    {
+                        results.add(record);
+                    }
+                }
+            }
+
+        }
+        catch (InstantiationException e)
+        {
+            logger.error("Error during persist, Caused by:", e);
+            throw new PersistenceException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error("Error during persist, Caused by:", e);
+            throw new PersistenceException(e);
+        }
+        finally
+        {
+            if (connection != null)
+            {
+                factory.releaseConnection(connection);
+            }
+        }
+
+        return results;
+    }
 }

@@ -18,6 +18,10 @@ package com.impetus.client.redis;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.impetus.kundera.property.PropertyAccessorHelper;
+
 /**
  * Query interpreter responsible for: <li>Determine if it is a query by id.</li>
  * <li>holds value and clause(UNION or INTERSECT REDIS clause for sorted set)</li>
@@ -30,9 +34,9 @@ class RedisQueryInterpreter
 
     private boolean isById;
 
-    private Map<String, Object> min;
+    private Map<String, Double> min;
 
-    private Map<String, Object> max;
+    private Map<String, Double> max;
 
     private Clause clause;
 
@@ -40,11 +44,24 @@ class RedisQueryInterpreter
 
     private String fieldName;
 
+    private Map<String, Object> fields;
+
+    private static Map<String,Clause> clauseMapper = new HashMap<String,Clause>();
+    static
+    {
+        clauseMapper.put("AND", Clause.INTERSECT);
+        clauseMapper.put("OR", Clause.UNION);
+    }
     enum Clause
     {
         UNION, INTERSECT;
     }
 
+    static Clause getMappedClause(String intraClause)
+    {
+        return clauseMapper.get(intraClause);
+    }
+    
     /**
      * Default constructor
      */
@@ -85,28 +102,32 @@ class RedisQueryInterpreter
     void setValue(Object value)
     {
         this.value = value;
+        if (this.fields != null)
+        {
+            fields.put(fieldName, value);
+        }
     }
 
-    Map<String, Object> getMin()
+    Map<String, Double> getMin()
     {
         return min;
     }
 
     void setMin(String field, Object fieldValue)
     {
-        this.min = new HashMap<String, Object>(1);
-        this.min.put(field, fieldValue);
+        this.min = new HashMap<String, Double>(1);
+        this.min.put(field, !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(fieldValue).hashCode()): Double.valueOf(fieldValue.toString()));
     }
 
-    Map<String, Object> getMax()
+    Map<String, Double> getMax()
     {
         return max;
     }
 
     void setMax(String field, Object fieldValue)
     {
-        this.max = new HashMap<String, Object>(1);
-        this.max.put(field, fieldValue);
+        this.max = new HashMap<String, Double>(1);
+        this.max.put(field, !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(fieldValue).hashCode()): Double.valueOf(fieldValue.toString()));
     }
 
     String getFieldName()
@@ -117,5 +138,15 @@ class RedisQueryInterpreter
     void setFieldName(String fieldName)
     {
         this.fieldName = fieldName;
+        if (fields == null)
+        {
+            fields = new HashMap<String, Object>(2);
+        }
+        fields.put(fieldName, null);
+    }
+
+    Map<String, Object> getFields()
+    {
+        return fields;
     }
 }
