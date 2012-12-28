@@ -90,7 +90,7 @@ public class PersistenceUnitConfiguration implements Configuration
                 {
                     log.error("Unconfigured persistence unit: " + persistenceUnit
                             + " please validate with persistence.xml");
-                    throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
+                    throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
 //                metadatas.get(persistenceUnit);
             }

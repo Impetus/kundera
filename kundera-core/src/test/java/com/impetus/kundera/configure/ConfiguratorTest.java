@@ -107,7 +107,7 @@ public class ConfiguratorTest
             configurator.configure();
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(invalidPuName);
         }
-        catch (IllegalArgumentException iex)
+        catch (PersistenceUnitConfigurationException iex)
         {
             Assert.assertNull(puMetadata);
         }

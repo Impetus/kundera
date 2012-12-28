@@ -23,6 +23,8 @@ import net.dataforte.cassandra.pool.PoolConfiguration;
 import net.dataforte.cassandra.pool.PoolProperties;
 
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
@@ -32,6 +34,7 @@ import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -45,6 +48,10 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class ThriftClientFactory extends GenericClientFactory
 {
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
+
+    /** Cassandra pool */
     private ConnectionPool pool;
 
     @Override
@@ -135,10 +142,9 @@ public class ThriftClientFactory extends GenericClientFactory
         }
         catch (TException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error during pool creation: caused by ", e);
+            throw new ClientLoaderException(e);
         }
-        // TODO return a thrift pool
         return null;
     }
 

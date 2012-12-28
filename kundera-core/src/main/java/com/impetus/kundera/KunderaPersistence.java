@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -71,11 +72,18 @@ public class KunderaPersistence implements PersistenceProvider
         // list may not be intended
         synchronized (persistenceUnit)
         {
+            try
+            {
             initializeKundera(persistenceUnit, map);
 
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;
+            }catch(PersistenceUnitConfigurationException pcex)
+            {
+                // Means it is not for kundera persistence!
+                return null;
+            }
         }
     }
 
