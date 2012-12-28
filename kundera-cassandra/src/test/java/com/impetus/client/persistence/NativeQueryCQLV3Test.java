@@ -68,23 +68,22 @@ public class NativeQueryCQLV3Test
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-//        CassandraCli.initClient();
-        CassandraCli.dropKeySpace(schema);
-        CassandraCli.createKeySpace(schema);
+        // CassandraCli.initClient();
+         CassandraCli.dropKeySpace(schema);
+        // CassandraCli.createKeySpace(schema);
+        String nativeSql = "CREATE KEYSPACE " + schema
+                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        CassandraCli.executeCqlQuery(nativeSql);
     }
 
     /**
      * Test create insert column family query.
      */
-     @Test
+    @Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
 
-        // String nativeSql = "CREATE KEYSPACE " + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        // String useNativeSql = "USE test";
         String useNativeSql = "USE " + schema;
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
@@ -214,6 +213,7 @@ public class NativeQueryCQLV3Test
     @Test
     public void testCQLBatch()
     {
+
         String useNativeSql = "USE " + schema;
         EntityManagerFactory emf = getEntityManagerFactory();
         String createColumnFamily = "CREATE TABLE CassandraBatchEntity ( user_name varchar PRIMARY KEY, password varchar, name varchar)";
@@ -237,7 +237,7 @@ public class NativeQueryCQLV3Test
         q = em.createNativeQuery(batchOps, CassandraBatchEntity.class);
         // q.getResultList();
         q.executeUpdate();
-        
+
         q = em.createNativeQuery("select * from CassandraBatchEntity", CassandraBatchEntity.class);
         List<CassandraBatchEntity> results = q.getResultList();
         Assert.assertNotNull(results);
@@ -251,7 +251,7 @@ public class NativeQueryCQLV3Test
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
         batchOps = "BEGIN BATCH USING CONSISTENCY QUORUM INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
         em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
-        
+
     }
 
     /**

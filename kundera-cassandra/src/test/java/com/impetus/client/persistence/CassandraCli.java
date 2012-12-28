@@ -203,7 +203,7 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error(e);
+            return;
         }
         catch (SchemaDisagreementException e)
         {
