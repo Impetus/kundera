@@ -68,7 +68,8 @@ public class NativeQueryCQLV3Test
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        CassandraCli.dropKeySpace("KunderaExamples");
+//        CassandraCli.initClient();
+        CassandraCli.dropKeySpace(schema);
         CassandraCli.createKeySpace(schema);
     }
 
@@ -242,6 +243,15 @@ public class NativeQueryCQLV3Test
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
 
+        // Multiple table batch processing.
+
+        createColumnFamily = "create table test1 (id timeuuid primary key, url text, userid uuid, datetime timestamp, linkcounts int)";
+        em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
+        createColumnFamily = "create table test2 (key text primary key, count int)";
+        em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
+        batchOps = "BEGIN BATCH USING CONSISTENCY QUORUM INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
+        em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
+        
     }
 
     /**

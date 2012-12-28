@@ -15,11 +15,134 @@
  */
 package com.impetus.client.neo4j;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.test.ImpermanentGraphDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.impetus.client.neo4j.config.Neo4JPropertyReader;
+import com.impetus.client.neo4j.config.Neo4JPropertyReader.Neo4JSchemaMetadata;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+
 /**
  * Factory of Neo4J client(s) 
  * @author amresh.singh
  */
-public class Neo4JClientFactory
-{
+public class Neo4JClientFactory extends GenericClientFactory
+{    
+
+    /** The logger. */
+    private static Logger log = LoggerFactory.getLogger(Neo4JClientFactory.class);
+
+    private GraphDatabaseService graphDb;
+    
+
+    @Override
+    public void initialize(Map<String, Object> puProperties)
+    {
+        initializePropertyReader();
+    }
+
+    @Override
+    protected Object createPoolOrConnection()
+    {
+        log.info("Initializing Neo4J database connection");
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
+
+        Properties props = puMetadata.getProperties();
+        String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+
+        Neo4JSchemaMetadata nsmd = Neo4JPropertyReader.nsmd;
+        ClientProperties cp = nsmd != null ? nsmd.getClientProperties() : null;
+        if (cp != null)
+        {
+            DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;      
+         
+            Properties properties = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
+                    .getProperties() : null;
+                    
+            if(properties != null)
+            {
+                Map<String, String> config = new HashMap<String, String>((Map)properties);
+                graphDb = new ImpermanentGraphDatabase(config);
+            }        
+        }        
+        
+        if(graphDb == null)
+        {
+            graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(datastoreFilePath);
+        }        
+        
+        registerShutdownHook(graphDb);
+        
+        return graphDb;
+    }
+
+    @Override
+    protected Client instantiateClient(String persistenceUnit)
+    {
+        return new Neo4JClient(this);
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        return false;
+    }
+    
+    @Override
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
+    {
+        return null;
+    }
+
+    @Override
+    public void destroy()
+    {
+    }
+    
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new Neo4JPropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
+    }
+    
+    /**
+     * Registers a shutdown hook for the Neo4j instance so that it
+     * shuts down nicely when the VM exits (even if you "Ctrl-C" the
+     * running example before it's completed)
+     * @param graphDb
+     */
+    private static void registerShutdownHook(final GraphDatabaseService graphDb)
+    {
+        Runtime.getRuntime().addShutdownHook(new Thread()
+        {
+            @Override
+            public void run()
+            {
+                graphDb.shutdown();
+            }
+        });
+    }
 
 }

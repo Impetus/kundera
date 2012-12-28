@@ -15,8 +15,12 @@
  */
 package com.impetus.client.neo4j.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
 
 
@@ -27,16 +31,74 @@ import com.impetus.kundera.configure.PropertyReader;
 public class Neo4JPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
 
-    @Override
-    public void read(String pu)
+    /** log instance */
+    private static Log log = LogFactory.getLog(Neo4JPropertyReader.class);
+
+    /** Neo4J schema metadata instance */
+    public static Neo4JSchemaMetadata nsmd;
+    
+    public Neo4JPropertyReader()
     {
-        super.read(pu);
-    }
+        nsmd = new Neo4JSchemaMetadata();
+    } 
+    
 
     @Override
     protected void onXml(ClientProperties cp)
     {
-    }  
+        if (cp != null)
+        {
+            nsmd.setClientProperties(cp);
+        }
+    }    
     
+    
+    /**
+     * Holds property related to Neo4J specific configuration file
+     * 
+     * @author Amresh
+     * 
+     */
+    public class Neo4JSchemaMetadata
+    {
+        private ClientProperties clientProperties;
+
+        public Neo4JSchemaMetadata()
+        {
+
+        }
+
+        /**
+         * @return the clientProperties
+         */
+        public ClientProperties getClientProperties()
+        {
+            return clientProperties;
+        }
+
+        /**
+         * @param clientProperties
+         *            the clientProperties to set
+         */
+        private void setClientProperties(ClientProperties clientProperties)
+        {
+            this.clientProperties = clientProperties;
+        }
+
+        public DataStore getDataStore()
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("neo4j"))
+                    {
+                        return dataStore;
+                    }
+                }
+            }
+            return null;
+        }       
+    }
 
 }

@@ -32,6 +32,19 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
  */
 public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuery>
 {
+    /**
+     * Reference to Neo4J REST client factory.
+     */
+    private Neo4JRESTClientFactory factory;
+
+    private EntityReader reader;
+    
+    Neo4JRESTClient(final Neo4JRESTClientFactory factory)
+    {
+        this.factory = factory;
+        reader = new Neo4JEntityReader();
+    }
+    
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
