@@ -15,11 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.redis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -46,12 +49,15 @@ class RedisQueryInterpreter
 
     private Map<String, Object> fields;
 
-    private static Map<String,Clause> clauseMapper = new HashMap<String,Clause>();
+    private String[] columns;
+
+    private static Map<String, Clause> clauseMapper = new HashMap<String, Clause>();
     static
     {
         clauseMapper.put("AND", Clause.INTERSECT);
         clauseMapper.put("OR", Clause.UNION);
     }
+
     enum Clause
     {
         UNION, INTERSECT;
@@ -61,12 +67,13 @@ class RedisQueryInterpreter
     {
         return clauseMapper.get(intraClause);
     }
-    
+
     /**
      * Default constructor
      */
-    public RedisQueryInterpreter()
+    public RedisQueryInterpreter(String[] columns)
     {
+        this.columns = columns;
     }
 
     boolean isById()
@@ -116,7 +123,10 @@ class RedisQueryInterpreter
     void setMin(String field, Object fieldValue)
     {
         this.min = new HashMap<String, Double>(1);
-        this.min.put(field, !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(fieldValue).hashCode()): Double.valueOf(fieldValue.toString()));
+        this.min.put(
+                field,
+                !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(
+                        fieldValue).hashCode()) : Double.valueOf(fieldValue.toString()));
     }
 
     Map<String, Double> getMax()
@@ -127,7 +137,10 @@ class RedisQueryInterpreter
     void setMax(String field, Object fieldValue)
     {
         this.max = new HashMap<String, Double>(1);
-        this.max.put(field, !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(fieldValue).hashCode()): Double.valueOf(fieldValue.toString()));
+        this.max.put(
+                field,
+                !StringUtils.isNumeric(fieldValue.toString()) ? Double.valueOf(PropertyAccessorHelper.getString(
+                        fieldValue).hashCode()) : Double.valueOf(fieldValue.toString()));
     }
 
     String getFieldName()
@@ -149,4 +162,26 @@ class RedisQueryInterpreter
     {
         return fields;
     }
+
+    List<byte[]> getColumns()
+    {
+        if (columns != null && columns.length > 0)
+        {
+            // byte[] fields = new byte[columns.length][1];
+            List<byte[]> fields = new ArrayList<byte[]>(columns.length);
+            for (int i = 0; i < columns.length; i++)
+            {
+                if (columns[i] != null && columns[i].indexOf(".") >= 0)
+                {
+                    byte[] f = PropertyAccessorHelper.getBytes(columns[i]);
+                    fields.add(f);
+                }
+            }
+
+            return fields.isEmpty()?null:fields;
+        }
+
+        return null;
+    }
+
 }
