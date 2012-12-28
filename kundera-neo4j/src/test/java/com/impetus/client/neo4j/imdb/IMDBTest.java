@@ -19,10 +19,14 @@ package com.impetus.client.neo4j.imdb;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.metamodel.Metamodel;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * IMDB Test case 
@@ -42,8 +46,9 @@ public class IMDBTest
     @Before
     public void setUp() throws Exception
     {
-        //emf = Persistence.createEntityManagerFactory("imdb");
-        //em = emf.createEntityManager();
+/*        emf = Persistence.createEntityManagerFactory("imdb");
+        em = emf.createEntityManager();        
+*/        
     }
 
     /**
@@ -52,14 +57,28 @@ public class IMDBTest
     @After
     public void tearDown() throws Exception
     {
-        //em.close();
-        //emf.close();
-    }
+/*        em.close();
+        emf.close();
+*/    }
     
     @Test
     public void testCRUD()
     {
-        System.out.println("Running IMDB Test...");
+        /*System.out.println("Running IMDB Test...");
+        
+        EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Actor.class);
+        System.out.println(m1);
+        
+        EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(Movie.class);
+        System.out.println(m2);
+        
+        EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(Role.class);
+        System.out.println(m3);
+        
+        Metamodel mm = KunderaMetadataManager.getMetamodel("imdb");
+        System.out.println(mm);
+*/        
+        
     }
 
 }

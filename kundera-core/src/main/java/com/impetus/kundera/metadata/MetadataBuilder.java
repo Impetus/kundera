@@ -113,6 +113,7 @@ public class MetadataBuilder
         {
             // in case it is not intend for current persistence unit.
             checkForRDBMS(metadata);
+            checkForNeo4J(metadata);
             processor.process(clazz, metadata);
             metadata = belongsToPersistenceUnit(metadata);
             if (metadata == null)
@@ -132,6 +133,15 @@ public class MetadataBuilder
             metadata.setPersistenceUnit(persistenceUnit);
         }
     }
+    
+    private void checkForNeo4J(EntityMetadata metadata)
+    {
+        if (Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(client))
+        {
+            // no more "null" as persistence unit for RDBMS scenarios!
+            metadata.setPersistenceUnit(persistenceUnit);
+        }
+    }
 
     /**
      * If parameterised metadata is not for intended persistence unit, assign it
@@ -145,7 +155,7 @@ public class MetadataBuilder
     {
         // if pu is null and client is not rdbms OR metadata pu does not match
         // with configured one. don't process for anything.
-        if ((metadata.getPersistenceUnit() == null && !Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
+        if ((metadata.getPersistenceUnit() == null && ! (Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client) || Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(client)))
                 || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
         {
             metadata = null;

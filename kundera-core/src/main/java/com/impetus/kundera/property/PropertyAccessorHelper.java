@@ -401,7 +401,7 @@ public class PropertyAccessorHelper
     }
 
     /**
-     * Retrieves Generic class from a collection field.
+     * Retrieves Generic class from a collection field that has only one argument.
      * 
      * @param collectionField
      *            the collection field
@@ -416,7 +416,6 @@ public class PropertyAccessorHelper
         }
         if (isCollection(collectionField.getType()))
         {
-
             Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
             if (parameters != null)
             {
@@ -427,11 +426,39 @@ public class PropertyAccessorHelper
                 else
                 {
                     throw new PropertyAccessException(
-                            "Can't determine generic class from a field that has two parameters.");
+                            "Can't determine generic class from a field that has more than one parameters.");
                 }
             }
         }
         return genericClass != null ? genericClass : collectionField.getType();
+    }
+    
+    /**
+     * Retrieves Generic class from a collection field that has only one argument.
+     * 
+     * @param collectionField
+     *            the collection field
+     * @return the generic class
+     */
+    public static List<Class<?>> getGenericClasses(Field collectionField)
+    {
+        List<Class<?>> genericClasses = new ArrayList<Class<?>>();
+        if (collectionField == null)
+        {
+            return genericClasses;
+        }
+        Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
+        if (parameters != null)
+        {
+
+            for (Type parameter : parameters)
+            {
+                genericClasses.add((Class<?>) parameter);
+            }
+
+        }
+
+        return genericClasses;
     }
 
     /**
