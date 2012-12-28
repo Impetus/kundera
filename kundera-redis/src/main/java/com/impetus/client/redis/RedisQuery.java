@@ -129,7 +129,7 @@ public class RedisQuery extends QueryImpl
 
     private RedisQueryInterpreter onTranslation(Queue clauseQueue, EntityMetadata entityMetadata)
     {
-        RedisQueryInterpreter interpreter = new RedisQueryInterpreter();
+        RedisQueryInterpreter interpreter = new RedisQueryInterpreter(getKunderaQuery().getResult());
 
         // If there is no clause present, means we might need to scan complete
         // table.

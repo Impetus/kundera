@@ -70,6 +70,7 @@ public class RedisQueryTest
 
         final String originalName = "vivek";
 
+        // persist record.
         PersonRedis object = new PersonRedis();
         object.setAge(32);
         object.setPersonId(ROW_KEY);
@@ -89,27 +90,31 @@ public class RedisQueryTest
 
         em.persist(object);
 
+        // Find without where clause.
         String findWithOutWhereClause = "Select p from PersonRedis p";
         Query query = em.createQuery(findWithOutWhereClause);
         List<PersonRedis> results = query.getResultList();
         Assert.assertEquals(3, results.size());
         
+        // find by key.
         String findById = "Select p from PersonRedis p where p.personId=:personId";
         query = em.createQuery(findById);
         query.setParameter("personId", ROW_KEY);
         results = query.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
-//
-//        String findByIdAndAge = "Select p from PersonRedis p where p.personId=:personId AND p.age=:age";
-//        query = em.createQuery(findByIdAndAge);
-//        query.setParameter("personId", ROW_KEY);
-//        query.setParameter("age", 32);
-//
-//        results = query.getResultList();
-//        Assert.assertEquals(1, results.size());
-//        Assert.assertEquals(originalName, results.get(0).getPersonName());
 
+        // Find by key and now row key
+        String findByIdAndAge = "Select p from PersonRedis p where p.personId=:personId AND p.age=:age";
+        query = em.createQuery(findByIdAndAge);
+        query.setParameter("personId", ROW_KEY);
+        query.setParameter("age", 32);
+
+        results = query.getResultList();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(originalName, results.get(0).getPersonName());
+
+        // find by between over non rowkey
         String findAgeByBetween = "Select p from PersonRedis p where p.age between :min AND :max";
         query = em.createQuery(findAgeByBetween);
         query.setParameter("min", 32);
@@ -119,6 +124,19 @@ public class RedisQueryTest
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
 
+
+        // Between clause over rowkey
+        String findIdByBetween = "Select p from PersonRedis p where p.personId between :min AND :max";
+        query = em.createQuery(findIdByBetween);
+        query.setParameter("min", ROW_KEY);
+        query.setParameter("max", ROW_KEY+1);
+
+        results = query.getResultList();
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(originalName, results.get(0).getPersonName());
+
+        
+        // Find by greater than and less than clause over non row key
         String findAgeByGTELTEClause = "Select p from PersonRedis p where p.age <=:max AND p.age>=:min";
         query = em.createQuery(findAgeByGTELTEClause);
         query.setParameter("min", 32);
@@ -144,6 +162,49 @@ public class RedisQueryTest
         {
             Assert.assertNotNull(qhex);
         }
+        
+        // More than TWO AND clause
+        // OR Clause
+
+        // Find without where clause on SELECTIVE COLUMN TODOOOOOOOOOOOOOOOOOOOOOOO.
+        String findSelective = "Select p.age from PersonRedis p";
+        query = em.createQuery(findSelective);
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+
+        // Find by key and now row key
+        String findByIdOrAge = "Select p from PersonRedis p where p.personId=:personId OR p.age=:age";
+        query = em.createQuery(findByIdOrAge);
+        query.setParameter("personId", ROW_KEY);
+        query.setParameter("age", 29);
+
+        results = query.getResultList();
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(originalName, results.get(0).getPersonName());
+        boolean isPresent=false;
+        for(PersonRedis r : results)
+        {
+            if(r.getAge().equals(29) && !r.getPersonId().equals(ROW_KEY))
+            {
+                isPresent=true;
+                break;
+            }
+        }
+        
+        Assert.assertTrue(isPresent);
+
+
+        String findByIdMoreOrAge = "Select p from PersonRedis p where p.personId=:personId OR p.age=:age OR p.personName=:personName";
+        query = em.createQuery(findByIdMoreOrAge);
+        query.setParameter("personId", ROW_KEY);
+        query.setParameter("age", 29);
+        query.setParameter("personName", originalName);
+
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(originalName, results.get(0).getPersonName());
+        
+        // TODOOOO: selective column search
         
         // Delete by query.
         String deleteQuery="Delete from PersonRedis p";
