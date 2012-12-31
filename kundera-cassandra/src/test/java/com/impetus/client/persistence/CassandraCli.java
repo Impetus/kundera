@@ -63,6 +63,7 @@ public final class CassandraCli
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassandraCli.class);
 
+    private static TSocket socket;
     /**
      * Cassandra set up.
      * 
@@ -195,11 +196,11 @@ public final class CassandraCli
         try
         {
             client.system_drop_keyspace(keyspaceName);
-//            deleteCassandraFolders("/var/lib/cassandra/data/");
-//            deleteCassandraFolders("/var/lib/cassandra/data/system/");
-//            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
-//            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
-//            deleteCassandraFolders("/var/log/cassandra/");
+            deleteCassandraFolders("/var/lib/cassandra/data/");
+            deleteCassandraFolders("/var/lib/cassandra/data/system/");
+            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
+            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
+            deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {
@@ -212,6 +213,12 @@ public final class CassandraCli
         catch (TException e)
         {
             log.error(e);
+        } finally
+        {
+            if(socket != null)
+            {
+                socket.close();
+            }
         }
 
     }
@@ -307,7 +314,7 @@ public final class CassandraCli
      */
     public static void initClient() throws TTransportException
     {
-        TSocket socket = new TSocket("127.0.0.1", 9160);
+        socket = new TSocket("127.0.0.1", 9160);
         TTransport transport = new TFramedTransport(socket);
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new Cassandra.Client(protocol);
