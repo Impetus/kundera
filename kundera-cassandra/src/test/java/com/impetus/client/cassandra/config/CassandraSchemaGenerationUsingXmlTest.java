@@ -43,6 +43,7 @@ public class CassandraSchemaGenerationUsingXmlTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace(keyspaceName);
         emf = Persistence.createEntityManagerFactory("CassandraXmlPropertyTest");
     }
 

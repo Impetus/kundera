@@ -62,8 +62,6 @@ public final class CassandraCli
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassandraCli.class);
-
-    private static TSocket socket;
     /**
      * Cassandra set up.
      * 
@@ -213,14 +211,7 @@ public final class CassandraCli
         catch (TException e)
         {
             log.error(e);
-        } finally
-        {
-            if(socket != null)
-            {
-                socket.close();
-            }
-        }
-
+        } 
     }
 
     private static void deleteCassandraFolders(String dir)
@@ -314,7 +305,7 @@ public final class CassandraCli
      */
     public static void initClient() throws TTransportException
     {
-        socket = new TSocket("127.0.0.1", 9160);
+        TSocket socket = new TSocket("127.0.0.1", 9160);
         TTransport transport = new TFramedTransport(socket);
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new Cassandra.Client(protocol);
