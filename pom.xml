@@ -126,7 +126,7 @@
         <module>kundera-hbase</module>
         <module>kundera-mongo</module>
         <module>kundera-rdbms</module>
-	<module>kundera-neo4j</module>
+	<!-- <module>kundera-neo4j</module> -->
 	<module>kundera-rest</module>
 	<module>kundera-tests</module>
       </modules>
