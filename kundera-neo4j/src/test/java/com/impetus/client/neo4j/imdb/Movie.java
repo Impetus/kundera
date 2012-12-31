@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -41,10 +42,24 @@ public class Movie
     private String title;
     
     @Column(name="YEAR")
-    private int year;
+    private int year;      
     
     @ManyToMany(fetch = FetchType.LAZY, mappedBy="movies")
     private Map<Role, Actor> actors;
+    
+    public Movie() {}
+    public Movie(String id, String title, int year)
+    {
+        this.id = id;
+        this.title = title;
+        this.year = year;
+    }
+    
+    public void addActor(Role role, Actor actor)
+    {
+        if(actors == null) actors = new HashMap<Role, Actor>();
+        actors.put(role, actor);
+    }
 
     /**
      * @return the id

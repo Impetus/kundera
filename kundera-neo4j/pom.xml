@@ -70,7 +70,11 @@
 			<artifactId>neo4j-server</artifactId>
 			<version>1.8</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>1.8</version>
+		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>

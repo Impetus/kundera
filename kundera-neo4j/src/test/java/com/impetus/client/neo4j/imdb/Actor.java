@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -43,9 +44,23 @@ public class Actor
     @Column(name="ACTOR_NAME")
     private String name;
     
+    public Actor() {}
+    
+    public Actor(int actorId, String actorName)
+    {
+        this.id = actorId;
+        this.name = actorName;
+    }
+    
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<Role, Movie> movies;
+    
+    public void addMovie(Role role, Movie movie)
+    {
+        if(movies == null) movies = new HashMap<Role, Movie>();
+        movies.put(role, movie);
+    }
 
     /**
      * @return the id

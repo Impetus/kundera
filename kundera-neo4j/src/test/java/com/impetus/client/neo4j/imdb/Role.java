@@ -29,30 +29,22 @@ import javax.persistence.Table;
 public class Role
 {
     @Id
-    @Column(name="ROLE_ID")
-    private int id;
-    
     @Column(name="ROLE_NAME")
     private String roleName;
+    
+    @Column(name="ROLE_TYPE")
+    private String roleType;   
     
     private Actor actor;
     
     private Movie movie;
-
-    /**
-     * @return the id
-     */
-    public int getId()
+    
+    public Role() {}
+    
+    public Role(String roleName, String roleType)
     {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(int id)
-    {
-        this.id = id;
+        this.roleName = roleName;
+        this.roleType = roleType;
     }
 
     /**
@@ -69,6 +61,22 @@ public class Role
     public void setRoleName(String roleName)
     {
         this.roleName = roleName;
+    }
+
+    /**
+     * @return the roleType
+     */
+    public String getRoleType()
+    {
+        return roleType;
+    }
+
+    /**
+     * @param roleType the roleType to set
+     */
+    public void setRoleType(String roleType)
+    {
+        this.roleType = roleType;
     }
 
     /**
@@ -101,7 +109,6 @@ public class Role
     public void setMovie(Movie movie)
     {
         this.movie = movie;
-    } 
-    
+    }  
 
 }

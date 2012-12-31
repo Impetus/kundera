@@ -46,9 +46,9 @@ public class IMDBTest
     @Before
     public void setUp() throws Exception
     {
-/*        emf = Persistence.createEntityManagerFactory("imdb");
+        emf = Persistence.createEntityManagerFactory("imdb");
         em = emf.createEntityManager();        
-*/        
+        
     }
 
     /**
@@ -57,17 +57,18 @@ public class IMDBTest
     @After
     public void tearDown() throws Exception
     {
-/*        em.close();
+        em.close();
         emf.close();
-*/    }
+    }
     
     @Test
-    public void testCRUD()
+    public void testMetamodel()
     {
-        /*System.out.println("Running IMDB Test...");
+        System.out.println("Running IMDB Test...");
         
         EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Actor.class);
-        System.out.println(m1);
+        System.out.println(m1); 
+        
         
         EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(Movie.class);
         System.out.println(m2);
@@ -76,8 +77,40 @@ public class IMDBTest
         System.out.println(m3);
         
         Metamodel mm = KunderaMetadataManager.getMetamodel("imdb");
-        System.out.println(mm);
-*/        
+        System.out.println(mm);    
+        
+    }
+    
+    @Test
+    public void testCRUD()
+    {
+        //Actors
+        Actor actor1 = new Actor(1, "Tom Cruise");
+        Actor actor2 = new Actor(2, "Emmanuelle Béart");     
+        
+        //Movies
+        Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
+        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);       
+        Movie movie3 = new Movie("m3", "Hell", 2005);
+        
+        //Roles
+        Role role1 = new Role("Ray Ferrier", "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);
+        Role role2 = new Role("Ethan Hunt", "Lead Actor"); role2.setActor(actor1); role2.setMovie(movie2);
+        Role role3 = new Role("Claire Phelps", "Lead Actress"); role3.setActor(actor2); role1.setMovie(movie2);
+        Role role4 = new Role("Sophie", "Supporting Actress"); role4.setActor(actor2); role1.setMovie(movie3);
+        
+        //Relationships
+        actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
+        actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
+        
+        movie1.addActor(role1, actor1);
+        movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
+        movie3.addActor(role4, actor2);
+        
+        em.persist(actor1);
+        em.persist(actor2);
+        
+        
         
     }
 

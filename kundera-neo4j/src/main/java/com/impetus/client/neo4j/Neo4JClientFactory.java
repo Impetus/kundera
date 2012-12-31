@@ -45,8 +45,6 @@ public class Neo4JClientFactory extends GenericClientFactory
 
     /** The logger. */
     private static Logger log = LoggerFactory.getLogger(Neo4JClientFactory.class);
-
-    private GraphDatabaseService graphDb;
     
 
     @Override
@@ -68,6 +66,9 @@ public class Neo4JClientFactory extends GenericClientFactory
 
         Neo4JSchemaMetadata nsmd = Neo4JPropertyReader.nsmd;
         ClientProperties cp = nsmd != null ? nsmd.getClientProperties() : null;
+        
+        GraphDatabaseService graphDb = (GraphDatabaseService) getConnectionPoolOrConnection();
+        
         if (cp != null)
         {
             DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;      
@@ -85,9 +86,8 @@ public class Neo4JClientFactory extends GenericClientFactory
         if(graphDb == null)
         {
             graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(datastoreFilePath);
-        }        
-        
-        registerShutdownHook(graphDb);
+            registerShutdownHook(graphDb);           
+        }       
         
         return graphDb;
     }
@@ -113,6 +113,11 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
+    }
+    
+    GraphDatabaseService getConnection()
+    {
+        return (GraphDatabaseService)getConnectionPoolOrConnection();
     }
     
     /**

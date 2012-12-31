@@ -18,6 +18,9 @@ package com.impetus.client.neo4j;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
@@ -32,6 +35,8 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
  */
 public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
 {
+    
+    private static Log log = LogFactory.getLog(Neo4JClient.class);
 
     /**
      * Reference to Neo4J client factory.
@@ -125,6 +130,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
+        log.debug("Persisting " + entity);
+        
     }  
 
 }
