@@ -24,6 +24,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyClass;
+import javax.persistence.MapKeyJoinColumn;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -86,8 +89,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
                 targetEntity = genericClasses.get(1);
             }
             
-            MapKeyClass mapKeyClassAnn = relationField.getAnnotation(MapKeyClass.class);
-            //MapKeyJoinColumn mapKeyJoinColumnAnn = relationField.getAnnotation(MapKeyJoinColumn.class);
+            MapKeyClass mapKeyClassAnn = relationField.getAnnotation(MapKeyClass.class);           
             
             //Check for Map key class specified at annotation            
             if (mapKeyClass == null && mapKeyClassAnn != null && mapKeyClassAnn.value() != null && ! mapKeyClassAnn.value().getSimpleName().equals("void"))
@@ -137,6 +139,21 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         else if(isJoinedByMap)
         {
             relation.setMapKeyJoinClass(mapKeyClass);
+            
+            MapKeyJoinColumn mapKeyJoinColumnAnn = relationField.getAnnotation(MapKeyJoinColumn.class);
+            if(mapKeyJoinColumnAnn != null)
+            {
+                String mapKeyJoinColumnName = mapKeyJoinColumnAnn.name();
+                if (!StringUtils.isEmpty(mapKeyJoinColumnName))
+                {
+                    relation.setJoinColumnName(mapKeyJoinColumnName);
+                }
+                else
+                {
+                    throw new InvalidEntityDefinitionException("It's mandatory to specify name attribute with @MapKeyJoinColumn annotation");
+                }
+            }
+            
         }
         else if (relation.getMappedBy() == null || relation.getMappedBy().isEmpty())
         {
