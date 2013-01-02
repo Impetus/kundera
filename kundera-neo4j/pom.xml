@@ -82,6 +82,14 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Jersey - REST Libraries -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.12</version>
+		</dependency>
+		
 	</dependencies>
 	<build>
 		<plugins>

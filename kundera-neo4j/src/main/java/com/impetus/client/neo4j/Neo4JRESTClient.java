@@ -28,6 +28,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 /**
  * Client implementation of Neo4J using Neo4J REST API
  * (See Neo4j REST API in http://www.neo4j.org/develop/drivers) 
+ * (See http://docs.neo4j.org/chunked/milestone/server-java-rest-client-example.html)
  * @author amresh.singh
  */
 public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuery>
