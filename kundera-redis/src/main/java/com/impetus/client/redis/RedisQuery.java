@@ -20,11 +20,15 @@ import java.util.List;
 import java.util.Queue;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import com.impetus.client.redis.RedisQueryInterpreter.Clause;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -129,7 +133,7 @@ public class RedisQuery extends QueryImpl
 
     private RedisQueryInterpreter onTranslation(Queue clauseQueue, EntityMetadata entityMetadata)
     {
-        RedisQueryInterpreter interpreter = new RedisQueryInterpreter(getKunderaQuery().getResult());
+        RedisQueryInterpreter interpreter = new RedisQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
 
         // If there is no clause present, means we might need to scan complete
         // table.
@@ -249,4 +253,27 @@ public class RedisQuery extends QueryImpl
         interpreter.setFieldName(columnName);
     }
 
+    private String[] getColumns(final String[] columns, final EntityMetadata m)
+    {
+        List<String> columnAsList = new ArrayList<String>();
+        if (columns != null && columns.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            for (int i = 1; i < columns.length; i++)
+            {
+                if (columns[i] != null)
+                {
+                    Attribute col = entity.getAttribute(columns[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + columns);
+                    }
+                    columnAsList.add(((AbstractAttribute) col).getJPAColumnName());
+                }
+            }
+        }
+        return columnAsList.toArray(new String[]{});
+    }
 }

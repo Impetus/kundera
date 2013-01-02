@@ -61,7 +61,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * Redis client implementation for REDIS.
  * 
  * Pending: 
- * 1) Selective column search, external properties junit.
+ * 1) External properties junit.
  * 2) Performance number work
  * 3) Enable kundera-tests for redis.
  * 4) install redis server over kundera CI
@@ -253,7 +253,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 List<byte[]> fieldValues = connection.hmget(getEncodedBytes(hashKey), fields);
 
-                if (fieldValues != null && fieldValues.isEmpty())
+                if (fieldValues != null && !fieldValues.isEmpty())
                 {
                     for (int i = 0; i < fields.length; i++)
                     {
@@ -1157,7 +1157,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
 
                 Object record = fetch(entityClazz, k, connection,
-                        (byte[][]) (queryParameter.getColumns() != null ? queryParameter.getColumns().toArray() : null));
+                        (queryParameter.getColumns() != null ? queryParameter.getColumns().toArray(new byte[][]{}) : null));
                 if (record != null)
                 {
                     results.add(record);

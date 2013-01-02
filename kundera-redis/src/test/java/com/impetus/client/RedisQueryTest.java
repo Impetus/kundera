@@ -171,6 +171,8 @@ public class RedisQueryTest
         query = em.createQuery(findSelective);
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
 
         // Find by key and now row key
         String findByIdOrAge = "Select p from PersonRedis p where p.personId=:personId OR p.age=:age";
@@ -227,6 +229,14 @@ public class RedisQueryTest
     @After
     public void tearDown() throws Exception
     {
+        EntityManager em = emf.createEntityManager();
+
+        // Delete by query.
+        String deleteQuery="Delete from PersonRedis p";
+        Query query = em.createQuery(deleteQuery);
+        int updateCount = query.executeUpdate();
+        
+        em.close();
         emf.close();
         emf=null;
     }

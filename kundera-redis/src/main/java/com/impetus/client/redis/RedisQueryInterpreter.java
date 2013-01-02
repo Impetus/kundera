@@ -171,7 +171,7 @@ class RedisQueryInterpreter
             List<byte[]> fields = new ArrayList<byte[]>(columns.length);
             for (int i = 0; i < columns.length; i++)
             {
-                if (columns[i] != null && columns[i].indexOf(".") >= 0)
+                if (columns[i] != null /*&& columns[i].indexOf(".") >= 0*/)
                 {
                     byte[] f = PropertyAccessorHelper.getBytes(columns[i]);
                     fields.add(f);
