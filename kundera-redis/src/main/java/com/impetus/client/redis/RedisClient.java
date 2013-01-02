@@ -60,6 +60,13 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * Redis client implementation for REDIS.
  * 
+ * Pending: 
+ * 1) Selective column search, external properties junit.
+ * 2) Performance number work
+ * 3) Enable kundera-tests for redis.
+ * 4) install redis server over kundera CI
+ * 
+ * @author vivek.mishra
  */
 public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher
 {
@@ -69,6 +76,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private RedisClientFactory factory;
 
     private EntityReader reader;
+
+    private Map<String, String> settings;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
@@ -90,7 +99,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        Jedis connection = factory.getConnection();
+        Jedis connection = getConnection();
         try
         {
 
@@ -178,7 +187,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     public Object find(Class entityClass, Object key)
     {
         Object result = null;
-        Jedis connection = factory.getConnection();
+        Jedis connection = getConnection();
         try
         {
             result = fetch(entityClass, key, connection, null);
@@ -202,11 +211,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return result;
     }
 
+    /**
+     * Retrieves entity instance of given class,row key and specific fields.
+     * 
+     * @param clazz                     entity class
+     * @param key                       row key 
+     * @param connection                connection instance.
+     * @param fields                    fields.
+     * @return                          entity instance.
+     * @throws InstantiationException   throws in case of runtime exception
+     * @throws IllegalAccessException   throws in case of runtime exception 
+     */
     private Object fetch(Class clazz, Object key, Jedis connection, byte[][] fields) throws InstantiationException,
             IllegalAccessException
     {
         Object result;
-        // byte[] rowKey = PropertyAccessorHelper.getBytes(key);
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
 
@@ -259,10 +278,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class, java.lang.Object[])
+     */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
-        Jedis connection = factory.getConnection();
+        Jedis connection = getConnection();
         connection.pipelined();
         List results = new ArrayList();
         try
@@ -292,23 +314,30 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Method not supported!");
     }
 
     @Override
     public void close()
     {
-
+        if(settings != null)
+        {
+            settings.clear();
+            settings = null;
+        }
+        reader=null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
         Jedis connection = null;
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
             Pipeline pipeLine = connection.pipelined();
 
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
@@ -356,6 +385,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * On delete relation.
+     * 
+     * @param connection       connection instance.
+     * @param entityMetadata   entity metadata.
+     * @param rowKey           row key.
+     */
     private void deleteRelation(Jedis connection, EntityMetadata entityMetadata, String rowKey)
     {
         List<String> relations = entityMetadata.getRelationNames();
@@ -387,7 +423,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // String rowKey =
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
             Pipeline pipeline = connection.pipelined();
             Set<Object> joinKeys = joinTableRecords.keySet();
             for (Object joinKey : joinKeys)
@@ -422,6 +458,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
 
             }
+            pipeline.sync();
         }
         finally
         {
@@ -445,7 +482,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
 
             Pipeline pipeLine = connection.pipelined();
             String valueAsStr = PropertyAccessorHelper.getString(pKeyColumnValue);
@@ -485,7 +522,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
             String valueAsStr = PropertyAccessorHelper.getString(columnValue);
 
             Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), valueAsStr.hashCode(),
@@ -510,7 +547,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         Jedis connection = null;
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
             Pipeline pipeLine = connection.pipelined();
             String valueAsStr = PropertyAccessorHelper.getString(columnValue);
             Double score = Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
@@ -579,6 +616,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     public Class<RedisQuery> getQueryImplementor()
     {
         return RedisQuery.class;
+    }
+
+
+    /**
+     *  To supply configurations for jedis connection.  
+     */
+    public void setConfig(Map<String,String> configurations)
+    {
+        this.settings = configurations;
     }
 
     /*
@@ -763,6 +809,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
         if (connection != null)
         {
+            if(settings != null)
+            {
+                connection.configResetStat();
+            }
             factory.releaseConnection(connection);
         }
     }
@@ -1041,7 +1091,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         List<Object> results = new ArrayList<Object>();
         try
         {
-            connection = factory.getConnection();
+            connection = getConnection();
             Set<String> rowKeys = new HashSet<String>();
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
             if (queryParameter.getClause() != null && !queryParameter.isByRange())
@@ -1138,7 +1188,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private <E> List<E> findAllColumns(Class<E> entityClass, byte[][] columns, Object... keys)
     {
-        Jedis connection = factory.getConnection();
+        Jedis connection = getConnection();
+//        connection.co
         connection.pipelined();
         List results = new ArrayList();
         try
@@ -1165,4 +1216,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return results;
     }
 
+    /**
+     * Returns jedis connection.
+     * 
+     * @return jedis resource.
+     */
+    private Jedis getConnection()
+    {
+        Jedis connection = factory.getConnection();
+        if(settings != null)
+        {
+            for(String key : settings.keySet())
+            {
+                connection.configSet(key, settings.get(key));
+            }
+        }
+        return connection;
+    }
 }

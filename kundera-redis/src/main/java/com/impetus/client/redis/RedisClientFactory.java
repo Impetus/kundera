@@ -56,7 +56,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-
+        setExternalProperties(externalProperty);
     }
 
     /*
@@ -89,8 +89,6 @@ public class RedisClientFactory extends GenericClientFactory
         JedisPoolConfig poolConfig = onPoolConfig(WHEN_EXHAUSTED_FAIL, maxActivePerNode, maxIdlePerNode,
                 minIdlePerNode, maxTotal);
 
-        // TODO: need to look for transaction timeout once transaction is
-        // implemented.
         JedisPool pool = null;
         if (password != null)
         {
@@ -114,9 +112,21 @@ public class RedisClientFactory extends GenericClientFactory
      * .lang.String)
      */
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected Client<RedisQuery> instantiateClient(String persistenceUnit)
     {
+        logger.info("instantiating client instance");
         return new RedisClient(this);
+    }
+
+    /**
+     * On setting external properties.
+     */
+    protected void setExternalProperties(Map<String, Object> puProperties)
+    {
+        if (this.externalProperties == null)
+        {
+            this.externalProperties = puProperties;
+        }
     }
 
     /*
@@ -127,18 +137,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
      {
-        // TODO Auto-generated method stub
         return null;
-    }
-
-    Jedis getConnection()
-    {
-        return ((JedisPool) getConnectionPoolOrConnection()).getResource();
-    }
-
-    void releaseConnection(Jedis res)
-    {
-        ((JedisPool) getConnectionPoolOrConnection()).returnResource(res);
     }
 
     /*
@@ -149,12 +148,45 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
+        logger.info("on close destroying connection pool");
+
         if (getConnectionPoolOrConnection() != null)
         {
             ((JedisPool) getConnectionPoolOrConnection()).destroy();
         }
 
     }
+    
+    /**
+     * Retrieving connection from connection pool.
+     * 
+     * @return returns jedis instance.
+     */
+    Jedis getConnection()
+    {
+        logger.info("borrowing connection from pool");
+        Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
+        if(externalProperties != null)
+        {
+            for(String key : externalProperties.keySet())
+            {
+                connection.configSet(key, externalProperties.get(key).toString());
+            }
+        }
+        
+        return connection;
+    }
+
+    /**
+     * Release/return connection to pool.
+     * @param res  jedis resource
+     */
+    void releaseConnection(Jedis res)
+    {
+        logger.info("releasing connection from pool");
+        ((JedisPool) getConnectionPoolOrConnection()).returnResource(res);
+    }
+
 
     /*
      * (non-Javadoc)
@@ -164,6 +196,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
+        
         return false;
     }
 
@@ -173,6 +206,8 @@ public class RedisClientFactory extends GenericClientFactory
     private JedisPoolConfig onPoolConfig(final byte WHEN_EXHAUSTED_FAIL, String maxActivePerNode,
             String maxIdlePerNode, String minIdlePerNode, String maxTotal)
     {
+        logger.info("configuring connection pool");
+
         JedisPoolConfig poolConfig = new JedisPoolConfig();
 
         if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
@@ -200,4 +235,5 @@ public class RedisClientFactory extends GenericClientFactory
         return poolConfig;
     }
 
+    
 }
