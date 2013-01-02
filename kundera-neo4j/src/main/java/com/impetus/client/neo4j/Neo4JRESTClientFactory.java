@@ -18,6 +18,8 @@ package com.impetus.client.neo4j;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.ws.rs.core.MediaType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +30,8 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * Factory of {@link Neo4JRESTClient}
@@ -71,15 +75,15 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
-        
+
         String host = null;
         String port = null;
-        
+
         if (externalProperties != null)
         {
             host = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
             port = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
-            
+
         }
         if (host == null)
         {
@@ -89,9 +93,25 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
         {
             port = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         }
+
+        final String SERVER_ROOT_URI = "http://" + host + ":" + port + "/db/data/"; 
         
-        //TODO: complete code while implementing REST Client factory for Neo4J
-        return null;
+        WebResource resource = com.sun.jersey.api.client.Client.create().resource(SERVER_ROOT_URI);
+        WebResource.Builder builder = resource.path(SERVER_ROOT_URI).accept(MediaType.APPLICATION_JSON);
+        
+        ClientResponse response = (ClientResponse) builder.get(ClientResponse.class);
+        
+        if(response.getStatus() == 200) {
+            log.info(String.format("GET on [%s], status code [%d]", SERVER_ROOT_URI, response.getStatus()));            
+        }
+        else
+        {
+            log.error("Could not connect to " + SERVER_ROOT_URI + "; Connection to Neo4J failed.");
+            return null;
+        }
+        response.close();
+
+        return resource;
     }
 
     @Override
