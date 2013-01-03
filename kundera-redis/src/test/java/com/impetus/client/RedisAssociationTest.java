@@ -40,6 +40,7 @@ public class RedisAssociationTest
     @Test
     public void testCrud()
     {
+        logger.info("On crud over association ");
         EntityManager em = emf.createEntityManager();
         
         PersonOTORedis person = new PersonOTORedis(ROW_KEY);
@@ -70,6 +71,7 @@ public class RedisAssociationTest
     @After
     public void tearDown()
     {
-        
+        logger.info("on tear down");
+        emf.close();
     }
 }
