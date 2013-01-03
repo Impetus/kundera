@@ -20,8 +20,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.test.ImpermanentGraphDatabase;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,8 +79,12 @@ public class Neo4JClientFactory extends GenericClientFactory
                     
             if(properties != null)
             {
-                Map<String, String> config = new HashMap<String, String>((Map)properties);
-                graphDb = new ImpermanentGraphDatabase(config);
+                Map<String, String> config = new HashMap<String, String>((Map)properties);      
+                
+                GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(datastoreFilePath);
+                builder.setConfig(config);
+                
+                graphDb = builder.newGraphDatabase();
             }        
         }        
         
@@ -142,6 +147,8 @@ public class Neo4JClientFactory extends GenericClientFactory
      * Registers a shutdown hook for the Neo4j instance so that it
      * shuts down nicely when the VM exits (even if you "Ctrl-C" the
      * running example before it's completed)
+     * The EmbeddedGraphDatabase instance can be shared among multiple threads.
+     * Note however that you can’t create multiple instances pointing to the same database.
      * @param graphDb
      */
     private static void registerShutdownHook(final GraphDatabaseService graphDb)
@@ -154,6 +161,6 @@ public class Neo4JClientFactory extends GenericClientFactory
                 graphDb.shutdown();
             }
         });
-    }
+    }   
 
 }
