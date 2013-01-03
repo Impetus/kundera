@@ -52,24 +52,6 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        return null;
-    }
-
-    @Override
-    protected Client instantiateClient(String persistenceUnit)
-    {
-        return new Neo4JRESTClient(this);
-    }
-
-    @Override
-    public boolean isThreadSafe()
-    {
-        return false;
-    }
-
-    @Override
-    protected Object getConnectionPoolOrConnection()
-    {
         log.info("Getting Service root for Neo4J REST connection");
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
@@ -96,7 +78,14 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
 
         final String SERVER_ROOT_URI = "http://" + host + ":" + port + "/db/data/"; 
         
-        WebResource resource = com.sun.jersey.api.client.Client.create().resource(SERVER_ROOT_URI);
+        
+        WebResource resource = (WebResource) getConnectionPoolOrConnection();
+        
+        if(resource == null)
+        {
+            resource = com.sun.jersey.api.client.Client.create().resource(SERVER_ROOT_URI);
+        }       
+        
         WebResource.Builder builder = resource.path(SERVER_ROOT_URI).accept(MediaType.APPLICATION_JSON);
         
         ClientResponse response = (ClientResponse) builder.get(ClientResponse.class);
@@ -115,6 +104,18 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     }
 
     @Override
+    protected Client instantiateClient(String persistenceUnit)
+    {
+        return new Neo4JRESTClient(this);
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        return true;
+    }
+    
+    @Override
     public void destroy()
     {
     }
@@ -122,6 +123,7 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
+        log.error("No schema manager implementation available for Neo4J, returning null");
         return null;
     }
 

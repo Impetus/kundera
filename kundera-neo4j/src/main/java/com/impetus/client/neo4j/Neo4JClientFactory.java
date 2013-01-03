@@ -56,7 +56,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        log.info("Initializing Neo4J database connection");
+        log.info("Initializing Neo4J database connection...");
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
@@ -101,23 +101,29 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        return false;
+        return true;
     }
     
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
+        log.error("No schema manager implementation available for Neo4J, returning null");
         return null;
     }
 
     @Override
     public void destroy()
     {
+        /*GraphDatabaseService graphDb = (GraphDatabaseService) getConnectionPoolOrConnection();
+        if(graphDb != null)
+        {
+            graphDb.shutdown();
+        }*/
     }
     
     GraphDatabaseService getConnection()
     {
-        return (GraphDatabaseService)getConnectionPoolOrConnection();
+        return (GraphDatabaseService) getConnectionPoolOrConnection();
     }
     
     /**
