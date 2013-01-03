@@ -69,7 +69,7 @@ public class OTOUniAssociationTest extends TwinAssociation
      * 
      */
     // private static final String KEYSPACE = "KUNDERATESTS";
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", "addMongo"/*, "addHbase" */};
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","redis", /*"addCassandra",*/ "addMongo"/*, "addHbase"*/};
 
     /**
      * Inits the.

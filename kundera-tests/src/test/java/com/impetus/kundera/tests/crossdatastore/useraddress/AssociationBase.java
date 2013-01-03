@@ -89,7 +89,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,addCassandra,addMongo";
+    private String persistenceUnits =   "rdbms,redis,addCassandra,addMongo";
 
     protected RDBMSCli cli;
 

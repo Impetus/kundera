@@ -30,6 +30,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -187,7 +188,11 @@ public class RedisClientFactory extends GenericClientFactory
         ((JedisPool) getConnectionPoolOrConnection()).returnResource(res);
     }
 
-
+      IndexManager getIndexManager()
+      {
+          return indexManager;
+      }
+    
     /*
      * (non-Javadoc)
      * 
@@ -234,6 +239,7 @@ public class RedisClientFactory extends GenericClientFactory
         }
         return poolConfig;
     }
+
 
     
 }
