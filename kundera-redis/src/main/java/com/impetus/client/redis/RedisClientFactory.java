@@ -93,12 +93,12 @@ public class RedisClientFactory extends GenericClientFactory
         if (password != null)
         {
             pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
-                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : 0, password);
+                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1, password);
         }
         else
         {
             pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
-                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : 0);
+                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1);
         }
 
         return pool;

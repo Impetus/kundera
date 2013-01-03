@@ -43,6 +43,7 @@ import com.impetus.client.redis.RedisQueryInterpreter.Clause;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
@@ -68,7 +69,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author vivek.mishra
  */
-public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher
+public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter
 {
     /**
      * Reference to redis client factory.
@@ -77,10 +78,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private EntityReader reader;
 
-    private Map<String, String> settings;
+    private Map<String, Object> settings;
 
+    
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
+
+    private static final String COMPOSITE_KEY_SEPERATOR = "\001";
 
     RedisClient(final RedisClientFactory factory)
     {
@@ -622,7 +626,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     /**
      *  To supply configurations for jedis connection.  
      */
-    public void setConfig(Map<String,String> configurations)
+    public void setConfig(Map<String,Object> configurations)
     {
         this.settings = configurations;
     }
@@ -830,21 +834,20 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
     {
-        EmbeddableType keyObject = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+//        EmbeddableType keyObject = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
 
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
 
         StringBuilder stringBuilder = new StringBuilder();
-        String seperator = "\001";
         for (Field f : fields)
         {
-            Attribute compositeColumn = keyObject.getAttribute(f.getName());
+//            Attribute compositeColumn = keyObject.getAttribute(f.getName());
             try
             {
                 String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
                                                                                        // value
                 stringBuilder.append(fieldValue);
-                stringBuilder.append(seperator);
+                stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
             }
             catch (IllegalArgumentException e)
             {
@@ -856,7 +859,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (stringBuilder.length() > 0)
         {
-            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(seperator));
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(COMPOSITE_KEY_SEPERATOR));
         }
         return stringBuilder.toString();
     }
@@ -1216,6 +1219,20 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        setConfig(properties);
+    }
+
+    
     /**
      * Returns jedis connection.
      * 
@@ -1228,7 +1245,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             for(String key : settings.keySet())
             {
-                connection.configSet(key, settings.get(key));
+                connection.configSet(key, settings.get(key).toString());
             }
         }
         return connection;
