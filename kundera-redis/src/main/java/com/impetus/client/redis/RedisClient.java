@@ -65,7 +65,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 1) External properties junit.
  * 2) Performance number work
  * 3) Enable kundera-tests for redis.
- * 4) install redis server over kundera CI
  * 
  * @author vivek.mishra
  */

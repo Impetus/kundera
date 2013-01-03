@@ -128,6 +128,7 @@
         <module>kundera-rdbms</module>
 	<!-- <module>kundera-neo4j</module> -->
 	<module>kundera-rest</module>
+        <module>kundera-redis</module>
 	<module>kundera-tests</module>
       </modules>
     </profile>
@@ -140,6 +141,18 @@
       <modules>
         <module>kundera-core</module>
         <module>kundera-rdbms</module>
+      </modules>
+    </profile>
+
+
+    <profile>
+      <id>redis</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>kundera-core</module>
+        <module>kundera-redis</module>
       </modules>
     </profile>
 
