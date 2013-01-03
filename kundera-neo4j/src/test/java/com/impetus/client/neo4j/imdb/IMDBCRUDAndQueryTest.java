@@ -15,26 +15,20 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.metamodel.Metamodel;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-
 /**
- * IMDB Test case 
+ * Test case using IMDB example for CRUD and query 
  * @author amresh.singh
  */
-public class IMDBTest
+public class IMDBCRUDAndQueryTest
 {
-
     EntityManagerFactory emf;
     EntityManager em;   
     
@@ -59,27 +53,7 @@ public class IMDBTest
     {
         em.close();
         emf.close();
-    }
-    
-    @Test
-    public void testMetamodel()
-    {
-        System.out.println("Running IMDB Test...");
-        
-        EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Actor.class);
-        System.out.println(m1); 
-        
-        
-        EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(Movie.class);
-        System.out.println(m2);
-        
-        EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(Role.class);
-        System.out.println(m3);
-        
-        Metamodel mm = KunderaMetadataManager.getMetamodel("imdb");
-        System.out.println(mm);    
-        
-    }
+    }  
     
     @Test
     public void testCRUD()
@@ -108,9 +82,7 @@ public class IMDBTest
         movie3.addActor(role4, actor2);
         
         em.persist(actor1);
-        em.persist(actor2);
-        
-        
+        em.persist(actor2);   
         
     }
 
