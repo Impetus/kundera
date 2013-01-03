@@ -85,11 +85,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
 
-    RedisClient(final RedisClientFactory factory)
+    RedisClient(final RedisClientFactory factory, final String persistenceUnit)
     {
         this.factory = factory;
         reader = new RedisEntityReader();
         this.indexManager = factory.getIndexManager();
+        this.persistenceUnit = persistenceUnit;
     }
 
     /*
@@ -455,9 +456,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     connection.hmset(getEncodedBytes(redisKey), redisFields);
                     // add index
                     connection.zadd(getHashKey(tableName, inverseJoinKeyAsStr),
-                            Double.parseDouble(((Integer) inverseJoinKeyAsStr.hashCode()).toString()), redisKey);
+                            getDouble(inverseJoinKeyAsStr), redisKey);
                     connection.zadd(getHashKey(tableName, joinKeyAsStr),
-                            Double.parseDouble(((Integer) joinKeyAsStr.hashCode()).toString()), redisKey);
+                            getDouble(joinKeyAsStr), redisKey);
                     redisFields.clear();
                 }
 
@@ -491,7 +492,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             Pipeline pipeLine = connection.pipelined();
             String valueAsStr = PropertyAccessorHelper.getString(pKeyColumnValue);
 
-            Double score = Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
+            Double score = getDouble(valueAsStr);
             Set<String> resultKeys = connection.zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
 
             for (String hashKey : resultKeys)
@@ -529,8 +530,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             connection = getConnection();
             String valueAsStr = PropertyAccessorHelper.getString(columnValue);
 
-            Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), valueAsStr.hashCode(),
-                    Double.parseDouble(((Integer) valueAsStr.hashCode()).toString()));
+            Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),getDouble(valueAsStr));
             if (results != null)
             {
                 return results.toArray(new Object[0]);
@@ -554,7 +554,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             connection = getConnection();
             Pipeline pipeLine = connection.pipelined();
             String valueAsStr = PropertyAccessorHelper.getString(columnValue);
-            Double score = Double.parseDouble(((Integer) valueAsStr.hashCode()).toString());
+            Double score = getDouble(valueAsStr);
             Set<String> results = connection.zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
 
             if (results != null)
@@ -1148,7 +1148,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         .getColumns().toArray() : null), fieldSets.values().toArray());
                 return results;
             }
-            else
+            else if(queryParameter.getFields() != null)  
+            {
+                Set<String> columns =  queryParameter.getFields().keySet();
+                
+                for(String column : columns)
+                {
+                    // ideally it will always be 1 value in map, else it will go it queryParameter.getClause() will not be null!
+                    Double value = getDouble(PropertyAccessorHelper.getString(queryParameter.getFields().get(column)));
+                    rowKeys = connection.zrangeByScore(getHashKey(entityMetadata.getTableName(), column),
+                            value, value);
+                    
+                }
+                
+
+            } else
             {
                 rowKeys = new HashSet<String>(connection.zrange(
                         getHashKey(entityMetadata.getTableName(),

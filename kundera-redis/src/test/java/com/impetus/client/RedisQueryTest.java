@@ -105,6 +105,16 @@ public class RedisQueryTest
         Assert.assertEquals(originalName, results.get(0).getPersonName());
 
         // Find by key and now row key
+        String findByAge = "Select p from PersonRedis p where p.age=:age";
+        query = em.createQuery(findByAge);
+        query.setParameter("age", 32);
+
+        results = query.getResultList();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(originalName, results.get(0).getPersonName());
+        Assert.assertEquals(ROW_KEY, results.get(0).getPersonId());
+
+        // Find by key and now row key
         String findByIdAndAge = "Select p from PersonRedis p where p.personId=:personId AND p.age=:age";
         query = em.createQuery(findByIdAndAge);
         query.setParameter("personId", ROW_KEY);
