@@ -16,6 +16,7 @@
 
 package com.impetus.client;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -36,8 +38,10 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.PersonRedis;
 import com.impetus.client.redis.RedisClient;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
@@ -83,6 +87,45 @@ public class RedisClientTest
         em.close();
     }
 
+    
+    @Test
+    public void testCRUDWithBatch()
+    {
+        Map<String,String> batchProperty = new HashMap<String, String>(1);
+        batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
+        emf = Persistence.createEntityManagerFactory(REDIS_PU,batchProperty);
+        EntityManager em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        RedisClient client = (RedisClient) clients.get(REDIS_PU);
+        Assert.assertEquals(5,((Batcher)client).getBatchSize());
+
+        final String originalName = "vivek";
+
+        for(int i=0;i<9;i++)
+        {
+            PersonRedis object = new PersonRedis();
+            object.setAge(32);
+            object.setPersonId(ROW_KEY+i);
+            object.setPersonName(originalName);
+            em.persist(object);
+            
+            if(i >=5)
+            {
+                PersonRedis result = (PersonRedis) client.find(PersonRedis.class, ROW_KEY+i);
+                Assert.assertNull(result);
+            } else if(i > 0 && i%4==0)
+            {
+                PersonRedis result = (PersonRedis) client.find(PersonRedis.class, ROW_KEY+i);
+                Assert.assertNotNull(result);
+                Assert.assertEquals(result.getPersonId(), object.getPersonId());
+                Assert.assertEquals(result.getAge(), object.getAge());
+                Assert.assertEquals(result.getPersonName(), object.getPersonName());
+            }
+        }
+
+        em.close();
+    }
+    
     @Test
     public void testPersistJoinTableData()
     {
@@ -190,6 +233,15 @@ public class RedisClientTest
     @After
     public void tearDown() throws Exception
     {
+        EntityManager em = emf.createEntityManager();
+
+        // Delete by query.
+        String deleteQuery="Delete from PersonRedis p";
+        Query query = em.createQuery(deleteQuery);
+        query.executeUpdate();
+        
+        em.close();
+
         emf.close();
     }
 
