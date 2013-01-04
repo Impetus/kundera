@@ -71,10 +71,13 @@ final class AssociationBuilder
 
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
         Client pClient = delegator.getClient(entityMetadata);
+        
+        String schema=entityMetadata.getSchema();
         if(jtMetadata == null) {
             EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
             jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
+            schema = owningEntityMetadata.getSchema();
         }
         String joinTableName = jtMetadata.getJoinTableName();
 
@@ -89,7 +92,7 @@ final class AssociationBuilder
 
         
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(entityMetadata.getSchema(), joinTableName, joinColumnName,
+        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName,
                 inverseJoinColumnName, entityId);
 
         List childrenEntities = new ArrayList();
