@@ -41,16 +41,19 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import com.impetus.client.redis.RedisQueryInterpreter.Clause;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -60,11 +63,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Redis client implementation for REDIS.
- * 
- * Pending: 
- * 1) External properties junit.
- * 2) Performance number work
- * 3) Enable kundera-tests for redis.
  * 
  * @author vivek.mishra
  */
@@ -79,7 +77,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private Map<String, Object> settings;
 
-    
+    /** list of nodes for batch processing. */
+    private List<Node> nodes = new ArrayList<Node>();
+
+    /** batch size. */
+    private int batchSize;
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
 
@@ -91,6 +94,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         reader = new RedisEntityReader();
         this.indexManager = factory.getIndexManager();
         this.persistenceUnit = persistenceUnit;
+        setBatchSize(persistenceUnit, factory.getOverridenProperties());
     }
 
     /*
@@ -105,78 +109,18 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         Jedis connection = getConnection();
+        // Create a hashset and populate data into it
+        Pipeline pipeLine = connection.pipelined();
         try
         {
 
-            // first open a pipeline
-            // Create a hashset and populate data into it
-            Pipeline pipeLine = connection.pipelined();
-            AttributeWrapper wrapper = wrap(entityMetadata, entity);
-
-            // add relations.
-
-            if (rlHolders != null)
-            {
-                for (RelationHolder relation : rlHolders)
-                {
-                    String name = relation.getRelationName();
-                    Object value = relation.getRelationValue();
-                    byte[] valueInBytes = PropertyAccessorHelper.getBytes(value);
-                    byte[] nameInBytes = getEncodedBytes(name);
-                    String valueAsStr = PropertyAccessorHelper.getString(value);
-                    wrapper.addColumn(nameInBytes, valueInBytes);
-                    wrapper.addIndex(getHashKey(entityMetadata.getTableName(), name), getDouble(valueAsStr));
-
-                    // this index is required to work for UNION/INTERSECT
-                    // support.
-
-                    wrapper.addIndex(getHashKey(entityMetadata.getTableName(), getHashKey(name, valueAsStr)),
-                            getDouble(valueAsStr));
-                }
-            }
-
-            // prepareCompositeKey
-
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
-
-            String rowKey = null;
-            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
-            {
-                rowKey = prepareCompositeKey(entityMetadata, metaModel, id);
-            }
-            else
-            {
-                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                        .getJavaMember());
-            }
-
-            String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
-
-            connection.hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-
-            // Add row key to list(Required for wild search over table).
-            connection.zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add inverted indexes for column based search.
-            addIndex(connection, wrapper, rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-            connection
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
-            //
-            pipeLine.sync(); // send I/O.. as persist call. so no need to read
-                             // response?
+            onPersist(entityMetadata, entity, id, rlHolders, connection);
         }
         finally
         {
+            //
+            pipeLine.sync(); // send I/O.. as persist call. so no need to read
+                             // response?
             onCleanup(connection);
         }
 
@@ -219,13 +163,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     /**
      * Retrieves entity instance of given class,row key and specific fields.
      * 
-     * @param clazz                     entity class
-     * @param key                       row key 
-     * @param connection                connection instance.
-     * @param fields                    fields.
-     * @return                          entity instance.
-     * @throws InstantiationException   throws in case of runtime exception
-     * @throws IllegalAccessException   throws in case of runtime exception 
+     * @param clazz
+     *            entity class
+     * @param key
+     *            row key
+     * @param connection
+     *            connection instance.
+     * @param fields
+     *            fields.
+     * @return entity instance.
+     * @throws InstantiationException
+     *             throws in case of runtime exception
+     * @throws IllegalAccessException
+     *             throws in case of runtime exception
      */
     private Object fetch(Class clazz, Object key, Jedis connection, byte[][] fields) throws InstantiationException,
             IllegalAccessException
@@ -283,8 +233,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class, java.lang.Object[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.Object[])
      */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
@@ -325,67 +278,35 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public void close()
     {
-        if(settings != null)
+        if (settings != null)
         {
             settings.clear();
             settings = null;
         }
-        reader=null;
+        reader = null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
     public void delete(Object entity, Object pKey)
     {
         Jedis connection = null;
+        connection = getConnection();
+        Pipeline pipeLine = connection.pipelined();
+
         try
         {
-            connection = getConnection();
-            Pipeline pipeLine = connection.pipelined();
+            onDelete(entity, pKey, connection);
 
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-            AttributeWrapper wrapper = wrap(entityMetadata, entity);
-
-            Set<byte[]> columnNames = wrapper.columns.keySet();
-
-            String rowKey = null;
-
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
-
-            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
-            {
-                rowKey = prepareCompositeKey(entityMetadata, metaModel, pKey);
-            }
-            else
-            {
-                rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute()
-                        .getJavaMember());
-            }
-
-            for (byte[] name : columnNames)
-            {
-                connection.hdel(getHashKey(entityMetadata.getTableName(), rowKey),
-                        PropertyAccessorFactory.STRING.fromBytes(String.class, name));
-            }
-
-            // Delete relation values.
-
-            deleteRelation(connection, entityMetadata, rowKey);
-
-            // Delete inverted indexes.
-            unIndex(connection, wrapper, rowKey);
-
-            connection.zrem(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), rowKey);
-
-            pipeLine.sync();
         }
         finally
         {
+            pipeLine.sync();
             onCleanup(connection);
         }
     }
@@ -393,9 +314,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     /**
      * On delete relation.
      * 
-     * @param connection       connection instance.
-     * @param entityMetadata   entity metadata.
-     * @param rowKey           row key.
+     * @param connection
+     *            connection instance.
+     * @param entityMetadata
+     *            entity metadata.
+     * @param rowKey
+     *            row key.
      */
     private void deleteRelation(Jedis connection, EntityMetadata entityMetadata, String rowKey)
     {
@@ -455,10 +379,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     // add to hash table.
                     connection.hmset(getEncodedBytes(redisKey), redisFields);
                     // add index
-                    connection.zadd(getHashKey(tableName, inverseJoinKeyAsStr),
-                            getDouble(inverseJoinKeyAsStr), redisKey);
-                    connection.zadd(getHashKey(tableName, joinKeyAsStr),
-                            getDouble(joinKeyAsStr), redisKey);
+                    connection.zadd(getHashKey(tableName, inverseJoinKeyAsStr), getDouble(inverseJoinKeyAsStr),
+                            redisKey);
+                    connection.zadd(getHashKey(tableName, joinKeyAsStr), getDouble(joinKeyAsStr), redisKey);
                     redisFields.clear();
                 }
 
@@ -530,7 +453,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             connection = getConnection();
             String valueAsStr = PropertyAccessorHelper.getString(columnValue);
 
-            Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),getDouble(valueAsStr));
+            Set<String> results = connection.zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),
+                    getDouble(valueAsStr));
             if (results != null)
             {
                 return results.toArray(new Object[0]);
@@ -622,11 +546,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return RedisQuery.class;
     }
 
-
     /**
-     *  To supply configurations for jedis connection.  
+     * To supply configurations for jedis connection.
      */
-    public void setConfig(Map<String,Object> configurations)
+    public void setConfig(Map<String, Object> configurations)
     {
         this.settings = configurations;
     }
@@ -641,7 +564,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public void addBatch(Node node)
     {
-        // TODO Auto-generated method stub
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+
+        onBatchLimit();
 
     }
 
@@ -653,8 +581,40 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public int executeBatch()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        Jedis connection = getConnection();
+        // Create a hashset and populate data into it
+        Pipeline pipeLine = connection.pipelined();
+        try
+        {
+            for (Node node : nodes)
+            {
+                if (node.isDirty())
+                {
+                    // delete can not be executed in batch
+                    if (node.isInState(RemovedState.class))
+                    {
+                        onDelete(node.getData(), node.getEntityId(), connection);
+                    }
+                    else
+                    {
+
+                        List<RelationHolder> relationHolders = getRelationHolders(node);
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+
+                        onPersist(metadata, node.getData(), node.getEntityId(), relationHolders, connection);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            //
+            pipeLine.sync(); // send I/O.. as persist call. so no need to read
+                             // response?
+            onCleanup(connection);
+        }
+
+        return nodes.size();
     }
 
     /*
@@ -665,8 +625,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public int getBatchSize()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return batchSize;
+    }
+
+    /**
+     * Check on batch limit.
+     */
+    private void onBatchLimit()
+    {
+        if (batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
     }
 
     /**
@@ -813,7 +784,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
         if (connection != null)
         {
-            if(settings != null)
+            if (settings != null)
             {
                 connection.configResetStat();
             }
@@ -834,14 +805,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
     {
-//        EmbeddableType keyObject = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+        // EmbeddableType keyObject =
+        // metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
 
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
 
         StringBuilder stringBuilder = new StringBuilder();
         for (Field f : fields)
         {
-//            Attribute compositeColumn = keyObject.getAttribute(f.getName());
+            // Attribute compositeColumn = keyObject.getAttribute(f.getName());
             try
             {
                 String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
@@ -1148,21 +1120,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         .getColumns().toArray() : null), fieldSets.values().toArray());
                 return results;
             }
-            else if(queryParameter.getFields() != null)  
+            else if (queryParameter.getFields() != null)
             {
-                Set<String> columns =  queryParameter.getFields().keySet();
-                
-                for(String column : columns)
-                {
-                    // ideally it will always be 1 value in map, else it will go it queryParameter.getClause() will not be null!
-                    Double value = getDouble(PropertyAccessorHelper.getString(queryParameter.getFields().get(column)));
-                    rowKeys = connection.zrangeByScore(getHashKey(entityMetadata.getTableName(), column),
-                            value, value);
-                    
-                }
-                
+                Set<String> columns = queryParameter.getFields().keySet();
 
-            } else
+                for (String column : columns)
+                {
+                    // ideally it will always be 1 value in map, else it will go
+                    // it queryParameter.getClause() will not be null!
+                    Double value = getDouble(PropertyAccessorHelper.getString(queryParameter.getFields().get(column)));
+                    rowKeys = connection.zrangeByScore(getHashKey(entityMetadata.getTableName(), column), value, value);
+
+                }
+
+            }
+            else
             {
                 rowKeys = new HashSet<String>(connection.zrange(
                         getHashKey(entityMetadata.getTableName(),
@@ -1173,8 +1145,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             for (String k : rowKeys)
             {
 
-                Object record = fetch(entityClazz, k, connection,
-                        (queryParameter.getColumns() != null ? queryParameter.getColumns().toArray(new byte[][]{}) : null));
+                Object record = fetch(entityClazz, k, connection, (queryParameter.getColumns() != null ? queryParameter
+                        .getColumns().toArray(new byte[][] {}) : null));
                 if (record != null)
                 {
                     results.add(record);
@@ -1206,7 +1178,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private <E> List<E> findAllColumns(Class<E> entityClass, byte[][] columns, Object... keys)
     {
         Jedis connection = getConnection();
-//        connection.co
+        // connection.co
         connection.pipelined();
         List results = new ArrayList();
         try
@@ -1246,7 +1218,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         setConfig(properties);
     }
 
-    
     /**
      * Returns jedis connection.
      * 
@@ -1255,13 +1226,143 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private Jedis getConnection()
     {
         Jedis connection = factory.getConnection();
-        if(settings != null)
+        if (settings != null)
         {
-            for(String key : settings.keySet())
+            for (String key : settings.keySet())
             {
                 connection.configSet(key, settings.get(key).toString());
             }
         }
         return connection;
+    }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = null;
+        if (puProperties != null)
+        {
+            batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                    : null;
+            if (batch_Size != null)
+            {
+                batchSize = Integer.valueOf(batch_Size);
+                if (batchSize == 0)
+                {
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                }
+            }
+        }
+        else if (batch_Size == null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
+    }
+
+    private void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders,
+            Jedis connection)
+    {
+        // first open a pipeline
+        AttributeWrapper wrapper = wrap(entityMetadata, entity);
+
+        // add relations.
+
+        if (rlHolders != null)
+        {
+            for (RelationHolder relation : rlHolders)
+            {
+                String name = relation.getRelationName();
+                Object value = relation.getRelationValue();
+                byte[] valueInBytes = PropertyAccessorHelper.getBytes(value);
+                byte[] nameInBytes = getEncodedBytes(name);
+                String valueAsStr = PropertyAccessorHelper.getString(value);
+                wrapper.addColumn(nameInBytes, valueInBytes);
+                wrapper.addIndex(getHashKey(entityMetadata.getTableName(), name), getDouble(valueAsStr));
+
+                // this index is required to work for UNION/INTERSECT
+                // support.
+
+                wrapper.addIndex(getHashKey(entityMetadata.getTableName(), getHashKey(name, valueAsStr)),
+                        getDouble(valueAsStr));
+            }
+        }
+
+        // prepareCompositeKey
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        String rowKey = null;
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            rowKey = prepareCompositeKey(entityMetadata, metaModel, id);
+        }
+        else
+        {
+            rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+        }
+
+        String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
+
+        connection.hmset(getEncodedBytes(hashKey), wrapper.getColumns());
+
+        // Add row key to list(Required for wild search over table).
+        connection.zadd(
+                getHashKey(entityMetadata.getTableName(),
+                        ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey),
+                rowKey);
+
+        // Add inverted indexes for column based search.
+        addIndex(connection, wrapper, rowKey);
+
+        // Add row-key as inverted index as well needed for multiple clause
+        // search with key and non row key.
+        connection.zadd(
+                getHashKey(entityMetadata.getTableName(),
+                        getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
+                getDouble(rowKey), rowKey);
+    }
+
+    private void onDelete(Object entity, Object pKey, Jedis connection)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        AttributeWrapper wrapper = wrap(entityMetadata, entity);
+
+        Set<byte[]> columnNames = wrapper.columns.keySet();
+
+        String rowKey = null;
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            rowKey = prepareCompositeKey(entityMetadata, metaModel, pKey);
+        }
+        else
+        {
+            rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+        }
+
+        for (byte[] name : columnNames)
+        {
+            connection.hdel(getHashKey(entityMetadata.getTableName(), rowKey),
+                    PropertyAccessorFactory.STRING.fromBytes(String.class, name));
+        }
+
+        // Delete relation values.
+
+        deleteRelation(connection, entityMetadata, rowKey);
+
+        // Delete inverted indexes.
+        unIndex(connection, wrapper, rowKey);
+
+        connection.zrem(
+                getHashKey(entityMetadata.getTableName(),
+                        ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), rowKey);
     }
 }

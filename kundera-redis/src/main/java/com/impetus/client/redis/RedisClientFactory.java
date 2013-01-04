@@ -131,6 +131,11 @@ public class RedisClientFactory extends GenericClientFactory
         }
     }
 
+    Map<String, Object> getOverridenProperties()
+    {
+        return this.externalProperties; 
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -178,15 +183,6 @@ public class RedisClientFactory extends GenericClientFactory
             for(Object key : props.keySet())
             {
                 connection.configSet(key.toString(), props.get(key).toString());
-            }
-        }
-        
-        // replace with external properties supplied at the time emf creation.
-        if(externalProperties != null)
-        {
-            for(String key : externalProperties.keySet())
-            {
-                connection.configSet(key, externalProperties.get(key).toString());
             }
         }
         
