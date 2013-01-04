@@ -22,7 +22,6 @@ import java.util.Properties;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +51,14 @@ public class Neo4JClientFactory extends GenericClientFactory
     public void initialize(Map<String, Object> puProperties)
     {
         initializePropertyReader();
+        setExternalProperties(puProperties);
     }
 
+    /**
+     * Create Neo4J Embedded Graph DB instance, that acts as a Neo4J connection repository for Neo4J
+     * If a Neo4j specfic client properties file is specified in persistence.xml, it initializes DB instance with those properties.
+     * Other DB instance is initialized with default properties. 
+     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -70,7 +75,7 @@ public class Neo4JClientFactory extends GenericClientFactory
         
         GraphDatabaseService graphDb = (GraphDatabaseService) getConnectionPoolOrConnection();
         
-        if (cp != null)
+        if (cp != null && graphDb == null)
         {
             DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;      
          
@@ -85,6 +90,7 @@ public class Neo4JClientFactory extends GenericClientFactory
                 builder.setConfig(config);
                 
                 graphDb = builder.newGraphDatabase();
+                registerShutdownHook(graphDb);   
             }        
         }        
         
@@ -119,11 +125,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        /*GraphDatabaseService graphDb = (GraphDatabaseService) getConnectionPoolOrConnection();
-        if(graphDb != null)
-        {
-            graphDb.shutdown();
-        }*/
+        
     }
     
     GraphDatabaseService getConnection()
@@ -140,6 +142,17 @@ public class Neo4JClientFactory extends GenericClientFactory
         {
             propertyReader = new Neo4JPropertyReader();
             propertyReader.read(getPersistenceUnit());
+        }
+    }
+    
+    /**
+     * @param puProperties
+     */
+    protected void setExternalProperties(Map<String, Object> puProperties)
+    {
+        if (this.externalProperties == null)
+        {
+            this.externalProperties = puProperties;
         }
     }
     

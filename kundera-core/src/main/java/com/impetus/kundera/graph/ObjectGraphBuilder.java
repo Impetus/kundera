@@ -194,9 +194,13 @@ public class ObjectGraphBuilder
                 else if(Map.class.isAssignableFrom(childObject.getClass()))
                 {
                     Map childrenObjects = (Map) childObject;
-                    for(Map.Entry entry : (Set<Map.Entry>)childrenObjects.entrySet()) {
-                        addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
-                    }
+                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    {
+                        for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
+                        {
+                            addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
+                        }
+                    }                  
                 }
                 else
                 {
