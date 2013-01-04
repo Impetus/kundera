@@ -341,6 +341,14 @@
 			<version>2.3-SNAPSHOT</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-redis</artifactId>
+			<version>2.3-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- kundera tests dependencies -->
 
 		<dependency>
@@ -386,6 +394,15 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-redis</artifactId>
+			<version>2.3-SNAPSHOT</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.hibernate</groupId>

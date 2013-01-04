@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +71,13 @@ final class AssociationBuilder
 
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
         Client pClient = delegator.getClient(entityMetadata);
+        
+        String schema=entityMetadata.getSchema();
         if(jtMetadata == null) {
             EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
             jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
+            schema = owningEntityMetadata.getSchema();
         }
         String joinTableName = jtMetadata.getJoinTableName();
 
@@ -88,7 +92,7 @@ final class AssociationBuilder
 
         
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(entityMetadata.getSchema(), joinTableName, joinColumnName,
+        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName,
                 inverseJoinColumnName, entityId);
 
         List childrenEntities = new ArrayList();
@@ -305,8 +309,8 @@ final class AssociationBuilder
         String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass().getCanonicalName()
                 .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
 
-        Map<String, String> results = childClient.getIndexManager().search(query);
-        Set<String> rsSet = new HashSet<String>(results.values());
+        Map<String, String> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(query): new HashMap<String, String>();
+        Set<String> rsSet = results != null ? new HashSet<String>(results.values()) : new HashSet<String>();
 
         if (childClass.equals(entity.getClass()))
         {

@@ -195,4 +195,25 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="redis">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<!-- <property name="kundera.nodes" value="localhost" /> -->
+			<property name="kundera.nodes" value="192.168.145.168" />
+			
+			<property name="kundera.port" value="6379" />
+			<property name="kundera.keyspace" value="RedisK" />
+			<property name="kundera.dialect" value="redis" />
+			<property name="kundera.client" value="redis" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.redis.RedisClientFactory" />
+			<!-- <property name="kundera.password" value="Kundera@123" /> -->
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.transaction.timeout" value="30"/>
+			<property name="kundera.pool.size.max.active" value="10"/>
+		</properties>
+	</persistence-unit>
+
 </persistence>
