@@ -43,6 +43,9 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
     } 
     
 
+    /**
+     * Sets Client properties from XML configuration file into {@link Neo4JSchemaMetadata}
+     */
     @Override
     protected void onXml(ClientProperties cp)
     {
@@ -85,6 +88,10 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
             this.clientProperties = clientProperties;
         }
 
+        /**
+         * Returns datastore instance for given {@link ClientProperties} for Neo4j
+         * @return
+         */
         public DataStore getDataStore()
         {
             if (getClientProperties() != null && getClientProperties().getDatastores() != null)
