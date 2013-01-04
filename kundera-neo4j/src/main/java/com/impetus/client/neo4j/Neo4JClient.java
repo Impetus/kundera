@@ -20,11 +20,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.DatastoreObjectEntityMapper;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
@@ -45,10 +49,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
 
     private EntityReader reader;
     
+    private DatastoreObjectEntityMapper mapper;
+    
     Neo4JClient(final Neo4JClientFactory factory)
     {
         this.factory = factory;
         reader = new Neo4JEntityReader();
+        mapper = new GraphEntityMapper();
     }
     
     
@@ -131,6 +138,30 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         log.debug("Persisting " + entity);
+        Transaction tx = null;
+        
+        GraphDatabaseService graphDb = factory.getConnection();
+        
+        try
+        {
+            tx = graphDb.beginTx();
+            
+            Node node = graphDb.createNode();
+            
+            
+            mapper.fromEntity(entity, node, rlHolders, entityMetadata);
+            
+            
+            tx.success();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            tx.finish();
+        }
         
     }  
 

@@ -82,7 +82,7 @@ public class IMDBCRUDAndQueryTest
         movie3.addActor(role4, actor2);
         
         em.persist(actor1);
-        em.persist(actor2);   
+        //em.persist(actor2);   
         
     }
 
