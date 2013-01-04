@@ -7,7 +7,7 @@
 	<persistence-unit name="redis_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="localhost" />
 			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="6379" />
 			<property name="kundera.keyspace" value="RedisK" />
@@ -20,7 +20,8 @@
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.transaction.timeout" value="30"/>
-		</properties>
+			<property name="kundera.client.property" value="RedisTest.xml"/>
+			</properties>
 	</persistence-unit>
 
 	

@@ -58,6 +58,7 @@ public class RedisClientFactory extends GenericClientFactory
     public void initialize(Map<String, Object> externalProperty)
     {
         setExternalProperties(externalProperty);
+        initializePropertyReader();
     }
 
     /*
@@ -75,11 +76,11 @@ public class RedisClientFactory extends GenericClientFactory
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
-
+        
         Properties props = puMetadata.getProperties();
-        String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost():(String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ?RedisPropertyReader.rsmd.getPort() : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null? RedisPropertyReader.rsmd.getPassword() : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
         String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
@@ -167,6 +168,20 @@ public class RedisClientFactory extends GenericClientFactory
     {
         logger.info("borrowing connection from pool");
         Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
+        
+        Map props = RedisPropertyReader.rsmd.getProperties();
+
+        // set external xml properties.
+        if(props != null)
+        {
+//            props.
+            for(Object key : props.keySet())
+            {
+                connection.configSet(key.toString(), props.get(key).toString());
+            }
+        }
+        
+        // replace with external properties supplied at the time emf creation.
         if(externalProperties != null)
         {
             for(String key : externalProperties.keySet())
@@ -241,5 +256,16 @@ public class RedisClientFactory extends GenericClientFactory
     }
 
 
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new RedisPropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
+    }
     
 }
