@@ -17,56 +17,107 @@ package com.impetus.client.neo4j;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.MapAttribute;
+import javax.persistence.metamodel.PluralAttribute.CollectionType;
 
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.DatastoreObjectEntityMapper;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Responsible for converting Neo4J graph (nodes+relationships) to JPA entities and vice versa 
  * @author amresh.singh
  */
-public class GraphEntityMapper implements DatastoreObjectEntityMapper
+public class GraphEntityMapper
 {
 
-    @Override
-    public Object fromEntity(Object entity, Object datastoreObject, List<RelationHolder> relations, EntityMetadata m)
+    public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m)
     {
-        Node node = (Node) datastoreObject;
-        
+        //Construct top level node first
+        Node node = graphDb.createNode();        
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
-        Set<Attribute> attributes = entityType.getAttributes();   
         
-        
+        //Iterate over, entity attributes
+        Set<Attribute> attributes = entityType.getAttributes();      
         for(Attribute attribute : attributes)
-        {
+        {       
+            Field field = (Field) attribute.getJavaMember();
+            
+            //Set Node level properties
             if(! attribute.isCollection() && ! attribute.isAssociation())
             {
-                Field field = (Field)attribute.getJavaMember();                
+                
                 String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
-                Object value = PropertyAccessorHelper.getObject(entity, field);
-                
-                node.setProperty(columnName, value);
-                
+                Object value = PropertyAccessorHelper.getObject(entity, field);                
+                node.setProperty(columnName, value);                
             }
-        }
+            
+            //If a property refers to other nodes through Map, Construct those nodes and add 
+            //through relationship
+            else if(attribute.isCollection() && attribute.isAssociation())
+            {
+                MapAttribute mapAttribute = entityType.getDeclaredMap(field.getName());                
+                if(mapAttribute != null && mapAttribute.getCollectionType().equals(CollectionType.MAP))
+                {
+                    Field mapField = (Field)mapAttribute.getJavaMember();                    
+                    
+                    MapKeyJoinColumn mapKeyJoinColumnAnn = mapField.getAnnotation(MapKeyJoinColumn.class);
+                    if(mapKeyJoinColumnAnn != null)
+                    {
+                        Map mapObject = (Map)PropertyAccessorHelper.getObject(entity, mapField);
+                        Class<?> valueClass = mapAttribute.getBindableJavaType();    //Class for adjoining node object
+                        Class<?> keyClass = mapAttribute.getKeyJavaType();           //Class for relationship object
+                        
+                        for(Object key : mapObject.keySet())
+                        {
+                            //Construct Adjoining Node
+                            Object value = mapObject.get(key);
+                            EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(valueClass);
+                            Node childNode = fromEntity(value, null, graphDb, childMetadata);
+                            
+                            //Connect adjoining node through relationships
+                            DynamicRelationshipType relType  = DynamicRelationshipType.withName(mapKeyJoinColumnAnn.name());
+                            Relationship relationship = node.createRelationshipTo(childNode, relType);                            
+                            
+                            //Set relations's own attributes into it
+                            for(Field f : keyClass.getDeclaredFields())
+                            {
+                                if(! f.getType().equals(valueClass) && !f.getType().equals(m.getEntityClazz()))
+                                {
+                                    String relPropertyName = f.getAnnotation(Column.class) != null 
+                                        ? f.getAnnotation(Column.class).name() : f.getName();                                    
+                                    relationship.setProperty(relPropertyName, PropertyAccessorHelper.getObject(key, f));
+                                }
+                            }                            
+                            
+                        }
+                    }                
+                    
+                }
+            }
+        }      
         
         return node;
     }
 
-    @Override
     public Object toEntity(Object datastoreObject, List<String> relationNames, EntityMetadata m)
     {
         return null;

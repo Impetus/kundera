@@ -28,7 +28,6 @@ import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.DatastoreObjectEntityMapper;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
@@ -49,7 +48,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
 
     private EntityReader reader;
     
-    private DatastoreObjectEntityMapper mapper;
+    private GraphEntityMapper mapper;
     
     Neo4JClient(final Neo4JClientFactory factory)
     {
@@ -146,10 +145,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
         {
             tx = graphDb.beginTx();
             
-            Node node = graphDb.createNode();
-            
-            
-            mapper.fromEntity(entity, node, rlHolders, entityMetadata);
+            //Top level node                        
+            Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata);      
             
             
             tx.success();

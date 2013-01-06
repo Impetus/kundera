@@ -166,6 +166,9 @@ public class FlushManager
                     // Table
                     if (node.isDirty() && !node.isTraversed())
                     {
+                        //M-2-M relation fields that are Set or List are joined by join table.
+                        //M-2-M relation fields that are Map aren't joined by Join table        
+                        
                         JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
                                 .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
                         if (jtmd != null)
