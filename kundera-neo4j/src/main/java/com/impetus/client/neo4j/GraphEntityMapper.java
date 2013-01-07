@@ -136,9 +136,34 @@ public class GraphEntityMapper
             {
                 created.setProperty(idFieldName, properties.get(idFieldName));
             }
-        };       
+        }; 
+        
+        
         
         return factory.getOrCreate(idFieldName, id );
+    }
+    
+    private Relationship getOrCreateRelationshipWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
+    {
+        Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
+        final String idFieldName = m.getIdAttribute().getName();
+        
+        UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb, m.getIndexName())
+        {
+            
+            @Override
+            protected Relationship create(Map<String, Object> paramMap)
+            {
+                return null;
+            }
+            
+            @Override
+            protected void initialize(Relationship relationship, Map<String,Object> properties) {
+                relationship.setProperty(idFieldName, properties.get(idFieldName));
+            }
+        };
+        
+        return factory.getOrCreate(idFieldName, id);
     }
 
 }
