@@ -90,16 +90,10 @@ public class CassandraSchemaOperationTest
     @After
     public void tearDown() throws Exception
     {
-        try
-        {
-            client.system_drop_keyspace("KunderaCoreExmples");
-        }
-        catch (InvalidRequestException irex)
-        {
-            Assert.assertTrue(!CassandraCli.keyspaceExist("KunderaCoreExmples"));
-        }
+            CassandraCli.dropKeySpace("KunderaCoreExmples");
     }
 
+    
     @Test
     public void testCreate() throws NotFoundException, InvalidRequestException, TException,
             UnsupportedEncodingException

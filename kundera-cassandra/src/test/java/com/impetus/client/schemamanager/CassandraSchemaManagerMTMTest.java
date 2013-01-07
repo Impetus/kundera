@@ -76,15 +76,9 @@ public class CassandraSchemaManagerMTMTest
     @After
     public void tearDown() throws Exception
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(_keyspace);
-        }
-        catch (InvalidRequestException irex)
-        {
-            Assert.assertTrue(!CassandraCli.keyspaceExist(_keyspace));
-        }
+        CassandraCli.dropKeySpace(_keyspace);
     }
+
 
     @Test
     public void test()

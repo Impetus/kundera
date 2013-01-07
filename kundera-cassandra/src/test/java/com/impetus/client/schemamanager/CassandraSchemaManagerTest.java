@@ -90,16 +90,14 @@ public class CassandraSchemaManagerTest
     }
 
     /**
-     * Tear down.
-     * 
-     * @throws Exception
-     *             the exception
+     * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.client.system_drop_keyspace(_KEYSPACE);
+        CassandraCli.dropKeySpace(_KEYSPACE);
     }
+
 
     /**
      * Test schema operation.

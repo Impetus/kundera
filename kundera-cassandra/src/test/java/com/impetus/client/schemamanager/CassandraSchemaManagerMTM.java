@@ -65,21 +65,14 @@ public class CassandraSchemaManagerMTM
         CassandraCli.cassandraSetUp();
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
-        try
+        /**
+         * @throws java.lang.Exception
+         */
+        @After
+        public void tearDown() throws Exception
         {
-            CassandraCli.client.system_drop_keyspace(keyspace);
+            CassandraCli.dropKeySpace(keyspace);
         }
-        catch (InvalidRequestException irex)
-        {
-            Assert.assertTrue(!CassandraCli.keyspaceExist(keyspace));
-        }
-    }
 
     @Test
     public void test()
