@@ -31,6 +31,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.index.UniqueFactory;
 
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -49,8 +50,9 @@ public class GraphEntityMapper
 
     public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m)
     {
-        //Construct top level node first
-        Node node = graphDb.createNode();        
+        //Construct top level node first, making sure unique ID in the index        
+        Node node = getOrCreateNodeWithUniqueFactory(entity, m, graphDb);
+        
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -121,6 +123,47 @@ public class GraphEntityMapper
     public Object toEntity(Object datastoreObject, List<String> relationNames, EntityMetadata m)
     {
         return null;
+    }
+    
+    private Node getOrCreateNodeWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
+    {
+        Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
+        final String idFieldName = m.getIdAttribute().getName();
+        UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, m.getIndexName())
+        {
+            @Override
+            protected void initialize(Node created, Map<String, Object> properties)
+            {
+                created.setProperty(idFieldName, properties.get(idFieldName));
+            }
+        }; 
+        
+        
+        
+        return factory.getOrCreate(idFieldName, id );
+    }
+    
+    private Relationship getOrCreateRelationshipWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
+    {
+        Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
+        final String idFieldName = m.getIdAttribute().getName();
+        
+        UniqueFactory<Relationship> factory = new UniqueFactory.UniqueRelationshipFactory(graphDb, m.getIndexName())
+        {
+            
+            @Override
+            protected Relationship create(Map<String, Object> paramMap)
+            {
+                return null;
+            }
+            
+            @Override
+            protected void initialize(Relationship relationship, Map<String,Object> properties) {
+                relationship.setProperty(idFieldName, properties.get(idFieldName));
+            }
+        };
+        
+        return factory.getOrCreate(idFieldName, id);
     }
 
 }

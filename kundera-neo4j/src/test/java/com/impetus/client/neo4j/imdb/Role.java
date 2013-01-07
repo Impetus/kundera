@@ -20,12 +20,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Role Relationship entity class
  * @author amresh.singh
  */
 @Entity
 @Table
+@IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
 public class Role
 {
     @Id

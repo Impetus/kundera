@@ -43,7 +43,7 @@
 					
 					<!--Controls the auto indexing feature for nodes. Setting to false shuts it down,
 					 while true enables it by default for properties listed in the node_keys_indexable setting.  -->
-					<property name="node_auto_indexing" value="false"></property>
+					<property name="node_auto_indexing" value="true"></property>
 					<property name="node_cache_array_fraction" value="1.0"></property>
 					<!--<property name="node_cache_size" value=""></property>-->
 					<!--<property name="node_keys_indexable" value=""></property>-->
