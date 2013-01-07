@@ -377,13 +377,17 @@ public class ApplicationMetadata
     /**
      * 
      */
-    public void unloadApplicationMatadata(final String pu)
+    public void unloadApplicationMatadata()
     {
-        this.metamodelMap.remove(pu);
+        this.metamodelMap.clear();
+        this.metamodelMap = null;
         this.metaModelBuilder.clear();
+        this.metaModelBuilder=null;
         this.namedNativeQueries = null;
         this.clazzToPuMap = null;
-        this.persistenceUnitMetadataMap.remove(pu);
-        this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
+        this.persistenceUnitMetadataMap.clear();
+        this.persistenceUnitMetadataMap=null;
+        this.schemaMetadata.getPuToSchemaMetadata().clear();
+//        this.schemaMetadata.getPuToSchemaMetadata()=null;
     }
 }

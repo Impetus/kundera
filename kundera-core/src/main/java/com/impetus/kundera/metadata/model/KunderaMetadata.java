@@ -123,9 +123,9 @@ public class KunderaMetadata
         this.clientMetadata.put(persistenceUnit, clientMetadata);
     }
 
-    public void unloadKunderaMetadata(final String pu)
+    public void unloadKunderaMetadata()
     {
-        this.clientMetadata.remove(pu);
-        this.getApplicationMetadata().unloadApplicationMatadata(pu);
+        this.clientMetadata.clear();
+        this.getApplicationMetadata().unloadApplicationMatadata();
     }
 }
