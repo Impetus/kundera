@@ -198,9 +198,8 @@
 	<persistence-unit name="redis">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			 <property name="kundera.nodes" value="localhost" />
-<!-- 			<property name="kundera.nodes" value="192.168.145.168" />
- -->			
+			 <!-- <property name="kundera.nodes" value="localhost" /> -->
+ 			<property name="kundera.nodes" value="192.168.145.168" />
 			<property name="kundera.port" value="6379" />
 			<property name="kundera.keyspace" value="RedisK" />
 			<property name="kundera.dialect" value="redis" />
