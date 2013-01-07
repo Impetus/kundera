@@ -88,7 +88,7 @@ public class RedisClientTest
     }
 
     
-    @Test
+//    @Test
     public void testCRUDWithBatch()
     {
         Map<String,String> batchProperty = new HashMap<String, String>(1);
