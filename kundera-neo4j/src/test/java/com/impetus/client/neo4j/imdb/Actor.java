@@ -27,6 +27,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Actor Node Entity class 
  * @author amresh.singh
@@ -34,6 +37,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table
+@IndexCollection(columns={@Index(name = "name", type = "KEYS")})
 public class Actor
 {
     @Id

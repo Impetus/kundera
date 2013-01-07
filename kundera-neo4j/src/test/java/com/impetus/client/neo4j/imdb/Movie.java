@@ -25,6 +25,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Movie Node entity class 
  * @author amresh.singh
@@ -32,6 +35,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table
+@IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
 public class Movie
 {
     @Id
