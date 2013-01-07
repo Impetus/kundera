@@ -177,7 +177,7 @@ public class StudentCassandraByteTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -215,11 +215,13 @@ public class StudentCassandraByteTest extends CassandraBase
         Query q;
         List<StudentCassandraByte> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraByte s where s.id between " + getMinValue(Byte.class) + " and " + getMaxValue(Byte.class);
-//        query = "Select s From StudentCassandraByte s where s.id between ?1 and ?2";
+        query = "Select s From StudentCassandraByte s where s.id between " + getMinValue(Byte.class) + " and "
+                + getMaxValue(Byte.class);
+        // query =
+        // "Select s From StudentCassandraByte s where s.id between ?1 and ?2";
         q = em.createQuery(query);
-//        q.setParameter(1, getMinValue(Byte.class));
-//        q.setParameter(2, getMaxValue(Byte.class));
+        // q.setParameter(1, getMinValue(Byte.class));
+        // q.setParameter(2, getMaxValue(Byte.class));
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
@@ -258,8 +260,7 @@ public class StudentCassandraByteTest extends CassandraBase
         List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class);
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -285,8 +286,8 @@ public class StudentCassandraByteTest extends CassandraBase
         List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -438,8 +439,8 @@ public class StudentCassandraByteTest extends CassandraBase
         List<StudentCassandraByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age >= "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentCassandraByte s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -615,7 +616,7 @@ public class StudentCassandraByteTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraByte";
             cfDef.keyspace = keyspace;
-//            cfDef.setKey_validation_class("BytesType");
+            // cfDef.setKey_validation_class("BytesType");
 
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
@@ -679,26 +680,7 @@ public class StudentCassandraByteTest extends CassandraBase
 
     public void dropSchema()
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(keyspace);
-        }
-        catch (InvalidRequestException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

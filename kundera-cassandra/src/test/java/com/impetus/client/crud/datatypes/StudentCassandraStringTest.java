@@ -669,25 +669,7 @@ public class StudentCassandraStringTest extends CassandraBase
 
     public void dropSchema()
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(keyspace);
-        }
-        catch (InvalidRequestException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        CassandraCli.dropKeySpace(keyspace);
     }
+
 }
