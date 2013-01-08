@@ -18,6 +18,7 @@ package com.impetus.kundera.persistence;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.collection.internal.PersistentSet;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.mapping.Collection;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
@@ -157,7 +157,7 @@ public class AbstractEntityReader
                         PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
                         
                         //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
-                        if(relation.getPropertyType().isAssignableFrom(Collection.class))
+                        if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
                         {
                             associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
                         }
