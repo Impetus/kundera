@@ -121,8 +121,8 @@ public class PelopsClientFactory extends GenericClientFactory
             getSchemaManager(externalProperties).dropSchema();
         }
         schemaManager = null;
-        Pelops.shutdown();
-        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties));
+//        Pelops.shutdown();
+//        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties));
         externalProperties = null;
     }
 
