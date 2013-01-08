@@ -121,7 +121,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             //
             pipeLine.sync(); // send I/O.. as persist call. so no need to read
                              // response?
-//            onCleanup(connection);
+            onCleanup(connection);
         }
 
     }
@@ -746,14 +746,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      *            row key to be stor
      */
     private void addIndex(final Jedis connection, final AttributeWrapper wrapper, final String rowKey)
-    {/*
+    {
         Set<String> indexKeys = wrapper.getIndexes().keySet();
-
         for (String idx_Name : indexKeys)
         {
             connection.zadd(idx_Name, wrapper.getIndexes().get(idx_Name), rowKey);
         }
-    */}
+
+    }
 
     /**
      * Deletes inverted indexes from redis.
@@ -1303,7 +1303,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         else
         {
-            rowKey = id.toString();/*PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());*/
+            rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
@@ -1311,7 +1311,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         connection.hmset(getEncodedBytes(hashKey), wrapper.getColumns());
 
         // Add row key to list(Required for wild search over table).
-/*        connection.zadd(
+
+        connection.zadd(
                 getHashKey(entityMetadata.getTableName(),
                         ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey),
                 rowKey);
@@ -1325,7 +1326,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 getHashKey(entityMetadata.getTableName(),
                         getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
                 getDouble(rowKey), rowKey);
-*/    }
+    }
 
     private void onDelete(Object entity, Object pKey, Jedis connection)
     {
