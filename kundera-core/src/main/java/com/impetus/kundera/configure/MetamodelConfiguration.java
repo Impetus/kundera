@@ -36,6 +36,7 @@ import javax.persistence.metamodel.Metamodel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
@@ -140,7 +141,15 @@ public class MetamodelConfiguration implements Configuration
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
             classesToScan = puMetadata.getManagedClassNames();
             managedURLs = puMetadata.getManagedURLs();
-            client = puMetadata.getClient();
+            Map<String, Object> externalProperties = getExternalProperties(persistenceUnit);
+
+            client = externalProperties != null ? (String) externalProperties
+                    .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+
+            if (client == null)
+            {
+                client = puMetadata.getClient();
+            }
         }
 
         /*

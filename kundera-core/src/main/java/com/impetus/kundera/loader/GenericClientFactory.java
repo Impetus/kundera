@@ -17,6 +17,7 @@ package com.impetus.kundera.loader;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
@@ -219,6 +220,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         if (this.externalProperties == null)
         {
             this.externalProperties = puProperties;
+        }
+    }
+
+    protected void onValidation(final String host, final String port)
+    {
+        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        {
+            logger.error("Host or port should not be null / port should be numeric");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
         }
     }
 }

@@ -121,11 +121,12 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+                    null, orderByClause, maxResult, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
+                            .getResult());
         }
         catch (Exception e)
         {
-            log.error("Error during executing query, Caused by:" + e.getMessage());
+            log.error("Error during executing query, Caused by:", e);
             throw new QueryHandlerException(e);
         }
     }
@@ -140,13 +141,13 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             BasicDBObject orderByClause = getOrderByClause();
-            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m
-                    .getRelationNames(), orderByClause, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
-                    .getResult());
+            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                    m.getRelationNames(), orderByClause, maxResult, getKeys(m, getKunderaQuery().getResult()),
+                    getKunderaQuery().getResult());
         }
         catch (Exception e)
         {
-            log.error("Error during executing query, Caused by:" + e.getMessage());
+            log.error("Error during executing query, Caused by:", e);
             throw new QueryHandlerException(e);
         }
 
@@ -223,15 +224,9 @@ public class MongoDBQuery extends QueryImpl
                     // Means it is a case of composite column.
                     property = property.substring(property.indexOf(".") + 1);
                     isCompositeColumn = true;
-                    // compositeColumns.add(new
-                    // BasicDBObject(compositeColumn,value));
                 }
                 else
                 {
-                    // MetamodelImpl metaModel = (MetamodelImpl)
-                    // KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    // .getMetamodel(m.getPersistenceUnit());
-
                     EntityType entity = metaModel.entity(m.getEntityClazz());
                     String fieldName = m.getFieldName(property);
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
@@ -251,19 +246,12 @@ public class MongoDBQuery extends QueryImpl
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
 
-                // String enclosingDocumentName =
-                // MetadataUtils.getEnclosingEmbeddedFieldName(m, property,
-                // true);
-                // if (enclosingDocumentName != null)
-                // {
-                // property = enclosingDocumentName + "." + property;
-                // }
-
                 // Query could be geospatial in nature
                 if (f != null && f.getType().equals(Point.class))
                 {
-                    GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(condition, value);
-                    query = (BasicDBObject)geospatialQueryimpl.createGeospatialQuery(property, value, query);      
+                    GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(
+                            condition, value);
+                    query = (BasicDBObject) geospatialQueryimpl.createGeospatialQuery(property, value, query);
 
                 }
                 else
@@ -282,7 +270,6 @@ public class MongoDBQuery extends QueryImpl
                     }
                     else if (condition.equalsIgnoreCase("like"))
                     {
-                        // query.append(property, Pattern.compile(value));
                         if (isCompositeColumn)
                         {
                             compositeColumns.put(property, value);

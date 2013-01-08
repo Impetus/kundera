@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import javax.persistence.Embeddable;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -129,28 +130,23 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         }
                         if (tableInfo.getEmbeddedColumnMetadatas() != null)
                         {
-                         //    DO nothing as columns Embeddable entity would go into owners column family. 
+                            // DO nothing as columns Embeddable entity would go
+                            // into owners column family.
                             /*
-                            for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
-                            {
-                                boolean found = false;
-                                HColumnDescriptor columnDescriptor = new HColumnDescriptor(
-                                        embeddedColumnInfo.getEmbeddedColumnName());
-                                for (HColumnDescriptor hColumnDescriptor : descriptors)
-                                {
-                                    if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(
-                                            embeddedColumnInfo.getEmbeddedColumnName()))
-                                    {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found)
-                                {
-                                    admin.addColumn(tableInfo.getTableName(), columnDescriptor);
-                                }
-                            }
-                        */}
+                             * for (EmbeddedColumnInfo embeddedColumnInfo :
+                             * tableInfo.getEmbeddedColumnMetadatas()) { boolean
+                             * found = false; HColumnDescriptor columnDescriptor
+                             * = new HColumnDescriptor(
+                             * embeddedColumnInfo.getEmbeddedColumnName()); for
+                             * (HColumnDescriptor hColumnDescriptor :
+                             * descriptors) { if
+                             * (hColumnDescriptor.getNameAsString
+                             * ().equalsIgnoreCase(
+                             * embeddedColumnInfo.getEmbeddedColumnName())) {
+                             * found = true; break; } } if (!found) {
+                             * admin.addColumn(tableInfo.getTableName(),
+                             * columnDescriptor); } }
+                             */}
                     }
                 }
                 catch (IOException e)
@@ -204,27 +200,23 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 if (tableInfo.getEmbeddedColumnMetadatas() != null)
                 {
-//                  DO nothing as columns Embeddable entity would go into owners column family. 
-                   /* for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
-                    {
-                        boolean isColumnFound = false;
-                        for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
-                        {
-                            if (columnDescriptor.getNameAsString().equalsIgnoreCase(
-                                    embeddedColumnInfo.getEmbeddedColumnName()))
-                            {
-                                isColumnFound = true;
-                                break;
-                            }
-                        }
-                        if (!isColumnFound)
-                        {
-                            throw new SchemaGenerationException("column " + embeddedColumnInfo.getEmbeddedColumnName()
-                                    + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
-                                    tableInfo.getTableName(), tableInfo.getTableName());
-                        }
-                    }
-                */}
+                    // DO nothing as columns Embeddable entity would go into
+                    // owners column family.
+                    /*
+                     * for (EmbeddedColumnInfo embeddedColumnInfo :
+                     * tableInfo.getEmbeddedColumnMetadatas()) { boolean
+                     * isColumnFound = false; for (HColumnDescriptor
+                     * columnDescriptor : hTableDescriptor.getColumnFamilies())
+                     * { if
+                     * (columnDescriptor.getNameAsString().equalsIgnoreCase(
+                     * embeddedColumnInfo.getEmbeddedColumnName())) {
+                     * isColumnFound = true; break; } } if (!isColumnFound) {
+                     * throw new SchemaGenerationException("column " +
+                     * embeddedColumnInfo.getEmbeddedColumnName() +
+                     * " does not exist in table " + tableInfo.getTableName() +
+                     * "", "Hbase", tableInfo.getTableName(),
+                     * tableInfo.getTableName()); } }
+                     */}
             }
             catch (TableNotFoundException tnfex)
             {
@@ -334,6 +326,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected boolean initiateClient()
     {
+        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        {
+            logger.error("Host or port should not be null / port should be numeric");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+        }
+
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", host + ":" + port);
         conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
@@ -399,15 +397,17 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         if (tableInfo.getEmbeddedColumnMetadatas() != null)
         {
-         //  DO nothing as columns Embeddable entity would go into owners column family.
+            // DO nothing as columns Embeddable entity would go into owners
+            // column family.
             /*
-            for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
-            {
-                HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
-                setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
-                tableDescriptor.addFamily(hColumnDescriptor);
-            }
-        */}
+             * for (EmbeddedColumnInfo embeddedColumnInfo :
+             * tableInfo.getEmbeddedColumnMetadatas()) { HColumnDescriptor
+             * hColumnDescriptor = new
+             * HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
+             * setColumnFamilyProperties(hColumnDescriptor,
+             * tableInfo.getTableName());
+             * tableDescriptor.addFamily(hColumnDescriptor); }
+             */}
         if (tableProperties != null)
         {
             for (Object o : tableProperties.keySet())

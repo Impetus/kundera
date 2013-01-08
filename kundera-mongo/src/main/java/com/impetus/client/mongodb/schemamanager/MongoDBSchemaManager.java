@@ -20,6 +20,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,6 +188,12 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected boolean initiateClient()
     {
+        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        {
+            logger.error("Host or port should not be null / port should be numeric");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+        }
+
         int localport = Integer.parseInt(port);
         try
         {
@@ -195,12 +202,11 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (UnknownHostException e)
         {
-            logger.error("Database host cannot be resolved, Caused by" + e.getMessage());
+            logger.error("Database host cannot be resolved, Caused by", e);
             throw new SchemaGenerationException(e, "mongoDb");
         }
         catch (MongoException e)
         {
-
             throw new SchemaGenerationException(e);
         }
 

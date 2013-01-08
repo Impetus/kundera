@@ -46,6 +46,8 @@ public class RedisClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClientFactory.class);
 
+    private static Jedis connection;
+
     /*
      * (non-Javadoc)
      * 
@@ -76,11 +78,14 @@ public class RedisClientFactory extends GenericClientFactory
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
-        
+
         Properties props = puMetadata.getProperties();
-        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost():(String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ?RedisPropertyReader.rsmd.getPort() : (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String password = RedisPropertyReader.rsmd.getPassword() != null? RedisPropertyReader.rsmd.getPassword() : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
         String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
@@ -90,6 +95,8 @@ public class RedisClientFactory extends GenericClientFactory
 
         JedisPoolConfig poolConfig = onPoolConfig(WHEN_EXHAUSTED_FAIL, maxActivePerNode, maxIdlePerNode,
                 minIdlePerNode, maxTotal);
+
+        onValidation(contactNode, defaultPort);
 
         JedisPool pool = null;
         if (password != null)
@@ -133,9 +140,9 @@ public class RedisClientFactory extends GenericClientFactory
 
     Map<String, Object> getOverridenProperties()
     {
-        return this.externalProperties; 
+        return this.externalProperties;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -143,7 +150,7 @@ public class RedisClientFactory extends GenericClientFactory
      */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
-     {
+    {
         return null;
     }
 
@@ -163,7 +170,7 @@ public class RedisClientFactory extends GenericClientFactory
         }
 
     }
-    
+
     /**
      * Retrieving connection from connection pool.
      * 
@@ -172,26 +179,42 @@ public class RedisClientFactory extends GenericClientFactory
     Jedis getConnection()
     {
         logger.info("borrowing connection from pool");
-        Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
-        
-        Map props = RedisPropertyReader.rsmd.getProperties();
-
-        // set external xml properties.
-        if(props != null)
+        if (connection == null)
         {
-//            props.
-            for(Object key : props.keySet())
-            {
-                connection.configSet(key.toString(), props.get(key).toString());
-            }
+            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit());
+
+            Properties props = puMetadata.getProperties();
+            String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                    : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+            String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+            connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+            connection.connect();
+            //
+            // connection = ((JedisPool)
+            // getConnectionPoolOrConnection()).getResource();
+            //
+            // Map props = RedisPropertyReader.rsmd.getProperties();
+            //
+            // // set external xml properties.
+            // if (props != null)
+            // {
+            // // props.
+            // for (Object key : props.keySet())
+            // {
+            // connection.configSet(key.toString(), props.get(key).toString());
+            // }
+            // }
         }
-        
         return connection;
     }
 
     /**
      * Release/return connection to pool.
-     * @param res  jedis resource
+     * 
+     * @param res
+     *            jedis resource
      */
     void releaseConnection(Jedis res)
     {
@@ -199,11 +222,11 @@ public class RedisClientFactory extends GenericClientFactory
         ((JedisPool) getConnectionPoolOrConnection()).returnResource(res);
     }
 
-      IndexManager getIndexManager()
-      {
-          return indexManager;
-      }
-    
+    IndexManager getIndexManager()
+    {
+        return indexManager;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -212,7 +235,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        
+
         return false;
     }
 
@@ -251,7 +274,6 @@ public class RedisClientFactory extends GenericClientFactory
         return poolConfig;
     }
 
-
     /**
      * 
      */
@@ -263,5 +285,5 @@ public class RedisClientFactory extends GenericClientFactory
             propertyReader.read(getPersistenceUnit());
         }
     }
-    
+
 }

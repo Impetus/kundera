@@ -281,9 +281,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         Selector selector = Pelops.createSelector(PelopsUtils
                 .generatePoolName(getPersistenceUnit(), externalProperties));
-        // List<Column> columns = selector.getColumnsFromRow(joinTableName,
-        // Bytes.fromUTF8(parentId.toString()),
-        // Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+
         List<Column> columns = selector.getColumnsFromRow(joinTableName,
                 Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
                 Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());

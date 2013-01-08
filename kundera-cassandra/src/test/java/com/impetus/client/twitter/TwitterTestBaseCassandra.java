@@ -27,6 +27,7 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.twitter.dao.TwitterCassandra;
 import com.impetus.client.twitter.dao.TwitterServiceCassandra;
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
@@ -53,7 +54,7 @@ import com.impetus.client.twitter.entities.UserCassandra;
  */
 public abstract class TwitterTestBaseCassandra
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean RUN_IN_EMBEDDED_MODE = false;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
@@ -92,6 +93,7 @@ public abstract class TwitterTestBaseCassandra
         // Create Schema
         if (AUTO_MANAGE_SCHEMA)
         {
+            CassandraCli.initClient();
             createSchema();
         }
         twitter = new TwitterServiceCassandra(persistenceUnitName);

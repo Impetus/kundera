@@ -21,6 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
@@ -37,6 +39,9 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
+
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(HBaseClientFactory.class);
 
     /** The conf. */
     private HBaseConfiguration conf;
@@ -88,6 +93,8 @@ public class HBaseClientFactory extends GenericClientFactory
         {
             this.poolSize = Integer.parseInt(poolSize);
         }
+
+        onValidation(node, port);
 
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
@@ -150,7 +157,7 @@ public class HBaseClientFactory extends GenericClientFactory
         setExternalProperties(externalProperty);
         if (schemaManager == null)
         {
-            initializePropertyReader();           
+            initializePropertyReader();
             schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;

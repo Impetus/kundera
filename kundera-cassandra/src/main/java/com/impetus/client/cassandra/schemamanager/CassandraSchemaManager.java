@@ -346,6 +346,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected boolean initiateClient()
     {
+        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        {
+            log.error("Host or port should not be null / port should be numeric");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+        }
+
         if (cassandra_client == null)
         {
             TSocket socket = new TSocket(host, Integer.parseInt(port));
@@ -361,12 +367,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (TTransportException e)
             {
-                log.error("Error while opening socket , Caused by:" + e.getMessage());
+                log.error("Error while opening socket , Caused by:", e);
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             catch (NumberFormatException e)
             {
-                log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+                log.error("Error during creating schema in cassandra, Caused by:", e);
                 throw new SchemaGenerationException(e, "Cassandra");
             }
         }
@@ -508,19 +514,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:", e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (UnavailableException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:", e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (TimedOutException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:", e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
@@ -622,13 +628,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:", e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:", e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
@@ -856,17 +862,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:", e);
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:", e);
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:", e);
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
 

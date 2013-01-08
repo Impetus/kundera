@@ -1499,7 +1499,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else if (batch_Size == null)
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata.getBatchSize();
+            batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
         }
     }
 

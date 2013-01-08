@@ -121,6 +121,8 @@ public class MongoDBClientFactory extends GenericClientFactory
             poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
 
+        onValidation(contactNode, defaultPort);
+
         List<ServerAddress> addrs = new ArrayList<ServerAddress>();
 
         Mongo mongo = null;

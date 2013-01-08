@@ -37,7 +37,7 @@ public class PersonMongoTest extends BaseTest
 
     private static final String _PU = "mongoTest";
 
-	/** The emf. */
+    /** The emf. */
     private static EntityManagerFactory emf;
 
     /** The em. */
@@ -94,6 +94,13 @@ public class PersonMongoTest extends BaseTest
         query.setParameter(1, "vivek");
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
+
+        query = em.createQuery("select p from PersonMongo p");
+        query.setMaxResults(2);
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
     }
 
     /**
@@ -108,13 +115,12 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
-        TypedQuery<PersonMongo> query = em.createNamedQuery("mongo.named.query",PersonMongo.class);
+
+        TypedQuery<PersonMongo> query = em.createNamedQuery("mongo.named.query", PersonMongo.class);
         query.setParameter("name", "vivek");
         List<PersonMongo> results = query.getResultList();
         Assert.assertEquals(3, results.size());
     }
-    
 
     /**
      * On generic typed named query.
@@ -128,14 +134,14 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
-        TypedQuery<Object> query = em.createNamedQuery("mongo.named.query",Object.class);
+
+        TypedQuery<Object> query = em.createNamedQuery("mongo.named.query", Object.class);
         query.setParameter("name", "vivek");
         List<Object> results = query.getResultList();
         Assert.assertEquals(3, results.size());
         Assert.assertEquals(PersonMongo.class, results.get(0).getClass());
     }
-    
+
     /**
      * On invalid typed query.
      * 
@@ -149,19 +155,20 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
+
         TypedQuery<PersonBatchMongoEntity> query = null;
         try
         {
-            query = em.createNamedQuery("mongo.named.query",PersonBatchMongoEntity.class);
+            query = em.createNamedQuery("mongo.named.query", PersonBatchMongoEntity.class);
             query.setParameter("name", "vivek");
             Assert.fail("Should have gone to catch block, as it is an invalid scenario!");
-        } catch (IllegalArgumentException iaex) 
+        }
+        catch (IllegalArgumentException iaex)
         {
             Assert.assertNull(query);
         }
     }
-    
+
     /**
      * On merge mongo.
      */

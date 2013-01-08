@@ -361,7 +361,6 @@ public class ApplicationMetadata
      */
     public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
     {
-
         if (metaModelBuilder.containsKey(persistenceUnit))
         {
             return metaModelBuilder.get(persistenceUnit);
@@ -377,17 +376,13 @@ public class ApplicationMetadata
     /**
      * 
      */
-    public void unloadApplicationMatadata()
+    public void unloadApplicationMatadata(final String pu)
     {
-        this.metamodelMap.clear();
-        this.metamodelMap = null;
-        this.metaModelBuilder.clear();
-        this.metaModelBuilder=null;
+        this.metamodelMap.remove(pu);
+        this.metaModelBuilder.remove(pu);
         this.namedNativeQueries = null;
         this.clazzToPuMap = null;
-        this.persistenceUnitMetadataMap.clear();
-        this.persistenceUnitMetadataMap=null;
-        this.schemaMetadata.getPuToSchemaMetadata().clear();
-//        this.schemaMetadata.getPuToSchemaMetadata()=null;
+        this.persistenceUnitMetadataMap.remove(pu);
+        this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
     }
 }

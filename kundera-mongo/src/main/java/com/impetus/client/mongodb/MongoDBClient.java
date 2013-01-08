@@ -60,19 +60,13 @@ import com.mongodb.WriteConcern;
  */
 public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
 {
-
-    /** The is connected. */
-    // private boolean isConnected;
-
     /** The mongo db. */
     private DB mongoDb;
-
-    /** The data handler. */
-    // private MongoDBDataHandler dataHandler;
 
     /** The reader. */
     private EntityReader reader;
 
+    /** The data handler. */
     private MongoDBDataHandler handler;
 
     /** The log. */
@@ -269,11 +263,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put("_id",
-        /*
-         * ((AbstractAttribute)
-         * entityMetadata.getIdAttribute()).getJPAColumnName(),
-         */new BasicDBObject("$in", keys));
+        query.put("_id", new BasicDBObject("$in", keys));
 
         DBCursor cursor = dbCollection.find(query);
 
@@ -304,16 +294,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the relation names
      * @param orderBy
      *            the order by
+     * @param maxResult
      * @param keys
      * @return the list
      * @throws Exception
      *             the exception
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
-            BasicDBObject orderBy, BasicDBObject keys, String... results) throws Exception
+            BasicDBObject orderBy, int maxResult, BasicDBObject keys, String... results) throws Exception
     {
         String documentName = entityMetadata.getTableName();
-        // String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
@@ -334,25 +324,21 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     // TODO i need to discuss with Amresh before modifying it.
                     entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
-                            mongoQuery, result, orderBy, keys));
+                            mongoQuery, result, orderBy,maxResult, keys));
                     return entities;
                 }
             }
         }
-        // else
-        // {
         log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys);
+                mongoQuery, keys).limit(maxResult);
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
             Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
             entities.add(entity);
         }
-        // }
-
         return entities;
     }
 
@@ -687,91 +673,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes.clear();
         }
     }
-
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
-    // * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
-    // */
-    // @Override
-    // @Deprecated
-    // public <E> List<E> getColumnsById(String tableName, String
-    // pKeyColumnName, String columnName, Object pKeyColumnValue)
-    // {
-    //
-    // List<E> foreignKeys = new ArrayList<E>();
-    //
-    // DBCollection dbCollection = mongoDb.getCollection(tableName);
-    // BasicDBObject query = new BasicDBObject();
-    //
-    // query.put(pKeyColumnName, pKeyColumnValue);
-    //
-    // DBCursor cursor = dbCollection.find(query);
-    // DBObject fetchedDocument = null;
-    //
-    // while (cursor.hasNext())
-    // {
-    // fetchedDocument = cursor.next();
-    // String foreignKey = (String) fetchedDocument.get(columnName);
-    // foreignKeys.add((E) foreignKey);
-    // }
-    // return foreignKeys;
-    //
-    // }
-    //
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see
-    // com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
-    // * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
-    // * java.lang.Class)
-    // */
-    // @Override
-    // @Deprecated
-    // public Object[] findIdsByColumn(String tableName, String pKeyName, String
-    // columnName, Object columnValue,
-    // Class entityClazz)
-    // {
-    //
-    // String childIdStr = (String) columnValue;
-    //
-    // List<Object> primaryKeys = new ArrayList<Object>();
-    //
-    // DBCollection dbCollection = mongoDb.getCollection(tableName);
-    // BasicDBObject query = new BasicDBObject();
-    //
-    // query.put(columnName, childIdStr);
-    //
-    // DBCursor cursor = dbCollection.find(query);
-    // DBObject fetchedDocument = null;
-    //
-    // while (cursor.hasNext())
-    // {
-    // fetchedDocument = cursor.next();
-    // String primaryKey = (String) fetchedDocument.get(pKeyName);
-    // primaryKeys.add(primaryKey);
-    // }
-    //
-    // if (primaryKeys != null && !primaryKeys.isEmpty())
-    // {
-    // return primaryKeys.toArray(new Object[0]);
-    // }
-    // return null;
-    // }
-    //
-    // @Override
-    // @Deprecated
-    // public void deleteByColumn(String tableName, String columnName, Object
-    // columnValue)
-    // {
-    // DBCollection dbCollection = mongoDb.getCollection(tableName);
-    // BasicDBObject query = new BasicDBObject();
-    // query.put(columnName, columnValue);
-    // dbCollection.remove(query, getWriteConcern(), encoder);
-    // }
-    //
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)

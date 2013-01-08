@@ -48,7 +48,10 @@ public class BankTest
     public void setUp() throws Exception
     {
         cli = new HBaseCli();
-        cli.startCluster();
+        if (!cli.isStarted())
+        {
+            cli.startCluster();
+        }
 
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
         mongoProperties.put("kundera.keyspace", "KunderaKeyspace");
@@ -74,7 +77,7 @@ public class BankTest
         mongoProperties = null;
         hbaseProperties = null;
         puPropertiesMap = null;
-        cli.startCluster();
+//        cli.startCluster();
     }
 
     @Test

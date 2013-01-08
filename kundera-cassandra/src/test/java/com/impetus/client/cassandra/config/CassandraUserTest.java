@@ -33,7 +33,7 @@ public class CassandraUserTest
 
     private EntityManager em;
 
-    private Map<String, String> puProperties = new HashMap<String, String>();
+    private Map<String, Object> puProperties = new HashMap<String, Object>();
 
     /**
      * @throws java.lang.Exception
@@ -45,6 +45,9 @@ public class CassandraUserTest
         puProperties.put("kundera.ddl.auto.prepare", "create-drop");
         puProperties.put("kundera.keyspace", "KunderaKeyspace");
         puProperties.put("kundera.client.lookup.class", "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+        puProperties.put("kundera.nodes", "localhost");
+        puProperties.put("kundera.port", "9160");
+        puProperties.put("kundera.client.property", "kunderaTest.xml");
         emf = Persistence.createEntityManagerFactory(_PU, puProperties);
         em = emf.createEntityManager();
     }

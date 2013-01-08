@@ -457,12 +457,13 @@ final class MongoDBDataHandler
      *            the result
      * @param orderBy
      *            the order by
+     * @param maxResult
      * @return the embedded object list
      * @throws PropertyAccessException
      *             the property access exception
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, BasicDBObject keys)
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys)
             throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
@@ -516,7 +517,7 @@ final class MongoDBDataHandler
 
         // Query for fetching entities based on user specified criteria
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys);
+                mongoQuery, keys).limit(maxResult);
 
         // EmbeddableType superColumn =
         // m.getEmbeddedColumn(enclosingDocumentName);

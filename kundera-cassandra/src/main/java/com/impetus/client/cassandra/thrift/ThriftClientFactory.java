@@ -22,6 +22,7 @@ import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 import net.dataforte.cassandra.pool.PoolProperties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +130,8 @@ public class ThriftClientFactory extends GenericClientFactory
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
+
+        onValidation(contactNodes, defaultPort);
 
         PoolConfiguration prop = new PoolProperties();
         prop.setHost(contactNodes);

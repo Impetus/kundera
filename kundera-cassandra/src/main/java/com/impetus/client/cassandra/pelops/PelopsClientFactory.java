@@ -84,6 +84,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
         if (Pelops.getDbConnPool(poolName) == null)
         {
+            onValidation(contactNodes, defaultPort);
+
             Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
                     PelopsUtils.getAuthenticationRequest(props)), false);
 
