@@ -27,18 +27,23 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.UniqueFactory;
 
+import com.impetus.client.neo4j.index.AutoIndexing;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -47,9 +52,14 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class GraphEntityMapper
 {
+    
+    /** The log. */
+    private static Log log = LogFactory.getLog(GraphEntityMapper.class);
 
     public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m)
     {
+        AutoIndexing autoIndexing = new AutoIndexing();
+        
         //Construct top level node first, making sure unique ID in the index        
         Node node = getOrCreateNodeWithUniqueFactory(entity, m, graphDb);
         
@@ -108,21 +118,80 @@ public class GraphEntityMapper
                                         ? f.getAnnotation(Column.class).name() : f.getName();                                    
                                     relationship.setProperty(relPropertyName, PropertyAccessorHelper.getObject(key, f));
                                 }
-                            }                            
+                            }
+                            
+                            //TODO: If relationship auto-indexing is disabled, manually index this relationship
+                            if(! autoIndexing.isRelationshipAutoIndexingEnabled(graphDb))
+                            {
+                                
+                            }
                             
                         }
                     }                
                     
                 }
             }
-        }      
+        }
+        
+        //TODO: If node auto-indexing is disabled, manually index this node
+        if(! autoIndexing.isNodeAutoIndexingEnabled(graphDb))
+        {
+            
+        }
         
         return node;
     }
 
-    public Object toEntity(Object datastoreObject, List<String> relationNames, EntityMetadata m)
+    public Object toEntity(Node node, List<String> relationNames, EntityMetadata m)
     {
-        return null;
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        //Iterate over, entity attributes
+        Set<Attribute> attributes = entityType.getAttributes();      
+        
+        Object entity = null;   
+        
+        try
+        {
+            entity = m.getEntityClazz().newInstance();
+            
+            for(Attribute attribute : attributes)
+            {       
+                Field field = (Field) attribute.getJavaMember();  
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                
+                //Set Entity level properties
+                if(! attribute.isCollection() && ! attribute.isAssociation())
+                {
+                    PropertyAccessorHelper.set(entity, field, node.getProperty(columnName));               
+                    
+                }
+                
+                //TODO: Set Relations
+            
+            }
+            
+            
+            
+            
+            
+            
+        }
+        catch (InstantiationException e)
+        {            
+            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            throw new EntityReaderException("Error while converting Neo4j object to entity");
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            throw new EntityReaderException("Error while converting Neo4j object to entity");
+        }  
+        
+        
+        return entity;
     }
     
     private Node getOrCreateNodeWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)

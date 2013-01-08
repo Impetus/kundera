@@ -87,9 +87,11 @@ public class Neo4JClientFactory extends GenericClientFactory
                 Map<String, String> config = new HashMap<String, String>((Map)properties);      
                 
                 GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(datastoreFilePath);
-                builder.setConfig(config);
+                builder.setConfig(config);                
                 
                 graphDb = builder.newGraphDatabase();
+                
+                
                 registerShutdownHook(graphDb);   
             }        
         }        
@@ -99,6 +101,8 @@ public class Neo4JClientFactory extends GenericClientFactory
             graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(datastoreFilePath);
             registerShutdownHook(graphDb);           
         }       
+        
+        
         
         return graphDb;
     }

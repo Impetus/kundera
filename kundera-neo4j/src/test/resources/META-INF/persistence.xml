@@ -19,7 +19,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-<!--			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>-->
+			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>
 		</properties>
 	</persistence-unit>
 </persistence>

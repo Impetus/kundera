@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.collection.internal.PersistentSet;
 import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.mapping.Collection;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
@@ -150,13 +151,20 @@ public class AbstractEntityReader
                      */
                     if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
-                        // M-M relationship. Relationship entities are always
-                        // fetched
-                        // from Join Table.
+                        
 
                         // First, Save this entity to persistence cache
                         PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-                        associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
+                        
+                        //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
+                        if(relation.getPropertyType().isAssignableFrom(Collection.class))
+                        {
+                            associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
+                        }
+                        else if(relation.getPropertyType().isAssignableFrom(Map.class))
+                        {
+                            //TODO: Implement fetching of Map relationship type
+                        }                        
                     }
                     else
                     {
