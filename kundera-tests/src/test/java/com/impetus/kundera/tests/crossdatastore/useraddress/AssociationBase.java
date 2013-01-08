@@ -39,8 +39,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
+import redis.clients.jedis.Jedis;
+
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
+import com.impetus.client.redis.RedisClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -89,7 +92,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits =   "rdbms,redis,addCassandra,addMongo";
+    private String persistenceUnits = "rdbms,redis,addCassandra,addMongo";
 
     protected RDBMSCli cli;
 
@@ -305,7 +308,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-//        dao.closeEntityManagerFactory();
+        // dao.closeEntityManagerFactory();
 
     }
 
@@ -323,7 +326,6 @@ public abstract class AssociationBase
      */
     private void truncateMongo()
     {
-
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         MongoDBClient client = (MongoDBClient) clients.get("addMongo");
         if (client != null)
@@ -358,6 +360,42 @@ public abstract class AssociationBase
             }
         }
 
+    }
+
+    private void truncateRedis()
+    {
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        RedisClient client = (RedisClient) clients.get("redis");
+        if (client != null)
+        {
+            try
+            {
+                Field db = client.getClass().getDeclaredField("redis");
+                if (!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                Jedis jedis = (Jedis) db.get(client);
+                jedis.flushDB();
+               
+            }
+            catch (SecurityException e)
+            {
+                log.error(e);
+            }
+            catch (NoSuchFieldException e)
+            {
+                log.error(e);
+            }
+            catch (IllegalArgumentException e)
+            {
+                log.error(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                log.error(e);
+            }
+        }
     }
 
     /**
