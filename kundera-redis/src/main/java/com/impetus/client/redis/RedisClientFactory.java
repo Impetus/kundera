@@ -46,7 +46,6 @@ public class RedisClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClientFactory.class);
 
-    private static Jedis connection;
 
     /*
      * (non-Javadoc)
@@ -116,7 +115,7 @@ public class RedisClientFactory extends GenericClientFactory
         }
         else
         {
-            connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+            Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
             connection.auth(password);
             connection.connect();
             return connection;
@@ -193,7 +192,7 @@ public class RedisClientFactory extends GenericClientFactory
         if (poolOrConnection instanceof JedisPool)
         {
 
-            connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
+           Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
 
             Map props = RedisPropertyReader.rsmd.getProperties();
 

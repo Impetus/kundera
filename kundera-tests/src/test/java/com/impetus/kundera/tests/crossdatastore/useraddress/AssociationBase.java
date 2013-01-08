@@ -17,6 +17,7 @@ package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Metamodel;
@@ -40,10 +42,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.redis.RedisClient;
+import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -298,6 +302,8 @@ public abstract class AssociationBase
 
         truncateMongo();
 
+        truncateRedis();
+
         if (AUTO_MANAGE_SCHEMA)
         {
             truncateColumnFamily();
@@ -363,39 +369,21 @@ public abstract class AssociationBase
     }
 
     private void truncateRedis()
+
     {
-        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        RedisClient client = (RedisClient) clients.get("redis");
-        if (client != null)
-        {
-            try
-            {
-                Field db = client.getClass().getDeclaredField("redis");
-                if (!db.isAccessible())
-                {
-                    db.setAccessible(true);
-                }
-                Jedis jedis = (Jedis) db.get(client);
-                jedis.flushDB();
-               
-            }
-            catch (SecurityException e)
-            {
-                log.error(e);
-            }
-            catch (NoSuchFieldException e)
-            {
-                log.error(e);
-            }
-            catch (IllegalArgumentException e)
-            {
-                log.error(e);
-            }
-            catch (IllegalAccessException e)
-            {
-                log.error(e);
-            }
-        }
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata("redis");
+        Properties props = puMetadata.getProperties();
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+        connection.auth(password);
+        connection.connect();
+        connection.flushDB();
     }
 
     /**
