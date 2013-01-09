@@ -26,5 +26,6 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
 {
     
     
+    
 
 }

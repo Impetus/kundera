@@ -543,6 +543,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return batchSize;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
+    @Override
+    public void clear()
+    {
+        if(nodes != null)
+        {
+            nodes.clear();
+            nodes=null;
+            nodes = new ArrayList<Node>();
+        }
+    }
+    
     /*
      * (non-Javadoc)
      * 

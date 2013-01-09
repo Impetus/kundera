@@ -16,15 +16,12 @@
 package com.impetus.client.neo4j;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * Entity Reader for Neo4J 
@@ -46,40 +43,7 @@ public class Neo4JEntityReader  extends AbstractEntityReader implements EntityRe
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         return null;
-    }
-
-    @Override
-    public Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
-            PersistenceDelegator pd)
-    {
-        return super.recursivelyFindEntities(entity, relationsMap, m, pd);
-    }
-
-    @Override
-    protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
-    {
-        return super.onAssociationUsingLucene(m, client, ls);
-    }
-
-    @Override
-    protected List<EnhanceEntity> transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
-    {
-        return super.transform(m, ls, resultList);
-    }
-
-    @Override
-    protected Set<String> fetchDataFromLucene(Client client)
-    {
-        return super.fetchDataFromLucene(client);
-    }
-
-    @Override
-    protected Object getId(Object entity, EntityMetadata metadata)
-    {
-        return super.getId(entity, metadata);
-    }
-
-   
+    }  
     
 
 }

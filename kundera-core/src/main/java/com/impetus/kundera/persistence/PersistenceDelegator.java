@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.ClientResolver;
@@ -53,6 +54,7 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.CacheBase;
@@ -110,6 +112,7 @@ public class PersistenceDelegator
 
     private boolean enableFlush;
 
+    private Coordinator coordinator;
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -161,10 +164,8 @@ public class PersistenceDelegator
         {
             // build flush stack.
 
-            flushManager.buildFlushStack(node, EventType.INSERT);
+            flushManager.buildFlushStack(node, com.impetus.kundera.persistence.context.EventLog.EventType.INSERT);
 
-            // TODO : push into action queue.
-            // Action/ExecutionQueue/ActivityQueue :-> id, name, EndPoint,
 
             flush();
 
@@ -377,8 +378,8 @@ public class PersistenceDelegator
     public void flush()
     {
         // Get flush stack from Flush Manager
-        if (applyFlush())
-        {
+//        if (applyFlush())
+//        {
             FlushStack fs = flushManager.getFlushStack();
 
             // Flush each node in flush stack from top to bottom unit it's empty
@@ -408,7 +409,13 @@ public class PersistenceDelegator
                         }
                         else if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
                         {
-                            node.flush();
+                            if(isTransactionInProgress && defaultTransactionSupported(metadata.getPersistenceUnit()))
+                            {
+                                onSynchronization(node, metadata);
+                            } else
+                            {
+                                node.flush();
+                            }
                         }
 
                         // Update Link value for all nodes attached to this one
@@ -443,11 +450,10 @@ public class PersistenceDelegator
                     flushJoinTableData();
                     // performed,
                 }
-                // clear it.
 
             }
 
-        }
+//        }
     }
 
     public <E> E merge(E e)
@@ -807,21 +813,6 @@ public class PersistenceDelegator
         getPersistenceCache().clean();
     }
 
-    public boolean getRollbackOnly()
-    {
-        return false;
-    }
-
-    public void setRollbackOnly()
-    {
-
-    }
-
-    public boolean isActive()
-    {
-        return isTransactionInProgress;
-    }
-
     /**
      * Populates client specific properties.
      * 
@@ -903,30 +894,42 @@ public class PersistenceDelegator
      */
     private void flushJoinTableData()
     {
-        Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
-        for (JoinTableData jtData : joinTableDataMap.values())
+        if (applyFlush())
         {
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
-            Client client = getClient(m);
-
-            if (OPERATION.INSERT.equals(jtData.getOperation()))
+            Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
+            for (JoinTableData jtData : joinTableDataMap.values())
             {
-                client.persistJoinTable(jtData);
-            }
-            else if (OPERATION.DELETE.equals(jtData.getOperation()))
-            {
-                for (Object pk : jtData.getJoinTableRecords().keySet())
+                if (!jtData.isProcessed())
                 {
-                    client.deleteByColumn(jtData.getSchemaName(), jtData.getJoinTableName(),
-                            ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), pk);
+                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
+                    Client client = getClient(m);
+                    /*
+                     * if (isTransactionInProgress &&
+                     * defaultTransactionSupported(m.getPersistenceUnit())) {
+                     * DefaultTransactionResource resource =
+                     * (DefaultTransactionResource) coordinator.getResource(m
+                     * .getPersistenceUnit()); resource.syncJoinTable(jtData); }
+                     * else
+                     */if (OPERATION.INSERT.equals(jtData.getOperation()))
+                    {
+                        client.persistJoinTable(jtData);
+                        jtData.setProcessed(true);
+                    }
+                    else if (OPERATION.DELETE.equals(jtData.getOperation()))
+                    {
+                        for (Object pk : jtData.getJoinTableRecords().keySet())
+                        {
+                            client.deleteByColumn(jtData.getSchemaName(), jtData.getJoinTableName(),
+                                    ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), pk);
+                        }
+                        jtData.setProcessed(true);
+                    }
                 }
             }
-            jtData.setProcessed(true);
         }
-        joinTableDataMap.clear(); // All Join table operation
     }
 
-    /**
+/**
      * Returns true, if flush mode is AUTO and not running within transaction ||
      * running within transaction and commit is invoked.
      * 
@@ -934,7 +937,82 @@ public class PersistenceDelegator
      */
     private boolean applyFlush()
     {
+//        return true;
         return (!isTransactionInProgress && flushMode.equals(FlushModeType.AUTO)) || enableFlush;
     }
 
+    /**
+     * Returns transaction coordinator.
+     * @return
+     */
+    Coordinator getCoordinator()
+    {
+        coordinator = new Coordinator();
+        try
+        {
+            for (String pu : clientMap.keySet())
+            {
+                PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+
+                String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
+
+                if (txResource != null)
+                {
+
+                    TransactionResource resource = (TransactionResource) Class.forName(txResource).newInstance();
+                    coordinator.addResource(resource, pu);
+                }
+                else
+                {
+                    coordinator.addResource(new DefaultTransactionResource(clientMap.get(pu)), pu);
+                }
+            }
+        }
+        catch (InstantiationException e)
+        {
+            log.error("Error while initializing Transaction Resource:", e);
+            throw new KunderaTransactionException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error("Error while initializing Transaction Resource:", e);
+            throw new KunderaTransactionException(e);
+        }
+        catch (ClassNotFoundException e)
+        {
+            log.error("Error while initializing Transaction Resource:", e);
+            throw new KunderaTransactionException(e);
+        }
+
+        return coordinator;
+    }
+
+
+    /**
+     * If transaction is in progress and user explicitly invokes em.flush()!
+     * 
+     * @param node data node
+     * @param metadata entity metadata.
+     */
+    private void onSynchronization(Node node, EntityMetadata metadata)
+    {
+        DefaultTransactionResource resource = (DefaultTransactionResource) coordinator.getResource(metadata.getPersistenceUnit());
+        if(enableFlush)
+        {
+            resource.onFlush();
+        } else
+        {
+            resource.syncNode(node/*, flushManager.getEvents(node.getNodeId())*/);
+        }
+    }
+
+
+    private boolean defaultTransactionSupported(final String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+
+        String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
+        
+        return txResource == null;
+    }
 }

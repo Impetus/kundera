@@ -1211,6 +1211,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return batchSize;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
+    public void clear()
+    {
+        if(nodes != null)
+        {
+            nodes.clear();
+            nodes=null;
+            nodes = new ArrayList<Node>();
+        }
+    }
+    
     /*
      * (non-Javadoc)
      * 

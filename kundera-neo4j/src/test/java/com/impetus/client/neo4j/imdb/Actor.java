@@ -41,8 +41,7 @@ import com.impetus.kundera.index.IndexCollection;
 public class Actor
 {
     @Id
-    @Column(name="ACTOR_ID")
-   
+    @Column(name="ACTOR_ID")   
     private int id;
     
     @Column(name="ACTOR_NAME")

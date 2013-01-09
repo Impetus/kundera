@@ -20,6 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,6 +59,28 @@ public class IMDBCRUDAndQueryTest
     @Test
     public void testCRUD()
     {
+        //insert();
+        findById();
+        
+    }
+    
+    private void findById()
+    {
+        //Find actor by ID
+        Actor actor1 = em.find(Actor.class, 1);
+        Actor actor2 = em.find(Actor.class, 2);
+        
+        Assert.assertNotNull(actor1);
+        Assert.assertEquals(1, actor1.getId());
+        Assert.assertEquals("Tom Cruise", actor1.getName());
+        
+        Assert.assertNotNull(actor2);
+        Assert.assertEquals(2, actor2.getId());
+        Assert.assertEquals("Emmanuelle Béart", actor2.getName());
+    }
+    
+    private void insert()
+    {
         //Actors
         Actor actor1 = new Actor(1, "Tom Cruise");
         Actor actor2 = new Actor(2, "Emmanuelle Béart");     
@@ -82,8 +105,7 @@ public class IMDBCRUDAndQueryTest
         movie3.addActor(role4, actor2);
         
         em.persist(actor1);
-        em.persist(actor2);   
-        
+        em.persist(actor2); 
     }
 
 }

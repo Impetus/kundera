@@ -92,18 +92,30 @@ public class RedisClientFactory extends GenericClientFactory
                 minIdlePerNode, maxTotal);
 
         JedisPool pool = null;
-        if (password != null)
+        onValidation(contactNode, defaultPort);
+
+        if (poolConfig != null)
         {
-            pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
-                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1, password);
+            if (password != null)
+            {
+                pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
+                        && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1, password);
+            }
+            else
+            {
+                pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
+                        && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1);
+            }
+
+            return pool;
         }
         else
         {
-            pool = new JedisPool(poolConfig, contactNode, Integer.parseInt(defaultPort), txTimeOut != null
-                    && StringUtils.isNumeric(txTimeOut) ? Integer.parseInt(txTimeOut) : -1);
+            Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+            connection.auth(password);
+            connection.connect();
+            return connection;
         }
-
-        return pool;
     }
 
     /*
@@ -157,7 +169,7 @@ public class RedisClientFactory extends GenericClientFactory
     {
         logger.info("on close destroying connection pool");
 
-        if (getConnectionPoolOrConnection() != null)
+        if (getConnectionPoolOrConnection() != null && getConnectionPoolOrConnection() instanceof JedisPool)
         {
             ((JedisPool) getConnectionPoolOrConnection()).destroy();
         }
@@ -172,21 +184,29 @@ public class RedisClientFactory extends GenericClientFactory
     Jedis getConnection()
     {
         logger.info("borrowing connection from pool");
-        Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
-        
-        Map props = RedisPropertyReader.rsmd.getProperties();
-
-        // set external xml properties.
-        if(props != null)
+        Object poolOrConnection = getConnectionPoolOrConnection();
+        if (poolOrConnection instanceof JedisPool)
         {
-//            props.
-            for(Object key : props.keySet())
+
+           Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
+
+            Map props = RedisPropertyReader.rsmd.getProperties();
+
+            // set external xml properties.
+            if (props != null)
             {
-                connection.configSet(key.toString(), props.get(key).toString());
+                // props.
+                for (Object key : props.keySet())
+                {
+                    connection.configSet(key.toString(), props.get(key).toString());
+                }
             }
+            return connection;
         }
-        
-        return connection;
+        else
+        {
+            return (Jedis) poolOrConnection;
+        }
     }
 
     /**
@@ -196,7 +216,11 @@ public class RedisClientFactory extends GenericClientFactory
     void releaseConnection(Jedis res)
     {
         logger.info("releasing connection from pool");
-        ((JedisPool) getConnectionPoolOrConnection()).returnResource(res);
+        Object poolOrConnection = getConnectionPoolOrConnection();
+        if (poolOrConnection instanceof JedisPool)
+        {
+            ((JedisPool) poolOrConnection).returnResource(res);
+        }
     }
 
       IndexManager getIndexManager()
@@ -222,33 +246,33 @@ public class RedisClientFactory extends GenericClientFactory
     private JedisPoolConfig onPoolConfig(final byte WHEN_EXHAUSTED_FAIL, String maxActivePerNode,
             String maxIdlePerNode, String minIdlePerNode, String maxTotal)
     {
-        logger.info("configuring connection pool");
+        if (!StringUtils.isBlank(maxActivePerNode) && StringUtils.isNumeric(maxActivePerNode))
+        {
+            logger.info("configuring connection pool");
 
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
+            JedisPoolConfig poolConfig = new JedisPoolConfig();
 
-        if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
-        {
-            poolConfig.setMaxActive(Integer.valueOf(maxActivePerNode));
+            if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
+            {
+                poolConfig.setMaxActive(Integer.valueOf(maxActivePerNode));
+            }
+
+            if (maxIdlePerNode != null && StringUtils.isNumeric(maxIdlePerNode))
+            {
+                poolConfig.setMaxIdle(Integer.valueOf(maxIdlePerNode));
+            }
+            if (minIdlePerNode != null && StringUtils.isNumeric(minIdlePerNode))
+            {
+                poolConfig.setMinIdle(Integer.parseInt(minIdlePerNode));
+            }
+            if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
+            {
+                poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
+            }
+            return poolConfig;
         }
 
-        if (maxIdlePerNode != null && StringUtils.isNumeric(maxIdlePerNode))
-        {
-            poolConfig.setMaxIdle(Integer.valueOf(maxIdlePerNode));
-        }
-        if (minIdlePerNode != null && StringUtils.isNumeric(minIdlePerNode))
-        {
-            poolConfig.setMinIdle(Integer.parseInt(minIdlePerNode));
-        }
-
-        if (maxTotal != null && StringUtils.isNumeric(maxTotal))
-        {
-            poolConfig.setMaxActive(Integer.parseInt(maxTotal));
-        }
-        if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
-        {
-            poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
-        }
-        return poolConfig;
+        return null;
     }
 
 

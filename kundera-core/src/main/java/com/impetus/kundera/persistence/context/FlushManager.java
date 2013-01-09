@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -554,6 +555,10 @@ public class FlushManager
                 }
             }
         }
+        joinTableDataMap.clear();
+        joinTableDataMap = null;
+        joinTableDataMap = new HashMap<String, JoinTableData>();
+
     }
 
 }

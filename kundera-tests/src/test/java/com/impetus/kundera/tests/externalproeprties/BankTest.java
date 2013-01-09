@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author Kuldeep Mishra
@@ -47,6 +48,7 @@ public class BankTest
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         cli = new HBaseCli();
         if (!cli.isStarted())
         {

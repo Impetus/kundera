@@ -23,12 +23,18 @@ import org.apache.commons.logging.LogFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.ReadableIndex;
 
+import com.impetus.client.neo4j.index.AutoIndexing;
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
@@ -50,6 +56,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     
     private GraphEntityMapper mapper;
     
+    
     Neo4JClient(final Neo4JClientFactory factory)
     {
         this.factory = factory;
@@ -66,12 +73,46 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     @Override
     public Object find(Class entityClass, Object key)
     {
-        return null;
+        
+        GraphDatabaseService graphDb = factory.getConnection();
+        AutoIndexing autoIndexing = new AutoIndexing();
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        String idColumnName = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
+        
+        Object entity = null;
+        
+        if(autoIndexing.isNodeAutoIndexingEnabled(graphDb))
+        {
+            // Get the Node auto index
+            ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+            IndexHits<Node> nodesFound = autoNodeIndex.get(idColumnName, key);
+            if(nodesFound.size() == 0)
+            {
+                return entity;
+            } 
+            else if(nodesFound.size() > 1)
+            {
+                throw new EntityReaderException("Possibly corrupt data in Neo4J. Two nodes with the same ID found");
+            }
+            else
+            {
+                Node node = nodesFound.getSingle();
+                entity = mapper.toEntity(node, m.getRelationNames(), m);                
+            }
+            
+        }
+        else
+        {
+            //TODO: Implement searching within manually created indexes
+        }     
+        
+        return entity;
     }
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
+        
         return null;
     }
 
@@ -124,7 +165,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     @Override
     public EntityReader getReader()
     {
-        return null;
+        return reader;
     }
 
     @Override
@@ -146,8 +187,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
             tx = graphDb.beginTx();
             
             //Top level node                        
-            Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata);      
-            
+            Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata);          
             
             tx.success();
         }
@@ -160,6 +200,6 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
             tx.finish();
         }
         
-    }  
+    } 
 
 }

@@ -46,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.tests.cli.CassandraCli;
 
@@ -68,6 +69,7 @@ public class EmbeddedRDBMSUserTest
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         try
         {
             CassandraCli.cassandraSetUp();
