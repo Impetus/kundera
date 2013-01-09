@@ -210,7 +210,6 @@
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.transaction.timeout" value="30" />
-			<property name="kundera.pool.size.max.active" value="10" />
 		</properties>
 	</persistence-unit>
 
