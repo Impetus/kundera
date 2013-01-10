@@ -144,10 +144,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                     throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
                             + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
 
+                } 
+                
+                if(((KunderaJTAUserTransaction)utx).isTransactionInProgress())
+                {
+                    entityTransaction.begin();
                 }
 
                 this.setFlushMode(FlushModeType.COMMIT);
                 ((KunderaJTAUserTransaction) utx).setImplementor(this);
+                
             }
             catch (NamingException e)
             {
