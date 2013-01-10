@@ -73,8 +73,11 @@ public class KunderaEntityTransaction implements EntityTransaction
     @Override
     public void commit()
     {
-        onTransaction(TxAction.COMMIT);
-        ((EntityManagerImpl) entityManager).getPersistenceDelegator().commit();
+        if (!getRollbackOnly())
+        {
+            onTransaction(TxAction.COMMIT);
+            ((EntityManagerImpl) entityManager).getPersistenceDelegator().commit();
+        }
     }
 
     /*

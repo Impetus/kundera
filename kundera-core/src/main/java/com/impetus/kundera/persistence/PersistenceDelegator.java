@@ -962,6 +962,18 @@ public class PersistenceDelegator
 
                     TransactionResource resource = (TransactionResource) Class.forName(txResource).newInstance();
                     coordinator.addResource(resource, pu);
+                    Client client = clientMap.get(pu);
+                    
+                    if(! (client instanceof TransactionBinder))
+                    {
+                        throw new KunderaTransactionException(
+                                "Client : "
+                                        + client.getClass()
+                                        + " must implement TransactionBinder interface, if {kundera.transaction.resource.class} property provided!");
+                    } else
+                    {
+                        ((TransactionBinder)client).bind(resource);
+                    }
                 }
                 else
                 {

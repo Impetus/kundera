@@ -56,6 +56,9 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.KunderaTransactionException;
+import com.impetus.kundera.persistence.TransactionBinder;
+import com.impetus.kundera.persistence.TransactionResource;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -66,7 +69,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author vivek.mishra
  */
-public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter
+public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter, TransactionBinder
 {
     /**
      * Reference to redis client factory.
@@ -79,6 +82,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
+    
+    private TransactionResource resource;
 
     /** batch size. */
     private int batchSize;
@@ -1232,6 +1237,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         setConfig(properties);
     }
 
+
+    @Override
+    public void bind(TransactionResource resource)
+    {
+        // Not checking for type of TransactionRes
+        if(resource != null && resource.getClass().isAssignableFrom(RedisTransaction.class))
+        {
+            this.resource = resource;        
+        } else
+        {
+            throw new KunderaTransactionException("Invalid transaction resource provided:" + resource + " Should have been an instance of :" + RedisTransaction.class);
+        }
+    }
+    
+    
     /**
      * Returns jedis connection.
      * 
@@ -1240,6 +1260,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private Jedis getConnection()
     {
         Jedis connection = factory.getConnection();
+        
+        // If resource is not null means a transaction in progress.
+        
+        if(resource != null)
+        {
+            ((RedisTransaction) resource).bindResource(connection);
+        }
+        
         if (settings != null)
         {
             for (String key : settings.keySet())
@@ -1380,4 +1408,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 getHashKey(entityMetadata.getTableName(),
                         ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), rowKey);
     }
+
+    
 }
