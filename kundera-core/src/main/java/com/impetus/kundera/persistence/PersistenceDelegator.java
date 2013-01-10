@@ -896,8 +896,8 @@ public class PersistenceDelegator
     {
         if (applyFlush())
         {
-            Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
-            for (JoinTableData jtData : joinTableDataMap.values())
+//            Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableData();
+            for (JoinTableData jtData : flushManager.getJoinTableData())
             {
                 if (!jtData.isProcessed())
                 {
@@ -925,6 +925,7 @@ public class PersistenceDelegator
                         jtData.setProcessed(true);
                     }
                 }
+                
             }
         }
     }

@@ -157,6 +157,8 @@ public class AbstractEntityReader
                         PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
                         
                         //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
+                        
+                        
                         if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
                         {
                             associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);

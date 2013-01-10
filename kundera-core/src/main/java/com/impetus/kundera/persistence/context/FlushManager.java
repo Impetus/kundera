@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +61,7 @@ public class FlushManager
      * Key -> Name of Join Table Value -> records to be persisted in the join
      * table
      */
-    private Map<String, JoinTableData> joinTableDataMap;
+    private List<JoinTableData> joinTableDataCollection = new ArrayList<JoinTableData>();
 
     /** The event log queue. */
     private EventLogQueue eventLogQueue = new EventLogQueue();
@@ -74,7 +75,7 @@ public class FlushManager
     public FlushManager()
     {
         flushStack = new FlushStack();
-        joinTableDataMap = new HashMap<String, JoinTableData>();
+//        joinTableDataMap = new HashMap<String, JoinTableData>();
     }
 
     /**
@@ -208,7 +209,7 @@ public class FlushManager
                                 operation = OPERATION.DELETE;
                             }
 
-                            addJoinTableDataIntoMap(operation, jtmd.getJoinTableSchema(), jtmd.getJoinTableName(),
+                            addJoinTableData(operation, jtmd.getJoinTableSchema(), jtmd.getJoinTableName(),
                                     joinColumnName, inverseJoinColumnName, node.getDataClass(), entityId, childValues);
                         }
                     }
@@ -326,9 +327,9 @@ public class FlushManager
      * 
      * @return the joinTableDataMap
      */
-    public Map<String, JoinTableData> getJoinTableDataMap()
+    public List<JoinTableData> getJoinTableData()
     {
-        return joinTableDataMap;
+        return joinTableDataCollection;
     }
 
     /**
@@ -342,9 +343,9 @@ public class FlushManager
             flushStack.clear();
             // flushStack = null;
         }
-        if (joinTableDataMap != null && !joinTableDataMap.isEmpty())
+        if (joinTableDataCollection != null && !joinTableDataCollection.isEmpty())
         {
-            joinTableDataMap.clear();
+            joinTableDataCollection.clear();
             // joinTableDataMap = null;
         }
 
@@ -494,23 +495,23 @@ public class FlushManager
      * @param invJoinColumnValues
      *            the inv join column values
      */
-    private void addJoinTableDataIntoMap(OPERATION operation, String schemaName, String joinTableName,
+    private void addJoinTableData(OPERATION operation, String schemaName, String joinTableName,
             String joinColumnName, String invJoinColumnName, Class<?> entityClass, Object joinColumnValue,
             Set<Object> invJoinColumnValues)
     {
-        JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
+/*        JoinTableData joinTableData = joinTableDataCollection.get(joinTableName);
         if (joinTableData == null)
         {
-            joinTableData = new JoinTableData(operation, schemaName, joinTableName, joinColumnName, invJoinColumnName,
+*/           JoinTableData joinTableData = new JoinTableData(operation, schemaName, joinTableName, joinColumnName, invJoinColumnName,
                     entityClass);
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
-            joinTableDataMap.put(joinTableName, joinTableData);
-        }
+            joinTableDataCollection.add(joinTableData);
+/*        }
         else
         {
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
         }
-
+*/
     }
 
     /**
@@ -531,8 +532,8 @@ public class FlushManager
     private void rollbackJoinTableData(PersistenceDelegator delegator)
     {
         // on deleting join table data.
-        Map<String, JoinTableData> joinTableDataMap = getJoinTableDataMap();
-        for (JoinTableData jtData : joinTableDataMap.values())
+//        Map<String, JoinTableData> joinTableDataMap = getJoinTableDataMap();
+        for (JoinTableData jtData : joinTableDataCollection)
         {
             if (jtData.isProcessed())
             {
@@ -555,9 +556,9 @@ public class FlushManager
                 }
             }
         }
-        joinTableDataMap.clear();
-        joinTableDataMap = null;
-        joinTableDataMap = new HashMap<String, JoinTableData>();
+        joinTableDataCollection.clear();
+        joinTableDataCollection = null;
+        joinTableDataCollection = new ArrayList<JoinTableData>();
 
     }
 
