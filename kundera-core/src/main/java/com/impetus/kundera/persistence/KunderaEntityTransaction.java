@@ -90,7 +90,7 @@ public class KunderaEntityTransaction implements EntityTransaction
     {
         if (isActive())
         {
-            return rollbackOnly;
+            return rollbackOnly != null ? rollbackOnly : false;
         }
         else
         {
