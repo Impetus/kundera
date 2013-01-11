@@ -1020,7 +1020,7 @@ public class PersistenceDelegator
     }
 
 
-    private boolean defaultTransactionSupported(final String persistenceUnit)
+    public boolean defaultTransactionSupported(final String persistenceUnit)
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
 

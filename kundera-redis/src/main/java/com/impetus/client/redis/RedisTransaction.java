@@ -21,6 +21,7 @@ import java.util.List;
 
 import redis.clients.jedis.BinaryTransaction;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Transaction;
 
 import com.impetus.kundera.persistence.TransactionResource;
 
@@ -32,7 +33,7 @@ import com.impetus.kundera.persistence.TransactionResource;
 public class RedisTransaction implements TransactionResource
 {
 
-      private List<BinaryTransaction>  resources = new ArrayList<BinaryTransaction>();
+      private List<Transaction>  resources = new ArrayList<Transaction>();
       
       private boolean isTransactionInProgress;
     
@@ -64,7 +65,7 @@ public class RedisTransaction implements TransactionResource
         {
             resource.exec();
         }
-
+        isTransactionInProgress = false;
     }
 
     /* (non-Javadoc)
@@ -77,7 +78,11 @@ public class RedisTransaction implements TransactionResource
         {
             resource.discard();
         }
-
+        
+        resources.clear();
+        resources = new ArrayList<Transaction>();
+        isTransactionInProgress = false;
+        
     }
 
     /* (non-Javadoc)
@@ -107,8 +112,17 @@ public class RedisTransaction implements TransactionResource
         return isTransactionInProgress;
     }
 
-    void bindResource(Jedis resource)
+    Transaction bindResource(Jedis resource)
     {
-        resources.add(resource.multi());
+        Transaction tx = null;
+        if(resources.isEmpty())
+        {
+            tx = resource.multi();
+            resources.add(tx);
+        } else
+        {
+            tx = resources.get(0);
+        }
+        return tx;
     }
 }

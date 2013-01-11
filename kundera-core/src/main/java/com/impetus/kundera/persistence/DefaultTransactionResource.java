@@ -73,7 +73,7 @@ public class DefaultTransactionResource implements TransactionResource
     public void onCommit()
     {
         onFlush();
-//        isActive = false;
+        isActive = false;
     }
 
     /* (non-Javadoc)
@@ -100,6 +100,7 @@ public class DefaultTransactionResource implements TransactionResource
             nodes.clear();
             nodes=null;
             nodes = new ArrayList<Node>();
+            isActive = false;
     }
 
     /*

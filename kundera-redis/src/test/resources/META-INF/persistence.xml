@@ -21,6 +21,7 @@
 			<property name="kundera.transaction.timeout" value="30" />
 			<!-- <property name="kundera.pool.size.max.active" value="10" /> -->
 			<property name="kundera.client.property" value="RedisTest.xml" />
+			<property name="kundera.transaction.resource.class" value="com.impetus.client.redis.RedisTransaction" />
 		</properties>
 	</persistence-unit>
 

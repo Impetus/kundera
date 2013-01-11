@@ -448,7 +448,8 @@ public class FlushManager
                     Class clazz = node.getDataClass();
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
                     Client client = delegator.getClient(metadata);
-                    if (node.isProcessed())
+                    
+                    if (node.isProcessed() /*&& delegator.defaultTransactionSupported(metadata.getPersistenceUnit())*/)
                     {
                         if (node.getOriginalNode() == null)
                         {
