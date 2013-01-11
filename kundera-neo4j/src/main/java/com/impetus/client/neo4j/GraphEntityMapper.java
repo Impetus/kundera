@@ -36,18 +36,19 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.UniqueFactory;
 
 import com.impetus.client.neo4j.index.AutoIndexing;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * Responsible for converting Neo4J graph (nodes+relationships) to JPA entities and vice versa 
+ * Responsible for converting Neo4J graph (nodes+relationships) into JPA entities and vice versa 
  * @author amresh.singh
  */
 public class GraphEntityMapper
@@ -67,7 +68,7 @@ public class GraphEntityMapper
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         
-        //Iterate over, entity attributes
+        //Iterate over entity attributes
         Set<Attribute> attributes = entityType.getAttributes();      
         for(Attribute attribute : attributes)
         {       
@@ -98,33 +99,47 @@ public class GraphEntityMapper
                         Class<?> valueClass = mapAttribute.getBindableJavaType();    //Class for adjoining node object
                         Class<?> keyClass = mapAttribute.getKeyJavaType();           //Class for relationship object
                         
+                        DynamicRelationshipType relType  = DynamicRelationshipType.withName(mapKeyJoinColumnAnn.name());
+                        
+                        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(valueClass);
+                        
                         for(Object key : mapObject.keySet())
                         {
-                            //Construct Adjoining Node
-                            Object value = mapObject.get(key);
-                            EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(valueClass);
-                            Node childNode = fromEntity(value, null, graphDb, childMetadata);
                             
-                            //Connect adjoining node through relationships
-                            DynamicRelationshipType relType  = DynamicRelationshipType.withName(mapKeyJoinColumnAnn.name());
-                            Relationship relationship = node.createRelationshipTo(childNode, relType);                            
-                            
-                            //Set relations's own attributes into it
-                            for(Field f : keyClass.getDeclaredFields())
+                            //If child entities are meant for Neo4J, Create "Real" nodes.                            
+                            if(isEntityForNeo4J(childMetadata))
                             {
-                                if(! f.getType().equals(valueClass) && !f.getType().equals(m.getEntityClazz()))
+                                //Construct Adjoining Node
+                                Object value = mapObject.get(key);                            
+                                Node childNode = fromEntity(value, null, graphDb, childMetadata);
+                                
+                                //Connect adjoining node through relationships                            
+                                Relationship relationship = node.createRelationshipTo(childNode, relType);                            
+                                
+                                //Set relations's own attributes into it
+                                for(Field f : keyClass.getDeclaredFields())
                                 {
-                                    String relPropertyName = f.getAnnotation(Column.class) != null 
-                                        ? f.getAnnotation(Column.class).name() : f.getName();                                    
-                                    relationship.setProperty(relPropertyName, PropertyAccessorHelper.getObject(key, f));
+                                    if(! f.getType().equals(valueClass) && !f.getType().equals(m.getEntityClazz()))
+                                    {
+                                        String relPropertyName = f.getAnnotation(Column.class) != null 
+                                            ? f.getAnnotation(Column.class).name() : f.getName();                                    
+                                        relationship.setProperty(relPropertyName, PropertyAccessorHelper.getObject(key, f));
+                                    }
+                                } 
+                                
+                                //TODO: If relationship auto-indexing is disabled, manually index this relationship
+                                if(! autoIndexing.isRelationshipAutoIndexingEnabled(graphDb))
+                                {
+                                    
                                 }
-                            }
-                            
-                            //TODO: If relationship auto-indexing is disabled, manually index this relationship
-                            if(! autoIndexing.isRelationshipAutoIndexingEnabled(graphDb))
-                            {
                                 
                             }
+                            
+                            //Otherwise, create "Proxy" nodes
+                            else
+                            {
+                                //TODO: Write code for create proxy nodes, as part of Polyglot implementation
+                            }             
                             
                         }
                     }                
@@ -234,5 +249,18 @@ public class GraphEntityMapper
         
         return factory.getOrCreate(idFieldName, id);
     }
+    
+    private boolean isEntityForNeo4J(EntityMetadata entityMetadata)
+    {
+        String persistenceUnit = entityMetadata.getPersistenceUnit();
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        String clientFactory = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+        if(clientFactory.indexOf("com.impetus.client.neo4j") > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+    
 
 }
