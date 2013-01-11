@@ -13,44 +13,25 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.persistence.api;
 
-import com.impetus.kundera.graph.Node;
+package com.impetus.kundera.persistence;
 
 /**
- * API to handler batch operations.
+ * TransactionBinder interface. If underlying database provides in-built transaction support, client has to implement this interface and 
+ * bind transaction resource with client.
  * 
  * @author vivek.mishra
- * 
+ *
  */
-public interface Batcher
+public interface TransactionBinder
 {
 
     /**
-     * Adds node to batch collection.
+     * Binds a transaction resource with client instance. Any subsequent CRUD calls will use this transaction resource to mark bind within 
+     * already running transaction boundary. TransactionResource is responsible to bind and provide connection instance with for subsequent
+     * commit/rollback. 
      * 
-     * @param node
-     *            data node.
+     * @param resource transactional resource
      */
-    void addBatch(Node node);
-
-    /**
-     * executes batch.
-     * 
-     * @return returns number of records persisted/update via batch.
-     */
-    int executeBatch();
-
-    /**
-     * Returns batch size
-     * 
-     * @return batch size as integer
-     */
-    int getBatchSize();
-    
-    /**
-     * In case user asked for 
-     */
-    void clear();
-
+    void bind(TransactionResource resource);
 }

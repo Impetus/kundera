@@ -13,44 +13,52 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.persistence.api;
+package com.impetus.kundera.persistence;
 
-import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.KunderaException;
 
 /**
- * API to handler batch operations.
- * 
- * @author vivek.mishra
+ * @author amresh
  * 
  */
-public interface Batcher
+public class KunderaTransactionException extends KunderaException
 {
 
     /**
-     * Adds node to batch collection.
      * 
-     * @param node
-     *            data node.
      */
-    void addBatch(Node node);
+    private static final long serialVersionUID = -7672192031279208722L;
 
     /**
-     * executes batch.
      * 
-     * @return returns number of records persisted/update via batch.
      */
-    int executeBatch();
+    public KunderaTransactionException()
+    {
+    }
 
     /**
-     * Returns batch size
-     * 
-     * @return batch size as integer
+     * @param arg0
      */
-    int getBatchSize();
-    
+    public KunderaTransactionException(String arg0)
+    {
+        super(arg0);
+    }
+
     /**
-     * In case user asked for 
+     * @param arg0
      */
-    void clear();
+    public KunderaTransactionException(Throwable arg0)
+    {
+        super(arg0);
+    }
+
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public KunderaTransactionException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);
+    }
 
 }

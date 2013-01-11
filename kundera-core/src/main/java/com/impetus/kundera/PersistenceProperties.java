@@ -87,4 +87,6 @@ public interface PersistenceProperties
     
     /** Location where datastore file is stored */
     public static final String KUNDERA_DATASTORE_FILE_PATH = "kundera.datastore.file.path";
+
+    public static final String KUNDERA_TRANSACTION_RESOURCE="kundera.transaction.resource.class";
 }

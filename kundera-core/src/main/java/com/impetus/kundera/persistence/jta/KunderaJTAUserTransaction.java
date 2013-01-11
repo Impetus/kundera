@@ -276,4 +276,9 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     {
         return UserTransactionFactory.getReference(this);
     }
+
+    public boolean isTransactionInProgress()
+    {
+        return isTransactionInProgress;
+    }
 }

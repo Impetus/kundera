@@ -623,6 +623,20 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         return batchSize;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
+    @Override
+    public void clear()
+    {
+        if(nodes != null)
+        {
+            nodes.clear();
+            nodes=null;
+            nodes = new ArrayList<Node>();
+        }
+    }
+    
     /*
      * (non-Javadoc)
      * 
