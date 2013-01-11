@@ -50,7 +50,7 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter)
+    public List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter, String... columns)
             throws IOException
     {
         List<HBaseData> results = null;
@@ -71,7 +71,7 @@ public class HBaseReader implements Reader
         {
             scan = new Scan();
         }
-        setScanCriteria(filter, columnFamily, null, scan, null);
+        setScanCriteria(filter, columnFamily, null, scan, columns);
         scanner = hTable.getScanner(scan);
 
         return scanResults(columnFamily, results, scanner);
@@ -85,9 +85,9 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter) throws IOException
+    public List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter, String... columns) throws IOException
     {
-        return LoadData(hTable, null, rowKey, filter);
+        return LoadData(hTable, Bytes.toString(hTable.getTableName()), rowKey, filter, columns);
     }
 
     /*
@@ -103,7 +103,12 @@ public class HBaseReader implements Reader
     {
         List<HBaseData> results = null;
         Scan s = null;
-        if (startRow != null && endRow != null)
+        if (startRow != null && endRow != null && startRow.equals(endRow))
+        {
+            Get g = new Get(startRow);
+            s = new Scan(g);
+        }
+        else if (startRow != null && endRow != null)
         {
             s = new Scan(startRow, endRow);
         }
@@ -140,7 +145,7 @@ public class HBaseReader implements Reader
         }
         if (columnFamily != null)
         {
-//            s.addFamily(Bytes.toBytes(columnFamily));
+            // s.addFamily(Bytes.toBytes(columnFamily));
         }
         if (columnFamily != null && qualifier != null)
         {
@@ -150,7 +155,7 @@ public class HBaseReader implements Reader
         {
             for (String columnName : columns)
             {
-                if (columnName != null)
+                if (columnFamily != null && columnName != null)
                 {
                     s.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName));
                 }

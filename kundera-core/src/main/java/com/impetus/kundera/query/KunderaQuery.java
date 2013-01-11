@@ -65,7 +65,7 @@ public class KunderaQuery
             Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|\\bin\\b|>=|>|<=|<",
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|\\bin\\b|>=|>|<=|<|set",
             Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
@@ -332,6 +332,19 @@ public class KunderaQuery
     {
         initEntityClass();
         initFilter();
+        initUpdateClause();
+    }
+
+    /**
+     * 
+     */
+    private void initUpdateClause()
+    {
+        for (UpdateClause updateClause : updateClauseQueue)
+        {
+            onTypedParameter(updateClause.getValue(), updateClause, updateClause.getProperty().trim());
+        }
+
     }
 
     /**
@@ -342,15 +355,16 @@ public class KunderaQuery
         // String result = getResult();
         // String from = getFrom();
 
-        String fromArray[] = from.split(" ");        
+        String fromArray[] = from.split(" ");
 
-        if (!this.isDeleteUpdate)            
+        if (!this.isDeleteUpdate)
         {
             if (fromArray.length != 2)
             {
-                throw new JPQLParseException("Bad query format: " + from + ". Identification variable is mandatory in FROM clause for SELECT queries");
-            }            
-            
+                throw new JPQLParseException("Bad query format: " + from
+                        + ". Identification variable is mandatory in FROM clause for SELECT queries");
+            }
+
             // TODO
             StringTokenizer tokenizer = new StringTokenizer(getResult()[0], ",");
             while (tokenizer.hasMoreTokens())
@@ -364,7 +378,8 @@ public class KunderaQuery
         }
 
         this.entityName = fromArray[0];
-        if(fromArray.length == 2) this.entityAlias = fromArray[1];
+        if (fromArray.length == 2)
+            this.entityAlias = fromArray[1];
 
         persistenceUnit = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityName);
 
@@ -410,7 +425,7 @@ public class KunderaQuery
         // parse and structure for "between" clause , if present, else it will
         // return original clause
         clauses = parseFilterForBetweenClause(clauses, indexName);
-        //clauses = parseFilterForInClause(clauses, indexName);
+        // clauses = parseFilterForInClause(clauses, indexName);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
@@ -493,6 +508,30 @@ public class KunderaQuery
      * @param filterClause
      *            filter clauses.
      */
+    private void onTypedParameter(Object value, UpdateClause updateClause, String fieldName)
+    {
+        String token = value.toString();
+        if (token != null && token.startsWith(":"))
+        {
+            addTypedParameter(Type.NAMED, token, updateClause);
+            filterJPAParameterInfo(Type.NAMED, token.substring(1), fieldName);
+        }
+        else if (token != null && token.startsWith("?"))
+        {
+            addTypedParameter(Type.INDEXED, token, updateClause);
+            filterJPAParameterInfo(Type.INDEXED, token.substring(1), fieldName);
+        }
+    }
+
+    /**
+     * Depending upon filter value, if it starts with ":" then it is NAMED
+     * parameter, else if starts with "?", it will be INDEXED parameter.
+     * 
+     * @param tokens
+     *            tokens
+     * @param filterClause
+     *            filter clauses.
+     */
     private void onTypedParameter(List<String> tokens, FilterClause filterClause, String fieldName)
     {
         if (tokens.get(2) != null && tokens.get(2).startsWith(":"))
@@ -518,6 +557,33 @@ public class KunderaQuery
      *            filter clause.
      */
     private void addTypedParameter(Type type, String parameter, FilterClause clause)
+    {
+        if (typedParameter == null)
+        {
+            typedParameter = new TypedParameter(type);
+        }
+
+        if (typedParameter.getType().equals(type))
+        {
+            typedParameter.addParameters(parameter, clause);
+        }
+        else
+        {
+            logger.warn("Invalid type provided, it can either be name or indexes!");
+        }
+    }
+
+    /**
+     * Adds typed parameter to {@link TypedParameter}
+     * 
+     * @param type
+     *            type of parameter(e.g. NAMED/INDEXED)
+     * @param parameter
+     *            parameter name.
+     * @param clause
+     *            filter clause.
+     */
+    private void addTypedParameter(Type type, String parameter, UpdateClause clause)
     {
         if (typedParameter == null)
         {
@@ -599,8 +665,16 @@ public class KunderaQuery
             }
             else
             {
-                logger.error("Error while setting parameter by clause:");
-                throw new QueryHandlerException("named parameter:" + name + " not found!");
+                if (typedParameter.getUpdateParameters() != null)
+                {
+                    UpdateClause updateClause = typedParameter.getUpdateParameters().get(name);
+                    updateClause.setValue(value);
+                }
+                else
+                {
+                    logger.error("Error while setting parameter by clause:");
+                    throw new QueryHandlerException("named parameter:" + name + " not found!");
+                }
             }
         }
         else
@@ -740,9 +814,9 @@ public class KunderaQuery
     {
         private String property;
 
-        private String value;
+        private Object value;
 
-        public UpdateClause(final String property, final String value)
+        public UpdateClause(final String property, final Object value)
         {
             this.property = property;
             this.value = value;
@@ -759,7 +833,7 @@ public class KunderaQuery
         /**
          * @return the value
          */
-        public String getValue()
+        public Object getValue()
         {
             return value;
         }
@@ -768,7 +842,7 @@ public class KunderaQuery
          * @param value
          *            the value to set
          */
-        public void setValue(String value)
+        public void setValue(Object value)
         {
             this.value = value;
         }
@@ -978,7 +1052,8 @@ public class KunderaQuery
 
     public void addUpdateClause(final String property, final String value)
     {
-        updateClauseQueue.add(new UpdateClause(property.trim(), value.trim()));
+        UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
+        updateClauseQueue.add(updateClause);
     }
 
     /**
@@ -1031,7 +1106,7 @@ public class KunderaQuery
         }
 
         return tokens;
-    }   
+    }
 
     private class TypedParameter
     {
@@ -1040,6 +1115,8 @@ public class KunderaQuery
         private Set<Parameter<?>> jpaParameters = new HashSet<Parameter<?>>();
 
         private Map<String, FilterClause> parameters;
+
+        private Map<String, UpdateClause> updateParameters;
 
         /**
          * 
@@ -1065,6 +1142,14 @@ public class KunderaQuery
             return parameters;
         }
 
+        /**
+         * @return the parameters
+         */
+        Map<String, UpdateClause> getUpdateParameters()
+        {
+            return updateParameters;
+        }
+
         void addParameters(String key, FilterClause clause)
         {
             if (parameters == null)
@@ -1073,6 +1158,16 @@ public class KunderaQuery
             }
 
             parameters.put(key, clause);
+        }
+
+        void addParameters(String key, UpdateClause clause)
+        {
+            if (updateParameters == null)
+            {
+                updateParameters = new HashMap<String, UpdateClause>();
+            }
+
+            updateParameters.put(key, clause);
         }
 
         void addJPAParameter(Parameter param)

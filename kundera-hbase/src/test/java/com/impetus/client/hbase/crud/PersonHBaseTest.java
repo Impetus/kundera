@@ -80,6 +80,37 @@ public class PersonHBaseTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "3", "personId");
         assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
+        selectIdQuery();
+    }
+
+    private void selectIdQuery()
+    {
+        String query = "select p.personId from PersonHBase p";
+        Query q = em.createQuery(query);
+        List<PersonHBase> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+
+        query = "Select p.personId from PersonHBase p where p.personName = vivek";
+        // // find by name.
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+
+        q = em.createQuery("Select p.personId from PersonHBase p where p.personName = vivek and p.age > " + 10);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
     }
 
     private void init()
@@ -88,8 +119,8 @@ public class PersonHBaseTest extends BaseTest
         {
             cli.startCluster();
         }
-//        cli.createTable("PERSON");
-//        cli.addColumnFamily("PERSON", "PERSON");
+        // cli.createTable("PERSON");
+        // cli.addColumnFamily("PERSON", "PERSON");
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);

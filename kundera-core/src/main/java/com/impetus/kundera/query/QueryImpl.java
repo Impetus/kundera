@@ -542,7 +542,7 @@ public abstract class QueryImpl implements Query
                         //
                         // if (column != null)
                         // {
-                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue());
+                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue().toString());
                         // }
                         persistenceDelegeator.merge(result);
                     }

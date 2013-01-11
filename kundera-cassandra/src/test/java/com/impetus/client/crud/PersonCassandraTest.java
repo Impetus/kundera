@@ -35,6 +35,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -48,8 +49,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.thrift.CQLTranslator;
+import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -139,6 +146,11 @@ public class PersonCassandraTest extends BaseTest
 
         em.clear();
 
+        // select rowid test
+        selectIdQuery();
+
+        em.clear();
+
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("after merge", p.getPersonName());
@@ -152,11 +164,17 @@ public class PersonCassandraTest extends BaseTest
     }
 
     private void testCountResult()
-    {/*
-      * String query = "select count(p.personId) from PersonCassandra"; Query q
-      * = em.createNativeQuery(query, PersonCassandra.class); int noOfRows =
-      * q.executeUpdate(); Assert.assertEquals(3, noOfRows);
-      */
+    {
+        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        CQLTranslator translator = new CQLTranslator();
+        
+        String query = "select count(*) from "  + translator.ensureCase(new StringBuilder(), "PERSON").toString();
+        Query q = em.createNativeQuery(query, PersonCassandra.class);
+        List noOfRows = q.getResultList();
+        Assert.assertEquals(new Long(3), noOfRows.get(0));
+
     }
 
     /**
@@ -165,7 +183,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws Exception
      *             the exception
      */
-    @Test
+     @Test
     public void onMergeCassandra() throws Exception
     {
         // CassandraCli.cassandraSetUp();
@@ -190,7 +208,7 @@ public class PersonCassandraTest extends BaseTest
         assertOnMerge(em, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
     }
 
-    @Test
+     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
         // CassandraCli.cassandraSetUp();
@@ -231,7 +249,7 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
-    @Test
+     @Test
     public void onRefreshCassandra() throws Exception
     {
         // cassandraSetUp();
@@ -302,7 +320,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-    @Test
+     @Test
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
@@ -332,7 +350,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-    @Test
+     @Test
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -363,7 +381,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-    @Test
+     @Test
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -389,7 +407,7 @@ public class PersonCassandraTest extends BaseTest
         }
     }
 
-    @Test
+     @Test
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
@@ -411,6 +429,33 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
 
+    }
+
+    private void selectIdQuery()
+    {/*
+      * String query = "select p.personId from PersonCassandra p"; Query q =
+      * em.createQuery(query); List<PersonCassandra> results =
+      * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * 
+      * query =
+      * "Select p.personId from PersonCassandra p where p.personName = vivek";
+      * // // find by name. q = em.createQuery(query); results =
+      * q.getResultList(); Assert.assertNotNull(results);
+      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * Assert.assertNull(results.get(0).getAge());
+      * 
+      * q = em.createQuery(
+      * "Select p.personId from PersonCassandra p where p.personName = vivek and p.age > "
+      * + 10); results = q.getResultList(); Assert.assertNotNull(results);
+      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(2,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * Assert.assertNull(results.get(0).getAge());
+      */
     }
 
     /**
