@@ -112,7 +112,10 @@ public class RedisClientFactory extends GenericClientFactory
         else
         {
             Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
-            connection.auth(password);
+            if(password != null)
+            {
+                connection.auth(password);
+            }
             connection.connect();
             return connection;
         }
