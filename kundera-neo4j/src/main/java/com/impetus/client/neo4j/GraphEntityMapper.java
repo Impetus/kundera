@@ -69,7 +69,7 @@ public class GraphEntityMapper
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         
         //Iterate over entity attributes
-        Set<Attribute> attributes = entityType.getAttributes();      
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
         for(Attribute attribute : attributes)
         {       
             Field field = (Field) attribute.getJavaMember();
@@ -81,71 +81,7 @@ public class GraphEntityMapper
                 String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
                 Object value = PropertyAccessorHelper.getObject(entity, field);                
                 node.setProperty(columnName, value);                
-            }
-            
-            //If a property refers to other nodes through Map, Construct those nodes and add 
-            //through relationship
-            else if(attribute.isCollection() && attribute.isAssociation())
-            {
-                MapAttribute mapAttribute = entityType.getDeclaredMap(field.getName());                
-                if(mapAttribute != null && mapAttribute.getCollectionType().equals(CollectionType.MAP))
-                {
-                    Field mapField = (Field)mapAttribute.getJavaMember();                    
-                    
-                    MapKeyJoinColumn mapKeyJoinColumnAnn = mapField.getAnnotation(MapKeyJoinColumn.class);
-                    if(mapKeyJoinColumnAnn != null)
-                    {
-                        Map mapObject = (Map)PropertyAccessorHelper.getObject(entity, mapField);
-                        Class<?> valueClass = mapAttribute.getBindableJavaType();    //Class for adjoining node object
-                        Class<?> keyClass = mapAttribute.getKeyJavaType();           //Class for relationship object
-                        
-                        DynamicRelationshipType relType  = DynamicRelationshipType.withName(mapKeyJoinColumnAnn.name());
-                        
-                        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(valueClass);
-                        
-                        for(Object key : mapObject.keySet())
-                        {
-                            
-                            //If child entities are meant for Neo4J, Create "Real" nodes.                            
-                            if(isEntityForNeo4J(childMetadata))
-                            {
-                                //Construct Adjoining Node
-                                Object value = mapObject.get(key);                            
-                                Node childNode = fromEntity(value, null, graphDb, childMetadata);
-                                
-                                //Connect adjoining node through relationships                            
-                                Relationship relationship = node.createRelationshipTo(childNode, relType);                            
-                                
-                                //Set relations's own attributes into it
-                                for(Field f : keyClass.getDeclaredFields())
-                                {
-                                    if(! f.getType().equals(valueClass) && !f.getType().equals(m.getEntityClazz()))
-                                    {
-                                        String relPropertyName = f.getAnnotation(Column.class) != null 
-                                            ? f.getAnnotation(Column.class).name() : f.getName();                                    
-                                        relationship.setProperty(relPropertyName, PropertyAccessorHelper.getObject(key, f));
-                                    }
-                                } 
-                                
-                                //TODO: If relationship auto-indexing is disabled, manually index this relationship
-                                if(! autoIndexing.isRelationshipAutoIndexingEnabled(graphDb))
-                                {
-                                    
-                                }
-                                
-                            }
-                            
-                            //Otherwise, create "Proxy" nodes
-                            else
-                            {
-                                //TODO: Write code for create proxy nodes, as part of Polyglot implementation
-                            }             
-                            
-                        }
-                    }                
-                    
-                }
-            }
+            }           
         }
         
         //TODO: If node auto-indexing is disabled, manually index this node
@@ -183,15 +119,10 @@ public class GraphEntityMapper
                     PropertyAccessorHelper.set(entity, field, node.getProperty(columnName));               
                     
                 }
-                
-                //TODO: Set Relations
-            
+        
             }
             
-            
-            
-            
-            
+
             
         }
         catch (InstantiationException e)
