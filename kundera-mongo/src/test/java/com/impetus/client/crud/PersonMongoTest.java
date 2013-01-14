@@ -100,9 +100,44 @@ public class PersonMongoTest extends BaseTest
         results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
+        
+        selectIdQuery();
 
     }
 
+    private void selectIdQuery()
+    {
+        String query = "select p.personId from PersonMongo p";
+        Query q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+        
+        query = "Select p.personId from PersonMongo p where p.personName = vivek";
+        // // find by name.
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+        
+        q = em.createQuery("Select p.personId from PersonMongo p where p.personName = vivek and p.age > "
+                + 10);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+    }
+    
     /**
      * On typed named query.
      */

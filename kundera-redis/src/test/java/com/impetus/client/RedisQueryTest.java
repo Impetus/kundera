@@ -95,7 +95,7 @@ public class RedisQueryTest
         Query query = em.createQuery(findWithOutWhereClause);
         List<PersonRedis> results = query.getResultList();
         Assert.assertEquals(3, results.size());
-        
+
         // find by key.
         String findById = "Select p from PersonRedis p where p.personId=:personId";
         query = em.createQuery(findById);
@@ -134,18 +134,16 @@ public class RedisQueryTest
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
 
-
         // Between clause over rowkey
         String findIdByBetween = "Select p from PersonRedis p where p.personId between :min AND :max";
         query = em.createQuery(findIdByBetween);
         query.setParameter("min", ROW_KEY);
-        query.setParameter("max", ROW_KEY+1);
+        query.setParameter("max", ROW_KEY + 1);
 
         results = query.getResultList();
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
 
-        
         // Find by greater than and less than clause over non row key
         String findAgeByGTELTEClause = "Select p from PersonRedis p where p.age <=:max AND p.age>=:min";
         query = em.createQuery(findAgeByGTELTEClause);
@@ -155,6 +153,27 @@ public class RedisQueryTest
         results = query.getResultList();
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
+
+        String q = "select p.personId from PersonRedis p";
+        query = em.createQuery(q);
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+
+        // Find id by greater than and less than clause over non row key
+        String findIdByGTELTEClause = "Select p from PersonRedis p where p.age <=:max AND p.age>=:min";
+        query = em.createQuery(findIdByGTELTEClause);
+        query.setParameter("min", 32);
+        query.setParameter("max", 35);
+
+        results = query.getResultList();
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
 
         // Invalid scenario.
         try
@@ -166,17 +185,17 @@ public class RedisQueryTest
             query.getResultList();
             Assert.fail("Must have thrown query handler exception!");
         }
-        
-        
+
         catch (QueryHandlerException qhex)
         {
             Assert.assertNotNull(qhex);
         }
-        
+
         // More than TWO AND clause
         // OR Clause
 
-        // Find without where clause on SELECTIVE COLUMN TODOOOOOOOOOOOOOOOOOOOOOOO.
+        // Find without where clause on SELECTIVE COLUMN
+        // TODOOOOOOOOOOOOOOOOOOOOOOO.
         String findSelective = "Select p.age from PersonRedis p";
         query = em.createQuery(findSelective);
         results = query.getResultList();
@@ -193,18 +212,17 @@ public class RedisQueryTest
         results = query.getResultList();
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
-        boolean isPresent=false;
-        for(PersonRedis r : results)
+        boolean isPresent = false;
+        for (PersonRedis r : results)
         {
-            if(r.getAge().equals(29) && !r.getPersonId().equals(ROW_KEY))
+            if (r.getAge().equals(29) && !r.getPersonId().equals(ROW_KEY))
             {
-                isPresent=true;
+                isPresent = true;
                 break;
             }
         }
-        
-        Assert.assertTrue(isPresent);
 
+        Assert.assertTrue(isPresent);
 
         String findByIdMoreOrAge = "Select p from PersonRedis p where p.personId=:personId OR p.age=:age OR p.personName=:personName";
         query = em.createQuery(findByIdMoreOrAge);
@@ -215,22 +233,22 @@ public class RedisQueryTest
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
-        
+
         // TODOOOO: selective column search
-        
+
         // Delete by query.
-        String deleteQuery="Delete from PersonRedis p";
+        String deleteQuery = "Delete from PersonRedis p";
         query = em.createQuery(deleteQuery);
         int updateCount = query.executeUpdate();
-        
+
         Assert.assertEquals(3, updateCount);
-        
+
         // Search all after delete.
         findWithOutWhereClause = "Select p from PersonRedis p";
         query = em.createQuery(findWithOutWhereClause);
         results = query.getResultList();
         Assert.assertNull(results);
-        
+
     }
 
     /**
@@ -242,13 +260,13 @@ public class RedisQueryTest
         EntityManager em = emf.createEntityManager();
 
         // Delete by query.
-        String deleteQuery="Delete from PersonRedis p";
+        String deleteQuery = "Delete from PersonRedis p";
         Query query = em.createQuery(deleteQuery);
         int updateCount = query.executeUpdate();
-        
+
         em.close();
         emf.close();
-        emf=null;
+        emf = null;
     }
 
 }

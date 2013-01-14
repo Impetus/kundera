@@ -612,11 +612,37 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             results = q.getResultList();
             Assert.assertNull(results);
 
+            updateQueryTest();
         }
         catch (Exception e)
         {
-            Assert.fail("Failure onInsert test, caused by :" + e.getMessage());
+            e.printStackTrace();
+            Assert.fail("Failure onInsert test, caused by :" + e);
         }
+    }
+
+    private void updateQueryTest()
+    {
+        Query q = em.createQuery("update StudentCassandra s set s.studentName = :newName where s.studentName = :oldName");
+        q.setParameter("newName", "NewAmresh");
+        q.setParameter("oldName", "Amresh");
+        q.executeUpdate();
+        
+        em.clear();
+        // // find by id.
+        StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
+        Assert.assertEquals("NewAmresh", s.getStudentName());
+        
+        
+        q = em.createQuery("update StudentCassandra s set s.studentName = :newName where s.studentName = :oldName");
+        q.setParameter("newName", "Amresh");
+        q.setParameter("oldName", "NewAmresh");
+        q.executeUpdate();
+        
+        em.clear();
+        // // find by id.
+        s = em.find(StudentCassandra.class, studentId1);
+        Assert.assertEquals("Amresh", s.getStudentName());
     }
 
     /**

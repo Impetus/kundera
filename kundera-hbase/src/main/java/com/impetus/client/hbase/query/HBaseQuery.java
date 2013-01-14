@@ -156,8 +156,8 @@ public class HBaseQuery extends QueryImpl implements Query
         // Called only in case of standalone entity.
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
-        Map<Boolean, Filter> filter = translator.getFilter();
         String[] columns = getTranslatedColumns(m, getKunderaQuery().getResult());
+        Map<Boolean, Filter> filter = translator.getFilter();
         if (translator.isFindById && (filter == null && columns == null))
         {
             List results = new ArrayList();
@@ -210,7 +210,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m);
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, columns);
                 }
             }
         }
@@ -299,9 +299,9 @@ public class HBaseQuery extends QueryImpl implements Query
         void translate(KunderaQuery query, EntityMetadata m)
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-            boolean isIdColumn = false;
             for (Object obj : query.getFilterClauseQueue())
             {
+                boolean isIdColumn = false;
                 // parse for filter(e.g. where) clause.
 
                 if (obj instanceof FilterClause)
@@ -309,17 +309,12 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
-                    if ((!isIdColumn || isIdColumn) && idColumn.equalsIgnoreCase(name))
+                    if (/*(!isIdColumn) || */idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
                     }
-                    else
-                    {
-                        isIdColumn = false;
-                    }
 
                     onParseFilter(condition, name, value, isIdColumn, m);
-
                 }
                 else
                 {
@@ -375,7 +370,8 @@ public class HBaseQuery extends QueryImpl implements Query
             {
                 // Filter f = new SingleColumnValueFilter(name.getBytes(),
                 // name.getBytes(), operator, valueInBytes);
-                Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator, valueInBytes);
+                Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
+                        valueInBytes);
                 addToFilter(f);
             }
             else

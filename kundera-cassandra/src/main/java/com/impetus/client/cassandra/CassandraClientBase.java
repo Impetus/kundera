@@ -720,7 +720,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     }
                     else
                     {
-                        returnedEntities.add(row);
+                        returnedEntities.add(PropertyAccessorHelper.getObject(Long.class,row.getColumns().get(0).getValue()));
                     }
                 }
             }

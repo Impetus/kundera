@@ -582,8 +582,9 @@ public abstract class CassandraDataHandlerBase
             {
                 if (column != null)
                 {
-                    entity = initialize(tr, m, entity);
-                    onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                    // entity = initialize(tr, m, entity);
+                    entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+
                 }
             }
 
@@ -599,7 +600,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (superColumn != null)
                 {
-                    entity = initialize(tr, m, entity);
+                    entity = initialize(m, entity, tr.getId());
 
                     String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
                     String scNamePrefix = null;
@@ -669,7 +670,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (counterColumn != null)
                 {
-                    entity = initialize(tr, m, entity);
+                    entity = initialize(m, entity, tr.getId());
                     onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
                 }
             }
@@ -678,7 +679,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (counterSuperColumn != null)
                 {
-                    entity = initialize(tr, m, entity);
+                    entity = initialize(m, entity, tr.getId());
                     String scName = PropertyAccessorFactory.STRING
                             .fromBytes(String.class, counterSuperColumn.getName());
                     String scNamePrefix = null;
@@ -752,11 +753,16 @@ public abstract class CassandraDataHandlerBase
             throw new PersistenceException(iaex);
         }
 
+        if (entity != null && tr.getId() != null)
+        {
+            PropertyAccessorHelper.setId(entity, m, tr.getId());
+        }
+
         return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
                 : entity;
     }
 
-    /**
+    /*    *//**
      * Initialize.
      * 
      * @param tr
@@ -771,13 +777,40 @@ public abstract class CassandraDataHandlerBase
      * @throws IllegalAccessException
      *             the illegal access exception
      */
-    private Object initialize(ThriftRow tr, EntityMetadata m, Object entity) throws InstantiationException,
+    /*
+     * private Object initialize(ThriftRow tr, EntityMetadata m, Object entity)
+     * throws InstantiationException, IllegalAccessException { if (entity ==
+     * null) { entity = m.getEntityClazz().newInstance();
+     * PropertyAccessorHelper.setId(entity, m, tr.getId()); }
+     * 
+     * return entity; }
+     */
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param tr
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    private Object initialize(EntityMetadata m, Object entity, Object id) throws InstantiationException,
             IllegalAccessException
     {
         if (entity == null)
         {
             entity = m.getEntityClazz().newInstance();
-            PropertyAccessorHelper.setId(entity, m, tr.getId());
+            if (id != null)
+            {
+                PropertyAccessorHelper.setId(entity, m, id);
+            }
         }
 
         return entity;
@@ -800,13 +833,16 @@ public abstract class CassandraDataHandlerBase
      *            the super column
      * @param embeddedObject
      *            the embedded object
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject)
+            throws InstantiationException, IllegalAccessException
     {
         for (Column column : superColumn.getColumns())
         {
-            onColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
+            embeddedObject = onColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
         }
     }
 
@@ -827,9 +863,12 @@ public abstract class CassandraDataHandlerBase
      *            the super column
      * @param embeddedObject
      *            the embedded object
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject)
+            throws InstantiationException, IllegalAccessException
     {
         for (CounterColumn column : superColumn.getColumns())
         {
@@ -918,16 +957,19 @@ public abstract class CassandraDataHandlerBase
      *            the is wrap req
      * @param relations
      *            the relations
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
-    private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
+    private Object onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+            throws InstantiationException, IllegalAccessException
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
-        populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
+        return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
     }
 
     /**
@@ -947,9 +989,12 @@ public abstract class CassandraDataHandlerBase
      *            the is wrap req
      * @param relations
      *            the relations
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+            throws InstantiationException, IllegalAccessException
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         String thriftColumnValue = new Long(column.getValue()).toString();
@@ -973,9 +1018,12 @@ public abstract class CassandraDataHandlerBase
      *            the thrift column name
      * @param thriftColumnValue
      *            the thrift column value
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
-    private void populateViaThrift(EntityMetadata m, Object entity, EntityType entityType, List<String> relationNames,
-            Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
+    private Object populateViaThrift(EntityMetadata m, Object entity, EntityType entityType,
+            List<String> relationNames, Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
+            throws InstantiationException, IllegalAccessException
     {
         if (relationNames == null || !relationNames.contains(thriftColumnName))
         {
@@ -985,6 +1033,7 @@ public abstract class CassandraDataHandlerBase
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
                 if (attribute != null)
                 {
+                    entity = initialize(m, entity, null);
                     setFieldValue(entity, thriftColumnValue, attribute);
                 }
                 else
@@ -993,6 +1042,7 @@ public abstract class CassandraDataHandlerBase
                             .getMetamodel(m.getPersistenceUnit());
                     if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                     {
+                        entity = initialize(m, entity, null);
                         EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
                         try
                         {
@@ -1057,6 +1107,7 @@ public abstract class CassandraDataHandlerBase
             }
 
         }
+        return entity;
     }
 
     private void setFieldValue(Object entity, Object thriftColumnValue, Attribute attribute)

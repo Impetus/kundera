@@ -73,6 +73,8 @@ public class MongoDBQueryOnIdTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
+        findByIdAndAge();
+        findByIdAndAgeGTAndLT();
         findByIdGTAndAgeGTAndLT();
         findByIdGTEAndAge();
         findByIdLTEAndAge();
@@ -406,7 +408,47 @@ public class MongoDBQueryOnIdTest extends BaseTest
         }
 
     }
+    /**
+     * 
+     */
+    private void findByIdAndAge()
+    {
+        String qry = "Select p.personName, p.age from PersonMongo p where p.personId = 1 and p.age = 10";
+        Query q = em.createQuery(qry);
+        List<PersonMongo> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        for (PersonMongo person : persons)
+        {
+            Assert.assertEquals(new Integer(10), person.getAge());
+            Assert.assertEquals("1", person.getPersonId());
+            Assert.assertEquals("vivek", person.getPersonName());
+            Assert.assertEquals(10, person.getAge().intValue());
+        }
+    }
 
+    /**
+     * 
+     */
+    private void findByIdAndAgeGTAndLT()
+    {
+        String qry = "Select p.personName from PersonMongo p where p.personId = 1 and p.personName = vivek and p.age >=10 and p.age <= 20";
+        Query q = em.createQuery(qry);
+        List<PersonMongo> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        int count = 0;
+        for (PersonMongo person : persons)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertNull(person.getAge());
+                Assert.assertEquals("vivek", person.getPersonName());
+                count++;
+            }
+        }
+        Assert.assertEquals(1, count);
+    }
     private void init()
     {
         Object p1 = prepareMongoInstance("1", 10);

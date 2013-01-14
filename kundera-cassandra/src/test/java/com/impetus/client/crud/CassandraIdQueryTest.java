@@ -92,7 +92,10 @@ public class CassandraIdQueryTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
+        findByIdAndAgeGTAndLT();
         findByIdGTAndAgeGTAndLT();
+        findByIdAndAge();
+        findByIdAndAgeGT();
         findByIdGTEAndAge();
         findByIdLTEAndAge();
     }
@@ -436,6 +439,68 @@ public class CassandraIdQueryTest extends BaseTest
             Assert.assertEquals("1", person.getPersonId());
             Assert.assertEquals("vivek", person.getPersonName());
         }
+    }
+
+    /**
+     * 
+     */
+    private void findByIdAndAge()
+    {
+        String qry = "Select p.personName, p.age from PersonCassandra p where p.personId = 1 and p.age = 10";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        for (PersonCassandra person : persons)
+        {
+            Assert.assertEquals(new Integer(10), person.getAge());
+            Assert.assertEquals("1", person.getPersonId());
+            Assert.assertEquals("vivek", person.getPersonName());
+            Assert.assertEquals(10, person.getAge().intValue());
+            Assert.assertNull(person.getA());
+        }
+    }
+
+    /**
+     * 
+     */
+    private void findByIdAndAgeGT()
+    {
+        String qry = "Select p.personName, p.age from PersonCassandra p where p.personId = 1 and p.age > 5";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        for (PersonCassandra person : persons)
+        {
+            Assert.assertEquals(new Integer(10), person.getAge());
+            Assert.assertEquals("1", person.getPersonId());
+            Assert.assertEquals("vivek", person.getPersonName());
+            Assert.assertEquals(10, person.getAge().intValue());
+            Assert.assertNull(person.getA());
+        }
+    }
+    /**
+     * 
+     */
+    private void findByIdAndAgeGTAndLT()
+    {
+        String qry = "Select p.personName from PersonCassandra p where p.personId = 1 and p.personName = vivek and p.age >=10 and p.age <= 20";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        int count = 0;
+        for (PersonCassandra person : persons)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertNull(person.getAge());
+                Assert.assertEquals("vivek", person.getPersonName());
+                count++;
+            }
+        }
+        Assert.assertEquals(1, count);
     }
 
     /**

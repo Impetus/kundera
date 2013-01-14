@@ -112,8 +112,9 @@ public class KunderaQueryParserTest
         {
             Assert.assertEquals("population", q.getProperty());
             Assert.assertEquals("10", q.getValue());
-        }
-
+        }    
+        
+        
         kunderaQuery = new KunderaQuery();
         // Update with multi valued SET clause.
         String multiValueUpdaeQuery = "UPDATE Country SET population = 10,name=vivek where currency = INR";
@@ -195,8 +196,9 @@ public class KunderaQueryParserTest
         }
         catch (JPQLParseException jpqlpe)
         {
-           
-            Assert.assertTrue(jpqlpe.getMessage().startsWith("You have not given any column name after . ,Column name should not be empty"));
+
+            Assert.assertTrue(jpqlpe.getMessage().startsWith(
+                    "You have not given any column name after . ,Column name should not be empty"));
         }
     }
 

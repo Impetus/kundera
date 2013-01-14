@@ -279,8 +279,7 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
 
-        
-     // query on cpga and digitalSignature.
+        // query on cpga and digitalSignature.
         query = "Select s from StudentHbase s where s.digitalSignature >= ?2 and s.digitalSignature <= ?3 and s.cgpa =?1";
         q = em.createQuery(query);
         q.setParameter(1, (short) 8);
@@ -294,7 +293,6 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         Assert.assertEquals((short) 8, results.get(0).getCgpa());
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-
 
         // query on percentage and height.
         query = "Select s from StudentHbase s where s.percentage >= ?2 and s.percentage <= ?3 and s.height =?1";
@@ -313,7 +311,7 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
 
         // query on percentage and height parameter appended in string.
         query = "Select s from StudentHbase s where s.percentage >= 61.6 and s.percentage <= 69.3 and s.height = 163.76765654";
-        q = em.createQuery(query);           
+        q = em.createQuery(query);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
@@ -322,8 +320,7 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
         Assert.assertEquals(61.6f, results.get(0).getPercentage());
         Assert.assertEquals(163.76765654, results.get(0).getHeight());
-        
-        
+
         // query on cpga and uniqueId.
         query = "Select s from StudentHbase s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
         q = em.createQuery(query);
@@ -410,7 +407,19 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         results = q.getResultList();
         Assert.assertNull(results);
 
+        updateQueryTest();
+
     }
+
+    private void updateQueryTest()
+    {/*
+        Query q = em.createQuery("update StudentHbase s set s.studentName = :oldName where s.studentName = :newName");
+        q.setParameter("newName", "NewAmresh");
+        q.setParameter("oldName", "Amresh");
+        int results = q.executeUpdate();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results);
+    */}
 
     /**
      * On merge.
@@ -489,7 +498,7 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
                 "ROLL_NUMBER".getBytes(), "MONTHLY_FEE".getBytes(), "SQL_DATE".getBytes(), "SQL_TIMESTAMP".getBytes(),
                 "SQL_TIME".getBytes(), "SQL_TIMESTAMP".getBytes(), "SQL_TIME".getBytes(), "BIG_INT".getBytes(),
                 "BIG_DECIMAL".getBytes(), "CALENDAR".getBytes() };
-//        cli.createTable("STUDENT".getBytes(), families);
+        // cli.createTable("STUDENT".getBytes(), families);
         cli.createTable("STUDENT");
         // cli.addColumnFamily("STUDENT", "UNIQUE_ID");
         // cli.addColumnFamily("STUDENT", "STUDENT_NAME");

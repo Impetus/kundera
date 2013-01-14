@@ -45,7 +45,6 @@ import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.client.hbase.query.HBaseQuery;
 import com.impetus.client.hbase.utils.HBaseUtils;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -257,7 +256,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            entity metadata.
      * @return list of entities.
      */
-    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata)
+    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, String... columns)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
@@ -266,10 +265,17 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;
         List results = null;
+
+        if (isFindKeyOnly(metadata, columns))
+        {
+            columns = null;
+            setFilter(new KeyOnlyFilter());
+        }
+
         try
         {
-
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null, relationNames);
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null, relationNames,
+                    columns);
         }
         catch (IOException ioex)
         {
@@ -306,9 +312,14 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         Object enhancedEntity = null;
         List results = null;
 
+        if (isFindKeyOnly(metadata, columns))
+        {
+            columns = null;
+            setFilter(new KeyOnlyFilter());
+        }
+
         try
         {
-
             results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns);
         }
         catch (IOException ioex)
@@ -318,6 +329,41 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         return results;
 
+    }
+
+    /**
+     * @param metadata
+     * @param columns
+     * @return
+     */
+    private boolean isFindKeyOnly(EntityMetadata metadata, String[] columns)
+    {
+        int noOFColumnsToFind = 0;
+        boolean findIdOnly = false;
+        if (columns != null)
+        {
+            for (String column : columns)
+            {
+                if (column != null)
+                {
+                    if (column.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
+                    {
+                        noOFColumnsToFind++;
+                        findIdOnly = true;
+                    }
+                    else
+                    {
+                        noOFColumnsToFind++;
+                        findIdOnly = false;
+                    }
+                }
+            }
+        }
+        if (noOFColumnsToFind == 1 && findIdOnly)
+        {
+            return true;
+        }
+        return false;
     }
 
     /*
@@ -538,8 +584,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         FilterList filterList = new FilterList(f, keyFilter);
         try
         {
-            return handler.scanRowyKeys(filterList, tableName, tableName, columnName + "_"
-                    + columnValue, m.getIdAttribute().getBindableJavaType());
+            return handler.scanRowyKeys(filterList, tableName, tableName, columnName + "_" + columnValue, m
+                    .getIdAttribute().getBindableJavaType());
         }
         catch (IOException e)
         {
