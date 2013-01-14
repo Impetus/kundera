@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,8 +75,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
+        //All client properties currently are those that are specified in neo4j.properties.
+        //No custom property currently defined by Kundera, leaving empty
     }
 
+    /**
+     * Finds an entity from graph database
+     */
     @Override
     public Object find(Class entityClass, Object key)
     {
@@ -143,14 +149,53 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
     {
     }
 
+    /**
+     * Deletes an entity from database
+     */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object key)
     {
+        GraphDatabaseService graphDb = factory.getConnection();
+        
+        Transaction tx = graphDb.beginTx();
+        
+        try 
+        {
+            //Find Node for this particular entity
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+            Node node = searchNode(key, m, graphDb);
+            if(node == null)
+            {
+                log.error("Entity to be deleted doesn't exist in graph. Doing nothing");
+                return;
+            }
+            
+            //Remove this particular node
+            node.delete();
+            
+            //Remove all relationship edges attached to this node (otherwise an exception is thrown)
+            for(Relationship relationship : node.getRelationships())
+            {
+                relationship.delete();
+            }            
+            
+            tx.success();
+        }
+        catch(Exception e)
+        {
+            log.error("Error while removing entity. Details:" + e.getMessage());
+        }
+        finally
+        {
+            tx.finish();
+        } 
+        
     }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
+        throw new PersistenceException("Operation not supported for Neo4J");
     }
 
     @Override
@@ -215,6 +260,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
                     Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
                     Node targetNode = searchNode(targetNodeKey, targetNodeMetadata, graphDb);
                     
+                    
                     if(targetNode != null)
                     {             
                         //Join this node (source node) to target node via relationship
@@ -256,7 +302,6 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             log.error("Error while persisting entity " + entity + ". Details:" + e.getMessage());
         }
         finally
