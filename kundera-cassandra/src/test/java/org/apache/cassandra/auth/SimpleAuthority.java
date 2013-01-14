@@ -56,10 +56,10 @@ public class SimpleAuthority implements IAuthority
     {
         if (resource.size() < 2 || !Resources.ROOT.equals(resource.get(0))
                 || !Resources.KEYSPACES.equals(resource.get(1)))
-            return Permission.NONE;
+            return (EnumSet<Permission>) Permission.NONE;
 
         String keyspace, columnFamily = null;
-        EnumSet<Permission> authorized = Permission.NONE;
+        EnumSet<Permission> authorized = (EnumSet<Permission>) Permission.NONE;
 
         // /cassandra/keyspaces
         if (resource.size() == 2)
@@ -100,7 +100,7 @@ public class SimpleAuthority implements IAuthority
                 String kspAdmins = accessProperties.getProperty(KEYSPACES_WRITE_PROPERTY);
                 for (String admin : kspAdmins.split(","))
                     if (admin.equals(user.username))
-                        return Permission.ALL;
+                        return (EnumSet<Permission>) Permission.ALL;
             }
 
             boolean canRead = false, canWrite = false;
@@ -142,7 +142,7 @@ public class SimpleAuthority implements IAuthority
             }
 
             if (canWrite)
-                authorized = Permission.ALL;
+                authorized = (EnumSet<Permission>) Permission.ALL;
             else if (canRead)
                 authorized = EnumSet.of(Permission.READ);
 

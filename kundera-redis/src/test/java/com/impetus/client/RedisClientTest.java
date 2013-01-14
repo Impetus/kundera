@@ -30,8 +30,14 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.databene.contiperf.report.CSVSummaryReportModule;
+import org.databene.contiperf.report.HtmlReportModule;
+import org.databene.contiperf.report.ReportModule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +71,9 @@ public class RedisClientTest
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClientTest.class);
 
+    @Rule
+    public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
+            new HtmlReportModule() });
     /**
      * @throws java.lang.Exception
      */
@@ -75,6 +84,7 @@ public class RedisClientTest
     }
 
     @Test
+    @PerfTest(invocations = 10)
     public void testCRUD()
     {
         logger.info("On testInsert");

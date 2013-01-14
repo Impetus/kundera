@@ -921,7 +921,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);
         ColumnParent cp = new ColumnParent(m.getTableName());
 
-        if (conditions != null)
+        if (conditions != null && !conditions.isEmpty())
         {
             keyRange.setRow_filter(conditions);
             keyRange.setRow_filterIsSet(true);

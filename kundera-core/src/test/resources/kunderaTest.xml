@@ -123,7 +123,7 @@
 								<property name="COMPRESSION" value="GZ" />
 								<property name="COMPRESSION_COMPACT" value="GZ" />
 							</properties>
-						</table>					
+						</table>
 					</tables>
 				</schema>
 				<schema>

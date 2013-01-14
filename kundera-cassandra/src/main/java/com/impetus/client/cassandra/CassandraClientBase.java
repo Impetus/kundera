@@ -681,6 +681,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
+            log.info("executing query " + cqlQuery);
             result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
@@ -720,7 +721,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     }
                     else
                     {
-                        returnedEntities.add(PropertyAccessorHelper.getObject(Long.class,row.getColumns().get(0).getValue()));
+                        returnedEntities.add(row.getColumns().get(0));
                     }
                 }
             }
@@ -1211,19 +1212,21 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return batchSize;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#clear()
      */
     public void clear()
     {
-        if(nodes != null)
+        if (nodes != null)
         {
             nodes.clear();
-            nodes=null;
+            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * 
