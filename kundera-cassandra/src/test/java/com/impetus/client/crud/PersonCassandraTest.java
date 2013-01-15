@@ -169,11 +169,14 @@ public class PersonCassandraTest extends BaseTest
         ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         CQLTranslator translator = new CQLTranslator();
-        
-        String query = "select count(*) from "  + translator.ensureCase(new StringBuilder(), "PERSON").toString();
+
+        String query = "select count(*) from " + translator.ensureCase(new StringBuilder(), "PERSON").toString();
         Query q = em.createNativeQuery(query, PersonCassandra.class);
         List noOfRows = q.getResultList();
-        Assert.assertEquals(new Long(3), noOfRows.get(0));
+        Assert.assertEquals(new Long(3),
+                PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+        Assert.assertEquals("count",
+                PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
 
     }
 
@@ -183,7 +186,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws Exception
      *             the exception
      */
-     @Test
+    @Test
     public void onMergeCassandra() throws Exception
     {
         // CassandraCli.cassandraSetUp();
@@ -208,7 +211,7 @@ public class PersonCassandraTest extends BaseTest
         assertOnMerge(em, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
     }
 
-     @Test
+    @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
         // CassandraCli.cassandraSetUp();
@@ -249,7 +252,7 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
-     @Test
+    @Test
     public void onRefreshCassandra() throws Exception
     {
         // cassandraSetUp();
@@ -320,7 +323,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-     @Test
+    @Test
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
@@ -350,7 +353,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-     @Test
+    @Test
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -381,7 +384,7 @@ public class PersonCassandraTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-     @Test
+    @Test
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -407,7 +410,7 @@ public class PersonCassandraTest extends BaseTest
         }
     }
 
-     @Test
+    @Test
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {

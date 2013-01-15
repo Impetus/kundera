@@ -34,6 +34,14 @@
 			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- contiperf dependency should not be here -->
+
+		<dependency>
+			<groupId>org.databene</groupId>
+			<artifactId>contiperf</artifactId>
+			<version>2.2.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

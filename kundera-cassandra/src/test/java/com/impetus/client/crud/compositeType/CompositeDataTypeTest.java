@@ -418,7 +418,7 @@ public class CompositeDataTypeTest
      * create column family script for compound key.
      */
     private void loadData()
-    {
+    {/*
         CassandraCli.createKeySpace("CompositeCassandra");
         String cql_Query = "create columnfamily \"CompositeUserDataType\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
                 + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
@@ -436,7 +436,7 @@ public class CompositeDataTypeTest
         }
         CassandraCli.executeCqlQuery(cql_Query);
 
-    }
+    */}
 
     /**
      * Prepare data.

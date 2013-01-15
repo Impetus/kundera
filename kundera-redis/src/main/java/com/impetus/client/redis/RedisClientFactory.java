@@ -76,11 +76,14 @@ public class RedisClientFactory extends GenericClientFactory
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
-        
+
         Properties props = puMetadata.getProperties();
-        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost():(String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ?RedisPropertyReader.rsmd.getPort() : (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String password = RedisPropertyReader.rsmd.getPassword() != null? RedisPropertyReader.rsmd.getPassword() : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
         String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
@@ -112,7 +115,8 @@ public class RedisClientFactory extends GenericClientFactory
         else
         {
             Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
-            if(password != null)
+
+            if (password != null)
             {
                 connection.auth(password);
             }
@@ -148,9 +152,9 @@ public class RedisClientFactory extends GenericClientFactory
 
     Map<String, Object> getOverridenProperties()
     {
-        return this.externalProperties; 
+        return this.externalProperties;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -158,7 +162,7 @@ public class RedisClientFactory extends GenericClientFactory
      */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
-     {
+    {
         return null;
     }
 
@@ -178,7 +182,7 @@ public class RedisClientFactory extends GenericClientFactory
         }
 
     }
-    
+
     /**
      * Retrieving connection from connection pool.
      * 
@@ -191,7 +195,7 @@ public class RedisClientFactory extends GenericClientFactory
         if (poolOrConnection instanceof JedisPool)
         {
 
-           Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
+            Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
 
             Map props = RedisPropertyReader.rsmd.getProperties();
 
@@ -214,7 +218,9 @@ public class RedisClientFactory extends GenericClientFactory
 
     /**
      * Release/return connection to pool.
-     * @param res  jedis resource
+     * 
+     * @param res
+     *            jedis resource
      */
     void releaseConnection(Jedis res)
     {
@@ -226,11 +232,11 @@ public class RedisClientFactory extends GenericClientFactory
         }
     }
 
-      IndexManager getIndexManager()
-      {
-          return indexManager;
-      }
-    
+    IndexManager getIndexManager()
+    {
+        return indexManager;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -239,7 +245,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        
+
         return false;
     }
 
@@ -278,7 +284,6 @@ public class RedisClientFactory extends GenericClientFactory
         return null;
     }
 
-
     /**
      * 
      */
@@ -290,5 +295,5 @@ public class RedisClientFactory extends GenericClientFactory
             propertyReader.read(getPersistenceUnit());
         }
     }
-    
+
 }

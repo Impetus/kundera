@@ -465,7 +465,7 @@
 				<version>2.5</version>
 				<configuration>
 					<forkMode>once</forkMode>
-					<argLine>-Xms512m -Xmx1024m</argLine>
+					<argLine>-Xms256m -Xmx512m</argLine>
 				</configuration>
 				<dependencies>
 					<dependency>

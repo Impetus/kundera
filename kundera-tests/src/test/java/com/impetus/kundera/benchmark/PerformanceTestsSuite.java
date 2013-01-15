@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.impetus.client.RedisClientTest;
 import com.impetus.client.gis.MongoGISTest;
 
 /**
@@ -41,7 +42,7 @@ import com.impetus.client.gis.MongoGISTest;
  * @author Kuldeep Mishra
  * 
  */
-@SuiteClasses({ MongoGISTest.class })
+@SuiteClasses({ MongoGISTest.class, RedisClientTest.class })
 @PerfTest(threads = 1, invocations = 2)
 @RunWith(ContiPerfSuiteRunner.class)
 public class PerformanceTestsSuite

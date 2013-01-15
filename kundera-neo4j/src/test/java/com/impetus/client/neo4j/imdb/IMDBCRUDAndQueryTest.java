@@ -59,8 +59,8 @@ public class IMDBCRUDAndQueryTest
     @Test
     public void testCRUD()
     {
-        //insert();
-        findById();
+        insert();
+        //findById();
         
     }
     

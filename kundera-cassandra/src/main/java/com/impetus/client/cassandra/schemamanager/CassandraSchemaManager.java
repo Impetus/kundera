@@ -41,6 +41,7 @@ import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -244,25 +245,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + irex.getMessage());
+            log.error("Error occurred while creating " + databaseName + " Caused by :", irex);
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, irex, "Cassandra",
                     databaseName);
         }
         catch (TException tex)
         {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + tex.getMessage());
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + tex);
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, tex, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException sdex)
         {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + sdex.getMessage());
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + sdex);
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, sdex, "Cassandra",
                     databaseName);
         }
         catch (InterruptedException ie)
         {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + ie.getMessage());
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + ie);
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, ie, "Cassandra",
                     databaseName);
         }
@@ -287,19 +288,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while updating " + databaseName + " Caused by :" + e.getMessage());
+            log.error("Error occurred while updating " + databaseName + " Caused by :" + e);
             throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while updating " + databaseName + e.getMessage());
+            log.error("Error occurred while updating " + databaseName + e);
             throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error occurred while updating " + databaseName + e.getMessage());
+            log.error("Error occurred while updating " + databaseName + e);
             throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
                     databaseName);
         }
@@ -320,19 +321,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
@@ -507,6 +508,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
 
         cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
+        cassandra_client.set_keyspace(databaseName);
         try
         {
             cassandra_client.execute_cql_query(
