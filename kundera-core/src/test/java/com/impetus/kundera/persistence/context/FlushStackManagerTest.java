@@ -17,6 +17,7 @@ package com.impetus.kundera.persistence.context;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,7 @@ public class FlushStackManagerTest
         markAllNodeAsDirty();
         flushManager.buildFlushStack(headNode, EventType.INSERT);
 
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(4, fs.size());
     }
 
@@ -157,7 +158,7 @@ public class FlushStackManagerTest
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
 
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
     }
 
@@ -185,7 +186,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
     }
 
@@ -219,7 +220,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
         flushManager.clearFlushStack();
         flushManager = new FlushManager();
@@ -266,7 +267,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(7, fs.size());
     }
 
@@ -300,7 +301,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(6, fs.size());
     }
 
@@ -339,7 +340,7 @@ public class FlushStackManagerTest
         markAllNodeAsDirty();
 
         flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
         flushManager.clearFlushStack();
 
@@ -398,7 +399,7 @@ public class FlushStackManagerTest
         markAllNodeAsDirty();
 
         flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
         flushManager.clearFlushStack();
 
@@ -454,7 +455,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
-        FlushStack fs = flushManager.getFlushStack();
+        Deque<Node> fs = flushManager.getFlushStack();
         Assert.assertEquals(6, fs.size());
         flushManager.clearFlushStack();
 

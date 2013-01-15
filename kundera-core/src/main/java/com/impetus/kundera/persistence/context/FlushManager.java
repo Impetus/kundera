@@ -15,8 +15,10 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,8 +56,10 @@ public class FlushManager
      * Stack containing Nodes to be flushed Entities are always flushed from the
      * top, there way to bottom until stack is empty.
      */
-    private FlushStack flushStack;
+//    private FlushStack flushStack;
 
+    Deque<Node> stackQueue ;
+    
     /**
      * Map containing data required for inserting records for each join table.
      * Key -> Name of Join Table Value -> records to be persisted in the join
@@ -74,7 +78,8 @@ public class FlushManager
      */
     public FlushManager()
     {
-        flushStack = new FlushStack();
+//        flushStack = new FlushStack();
+        stackQueue = new ArrayDeque<Node>();
 //        joinTableDataMap = new HashMap<String, JoinTableData>();
     }
 
@@ -230,7 +235,8 @@ public class FlushManager
                 {
                     // Push this node to stack
                     node.setTraversed(true);
-                    flushStack.push(node);
+//                    flushStack.push(node);
+                    stackQueue.push(node);
                     logEvent(node, eventType);
 
                     // Process child node Graph recursively
@@ -248,7 +254,8 @@ public class FlushManager
                 {
                     // Push this node to stack
                     node.setTraversed(true);
-                    flushStack.push(node);
+//                    flushStack.push(node);
+                    stackQueue.push(node);
                     logEvent(node, eventType);
                 }
 
@@ -282,8 +289,9 @@ public class FlushManager
                 else if (!childNode.isDirty())
                 {
                     childNode.setTraversed(true);
-                    flushStack.push(childNode);
-                    logEvent(childNode, eventType);
+//                    flushStack.push(childNode);
+                    stackQueue.push(node);
+                  logEvent(childNode, eventType);
                 }
             }
         }
@@ -295,33 +303,39 @@ public class FlushManager
         if (!node.isTraversed() && node.isDirty())
         {
             node.setTraversed(true);
-            flushStack.push(node);
-            logEvent(node, eventType);
+//           flushStack.push(node);
+           stackQueue.push(node);
+          logEvent(node, eventType);
         }
 
     }
 
-    /**
+/*    *//**
      * Gets the flush stack.
      * 
      * @return the flushStack
-     */
+     *//*
     public FlushStack getFlushStack()
     {
         return flushStack;
     }
-
-    /**
+*/
+    public Deque<Node> getFlushStack()
+    {
+        return stackQueue;
+    }
+    
+/*    *//**
      * Sets the flush stack.
      * 
      * @param flushStack
      *            the flushStack to set
-     */
+     *//*
     public void setFlushStack(FlushStack flushStack)
     {
         this.flushStack = flushStack;
     }
-
+*/
     /**
      * Gets the join table data map.
      * 
@@ -338,21 +352,30 @@ public class FlushManager
      */
     public void clearFlushStack()
     {
-        if (flushStack != null && !flushStack.isEmpty())
+        if(stackQueue != null && !stackQueue.isEmpty())
+        {
+            stackQueue.clear();
+            stackQueue=null;
+            stackQueue = new ArrayDeque<Node>();
+        }
+        /*if (flushStack != null)
         {
             flushStack.clear();
-            // flushStack = null;
-        }
+             flushStack = null;
+             flushStack = new FlushStack();
+        }*/
         if (joinTableDataCollection != null && !joinTableDataCollection.isEmpty())
         {
             joinTableDataCollection.clear();
-            // joinTableDataMap = null;
+            joinTableDataCollection = null;
+            joinTableDataCollection = new ArrayList<JoinTableData>();
         }
 
         if (eventLogQueue != null)
         {
             eventLogQueue.clear();
-            // eventLogQueue = null;
+             eventLogQueue = null;
+             eventLogQueue = new EventLogQueue();
         }
     }
 

@@ -15,11 +15,16 @@
  */
 package com.impetus.kundera.cache.ehcache;
 
+import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
  * <Prove description of functionality provided by this Type>
@@ -49,7 +54,116 @@ public class CoreTestClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return null;
+        return new  Client()
+        {
+
+            @Override
+            public Object find(Class entityClass, Object key)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public List findAll(Class entityClass, Object... keys)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public List find(Class entityClass, Map embeddedColumnMap)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void close()
+            {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void delete(Object entity, Object pKey)
+            {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public String getPersistenceUnit()
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public IndexManager getIndexManager()
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void persist(Node node)
+            {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void persistJoinTable(JoinTableData joinTableData)
+            {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public List getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
+                    Object pKeyColumnValue)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
+                    Object columnValue, Class entityClazz)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+            {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public List findByRelation(String colName, Object colValue, Class entityClazz)
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public EntityReader getReader()
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public Class getQueryImplementor()
+            {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
     }
 
     @Override

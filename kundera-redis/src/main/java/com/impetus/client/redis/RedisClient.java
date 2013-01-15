@@ -120,12 +120,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
         Object connection = getConnection();
         // Create a hashset and populate data into it
-        
-        Pipeline pipeLine = null;
-        if(resource == null)
-        {
-            pipeLine = ((Jedis) connection).pipelined();
-        }
+//        
+//        Pipeline pipeLine = null;
+//        if(resource == null)
+//        {
+//            pipeLine = ((Jedis) connection).pipelined();
+//        }
 
         try
         {
@@ -135,10 +135,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         finally
         {
             //
-            if(pipeLine != null)
-            {
-                pipeLine.sync(); // send I/O.. as persist call. so no need to read
-            }                // response?
+//            if(pipeLine != null)
+//            {
+//                pipeLine.sync(); // send I/O.. as persist call. so no need to read
+//            }                // response?
             
             onCleanup(connection);
         }
@@ -1610,7 +1610,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         } else
         {
             ((Jedis) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-            
             
             ((Jedis) connection).zadd(
                     getHashKey(entityMetadata.getTableName(),

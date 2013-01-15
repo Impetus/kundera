@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.junit.Test;
+
 import junit.framework.TestCase;
 
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
@@ -589,5 +591,21 @@ public class DeepEqualsTest extends TestCase
         assertFalse(DeepEquals.deepEquals(a1, a2));
         c24.setPhotoCaption(originalPhotoCaption);
 
+    }
+
+
+    @Test
+    public void testPerf()
+    {
+        Pet p1 = null;
+        long t1 = System.currentTimeMillis();
+        
+        for(int i = 0 ; i < 1000000 ;i++)
+        {
+            p1 = new Pet("Eddie"+i, "Terrier");
+            ObjectUtils.deepCopy(p1);
+        }
+        long t2 = System.currentTimeMillis(); 
+        System.out.println(t2 -t1);
     }
 }

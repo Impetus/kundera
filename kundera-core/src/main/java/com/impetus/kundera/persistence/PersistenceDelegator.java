@@ -16,8 +16,10 @@
 
 package com.impetus.kundera.persistence;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -159,11 +161,13 @@ public class PersistenceDelegator
 
         lock.writeLock().lock();
 
-        node.persist();
+        //if(node.getChildren() != null)
+        //{
+            node.persist();
+        //}
         if (node.isHeadNode())
         {
             // build flush stack.
-
             flushManager.buildFlushStack(node, com.impetus.kundera.persistence.context.EventLog.EventType.INSERT);
 
 
@@ -173,7 +177,7 @@ public class PersistenceDelegator
             getPersistenceCache().getMainCache().addHeadNode(node);
         }
         lock.writeLock().unlock();
-        graph.getNodeMapping().clear();
+        graph.clear();
         graph = null;
 
         // Invoke Post Persist Events
@@ -380,7 +384,8 @@ public class PersistenceDelegator
         // Get flush stack from Flush Manager
 //        if (applyFlush())
 //        {
-            FlushStack fs = flushManager.getFlushStack();
+//            FlushStack fs = flushManager.getFlushStack();
+            Deque<Node> fs = flushManager.getFlushStack();
 
             // Flush each node in flush stack from top to bottom unit it's empty
             log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n"

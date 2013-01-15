@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.Deque;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +32,7 @@ import com.impetus.kundera.graph.Node;
 public class FlushStackTest
 {
 
-    FlushStack fs;
+    Deque<Node> fs;
 
     FlushManager flushManager;
 
