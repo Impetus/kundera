@@ -281,7 +281,6 @@ public class PropertyAccessorHelper
     {
         try
         {
-
             Field idField = (Field) metadata.getIdAttribute().getJavaMember();
             set(entity, idField, rowKey);
         }

@@ -113,9 +113,8 @@ public class CRUDResourceTest extends JerseyTest
     private final static boolean USE_EMBEDDED_SERVER = true;
 
     private final static boolean AUTO_MANAGE_SCHEMA = true;
-    
+
     WebResource webResource = resource();
-    
 
     public CRUDResourceTest() throws Exception
     {
@@ -133,24 +132,24 @@ public class CRUDResourceTest extends JerseyTest
         if (AUTO_MANAGE_SCHEMA)
         {
             loadData();
-        }           
+        }
 
-        // Initialize REST Client        
-        restClient = new RESTClientImpl();        
+        // Initialize REST Client
+        restClient = new RESTClientImpl();
 
     }
 
     @Before
     public void setup() throws Exception
-    {       
-        
+    {
+
         restClient.initialize(webResource, mediaType);
     }
 
     @After
     public void tearDown() throws Exception
     {
-        super.tearDown();          
+        super.tearDown();
     }
 
     @AfterClass
@@ -172,7 +171,7 @@ public class CRUDResourceTest extends JerseyTest
     @Test
     @PerfTest(invocations = 10)
     public void testCRUD()
-    {        
+    {
 
         if (MediaType.APPLICATION_XML.equals(mediaType))
         {
@@ -270,7 +269,7 @@ public class CRUDResourceTest extends JerseyTest
 
         /** Native Query - Select */
         // Get All books
-        String nativeQuery = "Select * from BOOK";
+        String nativeQuery = "Select * from " + "\"BOOK\"";
         String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery,
                 new HashMap<String, Object>());
         log.debug("Native Query Select Result:" + nativeQueryResult);
@@ -297,8 +296,8 @@ public class CRUDResourceTest extends JerseyTest
 
         // Close Application
         restClient.closeApplication(applicationToken);
-        
-        if(AUTO_MANAGE_SCHEMA)
+
+        if (AUTO_MANAGE_SCHEMA)
         {
             truncateColumnFamily();
         }
@@ -398,8 +397,8 @@ public class CRUDResourceTest extends JerseyTest
 
         // Close Application
         restClient.closeApplication(applicationToken);
-        
-        if(AUTO_MANAGE_SCHEMA)
+
+        if (AUTO_MANAGE_SCHEMA)
         {
             truncateColumnFamily();
         }
@@ -505,7 +504,7 @@ public class CRUDResourceTest extends JerseyTest
 
         CassandraCli.client.set_keyspace(_KEYSPACE);
     }
-    
+
     private void truncateColumnFamily()
     {
         String[] columnFamily = new String[] { "BOOK", "PERSONNEL", "ADDRESS" };

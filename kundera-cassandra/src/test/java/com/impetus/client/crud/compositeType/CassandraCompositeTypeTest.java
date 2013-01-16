@@ -80,7 +80,8 @@ public class CassandraCompositeTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-//        loadData();
+        CassandraCli.dropKeySpace("CompositeCassandra");
+        // loadData();
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 

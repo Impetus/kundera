@@ -499,4 +499,12 @@ public final class CQLTranslator
             return mapper.get(propertyName);
         }
     }
+
+    /**
+     * @param builder
+     */
+    public void buildFilteringClause(StringBuilder builder)
+    {
+        builder.append(" ALLOW FILTERING");
+    }
 }

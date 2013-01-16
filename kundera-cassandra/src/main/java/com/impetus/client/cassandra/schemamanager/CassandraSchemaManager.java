@@ -511,8 +511,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(databaseName);
         try
         {
-            cassandra_client.execute_cql_query(
-                    ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE);
+            cassandra_client.execute_cql3_query(
+                    ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
         catch (UnsupportedEncodingException e)
         {

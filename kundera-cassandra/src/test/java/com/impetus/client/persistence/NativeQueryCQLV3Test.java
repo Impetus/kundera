@@ -29,6 +29,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,17 +70,18 @@ public class NativeQueryCQLV3Test
     {
         CassandraCli.cassandraSetUp();
         // CassandraCli.initClient();
-         CassandraCli.dropKeySpace(schema);
+//         CassandraCli.dropKeySpace(schema);
         // CassandraCli.createKeySpace(schema);
         String nativeSql = "CREATE KEYSPACE " + schema
-                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+                + " with replication = {'class':'SimpleStrategy', 'replication_factor':1}";
+//        strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1"
         CassandraCli.executeCqlQuery(nativeSql);
     }
 
     /**
      * Test create insert column family query.
      */
-    @Test
+//    @Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
@@ -217,7 +219,7 @@ public class NativeQueryCQLV3Test
         String useNativeSql = "USE " + schema;
         EntityManagerFactory emf = getEntityManagerFactory();
         String createColumnFamily = "CREATE TABLE CassandraBatchEntity ( user_name varchar PRIMARY KEY, password varchar, name varchar)";
-        String batchOps = "BEGIN BATCH USING CONSISTENCY QUORUM  INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user2', 'ch@ngem3b', 'second user') UPDATE CassandraBatchEntity SET password = 'ps22dhds' WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password) VALUES ('user3', 'ch@ngem3c') DELETE name FROM CassandraBatchEntity WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user4', 'ch@ngem3c', 'Andrew') APPLY BATCH";
+        String batchOps = "BEGIN BATCH INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user2', 'ch@ngem3b', 'second user') UPDATE CassandraBatchEntity SET password = 'ps22dhds' WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password) VALUES ('user3', 'ch@ngem3c') DELETE name FROM CassandraBatchEntity WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user4', 'ch@ngem3c', 'Andrew') APPLY BATCH";
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -230,10 +232,12 @@ public class NativeQueryCQLV3Test
         // q.getResultList();
         q.executeUpdate();
 
+        pc.setConsistencyLevel(ConsistencyLevel.QUORUM);
         q = em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class);
         // q.getResultList();
         q.executeUpdate();
 
+        pc.setConsistencyLevel(ConsistencyLevel.QUORUM);
         q = em.createNativeQuery(batchOps, CassandraBatchEntity.class);
         // q.getResultList();
         q.executeUpdate();
@@ -249,7 +253,7 @@ public class NativeQueryCQLV3Test
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
         createColumnFamily = "create table test2 (key text primary key, count int)";
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
-        batchOps = "BEGIN BATCH USING CONSISTENCY QUORUM INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
+        batchOps = "BEGIN BATCH INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
         em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
 
     }

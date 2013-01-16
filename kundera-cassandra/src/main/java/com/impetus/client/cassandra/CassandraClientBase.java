@@ -107,7 +107,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
 
     /** The cql version. */
-    private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
+    private String cqlVersion = CassandraConstants.CQL_VERSION_3_0;
 
     /** The consistency level. */
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
@@ -135,7 +135,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         this.externalProperties = externalProperties;
         setBatchSize(persistenceUnit, this.externalProperties);
         cqlVersion = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
-                : CassandraConstants.CQL_VERSION_2_0;
+                : CassandraConstants.CQL_VERSION_3_0;
     }
 
     /**
@@ -682,8 +682,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     entityMetadata.getPersistenceUnit());
 
             log.info("executing query " + cqlQuery);
-            result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-                    org.apache.cassandra.thrift.Compression.NONE);
+
+            if (getCqlVersion().equals(CassandraConstants.CQL_VERSION_2_0)
+                    && !metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE);
+            }
+            else
+            {
+                result = conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+            }
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
             {
                 returnedEntities = new ArrayList<Object>(result.getRowsSize());
@@ -695,8 +705,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                     if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
                     {
-                        rowKey = PropertyAccessorHelper.getObject(
-                                entityMetadata.getIdAttribute().getBindableJavaType(), row.getKey());
+                        // rowKey = PropertyAccessorHelper.getObject(
+                        // entityMetadata.getIdAttribute().getBindableJavaType(),
+                        // row.getKey());
                     }
                     // String rowKeys = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
@@ -897,8 +908,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translation.get(TranslationType.VALUE));
         insert_Query = StringUtils
                 .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
-        cassandra_client.execute_cql_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
-                Compression.NONE);
+        cassandra_client.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
+                Compression.NONE, consistencyLevel);
     }
 
     /**
@@ -1424,7 +1435,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         // Create Mutation Map
         Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
         columnFamilyValues.put(columnFamily, insertion_list);
-        Bytes b = CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass());
+        Bytes b = CassandraUtilities.toBytes(tf.getId(), entityMetadata.getIdAttribute().getBindableJavaType());
         mutationMap.put(b.getBytes(), columnFamilyValues);
 
         return mutationMap;

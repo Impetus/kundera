@@ -96,7 +96,7 @@ public class NativeQueryTest
         // String nativeSql = "CREATE KEYSPACE " + schema
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -124,7 +124,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -152,7 +152,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -205,7 +205,7 @@ public class NativeQueryTest
         q.getResultList();
 
         // select all
-        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970";
+        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970 ALLOW FILTERING";
         q = em.createNativeQuery(selectAll, CassandraEntitySample.class);
         results = q.getResultList();
         Assert.assertNotNull(results);

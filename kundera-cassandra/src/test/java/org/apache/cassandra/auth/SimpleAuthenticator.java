@@ -41,10 +41,12 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.AuthenticationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
+import org.apache.cassandra.exceptions.InvalidRequestException;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.Hex;
 
@@ -69,8 +71,7 @@ public class SimpleAuthenticator implements IAuthenticator
         return null;
     }
 
-    public AuthenticatedUser authenticate(Map<? extends CharSequence, ? extends CharSequence> credentials)
-            throws AuthenticationException
+    public AuthenticatedUser authenticate(Map<String, String> credentials) throws AuthenticationException
     {
         String pmode_plain = System.getProperty(PMODE_PROPERTY);
         PasswordMode mode = PasswordMode.PLAIN;
@@ -172,5 +173,85 @@ public class SimpleAuthenticator implements IAuthenticator
     static String authenticationErrorMessage(PasswordMode mode, String username)
     {
         return String.format("Given password in password mode %s could not be validated for user %s", mode, username);
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#alter(java.lang.String, java.util.Map)
+     */
+    @Override
+    public void alter(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#alterableOptions()
+     */
+    @Override
+    public Set<Option> alterableOptions()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#create(java.lang.String, java.util.Map)
+     */
+    @Override
+    public void create(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#drop(java.lang.String)
+     */
+    @Override
+    public void drop(String arg0) throws InvalidRequestException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#protectedResources()
+     */
+    @Override
+    public Set<? extends IResource> protectedResources()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#requireAuthentication()
+     */
+    @Override
+    public boolean requireAuthentication()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#setup()
+     */
+    @Override
+    public void setup()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.cassandra.auth.IAuthenticator#supportedOptions()
+     */
+    @Override
+    public Set<Option> supportedOptions()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

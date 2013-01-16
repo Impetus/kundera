@@ -30,6 +30,7 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -62,6 +63,7 @@ public final class CassandraCli
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassandraCli.class);
+
     /**
      * Cassandra set up.
      * 
@@ -81,7 +83,6 @@ public final class CassandraCli
     public static void cassandraSetUp() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-
         if (!checkIfServerRunning())
         {
             cassandra = new EmbeddedCassandraService();
@@ -194,11 +195,11 @@ public final class CassandraCli
         try
         {
             client.system_drop_keyspace(keyspaceName);
-//            deleteCassandraFolders("/var/lib/cassandra/data/");
-//            deleteCassandraFolders("/var/lib/cassandra/data/system/");
-//            deleteCassandraFolders("/var/lib/cassandra/commitlog/");
-//            deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
-//            deleteCassandraFolders("/var/log/cassandra/");
+            // deleteCassandraFolders("/var/lib/cassandra/data/");
+            // deleteCassandraFolders("/var/lib/cassandra/data/system/");
+            // deleteCassandraFolders("/var/lib/cassandra/commitlog/");
+            // deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
+            // deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {
@@ -211,7 +212,7 @@ public final class CassandraCli
         catch (TException e)
         {
             log.error(e);
-        } 
+        }
     }
 
     private static void deleteCassandraFolders(String dir)
@@ -326,7 +327,8 @@ public final class CassandraCli
         try
         {
             getClient().set_cql_version("3.0.0");
-            getClient().execute_cql_query(ByteBuffer.wrap(cqlQuery.getBytes("UTF-8")), Compression.NONE);
+            getClient().execute_cql3_query(ByteBuffer.wrap(cqlQuery.getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
         catch (InvalidRequestException e)
         {

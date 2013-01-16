@@ -83,7 +83,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
      */
     private void testNativeQuery(boolean b)
     {
-        String s = "Select * From StudentCassandraUUID";
+        String s = "Select * From " + "\"StudentCassandraUUID\"";
         EntityManager em = emf.createEntityManager();
         Query q = em.createNativeQuery(s, StudentCassandraUUID.class);
         List<StudentCassandraUUID> results = q.getResultList();
@@ -693,6 +693,5 @@ public class StudentCassandraUUIDTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

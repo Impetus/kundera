@@ -54,7 +54,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -154,6 +153,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             {
                 prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
                 // Write Mutation map to database
+//                conn.set_cql_version("3.0.0");
                 conn.batch_mutate(mutationMap, getConsistencyLevel());
             }
             mutationMap.clear();
@@ -478,13 +478,23 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        SlicePredicate slicePredicate = new SlicePredicate();
+
+        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
+
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
                 columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
                 .fromUTF8(childIdStr).getBytes());
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
+        
+        List<IndexExpression> expressions = new ArrayList<IndexExpression>();
+        expressions.add(ie);
+        
+        IndexClause ix = new IndexClause();
+        ix.setStart_key(Bytes.EMPTY.toByteArray());
+        ix.setCount(1000);
+        ix.setExpressions(expressions);
 
         List<Object> rowKeys = new ArrayList<Object>();
         ColumnParent columnParent = new ColumnParent(tableName);
@@ -536,12 +546,19 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        SlicePredicate slicePredicate = new SlicePredicate();
+        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
         List<Object> entities = null;
 
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
                 ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
+        List<IndexExpression> expressions = new ArrayList<IndexExpression>();
+        expressions.add(ie);
+        
+        IndexClause ix = new IndexClause();
+        ix.setStart_key(Bytes.EMPTY.toByteArray());
+        ix.setCount(1000);
+        ix.setExpressions(expressions);
         ColumnParent columnParent = new ColumnParent(m.getTableName());
 
         List<KeySlice> keySlices;
@@ -811,12 +828,27 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             // ixClause can be 0,1 or more!
-            SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+            SlicePredicate slicePredicate = new SlicePredicate();
+
             if (columns != null && !columns.isEmpty())
             {
-                slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
+                List asList = new ArrayList(32);
+                for (String colName : columns)
+                {
+                    if (colName != null)
+                    {
+                        asList.add(Bytes.fromUTF8(colName).getBytes());
+                    }
+                }
+                slicePredicate.setColumn_names(asList);
             }
-
+            else
+            {
+                SliceRange sliceRange = new SliceRange();
+                sliceRange.setStart(Bytes.EMPTY.getBytes());
+                sliceRange.setFinish(Bytes.EMPTY.getBytes());
+                slicePredicate.setSlice_range(sliceRange);
+            }
             conn = PelopsUtils.getCassandraConnection(pool);
 
             if (ixClause.isEmpty())
@@ -911,11 +943,28 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions) throws Exception
     {
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        SlicePredicate slicePredicate = new SlicePredicate();
+
         if (columns != null && !columns.isEmpty())
         {
-            slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
+            List asList = new ArrayList(32);
+            for (String colName : columns)
+            {
+                if (colName != null)
+                {
+                    asList.add(Bytes.fromUTF8(colName).getBytes());
+                }
+            }
+            slicePredicate.setColumn_names(asList);
         }
+        else
+        {
+            SliceRange sliceRange = new SliceRange();
+            sliceRange.setStart(Bytes.EMPTY.getBytes());
+            sliceRange.setFinish(Bytes.EMPTY.getBytes());
+            slicePredicate.setSlice_range(sliceRange);
+        }
+
         KeyRange keyRange = new KeyRange(10000);
         keyRange.setStart_key(minVal == null ? "".getBytes() : minVal);
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);

@@ -238,7 +238,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         catch (Exception e)
         {
-            log.error("Error while executing find by range. Details: " + e.getMessage());
+            log.error("Error while executing find by range. Details: " , e);
             throw new QueryHandlerException(e);
         }
         return result;

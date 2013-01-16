@@ -182,7 +182,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-        findByRange();
+//        findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -616,6 +616,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             cfDef.name = "StudentCassandraBigDecimal";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DecimalType");
+            cfDef.setComparator_type("UTF8Type");
 
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
@@ -679,7 +680,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
 
     public void dropSchema()
     {
-            CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

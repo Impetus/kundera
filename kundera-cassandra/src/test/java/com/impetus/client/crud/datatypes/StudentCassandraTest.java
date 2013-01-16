@@ -16,6 +16,7 @@
 package com.impetus.client.crud.datatypes;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -414,6 +415,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             Assert.assertEquals((short) 8, results.get(0).getCgpa());
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             em.clear();
+
             // query on percentage and height.
             query = "Select s from StudentCassandra s where s.percentage >= ?2 and s.percentage <= ?3 and s.height =?1";
             q = em.createQuery(query);
@@ -623,22 +625,22 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
 
     private void updateQueryTest()
     {
-        Query q = em.createQuery("update StudentCassandra s set s.studentName = :newName where s.studentName = :oldName");
+        Query q = em
+                .createQuery("update StudentCassandra s set s.studentName = :newName where s.studentName = :oldName");
         q.setParameter("newName", "NewAmresh");
         q.setParameter("oldName", "Amresh");
         q.executeUpdate();
-        
+
         em.clear();
         // // find by id.
         StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
         Assert.assertEquals("NewAmresh", s.getStudentName());
-        
-        
+
         q = em.createQuery("update StudentCassandra s set s.studentName = :newName where s.studentName = :oldName");
         q.setParameter("newName", "Amresh");
         q.setParameter("oldName", "NewAmresh");
         q.executeUpdate();
-        
+
         em.clear();
         // // find by id.
         s = em.find(StudentCassandra.class, studentId1);
@@ -696,6 +698,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         cfDef.name = "STUDENT";
         cfDef.keyspace = "KunderaExamples";
         cfDef.setKey_validation_class("LongType");
+        cfDef.setComparator_type("UTF8Type");
 
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("UNIQUE_ID".getBytes()), "LongType");
         columnDef2.index_type = IndexType.KEYS;

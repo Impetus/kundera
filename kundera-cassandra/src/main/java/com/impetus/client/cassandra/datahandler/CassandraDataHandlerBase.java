@@ -964,9 +964,6 @@ public abstract class CassandraDataHandlerBase
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
             throws InstantiationException, IllegalAccessException
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
         return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
@@ -1029,17 +1026,23 @@ public abstract class CassandraDataHandlerBase
         {
             if (thriftColumnValue != null)
             {
+                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getMetamodel(m.getPersistenceUnit());
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
                 if (attribute != null)
                 {
                     entity = initialize(m, entity, null);
+                    String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+                    if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                            && thriftColumnName.equals(idColumnName))
+                    {
+                        PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
+                    }
                     setFieldValue(entity, thriftColumnValue, attribute);
                 }
                 else
                 {
-                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                            .getMetamodel(m.getPersistenceUnit());
                     if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                     {
                         entity = initialize(m, entity, null);
