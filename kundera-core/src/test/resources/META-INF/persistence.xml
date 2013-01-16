@@ -59,6 +59,7 @@
 		<class>com.impetus.kundera.entity.photo.PhotoBi_M_1_1_M</class>
 		<class>com.impetus.kundera.entity.photo.PhotoBi_M_M_1_1</class>
 		<class>com.impetus.kundera.entity.photo.PhotoBi_M_M_M_M</class>
+		<class>com.impetus.kundera.metadata.entities.SampleEntity</class>
 		<!-- <class>com.impetus.kundera.metadata.entities.bi.AssociationBiEntity</class> 
 			<class>com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>

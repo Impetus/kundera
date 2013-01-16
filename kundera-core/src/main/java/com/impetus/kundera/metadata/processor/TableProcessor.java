@@ -83,7 +83,6 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
 
         LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
-
         populateMetadata(metadata, clazz, puProperties);
 
     }

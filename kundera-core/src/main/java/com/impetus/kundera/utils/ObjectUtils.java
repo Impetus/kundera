@@ -95,14 +95,20 @@ public class ObjectUtils
 
             // May break for mapped super class.
 
-            Object id = PropertyAccessorHelper.getId(source, metadata);
-
-            Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass.getName() + "#" + id);
-            if (copiedObjectInMap != null)
+            Object id = null;
+            if (metadata.getRelations() != null && !metadata.getRelations().isEmpty())
             {
-                return copiedObjectInMap;
-            }
+                id = PropertyAccessorHelper.getId(source, metadata);
 
+                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
+                keyBuilder.append("#");
+                keyBuilder.append(id);
+                Object copiedObjectInMap = copiedObjectMap.get(keyBuilder.toString());
+                if (copiedObjectInMap != null)
+                {
+                    return copiedObjectInMap;
+                }
+            }
             // Copy Columns (in a table that doesn't have any embedded objects
 
             target = sourceObjectClass.newInstance();
@@ -196,8 +202,13 @@ public class ObjectUtils
             }
 
             // Put this object into copied object map
-            copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
-
+            if (id != null)
+            {
+                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
+                keyBuilder.append("#");
+                keyBuilder.append(id);
+                copiedObjectMap.put(keyBuilder.toString(), target);
+            }
             // Copy Relationships recursively
             for (Relation relation : metadata.getRelations())
             {
