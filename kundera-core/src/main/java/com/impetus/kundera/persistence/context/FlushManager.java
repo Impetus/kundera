@@ -290,7 +290,7 @@ public class FlushManager
                 {
                     childNode.setTraversed(true);
 //                    flushStack.push(childNode);
-                    stackQueue.push(node);
+                    stackQueue.push(childNode);
                   logEvent(childNode, eventType);
                 }
             }
