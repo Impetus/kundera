@@ -86,8 +86,8 @@ public final class CassandraCli
         {
             cassandra = new EmbeddedCassandraService();
             cassandra.start();
-            initClient();
         }
+        initClient();
     }
 
     /**
