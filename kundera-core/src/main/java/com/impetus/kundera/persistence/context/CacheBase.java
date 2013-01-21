@@ -155,7 +155,10 @@ public class CacheBase
 
     private void logCacheEvent(String eventType, String nodeId)
     {
-        log.debug("Node: " + nodeId + ":: " + eventType + " Persistence Context");
+        if(log.isDebugEnabled())
+        {
+            log.debug("Node: " + nodeId + ":: " + eventType + " Persistence Context");
+        }
     }
 
     /**
