@@ -571,16 +571,34 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
+        CfDef cfDef = getInvertedIndexCF(tableInfo);
+        if (cfDef != null)
+        {
+            cassandra_client.system_add_column_family(cfDef);
+        }
+    }
+
+    /**
+     * @param tableInfo
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     */
+    private CfDef getInvertedIndexCF(TableInfo tableInfo) throws InvalidRequestException, SchemaDisagreementException,
+            TException
+    {
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled(databaseName)
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
             CfDef cfDef = new CfDef();
             cfDef.setKeyspace(databaseName);
+            cfDef.setColumn_type("Super");
             cfDef.setName(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
             cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());
-            cassandra_client.system_add_column_family(cfDef);
+            return cfDef;
         }
+        return null;
     }
 
     /**
@@ -844,6 +862,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         || tableInfo.getTableIdType() == null)
                 {
                     cfDefs.add(getTableMetadata(tableInfo));
+                    CfDef cfDef = getInvertedIndexCF(tableInfo);
+                    if (cfDef != null)
+                        cfDefs.add(getInvertedIndexCF(tableInfo));
                 }
                 else if (tableInfo.getTableIdType() != null
                         && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
