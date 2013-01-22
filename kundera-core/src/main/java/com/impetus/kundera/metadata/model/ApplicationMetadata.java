@@ -83,6 +83,7 @@ public class ApplicationMetadata
         }
         else
         {
+            if(logger.isDebugEnabled())
             logger.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
                     + clazz + ". Noting needs to be done");
         }

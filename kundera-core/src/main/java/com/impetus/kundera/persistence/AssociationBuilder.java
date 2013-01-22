@@ -281,6 +281,7 @@ final class AssociationBuilder
                 && !childMetadata.isRelationViaJoinTable())
         {
             // There is no relation (not even via Join Table), nothing to do
+            if(log.isDebugEnabled())
             log.info("Nothing to do, simply moving to next:");
         }
 

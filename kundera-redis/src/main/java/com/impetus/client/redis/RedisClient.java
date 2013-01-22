@@ -1639,23 +1639,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             ((Jedis) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
 
-            ((Jedis) connection).zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-
-            ((Jedis) connection)
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
+//            ((Jedis) connection).zadd(
+//                    getHashKey(entityMetadata.getTableName(),
+//                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
+//                    getDouble(rowKey), rowKey);
+//
+//            // Add row-key as inverted index as well needed for multiple clause
+//            // search with key and non row key.
+//
+//            ((Jedis) connection)
+//                    .zadd(getHashKey(
+//                            entityMetadata.getTableName(),
+//                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
+//                            getDouble(rowKey), rowKey);
         }
 
         // Add inverted indexes for column based search.
-        addIndex(connection, wrapper, rowKey);
+//        addIndex(connection, wrapper, rowKey);
 
     }
 

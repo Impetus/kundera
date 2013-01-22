@@ -49,7 +49,9 @@ public class MetadataResource
     private static Log log = LogFactory.getLog(MetadataResource.class);
 
     /**
-     * Handler for GET requests. Returns schema List and related metadata for the given list of persistence units.
+     * Handler for GET requests. Returns schema List and related metadata for
+     * the given list of persistence units.
+     * 
      * @param persistenceUnits
      * @return
      */
@@ -58,7 +60,8 @@ public class MetadataResource
     @Path("/schemaList/{persistenceUnits}")
     public Response getSchemaList(@PathParam("persistenceUnits") String persistenceUnits)
     {
-        log.debug("GET: Persistence Units:" + persistenceUnits);
+        if (log.isDebugEnabled())
+            log.debug("GET: Persistence Units:" + persistenceUnits);
 
         StringTokenizer st = new StringTokenizer(persistenceUnits, ",");
 
@@ -94,7 +97,8 @@ public class MetadataResource
 
         if (schemaMetadata.getSchemaList().isEmpty())
         {
-            log.warn("GET: getSchemaList: Can't find Schema for PUs " + persistenceUnits);
+            if (log.isDebugEnabled())
+                log.warn("GET: getSchemaList: Can't find Schema for PUs " + persistenceUnits);
             return Response.noContent().build();
         }
         else

@@ -227,6 +227,7 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public final void unindex(EntityMetadata metadata, Object id) throws LuceneIndexingException
     {
+        if(log.isDebugEnabled())
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
@@ -254,6 +255,7 @@ public class LuceneIndexer extends DocumentIndexer
             count = 100;
         }
 
+        if(log.isDebugEnabled())
         log.debug("Searching index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
         // Set<String> entityIds = new HashSet<String>();
@@ -316,6 +318,7 @@ public class LuceneIndexer extends DocumentIndexer
      */
     public void indexDocument(EntityMetadata metadata, Document document)
     {
+        if(log.isDebugEnabled())
         log.debug("Indexing document: " + document + " for in file system using Lucene");
 
         IndexWriter w = getIndexWriter();
@@ -459,6 +462,7 @@ public class LuceneIndexer extends DocumentIndexer
             return null;
         }
 
+        if(log.isDebugEnabled())
         log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
 
         Document currentDoc = null;

@@ -58,13 +58,16 @@ public class SessionResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String getSessionToken(@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken)
     {
-        log.debug("GET: Application Token:" + applicationToken);
+        if (log.isDebugEnabled())
+            log.debug("GET: Application Token:" + applicationToken);
 
         EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
 
         if (emf == null)
         {
-            log.warn("GET: Application Token:" + applicationToken + " doesn't exist and hence Session can't be created");
+            if (log.isDebugEnabled())
+                log.warn("GET: Application Token:" + applicationToken
+                        + " doesn't exist and hence Session can't be created");
             return Response.GET_ST_FAILED;
         }
 
@@ -87,12 +90,14 @@ public class SessionResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String flush(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
     {
-        log.debug("PUT: Session Token:" + sessionToken);
+        if (log.isDebugEnabled())
+            log.debug("PUT: Session Token:" + sessionToken);
 
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         if (em == null)
         {
-            log.warn("PUT: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
+            if (log.isDebugEnabled())
+                log.warn("PUT: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
             return Response.PUT_ST_FAILED;
         }
 
@@ -120,12 +125,14 @@ public class SessionResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String deleteSession(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
     {
-        log.debug("DELETE: Session Token:" + sessionToken);
+        if (log.isDebugEnabled())
+            log.debug("DELETE: Session Token:" + sessionToken);
 
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         if (em == null)
         {
-            log.warn("DELETE: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
+            if (log.isDebugEnabled())
+                log.warn("DELETE: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
             return Response.DELETE_ST_FAILED;
         }
 

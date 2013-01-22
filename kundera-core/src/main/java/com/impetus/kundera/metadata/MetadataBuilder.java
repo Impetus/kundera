@@ -107,6 +107,7 @@ public class MetadataBuilder
         EntityMetadata metadata = new EntityMetadata(clazz);
         validate(clazz);
 
+        if(log.isDebugEnabled())
         log.debug("Processing @Entity >> " + clazz);
 
         for (MetadataProcessor processor : metadataProcessors)

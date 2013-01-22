@@ -85,6 +85,7 @@ public class LuceneQuery extends QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
+        if(log.isDebugEnabled())
         log.debug("JPA Query: " + query);
 
         // get luence query
@@ -93,7 +94,8 @@ public class LuceneQuery extends QueryImpl implements Query
         {
             q = getLuceneQueryFromJPAQuery();
         }
-
+        
+        if(log.isDebugEnabled())
         log.debug("Lucene Query: " + q);
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();

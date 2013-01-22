@@ -97,7 +97,10 @@ public class CassQuery extends QueryImpl implements Query
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        log.debug("on populateEntities cassandra query");
+        if(log.isDebugEnabled())
+        {
+            log.debug("on populateEntities cassandra query");
+        }
         List<Object> result = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 

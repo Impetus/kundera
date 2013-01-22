@@ -82,7 +82,8 @@ public class EntityValidatorImpl implements EntityValidator
         {
             return;
         }
-
+        
+        if(log.isDebugEnabled())
         log.debug("Validating " + clazz.getName());
 
         // Is Entity?

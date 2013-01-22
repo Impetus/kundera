@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.persistence;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -62,7 +61,6 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
-import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -371,6 +369,8 @@ public class PersistenceDelegator
         graph = null;
 
         getEventDispatcher().fireEventListeners(metadata, e, PostRemove.class);
+        
+        if(log.isDebugEnabled())
         log.debug("Data removed successfully for entity : " + e.getClass());
 
     }
@@ -464,6 +464,7 @@ public class PersistenceDelegator
     public <E> E merge(E e)
     {
 
+        if(log.isDebugEnabled())
         log.debug("Merging Entity : " + e);
         EntityMetadata m = getMetadata(e.getClass());
 
@@ -843,6 +844,7 @@ public class PersistenceDelegator
         }
         else
         {
+            if(log.isDebugEnabled())
             log.debug("Can't set Client properties as None/ Null was supplied");
         }
     }
