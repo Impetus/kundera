@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.persistence;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -62,7 +61,6 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
-import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -161,16 +159,11 @@ public class PersistenceDelegator
 
         lock.writeLock().lock();
 
-        //if(node.getChildren() != null)
-        //{
-            node.persist();
-        //}
+         node.persist();
         if (node.isHeadNode())
         {
             // build flush stack.
             flushManager.buildFlushStack(node, com.impetus.kundera.persistence.context.EventLog.EventType.INSERT);
-
-
             flush();
 
             // Add node to persistence context after successful flush.
@@ -182,7 +175,11 @@ public class PersistenceDelegator
 
         // Invoke Post Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-        log.debug("Data persisted successfully for entity : " + e.getClass());
+        
+        if(log.isDebugEnabled())
+        {
+            log.debug("Data persisted successfully for entity : " + e.getClass());
+        }
     }
 
     public <E> E findById(Class<E> entityClass, Object primaryKey)
@@ -372,6 +369,8 @@ public class PersistenceDelegator
         graph = null;
 
         getEventDispatcher().fireEventListeners(metadata, e, PostRemove.class);
+        
+        if(log.isDebugEnabled())
         log.debug("Data removed successfully for entity : " + e.getClass());
 
     }
@@ -382,15 +381,16 @@ public class PersistenceDelegator
     public void flush()
     {
         // Get flush stack from Flush Manager
-//        if (applyFlush())
-//        {
-//            FlushStack fs = flushManager.getFlushStack();
             Deque<Node> fs = flushManager.getFlushStack();
 
             // Flush each node in flush stack from top to bottom unit it's empty
+            
+        if (log.isDebugEnabled())
+        {
             log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n"
                     + fs);
 
+        }
             if (fs != null)
             {
                 boolean isBatch = false;
@@ -464,6 +464,7 @@ public class PersistenceDelegator
     public <E> E merge(E e)
     {
 
+        if(log.isDebugEnabled())
         log.debug("Merging Entity : " + e);
         EntityMetadata m = getMetadata(e.getClass());
 
@@ -843,6 +844,7 @@ public class PersistenceDelegator
         }
         else
         {
+            if(log.isDebugEnabled())
             log.debug("Can't set Client properties as None/ Null was supplied");
         }
     }

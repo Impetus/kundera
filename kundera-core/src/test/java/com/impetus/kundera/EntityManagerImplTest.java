@@ -73,6 +73,7 @@ public class EntityManagerImplTest
                 {
                     em.clear();
                 }
+                
                 em.persist(entity);
 
             }

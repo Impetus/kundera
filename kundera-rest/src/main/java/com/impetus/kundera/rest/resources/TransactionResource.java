@@ -53,12 +53,14 @@ public class TransactionResource
     @Produces(MediaType.TEXT_PLAIN)
     public String begin(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
     {
-        log.debug("GET: Session Token:" + sessionToken);
+        if (log.isDebugEnabled())
+            log.debug("GET: Session Token:" + sessionToken);
 
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         if (em == null)
         {
-            log.warn("GET: Session Token:" + sessionToken + " doesn't exist and transaction failed to begin");
+            if (log.isDebugEnabled())
+                log.warn("GET: Session Token:" + sessionToken + " doesn't exist and transaction failed to begin");
             return Response.GET_TX_FAILED;
         }
 
@@ -85,12 +87,14 @@ public class TransactionResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String commit(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
     {
-        log.debug("POST: Session Token:" + sessionToken);
+        if (log.isDebugEnabled())
+            log.debug("POST: Session Token:" + sessionToken);
 
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         if (em == null)
         {
-            log.warn("POST: Session Token:" + sessionToken + " doesn't exist and transaction could not be commited");
+            if (log.isDebugEnabled())
+                log.warn("POST: Session Token:" + sessionToken + " doesn't exist and transaction could not be commited");
             return Response.POST_TX_FAILED;
         }
 
@@ -116,13 +120,15 @@ public class TransactionResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String rollback(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
     {
-        log.debug("DELETE: Session Token:" + sessionToken);
+        if (log.isDebugEnabled())
+            log.debug("DELETE: Session Token:" + sessionToken);
 
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         if (em == null)
         {
-            log.warn("DELETE: Session Token:" + sessionToken
-                    + " doesn't exist and transaction could not be rolled back");
+            if (log.isDebugEnabled())
+                log.warn("DELETE: Session Token:" + sessionToken
+                        + " doesn't exist and transaction could not be rolled back");
             return Response.DELETE_TX_FAILED;
 
         }

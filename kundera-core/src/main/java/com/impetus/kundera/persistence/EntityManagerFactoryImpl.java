@@ -146,6 +146,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         this.util = new KunderaPersistenceUnitUtil(cache);
 
+        if(logger.isDebugEnabled())
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 

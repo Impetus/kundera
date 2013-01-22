@@ -103,7 +103,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
-        logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        if(logger.isDebugEnabled())
+        {
+            logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        }
         session = new EntityManagerSession((Cache) factory.getCache());
         persistenceCache = new PersistenceCache();
         persistenceCache.setPersistenceContextType(persistenceContextType);
@@ -118,7 +121,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         this.transactionType = transactionType;
         this.entityTransaction = new KunderaEntityTransaction(this);
         
-        logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        }
     }
 
     private void onLookUp(PersistenceUnitTransactionType transactionType)

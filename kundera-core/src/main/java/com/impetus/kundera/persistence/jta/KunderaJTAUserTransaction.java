@@ -95,6 +95,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public void begin() throws NotSupportedException, SystemException
     {
+        if(log.isDebugEnabled())
         log.info("beginning JTA transaction");
 
         isTransactionInProgress = true;
@@ -126,6 +127,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         {
             if (tx != null)
             {
+                if(log.isDebugEnabled())
                 log.info("Commiting transaction:" + tx);
                 tx.commit();
             }
@@ -137,6 +139,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         }
         finally
         {
+            if(log.isDebugEnabled())
             log.info("Resetting after commit.");
             threadLocal.set(null);
             timerThead.set(null);
@@ -176,7 +179,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
                 {
                     throw new IllegalStateException("Cannot locate a Transaction for rollback.");
                 }
-
+                
+                if(log.isDebugEnabled())
                 log.info("Rollback transaction:" + tx);
 
                 tx.rollback();
@@ -184,6 +188,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             }
             finally
             {
+                if(log.isDebugEnabled())
                 log.info("Resetting after rollback.");
                 threadLocal.set(null);
                 timerThead.set(null);
@@ -228,6 +233,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         }
         else
         {
+            if(log.isDebugEnabled())
             log.debug("Cannot reset running transaction:" + tx);
         }
 

@@ -355,8 +355,8 @@ public class FlushManager
         if(stackQueue != null && !stackQueue.isEmpty())
         {
             stackQueue.clear();
-            stackQueue=null;
-            stackQueue = new ArrayDeque<Node>();
+//            stackQueue=null;
+//            stackQueue = new ArrayDeque<Node>();
         }
         /*if (flushStack != null)
         {
@@ -374,8 +374,8 @@ public class FlushManager
         if (eventLogQueue != null)
         {
             eventLogQueue.clear();
-             eventLogQueue = null;
-             eventLogQueue = new EventLogQueue();
+//             eventLogQueue = null;
+//             eventLogQueue = new EventLogQueue();
         }
     }
 

@@ -681,8 +681,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
-            log.info("executing query " + cqlQuery);
-
+            if (log.isDebugEnabled())
+            {
+                log.info("executing query " + cqlQuery);
+            }
             if (getCqlVersion().equals(CassandraConstants.CQL_VERSION_2_0)
                     && !metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {

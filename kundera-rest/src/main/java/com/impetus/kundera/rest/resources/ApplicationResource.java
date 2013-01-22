@@ -58,6 +58,7 @@ public class ApplicationResource
     @Path("/{persistenceUnits}")
     public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits)
     {
+        if(log.isDebugEnabled())
         log.debug("GET Persistence Unit(s):" + persistenceUnits);
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits);
@@ -81,6 +82,7 @@ public class ApplicationResource
     @Consumes(MediaType.TEXT_PLAIN)
     public String closeApplication(@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken)
     {
+        if(log.isDebugEnabled())
         log.debug("DELETE: Application Token:" + applicationToken);
 
         EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
