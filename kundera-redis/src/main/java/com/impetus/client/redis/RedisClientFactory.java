@@ -179,6 +179,9 @@ public class RedisClientFactory extends GenericClientFactory
         if (getConnectionPoolOrConnection() != null && getConnectionPoolOrConnection() instanceof JedisPool)
         {
             ((JedisPool) getConnectionPoolOrConnection()).destroy();
+        } else if(getConnectionPoolOrConnection() != null && getConnectionPoolOrConnection() instanceof Jedis)
+        {
+            ((Jedis) getConnectionPoolOrConnection()).disconnect();
         }
 
     }
