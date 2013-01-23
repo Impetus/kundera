@@ -174,6 +174,7 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
+        if(logger.isDebugEnabled())
         logger.info("on close destroying connection pool");
 
         if (getConnectionPoolOrConnection() != null && getConnectionPoolOrConnection() instanceof JedisPool)
@@ -193,6 +194,7 @@ public class RedisClientFactory extends GenericClientFactory
      */
     Jedis getConnection()
     {
+        if(logger.isDebugEnabled())
         logger.info("borrowing connection from pool");
         Object poolOrConnection = getConnectionPoolOrConnection();
         if (poolOrConnection instanceof JedisPool)
@@ -227,6 +229,7 @@ public class RedisClientFactory extends GenericClientFactory
      */
     void releaseConnection(Jedis res)
     {
+        if(logger.isDebugEnabled())
         logger.info("releasing connection from pool");
         Object poolOrConnection = getConnectionPoolOrConnection();
         if (poolOrConnection instanceof JedisPool)
