@@ -87,8 +87,8 @@ public final class CassandraCli
         {
             cassandra = new EmbeddedCassandraService();
             cassandra.start();
-            initClient();
         }
+        initClient();
     }
 
     /**
@@ -114,7 +114,7 @@ public final class CassandraCli
             Map<String, String> strategy_options = new HashMap<String, String>();
             strategy_options.put("replication_factor", "1");
             ks_Def.setStrategy_options(strategy_options);
-//            ks_Def.setReplication_factor(1);
+            // ks_Def.setReplication_factor(1);
             try
             {
                 client.system_add_keyspace(ks_Def);
