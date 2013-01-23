@@ -793,8 +793,9 @@ public class PersistenceDelegator
 
     public void commit()
     {
-        doFlush();
         execute();
+        flushManager.commit();
+        flushManager.clearFlushStack();
         isTransactionInProgress = false;
     }
 

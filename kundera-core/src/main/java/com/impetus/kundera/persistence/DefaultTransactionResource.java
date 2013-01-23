@@ -73,6 +73,9 @@ public class DefaultTransactionResource implements TransactionResource
     public void onCommit()
     {
         onFlush();
+        nodes.clear();
+        nodes=null;
+        nodes = new ArrayList<Node>();
         isActive = false;
     }
 
@@ -85,6 +88,8 @@ public class DefaultTransactionResource implements TransactionResource
         {
             node.flush();
         }
+        
+        
     }
 
     /*
