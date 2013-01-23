@@ -161,7 +161,10 @@ public class PersistenceXMLLoader
         {
             try
             {
-                is.close();
+                if (is != null)
+                {
+                    is.close();
+                }
             }
             catch (IOException e)
             {
