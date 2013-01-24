@@ -1037,7 +1037,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             Attribute attribute = compoundKey.getAttribute(field.getName());
             String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-            // System.out.println("DD");
             translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
         }
 
