@@ -126,29 +126,6 @@ public class AbstractEntityReader
                     // If fetch type is LAZY, just populate proxy object
 
                     FetchType fetch = relation.getFetchType();
-                    /*
-                     * if (fetch.equals(FetchType.LAZY) ) { String relationName
-                     * = MetadataUtils.getMappedName(m, relation); Object
-                     * relationValue = relationsMap != null ?
-                     * relationsMap.get(relationName) : null;
-                     * 
-                     * if(relationValue != null) {
-                     * log.debug("Creating proxy for >> " +
-                     * m.getEntityClazz().getName() + "#" +
-                     * relation.getProperty().getName() + "_" + relationValue);
-                     * 
-                     * String entityName = m.getEntityClazz().getName() + "_" +
-                     * entityId + "#" + relation.getProperty().getName();
-                     * 
-                     * Object proxy = getLazyEntity(entityName,
-                     * relation.getTargetEntity(), m.getReadIdentifierMethod(),
-                     * m.getWriteIdentifierMethod(), relationValue, pd);
-                     * //System.out.println(proxy);
-                     * PropertyAccessorHelper.set(entity,
-                     * relation.getProperty(), proxy); }
-                     * 
-                     * } else {
-                     */
                     if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
                         

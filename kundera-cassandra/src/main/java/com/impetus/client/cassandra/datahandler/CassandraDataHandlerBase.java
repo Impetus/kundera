@@ -1079,15 +1079,16 @@ public abstract class CassandraDataHandlerBase
                             // No
                             // need for any logger message
                         }
-                        catch (InstantiationException e)
+                        catch (InstantiationException iex)
                         {
                             // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+                            throw new PersistenceException(iex);
                         }
-                        catch (IllegalAccessException e)
+                        catch (IllegalAccessException iaex)
                         {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+                            throw new PersistenceException(iaex);
                         }
                     }
                 }
