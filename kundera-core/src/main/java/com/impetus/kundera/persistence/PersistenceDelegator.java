@@ -814,10 +814,10 @@ public class PersistenceDelegator
 
     public void rollback()
     {
-        isTransactionInProgress = false;
         flushManager.rollback(this);
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
+        isTransactionInProgress = false;
     }
 
     /**
