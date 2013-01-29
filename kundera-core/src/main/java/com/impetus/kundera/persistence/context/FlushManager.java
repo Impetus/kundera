@@ -472,7 +472,8 @@ public class FlushManager
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
                     Client client = delegator.getClient(metadata);
                     
-                    if (node.isProcessed() /*&& delegator.defaultTransactionSupported(metadata.getPersistenceUnit())*/)
+                    // do manual rollback, if data is processed, and running without transaction or with kundera's default transaction support!
+                    if (node.isProcessed() && (!delegator.isTransactionInProgress() || delegator.defaultTransactionSupported(metadata.getPersistenceUnit())))
                     {
                         if (node.getOriginalNode() == null)
                         {
