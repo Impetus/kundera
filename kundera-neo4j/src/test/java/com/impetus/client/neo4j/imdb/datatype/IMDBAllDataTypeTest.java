@@ -40,6 +40,9 @@ public class IMDBAllDataTypeTest
     EntityManager em;   
     Calendar cal = Calendar.getInstance();
 
+    ActorAllDataType actor1;
+    ActorAllDataType actor2;
+    
 
     /**
      * @throws java.lang.Exception
@@ -66,8 +69,19 @@ public class IMDBAllDataTypeTest
     public void testCRUD()
     {
         insert();
-        findById();
+        //findById();
+        delete();
         
+    }
+    
+    private void insert()
+    {        
+        prepareData();       
+        
+        em.getTransaction().begin();
+        em.persist(actor1);
+        em.persist(actor2);
+        em.getTransaction().commit();        
     }
     
     private void findById()
@@ -78,6 +92,23 @@ public class IMDBAllDataTypeTest
         ActorAllDataType actor2 = em.find(ActorAllDataType.class, 2);
         
         assertActors(actor1, actor2);  
+    }
+    
+    private void delete()
+    {
+        ActorAllDataType actor1 = em.find(ActorAllDataType.class, 1);
+        ActorAllDataType actor2 = em.find(ActorAllDataType.class, 2);
+        
+        em.getTransaction().begin();
+        em.remove(actor1);
+        em.remove(actor2);
+        em.getTransaction().commit();
+        
+        em.clear();
+        ActorAllDataType actor11 = em.find(ActorAllDataType.class, 1);
+        ActorAllDataType actor22 = em.find(ActorAllDataType.class, 2);
+        Assert.assertNull(actor11);
+        Assert.assertNull(actor22);
     }
     
     private void assertActors(ActorAllDataType actor1, ActorAllDataType actor2)
@@ -150,15 +181,18 @@ public class IMDBAllDataTypeTest
         }
     }
     
-    private void insert()
-    {        
-        ActorAllDataType actor1 = new ActorAllDataType(1, "Tom Cruise", 23456789l, true, 'C', (byte) 8, (short) 5, (float) 10.0,
+    
+    
+    
+    private void prepareData()
+    {
+        actor1 = new ActorAllDataType(1, "Tom Cruise", 23456789l, true, 'C', (byte) 8, (short) 5, (float) 10.0,
                 163.12, new Date(
                 Long.parseLong("1351667541111")), new Date(Long.parseLong("1351667542222")), new Date(
                         Long.parseLong("1351667543333")), 2, new Long(3634521523423L), new Double(7.23452342343), 
                         new BigInteger("123456789"), new BigDecimal(123456789), cal);
         
-        ActorAllDataType actor2 = new ActorAllDataType(2, "Emmanuelle Béart", 23456790l, false, 'D', (byte) 9, (short) 6, (float) 11.3,
+        actor2 = new ActorAllDataType(2, "Emmanuelle Béart", 23456790l, false, 'D', (byte) 9, (short) 6, (float) 11.3,
                 161.99, new Date(
                 Long.parseLong("1351667544444")), new Date(Long.parseLong("1351667545555")), new Date(
                         Long.parseLong("1351667546666")), 3, new Long(3634521523453L), new Double(8.23452342343), 
@@ -194,8 +228,6 @@ public class IMDBAllDataTypeTest
                7.0, new BigInteger("4444444444444"), new BigDecimal(1234567893), cal);
         role4.setActor(actor2); role1.setMovie(movie3); 
         
-
-        
         //Relationships
         actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
         actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
@@ -203,10 +235,6 @@ public class IMDBAllDataTypeTest
         movie1.addActor(role1, actor1);
         movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
         movie3.addActor(role4, actor2);
-        
-        em.persist(actor1);
-        em.persist(actor2);
-        
     }
     
 
