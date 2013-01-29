@@ -113,6 +113,30 @@ public class Role
     public void setMovie(Movie movie)
     {
         this.movie = movie;
-    }  
+    } 
+    
+    
+    public boolean equals(Object o)
+    {
+        if (!(o instanceof Role))
+        {
+            return false;
+        }
+
+        Role that = (Role) o;
+        
+        return (this.roleName == that.roleName || this.roleName.equals(that.roleName))
+                &&(this.roleType == that.roleType || this.roleType.equals(that.roleType));   
+        
+    }
+
+    public int hashCode()
+    {
+        int h1 = (roleName == null) ? 0 : roleName.hashCode();
+        int h2 = (roleType == null) ? 0 : roleType.hashCode();
+        return h1 + 31 * h2;
+    }
+    
+    
 
 }

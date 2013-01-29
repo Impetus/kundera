@@ -26,7 +26,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Neo4J Query Implementor 
  * @author amresh.singh
  */
 public class Neo4JQuery extends QueryImpl implements Query

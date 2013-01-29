@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.neo4j.imdb;
+package com.impetus.client.neo4j.imdb.datatype;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,14 +29,13 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Movie Node entity class 
+ * Movie entity containing all data type fields 
  * @author amresh.singh
  */
-
 @Entity
 @Table
 @IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
-public class Movie
+public class MovieAllDataType
 {
     @Id
     @Column(name="MOVIE_ID")
@@ -49,19 +48,26 @@ public class Movie
     private int year;      
     
     @ManyToMany(fetch = FetchType.LAZY, mappedBy="movies")
-    private Map<Role, Actor> actors;
+    private Map<RoleAllDataType, ActorAllDataType> actors;
     
-    public Movie() {}
-    public Movie(String id, String title, int year)
+    public MovieAllDataType()
     {
+    }
+    
+    
+    public MovieAllDataType(String id, String title, int year)
+    {
+        super();
         this.id = id;
         this.title = title;
         this.year = year;
     }
-    
-    public void addActor(Role role, Actor actor)
+
+
+
+    public void addActor(RoleAllDataType role, ActorAllDataType actor)
     {
-        if(actors == null) actors = new HashMap<Role, Actor>();
+        if(actors == null) actors = new HashMap<RoleAllDataType, ActorAllDataType>();
         actors.put(role, actor);
     }
 
@@ -116,7 +122,7 @@ public class Movie
     /**
      * @return the actors
      */
-    public Map<Role, Actor> getActors()
+    public Map<RoleAllDataType, ActorAllDataType> getActors()
     {
         return actors;
     }
@@ -124,9 +130,9 @@ public class Movie
     /**
      * @param actors the actors to set
      */
-    public void setActors(Map<Role, Actor> actors)
+    public void setActors(Map<RoleAllDataType, ActorAllDataType> actors)
     {
         this.actors = actors;
-    }   
+    }  
 
 }

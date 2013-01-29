@@ -42,7 +42,7 @@ public class Neo4JEntityReader  extends AbstractEntityReader implements EntityRe
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
-        return null;
+        throw new UnsupportedOperationException("Method supported not required for Neo4J");
     }  
     
 

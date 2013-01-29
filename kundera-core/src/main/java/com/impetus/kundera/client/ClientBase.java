@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,11 +129,21 @@ public abstract class ClientBase
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();
 
-                if (linkName != null && linkValue != null && !isSharedByPrimaryKey
-                        && (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE)))
+                if (linkName != null && linkValue != null && !isSharedByPrimaryKey)
                 {
-                    RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
-                    relationsHolder.add(relationHolder);
+                    if(multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))
+                    {
+                        RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
+                        relationsHolder.add(relationHolder);
+                    }
+                    else if(multiplicity.equals(ForeignKey.MANY_TO_MANY) 
+                            && ((Field)childNodeLink.getLinkProperty(LinkProperty.PROPERTY)).getType().isAssignableFrom(Map.class))
+                    {                        
+                        Object relationTo = ((Node)children.get(childNodeLink)).getData();
+                        RelationHolder relationHolder = new RelationHolder(linkName, relationTo,linkValue);
+                        relationsHolder.add(relationHolder);
+                    }                
+                    
                 }
             }
         }

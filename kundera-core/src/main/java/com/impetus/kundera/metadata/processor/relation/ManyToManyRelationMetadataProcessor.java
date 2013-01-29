@@ -129,14 +129,16 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
                     "@JoinColumn not allowed for ManyToMany relationship. Use @JoinTable instead");
 
         }
-        else if (isJoinedByTable)
+        
+        if (isJoinedByTable)
         {
             JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
 
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
-        } 
-        else if(isJoinedByMap)
+        }
+        
+        if(isJoinedByMap)
         {
             relation.setMapKeyJoinClass(mapKeyClass);
             
@@ -155,13 +157,12 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
             }
             
         }
-        else if (relation.getMappedBy() == null || relation.getMappedBy().isEmpty())
+        
+        else if (!isJoinedByTable && ! isJoinedByMap && (relation.getMappedBy() == null || relation.getMappedBy().isEmpty()))
         {
             throw new InvalidEntityDefinitionException(
                     "It's manadatory to use @JoinTable with parent side of ManyToMany relationship.");
-        }
-        
-        
+        }       
 
         metadata.addRelation(relationField.getName(), relation);
 

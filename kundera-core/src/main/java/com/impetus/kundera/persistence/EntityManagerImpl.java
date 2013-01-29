@@ -216,7 +216,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         catch (Exception ex)
         {
             // onRollBack.
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -252,9 +252,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         catch (Exception ex)
         {
-            // on Rollback
-            getPersistenceDelegator().rollback();
-
+			// on Rollback            
+			doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -289,7 +288,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         catch (Exception ex)
         {
             // on rollback.
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new KunderaException(ex);
         }
     }

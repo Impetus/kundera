@@ -62,7 +62,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        log.info("Initializing Neo4J database connection...");
+        if(log.isInfoEnabled()) log.info("Initializing Neo4J database connection...");
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());

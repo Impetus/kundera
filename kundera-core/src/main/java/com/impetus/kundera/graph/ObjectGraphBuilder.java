@@ -20,6 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.remote.TargetedNotification;
+import javax.persistence.MapKeyJoinColumn;
+
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.collection.spi.PersistentCollection;
 
 import com.impetus.kundera.Constants;
@@ -236,6 +240,11 @@ public class ObjectGraphBuilder
             
             if(childNode != null)
             {
+                if( ! StringUtils.isEmpty(relation.getMappedBy()) 
+                        && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) == null) {
+                    return;
+                }
+                
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 

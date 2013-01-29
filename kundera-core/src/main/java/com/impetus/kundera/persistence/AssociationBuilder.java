@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,78 +66,42 @@ final class AssociationBuilder
      * @param delegator
      * @param relation
      */
-    void populateRelationFromJoinTable(Object entity, EntityMetadata entityMetadata, PersistenceDelegator delegator,
+    void populateRelationForM2M(Object entity, EntityMetadata entityMetadata, PersistenceDelegator delegator,
             Relation relation)
     {
-
-        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
-        Client pClient = delegator.getClient(entityMetadata);
-        
-        String schema=entityMetadata.getSchema();
-        if(jtMetadata == null) {
-            EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
-            jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
-            pClient = delegator.getClient(owningEntityMetadata);
-            schema = owningEntityMetadata.getSchema();
-        }
-        String joinTableName = jtMetadata.getJoinTableName();
-
-        Set<String> joinColumns = jtMetadata.getJoinColumns();
-        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
-
-        String joinColumnName = (String) joinColumns.toArray()[0];
-        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
-
-        // EntityMetadata relMetadata =
-        // delegator.getMetadata(relation.getTargetEntity());
-
-        
-        Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName,
-                inverseJoinColumnName, entityId);
-
-        List childrenEntities = new ArrayList();
-        for (Object foreignKey : foreignKeys)
+        //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
+        if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
         {
-            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
-
-            Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-            Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
-
-            // If child has any bidirectional relationship, process them here
-            Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
-            boolean isBidirectionalRelation = (biDirectionalField != null);
-
-            if (isBidirectionalRelation && obj != null)
+           if(relation.isRelatedViaJoinTable())
+           {
+               populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
+           }
+           else
+           {
+               log.error("A M2M relationship of Collection type must be joined by JoinTable, relationships won't be set");
+           } 
+            
+        }
+        else if(relation.getPropertyType().isAssignableFrom(Map.class))
+        {
+            /*if(relation.isRelatedViaJoinTable())
             {
-                Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
-                Object[] pKeys = pClient.findIdsByColumn(entityMetadata.getSchema(), joinTableName, joinColumnName,
-                        inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());
-                List parents = delegator.find(entity.getClass(), pKeys);
-                PropertyAccessorHelper.set(obj, biDirectionalField,
-                        ObjectUtils.getFieldInstance(parents, biDirectionalField));
+                //TODO: Implement Map relationships via Join Table (not supported as of now)
             }
-
-            childrenEntities.add(obj);
-        }
-
-        Field childField = relation.getProperty();
-
-        try
-        {
-            PropertyAccessorHelper.set(
-                    entity,
-                    childField,
-                    PropertyAccessorHelper.isCollection(childField.getType()) ? ObjectUtils.getFieldInstance(
-                            childrenEntities, childField) : childrenEntities.get(0));
-            PersistenceCacheManager.addEntityToPersistenceCache(entity, delegator, entityId);
-        }
-        catch (PropertyAccessException ex)
-        {
-            throw new EntityReaderException(ex);
-        }
+            else
+            {
+                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+                Client childClient = delegator.getClient(childMetadata);
+                Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
+                List<Object> relationObjects = childClient.findByRelation(relation.getProperty().getName(), id, entityMetadata.getEntityClazz());
+                
+                System.out.println(relationObjects);
+            }*/
+        }       
 
     }
+
+    
 
     /**
      * @param entity
@@ -296,6 +261,80 @@ final class AssociationBuilder
             }
         }
 
+    }
+    
+    /**
+     * Populates a relationship of type {@link Collection} (i.e. those of type {@link Set} or {@link List})    
+     */
+    private void populateCollectionFromJoinTable(Object entity, EntityMetadata entityMetadata,
+            PersistenceDelegator delegator, Relation relation)
+    {
+        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
+        Client pClient = delegator.getClient(entityMetadata);
+        
+        String schema=entityMetadata.getSchema();
+        if(jtMetadata == null) {
+            EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
+            jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
+            pClient = delegator.getClient(owningEntityMetadata);
+            schema = owningEntityMetadata.getSchema();
+        }
+        String joinTableName = jtMetadata.getJoinTableName();
+
+        Set<String> joinColumns = jtMetadata.getJoinColumns();
+        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+
+        String joinColumnName = (String) joinColumns.toArray()[0];
+        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+
+        // EntityMetadata relMetadata =
+        // delegator.getMetadata(relation.getTargetEntity());
+
+        
+        Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
+        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName,
+                inverseJoinColumnName, entityId);
+
+        List childrenEntities = new ArrayList();
+        for (Object foreignKey : foreignKeys)
+        {
+            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
+
+            Object child = delegator.find(relation.getTargetEntity(), foreignKey);
+            Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
+
+            // If child has any bidirectional relationship, process them here
+            Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
+            boolean isBidirectionalRelation = (biDirectionalField != null);
+
+            if (isBidirectionalRelation && obj != null)
+            {
+                Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
+                Object[] pKeys = pClient.findIdsByColumn(entityMetadata.getSchema(), joinTableName, joinColumnName,
+                        inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());
+                List parents = delegator.find(entity.getClass(), pKeys);
+                PropertyAccessorHelper.set(obj, biDirectionalField,
+                        ObjectUtils.getFieldInstance(parents, biDirectionalField));
+            }
+
+            childrenEntities.add(obj);
+        }
+
+        Field childField = relation.getProperty();
+
+        try
+        {
+            PropertyAccessorHelper.set(
+                    entity,
+                    childField,
+                    PropertyAccessorHelper.isCollection(childField.getType()) ? ObjectUtils.getFieldInstance(
+                            childrenEntities, childField) : childrenEntities.get(0));
+            PersistenceCacheManager.addEntityToPersistenceCache(entity, delegator, entityId);
+        }
+        catch (PropertyAccessException ex)
+        {
+            throw new EntityReaderException(ex);
+        }
     }
 
     /**

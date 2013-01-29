@@ -20,6 +20,7 @@
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>
+			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 		</properties>
 	</persistence-unit>
 </persistence>

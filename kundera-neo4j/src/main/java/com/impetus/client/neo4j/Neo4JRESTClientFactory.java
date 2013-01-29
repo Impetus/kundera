@@ -52,7 +52,7 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        log.info("Getting Service root for Neo4J REST connection");
+        if(log.isInfoEnabled()) log.info("Getting Service root for Neo4J REST connection");
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
@@ -91,7 +91,7 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
         ClientResponse response = (ClientResponse) builder.get(ClientResponse.class);
         
         if(response.getStatus() == 200) {
-            log.info(String.format("GET on [%s], status code [%d]", SERVER_ROOT_URI, response.getStatus()));            
+            if(log.isInfoEnabled()) log.info(String.format("GET on [%s], status code [%d]", SERVER_ROOT_URI, response.getStatus()));            
         }
         else
         {

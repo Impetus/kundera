@@ -56,11 +56,13 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
+import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -113,6 +115,7 @@ public class PersistenceDelegator
     private boolean enableFlush;
 
     private Coordinator coordinator;
+
     /**
      * Instantiates a new persistence delegator.
      * 

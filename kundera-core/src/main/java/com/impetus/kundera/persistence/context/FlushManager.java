@@ -152,7 +152,7 @@ public class FlushManager
                 // mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                 Node childNode = children.get(nodeLink);
 
-                if (!childNode.isTraversed())
+                if (childNode != null && !childNode.isTraversed())
                 {
                     addNodesToFlushStack(childNode, eventType);
                 }
