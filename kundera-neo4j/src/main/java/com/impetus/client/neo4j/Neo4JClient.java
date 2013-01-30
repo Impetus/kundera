@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,22 +32,21 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.ReadableIndex;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexManager;
 
 import com.impetus.client.neo4j.index.AutoIndexing;
 import com.impetus.client.neo4j.query.Neo4JQuery;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
 import com.impetus.kundera.persistence.TransactionResource;
@@ -260,13 +260,12 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        if(log.isDebugEnabled()) log.debug("Persisting " + entity);
-
+        if(log.isDebugEnabled()) log.debug("Persisting " + entity);        
+        
         //All Modifying Neo4J operations must be executed within a transaction
         checkActiveTransaction();     
         
-        GraphDatabaseService graphDb = factory.getConnection();
-        AutoIndexing autoIndexing = new AutoIndexing();
+        GraphDatabaseService graphDb = factory.getConnection();  
 
         try
         {
@@ -307,24 +306,18 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                             
                                 }
                             }
-                        }
-
-                        // TODO: If relationship auto-indexing is disabled,
-                        // manually index this relationship
-                        if (!autoIndexing.isRelationshipAutoIndexingEnabled(graphDb))
-                        {
-                                        
-                        }
+                            EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                            
+                            //After relationship creation, manually index it if desired
+                            manuallyIndexRelationship(relationMetadata, graphDb, relationship);
+                        }                     
                     }
 
                 }
             }
 
-            // TODO: If Node auto-indexing is disabled, manually index this node
-            if (!autoIndexing.isNodeAutoIndexingEnabled(graphDb))
-            {
-
-            }
+            //After node creation, mManually index this node, if desired
+            manuallyIndexNode(entityMetadata, graphDb, node);
         }
         catch (Exception e)
         {            
@@ -332,20 +325,10 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             throw new PersistenceException(e);
         }
     }
+
     
-
-    private boolean isEntityForNeo4J(EntityMetadata entityMetadata)
-    {
-        String persistenceUnit = entityMetadata.getPersistenceUnit();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        String clientFactory = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
-        if (clientFactory.indexOf("com.impetus.client.neo4j") >= 0)
-        {
-            return true;
-        }
-        return false;
-    }
-
+    
+    
     @Override
     public void bind(TransactionResource resource)
     {

@@ -18,6 +18,8 @@ package com.impetus.client.neo4j;
 import java.util.List;
 import java.util.Map;
 
+import org.neo4j.graphdb.Node;
+
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
@@ -126,8 +128,5 @@ public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuer
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
     }
-
     
-    
-
 }
