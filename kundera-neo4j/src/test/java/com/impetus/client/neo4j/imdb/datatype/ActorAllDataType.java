@@ -141,7 +141,7 @@ public class ActorAllDataType
         this.graduationDay = graduationDay;        
     }
     
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY) 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<RoleAllDataType, MovieAllDataType> movies;
     

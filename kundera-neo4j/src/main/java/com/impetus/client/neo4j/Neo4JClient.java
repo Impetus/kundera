@@ -20,9 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
-import javax.persistence.metamodel.Attribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,20 +33,14 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexManager;
 
-import com.impetus.client.neo4j.index.AutoIndexing;
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -113,14 +108,18 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             {
                 Class<?> targetEntityClass = relation.getTargetEntity();
                 EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);                
-                Field property = relation.getProperty();
-                //Method putMethod = property.getType().getMethod("put", new Class[]{Object.class, Object.class});
+                Field property = relation.getProperty();       
                 
                 
                 if (relation.getPropertyType().isAssignableFrom(Map.class)
                         && relation.getType().equals(ForeignKey.MANY_TO_MANY) 
                         && isEntityForNeo4J(targetEntityMetadata))
                 {
+                    
+                    if(relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
+                    {
+                        continue;
+                    }
                     
                     Map targetEntitiesMap = new HashMap();                   
 

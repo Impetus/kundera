@@ -149,6 +149,7 @@ public class IMDBCRUDAndQueryTest
     private void findById()
     {
         //Find actor by ID
+        em.clear();
         Actor actor1 = em.find(Actor.class, 1);
         Actor actor2 = em.find(Actor.class, 2);
         
