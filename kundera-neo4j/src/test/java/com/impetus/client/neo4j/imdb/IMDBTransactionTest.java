@@ -59,13 +59,15 @@ public class IMDBTransactionTest
     @After
     public void tearDown() throws Exception
     {
+        
+        
         em.close();
         emf.close();
     }  
     
     
     
-    //@Test
+    @Test
     public void withTransaction()
     {
         try
@@ -79,7 +81,7 @@ public class IMDBTransactionTest
             em.persist(actor1);
             em.persist(actor2);             
             em.getTransaction().commit();            
-            em.clear();
+            
             
             /** Find records (Doesn't need transaction) */
             Actor actor11 = em.find(Actor.class, 1);
@@ -122,7 +124,7 @@ public class IMDBTransactionTest
         
     }
     
-    //@Test
+    @Test
     public void withoutTransaction()
     {        
             /** Prepare data */
@@ -133,11 +135,11 @@ public class IMDBTransactionTest
             {
                 em.persist(actor1);
                 em.persist(actor2);           
-                
+                Assert.fail();
             }
             catch (Exception e)
             {
-                Assert.assertTrue(e.getCause().toString().indexOf(NotInTransactionException.class.getSimpleName()) >= 0);
+                Assert.assertTrue(e.getMessage().toString().indexOf("transaction") >= 0);
             }
             
             /** Find records */
@@ -145,10 +147,15 @@ public class IMDBTransactionTest
             Actor actor11 = em.find(Actor.class, 1);
             Actor actor22 = em.find(Actor.class, 2);
             Assert.assertNull(actor11);
-            Assert.assertNull(actor22);       
+            Assert.assertNull(actor22);     
+            
+            em.getTransaction().begin();
+            em.remove(actor1);
+            em.remove(actor2);
+            em.getTransaction().commit();
     }
     
-    //@Test
+    @Test
     public void rollbackBehavior()
     {
         prepareData();
@@ -179,8 +186,10 @@ public class IMDBTransactionTest
             
             em.getTransaction().begin();
             actor1.setName("Amresh");
+            actor2.setName("Amir");
             em.merge(actor1);
             em.merge(null);
+            em.merge(actor2);
             em.getTransaction().commit();
         }
         catch (Exception e)
@@ -188,8 +197,11 @@ public class IMDBTransactionTest
             em.clear();
             Actor actor11 = em.find(Actor.class, 1);
             Actor actor22 = em.find(Actor.class, 2);
-            Assert.assertNull(actor11);
-            Assert.assertNull(actor22);   
+            Assert.assertNotNull(actor11);
+            Assert.assertNotNull(actor22);
+            Assert.assertEquals("Amresh", actor11.getName());
+            Assert.assertNotSame("Amir", actor22.getName());    
+            
         }  
              
     }
