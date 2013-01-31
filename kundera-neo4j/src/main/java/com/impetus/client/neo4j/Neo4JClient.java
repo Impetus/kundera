@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
@@ -195,21 +194,24 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                 return;
             }
 
-            // Remove this particular node
-            node.delete();
-
-            // Remove all relationship edges attached to this node (otherwise an
-            // exception is thrown)
-            for (Relationship relationship : node.getRelationships())
-            {
-                relationship.delete();
-            }            
+            // Remove this particular node, if not already deleted in current transaction
+            if(! ((Neo4JTransaction)resource).containsNodeId(node.getId())) {
+                node.delete();
+                
+                // Remove all relationship edges attached to this node (otherwise an
+                // exception is thrown)
+                for (Relationship relationship : node.getRelationships())
+                {
+                    relationship.delete();
+                }
+                
+                ((Neo4JTransaction)resource).addNodeId(node.getId());
+            }     
         }
         catch (Exception e)
         {
             log.error("Error while removing entity. Details:" + e.getMessage());
-        }      
-
+        }
     }
 
     @Override

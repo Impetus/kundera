@@ -28,6 +28,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.collection.internal.PersistentSet;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -67,12 +70,13 @@ final class AssociationBuilder
      * @param relation
      */
     void populateRelationForM2M(Object entity, EntityMetadata entityMetadata, PersistenceDelegator delegator,
-            Relation relation)
+            Relation relation, Object relObject)
     {
         //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
         if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
         {
-           if(relation.isRelatedViaJoinTable())
+           if(relation.isRelatedViaJoinTable() && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet
+                   || relObject instanceof PersistentCollection))
            {
                populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
            }
@@ -82,21 +86,22 @@ final class AssociationBuilder
            } 
             
         }
-        else if(relation.getPropertyType().isAssignableFrom(Map.class))
+        else if(relation.getPropertyType().isAssignableFrom(Map.class) && relObject instanceof Map)
         {
-            /*if(relation.isRelatedViaJoinTable())
+            if(relation.isRelatedViaJoinTable())
             {
                 //TODO: Implement Map relationships via Join Table (not supported as of now)
             }
             else
             {
                 EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-                Client childClient = delegator.getClient(childMetadata);
-                Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-                List<Object> relationObjects = childClient.findByRelation(relation.getProperty().getName(), id, entityMetadata.getEntityClazz());
                 
-                System.out.println(relationObjects);
-            }*/
+                for(Object child : ((Map)relObject).values())
+                {
+                    Object childId = PropertyAccessorHelper.getId(child, childMetadata);
+                    PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId); 
+                }
+            }
         }       
 
     }

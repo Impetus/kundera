@@ -15,6 +15,9 @@
  */
 package com.impetus.client.neo4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -27,9 +30,16 @@ import com.impetus.kundera.persistence.TransactionResource;
  */
 public class Neo4JTransaction implements TransactionResource
 {
+    /** Whether this transaction is currently in progress */
     private boolean isTransactionInProgress;  
     
+    /** IDs of nodes participating in this transaction */
+    private List<Long> nodeIds;
+    
+    /** Instance of {@link GraphDatabaseService} from which this transaction was spawned */
     GraphDatabaseService graphDb = null;
+    
+    /** Neo4J Transaction instance */
     Transaction tx = null;
     
     @Override
@@ -38,6 +48,7 @@ public class Neo4JTransaction implements TransactionResource
         if(graphDb != null && ! isTransactionInProgress)
         {
             tx = graphDb.beginTx();
+            nodeIds = new ArrayList<Long>();            
         }
         
         isTransactionInProgress = true;
@@ -50,6 +61,7 @@ public class Neo4JTransaction implements TransactionResource
         {
             tx.success();
             tx.finish();
+            nodeIds.clear();
         }
         
         isTransactionInProgress = false;
@@ -62,8 +74,8 @@ public class Neo4JTransaction implements TransactionResource
         {
             tx.failure();
             tx.finish();
-        }
-        
+            nodeIds.clear();
+        }        
         
         tx = null;
         isTransactionInProgress = false;
@@ -101,6 +113,32 @@ public class Neo4JTransaction implements TransactionResource
     public void setGraphDb(GraphDatabaseService graphDb)
     {
         this.graphDb = graphDb;
-    } 
+    }
 
+    /**
+     * @return the nodeIds
+     */
+    public List<Long> getNodeIds()
+    {
+        return nodeIds;
+    }
+
+    /**
+     * @param nodeIds the nodeIds to set
+     */
+    public void addNodeId(Long nodeId)
+    {
+        if(nodeIds == null)
+        {
+            nodeIds = new ArrayList<Long>();
+        }
+        nodeIds.add(nodeId);
+    }
+    
+    public boolean containsNodeId(Long nodeId)
+    {
+        if(nodeIds == null) return false;
+        
+        return nodeIds.contains(nodeId);
+    }
 }

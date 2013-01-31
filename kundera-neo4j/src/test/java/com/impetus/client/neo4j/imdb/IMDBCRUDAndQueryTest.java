@@ -103,6 +103,17 @@ public class IMDBCRUDAndQueryTest
        
     }
     
+    private void findById()
+    {
+        //Find actor by ID
+        em.clear();
+        Actor actor1 = em.find(Actor.class, 1);
+        Actor actor2 = em.find(Actor.class, 2);
+        
+        assertActors(actor1, actor2);  
+        
+    }
+    
     private void merge()
     {
         Actor actor1 = em.find(Actor.class, 1);
@@ -135,7 +146,7 @@ public class IMDBCRUDAndQueryTest
         
         em.getTransaction().begin();
         em.remove(actor1);
-        //em.remove(actor2);
+        em.remove(actor2);
         em.getTransaction().commit();
         
         em.clear(); //clear cache
@@ -143,19 +154,10 @@ public class IMDBCRUDAndQueryTest
         Actor actor2AfterDeletion = em.find(Actor.class, 2);
         
         Assert.assertNull(actor1AfterDeletion);
-        //Assert.assertNull(actor2AfterDeletion);
+        Assert.assertNull(actor2AfterDeletion);
     }
     
-    private void findById()
-    {
-        //Find actor by ID
-        em.clear();
-        Actor actor1 = em.find(Actor.class, 1);
-        Actor actor2 = em.find(Actor.class, 2);
-        
-        assertActors(actor1, actor2);  
-        
-    }
+    
 
     /**
      * @param actor1
@@ -198,8 +200,6 @@ public class IMDBCRUDAndQueryTest
         Map<Role, Movie> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
-    }
-    
-    
+    }  
 
 }

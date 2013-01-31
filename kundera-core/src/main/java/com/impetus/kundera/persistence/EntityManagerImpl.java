@@ -242,7 +242,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
         if (e == null)
         {
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new IllegalArgumentException("Entity to be merged must not be null.");
         }
 

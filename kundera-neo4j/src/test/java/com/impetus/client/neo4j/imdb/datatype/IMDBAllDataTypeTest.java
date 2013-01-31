@@ -101,14 +101,14 @@ public class IMDBAllDataTypeTest
         
         em.getTransaction().begin();
         em.remove(actor1);
-        //em.remove(actor2);
+        em.remove(actor2);
         em.getTransaction().commit();
         
         em.clear();
         ActorAllDataType actor11 = em.find(ActorAllDataType.class, 1);
         ActorAllDataType actor22 = em.find(ActorAllDataType.class, 2);
         Assert.assertNull(actor11);
-        //Assert.assertNull(actor22);
+        Assert.assertNull(actor22);
     }
     
     private void assertActors(ActorAllDataType actor1, ActorAllDataType actor2)
