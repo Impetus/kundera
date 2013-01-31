@@ -64,7 +64,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     private Neo4JClientFactory factory;
 
     private EntityReader reader;
-
+    
     private GraphEntityMapper mapper;
     
     private TransactionResource resource;
@@ -172,6 +172,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     @Override
     public void close()
     {
+        //Closure is internally handled by Neo4J
     }
 
     /**
@@ -224,26 +225,26 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue)
     {
-        return null;
+        throw new PersistenceException("Operation not supported for Neo4J");
     }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        return null;
+        throw new PersistenceException("Operation not supported for Neo4J");
     }
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
+        throw new PersistenceException("Operation not supported for Neo4J");
     }
 
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        System.out.println(colName);
-        return null;
+        throw new PersistenceException("Operation not supported for Neo4J");
     }
 
     @Override
@@ -258,6 +259,9 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         return null;
     }
 
+    /**
+     * Writes an entity to database
+     */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -303,7 +307,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                     String relPropertyName = f.getAnnotation(Column.class) != null ? f.getAnnotation(
                                             Column.class).name() : f.getName();
                                     Object value = PropertyAccessorHelper.getObject(relationshipObj, f);
-                                    relationship.setProperty(relPropertyName, mapper.toNeo4JObject(value));
+                                    relationship.setProperty(relPropertyName, mapper.toNeo4JProperty(value));
                                             
                                 }
                             }
@@ -329,7 +333,9 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
     
     
-    
+    /**
+     * Binds Transaction resource to this client
+     */
     @Override
     public void bind(TransactionResource resource)
     {

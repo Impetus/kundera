@@ -52,12 +52,16 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * Responsible for converting Neo4J graph (nodes+relationships) into JPA entities and vice versa 
  * @author amresh.singh
  */
-public class GraphEntityMapper
+public final class GraphEntityMapper
 {
     
     /** The log. */
     private static Log log = LogFactory.getLog(GraphEntityMapper.class);
 
+    /**
+     * Fetches(and converts) {@link Node} instance from Entity object
+     * 
+     */
     public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m, boolean isUpdate)
     {
         AutoIndexing autoIndexing = new AutoIndexing();
@@ -92,7 +96,7 @@ public class GraphEntityMapper
                 Object value = PropertyAccessorHelper.getObject(entity, field);                
                 if(value != null)
                 {
-                    node.setProperty(columnName, toNeo4JObject(value));
+                    node.setProperty(columnName, toNeo4JProperty(value));
                 }
                                 
             }           
@@ -107,6 +111,10 @@ public class GraphEntityMapper
         return node;
     }
 
+    /**
+     * 
+     * Converts a {@link Node} instance to entity object
+     */
     public Object toEntity(Node node, EntityMetadata m)
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -151,6 +159,10 @@ public class GraphEntityMapper
         return entity;
     }
     
+    /**
+     * 
+     * Converts a {@link Relationship} object to corresponding entity object
+     */
     public Object toEntity(Relationship relationship, EntityMetadata topLevelEntityMetadata, Relation relation)
     {
         EntityMetadata relationshipEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getMapKeyJoinClass());
@@ -199,6 +211,10 @@ public class GraphEntityMapper
         return entity;
     }
     
+    /**
+     * 
+     * Gets (if available) or creates a node for the given entity
+     */
     private Node getOrCreateNodeWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
     {
         Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
@@ -216,6 +232,9 @@ public class GraphEntityMapper
         return factory.getOrCreate(idFieldName, id );
     }
     
+    /**
+     * Gets (if available) or creates a relationship for the given entity
+     */
     private Relationship getOrCreateRelationshipWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
     {
         Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
@@ -239,8 +258,13 @@ public class GraphEntityMapper
         return factory.getOrCreate(idFieldName, id);
     }
     
-    
-    public Object toNeo4JObject(Object source)
+    /**
+     * Converts a given field value to an object that is Neo4J compatible
+     * 
+     * @param source
+     * @return
+     */
+    public Object toNeo4JProperty(Object source)
     {
         
         Class<?> sourceClass = source.getClass();
@@ -260,6 +284,9 @@ public class GraphEntityMapper
         return source;
     } 
     
+    /**
+     * Converts a property stored in Neo4J (nodes or relationship) to corresponding entity field value
+     */
     public Object fromNeo4JObject(Object source, Field field)
     {    
         Class<?> targetClass = field.getType();
@@ -287,6 +314,9 @@ public class GraphEntityMapper
         
     }
     
+    /**
+     * Searches a node from the database for a given key
+     */
     public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb)
     {
         Node node = null;

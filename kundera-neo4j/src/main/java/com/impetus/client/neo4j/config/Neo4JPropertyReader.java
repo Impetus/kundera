@@ -64,6 +64,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
      */
     public class Neo4JSchemaMetadata
     {
+        private static final String NEO4J_DATASTORE = "neo4j";
         private ClientProperties clientProperties;
 
         public Neo4JSchemaMetadata()
@@ -98,7 +99,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
             {
                 for (DataStore dataStore : getClientProperties().getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("neo4j"))
+                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase(NEO4J_DATASTORE))
                     {
                         return dataStore;
                     }

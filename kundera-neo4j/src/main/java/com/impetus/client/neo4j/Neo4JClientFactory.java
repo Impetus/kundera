@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -31,6 +32,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -69,7 +71,11 @@ public class Neo4JClientFactory extends GenericClientFactory
 
         Properties props = puMetadata.getProperties();
         String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
-
+        if(StringUtils.isEmpty(datastoreFilePath))
+        {
+            throw new PersistenceUnitConfigurationException("For Neo4J, it's mandatory to specify kundera.datastore.file.path property in persistence.xml");
+        }
+        
         Neo4JSchemaMetadata nsmd = Neo4JPropertyReader.nsmd;
         ClientProperties cp = nsmd != null ? nsmd.getClientProperties() : null;
         
@@ -129,9 +135,13 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        
+        //Not required for multithreaded clients
     }
     
+    /**
+     * Retrieves {@link GraphDatabaseService} instance
+     * @return
+     */
     GraphDatabaseService getConnection()
     {
         return (GraphDatabaseService) getConnectionPoolOrConnection();
