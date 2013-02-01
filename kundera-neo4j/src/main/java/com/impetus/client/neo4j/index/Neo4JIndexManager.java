@@ -34,7 +34,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Provides functionalities specific to Auto-indexing 
+ * Provides functionalities specific to Auto/ Manual Indexing 
  * @author amresh.singh
  */
 public class Neo4JIndexManager
@@ -86,28 +86,11 @@ public class Neo4JIndexManager
             Node node)
     {        
         if (! isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
-        {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
-            IndexManager index = graphDb.index();
-            Index<Node> nodeIndex = index.forNodes(entityMetadata.getIndexName());
-            
-            //ID attribute has to be indexed necessarily
-            nodeIndex.add(node, entityMetadata.getIdAttribute().getName(), node.getProperty(entityMetadata.getIdAttribute().getName()));
-            
-            // Index all other fields, for whom indexing is enabled
-            for (Attribute attribute : metaModel.entity(entityMetadata.getEntityClazz()).getSingularAttributes())
-            {
-                Field field = (Field) attribute.getJavaMember();
-                if (!attribute.isCollection() && !attribute.isAssociation()
-                        && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
-                {
-                    nodeIndex.add(node, field.getName(), node.getProperty(field.getName()));
-                }
-            }
-
+        {           
+            Index<Node> nodeIndex = graphDb.index().forNodes(entityMetadata.getIndexName());            
+            addNodeIndex(entityMetadata, node, nodeIndex);
         }
-    }  
+    }
     
     /**
      * If relationship auto-indexing is disabled, manually index this relationship
@@ -118,32 +101,62 @@ public class Neo4JIndexManager
      */
     public void manuallyIndexRelationship(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Relationship relationship)
-    {        
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
-        
+    {       
         if (! isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
         {
-            
-            IndexManager index = graphDb.index();
-            Index<Relationship> relationshipIndex = index.forRelationships(entityMetadata.getIndexName());
-            
-            //ID attribute has to be indexed first
-            relationshipIndex.add(relationship, entityMetadata.getIdAttribute().getName(), relationship.getProperty(entityMetadata.getIdAttribute().getName()));
-            
-            //Index all other fields, for whom indexing is enabled
-            for (Attribute attribute : metaModel.entity(entityMetadata.getEntityClazz()).getSingularAttributes())
-            {
-                Field field = (Field) attribute.getJavaMember();
-                if (!attribute.isCollection() && !attribute.isAssociation()
-                        && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
-                {
-                    relationshipIndex.add(relationship, field.getName(), relationship.getProperty(field.getName()));
-                }
-            }
-            
+            Index<Relationship> relationshipIndex = graphDb.index().forRelationships(entityMetadata.getIndexName());
+            addRelationshipIndex(entityMetadata, relationship, relationshipIndex);            
         }
-    }
+    } 
+
+    
+    
+    /**
+     * If node auto-indexing is disabled, Update index for this node manually
+     * @param entityMetadata
+     * @param graphDb
+     * @param autoIndexing
+     * @param node
+     */
+    public void manuallyUpdateNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+            Node node)
+    {        
+        if (! isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
+        {
+            Index<Node> nodeIndex = graphDb.index().forNodes(entityMetadata.getIndexName());
+            
+            //Remove all exiting node entries from Index
+            nodeIndex.remove(node);
+
+            //Recreate fresh index on this node
+            addNodeIndex(entityMetadata, node, nodeIndex);            
+        }
+        
+    } 
+    
+    /**
+     * If relationship auto-indexing is disabled, Update index for this relationship manually
+     * @param entityMetadata
+     * @param graphDb
+     * @param autoIndexing
+     * @param node
+     */
+    public void manuallyUpdateRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+            Relationship relationship)
+    {        
+        if (! isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
+        {
+            Index<Relationship> relationshipIndex = graphDb.index().forRelationships(entityMetadata.getIndexName());
+            
+            //Remove all existing relationship entries from Index 
+            relationshipIndex.remove(relationship);
+            
+            //Recreate fresh index on this relationship
+            addRelationshipIndex(entityMetadata, relationship, relationshipIndex);
+        }
+    } 
+    
+    
     
     /**
      * Deletes a {@link Node} from manually created index if auto-indexing is disabled
@@ -174,6 +187,59 @@ public class Neo4JIndexManager
         {
             Index<Relationship> relationshipIndex = graphDb.index().forRelationships(entityMetadata.getIndexName());
             relationshipIndex.remove(relationship);
+        }
+    }
+    
+    /**
+     * Adds Node Index for all singular attributes (including ID) of a given entity
+     * @param entityMetadata
+     * @param node
+     * @param metaModel
+     * @param nodeIndex
+     */
+    private void addNodeIndex(EntityMetadata entityMetadata, Node node, Index<Node> nodeIndex)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());    
+        
+        //ID attribute has to be indexed necessarily
+        nodeIndex.add(node, entityMetadata.getIdAttribute().getName(), node.getProperty(entityMetadata.getIdAttribute().getName()));
+        
+        // Index all other fields, for whom indexing is enabled
+        for (Attribute attribute : metaModel.entity(entityMetadata.getEntityClazz()).getSingularAttributes())
+        {
+            Field field = (Field) attribute.getJavaMember();
+            if (!attribute.isCollection() && !attribute.isAssociation()
+                    && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
+            {
+                nodeIndex.add(node, field.getName(), node.getProperty(field.getName()));
+            }
+        }
+    } 
+    
+    /**
+     * Adds Relationship Index for all singular attributes (including ID) of a given relationship entity
+     * @param entityMetadata
+     * @param graphDb
+     * @param relationship
+     */
+    private void addRelationshipIndex(EntityMetadata entityMetadata, Relationship relationship, Index<Relationship> relationshipIndex)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());       
+        
+        //ID attribute has to be indexed first
+        relationshipIndex.add(relationship, entityMetadata.getIdAttribute().getName(), relationship.getProperty(entityMetadata.getIdAttribute().getName()));
+        
+        //Index all other fields, for whom indexing is enabled
+        for (Attribute attribute : metaModel.entity(entityMetadata.getEntityClazz()).getSingularAttributes())
+        {
+            Field field = (Field) attribute.getJavaMember();
+            if (!attribute.isCollection() && !attribute.isAssociation()
+                    && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
+            {
+                relationshipIndex.add(relationship, field.getName(), relationship.getProperty(field.getName()));
+            }
         }
     }
 

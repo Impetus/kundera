@@ -325,7 +325,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
                             
                             //After relationship creation, manually index it if desired
-                            indexer.manuallyIndexRelationship(relationMetadata, graphDb, relationship);
+                            if(! isUpdate)
+                            {
+                                indexer.manuallyIndexRelationship(relationMetadata, graphDb, relationship);
+                            }
+                            else
+                            {
+                                indexer.manuallyUpdateRelationshipIndex(relationMetadata, graphDb, relationship);
+                            }
+                            
                         }                     
                     }
 
@@ -333,7 +341,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             }
 
             //After node creation, manually index this node, if desired
-            indexer.manuallyIndexNode(entityMetadata, graphDb, node);
+            if(! isUpdate)
+            {
+                indexer.manuallyIndexNode(entityMetadata, graphDb, node);
+            }
+            else
+            {
+                indexer.manuallyUpdateNodeIndex(entityMetadata, graphDb, node);
+            }
+            
         }
         catch (Exception e)
         {            
