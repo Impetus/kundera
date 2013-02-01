@@ -26,6 +26,7 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.action.internal.EntityDeleteAction;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -87,6 +88,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         // All client properties currently are those that are specified in
         // neo4j.properties (or custom XML configuration file according to Kundera format)
         // No custom property currently defined by Kundera, leaving empty
+        if (log.isDebugEnabled())
+            log.debug("No custom property to set for Neo4J");
     }
 
     /**
@@ -95,8 +98,14 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     @Override
     public Object find(Class entityClass, Object key)
     {
-
-        GraphDatabaseService graphDb = factory.getConnection();
+        GraphDatabaseService graphDb = null;
+        if(resource != null)
+        {
+            graphDb = getConnection();
+        }
+        
+        if(graphDb == null) graphDb = factory.getConnection();        
+        
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
 
         Object entity = null;
@@ -185,45 +194,44 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      */
     @Override
     public void delete(Object entity, Object key)
-    {
-        GraphDatabaseService graphDb = factory.getConnection();
-        checkActiveTransaction(); 
+    {     
+        // All Modifying Neo4J operations must be executed within a transaction
+        checkActiveTransaction();
 
-        try
-        {
-            // Find Node for this particular entity
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-            Node node = mapper.searchNode(key, m, graphDb);
-            if (node == null)
+        GraphDatabaseService graphDb = getConnection();
+
+        // Find Node for this particular entity
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        Node node = mapper.searchNode(key, m, graphDb);
+        if (node != null)
+        {            
+            // Remove this particular node, if not already deleted in current
+            // transaction
+            if (!((Neo4JTransaction) resource).containsNodeId(node.getId()))
             {
-                if(log.isDebugEnabled()) log.debug("Entity to be deleted doesn't exist in graph. Doing nothing");
-                return;
-            }
-
-            // Remove this particular node, if not already deleted in current transaction
-            if(! ((Neo4JTransaction) resource).containsNodeId(node.getId())) {
                 node.delete();
-                
-                //Manually remove node index if applicable
-                indexer.manuallyDeleteNodeIndex(m, graphDb, node);
-                
+
+                // Manually remove node index if applicable
+                indexer.deleteNodeIndex(m, graphDb, node);
+
                 // Remove all relationship edges attached to this node (otherwise an
                 // exception is thrown)
                 for (Relationship relationship : node.getRelationships())
                 {
                     relationship.delete();
-                    
-                    //Manually remove relationship index if applicable
-                    indexer.manuallyDeleteRelationshipIndex(m, graphDb, relationship);
+
+                    // Manually remove relationship index if applicable
+                    indexer.deleteRelationshipIndex(m, graphDb, relationship);
                 }
-                
+
                 ((Neo4JTransaction) resource).addNodeId(node.getId());
-            }     
+            }
         }
-        catch (Exception e)
+        else
         {
-            log.error("Error while removing entity. Details:" + e.getMessage());
-        }
+            if (log.isDebugEnabled())
+                log.debug("Entity to be deleted doesn't exist in graph. Doing nothing");
+        }       
     }
 
     @Override
@@ -279,9 +287,9 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if(log.isDebugEnabled()) log.debug("Persisting " + entity);        
         
         //All Modifying Neo4J operations must be executed within a transaction
-        checkActiveTransaction();     
+        checkActiveTransaction();  
         
-        GraphDatabaseService graphDb = factory.getConnection();  
+        GraphDatabaseService graphDb = getConnection();
 
         try
         {
@@ -327,11 +335,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             //After relationship creation, manually index it if desired
                             if(! isUpdate)
                             {
-                                indexer.manuallyIndexRelationship(relationMetadata, graphDb, relationship);
+                                indexer.indexRelationship(relationMetadata, graphDb, relationship);
                             }
                             else
                             {
-                                indexer.manuallyUpdateRelationshipIndex(relationMetadata, graphDb, relationship);
+                                indexer.updateRelationshipIndex(relationMetadata, graphDb, relationship);
                             }
                             
                         }                     
@@ -343,11 +351,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             //After node creation, manually index this node, if desired
             if(! isUpdate)
             {
-                indexer.manuallyIndexNode(entityMetadata, graphDb, node);
+                indexer.indexNode(entityMetadata, graphDb, node);
             }
             else
             {
-                indexer.manuallyUpdateNodeIndex(entityMetadata, graphDb, node);
+                indexer.updateNodeIndex(entityMetadata, graphDb, node);
             }
             
         }
@@ -388,6 +396,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         {
             throw new NotInTransactionException("All Modifying Neo4J operations must be executed within a transaction");
         }
+    }
+    
+    private GraphDatabaseService getConnection()
+    {
+        return ((Neo4JTransaction) resource).getGraphDb();
     }
 
 }

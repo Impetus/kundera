@@ -82,7 +82,7 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void manuallyIndexNode(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void indexNode(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Node node)
     {        
         if (! isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
@@ -99,7 +99,7 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void manuallyIndexRelationship(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void indexRelationship(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Relationship relationship)
     {       
         if (! isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
@@ -118,7 +118,7 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void manuallyUpdateNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void updateNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Node node)
     {        
         if (! isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
@@ -141,7 +141,7 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void manuallyUpdateRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void updateRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Relationship relationship)
     {        
         if (! isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
@@ -164,7 +164,7 @@ public class Neo4JIndexManager
      * @param graphDb
      * @param node
      */
-    public void manuallyDeleteNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void deleteNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Node node)
     {        
         if (! isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
@@ -180,7 +180,7 @@ public class Neo4JIndexManager
      * @param graphDb
      * @param relationship
      */
-    public void manuallyDeleteRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
+    public void deleteRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
             Relationship relationship)
     {        
         if (! isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())

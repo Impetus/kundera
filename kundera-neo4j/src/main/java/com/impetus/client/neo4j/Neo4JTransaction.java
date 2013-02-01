@@ -113,15 +113,7 @@ public class Neo4JTransaction implements TransactionResource
     public void setGraphDb(GraphDatabaseService graphDb)
     {
         this.graphDb = graphDb;
-    }
-
-    /**
-     * @return the nodeIds
-     */
-    public List<Long> getNodeIds()
-    {
-        return nodeIds;
-    }
+    }  
 
     /**
      * @param nodeIds the nodeIds to set
