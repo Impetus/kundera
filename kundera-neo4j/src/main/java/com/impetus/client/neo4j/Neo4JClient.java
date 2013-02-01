@@ -33,6 +33,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Relationship;
 
+import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
@@ -68,19 +69,23 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     private GraphEntityMapper mapper;
     
     private TransactionResource resource;
+    
+    private Neo4JIndexManager indexer;
 
     Neo4JClient(final Neo4JClientFactory factory)
     {
         this.factory = factory;
         reader = new Neo4JEntityReader();
-        mapper = new GraphEntityMapper();
+        indexer = new Neo4JIndexManager();
+        mapper = new GraphEntityMapper(indexer);
+        
     }
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         // All client properties currently are those that are specified in
-        // neo4j.properties.
+        // neo4j.properties (or custom XML configuration file according to Kundera format)
         // No custom property currently defined by Kundera, leaving empty
     }
 
@@ -196,17 +201,23 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             }
 
             // Remove this particular node, if not already deleted in current transaction
-            if(! ((Neo4JTransaction)resource).containsNodeId(node.getId())) {
+            if(! ((Neo4JTransaction) resource).containsNodeId(node.getId())) {
                 node.delete();
+                
+                //Manually remove node index if applicable
+                indexer.manuallyDeleteNodeIndex(m, graphDb, node);
                 
                 // Remove all relationship edges attached to this node (otherwise an
                 // exception is thrown)
                 for (Relationship relationship : node.getRelationships())
                 {
                     relationship.delete();
+                    
+                    //Manually remove relationship index if applicable
+                    indexer.manuallyDeleteRelationshipIndex(m, graphDb, relationship);
                 }
                 
-                ((Neo4JTransaction)resource).addNodeId(node.getId());
+                ((Neo4JTransaction) resource).addNodeId(node.getId());
             }     
         }
         catch (Exception e)
@@ -314,15 +325,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
                             
                             //After relationship creation, manually index it if desired
-                            manuallyIndexRelationship(relationMetadata, graphDb, relationship);
+                            indexer.manuallyIndexRelationship(relationMetadata, graphDb, relationship);
                         }                     
                     }
 
                 }
             }
 
-            //After node creation, mManually index this node, if desired
-            manuallyIndexNode(entityMetadata, graphDb, node);
+            //After node creation, manually index this node, if desired
+            indexer.manuallyIndexNode(entityMetadata, graphDb, node);
         }
         catch (Exception e)
         {            

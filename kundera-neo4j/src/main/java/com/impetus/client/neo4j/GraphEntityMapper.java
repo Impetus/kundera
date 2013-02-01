@@ -33,11 +33,12 @@ import org.apache.commons.logging.LogFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
 
-import com.impetus.client.neo4j.index.AutoIndexing;
+import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -57,14 +58,20 @@ public final class GraphEntityMapper
     
     /** The log. */
     private static Log log = LogFactory.getLog(GraphEntityMapper.class);
+    
+    private Neo4JIndexManager indexer;
+    
+    public GraphEntityMapper(Neo4JIndexManager indexer)
+    {
+        this.indexer = indexer;
+    }
 
     /**
      * Fetches(and converts) {@link Node} instance from Entity object
      * 
      */
     public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m, boolean isUpdate)
-    {
-        AutoIndexing autoIndexing = new AutoIndexing();
+    {        
         
         //Construct top level node first, making sure unique ID in the index
         Node node = null;
@@ -100,13 +107,7 @@ public final class GraphEntityMapper
                 }
                                 
             }           
-        }
-        
-        //TODO: If node auto-indexing is disabled, manually index this node
-        if(! autoIndexing.isNodeAutoIndexingEnabled(graphDb))
-        {
-            
-        }
+        }  
         
         return node;
     }
@@ -319,24 +320,18 @@ public final class GraphEntityMapper
      */
     public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb)
     {
-        Node node = null;
-
-        AutoIndexing autoIndexing = new AutoIndexing();
+        Node node = null;  
 
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-        if (autoIndexing.isNodeAutoIndexingEnabled(graphDb))
+        if (indexer.isNodeAutoIndexingEnabled(graphDb))
         {
             // Get the Node auto index
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
             IndexHits<Node> nodesFound = autoNodeIndex.get(idColumnName, key);
-            if (nodesFound.size() == 0)
+            if (nodesFound == null || nodesFound.size() == 0)
             {
                 return null;
-            }
-            /*else if (nodesFound.size() > 1)
-            {
-                throw new EntityReaderException("Possibly corrupt data in Neo4J. Two nodes with the same ID found");
-            }*/
+            }            
             else
             {
                 node = nodesFound.getSingle();
@@ -344,11 +339,20 @@ public final class GraphEntityMapper
         }
         else
         {
-            // TODO: Implement searching within manually created indexes
+            //Searching within manually created indexes
+            Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
+            IndexHits<Node> hits = nodeIndex.get(idColumnName, key);
+            if(hits == null || hits.size() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                node = hits.getSingle();
+            }            
         }
 
         return node;
-    }
-    
+    }  
 
 }
