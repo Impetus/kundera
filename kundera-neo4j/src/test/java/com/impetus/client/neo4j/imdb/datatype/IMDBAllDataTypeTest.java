@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb.datatype;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -29,6 +30,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
+
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case  
@@ -43,6 +49,8 @@ public class IMDBAllDataTypeTest
     ActorAllDataType actor1;
     ActorAllDataType actor2;
     
+    private static final String IMDB_PU = "imdb";
+    
 
     /**
      * @throws java.lang.Exception
@@ -50,7 +58,7 @@ public class IMDBAllDataTypeTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("imdb");
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();        
         
     }
@@ -61,16 +69,20 @@ public class IMDBAllDataTypeTest
     @After
     public void tearDown() throws Exception
     {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
         em.close();
-        emf.close();
+        emf.close(); 
+        
+        if(datastoreFilePath != null) FileUtils.deleteRecursively(new File(datastoreFilePath));
     }  
     
     @Test
     public void testCRUD()
     {
-        insert();
+        /*insert();
         findById();
-        delete();
+        delete();*/
         
     }
     

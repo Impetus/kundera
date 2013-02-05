@@ -21,10 +21,12 @@ import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
@@ -85,32 +87,12 @@ public final class GraphEntityMapper
             node = searchNode(key, m, graphDb);
         }        
         
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-        EntityType entityType = metaModel.entity(m.getEntityClazz());
-        
-        //Iterate over entity attributes
-        Set<Attribute> attributes = entityType.getSingularAttributes();     
-        for(Attribute attribute : attributes)
-        {       
-            Field field = (Field) attribute.getJavaMember();
-            
-            //Set Node level properties
-            if(! attribute.isCollection() && ! attribute.isAssociation())
-            {
-                
-                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
-                Object value = PropertyAccessorHelper.getObject(entity, field);                
-                if(value != null)
-                {
-                    node.setProperty(columnName, toNeo4JProperty(value));
-                }
-                                
-            }           
-        }  
+        populateNodeProperties(entity, m, node);  
         
         return node;
     }
+
+    
 
     /**
      * 
@@ -210,6 +192,101 @@ public final class GraphEntityMapper
         
         
         return entity;
+    }
+    
+    /**
+     * Populates Node properties from Entity object
+     * @param entity
+     * @param m
+     * @param node
+     */
+    public void populateNodeProperties(Object entity, EntityMetadata m, Node node)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        //Iterate over entity attributes
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
+        for(Attribute attribute : attributes)
+        {       
+            Field field = (Field) attribute.getJavaMember();
+            
+            //Set Node level properties
+            if(! attribute.isCollection() && ! attribute.isAssociation())
+            {
+                
+                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
+                Object value = PropertyAccessorHelper.getObject(entity, field);                
+                if(value != null)
+                {
+                    node.setProperty(columnName, toNeo4JProperty(value));
+                }                                
+            }           
+        }
+    }
+    
+    /**
+     * Creates a Map containing all properties (and their values) for a given entity
+     * @param entity
+     * @param m
+     * @return
+     */
+    public Map<String, Object> createNodeProperties(Object entity, EntityMetadata m)
+    {
+        Map<String, Object> props = new HashMap<String, Object>();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        
+        
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        //Iterate over entity attributes
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
+        for(Attribute attribute : attributes)
+        {       
+            Field field = (Field) attribute.getJavaMember();
+            
+            //Set Node level properties
+            if(! attribute.isCollection() && ! attribute.isAssociation())
+            {
+                
+                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
+                Object value = PropertyAccessorHelper.getObject(entity, field);                
+                if(value != null)
+                {
+                    props.put(columnName, toNeo4JProperty(value));                    
+                }                                
+            }           
+        }
+        return props;        
+    }
+    
+    /**
+     * Creates a Map containing all properties (and their values) for a given relationship entity
+     * @param entityMetadata
+     * @param relationEntityMetadata
+     * @param relationshipProperties
+     * @param relationshipEntity
+     */
+    public Map<String, Object> createRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata relationEntityMetadata,
+            Object relationshipEntity)
+    {
+        Map<String, Object> relationshipProperties = new HashMap<String, Object>();
+        
+        for (Field f : relationshipEntity.getClass().getDeclaredFields())
+        {
+            if (!f.getType().equals(entityMetadata.getEntityClazz())
+                    && !f.getType().equals(relationEntityMetadata.getEntityClazz()))
+            {
+                String relPropertyName = f.getAnnotation(Column.class) != null ? f.getAnnotation(
+                        Column.class).name() : f.getName();
+                Object value = PropertyAccessorHelper.getObject(relationshipEntity, f);                                            
+                relationshipProperties.put(relPropertyName, toNeo4JProperty(value));                                           
+            }
+        }
+        return relationshipProperties;
     }
     
     /**
@@ -336,6 +413,7 @@ public final class GraphEntityMapper
             {
                 node = nodesFound.getSingle();
             }
+            nodesFound.close();
         }
         else
         {
@@ -349,7 +427,8 @@ public final class GraphEntityMapper
             else
             {
                 node = hits.getSingle();
-            }            
+            } 
+            hits.close();
         }
 
         return node;

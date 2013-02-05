@@ -95,9 +95,7 @@ public class Neo4JClientFactory extends GenericClientFactory
                 GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(datastoreFilePath);
                 builder.setConfig(config);                
                 
-                graphDb = builder.newGraphDatabase();
-                
-                
+                graphDb = builder.newGraphDatabase();               
                 registerShutdownHook(graphDb);   
             }        
         }        
@@ -108,15 +106,13 @@ public class Neo4JClientFactory extends GenericClientFactory
             registerShutdownHook(graphDb);           
         }       
         
-        
-        
         return graphDb;
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new Neo4JClient(this);
+        return new Neo4JClient(this, externalProperties, persistenceUnit);
     }
 
     @Override
@@ -147,6 +143,11 @@ public class Neo4JClientFactory extends GenericClientFactory
         return (GraphDatabaseService) getConnectionPoolOrConnection();
     }
     
+    void setConnection(GraphDatabaseService graphDb)
+    {
+        setConnectionPoolOrConnection(graphDb);
+    }    
+        
     /**
      * 
      */

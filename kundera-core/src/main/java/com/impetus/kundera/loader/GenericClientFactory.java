@@ -200,6 +200,14 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     {
         return connectionPoolOrConnection;
     }
+    
+    /**
+     * Sets the connection pool or connection.      
+     */
+    protected void setConnectionPoolOrConnection(Object connectionPoolOrConnection)
+    {
+        this.connectionPoolOrConnection = connectionPoolOrConnection;
+    }
 
     /**
      * Sets the persistence unit.

@@ -19,33 +19,50 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.action.internal.EntityDeleteAction;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
+import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
+import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
+import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.neo4j.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
 
+import com.impetus.client.neo4j.config.Neo4JPropertyReader;
+import com.impetus.client.neo4j.config.Neo4JPropertyReader.Neo4JSchemaMetadata;
 import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.client.neo4j.query.Neo4JQuery;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
 import com.impetus.kundera.persistence.TransactionResource;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -55,7 +72,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, TransactionBinder
+public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, TransactionBinder, Batcher
 {
 
     private static Log log = LogFactory.getLog(Neo4JClient.class);
@@ -73,12 +90,14 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     
     private Neo4JIndexManager indexer;
 
-    Neo4JClient(final Neo4JClientFactory factory)
+    Neo4JClient(final Neo4JClientFactory factory, Map<String, Object> puProperties, String persistenceUnit)
     {
+        this.persistenceUnit = persistenceUnit;
         this.factory = factory;
         reader = new Neo4JEntityReader();
         indexer = new Neo4JIndexManager();
         mapper = new GraphEntityMapper(indexer);
+        populateBatchSize(persistenceUnit, puProperties);
         
     }
 
@@ -289,15 +308,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         //All Modifying Neo4J operations must be executed within a transaction
         checkActiveTransaction();  
         
-        GraphDatabaseService graphDb = getConnection();
-
+        GraphDatabaseService graphDb = getConnection();     
+        
         try
         {
 
             // Top level node
             Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata, isUpdate);
 
-            if (rlHolders != null && !rlHolders.isEmpty())
+            if (!rlHolders.isEmpty())
             {
                 for (RelationHolder rh : rlHolders)
                 {
@@ -364,10 +383,169 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             log.error("Error while persisting entity " + entity + ". Details:" + e.getMessage());
             throw new PersistenceException(e);
         }
+    }  
+    
+    @Override
+    public void addBatch(com.impetus.kundera.graph.Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+        if (batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
+    }
+    
+    @Override
+    public int executeBatch()
+    {
+        BatchInserter inserter = getBatchInserter();       
+        BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);        
+        
+        if(inserter == null)
+        {
+            log.error("Unable to create instance of BatchInserter. Opertion will fail");
+            throw new PersistenceException("Unable to create instance of BatchInserter. Opertion will fail");
+        }      
+        
+        if(resource != null && resource.isActive())
+        {
+            log.error("Batch Insertion MUST not be executed in a transaction");
+            throw new PersistenceException("Batch Insertion MUST not be executed in a transaction");
+        }        
+        
+        Map<Object, Long> pkToNodeIdMap = new HashMap<Object, Long>();
+        for (com.impetus.kundera.graph.Node graphNode : nodes)
+        {
+            if (graphNode.isDirty())
+            {
+                //Delete can not be executed in batch, deleting normally
+                if (graphNode.isInState(RemovedState.class))
+                {
+                    delete(graphNode.getData(), graphNode.getEntityId());
+                }
+                else if(graphNode.isUpdate())
+                {
+                    //Neo4J allows only batch insertion, follow usual path for normal updates
+                    persist(graphNode);                   
+                }
+                else
+                {
+                    //Insert node              
+                    Object entity = graphNode.getData();
+                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+                    Object pk = PropertyAccessorHelper.getId(entity, m);
+                    Map<String, Object> nodeProperties = mapper.createNodeProperties(entity, m);
+                    long nodeId = inserter.createNode(nodeProperties);          
+                    pkToNodeIdMap.put(pk, nodeId);
+                    
+                    //Index Node
+                    BatchInserterIndex nodeIndex = indexProvider.nodeIndex(m.getIndexName(), MapUtil.stringMap( "type", "exact"));
+                    nodeIndex.add(nodeId, nodeProperties);           
+                    
+                    
+                    //Insert relationships for this particular node                                        
+                    if (! getRelationHolders(graphNode).isEmpty())
+                    {
+                        for (RelationHolder rh : getRelationHolders(graphNode))
+                        {
+                            // Search Node (to be connected to ) in Neo4J graph
+                            EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
+                                    .getClass());
+                            Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
+                            Long targetNodeId = pkToNodeIdMap.get(targetNodeKey);
+
+                            if (targetNodeId != null)
+                            {
+                                /** Join this node (source node) to target node via relationship */
+                                //Relationship Type
+                                DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
+                                
+                                //Relationship Properties
+                                Map<String, Object> relationshipProperties = null;
+                                Object relationshipObj = rh.getRelationVia();
+                                if (relationshipObj != null)
+                                {
+                                    relationshipProperties = mapper.createRelationshipProperties(m, targetNodeMetadata, relationshipObj);    
+                                }                                
+                                //Finally insert relationship
+                                long relationshipId = inserter.createRelationship(nodeId, targetNodeId, relType, relationshipProperties);   
+                                
+                                //Index this relationship
+                                BatchInserterIndex relationshipIndex = indexProvider.relationshipIndex(targetNodeMetadata.getIndexName(), MapUtil.stringMap( "type", "exact"));
+                                relationshipIndex.add(relationshipId, relationshipProperties);
+                            }
+                        }
+                    }                
+                }
+            }
+        }
+        
+        //Shutdown Batch inserter
+        indexProvider.shutdown();
+        inserter.shutdown();
+        
+        //Restore Graph Database service
+        factory.setConnection((GraphDatabaseService)factory.createPoolOrConnection());
+        
+        return pkToNodeIdMap.size();
     }
 
     
     
+    /**
+     * Returns instance of {@link BatchInserter}
+     */
+    protected BatchInserter getBatchInserter()
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
+        Properties props = puMetadata.getProperties();
+        
+        //Datastore file path
+        String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);        
+        if (StringUtils.isEmpty(datastoreFilePath))
+        {
+            throw new PersistenceUnitConfigurationException(
+                    "For Neo4J, it's mandatory to specify kundera.datastore.file.path property in persistence.xml");
+        } 
+        
+        //Shut down Graph DB, at a time only one service may have lock on DB file
+        if(factory.getConnection() != null)
+        {
+            factory.getConnection().shutdown();
+        }        
+        
+        BatchInserter inserter = null;
+        
+        //Create Batch inserter with configuration if specified
+        Neo4JSchemaMetadata nsmd = Neo4JPropertyReader.nsmd;
+        ClientProperties cp = nsmd != null ? nsmd.getClientProperties() : null;
+        if (cp != null)
+        {
+            DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;        
+            Properties properties = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
+                    .getProperties() : null;
+                    
+            if(properties != null)
+            {
+                Map<String, String> config = new HashMap<String, String>((Map)properties);
+                inserter = BatchInserters.inserter(datastoreFilePath, config);                
+            }
+        }
+        
+        //Create Batch inserter without configuration if not provided
+        if(inserter == null)
+        {
+            inserter = BatchInserters.inserter(datastoreFilePath);     
+        }
+        return inserter;
+    }
+    
+
     /**
      * Binds Transaction resource to this client
      */

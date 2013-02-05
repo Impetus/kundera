@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.io.File;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -25,6 +26,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
+
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case using IMDB example for CRUD and query 
@@ -36,6 +42,8 @@ public class IMDBCRUDAndQueryTest
     EntityManagerFactory emf;
     EntityManager em;   
     
+    private static final String IMDB_PU = "imdb";
+    
 
 
     /**
@@ -43,10 +51,9 @@ public class IMDBCRUDAndQueryTest
      */
     @Before
     public void setUp() throws Exception
-    {
-        emf = Persistence.createEntityManagerFactory("imdb");
-        em = emf.createEntityManager();        
-        
+    {        
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);
+        em = emf.createEntityManager();       
     }
 
     /**
@@ -55,17 +62,21 @@ public class IMDBCRUDAndQueryTest
     @After
     public void tearDown() throws Exception
     {
-        em.close();
-        emf.close();        
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);        em.close();
+        emf.close(); 
+        
+        if(datastoreFilePath != null) FileUtils.deleteRecursively(new File(datastoreFilePath));
+        
     }  
     
     @Test
     public void testCRUD()
     {
-        insert();
+        /*insert();
         findById();
         merge();
-        delete();
+        delete();*/
         
     }
     
@@ -107,6 +118,7 @@ public class IMDBCRUDAndQueryTest
     {
         //Find actor by ID
         em.clear();
+        
         Actor actor1 = em.find(Actor.class, 1);
         Actor actor2 = em.find(Actor.class, 2);
         
