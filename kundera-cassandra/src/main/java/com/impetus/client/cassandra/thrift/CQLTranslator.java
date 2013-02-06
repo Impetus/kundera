@@ -207,9 +207,14 @@ public final class CQLTranslator
             }
             else
             {
+                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
+                
+                if(!attrib.isAssociation())
+                {
                 onTranslation(type, builder, columnBuilder,
-                        ((AbstractAttribute) (entityType.getAttribute(field.getName()))).getJPAColumnName(), record,
+                        attrib.getJPAColumnName(), record,
                         field);
+                }
 
             }
 
@@ -328,7 +333,7 @@ public final class CQLTranslator
      *            if field is present.
      * @return true, if value is not null else false.
      */
-    private boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
+    public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
     {
         if (value != null)
         {

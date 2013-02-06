@@ -114,7 +114,7 @@ public class CassQuery extends QueryImpl implements Query
         if (!appMetadata.isNative(getJPAQuery()) && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
 
-            result = onQueryOverCompositeColumns(m, client, metaModel);
+            result = onQueryOverCompositeColumns(m, client, metaModel,null);
         }
         else
         {
@@ -168,15 +168,25 @@ public class CassQuery extends QueryImpl implements Query
      * .kundera.metadata.model.EntityMetadata,
      * com.impetus.kundera.client.Client)
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         List<EnhanceEntity> ls = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
         if (appMetadata.isNative(getJPAQuery()))
         {
             ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
                     m.getEntityClazz(), null);
+        } else 
+            if (!appMetadata.isNative(getJPAQuery()) && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+
+            ls = onQueryOverCompositeColumns(m, client, metaModel, m.getRelationNames());
         }
         else
         {
@@ -501,10 +511,9 @@ public class CassQuery extends QueryImpl implements Query
      *            the meta model
      * @return the list
      */
-    private List<Object> onQueryOverCompositeColumns(EntityMetadata m, Client client, MetamodelImpl metaModel)
+    private List onQueryOverCompositeColumns(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
     {
         List<Object> result;
-        // TODO: ensure ordering!
 
         // select column will always be of entity field only!
         // where clause ordering
@@ -532,7 +541,7 @@ public class CassQuery extends QueryImpl implements Query
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
 
 
-        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), null);
+        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
         return result;
     }
 

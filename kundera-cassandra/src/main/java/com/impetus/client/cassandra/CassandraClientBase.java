@@ -894,7 +894,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     protected void onpersistOverCompositeKey(EntityMetadata entityMetadata, Object entity,
-            Cassandra.Client cassandra_client) throws InvalidRequestException, TException, UnavailableException,
+            Cassandra.Client cassandra_client,  List<RelationHolder> rlHolders) throws InvalidRequestException, TException, UnavailableException,
             TimedOutException, SchemaDisagreementException, UnsupportedEncodingException
     {
         cassandra_client.set_cql_version(getCqlVersion());
@@ -904,7 +904,24 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
                 TranslationType.ALL);
-
+        
+        String columnNames = translation.get(TranslationType.COLUMN);
+        String columnValues = translation.get(TranslationType.VALUE);
+        StringBuilder columnNameBuilder = new StringBuilder(columnNames);
+        StringBuilder columnValueBuilder = new StringBuilder(columnValues);
+        
+        for(RelationHolder rl : rlHolders)
+        {
+            columnNameBuilder.append(",");
+            columnValueBuilder.append(",");
+            translator.appendColumnName(columnNameBuilder, rl.getRelationName());
+            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
+        }
+        
+        translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
+        translation.put(TranslationType.VALUE, columnValueBuilder.toString());
+        
+        
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
                 translation.get(TranslationType.VALUE));
         insert_Query = StringUtils
