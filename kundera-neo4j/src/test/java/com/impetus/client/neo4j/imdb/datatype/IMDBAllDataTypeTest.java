@@ -57,7 +57,7 @@ public class IMDBAllDataTypeTest
      */
     @Before
     public void setUp() throws Exception
-    {
+    {        
         emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();        
         
@@ -68,21 +68,17 @@ public class IMDBAllDataTypeTest
      */
     @After
     public void tearDown() throws Exception
-    {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
-        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+    {       
         em.close();
-        emf.close(); 
-        
-        if(datastoreFilePath != null) FileUtils.deleteRecursively(new File(datastoreFilePath));
+        emf.close();       
     }  
     
     @Test
     public void testCRUD()
     {
-        /*insert();
+        insert();
         findById();
-        delete();*/
+        delete();
         
     }
     

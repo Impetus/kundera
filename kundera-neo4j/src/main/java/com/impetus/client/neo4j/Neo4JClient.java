@@ -402,96 +402,104 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     @Override
     public int executeBatch()
     {
-        BatchInserter inserter = getBatchInserter();       
-        BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);        
-        
-        if(inserter == null)
+        if(batchSize > 0)
         {
-            log.error("Unable to create instance of BatchInserter. Opertion will fail");
-            throw new PersistenceException("Unable to create instance of BatchInserter. Opertion will fail");
-        }      
-        
-        if(resource != null && resource.isActive())
-        {
-            log.error("Batch Insertion MUST not be executed in a transaction");
-            throw new PersistenceException("Batch Insertion MUST not be executed in a transaction");
-        }        
-        
-        Map<Object, Long> pkToNodeIdMap = new HashMap<Object, Long>();
-        for (com.impetus.kundera.graph.Node graphNode : nodes)
-        {
-            if (graphNode.isDirty())
+            BatchInserter inserter = getBatchInserter();       
+            BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);        
+            
+            if(inserter == null)
             {
-                //Delete can not be executed in batch, deleting normally
-                if (graphNode.isInState(RemovedState.class))
+                log.error("Unable to create instance of BatchInserter. Opertion will fail");
+                throw new PersistenceException("Unable to create instance of BatchInserter. Opertion will fail");
+            }      
+            
+            if(resource != null && resource.isActive())
+            {
+                log.error("Batch Insertion MUST not be executed in a transaction");
+                throw new PersistenceException("Batch Insertion MUST not be executed in a transaction");
+            }        
+            
+            Map<Object, Long> pkToNodeIdMap = new HashMap<Object, Long>();
+            for (com.impetus.kundera.graph.Node graphNode : nodes)
+            {
+                if (graphNode.isDirty())
                 {
-                    delete(graphNode.getData(), graphNode.getEntityId());
-                }
-                else if(graphNode.isUpdate())
-                {
-                    //Neo4J allows only batch insertion, follow usual path for normal updates
-                    persist(graphNode);                   
-                }
-                else
-                {
-                    //Insert node              
-                    Object entity = graphNode.getData();
-                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-                    Object pk = PropertyAccessorHelper.getId(entity, m);
-                    Map<String, Object> nodeProperties = mapper.createNodeProperties(entity, m);
-                    long nodeId = inserter.createNode(nodeProperties);          
-                    pkToNodeIdMap.put(pk, nodeId);
-                    
-                    //Index Node
-                    BatchInserterIndex nodeIndex = indexProvider.nodeIndex(m.getIndexName(), MapUtil.stringMap( "type", "exact"));
-                    nodeIndex.add(nodeId, nodeProperties);           
-                    
-                    
-                    //Insert relationships for this particular node                                        
-                    if (! getRelationHolders(graphNode).isEmpty())
+                    //Delete can not be executed in batch, deleting normally
+                    if (graphNode.isInState(RemovedState.class))
                     {
-                        for (RelationHolder rh : getRelationHolders(graphNode))
+                        delete(graphNode.getData(), graphNode.getEntityId());
+                    }
+                    else if(graphNode.isUpdate())
+                    {
+                        //Neo4J allows only batch insertion, follow usual path for normal updates
+                        persist(graphNode);                   
+                    }
+                    else
+                    {
+                        //Insert node              
+                        Object entity = graphNode.getData();
+                        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+                        Object pk = PropertyAccessorHelper.getId(entity, m);
+                        Map<String, Object> nodeProperties = mapper.createNodeProperties(entity, m);
+                        long nodeId = inserter.createNode(nodeProperties);          
+                        pkToNodeIdMap.put(pk, nodeId);
+                        
+                        //Index Node
+                        BatchInserterIndex nodeIndex = indexProvider.nodeIndex(m.getIndexName(), MapUtil.stringMap( "type", "exact"));
+                        nodeIndex.add(nodeId, nodeProperties);           
+                        
+                        
+                        //Insert relationships for this particular node                                        
+                        if (! getRelationHolders(graphNode).isEmpty())
                         {
-                            // Search Node (to be connected to ) in Neo4J graph
-                            EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
-                                    .getClass());
-                            Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
-                            Long targetNodeId = pkToNodeIdMap.get(targetNodeKey);
-
-                            if (targetNodeId != null)
+                            for (RelationHolder rh : getRelationHolders(graphNode))
                             {
-                                /** Join this node (source node) to target node via relationship */
-                                //Relationship Type
-                                DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
-                                
-                                //Relationship Properties
-                                Map<String, Object> relationshipProperties = null;
-                                Object relationshipObj = rh.getRelationVia();
-                                if (relationshipObj != null)
+                                // Search Node (to be connected to ) in Neo4J graph
+                                EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
+                                        .getClass());
+                                Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
+                                Long targetNodeId = pkToNodeIdMap.get(targetNodeKey);
+
+                                if (targetNodeId != null)
                                 {
-                                    relationshipProperties = mapper.createRelationshipProperties(m, targetNodeMetadata, relationshipObj);    
-                                }                                
-                                //Finally insert relationship
-                                long relationshipId = inserter.createRelationship(nodeId, targetNodeId, relType, relationshipProperties);   
-                                
-                                //Index this relationship
-                                BatchInserterIndex relationshipIndex = indexProvider.relationshipIndex(targetNodeMetadata.getIndexName(), MapUtil.stringMap( "type", "exact"));
-                                relationshipIndex.add(relationshipId, relationshipProperties);
+                                    /** Join this node (source node) to target node via relationship */
+                                    //Relationship Type
+                                    DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
+                                    
+                                    //Relationship Properties
+                                    Map<String, Object> relationshipProperties = null;
+                                    Object relationshipObj = rh.getRelationVia();
+                                    if (relationshipObj != null)
+                                    {
+                                        relationshipProperties = mapper.createRelationshipProperties(m, targetNodeMetadata, relationshipObj);    
+                                    }                                
+                                    //Finally insert relationship
+                                    long relationshipId = inserter.createRelationship(nodeId, targetNodeId, relType, relationshipProperties);   
+                                    
+                                    //Index this relationship
+                                    BatchInserterIndex relationshipIndex = indexProvider.relationshipIndex(targetNodeMetadata.getIndexName(), MapUtil.stringMap( "type", "exact"));
+                                    relationshipIndex.add(relationshipId, relationshipProperties);
+                                }
                             }
-                        }
-                    }                
+                        }                
+                    }
                 }
             }
+            
+            //Shutdown Batch inserter
+            indexProvider.shutdown();
+            inserter.shutdown();
+            
+            //Restore Graph Database service
+            factory.setConnection((GraphDatabaseService)factory.createPoolOrConnection());
+            
+            return pkToNodeIdMap.size(); 
+        }
+        else
+        {
+            return 0;
         }
         
-        //Shutdown Batch inserter
-        indexProvider.shutdown();
-        inserter.shutdown();
-        
-        //Restore Graph Database service
-        factory.setConnection((GraphDatabaseService)factory.createPoolOrConnection());
-        
-        return pkToNodeIdMap.size();
     }
 
     
@@ -566,11 +574,12 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     
     /**
      * Checks whether there is an active transaction within this client
+     * Batch operations are run without any transaction boundary hence this check is not applicable for them 
      * All Modifying Neo4J operations must be executed within a transaction
      */
     private void checkActiveTransaction()
     {
-        if(resource == null || ! resource.isActive())
+        if(batchSize == 0 && (resource == null || ! resource.isActive()))
         {
             throw new NotInTransactionException("All Modifying Neo4J operations must be executed within a transaction");
         }
