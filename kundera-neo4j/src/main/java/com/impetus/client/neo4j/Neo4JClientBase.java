@@ -16,31 +16,18 @@
 package com.impetus.client.neo4j;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import javax.persistence.PersistenceException;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.neo4j.unsafe.batchinsert.BatchInserter;
-import org.neo4j.unsafe.batchinsert.BatchInserters;
 
-import com.impetus.client.neo4j.config.Neo4JPropertyReader;
-import com.impetus.client.neo4j.config.Neo4JPropertyReader.Neo4JSchemaMetadata;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
-import com.impetus.kundera.configure.ClientProperties;
-import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
-import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**

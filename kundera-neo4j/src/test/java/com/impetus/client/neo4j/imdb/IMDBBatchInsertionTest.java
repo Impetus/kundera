@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,11 +27,8 @@ import javax.persistence.Persistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case demonstrating batch insertion in Neo4J 
@@ -48,11 +44,11 @@ public class IMDBBatchInsertionTest
      */
     @Before
     public void setUp() throws Exception
-    {
-        Map properties = new HashMap();
+    {      
+        /*Map properties = new HashMap();
         properties.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");        
         emf = Persistence.createEntityManagerFactory(IMDB_PU, properties);        
-        em = emf.createEntityManager();           
+        em = emf.createEntityManager();      */     
     }
 
     /**
@@ -60,13 +56,9 @@ public class IMDBBatchInsertionTest
      */
     @After
     public void tearDown() throws Exception
-    {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
-        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
-        em.close();
-        emf.close(); 
-        
-        if(datastoreFilePath != null) FileUtils.deleteRecursively(new File(datastoreFilePath));
+    {        
+        //em.close();
+        //emf.close();    
     }  
     
     @Test
@@ -79,9 +71,7 @@ public class IMDBBatchInsertionTest
             {
                 em.persist(actor);
             }
-        }
-        em.clear();*/
-        
+        }*/       
     }
     
     /**
