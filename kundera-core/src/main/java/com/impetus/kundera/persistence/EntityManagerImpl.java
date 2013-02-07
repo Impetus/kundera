@@ -119,7 +119,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
-        this.entityTransaction = new KunderaEntityTransaction(this);
         
         if (logger.isDebugEnabled())
         {
@@ -558,6 +557,12 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         {
             throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
         }
+
+        if(this.entityTransaction == null)
+        {
+            this.entityTransaction = new KunderaEntityTransaction(this);
+        }
+
         return this.entityTransaction;
     }
 
@@ -946,7 +951,13 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void doRollback()
     {
         checkClosed();
-        this.entityTransaction.rollback();
+        if(this.entityTransaction != null)
+        {
+            this.entityTransaction.rollback();
+        } else
+        {
+            this.persistenceDelegator.rollback();
+        }
     }
 
     /**

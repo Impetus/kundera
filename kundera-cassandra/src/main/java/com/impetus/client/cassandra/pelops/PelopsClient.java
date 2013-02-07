@@ -432,7 +432,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 client.set_cql_version(getCqlVersion());
                 client.set_keyspace(metadata.getSchema());
-                onpersistOverCompositeKey(metadata, entity, client);
+                onpersistOverCompositeKey(metadata, entity, client,rlHolders);
             }
             catch (InvalidRequestException e)
             {

@@ -147,7 +147,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
-                onpersistOverCompositeKey(entityMetadata, entity, conn);
+                onpersistOverCompositeKey(entityMetadata, entity, conn,rlHolders);
             }
             else
             {

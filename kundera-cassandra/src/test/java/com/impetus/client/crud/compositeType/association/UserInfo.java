@@ -49,9 +49,6 @@ public class UserInfo
     @Column(name = "age")
     private int age;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private CassandraPrimeUser timeLine;
     
     /**
      * 
@@ -68,14 +65,14 @@ public class UserInfo
      * @param age
      * @param timeLine
      */
-    public UserInfo(String userInfoId, String firstName, String lastName, int age, CassandraPrimeUser timeLine)
+    public UserInfo(String userInfoId, String firstName, String lastName, int age/*, CassandraPrimeUser timeLine*/)
     {
         super();
         this.userInfoId = userInfoId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
-        this.timeLine = timeLine;
+//        this.timeLine = timeLine;
     }
 
 
@@ -111,13 +108,13 @@ public class UserInfo
         return age;
     }
 
-    /**
-     * @return the timeLine
-     */
-    public CassandraPrimeUser getTimeLine()
-    {
-        return timeLine;
-    }
+//    /**
+//     * @return the timeLine
+//     */
+//    public CassandraPrimeUser getTimeLine()
+//    {
+//        return timeLine;
+//    }
 
 
     /**

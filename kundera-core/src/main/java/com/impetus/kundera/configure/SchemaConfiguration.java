@@ -429,7 +429,7 @@ public class SchemaConfiguration implements Configuration
                 .getPersistenceUnitMetadata(persistenceUnit);
         String autoDdlOption = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
-        if (autoDdlOption == null || autoDdlOption.isEmpty())
+        if (autoDdlOption == null)
         {
             autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
