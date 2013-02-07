@@ -17,10 +17,16 @@ package com.impetus.client.crud.compositeType;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.impetus.client.crud.compositeType.association.UserInfo;
 
 /**
  * @author vivek.mishra
@@ -30,7 +36,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="CompositeUser", schema = "CompositeCassandra@composite_pu")
 //@Index(index = true,columns = { "tweetBody","tweetDate" })
-public class CassandraPrimeUser
+public class CassandraEmbeddedAssociation
 {
     
     @EmbeddedId
@@ -42,12 +48,15 @@ public class CassandraPrimeUser
     @Column 
     private Date tweetDate;
 
+    @OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @JoinColumn(name="userInfo_id")
+    private UserInfo userInfo;
     
-    public CassandraPrimeUser()
+    public CassandraEmbeddedAssociation()
     {
     }
     
-    public CassandraPrimeUser(CassandraCompoundKey key)
+    public CassandraEmbeddedAssociation(CassandraCompoundKey key)
     {
         this.key = key;
     }
@@ -90,6 +99,16 @@ public class CassandraPrimeUser
     public void setTweetDate(Date tweetDate)
     {
         this.tweetDate = tweetDate;
+    }
+
+    public UserInfo getUserInfo()
+    {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo)
+    {
+        this.userInfo = userInfo;
     }
 
     
