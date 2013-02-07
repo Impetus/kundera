@@ -106,7 +106,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
     public BigDecimal getCopy(Object object)
     {
         BigDecimal b = (BigDecimal) object;
-        return object != null ? new BigDecimal(b.toBigInteger()) : null;
+        return object != null ? b: null;
     }
 
     public BigDecimal getInstance(Class<?> clazz)

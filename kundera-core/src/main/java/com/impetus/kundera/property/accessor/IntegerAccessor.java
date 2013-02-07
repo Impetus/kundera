@@ -101,7 +101,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     @Override
     public Integer getCopy(Object object)
     {
-        return object != null ? new Integer((Integer)object) : null;
+        return object != null ? (Integer)object : null;
     }
 
     public Integer getInstance(Class<?> clazz)

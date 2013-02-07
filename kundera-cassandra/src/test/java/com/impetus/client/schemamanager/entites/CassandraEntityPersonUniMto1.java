@@ -17,7 +17,6 @@ package com.impetus.client.schemamanager.entites;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -25,11 +24,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * The Class CassandraEntityPersonUniMto1.
  */
 @Entity
 @Table(name = "CassandraEntityPersonUniMto1", schema = "CassandraSchemaManagerTest@CassandraSchemaManager")
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age")})
 public class CassandraEntityPersonUniMto1
 {
 
@@ -45,10 +48,6 @@ public class CassandraEntityPersonUniMto1
     /** The age. */
     @Column(name = "AGE")
     private short age;
-
-    /** The personal data. */
-    @Embedded
-    private CassandraPersonalData personalData;
 
     /** The address. */
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -116,27 +115,6 @@ public class CassandraEntityPersonUniMto1
     public void setAge(short age)
     {
         this.age = age;
-    }
-
-    /**
-     * Gets the personal data.
-     * 
-     * @return the personalData
-     */
-    public CassandraPersonalData getPersonalData()
-    {
-        return personalData;
-    }
-
-    /**
-     * Sets the personal data.
-     * 
-     * @param personalData
-     *            the personalData to set
-     */
-    public void setPersonalData(CassandraPersonalData personalData)
-    {
-        this.personalData = personalData;
     }
 
     /**

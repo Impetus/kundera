@@ -122,7 +122,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
     @Override
     public Float getCopy(Object object)
     {
-        return object != null ? new Float((Float)object) : null;
+        return object != null ? (Float)object : null;
     }    
 
 
