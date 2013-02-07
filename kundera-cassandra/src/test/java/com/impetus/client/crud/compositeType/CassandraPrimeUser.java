@@ -48,9 +48,6 @@ public class CassandraPrimeUser
     @Column 
     private Date tweetDate;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "userInfo_id")
-    private UserInfo userInfo;
     
     public CassandraPrimeUser()
     {
@@ -101,15 +98,5 @@ public class CassandraPrimeUser
         this.tweetDate = tweetDate;
     }
 
-    public UserInfo getUserInfo()
-    {
-        return userInfo;
-    }
-
-    public void setUserInfo(UserInfo userInfo)
-    {
-        this.userInfo = userInfo;
-    }
-    
     
 }

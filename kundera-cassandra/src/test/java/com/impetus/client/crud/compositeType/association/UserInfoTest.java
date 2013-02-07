@@ -42,7 +42,7 @@ import org.junit.Test;
 
 import com.impetus.client.crud.compositeType.CassandraCompositeTypeTest;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
-import com.impetus.client.crud.compositeType.CassandraPrimeUser;
+import com.impetus.client.crud.compositeType.CassandraEmbeddedAssociation;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
@@ -80,7 +80,7 @@ public class UserInfoTest
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
+        CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -90,7 +90,7 @@ public class UserInfoTest
         em.clear();
 
         // Find
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        CassandraEmbeddedAssociation result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate, result.getTweetDate());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -106,7 +106,7 @@ public class UserInfoTest
 
         // Find
         result = null;
-        result = em.find(CassandraPrimeUser.class, key);
+        result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate, result.getTweetDate());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -116,7 +116,7 @@ public class UserInfoTest
         em.remove(result);
 
         em.clear();
-        result = em.find(CassandraPrimeUser.class, key);
+        result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNull(result);
 
     }
@@ -130,7 +130,7 @@ public class UserInfoTest
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
+        CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
@@ -140,10 +140,10 @@ public class UserInfoTest
 
         em.clear(); // optional,just to clear persistence cache.
         
-        final String noClause = "Select t from CassandraPrimeUser t";
+        final String noClause = "Select t from CassandraEmbeddedAssociation t";
         
         Query query = em.createQuery(noClause);
-        List<CassandraPrimeUser> results = query.getResultList();
+        List<CassandraEmbeddedAssociation> results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("Vivek", results.get(0).getUserInfo().getFirstName());
@@ -165,6 +165,7 @@ public class UserInfoTest
     public void tearDown() throws Exception
     {
         CassandraCli.dropKeySpace("CompositeCassandra");
+        emf.close();
     }
 
     /**
