@@ -162,13 +162,13 @@ public class FlushManager
             // Process Many-To-Many children
             for (NodeLink nodeLink : manyToManyChildren.keySet())
             {
-                if (!node.isTraversed())
+                if (!node.isTraversed() && ! (Boolean)nodeLink.getLinkProperty(LinkProperty.IS_RELATED_VIA_JOIN_TABLE))
                 {
                     // Push this node to stack
                     node.setTraversed(true);
                     stackQueue.push(node);
                     logEvent(node, eventType);                
-                }    
+                }   
 
                 Node childNode = children.get(nodeLink);
 
