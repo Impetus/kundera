@@ -52,6 +52,7 @@ public class HBaseClientFactory extends GenericClientFactory
     /** The Constant DEFAULT_POOL_SIZE. */
     private static final int DEFAULT_POOL_SIZE = 100;
 
+    private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
     /** The pool size. */
     private int poolSize;
 
@@ -106,13 +107,13 @@ public class HBaseClientFactory extends GenericClientFactory
             String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
             String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
             hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : node);
-            hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : "2181");
+            hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : DEFAULT_ZOOKEEPER_PORT);
         }
         else
         {
+            // in case "hbase.zookeeper.property.clientPort" is not supplied, it is different than hbase master port!
             hadoopConf.set("hbase.zookeeper.quorum", node);
-//            hadoopConf.set("hbase.zookeeper.property.clientPort", "2181");
-            hadoopConf.set("hbase.zookeeper.property.clientPort", port == null ? "2181" : port);
+            hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
         }
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();

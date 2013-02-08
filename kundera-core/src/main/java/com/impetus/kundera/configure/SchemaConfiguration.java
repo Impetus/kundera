@@ -296,24 +296,27 @@ public class SchemaConfiguration implements Configuration
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
+            if (!attr.isAssociation())
             {
-                EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
-
-                EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
-                        attr.getJavaType());
-
-                if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
+                if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
                 {
-                    tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
+                    EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
+
+                    EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
+                            attr.getJavaType());
+
+                    if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
+                    {
+                        tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
+                    }
                 }
-            }
-            else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
-            {
-                ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(attr.getName()) : null);
-                if (!tableInfo.getColumnMetadatas().contains(columnInfo))
+                else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                    tableInfo.addColumnInfo(columnInfo);
+                    ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(attr.getName()) : null);
+                    if (!tableInfo.getColumnMetadatas().contains(columnInfo))
+                    {
+                        tableInfo.addColumnInfo(columnInfo);
+                    }
                 }
             }
         }
