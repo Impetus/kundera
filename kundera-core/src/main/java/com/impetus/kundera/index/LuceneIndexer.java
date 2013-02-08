@@ -54,6 +54,7 @@ import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -121,6 +122,7 @@ public class LuceneIndexer extends DocumentIndexer
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
             w.setMergePolicy(new LogDocMergePolicy());
+//            w.setMergeFactor(1);
             w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
@@ -231,8 +233,34 @@ public class LuceneIndexer extends DocumentIndexer
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
+            String luceneQuery = "+"
+                    + ENTITY_CLASS_FIELD
+                    + ":"
+                    + metadata.getEntityClazz().getCanonicalName().toLowerCase()
+                    + " AND +"
+                    + getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(),
+                            ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()) + ":" + id.toString();
+
             /* String indexName, Query query, boolean autoCommit */
-            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+//            w.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+            
+            QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
+                    Version.LUCENE_34));
+                qp.setLowercaseExpandedTerms(false);
+                qp.setAllowLeadingWildcard(true);
+                // qp.set
+                Query q = qp.parse(luceneQuery);
+
+            w.deleteDocuments(q);
+            w.commit();
+            w.close();
+            w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
+            /* reader = */
+            w.setMergePolicy(new LogDocMergePolicy());
+//            w.setMergeFactor(1);
+            w.setMergeFactor(1000);
+            w.getConfig().setRAMBufferSizeMB(32);
+//            flushInternal();
         }
         catch (CorruptIndexException e)
         {
@@ -242,8 +270,14 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new LuceneIndexingException(e);
         }
+        catch (ParseException e)
+        {
+            throw new LuceneIndexingException(e);
+        }
     }
 
+
+    
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
@@ -351,9 +385,12 @@ public class LuceneIndexer extends DocumentIndexer
         {
             if (w != null && readyForCommit)
             {
+                w.optimize();
                 w.commit();
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
                 readyForCommit = false;
+                reader=null;
+                isInitialized=false;
             }
         }
 
@@ -403,11 +440,27 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void flush()
     {
-        /*
-         * if (w != null) {
-         * 
-         * // w.commit(); // w.close(); // index.copy(index,
-         * FSDirectory.open(getIndexDirectory()), // false); }
+/*        
+        if (w != null)
+        {
+
+            try
+            {
+                w.commit();
+//                w.close();
+//                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+            }
+            catch (CorruptIndexException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
          */
     }
 
@@ -567,6 +620,7 @@ public class LuceneIndexer extends DocumentIndexer
             currentDoc = new Document();
 
             // Add entity class, PK info into document
+            
             addEntityClassToDocument(metadata, object, currentDoc);
 
             // Add all entity fields(columns) into document

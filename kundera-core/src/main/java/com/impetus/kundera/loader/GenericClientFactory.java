@@ -105,7 +105,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             ClientMetadata clientMetadata = new ClientMetadata();
             String luceneDirectoryPath = puProperties != null ? (String) puProperties
                     .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
-            if (luceneDirectoryPath != null)
+            if (luceneDirectoryPath == null)
             {
                 luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getPersistenceUnitMetadata(persistenceUnit)

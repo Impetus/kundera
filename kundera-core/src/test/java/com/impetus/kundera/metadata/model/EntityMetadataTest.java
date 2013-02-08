@@ -70,8 +70,8 @@ public class EntityMetadataTest
         Assert.assertNotNull(entityMetadata.getIndexProperties());
         Assert.assertFalse(entityMetadata.getIndexProperties().isEmpty());
         Assert.assertEquals(2, entityMetadata.getIndexProperties().size());
-        Assert.assertNotNull(entityMetadata.getIndexProperties().get("age"));
-        Assert.assertNotNull(entityMetadata.getIndexProperties().get("empName"));
+        Assert.assertNotNull(entityMetadata.getIndexProperties().get("AGE"));
+        Assert.assertNotNull(entityMetadata.getIndexProperties().get("EMP_NAME"));
         Assert.assertNull(entityMetadata.getIndexProperties().get("departmentData"));
 
         Map<String, PropertyIndex> indexes = IndexProcessor.getIndexesOnEmbeddable(Department.class);

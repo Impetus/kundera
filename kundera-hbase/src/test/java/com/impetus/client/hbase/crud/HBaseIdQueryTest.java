@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * @author Kuldeep Mishra

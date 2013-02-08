@@ -29,7 +29,7 @@ import com.impetus.kundera.annotations.Index;
  */
 @Entity
 @Table(name = "EMPLOYE", schema = "KunderaMetaDataTest@metaDataTest")
-@Index(index = true, columns = { "EMP_NAME", "AGE" })
+@Index(index = true, columns = { "empName", "age" })
 public class Employe
 {
 

@@ -166,6 +166,7 @@ public abstract class ClientBase
                 {
                     for (NodeLink parentNodeLink : parents.keySet())
                     {
+                        
                         indexManager.update(entityMetadata, node.getData(), parentNodeLink
                                 .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
                     }
@@ -185,13 +186,13 @@ public abstract class ClientBase
                         }
                         else
                         {
-                            indexManager.update(entityMetadata, node.getData(), null, null);
+                            indexManager.update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
                         }
                     }
                 }
                 else
                 {
-                    indexManager.update(entityMetadata, node.getData(), null, null);
+                    indexManager.update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
                 }
             }
         }

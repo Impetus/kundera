@@ -312,7 +312,7 @@ public class SchemaConfiguration implements Configuration
                 }
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                    ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(attr.getName()) : null);
+                    ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(((AbstractAttribute)attr).getJPAColumnName()) : null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                     {
                         tableInfo.addColumnInfo(columnInfo);

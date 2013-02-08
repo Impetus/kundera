@@ -254,7 +254,7 @@ public class PersistenceDelegator
         }
         else
         {
-            return (E) node.getData();
+            return (E) ObjectUtils.deepCopy((Object) node.getData());
         }
 
     }

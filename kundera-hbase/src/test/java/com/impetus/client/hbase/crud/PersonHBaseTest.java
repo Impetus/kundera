@@ -36,6 +36,7 @@ import org.junit.Test;
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 public class PersonHBaseTest extends BaseTest
 {

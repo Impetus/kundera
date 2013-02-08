@@ -70,7 +70,7 @@ public class CassandraSchemaOperationTest
 
     private Cassandra.Client client;
 
-    private final boolean useLucene = true;
+    private final boolean useLucene = false;
 
     /**
      * @throws java.lang.Exception
@@ -446,9 +446,9 @@ public class CassandraSchemaOperationTest
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
         if (useLucene)
         {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
+            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "lucene");
 
-            clientMetadata.setLuceneIndexDir("/home/impadmin/lucene");
+            clientMetadata.setLuceneIndexDir("lucene");
         }
         else
         {

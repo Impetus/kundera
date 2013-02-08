@@ -229,7 +229,7 @@ public abstract class QueryImpl implements Query
         String luceneQ = getLuceneQueryFromJPAQuery();
         Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
-        if (kunderaQuery.isAliasOnly())
+        if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
         {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
@@ -240,8 +240,7 @@ public abstract class QueryImpl implements Query
         else
         {
             return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
-
-        }
+        } 
         return result;
     }
 
