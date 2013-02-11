@@ -90,9 +90,9 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     private PersistenceCache persistenceCache;
 
     private UserTransaction utx;
-    
+
     private EntityTransaction entityTransaction;
-    
+
     /**
      * Instantiates a new entity manager impl.
      * 
@@ -103,7 +103,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
         {
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         }
@@ -119,7 +119,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
-        
+
         if (logger.isDebugEnabled())
         {
             logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
@@ -130,6 +130,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
         {
+            if (entityTransaction == null)
+            {
+                this.entityTransaction = new KunderaEntityTransaction(this);
+            }
             Context ctx;
             try
             {
@@ -149,16 +153,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                     throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
                             + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
 
-                } 
-                
-                if(((KunderaJTAUserTransaction)utx).isTransactionInProgress())
+                }
+
+                if (((KunderaJTAUserTransaction) utx).isTransactionInProgress())
                 {
                     entityTransaction.begin();
                 }
 
                 this.setFlushMode(FlushModeType.COMMIT);
                 ((KunderaJTAUserTransaction) utx).setImplementor(this);
-                
+
             }
             catch (NamingException e)
             {
@@ -251,8 +255,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         catch (Exception ex)
         {
-			// on Rollback            
-			doRollback();
+            // on Rollback
+            doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -558,7 +562,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
         }
 
-        if(this.entityTransaction == null)
+        if (this.entityTransaction == null)
         {
             this.entityTransaction = new KunderaEntityTransaction(this);
         }
@@ -951,10 +955,11 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void doRollback()
     {
         checkClosed();
-        if(this.entityTransaction != null)
+        if (this.entityTransaction != null)
         {
             this.entityTransaction.rollback();
-        } else
+        }
+        else
         {
             this.persistenceDelegator.rollback();
         }

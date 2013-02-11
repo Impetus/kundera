@@ -165,7 +165,7 @@ public class StudentHBaseBigDecimalTest extends Base
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-        findByRange();
+//        findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -203,7 +203,7 @@ public class StudentHBaseBigDecimalTest extends Base
         Query q;
         List<StudentHBaseBigDecimal> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBigDecimal s where s.id between " + getRandomValue(BigDecimal.class)
+        query = "Select s From StudentHBaseBigDecimal s where s.id between " + getMinValue(BigDecimal.class)
                 + " and " + getMaxValue(BigDecimal.class);
         q = em.createQuery(query);
         students = q.getResultList();
