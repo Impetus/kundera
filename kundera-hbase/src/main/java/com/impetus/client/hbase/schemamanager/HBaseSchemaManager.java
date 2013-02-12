@@ -128,25 +128,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                 admin.addColumn(tableInfo.getTableName(), columnDescriptor);
                             }
                         }
-                        if (tableInfo.getEmbeddedColumnMetadatas() != null)
-                        {
-                            // DO nothing as columns Embeddable entity would go
-                            // into owners column family.
-                            /*
-                             * for (EmbeddedColumnInfo embeddedColumnInfo :
-                             * tableInfo.getEmbeddedColumnMetadatas()) { boolean
-                             * found = false; HColumnDescriptor columnDescriptor
-                             * = new HColumnDescriptor(
-                             * embeddedColumnInfo.getEmbeddedColumnName()); for
-                             * (HColumnDescriptor hColumnDescriptor :
-                             * descriptors) { if
-                             * (hColumnDescriptor.getNameAsString
-                             * ().equalsIgnoreCase(
-                             * embeddedColumnInfo.getEmbeddedColumnName())) {
-                             * found = true; break; } } if (!found) {
-                             * admin.addColumn(tableInfo.getTableName(),
-                             * columnDescriptor); } }
-                             */}
                     }
                 }
                 catch (IOException e)
@@ -198,25 +179,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                 tableInfo.getTableName(), tableInfo.getTableName());
                     }
                 }
-                if (tableInfo.getEmbeddedColumnMetadatas() != null)
-                {
-                    // DO nothing as columns Embeddable entity would go into
-                    // owners column family.
-                    /*
-                     * for (EmbeddedColumnInfo embeddedColumnInfo :
-                     * tableInfo.getEmbeddedColumnMetadatas()) { boolean
-                     * isColumnFound = false; for (HColumnDescriptor
-                     * columnDescriptor : hTableDescriptor.getColumnFamilies())
-                     * { if
-                     * (columnDescriptor.getNameAsString().equalsIgnoreCase(
-                     * embeddedColumnInfo.getEmbeddedColumnName())) {
-                     * isColumnFound = true; break; } } if (!isColumnFound) {
-                     * throw new SchemaGenerationException("column " +
-                     * embeddedColumnInfo.getEmbeddedColumnName() +
-                     * " does not exist in table " + tableInfo.getTableName() +
-                     * "", "Hbase", tableInfo.getTableName(),
-                     * tableInfo.getTableName()); } }
-                     */}
             }
             catch (TableNotFoundException tnfex)
             {
@@ -395,19 +357,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
             tableDescriptor.addFamily(hColumnDescriptor);
         }
-        if (tableInfo.getEmbeddedColumnMetadatas() != null)
-        {
-            // DO nothing as columns Embeddable entity would go into owners
-            // column family.
-            /*
-             * for (EmbeddedColumnInfo embeddedColumnInfo :
-             * tableInfo.getEmbeddedColumnMetadatas()) { HColumnDescriptor
-             * hColumnDescriptor = new
-             * HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
-             * setColumnFamilyProperties(hColumnDescriptor,
-             * tableInfo.getTableName());
-             * tableDescriptor.addFamily(hColumnDescriptor); }
-             */}
         if (tableProperties != null)
         {
             for (Object o : tableProperties.keySet())
