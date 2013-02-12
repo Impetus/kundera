@@ -315,7 +315,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
             // Top level node
             Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata, isUpdate);
-
+            ((Neo4JTransaction)resource).addProcessedNode(id, node);
+            
             if (!rlHolders.isEmpty())
             {
                 for (RelationHolder rh : rlHolders)
@@ -324,34 +325,25 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                     EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
                             .getClass());
                     Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
-                    Node targetNode = mapper.searchNode(targetNodeKey, targetNodeMetadata, graphDb);
+                    //Node targetNode = mapper.searchNode(targetNodeKey, targetNodeMetadata, graphDb);
+                    Node targetNode = ((Neo4JTransaction)resource).getProcessedNode(targetNodeKey);
 
                     if (targetNode != null)
                     {
                         // Join this node (source node) to target node via
                         // relationship
                         DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
-                        Relationship relationship = node.createRelationshipTo(targetNode, relType);
+                        Relationship relationship = node.createRelationshipTo(targetNode, relType);                        
 
                         // Populate relationship's own properties into it
                         Object relationshipObj = rh.getRelationVia();
                         if (relationshipObj != null)
                         {
-                            for (Field f : relationshipObj.getClass().getDeclaredFields())
-                            {
-                                if (!f.getType().equals(entityMetadata.getEntityClazz())
-                                        && !f.getType().equals(targetNodeMetadata.getEntityClazz()))
-                                {
-                                    String relPropertyName = f.getAnnotation(Column.class) != null ? f.getAnnotation(
-                                            Column.class).name() : f.getName();
-                                    Object value = PropertyAccessorHelper.getObject(relationshipObj, f);
-                                    relationship.setProperty(relPropertyName, mapper.toNeo4JProperty(value));
-                                            
-                                }
-                            }
-                            EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                            mapper.populateRelationshipProperties(entityMetadata, targetNodeMetadata, relationship,
+                                    relationshipObj);                            
                             
                             //After relationship creation, manually index it if desired
+                            EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
                             if(! isUpdate)
                             {
                                 indexer.indexRelationship(relationMetadata, graphDb, relationship);
@@ -379,11 +371,14 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             
         }
         catch (Exception e)
-        {            
+        {       
+            e.printStackTrace();
             log.error("Error while persisting entity " + entity + ". Details:" + e.getMessage());
             throw new PersistenceException(e);
         }
-    }  
+    }
+
+     
     
     @Override
     public void addBatch(com.impetus.kundera.graph.Node node)

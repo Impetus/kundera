@@ -16,9 +16,12 @@
 package com.impetus.client.neo4j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 
 import com.impetus.kundera.persistence.TransactionResource;
@@ -35,6 +38,8 @@ public class Neo4JTransaction implements TransactionResource
     
     /** IDs of nodes participating in this transaction */
     private List<Long> nodeIds;
+    
+    private Map<Object, Node> processedNodes;
     
     /** Instance of {@link GraphDatabaseService} from which this transaction was spawned */
     GraphDatabaseService graphDb = null;
@@ -133,4 +138,29 @@ public class Neo4JTransaction implements TransactionResource
         
         return nodeIds.contains(nodeId);
     }
+
+    /**
+     * @return the processedNodes
+     */
+    public Node getProcessedNode(Object key)
+    {
+        if(processedNodes == null || processedNodes.isEmpty())
+        {
+            return null;
+        }        
+        return processedNodes.get(key);
+    }
+
+    /**
+     * @param processedNodes the processedNodes to set
+     */
+    public void addProcessedNode(Object key, Node processedNode)
+    {
+        if(processedNodes == null)
+        {
+            processedNodes = new HashMap<Object, Node>();
+        }
+        processedNodes.put(key, processedNode);
+    }  
+    
 }

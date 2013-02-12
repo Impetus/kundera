@@ -16,8 +16,8 @@
 package com.impetus.client.neo4j.imdb.composite;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -32,9 +32,8 @@ import com.impetus.kundera.index.IndexCollection;
 @IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
 public class RoleComposite
 {
-    @Id
-    @Column(name="ROLE_NAME")
-    private String roleName;
+    @EmbeddedId
+    private RoleId roleId;
     
     @Column(name="ROLE_TYPE")
     private String roleType;   
@@ -45,26 +44,26 @@ public class RoleComposite
     
     public RoleComposite() {}
     
-    public RoleComposite(String roleName, String roleType)
+    public RoleComposite(RoleId id, String roleType)
     {
-        this.roleName = roleName;
+        this.roleId = id;
         this.roleType = roleType;
+    }   
+
+    /**
+     * @return the roleId
+     */
+    public RoleId getRoleId()
+    {
+        return roleId;
     }
 
     /**
-     * @return the roleName
+     * @param roleId the roleId to set
      */
-    public String getRoleName()
+    public void setRoleId(RoleId roleId)
     {
-        return roleName;
-    }
-
-    /**
-     * @param roleName the roleName to set
-     */
-    public void setRoleName(String roleName)
-    {
-        this.roleName = roleName;
+        this.roleId = roleId;
     }
 
     /**
@@ -125,14 +124,14 @@ public class RoleComposite
 
         RoleComposite that = (RoleComposite) o;
         
-        return (this.roleName == that.roleName || this.roleName.equals(that.roleName))
+        return (this.roleId == that.roleId || this.roleId.equals(that.roleId))
                 &&(this.roleType == that.roleType || this.roleType.equals(that.roleType));   
         
     }
 
     public int hashCode()
     {
-        int h1 = (roleName == null) ? 0 : roleName.hashCode();
+        int h1 = (roleId == null) ? 0 : roleId.hashCode();
         int h2 = (roleType == null) ? 0 : roleType.hashCode();
         return h1 + 31 * h2;
     }
