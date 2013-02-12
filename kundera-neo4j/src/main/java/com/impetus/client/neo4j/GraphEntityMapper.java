@@ -29,6 +29,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -213,9 +214,8 @@ public final class GraphEntityMapper
             Field field = (Field) attribute.getJavaMember();
             
             //Set Node level properties
-            if(! attribute.isCollection() && ! attribute.isAssociation())
-            {
-                
+            if(! attribute.isCollection() && ! attribute.isAssociation() && !((SingularAttribute)attribute).isId())
+            {                
                 String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
                 Object value = PropertyAccessorHelper.getObject(entity, field);                
                 if(value != null)
@@ -225,6 +225,61 @@ public final class GraphEntityMapper
             }           
         }
     }
+    
+    /**
+     * Populates a {@link Relationship} with attributes of a given relationship entity object <code>relationshipObj</code>
+     * @param entityMetadata
+     * @param targetNodeMetadata
+     * @param relationship
+     * @param relationshipObj
+     */
+    public void populateRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata targetNodeMetadata,
+            Relationship relationship, Object relationshipObj)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());     
+        EntityType entityType = metaModel.entity(relationshipObj.getClass());
+        
+        
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
+        for(Attribute attribute : attributes)
+        {       
+            Field f = (Field) attribute.getJavaMember();
+            if (!f.getType().equals(entityMetadata.getEntityClazz())
+                    && !f.getType().equals(targetNodeMetadata.getEntityClazz()))
+            {
+                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                if(metaModel.isEmbeddable(relMetadata.getIdAttribute().getBindableJavaType())
+                        && ((SingularAttribute)attribute).isId())
+                {
+                    //Populate Embedded attribute value into relationship 
+                    Object id = PropertyAccessorHelper.getId(relationshipObj, relMetadata);
+                    Object serializedIdValue = serializeIdAttributeValue(relMetadata, id);
+                    relationship.setProperty(columnName, serializedIdValue);
+                    
+                    //Populate attributes of embedded fields into relationship
+                    Set<Attribute> embeddableAttributes = metaModel.embeddable(relMetadata.getIdAttribute().getBindableJavaType()).getSingularAttributes();
+                    for(Attribute embeddableAttribute : embeddableAttributes)
+                    {
+                        String embeddedColumn = ((AbstractAttribute) embeddableAttribute).getJPAColumnName();
+                        if(embeddedColumn == null) embeddedColumn = embeddableAttribute.getName();
+                        Object value = PropertyAccessorHelper.getObject(id, (Field) embeddableAttribute.getJavaMember());
+                        
+                        if(value != null) relationship.setProperty(embeddedColumn, value);                         
+                    }
+                }
+                else
+                {
+                    Object value = PropertyAccessorHelper.getObject(relationshipObj, f);
+                    relationship.setProperty(columnName, toNeo4JProperty(value));
+                }   
+                        
+            }           
+        }
+        
+       
+    } 
     
     /**
      * Creates a Map containing all properties (and their values) for a given entity
@@ -237,8 +292,7 @@ public final class GraphEntityMapper
         Map<String, Object> props = new HashMap<String, Object>();
         
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-        
+                m.getPersistenceUnit());      
         
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         
@@ -266,11 +320,11 @@ public final class GraphEntityMapper
     /**
      * Creates a Map containing all properties (and their values) for a given relationship entity
      * @param entityMetadata
-     * @param relationEntityMetadata
+     * @param targetEntityMetadata
      * @param relationshipProperties
      * @param relationshipEntity
      */
-    public Map<String, Object> createRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata relationEntityMetadata,
+    public Map<String, Object> createRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata targetEntityMetadata,
             Object relationshipEntity)
     {
         Map<String, Object> relationshipProperties = new HashMap<String, Object>();
@@ -278,7 +332,7 @@ public final class GraphEntityMapper
         for (Field f : relationshipEntity.getClass().getDeclaredFields())
         {
             if (!f.getType().equals(entityMetadata.getEntityClazz())
-                    && !f.getType().equals(relationEntityMetadata.getEntityClazz()))
+                    && !f.getType().equals(targetEntityMetadata.getEntityClazz()))
             {
                 String relPropertyName = f.getAnnotation(Column.class) != null ? f.getAnnotation(
                         Column.class).name() : f.getName();
@@ -293,22 +347,85 @@ public final class GraphEntityMapper
      * 
      * Gets (if available) or creates a node for the given entity
      */
-    private Node getOrCreateNodeWithUniqueFactory(Object entity, EntityMetadata m, GraphDatabaseService graphDb)
+    private Node getOrCreateNodeWithUniqueFactory(final Object entity, final EntityMetadata m, GraphDatabaseService graphDb)
     {
-        Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
-        final String idFieldName = m.getIdAttribute().getName();
+        final Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());       
+        final String idColumnName = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();   
+       
+         
+        
+        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());      
+        
         UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, m.getIndexName())
-        {
+        {            
+            /** 
+             * Initialize ID attribute
+             */
             @Override
             protected void initialize(Node created, Map<String, Object> properties)
             {   
-                created.setProperty(idFieldName, properties.get(idFieldName));                
+                //Set Embeddable ID attribute
+                if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+                {                   
+                    //Populate embedded field value in serialized format
+                    String idUniqueValue = serializeIdAttributeValue(m, id);
+                    created.setProperty(idColumnName, idUniqueValue);
+                    
+                    //Populated all other attributes of embedded into this node 
+                    Set<Attribute> embeddableAttributes = metaModel.embeddable(m.getIdAttribute().getBindableJavaType()).getSingularAttributes();
+                    for(Attribute attribute : embeddableAttributes)
+                    {
+                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                        if(columnName == null) columnName = attribute.getName();
+                        Object value = PropertyAccessorHelper.getObject(id, (Field)attribute.getJavaMember());
+                        
+                        if(value != null) created.setProperty(columnName, value);                         
+                    }                   
+                }
+                else 
+                {                    
+                    created.setProperty(idColumnName, properties.get(idColumnName));                    
+                }
+                                
             }
         };        
         
+        if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {                      
+            String idUniqueValue = serializeIdAttributeValue(m, id);
+            return factory.getOrCreate(idColumnName, idUniqueValue);
+        }
+        else
+        {
+            return factory.getOrCreate(idColumnName, id );
+        }
         
-        return factory.getOrCreate(idFieldName, id );
+    }
+
+    /**
+     * @param m
+     * @param id
+     * @param metaModel
+     * @return
+     */
+    private String serializeIdAttributeValue(final EntityMetadata m, Object id)
+    {
+        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());  
+        Set<Attribute> embeddableAttributes = metaModel.embeddable(m.getIdAttribute().getBindableJavaType()).getSingularAttributes();
         
+        String idUniqueValue = "";
+        
+        for(Attribute attribute : embeddableAttributes)
+        {
+            String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+            if(columnName == null) columnName = attribute.getName();
+            
+            Object value = PropertyAccessorHelper.getObject(id, (Field)attribute.getJavaMember());
+            idUniqueValue += value;
+        }
+        return idUniqueValue;
     }
     
     /**
@@ -401,6 +518,14 @@ public final class GraphEntityMapper
         Node node = null;  
 
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+        
+        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());  
+        if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            key = serializeIdAttributeValue(m, key);
+        }        
+        
         if (indexer.isNodeAutoIndexingEnabled(graphDb))
         {
             // Get the Node auto index

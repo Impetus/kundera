@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb.composite;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
@@ -24,5 +25,61 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class MovieId
 {
+    @Column(name="CERTIFICATION")
+    private char certification;
+    
+    @Column(name="SERIAL_NUMBER")
+    private long serialNumber;
+    
+    
+
+    public MovieId()
+    {        
+    }
+
+    /**
+     * @param certification
+     * @param serialNumber
+     */
+    public MovieId(char certification, long serialNumber)
+    {
+        super();
+        this.certification = certification;
+        this.serialNumber = serialNumber;
+    }
+
+    /**
+     * @return the certification
+     */
+    public char getCertification()
+    {
+        return certification;
+    }
+
+    /**
+     * @param certification the certification to set
+     */
+    public void setCertification(char certification)
+    {
+        this.certification = certification;
+    }
+
+    /**
+     * @return the serialNumber
+     */
+    public long getSerialNumber()
+    {
+        return serialNumber;
+    }
+
+    /**
+     * @param serialNumber the serialNumber to set
+     */
+    public void setSerialNumber(long serialNumber)
+    {
+        this.serialNumber = serialNumber;
+    }
+    
+    
 
 }

@@ -15,11 +15,14 @@
  */
 package com.impetus.client.neo4j.imdb.composite;
 
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +38,8 @@ public class IMDBCompositeKeyTest
     
     private static final String IMDB_PU = "imdb";
     
+    ActorComposite actor1;
+    ActorComposite actor2;  
 
 
     /**
@@ -60,8 +65,73 @@ public class IMDBCompositeKeyTest
     @Test
     public void testCompositeKeys()
     {
+        insert();    
+        //findById();
+    }
+    
+    private void findById()
+    {
+        //Find actor by ID
+        em.clear();        
+        ActorComposite actor1 = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2 = em.find(ActorComposite.class, new ActorId("A", 2));        
+        assertActors(actor1, actor2);          
+    }
+
+    /**
+     * 
+     */
+    public void insert()
+    {
+        prepareData();
+        em.getTransaction().begin();
+        em.persist(actor1);
+        em.persist(actor2);
+        em.getTransaction().commit();
+    }
+    
+    private void prepareData()
+    {
+        //Actors
+        actor1 = new ActorComposite(new ActorId("A", 1), "Tom Cruise");
+        actor2 = new ActorComposite(new ActorId("A", 2), "Emmanuelle Béart");     
+        
+        //Movies
+        MovieComposite movie1 = new MovieComposite(new MovieId('U', 11111111L), "War of the Worlds", 2005);
+        MovieComposite movie2 = new MovieComposite(new MovieId('U', 22222222L), "Mission Impossible", 1996);       
+        MovieComposite movie3 = new MovieComposite(new MovieId('A', 33333333L), "Hell", 2005);
+        
+        //Roles
+        RoleComposite role1 = new RoleComposite(new RoleId("Ray", "Ferrier"), "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);
+        RoleComposite role2 = new RoleComposite(new RoleId("Ethan", "Hunt"), "Lead Actor"); role2.setActor(actor1); role2.setMovie(movie2);
+        RoleComposite role3 = new RoleComposite(new RoleId("Claire", "Phelps"), "Lead Actress"); role3.setActor(actor2); role1.setMovie(movie2);
+        RoleComposite role4 = new RoleComposite(new RoleId("Sophie", ""), "Supporting Actress"); role4.setActor(actor2); role1.setMovie(movie3);
+        
+        //Relationships
+        actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
+        actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
+        
+        movie1.addActor(role1, actor1);
+        movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
+        movie3.addActor(role4, actor2);
+    }
+    
+    private void assertActors(ActorComposite actor1, ActorComposite actor2)
+    {
+        Assert.assertNotNull(actor1);
+        Assert.assertEquals(1, actor1.getActorId());
+        Assert.assertEquals("Tom Cruise", actor1.getName());
+        Map<RoleComposite, MovieComposite> movies1 = actor1.getMovies();
+        Assert.assertFalse(movies1 == null || movies1.isEmpty());
+        Assert.assertEquals(2, movies1.size());
         
         
+        Assert.assertNotNull(actor2);
+        Assert.assertEquals(2, actor2.getActorId());
+        Assert.assertEquals("Emmanuelle Béart", actor2.getName());
+        Map<RoleComposite, MovieComposite> movies2 = actor2.getMovies();
+        Assert.assertFalse(movies2 == null || movies2.isEmpty());
+        Assert.assertEquals(2, movies2.size());
     }
 
 }

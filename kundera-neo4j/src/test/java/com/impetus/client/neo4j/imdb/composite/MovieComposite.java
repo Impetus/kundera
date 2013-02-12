@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
@@ -38,9 +38,8 @@ import com.impetus.kundera.index.IndexCollection;
 @IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
 public class MovieComposite
 {
-    @Id
-    @Column(name="MOVIE_ID")
-    private String id;
+    @EmbeddedId
+    private MovieId movieId;
     
     @Column(name="TITLE")
     private String title;
@@ -52,9 +51,9 @@ public class MovieComposite
     private Map<RoleComposite, ActorComposite> actors;
     
     public MovieComposite() {}
-    public MovieComposite(String id, String title, int year)
+    public MovieComposite(MovieId id, String title, int year)
     {
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.year = year;
     }
@@ -63,24 +62,24 @@ public class MovieComposite
     {
         if(actors == null) actors = new HashMap<RoleComposite, ActorComposite>();
         actors.put(role, actor);
-    }
+    }   
 
+    
     /**
-     * @return the id
+     * @return the movieId
      */
-    public String getId()
+    public MovieId getMovieId()
     {
-        return id;
+        return movieId;
     }
-
     /**
-     * @param id the id to set
+     * @param movieId the movieId to set
      */
-    public void setId(String id)
+    public void setMovieId(MovieId movieId)
     {
-        this.id = id;
+        this.movieId = movieId;
     }
-
+    
     /**
      * @return the title
      */

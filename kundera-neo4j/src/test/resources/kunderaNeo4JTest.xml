@@ -46,7 +46,7 @@
 					<property name="node_auto_indexing" value="true"></property>
 					<property name="node_cache_array_fraction" value="1.0"></property>
 					<!--<property name="node_cache_size" value=""></property>-->
-					<property name="node_keys_indexable" value="ACTOR_ID,ACTOR_NAME,MOVIE_ID,TITLE,YEAR"></property>
+					<property name="node_keys_indexable" value="ACTOR_ID,ACTOR_NAME,ACTOR_ID_PREFIX,ACTOR_ID_SUFFIX,MOVIE_ID,TITLE,YEAR,CERTIFICATION,SERIAL_NUMBER"></property>
 					<property name="query_cache_size" value="100"></property>
 					<property name="read_only" value="false"></property>
 					<property name="rebuild_idgenerators_fast" value="false"></property>

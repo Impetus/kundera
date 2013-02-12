@@ -20,11 +20,9 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.Table;
@@ -42,25 +40,21 @@ import com.impetus.kundera.index.IndexCollection;
 @IndexCollection(columns={@Index(name = "name", type = "KEYS")})
 public class ActorComposite
 {
-    @Id
-    @Column(name="ACTOR_ID")   
-    private int id;
+    @EmbeddedId   
+    private ActorId actorId;
     
     @Column(name="ACTOR_NAME")
     private String name;
     
     public ActorComposite() {}
     
-    public ActorComposite(int actorId, String actorName)
+    public ActorComposite(ActorId actorId, String actorName)
     {
-        this.id = actorId;
+        this.actorId = actorId;
         this.name = actorName;
     }
     
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
-    /*@JoinTable(name = "ACTOR_MOVIE",  //Ignored in case Movie isn't stored in Neo4J
-            joinColumns = { @JoinColumn(name = "ACTOR_ID") },
-            inverseJoinColumns = { @JoinColumn(name = "MOVIE_ID") })*/
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<RoleComposite, MovieComposite> movies;
     
@@ -68,22 +62,22 @@ public class ActorComposite
     {
         if(movies == null) movies = new HashMap<RoleComposite, MovieComposite>();
         movies.put(role, movie);
+    }   
+
+    /**
+     * @return the actorId
+     */
+    public ActorId getActorId()
+    {
+        return actorId;
     }
 
     /**
-     * @return the id
+     * @param actorId the actorId to set
      */
-    public int getId()
+    public void setActorId(ActorId actorId)
     {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(int id)
-    {
-        this.id = id;
+        this.actorId = actorId;
     }
 
     /**
