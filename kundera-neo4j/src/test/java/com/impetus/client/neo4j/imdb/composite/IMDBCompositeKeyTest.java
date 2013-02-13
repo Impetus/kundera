@@ -26,6 +26,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.neo4j.imdb.Actor;
+
 /**
  * Test case for entities that hold composite keys  
  * @author amresh.singh
@@ -67,16 +69,9 @@ public class IMDBCompositeKeyTest
     {
         insert();    
         findById();
-    }
-    
-    private void findById()
-    {
-        //Find actor by ID
-        em.clear();        
-        ActorComposite actor1 = em.find(ActorComposite.class, new ActorId("A", 1));
-        ActorComposite actor2 = em.find(ActorComposite.class, new ActorId("A", 2));        
-        assertActors(actor1, actor2);          
-    }
+        merge();
+        delete();
+    }   
 
     /**
      * 
@@ -88,6 +83,59 @@ public class IMDBCompositeKeyTest
         em.persist(actor1);
         em.persist(actor2);
         em.getTransaction().commit();
+    }
+    
+    private void findById()
+    {
+        //Find actor by ID
+        em.clear();        
+        ActorComposite actor1 = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2 = em.find(ActorComposite.class, new ActorId("A", 2));    
+        
+        
+        assertActors(actor1, actor2);          
+    }
+    
+    private void merge()
+    {
+        em.clear();        
+        ActorComposite actor1 = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2 = em.find(ActorComposite.class, new ActorId("A", 2));         
+        assertActors(actor1, actor2);  
+        
+        actor1.setName("Amresh");
+        actor2.setName("Amir");
+        
+        em.getTransaction().begin();
+        em.merge(actor1);
+        em.merge(actor2);
+        em.getTransaction().commit();
+        
+        em.clear();
+        
+        ActorComposite actor1AfterMerge = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2AfterMerge = em.find(ActorComposite.class, new ActorId("A", 2));    
+        
+        assertUpdatedActors(actor1AfterMerge, actor2AfterMerge);
+    }
+    
+    private void delete()
+    {
+        em.clear();
+        ActorComposite actor1 = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2 = em.find(ActorComposite.class, new ActorId("A", 2));
+        
+        
+        em.getTransaction().begin();
+        em.remove(actor1);
+        em.remove(actor2);
+        em.getTransaction().commit();
+        
+        em.clear();
+        ActorComposite actor1AfterDeletion = em.find(ActorComposite.class, new ActorId("A", 1));
+        ActorComposite actor2AfterDeletion = em.find(ActorComposite.class, new ActorId("A", 2));
+        Assert.assertNull(actor1AfterDeletion);
+        Assert.assertNull(actor2AfterDeletion);
     }
     
     private void prepareData()
@@ -131,6 +179,26 @@ public class IMDBCompositeKeyTest
         Assert.assertEquals("A", actor2.getActorId().getPrefix());
         Assert.assertEquals(2, actor2.getActorId().getSuffix());
         Assert.assertEquals("Emmanuelle Béart", actor2.getName());
+        Map<RoleComposite, MovieComposite> movies2 = actor2.getMovies();
+        Assert.assertFalse(movies2 == null || movies2.isEmpty());
+        Assert.assertEquals(2, movies2.size());
+    }
+    
+    private void assertUpdatedActors(ActorComposite actor1, ActorComposite actor2)
+    {
+        Assert.assertNotNull(actor1);
+        Assert.assertEquals("A", actor1.getActorId().getPrefix());
+        Assert.assertEquals(1, actor1.getActorId().getSuffix());
+        Assert.assertEquals("Amresh", actor1.getName());
+        Map<RoleComposite, MovieComposite> movies1 = actor1.getMovies();
+        Assert.assertFalse(movies1 == null || movies1.isEmpty());
+        Assert.assertEquals(2, movies1.size());
+        
+        
+        Assert.assertNotNull(actor2);
+        Assert.assertEquals("A", actor2.getActorId().getPrefix());
+        Assert.assertEquals(2, actor2.getActorId().getSuffix());
+        Assert.assertEquals("Amir", actor2.getName());
         Map<RoleComposite, MovieComposite> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
