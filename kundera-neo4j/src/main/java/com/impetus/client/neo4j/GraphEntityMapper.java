@@ -59,6 +59,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public final class GraphEntityMapper
 {
     
+    private static final String COMPOSITE_KEY_SEPARATOR = "-";
+
     /** The log. */
     private static Log log = LogFactory.getLog(GraphEntityMapper.class);
     
@@ -120,7 +122,12 @@ public final class GraphEntityMapper
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 
                 //Set Entity level properties
-                if(! attribute.isCollection() && ! attribute.isAssociation())
+                if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()) && m.getIdAttribute().getJavaType().equals(field.getType()))
+                {
+                    Object idValue = deserializeIdAttributeValue(m, (String)node.getProperty(columnName));
+                    PropertyAccessorHelper.set(entity, field, idValue);
+                }
+                else if(! attribute.isCollection() && ! attribute.isAssociation())
                 {
                     
                     PropertyAccessorHelper.set(entity, field, fromNeo4JObject(node.getProperty(columnName), field));         
@@ -170,7 +177,13 @@ public final class GraphEntityMapper
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 
                 //Set Entity level properties
-                if(! attribute.isCollection() && ! attribute.isAssociation() 
+                if(metaModel.isEmbeddable(relationshipEntityMetadata.getIdAttribute().getBindableJavaType()) 
+                        && relationshipEntityMetadata.getIdAttribute().getJavaType().equals(field.getType()))
+                {
+                    Object idValue = deserializeIdAttributeValue(relationshipEntityMetadata, (String) relationship.getProperty(columnName));
+                    PropertyAccessorHelper.set(entity, field, idValue);
+                }                
+                else if(! attribute.isCollection() && ! attribute.isAssociation() 
                         && ! field.getType().equals(topLevelEntityMetadata.getEntityClazz())
                         && ! field.getType().equals(relation.getTargetEntity()))
                 {
@@ -413,19 +426,56 @@ public final class GraphEntityMapper
     {
         final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());  
-        Set<Attribute> embeddableAttributes = metaModel.embeddable(m.getIdAttribute().getBindableJavaType()).getSingularAttributes();
+        Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
         
         String idUniqueValue = "";
-        
-        for(Attribute attribute : embeddableAttributes)
+               
+        for(Field embeddedField : embeddableClass.getDeclaredFields())
         {
-            String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-            if(columnName == null) columnName = attribute.getName();
+            Column columnAnn = embeddedField.getAnnotation(Column.class);
+            String columnName = columnAnn == null || columnAnn.name() == null ? embeddedField.getName() : columnAnn.name();         
             
-            Object value = PropertyAccessorHelper.getObject(id, (Field)attribute.getJavaMember());
-            idUniqueValue += value;
+            Object value = PropertyAccessorHelper.getObject(id, embeddedField);
+            idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
         }
+        
+        if(idUniqueValue.endsWith(COMPOSITE_KEY_SEPARATOR)) idUniqueValue = idUniqueValue.substring(0, idUniqueValue.length() - 1);
         return idUniqueValue;
+    }
+
+    private Object deserializeIdAttributeValue(final EntityMetadata m, String idValue)
+    {
+        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
+        Object embeddedObject = null;
+        try
+        {
+            embeddedObject = embeddableClass.newInstance();
+        }
+        catch (InstantiationException e)
+        {
+            log.error("Error while instantiating " + embeddableClass + ". Did you define no argument constructor? Details:" + e.getMessage());
+            return embeddedObject;
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error("Error while instantiating " + embeddableClass + ".? Details:" + e.getMessage());
+            return embeddedObject;
+        }
+
+        String[] tokens = idValue.split(COMPOSITE_KEY_SEPARATOR);
+
+        int count = 0;
+        for (Field embeddedField : embeddableClass.getDeclaredFields())
+        {
+            if(count < tokens.length)
+            {
+                String value = tokens[count++];
+                PropertyAccessorHelper.set(embeddedObject, embeddedField, value);
+            }            
+        }
+        return embeddedObject;
     }
     
     /**
