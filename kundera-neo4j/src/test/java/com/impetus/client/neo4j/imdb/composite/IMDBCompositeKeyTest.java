@@ -66,7 +66,7 @@ public class IMDBCompositeKeyTest
     public void testCompositeKeys()
     {
         insert();    
-        //findById();
+        findById();
     }
     
     private void findById()
@@ -119,7 +119,8 @@ public class IMDBCompositeKeyTest
     private void assertActors(ActorComposite actor1, ActorComposite actor2)
     {
         Assert.assertNotNull(actor1);
-        Assert.assertEquals(1, actor1.getActorId());
+        Assert.assertEquals("A", actor1.getActorId().getPrefix());
+        Assert.assertEquals(1, actor1.getActorId().getSuffix());
         Assert.assertEquals("Tom Cruise", actor1.getName());
         Map<RoleComposite, MovieComposite> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
@@ -127,7 +128,8 @@ public class IMDBCompositeKeyTest
         
         
         Assert.assertNotNull(actor2);
-        Assert.assertEquals(2, actor2.getActorId());
+        Assert.assertEquals("A", actor2.getActorId().getPrefix());
+        Assert.assertEquals(2, actor2.getActorId().getSuffix());
         Assert.assertEquals("Emmanuelle Béart", actor2.getName());
         Map<RoleComposite, MovieComposite> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
