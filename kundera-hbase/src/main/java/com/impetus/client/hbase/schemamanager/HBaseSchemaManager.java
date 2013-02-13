@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.Embeddable;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -38,8 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
-import com.impetus.kundera.configure.schema.ColumnInfo;
-import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -128,6 +124,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                 admin.addColumn(tableInfo.getTableName(), columnDescriptor);
                             }
                         }
+                        if (admin.isTableDisabled(tableInfo.getTableName().getBytes()))
+                        {
+                            admin.enableTable(tableInfo.getTableName().getBytes());
+                        }
                     }
                 }
                 catch (IOException e)
@@ -141,6 +141,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         logger.error("Check for network connection, Caused by:" + e.getMessage());
                         throw new SchemaGenerationException(e, "Hbase");
                     }
+
+                }
+                finally
+                {
 
                 }
             }
