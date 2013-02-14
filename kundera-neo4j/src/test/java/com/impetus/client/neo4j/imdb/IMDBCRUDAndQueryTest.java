@@ -38,6 +38,9 @@ public class IMDBCRUDAndQueryTest
     
     private static final String IMDB_PU = "imdb";
     
+    Actor actor1;
+    Actor actor2;
+    
 
 
     /**
@@ -77,28 +80,7 @@ public class IMDBCRUDAndQueryTest
     
     private void insert()
     {
-        //Actors
-        Actor actor1 = new Actor(1, "Tom Cruise");
-        Actor actor2 = new Actor(2, "Emmanuelle Béart");     
-        
-        //Movies
-        Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
-        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);       
-        Movie movie3 = new Movie("m3", "Hell", 2005);
-        
-        //Roles
-        Role role1 = new Role("Ray Ferrier", "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);
-        Role role2 = new Role("Ethan Hunt", "Lead Actor"); role2.setActor(actor1); role2.setMovie(movie2);
-        Role role3 = new Role("Claire Phelps", "Lead Actress"); role3.setActor(actor2); role1.setMovie(movie2);
-        Role role4 = new Role("Sophie", "Supporting Actress"); role4.setActor(actor2); role1.setMovie(movie3);
-        
-        //Relationships
-        actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
-        actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
-        
-        movie1.addActor(role1, actor1);
-        movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
-        movie3.addActor(role4, actor2);
+        populateActors();
         
         em.getTransaction().begin();
         
@@ -208,5 +190,31 @@ public class IMDBCRUDAndQueryTest
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
     }  
+    
+    private void populateActors()
+    {
+        //Actors
+        actor1 = new Actor(1, "Tom Cruise");
+        actor2 = new Actor(2, "Emmanuelle Béart");     
+        
+        //Movies
+        Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
+        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);       
+        Movie movie3 = new Movie("m3", "Hell", 2005);
+        
+        //Roles
+        Role role1 = new Role("Ray Ferrier", "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);
+        Role role2 = new Role("Ethan Hunt", "Lead Actor"); role2.setActor(actor1); role2.setMovie(movie2);
+        Role role3 = new Role("Claire Phelps", "Lead Actress"); role3.setActor(actor2); role1.setMovie(movie2);
+        Role role4 = new Role("Sophie", "Supporting Actress"); role4.setActor(actor2); role1.setMovie(movie3);
+        
+        //Relationships
+        actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
+        actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
+        
+        movie1.addActor(role1, actor1);
+        movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
+        movie3.addActor(role4, actor2);
+    }
 
 }
