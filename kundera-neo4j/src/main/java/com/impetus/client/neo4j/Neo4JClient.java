@@ -326,7 +326,25 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             .getClass());
                     Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
                     //Node targetNode = mapper.searchNode(targetNodeKey, targetNodeMetadata, graphDb);
-                    Node targetNode = ((Neo4JTransaction)resource).getProcessedNode(targetNodeKey);
+                    
+                    Node targetNode = null;    //Target node connected through relationship
+                    
+                    /** If Relationship is with an entity in Neo4J, Target node must already have been created
+                     * Get a handle of it prom processed nodes and add edges to it.
+                     * Else, if relationship is with an entity in a database other than Neo4J, create a "Proxy Node"
+                     *  that points to a row in other database. This proxy node contains key equal to primary key of row in other database. 
+                     * */
+                    
+                    if(isEntityForNeo4J(targetNodeMetadata))
+                    {
+                        targetNode = ((Neo4JTransaction) resource).getProcessedNode(targetNodeKey);
+                    }
+                    else
+                    {
+                        //Create Proxy nodes
+                        targetNode = mapper.createProxyNode(id, targetNodeKey, graphDb, entityMetadata, targetNodeMetadata);                        
+                    }                  
+                    
 
                     if (targetNode != null)
                     {
