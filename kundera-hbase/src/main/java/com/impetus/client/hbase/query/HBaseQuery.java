@@ -27,7 +27,6 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -160,7 +159,8 @@ public class HBaseQuery extends QueryImpl implements Query
         // Called only in case of standalone entity.
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
-        List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult());
+        // start with 1 as first element is alias.
+        List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
         Map<Boolean, Filter> filter = translator.getFilter();
         if (translator.isFindById && (filter == null && columns == null))
         {
@@ -233,7 +233,7 @@ public class HBaseQuery extends QueryImpl implements Query
      * @param m
      * @return
      */
-    private List<String> getTranslatedColumns(EntityMetadata m, String[] columns)
+    private List<String> getTranslatedColumns(EntityMetadata m, String[] columns, final int startWith)
     {
         List<String> translatedColumns = new ArrayList<String>();
         if (columns != null)
@@ -243,7 +243,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
             EntityType entity = metaModel.entity(m.getEntityClazz());
             int count = 0;
-            for (int i = 1; i < columns.length; i++)
+            for (int i = startWith; i < columns.length; i++)
             {
                 if (columns[i] != null)
                 {
@@ -363,6 +363,14 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
+
+                    // StringTokenizer tokenizer = new StringTokenizer(name,
+                    // ".");
+                    // if (tokenizer.countTokens() > 1)
+                    // {
+                    // tokenizer.nextToken();
+                    // name = tokenizer.nextToken();
+                    // }
                     if (/* (!isIdColumn) || */idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
@@ -422,11 +430,20 @@ public class HBaseQuery extends QueryImpl implements Query
 
             if (!isIdColumn)
             {
-                // Filter f = new SingleColumnValueFilter(name.getBytes(),
-                // name.getBytes(), operator, valueInBytes);
+                List<String> columns = null;
+                if (new StringTokenizer(name, ".").countTokens() > 1)
+                {
+                    columns = getTranslatedColumns(m, new String[] { name }, 0);
+                }
+
+                if (columns != null && !columns.isEmpty())
+                {
+                    name = columns.get(0);
+                }
                 Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
                         valueInBytes);
                 addToFilter(f);
+
             }
             else
             {
@@ -530,16 +547,12 @@ public class HBaseQuery extends QueryImpl implements Query
                 String fieldName = m.getFieldName(jpaFieldName);
                 Attribute col = entity.getAttribute(fieldName);
                 // Column col = m.getColumn(jpaFieldName);
-                if (col == null)
-                {
-                    throw new QueryHandlerException("column type is null for: " + jpaFieldName);
-                }
                 fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
                 // f = (Field) col.getJavaMember();
             }
         }
 
-        if (fieldClazz != null /*&& f.getType() != null*/)
+        if (fieldClazz != null /* && f.getType() != null */)
         {
             return HBaseUtils.getBytes(value, fieldClazz);
         }

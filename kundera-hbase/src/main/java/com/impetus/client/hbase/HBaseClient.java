@@ -405,7 +405,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> relations)
     {
         String tableName = entityMetadata.getTableName();
-
+       
         try
         {
             // Write data to HBase
@@ -623,20 +623,22 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         return batchSize;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#clear()
      */
     @Override
     public void clear()
     {
-        if(nodes != null)
+        if (nodes != null)
         {
             nodes.clear();
-            nodes=null;
+            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * 

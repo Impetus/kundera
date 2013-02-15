@@ -139,7 +139,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                     catch (IOException ioe)
                     {
                         logger.error("Check for network connection, Caused by:", ioe);
-                        throw new SchemaGenerationException(e, "Hbase");
+                        throw new SchemaGenerationException(ioe, "Hbase");
                     }
 
                 }

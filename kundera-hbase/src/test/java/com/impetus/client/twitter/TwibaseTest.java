@@ -18,6 +18,7 @@ package com.impetus.client.twitter;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for Twitter like application on HBase
@@ -32,7 +33,8 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Override
     protected void setUp() throws Exception
     {
-//        setUpInternal("hbaseTest");
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        setUpInternal("twibaseTest");
     }
 
     /**
@@ -41,13 +43,13 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Test
     public void testOnExecute()
     {
-//        executeTestSuite();
+        executeTestSuite();
     }
 
     @Override
     protected void tearDown() throws Exception
     {
-//        tearDownInternal();
+        tearDownInternal();
     }
 
     @Override
@@ -72,22 +74,22 @@ public class TwibaseTest extends TwitterTestBaseHbase
     void createSchema()
     {
         if (AUTO_MANAGE_SCHEMA)
-        {
-            // cli.createTable("USER");
-            // cli.addColumnFamily("USER", "PREFERENCE_ID");
-            // cli.addColumnFamily("USER", "FRIEND_ID");
-            // cli.addColumnFamily("USER", "FOLLOWER_ID");
-            // cli.addColumnFamily("USER", "personalDetail");
+        {/*
+            cli.createTable("USER");
+            cli.addColumnFamily("USER", "PREFERENCE_ID");
+            cli.addColumnFamily("USER", "FRIEND_ID");
+            cli.addColumnFamily("USER", "FOLLOWER_ID");
+            cli.addColumnFamily("USER", "personalDetail");
 
-            // cli.createTable("PREFERENCE");
-            // cli.addColumnFamily("PREFERENCE", "WEBSITE_THEME");
-            // cli.addColumnFamily("PREFERENCE", "PRIVACY_LEVEL");
+            cli.createTable("PREFERENCE");
+            cli.addColumnFamily("PREFERENCE", "WEBSITE_THEME");
+            cli.addColumnFamily("PREFERENCE", "PRIVACY_LEVEL");
 
-            // cli.createTable("EXTERNAL_LINK");
-            // cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
-            // cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
-            // cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
-        }
+            cli.createTable("EXTERNAL_LINK");
+            cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
+            cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
+            cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
+        */}
     }
 
     @Override

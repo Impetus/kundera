@@ -38,7 +38,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "USER_HBASE", schema = "KunderaExamples@hbaseTest")
+@Table(name = "USER_HBASE", schema = "KunderaExamples@twibaseTest")
 public class UserHBase
 {
 
