@@ -1,12 +1,11 @@
 package com.impetus.client.hbase.crud;
 
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,8 +19,6 @@ public class HumanTest
 
     /** The em. */
     private static EntityManager em;
-
-    private Map<Object, Object> col;
 
     private HBaseCli cli;
 
@@ -50,7 +47,10 @@ public class HumanTest
         em.clear(); // just to clear pc cache
 
         Human result = em.find(Human.class, humanId);
-        System.out.println(result);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(humanId, result.getHumanId());
+        Assert.assertEquals("myPhoto", result.getHumansPrivatePhoto().getPhotoName());
+        Assert.assertTrue(result.getHumanAlive());
 
     }
 
@@ -63,8 +63,6 @@ public class HumanTest
         {
             cli.dropTable("Humans");
             cli.dropTable("HumansPrivatePhoto");
-            cli.stopCluster("Humans");
         }
-
     }
 }

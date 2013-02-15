@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.Embeddable;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -38,8 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
-import com.impetus.kundera.configure.schema.ColumnInfo;
-import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -128,6 +124,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                 admin.addColumn(tableInfo.getTableName(), columnDescriptor);
                             }
                         }
+                        if (admin.isTableDisabled(tableInfo.getTableName().getBytes()))
+                        {
+                            admin.enableTable(tableInfo.getTableName().getBytes());
+                        }
                     }
                 }
                 catch (IOException e)
@@ -136,9 +136,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                     {
                         admin.createTable(hTableDescriptor);
                     }
-                    catch (IOException e1)
+                    catch (IOException ioe)
                     {
-                        logger.error("Check for network connection, Caused by:" + e.getMessage());
+                        logger.error("Check for network connection, Caused by:", ioe);
                         throw new SchemaGenerationException(e, "Hbase");
                     }
 
@@ -185,11 +185,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 throw new SchemaGenerationException("table " + tableInfo.getTableName() + " does not exist ", tnfex,
                         "Hbase");
             }
-            catch (IOException e)
+            catch (IOException ioe)
             {
-                logger.error("Either check for network connection or table isn't in enabled state, Caused by:"
-                        + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
+                logger.error("Either check for network connection or table isn't in enabled state, Caused by:", ioe);
+                throw new SchemaGenerationException(ioe, "Hbase");
             }
         }
     }
@@ -229,8 +228,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 catch (IOException ioex)
                 {
-                    logger.error("Either table isn't in enabled state or some network problem, Caused by: "
-                            + ioex.getMessage());
+                    logger.error("Either table isn't in enabled state or some network problem, Caused by: ", ioex);
                     throw new SchemaGenerationException(ioex, "Hbase");
                 }
                 HTableDescriptor hTableDescriptor = getTableMetaData(tableInfo);
@@ -238,10 +236,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 {
                     admin.createTable(hTableDescriptor);
                 }
-                catch (IOException ioex1)
+                catch (IOException ioe)
                 {
-                    logger.error("Table isn't in enabled state, Caused by:" + ioex1.getMessage());
-                    throw new SchemaGenerationException(ioex1, "Hbase");
+                    logger.error("Table isn't in enabled state, Caused by:", ioe);
+                    throw new SchemaGenerationException(ioe, "Hbase");
                 }
             }
         }
@@ -263,15 +261,15 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         admin.disableTable(tableInfo.getTableName());
                         admin.deleteTable(tableInfo.getTableName());
                     }
-                    catch (TableNotFoundException e)
+                    catch (TableNotFoundException tnfe)
                     {
-                        logger.error("Table doesn't exist, Caused by " + e.getMessage());
-                        throw new SchemaGenerationException(e, "Hbase");
+                        logger.error("Table doesn't exist, Caused by ", tnfe);
+                        throw new SchemaGenerationException(tnfe, "Hbase");
                     }
-                    catch (IOException e)
+                    catch (IOException ioe)
                     {
-                        logger.error("Table isn't in enabled state, Caused by" + e.getMessage());
-                        throw new SchemaGenerationException(e, "Hbase");
+                        logger.error("Table isn't in enabled state, Caused by", ioe);
+                        throw new SchemaGenerationException(ioe, "Hbase");
                     }
                 }
             }
@@ -315,15 +313,15 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         {
             admin = new HBaseAdmin(conf);
         }
-        catch (MasterNotRunningException e)
+        catch (MasterNotRunningException mnre)
         {
-            logger.error("Master not running exception, Caused by:" + e.getMessage());
-            throw new SchemaGenerationException(e, "Hbase");
+            logger.error("Master not running exception, Caused by:" , mnre);
+            throw new SchemaGenerationException(mnre, "Hbase");
         }
-        catch (ZooKeeperConnectionException e)
+        catch (ZooKeeperConnectionException zkce)
         {
-            logger.equals("Unable to connect to zookeeper, Caused by:" + e.getMessage());
-            throw new SchemaGenerationException(e, "Hbase");
+            logger.error("Unable to connect to zookeeper, Caused by:" , zkce);
+            throw new SchemaGenerationException(zkce, "Hbase");
         }
         return true;
     }
