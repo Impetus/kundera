@@ -57,9 +57,11 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author amresh.singh
  */
 public final class GraphEntityMapper
-{
-    
+{     
     private static final String COMPOSITE_KEY_SEPARATOR = "-";
+    
+    private static final String PROXY_NODE_TYPE_KEY = "$NODE_TYPE$";
+    private static final String PROXY_NODE_VALUE = "$PROXY_NODE$";
 
     /** The log. */
     private static Log log = LogFactory.getLog(GraphEntityMapper.class);
@@ -93,9 +95,21 @@ public final class GraphEntityMapper
         populateNodeProperties(entity, m, node);  
         
         return node;
-    }
-
+    }  
     
+    public Node createProxyNode(Object sourceNodeId, Object targetNodeId, GraphDatabaseService graphDb, 
+            EntityMetadata sourceEntityMetadata, EntityMetadata targetEntityMetadata)
+    {
+        
+        String sourceNodeIdColumnName = ((AbstractAttribute) sourceEntityMetadata.getIdAttribute()).getJPAColumnName();
+        String targetNodeIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();;
+        
+        Node node = graphDb.createNode();
+        node.setProperty(PROXY_NODE_TYPE_KEY, PROXY_NODE_VALUE);
+        node.setProperty(sourceNodeIdColumnName, sourceNodeId);
+        node.setProperty(targetNodeIdColumnName, targetNodeId);        
+        return node;
+    }
 
     /**
      * 
@@ -423,17 +437,17 @@ public final class GraphEntityMapper
      * @return
      */
     private String serializeIdAttributeValue(final EntityMetadata m, Object id)
-    {
+    {/*
         final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());  
+                m.getPersistenceUnit()); */ 
         Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
         
         String idUniqueValue = "";
                
         for(Field embeddedField : embeddableClass.getDeclaredFields())
         {
-            Column columnAnn = embeddedField.getAnnotation(Column.class);
-            String columnName = columnAnn == null || columnAnn.name() == null ? embeddedField.getName() : columnAnn.name();         
+            /*Column columnAnn = embeddedField.getAnnotation(Column.class);
+            String columnName = columnAnn == null || columnAnn.name() == null ? embeddedField.getName() : columnAnn.name();*/         
             
             Object value = PropertyAccessorHelper.getObject(id, embeddedField);
             idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
@@ -445,8 +459,6 @@ public final class GraphEntityMapper
 
     private Object deserializeIdAttributeValue(final EntityMetadata m, String idValue)
     {
-        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
         Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
         Object embeddedObject = null;
         try

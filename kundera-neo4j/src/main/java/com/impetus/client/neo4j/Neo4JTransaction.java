@@ -53,7 +53,8 @@ public class Neo4JTransaction implements TransactionResource
         if(graphDb != null && ! isTransactionInProgress)
         {
             tx = graphDb.beginTx();
-            nodeIds = new ArrayList<Long>();            
+            nodeIds = new ArrayList<Long>();
+            processedNodes = new HashMap<Object, Node>();
         }
         
         isTransactionInProgress = true;
@@ -67,6 +68,7 @@ public class Neo4JTransaction implements TransactionResource
             tx.success();
             tx.finish();
             nodeIds.clear();
+            processedNodes.clear();
         }
         
         isTransactionInProgress = false;
@@ -80,6 +82,7 @@ public class Neo4JTransaction implements TransactionResource
             tx.failure();
             tx.finish();
             nodeIds.clear();
+            processedNodes.clear();
         }        
         
         tx = null;

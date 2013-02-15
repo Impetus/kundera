@@ -212,5 +212,38 @@
 			<property name="kundera.transaction.timeout" value="30" />
 		</properties>
 	</persistence-unit>
+	
+	<!-- Persistence Units for IMDB application -->
+	<persistence-unit name="imdbCassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="imdb" />
+			<property name="kundera.dialect" value="cassandra" />
+<!--			<property name="kundera.ddl.auto.prepare" value="create" />-->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="imdbNeo4J">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>			
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="7474" />
+			<property name="kundera.datastore.file.path" value="target/imdb.db" />			
+			<property name="kundera.dialect" value="neo4j" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.neo4j.Neo4JClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>
+			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
+		</properties>
+	</persistence-unit>
 
 </persistence>
