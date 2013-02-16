@@ -126,7 +126,7 @@
         <module>kundera-hbase</module>
         <module>kundera-mongo</module>
         <module>kundera-rdbms</module>
-
+	<module>kundera-neo4j</module>
 	<module>kundera-rest</module>
         <module>kundera-redis</module>
 	<module>kundera-tests</module>
@@ -176,7 +176,7 @@
         <module>kundera-mongo</module>
       </modules>
     </profile>
- <!--  <profile>
+    <profile>
       <id>neo4j</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -185,7 +185,7 @@
         <module>kundera-core</module>
       <module>kundera-neo4j</module>
       </modules>
-    </profile> -->	
+    </profile>	
     <profile>
       <id>cassandra</id>
       <activation>
