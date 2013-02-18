@@ -27,7 +27,7 @@ import com.impetus.kundera.index.IndexCollection;
  * Role Relationship entity class
  * @author amresh.singh
  */
-@Entity
+//@Entity
 @Table
 @IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
 public class Role
