@@ -149,7 +149,7 @@ public class ObjectGraphBuilder
                 node.setData(/*nodeDataCopy*/entity);
                 node.setDirty(true);
             }
-            else
+            else if(node.isProcessed())
             {
                 node.setDirty(false);
             }
