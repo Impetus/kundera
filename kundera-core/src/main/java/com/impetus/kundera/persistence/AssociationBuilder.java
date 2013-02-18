@@ -70,7 +70,7 @@ final class AssociationBuilder
      * @param relation
      */
     void populateRelationForM2M(Object entity, EntityMetadata entityMetadata, PersistenceDelegator delegator,
-            Relation relation, Object relObject)
+            Relation relation, Object relObject, Map<String, Object> relationsMap)
     {
         //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
         if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
@@ -86,7 +86,7 @@ final class AssociationBuilder
            } 
             
         }
-        else if(relation.getPropertyType().isAssignableFrom(Map.class) && relObject instanceof Map)
+        else if(relation.getPropertyType().isAssignableFrom(Map.class))
         {
             if(relation.isRelatedViaJoinTable())
             {
@@ -94,17 +94,15 @@ final class AssociationBuilder
             }
             else
             {
-                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-                
-                for(Object child : ((Map)relObject).values())
-                {
-                    Object childId = PropertyAccessorHelper.getId(child, childMetadata);
-                    PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId); 
-                }
+                populateCollectionFromMap(entity, delegator, relation, relObject, relationsMap);                
             }
         }       
 
     }
+
+
+
+    
 
     
 
@@ -339,6 +337,73 @@ final class AssociationBuilder
         catch (PropertyAccessException ex)
         {
             throw new EntityReaderException(ex);
+        }
+    }
+    
+    /**
+     * Populates a a relationship collection which is of type {@link Map} from relationsMap into entity
+     * @param entity
+     * @param delegator
+     * @param relation
+     * @param relObject
+     * @param relationsMap
+     */
+    private void populateCollectionFromMap(Object entity, PersistenceDelegator delegator, Relation relation,
+            Object relObject, Map<String, Object> relationsMap)
+    {
+        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>();   //Map collection to be set into entity        
+        
+        if(relObject == null && ! relationsMap.isEmpty())
+        {
+            for(String relationName : relationsMap.keySet())
+            {
+                Object relationValue = relationsMap.get(relationName);   
+                if(relationValue instanceof Map)
+                {
+                    Map<Object, Object> relationValueMap = (Map<Object, Object>) relationValue;
+                    
+                    Client targetEntityClient = delegator.getClient(childMetadata);    //Client for target entity
+                    for(Object targetEntityKey : relationValueMap.keySet())
+                    {
+                        //Find target entity from database 
+                        Object targetEntity = targetEntityClient.find(childMetadata.getEntityClazz(), targetEntityKey);
+                        
+                        //Set source and target entities into Map key entity
+                        Object mapKeyEntity = relationValueMap.get(targetEntityKey);
+                        Class<?> relationshipClass = relation.getMapKeyJoinClass();
+                        for(Field f : relationshipClass.getDeclaredFields())
+                        {
+                            if(f.getType().equals(entity.getClass()))
+                            {
+                                PropertyAccessorHelper.set(mapKeyEntity, f, entity);
+                            }
+                            else if(f.getType().equals(childMetadata.getEntityClazz()))
+                            {
+                                PropertyAccessorHelper.set(mapKeyEntity, f, targetEntity);
+                            }
+                        }
+                        
+                        //Finally, put map key and value into collection
+                        relationshipEntityMap.put(mapKeyEntity, targetEntity);
+                    }                  
+                }
+            }
+        }           
+        
+        relObject = relationshipEntityMap;
+        
+        //Set relationship collection into original entity
+        PropertyAccessorHelper.set(entity, relation.getProperty(), relObject);
+        
+        //Add target entities into persistence cache
+        if(relObject != null)
+        {
+            for(Object child : ((Map)relObject).values())
+            {
+                Object childId = PropertyAccessorHelper.getId(child, childMetadata);
+                PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId); 
+            }
         }
     }
 

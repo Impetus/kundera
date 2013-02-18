@@ -102,7 +102,7 @@ public final class GraphEntityMapper
     {
         
         String sourceNodeIdColumnName = ((AbstractAttribute) sourceEntityMetadata.getIdAttribute()).getJPAColumnName();
-        String targetNodeIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();;
+        String targetNodeIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
         
         Node node = graphDb.createNode();
         node.setProperty(PROXY_NODE_TYPE_KEY, PROXY_NODE_VALUE);
@@ -593,13 +593,13 @@ public final class GraphEntityMapper
             // Get the Node auto index
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
             IndexHits<Node> nodesFound = autoNodeIndex.get(idColumnName, key);
-            if (nodesFound == null || nodesFound.size() == 0)
+            if (nodesFound == null || nodesFound.size() == 0 || ! nodesFound.hasNext())
             {
                 return null;
             }            
             else
             {
-                node = nodesFound.getSingle();
+                node = nodesFound.next();
             }
             nodesFound.close();
         }

@@ -34,7 +34,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 
 //@Entity
-@Table
+@Table(name="MOVIE")
 @IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
 public class Movie
 {

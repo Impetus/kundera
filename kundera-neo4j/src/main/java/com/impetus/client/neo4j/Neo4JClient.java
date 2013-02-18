@@ -47,6 +47,7 @@ import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
@@ -55,9 +56,11 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -128,63 +131,98 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
 
         Object entity = null;
+        Map<String, Object> relationMap = new HashMap<String, Object>();
 
         Node node = mapper.searchNode(key, m, graphDb);
         if (node != null)
 
         {
             entity = mapper.toEntity(node, m);
+            
+            
 
             // Populate all relationship entities that are in Neo4J
             for (Relation relation : m.getRelations())
             {
+                
+                if(relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
+                {
+                    continue;
+                }
+                
                 Class<?> targetEntityClass = relation.getTargetEntity();
                 EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);                
                 Field property = relation.getProperty();       
                 
                 
                 if (relation.getPropertyType().isAssignableFrom(Map.class)
-                        && relation.getType().equals(ForeignKey.MANY_TO_MANY) 
-                        && isEntityForNeo4J(targetEntityMetadata))
-                {
+                        && relation.getType().equals(ForeignKey.MANY_TO_MANY))
+                {    
                     
-                    if(relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
+                    Map<Object, Object> targetEntitiesMap = new HashMap<Object, Object>();
+                    
+                    //If relationship entity is stored into Neo4J, fetch it immediately
+                    if(isEntityForNeo4J(targetEntityMetadata))
                     {
-                        continue;
-                    }
-                    
-                    Map targetEntitiesMap = new HashMap();                   
-
-                    for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
-                            DynamicRelationshipType.withName(relation.getJoinColumnName())))
-                    {                        
-                        Node endNode = relationship.getEndNode();
-                        Object targetEntity = mapper.toEntity(endNode, targetEntityMetadata);
-                        Object relationshipEntity = mapper.toEntity(relationship, m, relation);
                         
-                        //Set references to Target and owning entity in relationship entity
-                        Class<?> relationshipClass = relation.getMapKeyJoinClass();
-                        for(Field f : relationshipClass.getDeclaredFields())
-                        {
-                            if(f.getType().equals(m.getEntityClazz()))
+                        for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
+                                DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                        {                        
+                            Node endNode = relationship.getEndNode();
+                            Object targetEntity = mapper.toEntity(endNode, targetEntityMetadata);
+                            Object relationshipEntity = mapper.toEntity(relationship, m, relation);
+                            
+                            //Set references to Target and owning entity in relationship entity
+                            Class<?> relationshipClass = relation.getMapKeyJoinClass();
+                            for(Field f : relationshipClass.getDeclaredFields())
                             {
-                                PropertyAccessorHelper.set(relationshipEntity, f, entity);
+                                if(f.getType().equals(m.getEntityClazz()))
+                                {
+                                    PropertyAccessorHelper.set(relationshipEntity, f, entity);
+                                }
+                                else if(f.getType().equals(targetEntityClass))
+                                {
+                                    PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
+                                }
                             }
-                            else if(f.getType().equals(targetEntityClass))
-                            {
-                                PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
-                            }
+                            targetEntitiesMap.put(relationshipEntity, targetEntity);                        
                         }
-                        targetEntitiesMap.put(relationshipEntity, targetEntity);                        
+                        
+                        PropertyAccessorHelper.set(entity, property, targetEntitiesMap);
                     }
                     
-                    PropertyAccessorHelper.set(entity, property, targetEntitiesMap);
-
+                    /** If relationship entity is stored in a database other than Neo4J
+                    foreign keys are stored in "Proxy Nodes", retrieve these foreign keys 
+                    and set set into EnhanceEntity
+                    */  
+                    else
+                    {    
+                        
+                        for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
+                                DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                        {                            
+                            Node proxyNode = relationship.getEndNode();
+                            
+                            String targetEntityIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
+                            Object targetObjectId = proxyNode.getProperty(targetEntityIdColumnName);
+                            Object relationshipEntity = mapper.toEntity(relationship, m, relation);
+                            
+                            targetEntitiesMap.put(targetObjectId, relationshipEntity);                           
+                        }
+                        
+                        relationMap.put(relation.getJoinColumnName(), targetEntitiesMap);
+                    }
                 }
             }
         }
 
-        return entity;
+        if(! relationMap.isEmpty()) {
+            return new EnhanceEntity(entity, key, relationMap);
+        }
+        else
+        {
+            return entity;
+        }      
     }
 
     

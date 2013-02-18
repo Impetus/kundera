@@ -124,7 +124,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
-        log.error("No schema manager implementation available for Neo4J, returning null");
+        log.info("No schema manager implementation available (required) for Neo4J.");
         return null;
     }
 

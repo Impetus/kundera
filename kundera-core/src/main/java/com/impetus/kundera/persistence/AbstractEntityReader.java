@@ -124,7 +124,7 @@ public class AbstractEntityReader
                 {
                     // First, Save this entity to persistence cache
                     PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);                       
-                    associationBuilder.populateRelationForM2M(entity, m, pd, relation, object);
+                    associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
                 }
                 
                 //Populate other type of relationships

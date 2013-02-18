@@ -116,7 +116,7 @@ public class ManagedState extends NodeState
 
         Object nodeData = null; // Node data
 
-         EntityReader reader = client.getReader();
+        EntityReader reader = client.getReader();
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
 
         // Recursively retrieve relationship entities (if there are any)
