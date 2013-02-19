@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
@@ -158,7 +159,11 @@ public final class GraphEntityMapper
         {
             log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
             throw new EntityReaderException("Error while converting Neo4j object to entity");
-        }  
+        } catch(NotFoundException e)
+        {
+            log.info(e.getMessage());
+            return null;
+        }
         
         
         return entity;

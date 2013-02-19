@@ -58,8 +58,8 @@ public abstract class AssociationBase
     protected static final String MOVIE = "MOVIE";
     protected static final String ACTOR = "ACTOR";
 
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     protected EntityManager em;
 
@@ -157,11 +157,11 @@ public abstract class AssociationBase
 
                     if (AUTO_MANAGE_SCHEMA)
                     {
-                        if (mAdd.getTableName().equalsIgnoreCase("ADDRESS"))
+                        if (mAdd.getTableName().equalsIgnoreCase(MOVIE))
                         {
                             loadDataForMovie();
                         }
-                        else if (mAdd.getTableName().equalsIgnoreCase("PERSONNEL"))
+                        else if (mAdd.getTableName().equalsIgnoreCase(ACTOR))
                         {
                             loadDataForActor();
                         }
@@ -212,7 +212,7 @@ public abstract class AssociationBase
      */
     private void truncateColumnFamily()
     {
-        String[] columnFamily = new String[] { "ACTOR", "MOVIE"};
+        String[] columnFamily = new String[] {ACTOR, MOVIE};
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
     }   
 

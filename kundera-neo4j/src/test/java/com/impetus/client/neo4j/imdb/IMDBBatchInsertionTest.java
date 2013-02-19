@@ -25,6 +25,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,16 +40,18 @@ public class IMDBBatchInsertionTest
     private static final String IMDB_PU = "imdb";
     EntityManagerFactory emf;
     EntityManager em; 
+    final int n = 4;   //Number of actors
+    
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {      
-        /*Map properties = new HashMap();
+        Map properties = new HashMap();
         properties.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");        
         emf = Persistence.createEntityManagerFactory(IMDB_PU, properties);        
-        em = emf.createEntityManager();      */     
+        em = emf.createEntityManager();        
     }
 
     /**
@@ -57,21 +60,35 @@ public class IMDBBatchInsertionTest
     @After
     public void tearDown() throws Exception
     {        
-        //em.close();
-        //emf.close();    
+        em.close();
+        emf.close();    
     }  
     
     @Test
     public void batchTest()
     {
-        /*List<Actor> actors = prepareData(4);        
-        for(Actor actor : actors)
+        List<Actor> actors = prepareData(n);       
+        
+        /*for(Actor actor : actors)
         {
             if(actor != null)
             {
                 em.persist(actor);
             }
-        }*/       
+        }*/
+        
+        /*for(int i = 1; i <= n; i++)
+        {
+            Actor actor = em.find(Actor.class, i);
+            Assert.assertNotNull(actor);
+            Assert.assertEquals(i, actor.getId());
+            Assert.assertEquals("Actor " + i, actor.getName());
+            
+            Assert.assertNotNull(actor.getMovies());
+            Assert.assertFalse(actor.getMovies().isEmpty());
+           // Assert.assertEquals(2, actor.getMovies().size());
+        }*/
+        
     }
     
     /**
