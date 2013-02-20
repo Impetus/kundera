@@ -436,7 +436,7 @@ public abstract class QueryImpl implements Query
      *            the is greater than
      * @return the string
      */
-    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan)
     {
         String appender = " ";
         StringBuilder sb = new StringBuilder();

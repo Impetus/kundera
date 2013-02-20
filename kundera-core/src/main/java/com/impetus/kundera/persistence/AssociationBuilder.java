@@ -389,9 +389,10 @@ final class AssociationBuilder
                     }                  
                 }
             }
+            relObject = relationshipEntityMap;
         }           
         
-        relObject = relationshipEntityMap;
+        
         
         //Set relationship collection into original entity
         PropertyAccessorHelper.set(entity, relation.getProperty(), relObject);

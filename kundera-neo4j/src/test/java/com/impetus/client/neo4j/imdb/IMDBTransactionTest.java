@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.io.File;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -26,7 +25,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
 
 /**
  * Test case for validating transaction handling provided by Kundera for Neo4J

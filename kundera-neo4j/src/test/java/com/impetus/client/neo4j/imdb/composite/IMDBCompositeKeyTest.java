@@ -26,8 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.neo4j.imdb.Actor;
-
 /**
  * Test case for entities that hold composite keys  
  * @author amresh.singh

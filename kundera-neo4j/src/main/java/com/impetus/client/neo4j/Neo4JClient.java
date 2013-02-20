@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
 
@@ -34,9 +33,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.helpers.collection.MapUtil;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
-import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.neo4j.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
@@ -56,7 +56,6 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
@@ -332,7 +331,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     @Override
     public Class<Neo4JQuery> getQueryImplementor()
     {
-        return null;
+        return Neo4JQuery.class;
     }
 
     /**
@@ -353,77 +352,82 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
             // Top level node
             Node node = mapper.fromEntity(entity, rlHolders, graphDb, entityMetadata, isUpdate);
-            ((Neo4JTransaction)resource).addProcessedNode(id, node);
             
-            if (!rlHolders.isEmpty())
+            if(node != null)
             {
-                for (RelationHolder rh : rlHolders)
+                ((Neo4JTransaction)resource).addProcessedNode(id, node);
+                
+                if (!rlHolders.isEmpty())
                 {
-                    // Search Node (to be connected to ) in Neo4J graph
-                    EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
-                            .getClass());
-                    Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
-                    //Node targetNode = mapper.searchNode(targetNodeKey, targetNodeMetadata, graphDb);
-                    
-                    Node targetNode = null;    //Target node connected through relationship
-                    
-                    /** If Relationship is with an entity in Neo4J, Target node must already have been created
-                     * Get a handle of it prom processed nodes and add edges to it.
-                     * Else, if relationship is with an entity in a database other than Neo4J, create a "Proxy Node"
-                     *  that points to a row in other database. This proxy node contains key equal to primary key of row in other database. 
-                     * */
-                    
-                    if(isEntityForNeo4J(targetNodeMetadata))
+                    for (RelationHolder rh : rlHolders)
                     {
-                        targetNode = ((Neo4JTransaction) resource).getProcessedNode(targetNodeKey);
-                    }
-                    else
-                    {
-                        //Create Proxy nodes
-                        targetNode = mapper.createProxyNode(id, targetNodeKey, graphDb, entityMetadata, targetNodeMetadata);                        
-                    }                  
-                    
-
-                    if (targetNode != null)
-                    {
-                        // Join this node (source node) to target node via
-                        // relationship
-                        DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
-                        Relationship relationship = node.createRelationshipTo(targetNode, relType);                        
-
-                        // Populate relationship's own properties into it
-                        Object relationshipObj = rh.getRelationVia();
-                        if (relationshipObj != null)
+                        // Search Node (to be connected to ) in Neo4J graph
+                        EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh.getRelationValue()
+                                .getClass());
+                        Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
+                        //Node targetNode = mapper.searchNode(targetNodeKey, targetNodeMetadata, graphDb);
+                        
+                        Node targetNode = null;    //Target node connected through relationship
+                        
+                        /** If Relationship is with an entity in Neo4J, Target node must already have been created
+                         * Get a handle of it prom processed nodes and add edges to it.
+                         * Else, if relationship is with an entity in a database other than Neo4J, create a "Proxy Node"
+                         *  that points to a row in other database. This proxy node contains key equal to primary key of row in other database. 
+                         * */
+                        
+                        if(isEntityForNeo4J(targetNodeMetadata))
                         {
-                            mapper.populateRelationshipProperties(entityMetadata, targetNodeMetadata, relationship,
-                                    relationshipObj);                            
-                            
-                            //After relationship creation, manually index it if desired
-                            EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
-                            if(! isUpdate)
-                            {
-                                indexer.indexRelationship(relationMetadata, graphDb, relationship);
-                            }
-                            else
-                            {
-                                indexer.updateRelationshipIndex(relationMetadata, graphDb, relationship);
-                            }
-                            
-                        }                     
-                    }
+                            targetNode = ((Neo4JTransaction) resource).getProcessedNode(targetNodeKey);
+                        }
+                        else
+                        {
+                            //Create Proxy nodes
+                            targetNode = mapper.createProxyNode(id, targetNodeKey, graphDb, entityMetadata, targetNodeMetadata);                        
+                        }                  
+                        
 
+                        if (targetNode != null)
+                        {
+                            // Join this node (source node) to target node via
+                            // relationship
+                            DynamicRelationshipType relType = DynamicRelationshipType.withName(rh.getRelationName());
+                            Relationship relationship = node.createRelationshipTo(targetNode, relType);                        
+
+                            // Populate relationship's own properties into it
+                            Object relationshipObj = rh.getRelationVia();
+                            if (relationshipObj != null)
+                            {
+                                mapper.populateRelationshipProperties(entityMetadata, targetNodeMetadata, relationship,
+                                        relationshipObj);                            
+                                
+                                //After relationship creation, manually index it if desired
+                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                                if(! isUpdate)
+                                {
+                                    indexer.indexRelationship(relationMetadata, graphDb, relationship);
+                                }
+                                else
+                                {
+                                    indexer.updateRelationshipIndex(relationMetadata, graphDb, relationship);
+                                }
+                                
+                            }                     
+                        }
+
+                    }
+                }
+
+                //After node creation, manually index this node, if desired
+                if(! isUpdate)
+                {
+                    indexer.indexNode(entityMetadata, graphDb, node);
+                }
+                else
+                {
+                    indexer.updateNodeIndex(entityMetadata, graphDb, node);
                 }
             }
-
-            //After node creation, manually index this node, if desired
-            if(! isUpdate)
-            {
-                indexer.indexNode(entityMetadata, graphDb, node);
-            }
-            else
-            {
-                indexer.updateNodeIndex(entityMetadata, graphDb, node);
-            }
+            
             
         }
         catch (Exception e)
@@ -455,6 +459,9 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     {
         if(batchSize > 0)
         {
+            boolean nodeAutoIndexingEnabled = indexer.isNodeAutoIndexingEnabled(factory.getConnection());
+            boolean relationshipAutoIndexingEnabled = indexer.isRelationshipAutoIndexingEnabled(factory.getConnection());            
+            
             BatchInserter inserter = getBatchInserter();       
             BatchInserterIndexProvider indexProvider = new LuceneBatchInserterIndexProvider(inserter);        
             
@@ -496,8 +503,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         pkToNodeIdMap.put(pk, nodeId);
                         
                         //Index Node
-                        BatchInserterIndex nodeIndex = indexProvider.nodeIndex(m.getIndexName(), MapUtil.stringMap( "type", "exact"));
-                        nodeIndex.add(nodeId, nodeProperties);           
+                        indexer.indexNodeUsingBatchIndexer(indexProvider, m, nodeId, nodeProperties, nodeAutoIndexingEnabled);                     
                         
                         
                         //Insert relationships for this particular node                                        
@@ -522,14 +528,18 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                     Object relationshipObj = rh.getRelationVia();
                                     if (relationshipObj != null)
                                     {
-                                        relationshipProperties = mapper.createRelationshipProperties(m, targetNodeMetadata, relationshipObj);    
-                                    }                                
-                                    //Finally insert relationship
-                                    long relationshipId = inserter.createRelationship(nodeId, targetNodeId, relType, relationshipProperties);   
+                                        EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                                        
+                                        relationshipProperties = mapper.createRelationshipProperties(m, targetNodeMetadata, relationshipObj);   
+                                        
+                                        //Finally insert relationship
+                                        long relationshipId = inserter.createRelationship(nodeId, targetNodeId, relType, relationshipProperties);   
+                                        
+                                        //Index this relationship
+                                        indexer.indexRelationshipUsingBatchIndexer(indexProvider, relationMetadata,
+                                                relationshipId, relationshipProperties, relationshipAutoIndexingEnabled);
+                                    }                     
                                     
-                                    //Index this relationship
-                                    BatchInserterIndex relationshipIndex = indexProvider.relationshipIndex(targetNodeMetadata.getIndexName(), MapUtil.stringMap( "type", "exact"));
-                                    relationshipIndex.add(relationshipId, relationshipProperties);
                                 }
                             }
                         }                
@@ -621,6 +631,48 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             throw new KunderaTransactionException("Invalid transaction resource provided:" + resource
                     + " Should have been an instance of :" + Neo4JTransaction.class);
         }
+    }
+    
+    public List<Object> executeLuceneQuery(EntityMetadata m, String luceneQuery)
+    {
+        log.info("Executing Lucene Query on Neo4J:" + luceneQuery);
+        
+        GraphDatabaseService graphDb = getConnection(); 
+        
+        if(! indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
+        {
+            Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
+            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
+        }
+        else
+        {
+            IndexHits<Node> hits;
+            try
+            {
+                ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+                hits = autoNodeIndex.query(luceneQuery);
+                for(Node node : hits) 
+                {
+                    Object entity = mapper.toEntity(node, m);
+                    System.out.println(entity);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            
+            
+            
+        }
+        
+        
+        return null;
+        
+        
+        
+        
+        
     }
     
     /**

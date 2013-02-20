@@ -15,11 +15,13 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -69,12 +71,17 @@ public class IMDBCRUDAndQueryTest
     }  
     
     @Test
-    public void testCRUD()
+    public void testCRUDAndQuery()
     {
+        //CRUD
         insert();
         findById();
         merge();
         delete();
+        
+        //Queries
+        //findAllActors();
+        //findActorByName();
         
     }
     
@@ -144,6 +151,21 @@ public class IMDBCRUDAndQueryTest
         
         Assert.assertNull(actor1AfterDeletion);
         Assert.assertNull(actor2AfterDeletion);
+    }
+    
+    private void findAllActors()
+    {
+        Query query = em.createQuery("select a from Actor a");
+        List<Actor> actors = query.getResultList();
+        System.out.println(actors);
+    }
+    
+    private void findActorByName()
+    {
+        Query query = em.createQuery("select a from Actor a where a.name like :name");
+        query.setParameter("name", "Tom Cruise");
+        List<Actor> actors = query.getResultList();
+        System.out.println(actors);
     }
     
     

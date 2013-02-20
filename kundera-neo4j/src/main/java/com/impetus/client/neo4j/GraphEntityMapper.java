@@ -93,7 +93,10 @@ public final class GraphEntityMapper
             node = searchNode(key, m, graphDb);
         }        
         
-        populateNodeProperties(entity, m, node);  
+        if(node != null)
+        {
+            populateNodeProperties(entity, m, node);
+        }         
         
         return node;
     }  
@@ -613,15 +616,16 @@ public final class GraphEntityMapper
             //Searching within manually created indexes
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
             IndexHits<Node> hits = nodeIndex.get(idColumnName, key);
-            if(hits == null || hits.size() == 0)
+            if(hits == null || hits.size() == 0 || ! hits.hasNext())
             {
                 return null;
             }
             else
             {
-                node = hits.getSingle();
+                node = hits.next();
             } 
             hits.close();
+            
         }
 
         return node;
