@@ -16,6 +16,7 @@
 package com.impetus.client.neo4j;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,83 +137,10 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if (node != null)
 
         {
-            entity = mapper.toEntity(node, m);
+            entity = mapper.toEntity(node, m);     
             
-            
-
-            // Populate all relationship entities that are in Neo4J
-            for (Relation relation : m.getRelations())
-            {
-                
-                if(relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
-                {
-                    continue;
-                }
-                
-                Class<?> targetEntityClass = relation.getTargetEntity();
-                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);                
-                Field property = relation.getProperty();       
-                
-                
-                if (relation.getPropertyType().isAssignableFrom(Map.class)
-                        && relation.getType().equals(ForeignKey.MANY_TO_MANY))
-                {    
-                    
-                    Map<Object, Object> targetEntitiesMap = new HashMap<Object, Object>();
-                    
-                    //If relationship entity is stored into Neo4J, fetch it immediately
-                    if(isEntityForNeo4J(targetEntityMetadata))
-                    {
-                        
-                        for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
-                                DynamicRelationshipType.withName(relation.getJoinColumnName())))
-                        {                        
-                            Node endNode = relationship.getEndNode();
-                            Object targetEntity = mapper.toEntity(endNode, targetEntityMetadata);
-                            Object relationshipEntity = mapper.toEntity(relationship, m, relation);
-                            
-                            //Set references to Target and owning entity in relationship entity
-                            Class<?> relationshipClass = relation.getMapKeyJoinClass();
-                            for(Field f : relationshipClass.getDeclaredFields())
-                            {
-                                if(f.getType().equals(m.getEntityClazz()))
-                                {
-                                    PropertyAccessorHelper.set(relationshipEntity, f, entity);
-                                }
-                                else if(f.getType().equals(targetEntityClass))
-                                {
-                                    PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
-                                }
-                            }
-                            targetEntitiesMap.put(relationshipEntity, targetEntity);                        
-                        }
-                        
-                        PropertyAccessorHelper.set(entity, property, targetEntitiesMap);
-                    }
-                    
-                    /** If relationship entity is stored in a database other than Neo4J
-                    foreign keys are stored in "Proxy Nodes", retrieve these foreign keys 
-                    and set set into EnhanceEntity
-                    */  
-                    else
-                    {    
-                        
-                        for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
-                                DynamicRelationshipType.withName(relation.getJoinColumnName())))
-                        {                            
-                            Node proxyNode = relationship.getEndNode();
-                            
-                            String targetEntityIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
-                            Object targetObjectId = proxyNode.getProperty(targetEntityIdColumnName);
-                            Object relationshipEntity = mapper.toEntity(relationship, m, relation);
-                            
-                            targetEntitiesMap.put(targetObjectId, relationshipEntity);                           
-                        }
-                        
-                        relationMap.put(relation.getJoinColumnName(), targetEntitiesMap);
-                    }
-                }
-            }
+            //Populate relationships recursively
+            populateRelations(m, entity, relationMap, node);
         }
 
         if(! relationMap.isEmpty()) {
@@ -223,6 +151,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             return entity;
         }      
     }
+
+    
 
     
 
@@ -431,8 +361,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             
         }
         catch (Exception e)
-        {       
-            e.printStackTrace();
+        {
             log.error("Error while persisting entity " + entity + ". Details:" + e.getMessage());
             throw new PersistenceException(e);
         }
@@ -562,6 +491,90 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
         
     }
+    
+    /**
+     * Populates relationship entities into original entity
+     * @param m
+     * @param entity
+     * @param relationMap
+     * @param node
+     */
+    private void populateRelations(EntityMetadata m, Object entity, Map<String, Object> relationMap, Node node)
+    {
+        // Populate all relationship entities that are in Neo4J
+        for (Relation relation : m.getRelations())
+        {
+            
+            if(relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
+            {
+                continue;
+            }
+            
+            Class<?> targetEntityClass = relation.getTargetEntity();
+            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);                
+            Field property = relation.getProperty();       
+            
+            
+            if (relation.getPropertyType().isAssignableFrom(Map.class)
+                    && relation.getType().equals(ForeignKey.MANY_TO_MANY))
+            {    
+                
+                Map<Object, Object> targetEntitiesMap = new HashMap<Object, Object>();
+                
+                //If relationship entity is stored into Neo4J, fetch it immediately
+                if(isEntityForNeo4J(targetEntityMetadata))
+                {
+                    
+                    for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
+                            DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                    {                        
+                        Node endNode = relationship.getEndNode();
+                        Object targetEntity = mapper.toEntity(endNode, targetEntityMetadata);
+                        Object relationshipEntity = mapper.toEntity(relationship, m, relation);
+                        
+                        //Set references to Target and owning entity in relationship entity
+                        Class<?> relationshipClass = relation.getMapKeyJoinClass();
+                        for(Field f : relationshipClass.getDeclaredFields())
+                        {
+                            if(f.getType().equals(m.getEntityClazz()))
+                            {
+                                PropertyAccessorHelper.set(relationshipEntity, f, entity);
+                            }
+                            else if(f.getType().equals(targetEntityClass))
+                            {
+                                PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
+                            }
+                        }
+                        targetEntitiesMap.put(relationshipEntity, targetEntity);                        
+                    }
+                    
+                    PropertyAccessorHelper.set(entity, property, targetEntitiesMap);
+                }
+                
+                /** If relationship entity is stored in a database other than Neo4J
+                foreign keys are stored in "Proxy Nodes", retrieve these foreign keys 
+                and set set into EnhanceEntity
+                */  
+                else
+                {    
+                    
+                    for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
+                            DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                    {                            
+                        Node proxyNode = relationship.getEndNode();
+                        
+                        String targetEntityIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
+                        Object targetObjectId = proxyNode.getProperty(targetEntityIdColumnName);
+                        Object relationshipEntity = mapper.toEntity(relationship, m, relation);
+                        
+                        targetEntitiesMap.put(targetObjectId, relationshipEntity);                           
+                    }
+                    
+                    relationMap.put(relation.getJoinColumnName(), targetEntitiesMap);
+                }
+            }
+        }
+    }
 
     
     
@@ -636,42 +649,41 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     public List<Object> executeLuceneQuery(EntityMetadata m, String luceneQuery)
     {
         log.info("Executing Lucene Query on Neo4J:" + luceneQuery);
-        
-        GraphDatabaseService graphDb = getConnection(); 
-        
-        if(! indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
+
+        GraphDatabaseService graphDb = getConnection();
+        List<Object> entities = new ArrayList<Object>();
+
+        if (!indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
         {
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
-            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
+            IndexHits<Node> hits = nodeIndex.query(luceneQuery);            
         }
         else
         {
             IndexHits<Node> hits;
-            try
+
+            ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+            hits = autoNodeIndex.query(luceneQuery);
+            for (Node node : hits)
             {
-                ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-                hits = autoNodeIndex.query(luceneQuery);
-                for(Node node : hits) 
+
+                Object entity = mapper.toEntity(node, m);
+
+                Map<String, Object> relationMap = new HashMap<String, Object>();
+                populateRelations(m, entity, relationMap, node);
+
+                if (!relationMap.isEmpty())
                 {
-                    Object entity = mapper.toEntity(node, m);
-                    System.out.println(entity);
+                    entities.add(new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationMap));
+                }
+                else
+                {
+                    entities.add(entity);
                 }
             }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            
-            
-            
+
         }
-        
-        
-        return null;
-        
-        
-        
-        
+        return entities;       
         
     }
     

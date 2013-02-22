@@ -22,8 +22,8 @@ import javax.persistence.Query;
 
 import com.impetus.client.neo4j.Neo4JClient;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -56,24 +56,12 @@ public class Neo4JQuery extends QueryImpl implements Query
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        List<EnhanceEntity> entities = new ArrayList<EnhanceEntity>();
+        List<Object> entities = new ArrayList<Object>();
         
+        String luceneQuery = getLuceneQuery(kunderaQuery);
+        entities = ((Neo4JClient) client).executeLuceneQuery(m, luceneQuery);             
         
-        
-        if(kunderaQuery.getFilterClauseQueue().isEmpty())
-        {
-            //This is a select all query
-            
-        }
-        else
-        {
-            String luceneQuery = getLuceneQuery(kunderaQuery);
-            ((Neo4JClient) client).executeLuceneQuery(m, luceneQuery);
-        }
-        
-        
-        
-        return null;
+        return entities;
     }
 
     @Override
@@ -91,62 +79,81 @@ public class Neo4JQuery extends QueryImpl implements Query
     private String getLuceneQuery(KunderaQuery kunderaQuery)
     {
         StringBuffer sb = new StringBuffer();
-
-        for (Object object : kunderaQuery.getFilterClauseQueue())
+        
+        if(kunderaQuery.getFilterClauseQueue().isEmpty())
+        {           
+            //Select All query if filter clause is empty
+            String idColumnName = ((AbstractAttribute)kunderaQuery.getEntityMetadata().getIdAttribute()).getJPAColumnName();
+            sb.append(idColumnName).append(":").append("*");
+        }
+        else
         {
-            if (object instanceof FilterClause)
+            for (Object object : kunderaQuery.getFilterClauseQueue())
             {
-                boolean appended = false;
-                FilterClause filter = (FilterClause) object;
-                //sb.append("+");
-                // property
-                sb.append(filter.getProperty());
+                if (object instanceof FilterClause)
+                {
+                    boolean appended = false;
+                    FilterClause filter = (FilterClause) object;
+                    //sb.append("+");
+                    // property
+                    sb.append(filter.getProperty());
 
-                // joiner
-                String appender = "";
-                if (filter.getCondition().equals("="))
-                {
-                    sb.append(":");
-                }
-                else if (filter.getCondition().equalsIgnoreCase("like"))
-                {
-                    sb.append(":");
-                    appender = "*";
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">"))
-                {
-                    sb.append(appendRange(filter.getValue().toString(), false, true));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">="))
-                {
-                    sb.append(appendRange(filter.getValue().toString(), true, true));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<"))
-                {
-                    sb.append(appendRange(filter.getValue().toString(), false, false));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<="))
-                {
-                    sb.append(appendRange(filter.getValue().toString(), true, false));
-                    appended = true;
-                }
+                    // joiner
+                    String appender = "";
+                    if (filter.getCondition().equals("="))
+                    {
+                        sb.append(":");
+                    }
+                    else if (filter.getCondition().equalsIgnoreCase("like"))
+                    {
+                        sb.append(":");
+                        appender = "*";
+                    }
+                    else if (filter.getCondition().equalsIgnoreCase(">"))
+                    {
+                        sb.append(appendRange(filter.getValue().toString(), false, true));
+                        appended = true;
+                    }
+                    else if (filter.getCondition().equalsIgnoreCase(">="))
+                    {
+                        sb.append(appendRange(filter.getValue().toString(), true, true));
+                        appended = true;
+                    }
+                    else if (filter.getCondition().equalsIgnoreCase("<"))
+                    {
+                        sb.append(appendRange(filter.getValue().toString(), false, false));
+                        appended = true;
+                    }
+                    else if (filter.getCondition().equalsIgnoreCase("<="))
+                    {
+                        sb.append(appendRange(filter.getValue().toString(), true, false));
+                        appended = true;
+                    }
 
-                // value. if not already appended.
-                if (!appended)
-                {
-                    sb.append(filter.getValue());
-                    sb.append(appender);
+                    // value. if not already appended.
+                    if (!appended)
+                    {
+                        if(appender.equals("") && filter.getValue() != null && filter.getValue().toString().contains(" "))
+                        {
+                            sb.append("\"");
+                            sb.append(filter.getValue().toString());
+                            sb.append("\"");
+                        }
+                        else
+                        {
+                            sb.append(filter.getValue());
+                            sb.append(appender);
+                        }       
+                        
+                    }
                 }
-            }
-            else
-            {
-                sb.append(" " + object + " ");
-            }
+                else
+                {
+                    sb.append(" " + object + " ");
+                }
+            } 
         }       
-
+       
         return sb.toString();
     }
     

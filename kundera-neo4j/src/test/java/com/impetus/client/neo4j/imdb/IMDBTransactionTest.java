@@ -15,10 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
@@ -31,18 +27,8 @@ import org.junit.Test;
  * 
  * @author amresh.singh
  */
-public class IMDBTransactionTest
-{
-
-    EntityManagerFactory emf;
-
-    EntityManager em;
-
-    Actor actor1;
-
-    Actor actor2;
-    
-    private static final String IMDB_PU = "imdb";
+public class IMDBTransactionTest extends IMDBTestBase
+{  
 
     /**
      * @throws java.lang.Exception
@@ -78,7 +64,7 @@ public class IMDBTransactionTest
         {
             /** Prepare data */
             // Actors
-            prepareData();
+            populateActors();
 
             /** Insert records */
             em.getTransaction().begin();
@@ -130,8 +116,8 @@ public class IMDBTransactionTest
     public void withoutTransaction()
     {
         /** Prepare data */
-        prepareData();
-
+        populateActors();
+        
         /** Insert records without a transaction */
         try
         {
@@ -156,7 +142,7 @@ public class IMDBTransactionTest
     @Test
     public void rollbackBehavior()
     {
-        prepareData();
+        populateActors();
 
         em.getTransaction().begin();
         em.persist(actor1);
@@ -173,7 +159,7 @@ public class IMDBTransactionTest
     @Test
     public void rollbackBehaviorOnException()
     {
-        prepareData();
+        populateActors();
 
         try
         {
@@ -202,85 +188,5 @@ public class IMDBTransactionTest
 
         }
 
-    }
-
-    /**
-     * @param actor1
-     * @param actor2
-     */
-    private void assertActors(Actor actor1, Actor actor2)
-    {
-        Assert.assertNotNull(actor1);
-        Assert.assertEquals(1, actor1.getId());
-        Assert.assertEquals("Tom Cruise", actor1.getName());
-        Map<Role, Movie> movies1 = actor1.getMovies();
-        Assert.assertFalse(movies1 == null || movies1.isEmpty());
-        Assert.assertEquals(2, movies1.size());
-
-        Assert.assertNotNull(actor2);
-        Assert.assertEquals(2, actor2.getId());
-        Assert.assertEquals("Emmanuelle Béart", actor2.getName());
-        Map<Role, Movie> movies2 = actor2.getMovies();
-        Assert.assertFalse(movies2 == null || movies2.isEmpty());
-        Assert.assertEquals(2, movies2.size());
-    }
-
-    /**
-     * @param actor1
-     * @param actor2
-     */
-    private void assertUpdatedActors(Actor actor1, Actor actor2)
-    {
-        Assert.assertNotNull(actor1);
-        Assert.assertEquals(1, actor1.getId());
-        Assert.assertEquals("Amresh", actor1.getName());
-        Map<Role, Movie> movies1 = actor1.getMovies();
-        Assert.assertFalse(movies1 == null || movies1.isEmpty());
-        Assert.assertEquals(2, movies1.size());
-
-        Assert.assertNotNull(actor2);
-        Assert.assertEquals(2, actor2.getId());
-        Assert.assertEquals("Amir", actor2.getName());
-        Map<Role, Movie> movies2 = actor2.getMovies();
-        Assert.assertFalse(movies2 == null || movies2.isEmpty());
-        Assert.assertEquals(2, movies2.size());
-    }
-
-    private void prepareData()
-    {
-        // Actors
-        actor1 = new Actor(1, "Tom Cruise");
-        actor2 = new Actor(2, "Emmanuelle Béart");
-
-        // Movies
-        Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
-        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);
-        Movie movie3 = new Movie("m3", "Hell", 2005);
-
-        // Roles
-        Role role1 = new Role("Ray Ferrier", "Lead Actor");
-        role1.setActor(actor1);
-        role1.setMovie(movie1);
-        Role role2 = new Role("Ethan Hunt", "Lead Actor");
-        role2.setActor(actor1);
-        role2.setMovie(movie2);
-        Role role3 = new Role("Claire Phelps", "Lead Actress");
-        role3.setActor(actor2);
-        role1.setMovie(movie2);
-        Role role4 = new Role("Sophie", "Supporting Actress");
-        role4.setActor(actor2);
-        role1.setMovie(movie3);
-
-        // Relationships
-        actor1.addMovie(role1, movie1);
-        actor1.addMovie(role2, movie2);
-        actor2.addMovie(role3, movie2);
-        actor2.addMovie(role4, movie3);
-
-        movie1.addActor(role1, actor1);
-        movie2.addActor(role2, actor1);
-        movie2.addActor(role3, actor2);
-        movie3.addActor(role4, actor2);
-    }
-
+    }   
 }
