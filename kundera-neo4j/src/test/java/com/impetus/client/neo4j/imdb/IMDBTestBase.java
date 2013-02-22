@@ -117,7 +117,7 @@ public class IMDBTestBase
         //Movies
         Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
         Movie movie2 = new Movie("m2", "Mission Impossible", 1996);       
-        Movie movie3 = new Movie("m3", "Hell", 2005);
+        Movie movie3 = new Movie("m3", "Hell", 2009);
         
         //Roles
         Role role1 = new Role("Ray Ferrier", "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);

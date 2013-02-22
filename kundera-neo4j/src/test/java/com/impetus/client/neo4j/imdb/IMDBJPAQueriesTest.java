@@ -71,10 +71,13 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
     @Test
     public void testJPAQueries()
     {
-        //Queries
+        //Select Queries
         findAllActors();
         findActorByID();
         findActorByName();
+        findActorByIDAndName(); 
+        findActorWithMatchingName();
+        findMoviesBetweenAPeriod();
     }
     
     
@@ -108,5 +111,57 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         Assert.assertEquals(1, actors.size());        
         assertActor1(actors.get(0));        
     }    
+    
+    private void findActorByIDAndName()
+    {
+        //Positive scenario
+        Query query = em.createQuery("select a from Actor a where a.id=:id AND a.name=:name");
+        query.setParameter("id", 1);
+        query.setParameter("name", "Tom Cruise");
+        List<Actor> actors = query.getResultList();        
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());        
+        assertActor1(actors.get(0));  
+        
+        //Negative scenario
+        query = em.createQuery("select a from Actor a where a.id=:id AND a.name=:name");
+        query.setParameter("id", 2);
+        query.setParameter("name", "Tom Cruise");
+        actors = query.getResultList();        
+        Assert.assertTrue(actors == null || actors.isEmpty());
+    }
+    
+    private void findActorWithMatchingName()
+    {
+        Query query = em.createQuery("select a from Actor a where a.name like :name");
+        query.setParameter("name", "Emma");
+        List<Actor> actors = query.getResultList();        
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());        
+        assertActor2(actors.get(0));
+    }
+    
+    private void findMoviesBetweenAPeriod()
+    {
+        //Between
+        Query query = em.createQuery("select m from Movie m where m.year between :start AND :end");
+        query.setParameter("start",1990);
+        query.setParameter("end", 2006);
+        List<Movie> movies = query.getResultList();        
+        Assert.assertNotNull(movies);
+        Assert.assertFalse(movies.isEmpty());
+        Assert.assertEquals(2, movies.size());
+        
+        //Greater-than/ Less Than
+        query = em.createQuery("select m from Movie m where m.year >= :start AND m.year <= :end");
+        query.setParameter("start", 2005);
+        query.setParameter("end", 2010);
+        movies = query.getResultList();        
+        Assert.assertNotNull(movies);
+        Assert.assertFalse(movies.isEmpty());
+        Assert.assertEquals(2, movies.size());
+    }
 
 }
