@@ -131,30 +131,16 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
 
         Object entity = null;
-        Map<String, Object> relationMap = new HashMap<String, Object>();
-
-        Node node = mapper.searchNode(key, m, graphDb);
+        Node node = mapper.searchNode(key, m, graphDb);     
+        
         if (node != null)
 
-        {
-            entity = mapper.toEntity(node, m);     
-            
-            //Populate relationships recursively
-            populateRelations(m, entity, relationMap, node);
+        {           
+            entity = toEntityWithRelations(m, node);
         }
-
-        if(! relationMap.isEmpty()) {
-            return new EnhanceEntity(entity, key, relationMap);
-        }
-        else
-        {
-            return entity;
-        }      
-    }
-
-    
-
-    
+        
+        return entity;     
+    }   
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
@@ -656,7 +642,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if (!indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
         {
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
-            IndexHits<Node> hits = nodeIndex.query(luceneQuery);            
+            IndexHits<Node> hits = nodeIndex.query(luceneQuery);    
+            
+            for (Node node : hits)
+            {
+
+                entities.add(toEntityWithRelations(m, node));
+            }
         }
         else
         {
@@ -664,27 +656,37 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
             hits = autoNodeIndex.query(luceneQuery);
+            
             for (Node node : hits)
             {
 
-                Object entity = mapper.toEntity(node, m);
-
-                Map<String, Object> relationMap = new HashMap<String, Object>();
-                populateRelations(m, entity, relationMap, node);
-
-                if (!relationMap.isEmpty())
-                {
-                    entities.add(new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationMap));
-                }
-                else
-                {
-                    entities.add(entity);
-                }
+                entities.add(toEntityWithRelations(m, node));
             }
 
         }
-        return entities;       
+        return entities;      
+    }
+    
+    /**
+     * @param m
+     * @param entities
+     * @param node
+     */
+    private Object toEntityWithRelations(EntityMetadata m, Node node)
+    {
+        Map<String, Object> relationMap = new HashMap<String, Object>();
         
+        Object entity = mapper.toEntity(node, m);
+        populateRelations(m, entity, relationMap, node);
+
+        if (!relationMap.isEmpty())
+        {
+            return new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationMap);
+        }
+        else
+        {
+            return entity;
+        }
     }
     
     /**

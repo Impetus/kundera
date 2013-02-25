@@ -15,12 +15,20 @@
  */
 package com.impetus.client.neo4j.query;
 
+import java.util.List;
+
 /**
- * Enum for different native query types supported in Neo4J 
- * Currently, only Lucene is supported, rest are for future use.
+ * Lucene implementation of {@link Neo4JNativeQuery}
  * @author amresh.singh
  */
-public enum Neo4JQueryTypes
+public class Neo4JLuceneQuery implements Neo4JNativeQuery
 {
-    LUCENE, CYPHER, GREMLIN
+
+    @Override
+    public List<Object> executeNativeQuery(String nativeQuery)
+    {
+        return null;
+    }
+    
+
 }

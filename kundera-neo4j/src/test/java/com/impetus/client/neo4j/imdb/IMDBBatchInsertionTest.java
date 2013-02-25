@@ -24,6 +24,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,9 +68,9 @@ public class IMDBBatchInsertionTest
     @Test
     public void batchTest()
     {
-        List<Actor> actors = prepareData(n);       
+        /*List<Actor> actors = prepareData(n);       
         
-        /*for(Actor actor : actors)
+        for(Actor actor : actors)
         {
             if(actor != null)
             {
@@ -76,7 +78,13 @@ public class IMDBBatchInsertionTest
             }
         }*/
         
-        /*for(int i = 1; i <= n; i++)
+        /*em.close();
+        emf.close();
+        
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);        
+        em = emf.createEntityManager();  
+        
+        for(int i = 1; i <= n; i++)
         {
             Actor actor = em.find(Actor.class, i);
             Assert.assertNotNull(actor);
@@ -86,8 +94,7 @@ public class IMDBBatchInsertionTest
             Assert.assertNotNull(actor.getMovies());
             Assert.assertFalse(actor.getMovies().isEmpty());
            // Assert.assertEquals(2, actor.getMovies().size());
-        }*/
-        
+        }     */ 
     }
     
     /**

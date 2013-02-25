@@ -59,10 +59,13 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         Actor actor1 = em.find(Actor.class, 1);
         Actor actor2 = em.find(Actor.class, 2);    
         
-        em.getTransaction().begin();
-        em.remove(actor1);
-        em.remove(actor2);
-        em.getTransaction().commit();
+        if(actor1 != null && actor2 != null)
+        {
+            em.getTransaction().begin();
+            em.remove(actor1);
+            em.remove(actor2);
+            em.getTransaction().commit();
+        }       
         
         em.close();     
         emf.close();      
@@ -77,7 +80,16 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         findActorByName();
         findActorByIDAndName(); 
         findActorWithMatchingName();
+        findActorWithinGivenIdRange();
+        findSelectedFields();
         findMoviesBetweenAPeriod();
+        findMoviesGreaterThanLessThanYear();     
+        findMoviesUsingIdOrTitle();
+        findMoviesUsingIdOrTitleOrYear();
+        
+        //Delete Queries
+        deleteAllActors();
+        
     }
     
     
@@ -143,6 +155,18 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         assertActor2(actors.get(0));
     }
     
+    private void findActorWithinGivenIdRange()
+    {
+        Query query = em.createQuery("select a from Actor a where a.id between :min AND :max");
+        query.setParameter("min",1);
+        query.setParameter("max", 2);
+        List<Actor> actors = query.getResultList();        
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(2, actors.size());        
+        //assertActor2(actors.get(0));
+    }
+    
     private void findMoviesBetweenAPeriod()
     {
         //Between
@@ -154,14 +178,83 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         Assert.assertFalse(movies.isEmpty());
         Assert.assertEquals(2, movies.size());
         
+    }
+    
+    private void findMoviesGreaterThanLessThanYear()
+    {
         //Greater-than/ Less Than
-        query = em.createQuery("select m from Movie m where m.year >= :start AND m.year <= :end");
+        Query query = em.createQuery("select m from Movie m where m.year >= :start AND m.year <= :end");
         query.setParameter("start", 2005);
         query.setParameter("end", 2010);
-        movies = query.getResultList();        
+        List<Movie> movies = query.getResultList();        
         Assert.assertNotNull(movies);
         Assert.assertFalse(movies.isEmpty());
         Assert.assertEquals(2, movies.size());
+    }
+    
+    private void findSelectedFields()
+    {
+        Query query = em.createQuery("select a.name from Actor a");
+        List<Actor> actors = query.getResultList();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(2, actors.size());  
+        
+        for(Actor actor : actors)
+        {
+            Assert.assertNotNull(actor);
+            Assert.assertNotNull(actor.getId());
+            Assert.assertNotNull(actor.getName());
+        }   
+    }
+    
+    private void findMoviesUsingIdOrTitle()
+    {
+        Query query = em.createQuery("select m from Movie m where m.id = :movieId OR m.title like :title");
+        query.setParameter("movieId", "m1");
+        query.setParameter("title", "Miss");
+        List<Movie> movies = query.getResultList();        
+        Assert.assertNotNull(movies);
+        Assert.assertFalse(movies.isEmpty());
+        Assert.assertEquals(2, movies.size());
+        
+        for(Movie movie : movies)
+        {
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getId().equals("m1") || movie.getId().equals("m2"));
+        }
+    }
+    
+    private void findMoviesUsingIdOrTitleOrYear()
+    {
+        Query query = em.createQuery("select m from Movie m where m.id = :movieId OR m.title like :title OR m.year = :year");
+        query.setParameter("movieId", "m1");
+        query.setParameter("title", "Miss");
+        query.setParameter("year", 2009);
+        List<Movie> movies = query.getResultList();        
+        Assert.assertNotNull(movies);
+        Assert.assertFalse(movies.isEmpty());
+        Assert.assertEquals(3, movies.size());
+        
+        for(Movie movie : movies)
+        {
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getId().equals("m1") || movie.getId().equals("m2") || movie.getId().equals("m3"));
+        }
+    }
+    
+    private void deleteAllActors()
+    {
+        em.getTransaction().begin();
+        Query query = em.createQuery("delete from Actor a");
+        int deleteCount = query.executeUpdate();
+        em.getTransaction().commit();
+        Assert.assertEquals(2, deleteCount);       
+        
+        //Check whether all records have been deleted
+        query = em.createQuery("select a from Actor a");
+        List<Actor> actors = query.getResultList();
+        Assert.assertTrue(actors == null || actors.isEmpty());        
     }
 
 }

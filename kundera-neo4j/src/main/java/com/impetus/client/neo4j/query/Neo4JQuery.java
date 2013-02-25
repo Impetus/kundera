@@ -22,7 +22,9 @@ import javax.persistence.Query;
 
 import com.impetus.client.neo4j.Neo4JClient;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -36,6 +38,8 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class Neo4JQuery extends QueryImpl implements Query
 {
+    Neo4JQueryType queryType;
+    
     /**
      * @param query
      * @param persistenceDelegator
@@ -44,22 +48,41 @@ public class Neo4JQuery extends QueryImpl implements Query
     {
         super(query, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
+        if(getHints().containsKey("native.query.type"))
+        {
+            queryType = (Neo4JQueryType)getHints().get("native.query.type");
+        }
+        else
+        {
+            queryType = Neo4JQueryType.LUCENE;
+        }
         
     }
 
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        return null;
+        //One implementation for entities with or without relations
+        return recursivelyPopulateEntities(m, client);
     }
 
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         List<Object> entities = new ArrayList<Object>();
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         
-        String luceneQuery = getLuceneQuery(kunderaQuery);
-        entities = ((Neo4JClient) client).executeLuceneQuery(m, luceneQuery);             
+        if(appMetadata.isNative(getJPAQuery()))
+        {
+            String nativeQuery = appMetadata.getQuery(getJPAQuery());
+            Neo4JNativeQuery nativeQueryImpl = Neo4JNativeQueryFactory.getNativeQueryImplementation(queryType);
+            entities = nativeQueryImpl.executeNativeQuery(nativeQuery);
+        }
+        else
+        {
+            String luceneQuery = getLuceneQuery(kunderaQuery);
+            entities = ((Neo4JClient) client).executeLuceneQuery(m, luceneQuery);
+        }               
         
         return entities;
     }
@@ -73,6 +96,12 @@ public class Neo4JQuery extends QueryImpl implements Query
     @Override
     protected int onExecuteUpdate()
     {
+        if (kunderaQuery.isDeleteUpdate())
+        {
+            List result = getResultList();
+            return result != null ? result.size() : 0;
+        }
+
         return 0;
     }
     
@@ -143,7 +172,7 @@ public class Neo4JQuery extends QueryImpl implements Query
                         {
                             sb.append(filter.getValue());
                             sb.append(appender);
-                        }       
+                        }      
                         
                     }
                 }

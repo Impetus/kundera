@@ -43,6 +43,7 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
 
 import com.impetus.client.neo4j.index.Neo4JIndexManager;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -115,6 +116,8 @@ public final class GraphEntityMapper
         return node;
     }
 
+    
+    
     /**
      * 
      * Converts a {@link Node} instance to entity object
