@@ -16,9 +16,12 @@
 package com.impetus.kundera.tests.crossdatastore.imdb.entities;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
@@ -27,8 +30,8 @@ import com.impetus.kundera.index.IndexCollection;
  * Role Relationship entity class
  * @author amresh.singh
  */
-//@Entity
-@Table
+@Entity
+@Table(name="ROLE")
 @IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
 public class Role
 {
@@ -39,8 +42,10 @@ public class Role
     @Column(name="ROLE_TYPE")
     private String roleType;   
     
+    @OneToOne
     private Actor actor;
     
+    @OneToOne
     private Movie movie;
     
     public Role() {}

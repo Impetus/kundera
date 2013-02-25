@@ -35,8 +35,8 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 
-//@Entity
-@Table   //Ignored for Neo4J
+@Entity
+@Table(name="ACTOR")   //Ignored for Neo4J
 @IndexCollection(columns={@Index(name = "name", type = "KEYS")})
 public class Actor
 {
@@ -55,10 +55,7 @@ public class Actor
         this.name = actorName;
     }
     
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
-    /*@JoinTable(name = "ACTOR_MOVIE",  //Ignored in case Movie isn't stored in Neo4J
-            joinColumns = { @JoinColumn(name = "ACTOR_ID") },
-            inverseJoinColumns = { @JoinColumn(name = "MOVIE_ID") })*/
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)     
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<Role, Movie> movies;
     

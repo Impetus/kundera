@@ -43,7 +43,7 @@ import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Role;
 
-public class MTMBiAssociationTest extends TwinAssociation
+public class IMDBPolyglotTest extends TwinAssociation
 
 {  
     Set<Actor> actors = new HashSet<Actor>(); 
@@ -70,7 +70,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         setUpInternal();
     }
 
-    //@Test
+    @Test
     public void testCRUD()
     {
         tryOperation(ALL_PUs_UNDER_TEST);

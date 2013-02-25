@@ -354,7 +354,7 @@ final class AssociationBuilder
         EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
         Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>();   //Map collection to be set into entity        
         
-        if(relObject == null && ! relationsMap.isEmpty())
+        if(relObject == null && relationsMap != null && ! relationsMap.isEmpty())
         {
             for(String relationName : relationsMap.keySet())
             {
