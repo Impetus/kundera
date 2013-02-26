@@ -91,7 +91,7 @@ public final class GraphEntityMapper
         else
         {
             Object key = PropertyAccessorHelper.getId(entity, m);
-            node = searchNode(key, m, graphDb);
+            node = searchNode(key, m, graphDb, true);
         }        
         
         if(node != null)
@@ -586,7 +586,7 @@ public final class GraphEntityMapper
     /**
      * Searches a node from the database for a given key
      */
-    public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb)
+    public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb, boolean skipProxy)
     {
         Node node = null;  
 
@@ -609,8 +609,11 @@ public final class GraphEntityMapper
                 return null;
             }            
             else
-            {
-                node = nodesFound.next();
+            {                
+                if (skipProxy)
+                    node = getNonProxyNode(nodesFound);
+                else
+                    node = nodesFound.next();
             }
             nodesFound.close();
         }
@@ -625,7 +628,10 @@ public final class GraphEntityMapper
             }
             else
             {
-                node = hits.next();
+                if (skipProxy)
+                    node = getNonProxyNode(hits);
+                else
+                    node = hits.next();
             } 
             hits.close();
             
@@ -633,5 +639,29 @@ public final class GraphEntityMapper
 
         return node;
     }  
+    
+    private Node getNonProxyNode(IndexHits<Node> nodesFound)
+    {
+        Node node = null;
+        if(nodesFound.hasNext())
+        {
+            node = nodesFound.next();
+        }
+        else
+        {
+            return null;
+        }
+                
+        try
+        {
+            Object proxyNodeProperty = node.getProperty(PROXY_NODE_TYPE_KEY);
+        }
+        catch (NotFoundException e)
+        {
+            return node;
+        }
+        
+        return getNonProxyNode(nodesFound);       
+    }
 
 }

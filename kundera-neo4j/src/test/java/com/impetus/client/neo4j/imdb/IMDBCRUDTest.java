@@ -130,6 +130,15 @@ public class IMDBCRUDTest extends IMDBTestBase
         
         Assert.assertNull(actor1AfterDeletion);
         Assert.assertNull(actor2AfterDeletion);
+        
+        Movie movie1AfterDeletion = em.find(Movie.class, "m1");
+        Movie movie2AfterDeletion = em.find(Movie.class, "m2");
+        Movie movie3AfterDeletion = em.find(Movie.class, "m3");
+        
+        Assert.assertNull(movie1AfterDeletion);
+        Assert.assertNull(movie2AfterDeletion);
+        Assert.assertNull(movie3AfterDeletion);
+        
     }  
 
 }

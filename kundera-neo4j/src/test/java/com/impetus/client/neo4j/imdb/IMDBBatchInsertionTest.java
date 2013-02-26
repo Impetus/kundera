@@ -15,6 +15,8 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,13 +26,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case demonstrating batch insertion in Neo4J 
@@ -68,23 +71,32 @@ public class IMDBBatchInsertionTest
     @Test
     public void batchTest()
     {
-        /*List<Actor> actors = prepareData(n);       
         
-        for(Actor actor : actors)
+        List<Actor> actors = prepareData(n);       
+        
+        /*for(Actor actor : actors)
         {
             if(actor != null)
             {
                 em.persist(actor);
             }
-        }*/
+        }     
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);   
+        try
+        {
+            if(datastoreFilePath != null) 
+            {                
+                FileUtils.deleteRecursively(new File(datastoreFilePath));                
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        } */     
         
-        /*em.close();
-        emf.close();
         
-        emf = Persistence.createEntityManagerFactory(IMDB_PU);        
-        em = emf.createEntityManager();  
-        
-        for(int i = 1; i <= n; i++)
+        /*for(int i = 1; i <= n; i++)
         {
             Actor actor = em.find(Actor.class, i);
             Assert.assertNotNull(actor);
@@ -94,7 +106,7 @@ public class IMDBBatchInsertionTest
             Assert.assertNotNull(actor.getMovies());
             Assert.assertFalse(actor.getMovies().isEmpty());
            // Assert.assertEquals(2, actor.getMovies().size());
-        }     */ 
+        }*/     
     }
     
     /**

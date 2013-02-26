@@ -134,8 +134,8 @@ public abstract class TwinAssociation extends AssociationBase
                 switchPersistenceUnits(c);
                 insert();
                 find();                
-                //update();
-                //remove();
+                update();
+                remove();
                 tearDownInternal(ALL_PUs_UNDER_TEST);
             }
         }

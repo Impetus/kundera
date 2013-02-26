@@ -56,7 +56,7 @@ import com.impetus.kundera.utils.ObjectUtils;
  * 
  * @author vivek.mishra
  */
-final class AssociationBuilder
+public final class AssociationBuilder
 {
 
     private static Log log = LogFactory.getLog(AssociationBuilder.class);
@@ -455,6 +455,12 @@ final class AssociationBuilder
                 ParameterizedType type = (ParameterizedType) field.getGenericType();
                 Type[] types = type.getActualTypeArguments();
                 clazzz = (Class<?>) types[0];
+            }
+            else if(Map.class.isAssignableFrom(clazzz))
+            {
+                ParameterizedType type = (ParameterizedType) field.getGenericType();
+                Type[] types = type.getActualTypeArguments();
+                clazzz = (Class<?>) types[1];
             }
             if (clazzz.equals(originalClazz))
             {

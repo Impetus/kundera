@@ -110,7 +110,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         dao.merge(actor2);
         Actor actor1Modified = (Actor) dao.find(Actor.class, 1);
         Actor actor2Modified = (Actor) dao.find(Actor.class, 2);
-        //assertUpdatedActors(actor1Modified, actor2Modified);        
+        assertUpdatedActors(actor1Modified, actor2Modified);        
     }
 
     @Override

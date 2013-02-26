@@ -117,7 +117,7 @@ public class Neo4JIndexManager
     public void indexNodeUsingBatchIndexer(BatchInserterIndexProvider indexProvider,
             EntityMetadata entityMetadata, long nodeId, Map<String, Object> nodeProperties, boolean nodeAutoIndexingEnabled)
     {
-        BatchInserterIndex nodeIndex = null;
+        BatchInserterIndex nodeIndex = null;       
 
         if (!nodeAutoIndexingEnabled && entityMetadata.isIndexable())
         {
@@ -130,7 +130,7 @@ public class Neo4JIndexManager
         }
 
         if (nodeIndex != null)
-            nodeIndex.add(nodeId, nodeProperties);
+            nodeIndex.add(nodeId, nodeProperties);        
     }
     
     

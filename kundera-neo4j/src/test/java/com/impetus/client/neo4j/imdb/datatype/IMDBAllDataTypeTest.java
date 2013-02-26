@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb.datatype;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -29,6 +30,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
+
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case  
@@ -63,8 +69,46 @@ public class IMDBAllDataTypeTest
     @After
     public void tearDown() throws Exception
     {       
+        // Delete inserted records
+        ActorAllDataType actor1 = em.find(ActorAllDataType.class, 1);
+        ActorAllDataType actor2 = em.find(ActorAllDataType.class, 2);
+
+        if (actor1 != null && actor2 != null)
+        {
+            em.getTransaction().begin();
+            em.remove(actor1);
+            em.remove(actor2);
+            em.getTransaction().commit();
+        }
+        
+        MovieAllDataType movie1 = em.find(MovieAllDataType.class, "m1");
+        MovieAllDataType movie2 = em.find(MovieAllDataType.class, "m2");
+        MovieAllDataType movie3 = em.find(MovieAllDataType.class, "m3");
+        
+        if(movie1 != null)
+        {
+            em.getTransaction().begin();
+            em.remove(movie1);            
+            em.getTransaction().commit(); 
+        }
+        
+        if(movie2 != null)
+        {
+            em.getTransaction().begin();
+            em.remove(movie2);            
+            em.getTransaction().commit(); 
+        }
+        
+        if(movie3 != null)
+        {
+            em.getTransaction().begin();
+            em.remove(movie3);            
+            em.getTransaction().commit(); 
+        }
+        
         em.close();
         emf.close();       
+        
     }  
     
     @Test
@@ -72,7 +116,12 @@ public class IMDBAllDataTypeTest
     {
         insert();
         findById();
-        delete();
+        delete();        
+    }
+    
+    @Test
+    public void testDummy()
+    {
         
     }
     

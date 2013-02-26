@@ -57,6 +57,13 @@ public class IMDBTestBase
         Map<Role, Movie> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
+        for(Role role : movies2.keySet())
+        {
+            Assert.assertNotNull(role);
+            Movie movie = movies2.get(role);
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getActors() != null && ! movie.getActors().isEmpty());
+        }
     }
 
     /**
@@ -70,6 +77,13 @@ public class IMDBTestBase
         Map<Role, Movie> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
         Assert.assertEquals(2, movies1.size());
+        for(Role role : movies1.keySet())
+        {
+            Assert.assertNotNull(role);
+            Movie movie = movies1.get(role);
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getActors() != null && ! movie.getActors().isEmpty());
+        }
     }
     
     /**
@@ -93,6 +107,13 @@ public class IMDBTestBase
         Map<Role, Movie> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
+        for(Role role : movies2.keySet())
+        {
+            Assert.assertNotNull(role);
+            Movie movie = movies2.get(role);
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getActors() != null && ! movie.getActors().isEmpty());
+        }
     }
 
     /**
@@ -106,6 +127,13 @@ public class IMDBTestBase
         Map<Role, Movie> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
         Assert.assertEquals(2, movies1.size());
+        for(Role role : movies1.keySet())
+        {
+            Assert.assertNotNull(role);
+            Movie movie = movies1.get(role);
+            Assert.assertNotNull(movie);
+            Assert.assertTrue(movie.getActors() != null && ! movie.getActors().isEmpty());
+        }
     }  
     
     protected void populateActors()
