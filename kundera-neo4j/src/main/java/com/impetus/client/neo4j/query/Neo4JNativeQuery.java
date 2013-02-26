@@ -17,12 +17,16 @@ package com.impetus.client.neo4j.query;
 
 import java.util.List;
 
+import com.impetus.client.neo4j.Neo4JClient;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
  * Interface for Neo4J Native queries
  * @author amresh.singh
  */
 public interface Neo4JNativeQuery
-{
-    public List<Object> executeNativeQuery(String nativeQuery);
+{    
+    
+    public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m);
 
 }

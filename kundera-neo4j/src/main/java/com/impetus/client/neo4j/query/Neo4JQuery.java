@@ -76,7 +76,7 @@ public class Neo4JQuery extends QueryImpl implements Query
         {
             String nativeQuery = appMetadata.getQuery(getJPAQuery());
             Neo4JNativeQuery nativeQueryImpl = Neo4JNativeQueryFactory.getNativeQueryImplementation(queryType);
-            entities = nativeQueryImpl.executeNativeQuery(nativeQuery);
+            entities = nativeQueryImpl.executeNativeQuery(nativeQuery, (Neo4JClient)client, m);
         }
         else
         {

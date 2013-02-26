@@ -17,6 +17,9 @@ package com.impetus.client.neo4j.query;
 
 import java.util.List;
 
+import com.impetus.client.neo4j.Neo4JClient;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
  * Cypher implementation of {@link Neo4JNativeQuery}
  * @author amresh.singh
@@ -25,7 +28,7 @@ public class Neo4JCypherQuery implements Neo4JNativeQuery
 {
 
     @Override
-    public List<Object> executeNativeQuery(String nativeQuery)
+    public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m)
     {
         return null;
     }

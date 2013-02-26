@@ -15,7 +15,11 @@
  */
 package com.impetus.client.neo4j.query;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.impetus.client.neo4j.Neo4JClient;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Lucene implementation of {@link Neo4JNativeQuery}
@@ -25,10 +29,12 @@ public class Neo4JLuceneQuery implements Neo4JNativeQuery
 {
 
     @Override
-    public List<Object> executeNativeQuery(String nativeQuery)
+    public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m)
     {
-        return null;
+        List<Object> entities = new ArrayList<Object>();
+        
+        entities = client.executeLuceneQuery(m, nativeQuery);
+        
+        return entities;
     }
-    
-
 }

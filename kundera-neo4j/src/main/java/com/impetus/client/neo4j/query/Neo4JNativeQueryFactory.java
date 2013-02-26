@@ -30,11 +30,11 @@ public class Neo4JNativeQueryFactory
         {
             return new Neo4JLuceneQuery();
         }
-        /*else if (queryType.equals(Neo4JQueryType.CYPHER))
+        else if (queryType.equals(Neo4JQueryType.CYPHER))
         {
-            
+            return new Neo4JCypherQuery();
         }
-        else if (queryType.equals(Neo4JQueryType.GREMLIN))
+        /*else if (queryType.equals(Neo4JQueryType.GREMLIN))
         {
 
         }*/
