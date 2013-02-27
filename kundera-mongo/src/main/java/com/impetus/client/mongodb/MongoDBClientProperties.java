@@ -26,49 +26,47 @@ import com.mongodb.DBEncoder;
 import com.mongodb.WriteConcern;
 
 /**
- * MongoDB implementation of {@link ClientPropertiesSetter} 
+ * MongoDB implementation of {@link ClientPropertiesSetter}
+ * 
  * @author amresh.singh
  */
 public class MongoDBClientProperties
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(MongoDBClientProperties.class);
-    
+
     public static final String WRITE_CONCERN = "write.concern";
+
     public static final String DB_ENCODER = "db.encoder";
+
     public static final String BATCH_SIZE = "batch.size";
-    
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         MongoDBClient mongoDBClient = (MongoDBClient) client;
-        
+
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                
+
                 if (key.equals(WRITE_CONCERN) && value instanceof WriteConcern)
                 {
                     mongoDBClient.setWriteConcern((WriteConcern) value);
                 }
-                else if(key.equals(DB_ENCODER) && value instanceof DBEncoder)
+                else if (key.equals(DB_ENCODER) && value instanceof DBEncoder)
                 {
                     mongoDBClient.setEncoder((DBEncoder) value);
                 }
-                else if(key.equals(BATCH_SIZE) && value instanceof Integer)
+                else if (key.equals(BATCH_SIZE) && value instanceof Integer)
                 {
                     Integer batchSize = (Integer) value;
                     mongoDBClient.setBatchSize(batchSize);
                 }
 
                 // Add more properties as needed
-                
             }
         }
-        
-        
     }
-
 }

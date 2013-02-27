@@ -177,7 +177,7 @@ public class StudentCassandrabyteTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -215,7 +215,7 @@ public class StudentCassandrabyteTest extends CassandraBase
         Query q;
         List<StudentCassandrabyte> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandrabyte s where s.id between ?1 and ?2";     
+        query = "Select s From StudentCassandrabyte s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(byte.class));
         q.setParameter(2, getMaxValue(byte.class));
@@ -677,26 +677,7 @@ public class StudentCassandrabyteTest extends CassandraBase
 
     public void dropSchema()
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(keyspace);
-        }
-        catch (InvalidRequestException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

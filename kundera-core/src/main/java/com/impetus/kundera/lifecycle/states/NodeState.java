@@ -144,12 +144,14 @@ public abstract class NodeState
 
     public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId)
     {
+        if(log.isDebugEnabled())
         log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> "
                 + nextState.getClass().getSimpleName());
     }
 
     public void logNodeEvent(String eventType, NodeState currentState, String nodeId)
     {
+        if(log.isDebugEnabled())
         log.debug("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
     }
 

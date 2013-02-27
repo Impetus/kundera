@@ -35,6 +35,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import static com.impetus.kundera.utils.ReflectUtils.collectFieldsInClassHierarchy;
 
@@ -49,12 +50,16 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(TableProcessor.class);
 
+    /** holds pu prperties */
+    private Map puProperties;
+
     /**
      * Instantiates a new table processor.
      */
-    public TableProcessor()
+    public TableProcessor(Map puProperty)
     {
-        validator = new EntityValidatorImpl();
+        validator = new EntityValidatorImpl(puProperty);
+        this.puProperties = puProperty;
     }
 
     /*
@@ -68,9 +73,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     public void process(Class clazz, EntityMetadata metadata)
     {
 
+        if(LOG.isDebugEnabled())
         LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
-
-        populateMetadata(metadata, clazz);
+        populateMetadata(metadata, clazz, puProperties);
 
     }
 
@@ -86,7 +91,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param clazz
      *            the clazz
      */
-    private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz)
+    private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz,
+            Map puProperties)
     {
         Table table = clazz.getAnnotation(Table.class);
         boolean isEmbeddable = false;
@@ -96,24 +102,6 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
-        // Index idx = clazz.getAnnotation(Index.class);
-        // List<String> colToBeIndexed = null;
-        // List<IndexedColumn> colToBeIndexed = null;
-        // if (idx != null)
-        // {
-        // if (idx.columns() != null && idx.columns().length != 0)
-        // {
-        // colToBeIndexed = Arrays.asList(idx.columns());
-        // metadata.setColToBeIndexed(colToBeIndexed);
-        // }
-
-        // if (idx.indexedColumns() != null && idx.indexedColumns().length != 0)
-        // {
-        // colToBeIndexed = Arrays.asList(idx.indexedColumns());
-        // metadata.setColToBeIndexed(colToBeIndexed);
-        // }
-
-        // }
 
         if (schemaStr == null)
         {
@@ -122,9 +110,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
                     + table.name() + ". This entity won't be persisted");
         }
-        MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr);
+        MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
 
-        // metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.COLUMN_FAMILY);
         // scan for fields
 
         // process for metamodelImpl
@@ -277,7 +264,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
         if (entityMetadata.getType() == null || !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
-            if (f.isAnnotationPresent(Embedded.class))
+            if (f.isAnnotationPresent(Embedded.class) || f.isAnnotationPresent(ElementCollection.class))
             {
                 entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
             }

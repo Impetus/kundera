@@ -33,7 +33,7 @@ import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.hibernate.collection.AbstractPersistentCollection;
+import org.hibernate.collection.internal.AbstractPersistentCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,25 +84,31 @@ public class ObjectUtils
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
             if (metadata == null)
             {
-                
+
                 return source;
             }
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());            
+                    metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(sourceObjectClass);
 
             // May break for mapped super class.
 
-            Object id = PropertyAccessorHelper.getId(source, metadata);
-
-            Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass.getName() + "#" + id);
-            if (copiedObjectInMap != null)
+            Object id = null;
+            if (metadata.getRelations() != null && !metadata.getRelations().isEmpty())
             {
-                return copiedObjectInMap;
-            }
+                id = PropertyAccessorHelper.getId(source, metadata);
 
+                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
+                keyBuilder.append("#");
+                keyBuilder.append(id);
+                Object copiedObjectInMap = copiedObjectMap.get(keyBuilder.toString());
+                if (copiedObjectInMap != null)
+                {
+                    return copiedObjectInMap;
+                }
+            }
             // Copy Columns (in a table that doesn't have any embedded objects
 
             target = sourceObjectClass.newInstance();
@@ -131,10 +137,12 @@ public class ObjectUtils
                             Set<Attribute> columns = embeddedColumn.getAttributes();
                             for (Attribute column : columns)
                             {
-                  
-                                
-                                PropertyAccessorHelper.set(targetEmbeddedObj, (Field) column.getJavaMember(),
-                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj, (Field) column.getJavaMember()));
+
+                                PropertyAccessorHelper.set(
+                                        targetEmbeddedObj,
+                                        (Field) column.getJavaMember(),
+                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj,
+                                                (Field) column.getJavaMember()));
                             }
 
                             PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
@@ -156,7 +164,7 @@ public class ObjectUtils
                                     for (Field f : genericClass.getDeclaredFields())
                                     {
                                         PropertyAccessorHelper.set(targetEcObj, f,
-                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));                                       
+                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
 
                                     }
 
@@ -185,16 +193,22 @@ public class ObjectUtils
                     }
 
                 }
-                else if(attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
+                else if (attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
                 {
-                    
-                    PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObjectCopy(source, columnField));
+
+                    PropertyAccessorHelper.set(target, columnField,
+                            PropertyAccessorHelper.getObjectCopy(source, columnField));
                 }
-            }         
+            }
 
             // Put this object into copied object map
-            copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
-
+            if (id != null)
+            {
+                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
+                keyBuilder.append("#");
+                keyBuilder.append(id);
+                copiedObjectMap.put(keyBuilder.toString(), target);
+            }
             // Copy Relationships recursively
             for (Relation relation : metadata.getRelations())
             {

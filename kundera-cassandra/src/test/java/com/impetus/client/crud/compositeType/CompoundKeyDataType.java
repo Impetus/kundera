@@ -15,13 +15,11 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 

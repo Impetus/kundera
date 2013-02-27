@@ -42,7 +42,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class EntityMetadataTest
 {
-     private String persistenceUnit = "metaDataTest";
+    private String persistenceUnit = "metaDataTest";
 
     /**
      * @throws java.lang.Exception
@@ -70,8 +70,8 @@ public class EntityMetadataTest
         Assert.assertNotNull(entityMetadata.getIndexProperties());
         Assert.assertFalse(entityMetadata.getIndexProperties().isEmpty());
         Assert.assertEquals(2, entityMetadata.getIndexProperties().size());
-        Assert.assertNotNull(entityMetadata.getIndexProperties().get("age"));
-        Assert.assertNotNull(entityMetadata.getIndexProperties().get("empName"));
+        Assert.assertNotNull(entityMetadata.getIndexProperties().get("AGE"));
+        Assert.assertNotNull(entityMetadata.getIndexProperties().get("EMP_NAME"));
         Assert.assertNull(entityMetadata.getIndexProperties().get("departmentData"));
 
         Map<String, PropertyIndex> indexes = IndexProcessor.getIndexesOnEmbeddable(Department.class);
@@ -88,6 +88,15 @@ public class EntityMetadataTest
         Assert.assertEquals("GEO2D", indexes.get("location").getIndexType());
         Assert.assertEquals(new Integer(200), indexes.get("location").getMax());
         Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());
+    }
+
+    @Test
+    public void testEmbeddedCollection()
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(KunderaUser.class);
+        Assert.assertNotNull(entityMetadata);
+        Assert.assertTrue(entityMetadata.getIndexProperties().isEmpty());
+        Assert.assertEquals(EntityMetadata.Type.SUPER_COLUMN_FAMILY, entityMetadata.getType());
     }
 
     /**
@@ -126,21 +135,26 @@ public class EntityMetadataTest
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
         clazzToPu.put(Employe.class.getName(), pus);
+        clazzToPu.put(KunderaUser.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(Employe.class);
+        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Employe.class, m);
+        processor.process(KunderaUser.class, m1);
 
         IndexProcessor indexProcessor = new IndexProcessor();
         indexProcessor.process(Employe.class, m);
+        indexProcessor.process(KunderaUser.class, m1);
 
         m.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(Employe.class, m);
+        metaModel.addEntityMetadata(KunderaUser.class, m1);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
@@ -151,9 +165,9 @@ public class EntityMetadataTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null,persistenceUnits).configure();
 
-        new SchemaConfiguration(persistenceUnits).configure();
+        new SchemaConfiguration(null,persistenceUnits).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

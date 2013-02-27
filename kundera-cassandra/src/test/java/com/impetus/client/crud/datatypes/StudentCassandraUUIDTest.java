@@ -83,7 +83,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
      */
     private void testNativeQuery(boolean b)
     {
-        String s = "Select * From StudentCassandraUUID";
+        String s = "Select * From " + "\"StudentCassandraUUID\"";
         EntityManager em = emf.createEntityManager();
         Query q = em.createNativeQuery(s, StudentCassandraUUID.class);
         List<StudentCassandraUUID> results = q.getResultList();
@@ -691,26 +691,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
 
     public void dropSchema()
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(keyspace);
-        }
-        catch (InvalidRequestException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

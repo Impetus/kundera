@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -59,6 +62,12 @@ public final class ClientResolver
         throw new ClientResolverException(" No client configured for:" + persistenceUnit);
     }
 
+
+    public static ClientFactory getClientFactory(String persistenceUnit)
+    {
+        return getClientFactory(persistenceUnit, null);
+    }
+    
     /**
      * Gets the client factory.
      * 
@@ -66,7 +75,7 @@ public final class ClientResolver
      *            the persistence unit
      * @return the client factory
      */
-    public static ClientFactory getClientFactory(String persistenceUnit)
+    public static ClientFactory getClientFactory(String persistenceUnit, Map<String, Object> puProperties)
     {
         ClientFactory clientFactory = clientFactories.get(persistenceUnit);
 
@@ -76,8 +85,13 @@ public final class ClientResolver
         logger.info("Initializing client factory for: " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientFactory = persistenceUnitMetadata.getProperties().getProperty(
-                PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+        String kunderaClientFactory = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+        if (kunderaClientFactory == null)
+        {
+            kunderaClientFactory = persistenceUnitMetadata.getProperties().getProperty(
+                    PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+        }
 
         if (kunderaClientFactory == null)
         {
@@ -87,21 +101,43 @@ public final class ClientResolver
         try
         {
             clientFactory = (ClientFactory) Class.forName(kunderaClientFactory).newInstance();
+
+            Method m = GenericClientFactory.class.getDeclaredMethod("setPersistenceUnit", String.class);
+            if (!m.isAccessible())
+            {
+                m.setAccessible(true);
+            }
+
+            m.invoke(clientFactory, persistenceUnit);
+
         }
         catch (InstantiationException e)
         {
-            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
-            throw new ClientResolverException("Couldn't instantiate class", e);
+            onError(e);
         }
         catch (IllegalAccessException e)
         {
-            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
-            throw new ClientResolverException(e);
+            onError(e);
         }
         catch (ClassNotFoundException e)
         {
-            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
-            throw new ClientResolverException(e);
+            onError(e);
+        }
+        catch (SecurityException e)
+        {
+            onError(e);
+        }
+        catch (NoSuchMethodException e)
+        {
+            onError(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            onError(e);
+        }
+        catch (InvocationTargetException e)
+        {
+            onError(e);
         }
 
         if (clientFactory == null)
@@ -114,5 +150,14 @@ public final class ClientResolver
 
         logger.info("Finishing factory initialization");
         return clientFactory;
+    }
+
+    /**
+     * @param e
+     */
+    private static void onError(Exception e)
+    {
+        logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
+        throw new ClientResolverException("Couldn't instantiate class", e);
     }
 }

@@ -29,6 +29,7 @@
 						<property name="strategy.class" value="SimpleStrategy" />
 						<property name="replcation.factor" value="1" />
 						<property name="durable.writes" value="true" />
+						<property name="inverted.indexing.enabled" value="true" />
 					</properties>
 					<dataCenters>
 						<dataCenter>
@@ -42,7 +43,7 @@
 					</dataCenters>
 					<tables>
 						<table>
-							<name>USERXYZ</name>
+							<name>CASSANDRAUSERXYZ</name>
 							<properties>
 								<property name="default.validation.class" value="UTF8Type"></property>
 								<property name="key.validation.class" value="UTF8Type"></property>
@@ -53,7 +54,50 @@
 								<property name="comparator.type" value="UTF8Type"></property>
 							</properties>
 						</table>
+
 					</tables>
+				</schema>
+				<schema>
+					<name>KunderaCounterColumn</name>
+					<tables>
+						<table>
+							<name>counters</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>SuperCounters</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>InvalidCounterColumnEntity</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>ValidCounterColumnFamily</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+				<schema>
+					<name>KunderaExamples</name>
+					<properties>
+						<property name="strategy.class" value="SimpleStrategy" />
+						<property name="replcation.factor" value="1" />
+						<property name="durable.writes" value="true" />
+						<property name="inverted.indexing.enabled" value="true" />
+					</properties>
 				</schema>
 			</schemas>
 		</dataStore>
@@ -68,10 +112,10 @@
 			</connection>
 			<schemas>
 				<schema>
-					<name>USERXYZ</name>
+					<name>HBASEUSERXYZ</name>
 					<tables>
 						<table>
-							<name>age</name>
+							<name>HBASEUSERXYZ</name>
 							<properties>
 								<property name="TTL" value="12345678" />
 								<property name="VERSIONS" value="6" />
@@ -80,11 +124,26 @@
 								<property name="COMPRESSION_COMPACT" value="GZ" />
 							</properties>
 						</table>
+					</tables>
+				</schema>
+				<schema>
+					<name>KunderaExamples</name>
+					<tables>
 						<table>
-							<name>address</name>
+							<name>AGE</name>
 							<properties>
-								<property name="TTL" value="1234567" />
-								<property name="VERSIONS" value="5" />
+								<property name="TTL" value="123456" />
+								<property name="MAX_VERSIONS" value="5" />
+								<property name="MIN_VERSIONS" value="2" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+						<table>
+							<name>PERSON_NAME</name>
+							<properties>
+								<property name="TTL" value="123456" />
+								<property name="MAX_VERSIONS" value="5" />
 								<property name="MIN_VERSIONS" value="2" />
 								<property name="COMPRESSION" value="GZ" />
 								<property name="COMPRESSION_COMPACT" value="GZ" />

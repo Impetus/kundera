@@ -44,6 +44,8 @@ import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Implementation class for {@link EntityManagerFactory}
@@ -103,7 +105,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @param properties
      *            the properties
      */
-    public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
+    public EntityManagerFactoryImpl(String persistenceUnit, Map properties)
     {
         if (properties == null)
         {
@@ -144,6 +146,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         this.util = new KunderaPersistenceUnitUtil(cache);
 
+        if(logger.isDebugEnabled())
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -171,7 +174,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         for (String pu : persistenceUnits)
         {
-            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu)).destroy();
+            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu, getExternalProperties(pu))).destroy();
+            KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
         }
     }
 
@@ -381,4 +385,42 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return persistenceUnits;
     }
 
+    /**
+     * @param puProperty
+     */
+    private Map<String, Object> getExternalProperties(String pu)
+    {
+        Map<String, Object> puProperty;
+        if (persistenceUnits.length > 1 && properties != null)
+        {
+            puProperty = (Map<String, Object>) properties.get(pu);
+
+            // if property found then return it, if it is null by pass it, else
+            // throw invalidConfiguration.
+            if (puProperty != null)
+            {
+                return fetchPropertyMap(puProperty);
+            }
+        }
+
+        return properties;
+
+    }
+
+    /**
+     * @param puProperty
+     * @return
+     */
+    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
+    {
+        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
+        {
+            return puProperty;
+        }
+        else
+        {
+            throw new InvalidConfigurationException(
+                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
+        }
+    }
 }

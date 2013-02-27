@@ -16,14 +16,10 @@
 package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -461,12 +457,13 @@ final class MongoDBDataHandler
      *            the result
      * @param orderBy
      *            the order by
+     * @param maxResult
      * @return the embedded object list
      * @throws PropertyAccessException
      *             the property access exception
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, BasicDBObject keys)
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys)
             throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
@@ -520,7 +517,7 @@ final class MongoDBDataHandler
 
         // Query for fetching entities based on user specified criteria
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys);
+                mongoQuery, keys).limit(maxResult);
 
         // EmbeddableType superColumn =
         // m.getEmbeddedColumn(enclosingDocumentName);

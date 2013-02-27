@@ -65,21 +65,14 @@ public class CassandraSchemaManagerMTM
         CassandraCli.cassandraSetUp();
     }
 
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
-        try
+        /**
+         * @throws java.lang.Exception
+         */
+        @After
+        public void tearDown() throws Exception
         {
-            CassandraCli.client.system_drop_keyspace(keyspace);
+            CassandraCli.dropKeySpace(keyspace);
         }
-        catch (InvalidRequestException irex)
-        {
-            Assert.assertTrue(!CassandraCli.keyspaceExist(keyspace));
-        }
-    }
 
     @Test
     public void test()
@@ -145,7 +138,7 @@ public class CassandraSchemaManagerMTM
         EntityMetadata m = new EntityMetadata(CassandraEntityPersonnelUniMToM.class);
         EntityMetadata m1 = new EntityMetadata(CassandraEntityHabitatUniMToM.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntityPersonnelUniMToM.class, m);
         processor.process(CassandraEntityHabitatUniMToM.class, m1);
 
@@ -161,8 +154,8 @@ public class CassandraSchemaManagerMTM
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
 
-        new ClientFactoryConfiguraton(pu).configure();
-        new SchemaConfiguration(pu).configure();
+        new ClientFactoryConfiguraton(null,pu).configure();
+        new SchemaConfiguration(null,pu).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

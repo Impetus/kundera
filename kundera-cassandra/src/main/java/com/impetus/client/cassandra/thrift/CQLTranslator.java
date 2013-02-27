@@ -27,7 +27,6 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -40,8 +39,6 @@ import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
-import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -50,7 +47,6 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.ByteAccessor;
 
 /**
  * CQL translator interface, to translate all CRUD operations into CQL queries.
@@ -86,11 +82,11 @@ public final class CQLTranslator
     public static final String AND_CLAUSE = " AND ";
 
     public static final String EQ_CLAUSE = "=";
-    
-    public static final String WITH_CLAUSE=" WITH ";
+
+    public static final String WITH_CLAUSE = " WITH ";
 
     public static final String QUOTE_STR = "'";
-   
+
     public CQLTranslator()
     {
 
@@ -153,12 +149,12 @@ public final class CQLTranslator
     {
         return InternalToCQLMapper.getType(internalClazz);
     }
-    
+
     public static String getKeyword(String property)
     {
         return CQLKeywordMapper.getType(property);
     }
-    
+
     /**
      * On translation to column name or column value based on translation type.
      * 
@@ -211,9 +207,14 @@ public final class CQLTranslator
             }
             else
             {
+                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
+                
+                if(!attrib.isAssociation())
+                {
                 onTranslation(type, builder, columnBuilder,
-                        ((AbstractAttribute) (entityType.getAttribute(field.getName()))).getJPAColumnName(), record,
+                        attrib.getJPAColumnName(), record,
                         field);
+                }
 
             }
 
@@ -332,7 +333,7 @@ public final class CQLTranslator
      *            if field is present.
      * @return true, if value is not null else false.
      */
-    private boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
+    public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
     {
         if (value != null)
         {
@@ -340,14 +341,15 @@ public final class CQLTranslator
             // CQL can take string or date within single quotes.
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
-                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class) || fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class))
+                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
+                    || fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class))
             {
                 builder.append("'");
 
                 if (isDate(fieldClazz)) // For CQL, date has to
                                         // be in date.getTime()
                 {
-                    
+
                     builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
                 }
                 else
@@ -355,16 +357,15 @@ public final class CQLTranslator
                     builder.append(value);
                 }
                 builder.append("'");
-            } /*else if(fieldClazz.isAssignableFrom(byte.class))
-            {
-//                isPresent = false;
-                ByteAccessor accessor = new ByteAccessor();
-                builder.append(Hex.encodeHex(accessor.toBytes(value)));
-//                builder.append(Integer.toHexString(5));
-                ByteAccessor accessor = new ByteAccessor();
-             * 
-                builder.append(accessor.toBytes(value));
-            }*/
+            } /*
+               * else if(fieldClazz.isAssignableFrom(byte.class)) { // isPresent
+               * = false; ByteAccessor accessor = new ByteAccessor();
+               * builder.append(Hex.encodeHex(accessor.toBytes(value))); //
+               * builder.append(Integer.toHexString(5)); ByteAccessor accessor =
+               * new ByteAccessor();
+               * 
+               * builder.append(accessor.toBytes(value)); }
+               */
             else
             {
                 builder.append(value);
@@ -389,19 +390,21 @@ public final class CQLTranslator
         // builder.append(","); // because only key columns
     }
 
-
     /**
      * Appends column name and data type also ensures case sensitivity.
-     *
-     * @param builder           string builder
-     * @param columnName        column name
-     * @param dataType          data type. 
+     * 
+     * @param builder
+     *            string builder
+     * @param columnName
+     *            column name
+     * @param dataType
+     *            data type.
      */
     public void appendColumnName(StringBuilder builder, String columnName, String dataType)
     {
         ensureCase(builder, columnName);
-         builder.append(" "); // because only key columns
-         builder.append(dataType);
+        builder.append(" "); // because only key columns
+        builder.append(dataType);
     }
 
     /**
@@ -415,7 +418,8 @@ public final class CQLTranslator
     private boolean isDate(Class clazz)
     {
         return clazz.isAssignableFrom(Date.class) || clazz.isAssignableFrom(java.sql.Date.class)
-                || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class) || clazz.isAssignableFrom(Calendar.class);
+                || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Time.class)
+                || clazz.isAssignableFrom(Calendar.class);
     }
 
     /**
@@ -435,32 +439,32 @@ public final class CQLTranslator
 
             // putting possible combination into map.
 
-            validationClassMapper.put(UTF8Type.class.getSimpleName(),"text");
+            validationClassMapper.put(UTF8Type.class.getSimpleName(), "text");
 
-            validationClassMapper.put(IntegerType.class.getSimpleName(),"int");
+            validationClassMapper.put(IntegerType.class.getSimpleName(), "int");
 
-            validationClassMapper.put( DoubleType.class.getSimpleName(),"double");
+            validationClassMapper.put(DoubleType.class.getSimpleName(), "double");
 
-            validationClassMapper.put(BooleanType.class.getSimpleName(),"boolean");
+            validationClassMapper.put(BooleanType.class.getSimpleName(), "boolean");
 
-            validationClassMapper.put(LongType.class.getSimpleName(),"bigint");
+            validationClassMapper.put(LongType.class.getSimpleName(), "bigint");
 
-            validationClassMapper.put(BytesType.class.getSimpleName(),"blob");
+            validationClassMapper.put(BytesType.class.getSimpleName(), "blob");
 
-            validationClassMapper.put(FloatType.class.getSimpleName(),"float");
+            validationClassMapper.put(FloatType.class.getSimpleName(), "float");
 
             // missing
-            validationClassMapper.put(CounterColumnType.class.getSimpleName(),"counter");
+            validationClassMapper.put(CounterColumnType.class.getSimpleName(), "counter");
 
-            validationClassMapper.put(DecimalType.class.getSimpleName(),"decimal");
+            validationClassMapper.put(DecimalType.class.getSimpleName(), "decimal");
 
-            validationClassMapper.put(UUIDType.class.getSimpleName(),"uuid");
+            validationClassMapper.put(UUIDType.class.getSimpleName(), "uuid");
 
-            validationClassMapper.put(DateType.class.getSimpleName(),"timestamp");
-            
+            validationClassMapper.put(DateType.class.getSimpleName(), "timestamp");
+
             mapper = Collections.synchronizedMap(validationClassMapper);
         }
-        
+
         private static final String getType(final String internalClassName)
         {
             return mapper.get(internalClassName);
@@ -471,8 +475,9 @@ public final class CQLTranslator
     {
         /** The Mapper. */
         private final static Map<String, String> mapper = new HashMap<String, String>();
-        
-        // missing: compaction_strategy_options, compression_parameters,sstable_size_in_mb
+
+        // missing: compaction_strategy_options,
+        // compression_parameters,sstable_size_in_mb
         static
         {
             mapper.put(CassandraConstants.READ_REPAIR_CHANCE, "read_repair_chance");
@@ -480,21 +485,31 @@ public final class CQLTranslator
             mapper.put(CassandraConstants.BLOOM_FILTER_FP_CHANCE, "bloom_filter_fp_chance");
             mapper.put(CassandraConstants.COMPACTION_STRATEGY, "compaction_strategy_class");
             mapper.put(CassandraConstants.BLOOM_FILTER_FP_CHANCE, "bloom_filter_fp_chance");
-            
-//            mapper.put(CassandraConstants.COMPARATOR_TYPE, "comparator");
-            
+
+            // mapper.put(CassandraConstants.COMPARATOR_TYPE, "comparator");
+
             mapper.put(CassandraConstants.REPLICATE_ON_WRITE, "replicate_on_write");
             mapper.put(CassandraConstants.CACHING, "caching");
-            //TODO: these are not supported.
-//            mapper.put(CassandraConstants.MAX_COMPACTION_THRESHOLD, "max_compaction_threshold");
-//            mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD, "min_compaction_threshold");
+            // TODO: these are not supported.
+            // mapper.put(CassandraConstants.MAX_COMPACTION_THRESHOLD,
+            // "max_compaction_threshold");
+            // mapper.put(CassandraConstants.MIN_COMPACTION_THRESHOLD,
+            // "min_compaction_threshold");
             mapper.put(CassandraConstants.COMMENT, "comment");
             mapper.put(CassandraConstants.GC_GRACE_SECONDS, "gc_grace_seconds");
         }
-        
+
         private static final String getType(final String propertyName)
         {
             return mapper.get(propertyName);
         }
+    }
+
+    /**
+     * @param builder
+     */
+    public void buildFilteringClause(StringBuilder builder)
+    {
+        builder.append(" ALLOW FILTERING");
     }
 }

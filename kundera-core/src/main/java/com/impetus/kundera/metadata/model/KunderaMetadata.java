@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class KunderaMetadata
 {
-
     /* Metadata for Kundera core */
     /** The core metadata. */
     private CoreMetadata coreMetadata;
@@ -124,4 +123,9 @@ public class KunderaMetadata
         this.clientMetadata.put(persistenceUnit, clientMetadata);
     }
 
+    public void unloadKunderaMetadata(final String pu)
+    {
+        this.clientMetadata.remove(pu);
+        this.getApplicationMetadata().unloadApplicationMatadata(pu);
+    }
 }

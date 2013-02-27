@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 
-import com.impetus.client.hbase.crud.LuceneCleanupUtilities;
 import com.impetus.client.twitter.dao.TwitterHbase;
 import com.impetus.client.twitter.dao.TwitterServiceHbase;
 import com.impetus.client.twitter.entities.ExternalLinkHBase;
@@ -29,6 +28,7 @@ import com.impetus.client.twitter.entities.PersonalDetailHbase;
 import com.impetus.client.twitter.entities.PreferenceHBase;
 import com.impetus.client.twitter.entities.TweetHbase;
 import com.impetus.client.twitter.entities.UserHBase;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Test case for MongoDB.
@@ -37,9 +37,9 @@ import com.impetus.client.twitter.entities.UserHBase;
  */
 public abstract class TwitterTestBaseHbase extends TestCase
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     /** The user id1. */
     String userId1;

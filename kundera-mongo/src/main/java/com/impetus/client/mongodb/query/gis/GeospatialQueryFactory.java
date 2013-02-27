@@ -17,7 +17,6 @@ package com.impetus.client.mongodb.query.gis;
 
 import com.impetus.kundera.gis.geometry.Circle;
 import com.impetus.kundera.gis.geometry.Envelope;
-import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
 import com.impetus.kundera.gis.geometry.Triangle;
 import com.impetus.kundera.gis.query.GeospatialQuery;

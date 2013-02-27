@@ -145,7 +145,7 @@ public class HBaseCli
         }
         catch (IOException e)
         {
-          
+
         }
     }
 
@@ -164,15 +164,19 @@ public class HBaseCli
             utility.getHBaseAdmin().disableTable(tableName);
             utility.getHBaseAdmin().addColumn(tableName, new HColumnDescriptor(columnFamily));
             utility.getHBaseAdmin().enableTable(tableName);
+            while (utility.getHBaseAdmin().isTableEnabled(columnFamily))
+            {
+                return;
+            }
 
         }
         catch (InvalidFamilyOperationException ife)
         {
-            logger.info("Column family:" + columnFamily + " already exist!");
+            logger.info("Column family:" + columnFamily + " already exist!", ife);
         }
         catch (IOException e)
         {
-            logger.error(e.getMessage());
+            logger.error("", e);
         }
     }
 

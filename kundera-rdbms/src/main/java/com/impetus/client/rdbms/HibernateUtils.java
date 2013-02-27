@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.net.URL;
 import java.util.Properties;
 
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -43,4 +44,10 @@ public final class HibernateUtils
         return props;
     }
 
+    static final URL getPersistenceUnitUrl(final String persistenceUnit)
+    {
+        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        return persistenceUnitMetadatata != null ? persistenceUnitMetadatata.getMappedUrl(): null;
+    }
 }

@@ -127,7 +127,7 @@ public class PersistenceCacheTest
         EntityMetadata m = new EntityMetadata(Store.class);
         EntityMetadata m1 = new EntityMetadata(BillingCounter.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Store.class, m);
         processor.process(BillingCounter.class, m1);
 

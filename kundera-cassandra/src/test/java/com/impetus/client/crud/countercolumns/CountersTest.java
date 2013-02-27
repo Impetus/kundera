@@ -109,7 +109,7 @@ public class CountersTest
     {
         if (/* AUTO_MANAGE_SCHEMA && CassandraCli.keyspaceExist(keyspace) */CassandraCli.client != null)
         {
-            CassandraCli.client.system_drop_keyspace(keyspace);
+            CassandraCli.dropKeySpace(keyspace);
         }
         emf.close();
     }

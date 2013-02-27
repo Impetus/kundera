@@ -66,7 +66,7 @@ public class CassandraSchemaManagerMTMTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(_persistenceUnit);
+        configuration = new SchemaConfiguration(null,_persistenceUnit);
         CassandraCli.cassandraSetUp();
     }
 
@@ -76,15 +76,9 @@ public class CassandraSchemaManagerMTMTest
     @After
     public void tearDown() throws Exception
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(_keyspace);
-        }
-        catch (InvalidRequestException irex)
-        {
-            Assert.assertTrue(!CassandraCli.keyspaceExist(_keyspace));
-        }
+        CassandraCli.dropKeySpace(_keyspace);
     }
+
 
     @Test
     public void test()
@@ -148,7 +142,7 @@ public class CassandraSchemaManagerMTMTest
         EntityMetadata m = new EntityMetadata(CassandraEntityPersonnelUniMToM.class);
         EntityMetadata m1 = new EntityMetadata(CassandraEntityHabitatUniMToM.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntityPersonnelUniMToM.class, m);
         processor.process(CassandraEntityHabitatUniMToM.class, m1);
 
@@ -164,7 +158,7 @@ public class CassandraSchemaManagerMTMTest
 
         appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
 
-        new ClientFactoryConfiguraton(_persistenceUnit).configure();
+        new ClientFactoryConfiguraton(null,_persistenceUnit).configure();
         configuration.configure();
         return null;
     }

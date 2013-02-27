@@ -18,8 +18,12 @@ package com.impetus.kundera.graph;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import org.hibernate.collection.PersistentCollection;
+import javax.persistence.MapKeyJoinColumn;
+
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.collection.spi.PersistentCollection;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -31,7 +35,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.DeepEquals;
-import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Responsible for generating {@link ObjectGraph} of nodes from a given entity
@@ -51,7 +54,7 @@ public class ObjectGraphBuilder
     {
         // Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();
-        this.persistenceCache = persistenceCache;
+//        this.persistenceCache = persistenceCache;
 
         // Recursively build object graph and get head node.
         Node headNode = getNode(entity, objectGraph, initialNodeState);
@@ -127,11 +130,11 @@ public class ObjectGraphBuilder
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
 
         // Make a deep copy of entity data
-        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
+//        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache, id);
+            node = new Node(nodeId, /*nodeDataCopy*/entity, initialNodeState, persistenceCache, id);
 
         }
         else
@@ -143,10 +146,10 @@ public class ObjectGraphBuilder
             // If dirty, set the entity data into node and mark it as dirty
             if (!DeepEquals.deepEquals(node.getData(), entity))
             {
-                node.setData(nodeDataCopy);
+                node.setData(/*nodeDataCopy*/entity);
                 node.setDirty(true);
             }
-            else
+            else if(node.isProcessed())
             {
                 node.setDirty(false);
             }
@@ -173,7 +176,7 @@ public class ObjectGraphBuilder
             if (childObject != null)
             {
                 // This child object could be either an entity(1-1 or M-1) or a
-                // collection of entities(1-M or M-M)
+                // collection/ Map of entities(1-M or M-M)
                 if (Collection.class.isAssignableFrom(childObject.getClass()))
                 {
                     // For each entity in the collection, construct a child node
@@ -190,6 +193,17 @@ public class ObjectGraphBuilder
                         }
                     }
 
+                }
+                else if(Map.class.isAssignableFrom(childObject.getClass()))
+                {
+                    Map childrenObjects = (Map) childObject;
+                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    {
+                        for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
+                        {
+                            addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
+                        }
+                    }                  
                 }
                 else
                 {
@@ -214,24 +228,60 @@ public class ObjectGraphBuilder
     private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject,
             NodeState initialNodeState)
     {
-        // Construct child node for this child object via recursive call
-        Node childNode = getNode(childObject, graph, initialNodeState);
-
-        if (childNode != null)
+        
+        if(childObject instanceof Map.Entry)
         {
-            // Construct Node Link for this relationship
-            NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
-            nodeLink.setMultiplicity(relation.getType());
+            Map.Entry entry = (Map.Entry) childObject;
+            Object relObject = entry.getKey();
+            Object entityObject = entry.getValue();
+            
+            Node childNode = getNode(entityObject, graph, initialNodeState);
+            
+            if(childNode != null)
+            {
+                if( ! StringUtils.isEmpty(relation.getMappedBy()) 
+                        && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) == null) {
+                    return;
+                }
+                
+                NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
+                nodeLink.setMultiplicity(relation.getType());
 
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-            nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
+                
+                nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
 
-            // Add Parent node to this child
-            childNode.addParentNode(nodeLink, node);
+                // Add Parent node to this child
+                childNode.addParentNode(nodeLink, node);
 
-            // Add child node to this node
-            node.addChildNode(nodeLink, childNode);
+                // Add child node to this node
+                node.addChildNode(nodeLink, childNode);
+            }
         }
+        else
+        {
+            // Construct child node for this child object via recursive call
+            Node childNode = getNode(childObject, graph, initialNodeState);
+
+            if (childNode != null)
+            {
+                // Construct Node Link for this relationship
+                NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
+                nodeLink.setMultiplicity(relation.getType());
+
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
+
+                // Add Parent node to this child
+                childNode.addParentNode(nodeLink, node);
+
+                // Add child node to this node
+                node.addChildNode(nodeLink, childNode);
+            }
+        }
+        
+        
     }
 
     /**

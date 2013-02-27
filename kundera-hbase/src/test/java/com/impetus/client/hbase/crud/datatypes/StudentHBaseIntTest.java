@@ -588,8 +588,7 @@ public class StudentHBaseIntTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        cli.addColumnFamily(table, "NAME");
-        cli.addColumnFamily(table, "AGE");
+        
     }
 
     public void dropSchema()

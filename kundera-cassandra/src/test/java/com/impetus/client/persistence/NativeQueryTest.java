@@ -54,7 +54,6 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class NativeQueryTest
 {
-
     // /** The schema. */
     private final String schema = "KunderaExamples";
 
@@ -81,12 +80,12 @@ public class NativeQueryTest
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
         String nativeSql = "Select * from Cassandra c";
-        
+
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
         Assert.assertEquals(nativeSql, q.getJPAQuery());
         Assert.assertEquals(true, KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeSql));
     }
-    
+
     /**
      * Test execute native create keyspace query.
      */
@@ -97,7 +96,7 @@ public class NativeQueryTest
         // String nativeSql = "CREATE KEYSPACE " + schema
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -125,7 +124,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -153,7 +152,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + schema;
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
@@ -206,7 +205,7 @@ public class NativeQueryTest
         q.getResultList();
 
         // select all
-        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970";
+        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970 ALLOW FILTERING";
         q = em.createNativeQuery(selectAll, CassandraEntitySample.class);
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -217,9 +216,6 @@ public class NativeQueryTest
         Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
 
     }
-    
-    
-    
 
     /**
      * Gets the entity manager factory.
@@ -255,7 +251,7 @@ public class NativeQueryTest
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySample.class, m);
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
@@ -266,7 +262,7 @@ public class NativeQueryTest
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         return emf;
     }
 

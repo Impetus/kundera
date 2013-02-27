@@ -25,11 +25,12 @@ import javax.persistence.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
-@Index(index = true, columns = { "personName", "age" })
+@IndexCollection(columns = { @com.impetus.kundera.index.Index(name = "personName"),
+        @com.impetus.kundera.index.Index(name = "age") })
 public class PersonCassandra
 {
 
@@ -156,7 +157,8 @@ public class PersonCassandra
     }
 
     /**
-     * @param day the day to set
+     * @param day
+     *            the day to set
      */
     public void setDay(Day day)
     {

@@ -91,7 +91,7 @@ public class SchemaConfigurationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(persistenceUnit);
+        configuration = new SchemaConfiguration(null,persistenceUnit);
         puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
     }
 
@@ -172,7 +172,7 @@ public class SchemaConfigurationTest
         EntityMetadata m6 = new EntityMetadata(CoreEntityPersonUni1To1.class);
         EntityMetadata m7 = new EntityMetadata(CoreEntityPersonUni1ToM.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CoreEntitySimple.class, m);
         processor.process(CoreEntitySuper.class, m1);
         processor.process(CoreEntityAddressUni1To1.class, m2);

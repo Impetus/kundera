@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javassist.Modifier;
+
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -36,6 +38,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -264,7 +267,6 @@ public final class MetaModelBuilder<X, T>
             AbstractManagedType<T> embeddableType = null;
             if (!embeddables.containsKey(attribType))
             {
-
                 embeddableType = new DefaultEmbeddableType<T>(attribType, PersistenceType.EMBEDDABLE, null);
 
                 if (attribute != null)
@@ -272,7 +274,10 @@ public final class MetaModelBuilder<X, T>
                     Field[] embeddedFields = attribType.getDeclaredFields();
                     for (Field f : embeddedFields)
                     {
-                        new TypeBuilder<T>(f).build(embeddableType, f.getType());
+                        if(isNonTransient(f))
+                        {
+                            new TypeBuilder<T>(f).build(embeddableType, f.getType());
+                        }
                     }
                 }
                 addEmbeddables(attribType, embeddableType);
@@ -345,69 +350,73 @@ public final class MetaModelBuilder<X, T>
              */
             public <K, V> void build()
             {
-                if (isPluralAttribute(attribute))
+                if (isNonTransient(attribute))
                 {
-                    PluralAttribute<X, ?, ?> pluralAttribute = null;
-                    if (attribute.getType().equals(java.util.Collection.class))
+                    if (isPluralAttribute(attribute))
                     {
-                        pluralAttribute = new DefaultCollectionAttribute<X, T>(attributeType, attribute.getName(),
-                                getAttributeType(), managedType, attribute,
-                                (Class<java.util.Collection<T>>) attribute.getType());
-                    }
-                    else if (attribute.getType().equals(java.util.List.class))
-                    {
-                        pluralAttribute = new DefaultListAttribute<X, T>(attributeType, attribute.getName(),
-                                getAttributeType(), managedType, attribute, (Class<List<T>>) attribute.getType());
-                    }
-                    else if (attribute.getType().equals(java.util.Set.class))
-                    {
-                        pluralAttribute = new DefaultSetAttribute<X, T>(attributeType, attribute.getName(),
-                                getAttributeType(), managedType, attribute, (Class<Set<T>>) attribute.getType());
-                    }
-                    else if (attribute.getType().equals(java.util.Map.class))
-                    {
-                        java.lang.reflect.Type[] arguments = ((ParameterizedType) attribute.getGenericType())
-                                .getActualTypeArguments();
+                        PluralAttribute<X, ?, ?> pluralAttribute = null;
+                        if (attribute.getType().equals(java.util.Collection.class))
+                        {
+                            pluralAttribute = new DefaultCollectionAttribute<X, T>(attributeType, attribute.getName(),
+                                    getAttributeType(), managedType, attribute,
+                                    (Class<java.util.Collection<T>>) attribute.getType());
+                        }
+                        else if (attribute.getType().equals(java.util.List.class))
+                        {
+                            pluralAttribute = new DefaultListAttribute<X, T>(attributeType, attribute.getName(),
+                                    getAttributeType(), managedType, attribute, (Class<List<T>>) attribute.getType());
+                        }
+                        else if (attribute.getType().equals(java.util.Set.class))
+                        {
+                            pluralAttribute = new DefaultSetAttribute<X, T>(attributeType, attribute.getName(),
+                                    getAttributeType(), managedType, attribute, (Class<Set<T>>) attribute.getType());
+                        }
+                        else if (attribute.getType().equals(java.util.Map.class))
+                        {
+                            java.lang.reflect.Type[] arguments = ((ParameterizedType) attribute.getGenericType())
+                                    .getActualTypeArguments();
 
-                        Type keyType = new TypeBuilder<X>(null, getPersistentAttributeType(attribute))
-                                .buildType(getTypedClass(arguments[0]));
-                        pluralAttribute = new DefaultMapAttribute(attributeType, attribute.getName(),
-                                getAttributeType(), managedType, attribute, (Class<Map<T, ?>>) attribute.getType(),
-                                keyType);
+                            Type keyType = new TypeBuilder<X>(null, getPersistentAttributeType(attribute))
+                                    .buildType(getTypedClass(arguments[0]));
+                            pluralAttribute = new DefaultMapAttribute(attributeType, attribute.getName(),
+                                    getAttributeType(), managedType, attribute, (Class<Map<T, ?>>) attribute.getType(),
+                                    keyType);
+                        }
+                        ((AbstractManagedType<X>) managedType).addPluralAttribute(attribute.getName(), pluralAttribute);
                     }
-                    ((AbstractManagedType<X>) managedType).addPluralAttribute(attribute.getName(), pluralAttribute);
+                    else
+                    {
+                        SingularAttribute<X, T> singularAttribute = new DefaultSingularAttribute(attribute.getName(),
+                                getAttributeType(), attribute, attributeType, managedType, checkId(attribute));
+                        ((AbstractManagedType<X>) managedType).addSingularAttribute(attribute.getName(),
+                                singularAttribute);
+
+                        if (checkSimpleId(attribute) && checkIdClass(managedType.getJavaType()))
+
+                        {
+                            IdClass anno = managedType.getJavaType().getAnnotation(IdClass.class);
+                            AbstractManagedType superType = onSuperType(anno.value(), true);
+                            onDeclaredFields(anno.value(), superType);
+                            ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, true,
+                                    superType.getDeclaredSingularAttributes());
+                        }
+                        else if (checkEmbeddedId(attribute))
+                        {
+                            AbstractManagedType superType = onSuperType(attribute.getType(), false);
+                            checkEmbeddable(superType.getJavaType(), attribute.getName());
+                            ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, true,
+                                    superType.getDeclaredSingularAttributes());
+
+                        }
+                        else if (checkSimpleId(attribute))
+                        {
+                            ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, false, null);
+                        }
+                    }
                 }
-                else
-                {
-                    SingularAttribute<X, T> singularAttribute = new DefaultSingularAttribute(attribute.getName(),
-                            getAttributeType(), attribute, attributeType, managedType, checkId(attribute));
-                    ((AbstractManagedType<X>) managedType).addSingularAttribute(attribute.getName(), singularAttribute);
-
-                    if (checkSimpleId(attribute) && checkIdClass(managedType.getJavaType()))
-
-                    {
-                        IdClass anno = managedType.getJavaType().getAnnotation(IdClass.class);
-                        AbstractManagedType superType = onSuperType(anno.value(), true);
-                        onDeclaredFields(anno.value(), superType);
-                        ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, true,
-                                superType.getDeclaredSingularAttributes());
-                    }
-                    else if (checkEmbeddedId(attribute))
-                    {
-                        AbstractManagedType superType = onSuperType(attribute.getType(), false);
-                        checkEmbeddable(superType.getJavaType(), attribute.getName());
-                        ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, true,
-                                superType.getDeclaredSingularAttributes());
-
-                    }
-                    else if (checkSimpleId(attribute))
-                    {
-                        ((AbstractIdentifiableType<X>) managedType).addIdAttribute(singularAttribute, false, null);
-                    }
-                }
-
             }
 
+            
             /**
              * Validates that super type must be embeddable.
              * 
@@ -731,7 +740,10 @@ public final class MetaModelBuilder<X, T>
         Field[] embeddedFields = clazz.getDeclaredFields();
         for (Field f : embeddedFields)
         {
-            new TypeBuilder<T>(f).build(managedType, f.getType());
+            if(isNonTransient(f))
+            {
+                new TypeBuilder<T>(f).build(managedType, f.getType());
+            }
         }
     }
 
@@ -753,4 +765,14 @@ public final class MetaModelBuilder<X, T>
             return (AbstractManagedType<X>) managedTypes.get(clazz);
         }
     }
+
+    /**
+     * @return
+     */
+    private boolean isNonTransient(Field attribute)
+    {
+        return attribute != null && !Modifier.isStatic(attribute.getModifiers()) && !Modifier.isTransient(attribute.getModifiers())
+                && !attribute.isAnnotationPresent(Transient.class);
+    }
+
 }

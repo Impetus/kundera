@@ -50,12 +50,12 @@ public class NativeQueryResource
 {
     private static Log log = LogFactory.getLog(NativeQueryResource.class);
 
-    
     /************** Native Queries **************************/
-    
+
     /**
      * Handler for POST method requests for this resource Retrieves records from
-     * datasource for a given Native query 
+     * datasource for a given Native query
+     * 
      * @return
      */
 
@@ -66,10 +66,11 @@ public class NativeQueryResource
     {
         return executeNativeQuery(headers, info);
     }
-    
+
     /**
      * Handler for GET method requests for this resource Retrieves records from
-     * datasource for a given Native query 
+     * datasource for a given Native query
+     * 
      * @return
      */
 
@@ -80,10 +81,11 @@ public class NativeQueryResource
     {
         return executeNativeQuery(headers, info);
     }
-    
+
     /**
      * Handler for PUT method requests for this resource Retrieves records from
-     * datasource for a given Native query 
+     * datasource for a given Native query
+     * 
      * @return
      */
 
@@ -94,10 +96,11 @@ public class NativeQueryResource
     {
         return executeNativeQuery(headers, info);
     }
-    
+
     /**
-     * Handler for DELETE method requests for this resource Retrieves records from
-     * datasource for a given Native query 
+     * Handler for DELETE method requests for this resource Retrieves records
+     * from datasource for a given Native query
+     * 
      * @return
      */
 
@@ -109,13 +112,12 @@ public class NativeQueryResource
         return executeNativeQuery(headers, info);
     }
 
-    
     /************** Named Native Queries **************************/
-    
 
     /**
      * Handler for POST method requests for this resource Retrieves all entities
      * for the given named native query
+     * 
      * @return
      */
 
@@ -126,7 +128,7 @@ public class NativeQueryResource
     {
         return executeNamedNativeQuery(headers, info);
     }
-    
+
     /**
      * Handler for GET method requests for this resource Retrieves all entities
      * for the given named native query
@@ -138,7 +140,7 @@ public class NativeQueryResource
     {
         return executeNamedNativeQuery(headers, info);
     }
-    
+
     /**
      * Handler for PUT method requests for this resource Retrieves all entities
      * for the given named native query
@@ -150,10 +152,10 @@ public class NativeQueryResource
     {
         return executeNamedNativeQuery(headers, info);
     }
-    
+
     /**
-     * Handler for DELETE method requests for this resource Retrieves all entities
-     * for the given named native query
+     * Handler for DELETE method requests for this resource Retrieves all
+     * entities for the given named native query
      */
     @DELETE
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -162,10 +164,10 @@ public class NativeQueryResource
     {
         return executeNamedNativeQuery(headers, info);
     }
-    
-    
+
     /**
      * Executes Native Query and returns resposne
+     * 
      * @param headers
      * @param info
      * @return
@@ -175,11 +177,11 @@ public class NativeQueryResource
         String entityClassName = info.getPathParameters().getFirst("entityClassName");
         String nativeQueryName = info.getPathParameters().getFirst("nativeQuery");
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);  
-        
-        
-        log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName + ", Native Query:"
-                + nativeQueryName + ", Media Type:" + mediaType);
+        String mediaType = headers.getRequestHeader("accept").get(0);
+
+        if (log.isDebugEnabled())
+            log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName
+                    + ", Native Query:" + nativeQueryName + ", Media Type:" + mediaType);
 
         List result = null;
         Class<?> entityClass = null;
@@ -189,7 +191,8 @@ public class NativeQueryResource
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
             entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            log.debug("GET: entityClass" + entityClass);
+            if (log.isDebugEnabled())
+                log.debug("GET: entityClass" + entityClass);
             if (entityClass == null)
             {
                 return Response.serverError().build();
@@ -209,14 +212,16 @@ public class NativeQueryResource
             return Response.noContent().build();
         }
 
-        log.debug("GET: Media Type:" + mediaType);
+        if (log.isDebugEnabled())
+            log.debug("GET: Media Type:" + mediaType);
 
         String output = CollectionConverter.toString(result, entityClass, mediaType);
         return Response.ok(output).build();
     }
-    
+
     /**
      * Executes named native queries and returns response
+     * 
      * @param headers
      * @param info
      * @return
@@ -226,10 +231,11 @@ public class NativeQueryResource
         String entityClassName = info.getPathParameters().getFirst("entityClass");
         String namedNativeQueryName = info.getPathParameters().getFirst("namedNativeQueryName");
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);  
-        
-        log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName
-                + ", Named Native Query:" + namedNativeQueryName + ", Media Type:" + mediaType);
+        String mediaType = headers.getRequestHeader("accept").get(0);
+
+        if (log.isDebugEnabled())
+            log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName
+                    + ", Named Native Query:" + namedNativeQueryName + ", Media Type:" + mediaType);
 
         Class<?> entityClass = null;
         List result = null;
@@ -239,7 +245,8 @@ public class NativeQueryResource
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
             entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            log.debug("GET: entityClass" + entityClass);
+            if (log.isDebugEnabled())
+                log.debug("GET: entityClass" + entityClass);
             if (entityClass == null)
             {
                 return Response.serverError().build();
@@ -258,7 +265,7 @@ public class NativeQueryResource
         {
             return Response.noContent().build();
         }
-        
+
         String output = CollectionConverter.toString(result, entityClass, mediaType);
         return Response.ok(output).build();
     }

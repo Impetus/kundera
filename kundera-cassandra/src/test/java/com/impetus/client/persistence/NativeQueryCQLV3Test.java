@@ -22,12 +22,14 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,12 +50,13 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class NativeQueryCQLV3Test
 {
-    
+
     private final String schema = "kunderaexamples";
 
     /**
@@ -66,31 +69,32 @@ public class NativeQueryCQLV3Test
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        CassandraCli.dropKeySpace("KunderaExamples");
-        CassandraCli.createKeySpace(schema);
+        // CassandraCli.initClient();
+//         CassandraCli.dropKeySpace(schema);
+        // CassandraCli.createKeySpace(schema);
+        String nativeSql = "CREATE KEYSPACE " + schema
+                + " with replication = {'class':'SimpleStrategy', 'replication_factor':1}";
+//        strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1"
+        CassandraCli.executeCqlQuery(nativeSql);
     }
-    
+
     /**
      * Test create insert column family query.
      */
-    @Test
+//    @Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
-        
-        // String nativeSql = "CREATE KEYSPACE " + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        // String useNativeSql = "USE test";
+
         String useNativeSql = "USE " + schema;
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-        
+
         Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-        PelopsClient pc = (PelopsClient)clientMap.get("cassandra");
+        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
         pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        
+
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntity.class);
         // // q.getResultList();
@@ -151,7 +155,7 @@ public class NativeQueryCQLV3Test
         Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
 
     }
-    
+
     /**
      * Gets the entity manager factory.
      * 
@@ -182,25 +186,78 @@ public class NativeQueryCQLV3Test
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
         clazzToPu.put(CassandraEntity.class.getName(), pus);
+        clazzToPu.put(CassandraBatchEntity.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntity.class);
-        TableProcessor processor = new TableProcessor();
+        EntityMetadata m1 = new EntityMetadata(CassandraBatchEntity.class);
+
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntity.class, m);
+        processor.process(CassandraBatchEntity.class, m1);
+
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntity.class, m);
+        metaModel.addEntityMetadata(CassandraBatchEntity.class, m1);
+
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         return emf;
     }
-    
+
+    @Test
+    public void testCQLBatch()
+    {
+
+        String useNativeSql = "USE " + schema;
+        EntityManagerFactory emf = getEntityManagerFactory();
+        String createColumnFamily = "CREATE TABLE CassandraBatchEntity ( user_name varchar PRIMARY KEY, password varchar, name varchar)";
+        String batchOps = "BEGIN BATCH INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user2', 'ch@ngem3b', 'second user') UPDATE CassandraBatchEntity SET password = 'ps22dhds' WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password) VALUES ('user3', 'ch@ngem3c') DELETE name FROM CassandraBatchEntity WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user4', 'ch@ngem3c', 'Andrew') APPLY BATCH";
+
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
+                PersistenceContextType.EXTENDED);
+
+        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
+        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        Query q = em.createNativeQuery(useNativeSql, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+
+        pc.setConsistencyLevel(ConsistencyLevel.QUORUM);
+        q = em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+
+        pc.setConsistencyLevel(ConsistencyLevel.QUORUM);
+        q = em.createNativeQuery(batchOps, CassandraBatchEntity.class);
+        // q.getResultList();
+        q.executeUpdate();
+
+        q = em.createNativeQuery("select * from CassandraBatchEntity", CassandraBatchEntity.class);
+        List<CassandraBatchEntity> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        // Multiple table batch processing.
+
+        createColumnFamily = "create table test1 (id timeuuid primary key, url text, userid uuid, datetime timestamp, linkcounts int)";
+        em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
+        createColumnFamily = "create table test2 (key text primary key, count int)";
+        em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
+        batchOps = "BEGIN BATCH INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
+        em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
+
+    }
+
     /**
      * Tear down.
      * 

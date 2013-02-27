@@ -270,6 +270,7 @@ public abstract class DocumentIndexer implements Indexer
             Object id;
             id = PropertyAccessorHelper.getId(object, metadata);
             luceneField = new Field(ENTITY_ID_FIELD, id.toString(), Field.Store.YES, Field.Index.ANALYZED);
+            
             // luceneField.set
             // adding class
             // namespace
@@ -277,7 +278,7 @@ public abstract class DocumentIndexer implements Indexer
             document.add(luceneField);
 
             // index namespace for unique deletion
-            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), Field.Store.YES, Field.Index.NO); // adding
+            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), Field.Store.YES, Field.Index.ANALYZED); // adding
             // class
             // namespace
             // Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
@@ -294,6 +295,9 @@ public abstract class DocumentIndexer implements Indexer
             // index index name
             luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
                     Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
+            
+            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(), metadata.getIdAttribute().getName()),id.toString(),Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
         }
         catch (PropertyAccessException e)
@@ -366,7 +370,7 @@ public abstract class DocumentIndexer implements Indexer
      * 
      * @return the cannonical property name
      */
-    private String getCannonicalPropertyName(String indexName, String propertyName)
+    protected String getCannonicalPropertyName(String indexName, String propertyName)
     {
         return indexName + "." + propertyName;
     }

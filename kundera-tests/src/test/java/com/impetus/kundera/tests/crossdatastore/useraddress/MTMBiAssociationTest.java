@@ -46,7 +46,8 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 public class MTMBiAssociationTest extends TwinAssociation
 
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra",/*"addHbase",*/ "addMongo", };
+//    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*"addHbase",*/ "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","addCassandra", "addMongo"/*, "addHbase"*/};
 
     /**
      * Inits the.
@@ -229,8 +230,11 @@ public class MTMBiAssociationTest extends TwinAssociation
         Assert.assertEquals(2, addresses1.size());
         HabitatBiMToM address11 = (HabitatBiMToM) addresses1.toArray()[0];
         Assert.assertNotNull(address11);
+        Assert.assertNotNull(address11.getPeople());
+        Assert.assertFalse(address11.getPeople().isEmpty());
         HabitatBiMToM address12 = (HabitatBiMToM) addresses1.toArray()[1];
-        Assert.assertNotNull(address12);
+        Assert.assertNotNull(address12.getPeople());
+        Assert.assertFalse(address12.getPeople().isEmpty());
     }
 
     @Override

@@ -2,8 +2,6 @@ package com.impetus.client.hbase.utils;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -12,57 +10,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 
 public final class HBaseUtils
 {
-    /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseUtils.class);
-
-    /**
-     * Returns bytes value for given value.
-     * 
-     * @param fieldName
-     *            field name.
-     * @param m
-     *            entity metadata
-     * @param value
-     *            value.
-     * @return bytes value.
-     */
-//    public static byte[] getBytes(String fieldName, EntityMetadata m, Object value)
-//    {
-//        String idColName = m.getIdAttribute().getName();
-//        Field f = null;
-//        // boolean isId = false;
-//        if (idColName.equals(fieldName))
-//        {
-//            f = (Field) m.getIdAttribute().getJavaMember();
-//            // isId = true;
-//        }
-//        else
-//        {
-//            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-//                    m.getPersistenceUnit());
-//
-//            EntityType entityType = metaModel.entity(m.getEntityClazz());
-//
-//            Attribute a = entityType.getAttribute(fieldName);
-//
-//            if (a == null)
-//            {
-//                throw new QueryHandlerException("column type is null for: " + fieldName);
-//            }
-//            f = (Field) a.getJavaMember();
-//        }
-//
-//        if (f != null && f.getType() != null)
-//        {
-//            return getBytes(value, f.getType());
-//        }
-//        else
-//        {
-//            log.error("Error while handling data type for:" + fieldName);
-//            throw new QueryHandlerException("field type is null for:" + fieldName);
-//        }
-//    }
-
     /**
      * @param value
      * @param clazz
@@ -76,19 +23,19 @@ public final class HBaseUtils
         }
         else if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
         {
-            return Bytes.toBytes(Integer.parseInt(value.toString()));
+            return Bytes.toBytes(value instanceof Integer ? (Integer) value : new Integer(value.toString()));
         }
         else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
         {
-            return Bytes.toBytes(Long.parseLong(value.toString()));
+            return Bytes.toBytes(value instanceof Long ? (Long) value : new Long(value.toString()));
         }
         else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
         {
-            return Bytes.toBytes(Boolean.valueOf(value.toString()));
+            return Bytes.toBytes(value instanceof Boolean ? (Boolean) value : new Boolean(value.toString()));
         }
         else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
         {
-            return Bytes.toBytes(Double.valueOf(value.toString()));
+            return Bytes.toBytes(value instanceof Double ? (Double) value : new Double(value.toString()));
         }
         // else if (clazz.isAssignableFrom(java.util.UUID.class))
         // {
@@ -96,15 +43,15 @@ public final class HBaseUtils
         // }
         else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
         {
-            return Bytes.toBytes(Float.valueOf(value.toString()));
+            return Bytes.toBytes(value instanceof Float ? (Float) value : new Float(value.toString()));
         }
         else if (clazz.equals(short.class) || clazz.isAssignableFrom(Short.class))
         {
-            return Bytes.toBytes(Short.valueOf(value.toString()));
+            return Bytes.toBytes(value instanceof Short ? (Short) value : new Short(value.toString()));
         }
         else if (clazz.equals(BigDecimal.class))
         {
-            return Bytes.toBytes(BigDecimal.valueOf(new Long(value.toString())));
+            return Bytes.toBytes(value instanceof BigDecimal ? (BigDecimal) value : new BigDecimal(value.toString()));
         }
         else
         {
@@ -129,11 +76,11 @@ public final class HBaseUtils
      */
     public static byte[] getBytes(Object o)
     {
-        if(o != null)
+        if (o != null)
         {
             return getBytes(o, o.getClass());
         }
-        
+
         return null;
     }
 

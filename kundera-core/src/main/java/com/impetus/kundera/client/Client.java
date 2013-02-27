@@ -127,24 +127,6 @@ public interface Client<Q extends Query>
      * 
      * @param <E>
      *            Type cast
-     * @param tableName
-     *            Table/column family name.
-     * @param pKeyColumnName
-     *            Primary key column name.
-     * @param columnName
-     *            Name of column to be fetched.
-     * @param pKeyColumnValue
-     *            primary key value.
-     * @return list of values fetched for <columnName>
-     */
-    @Deprecated
-    <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue);
-
-    /**
-     * Returns List of column values for given primary key and column name.
-     * 
-     * @param <E>
-     *            Type cast
      * @param schemaName
      *            Schema/Keyspace name.
      * @param tableName
@@ -159,24 +141,6 @@ public interface Client<Q extends Query>
      */
     <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue);
-
-    /**
-     * Returns array of primary key for given column name and it's value.
-     * 
-     * @param tableName
-     *            table/column family name.
-     * @param pKeyName
-     *            primary key column name.
-     * @param columnName
-     *            column name to be used for search.
-     * @param columnValue
-     *            value for parameterised <columnName>.
-     * @param entity
-     *            class entity class
-     * @return array containing fetched primary keys.
-     */
-    @Deprecated
-    Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz);
 
     /**
      * Returns array of primary key for given column name and it's value.
@@ -198,20 +162,6 @@ public interface Client<Q extends Query>
 
     Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz);
-
-    /**
-     * Delete rows from given table for given column name and corresponding
-     * value..
-     * 
-     * @param tableName
-     *            Name of the table
-     * @param columnName
-     *            Name of the column
-     * @param columnValue
-     *            Name of column value
-     */
-    @Deprecated
-    void deleteByColumn(String tableName, String columnName, Object columnValue);
 
     /**
      * Delete rows from given table for given column name and corresponding

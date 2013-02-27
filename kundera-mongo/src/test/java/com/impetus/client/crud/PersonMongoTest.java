@@ -37,7 +37,7 @@ public class PersonMongoTest extends BaseTest
 
     private static final String _PU = "mongoTest";
 
-	/** The emf. */
+    /** The emf. */
     private static EntityManagerFactory emf;
 
     /** The em. */
@@ -94,8 +94,50 @@ public class PersonMongoTest extends BaseTest
         query.setParameter(1, "vivek");
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
+
+        query = em.createQuery("select p from PersonMongo p");
+        query.setMaxResults(2);
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        
+        selectIdQuery();
+
     }
 
+    private void selectIdQuery()
+    {
+        String query = "select p.personId from PersonMongo p";
+        Query q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+        
+        query = "Select p.personId from PersonMongo p where p.personName = vivek";
+        // // find by name.
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+        
+        q = em.createQuery("Select p.personId from PersonMongo p where p.personName = vivek and p.age > "
+                + 10);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+    }
+    
     /**
      * On typed named query.
      */
@@ -108,13 +150,12 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
-        TypedQuery<PersonMongo> query = em.createNamedQuery("mongo.named.query",PersonMongo.class);
+
+        TypedQuery<PersonMongo> query = em.createNamedQuery("mongo.named.query", PersonMongo.class);
         query.setParameter("name", "vivek");
         List<PersonMongo> results = query.getResultList();
         Assert.assertEquals(3, results.size());
     }
-    
 
     /**
      * On generic typed named query.
@@ -128,14 +169,14 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
-        TypedQuery<Object> query = em.createNamedQuery("mongo.named.query",Object.class);
+
+        TypedQuery<Object> query = em.createNamedQuery("mongo.named.query", Object.class);
         query.setParameter("name", "vivek");
         List<Object> results = query.getResultList();
         Assert.assertEquals(3, results.size());
         Assert.assertEquals(PersonMongo.class, results.get(0).getClass());
     }
-    
+
     /**
      * On invalid typed query.
      * 
@@ -149,19 +190,20 @@ public class PersonMongoTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
+
         TypedQuery<PersonBatchMongoEntity> query = null;
         try
         {
-            query = em.createNamedQuery("mongo.named.query",PersonBatchMongoEntity.class);
+            query = em.createNamedQuery("mongo.named.query", PersonBatchMongoEntity.class);
             query.setParameter("name", "vivek");
             Assert.fail("Should have gone to catch block, as it is an invalid scenario!");
-        } catch (IllegalArgumentException iaex) 
+        }
+        catch (IllegalArgumentException iaex)
         {
             Assert.assertNull(query);
         }
     }
-    
+
     /**
      * On merge mongo.
      */
@@ -206,5 +248,6 @@ public class PersonMongoTest extends BaseTest
             em.remove(val);
         }
         MongoUtils.dropDatabase(emf, _PU);
+        emf.close();
     }
 }

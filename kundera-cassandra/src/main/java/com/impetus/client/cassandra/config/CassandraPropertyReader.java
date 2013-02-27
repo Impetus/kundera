@@ -15,24 +15,21 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.config;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
-import org.apache.cassandra.locator.NetworkTopologyStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
 
 /**
@@ -64,67 +61,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         }
     }
 
-    public void onProperties(Properties properties)
-    {
-        if (properties != null)
-        {
-            log.warn("Use of properties file is Deprecated ,please use xml file instead ");
-            readKeyspaceSpecificProprerties(properties);
-            readColumnFamilySpecificProperties(properties);
-        }
-        else
-        {
-            log.warn("No property file found in class path, kundera will use default property");
-        }
-    }
-
-    /**
-     * loads column family specific properties and put into map
-     * 
-     * @param properties
-     * @param inStream
-     * @throws IOException
-     */
-    private void readColumnFamilySpecificProperties(Properties properties)
-    {
-        String cf_defs = properties.getProperty(CassandraConstants.CF_DEFS);
-        csmd.addCf_defs(cf_defs);
-    }
-
-    /**
-     * loads keyspace specific properties
-     * 
-     * @param properties
-     * @param inStream
-     * @throws IOException
-     */
-    private void readKeyspaceSpecificProprerties(Properties properties)
-    {
-
-        String placementStrategy = properties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
-        csmd.setPlacement_strategy(placementStrategy);
-
-        if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName()))
-        {
-            String replicationFactor = properties.getProperty(CassandraConstants.REPLICATION_FACTOR);
-            csmd.setReplication_factor(replicationFactor);
-        }
-        else
-        {
-            String dataCenters = properties.getProperty(CassandraConstants.DATA_CENTERS);
-            csmd.addDataCenter(dataCenters);
-        }
-
-        String invertedIndexingEnabled = properties.getProperty(CassandraConstants.INVERTED_INDEXING_ENABLED);
-        if (invertedIndexingEnabled != null)
-        {
-            if ("true".equalsIgnoreCase(invertedIndexingEnabled))
-            {
-                csmd.setInvertedIndexingEnabled(true);
-            }
-        }
-    }
-
     /**
      * Cassandra schema metadata holds metadata information.
      * 
@@ -133,43 +69,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
      */
     public class CassandraSchemaMetadata
     {
-        /**
-         * It holds all property related to columnFamily.
-         */
-        private Map<String, CassandraColumnFamilyProperties> columnFamilyProperties;
-
-        /**
-         * replication_factor will use in keyspace creation;
-         */
-        private String replication_factor = "1";
-
-        /**
-         * placement_strategy will use in keyspace creation;
-         */
-        private String placement_strategy = SimpleStrategy.class.getName();
-
-        /** Whether Inverted Indexing is enabled */
-        private boolean invertedIndexingEnabled;
-
-        /**
-         * dataCenterToNode map holds information about no of node per data
-         * center.
-         */
-        private Map<String, String> dataCentersInfo;
 
         private ClientProperties clientProperties;
-
-        /**
-         * @return the familyToProperties
-         */
-        public Map<String, CassandraColumnFamilyProperties> getColumnFamilyProperties()
-        {
-            if (columnFamilyProperties == null)
-            {
-                columnFamilyProperties = new HashMap<String, CassandraColumnFamilyProperties>();
-            }
-            return columnFamilyProperties;
-        }
 
         /**
          * @param parseXML
@@ -187,175 +88,43 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             return clientProperties;
         }
 
-        public void addCf_defs(String cf_defs)
-        {
-            if (cf_defs != null)
-            {
-                StringTokenizer cf_def = new StringTokenizer(cf_defs, ",");
-                while (cf_def.hasMoreTokens())
-                {
-                    CassandraColumnFamilyProperties familyProperties = new CassandraColumnFamilyProperties();
-                    StringTokenizer tokenizer = new StringTokenizer(cf_def.nextToken(), "|");
-                    if (tokenizer.countTokens() != 0 && tokenizer.countTokens() >= 2)
-                    {
-                        String columnFamilyName = tokenizer.nextToken();
-                        String defaultValidationClass = tokenizer.nextToken();
-                        if (validate(defaultValidationClass))
-                            familyProperties.setDefault_validation_class(defaultValidationClass);
-                        if (tokenizer.countTokens() != 0)
-                        {
-                            String comparator = tokenizer.nextToken();
-                            if (!comparator.equalsIgnoreCase(CounterColumnType.class.getSimpleName())
-                                    && validate(comparator))
-                            {
-                                familyProperties.setComparator(comparator);
-                            }
-                        }
-                        getColumnFamilyProperties().put(columnFamilyName, familyProperties);
-                    }
-                }
-            }
-        }
-
-        /**
-         * validates validators and comparators given by user in property file.
-         * 
-         * @param args
-         * @return
-         */
-        private boolean validate(String args)
-        {
-            boolean isValid = false;
-            if (CassandraValidationClassMapper.getValidatorsAndComparators().contains(args))
-            {
-                isValid = true;
-                return isValid;
-            }
-            else
-            {
-                log.warn("please provide valid default_validation_class and comparators ");
-                return isValid;
-            }
-        }
-
         /**
          * @return the replication_factor
          */
-        public String getReplication_factor()
+        public String getReplication_factor(String schemaName)
         {
-            return replication_factor;
-        }
-
-        /**
-         * @param replication_factor
-         *            the replication_factor to set
-         */
-        public void setReplication_factor(String replication_factor)
-        {
-            if (replication_factor != null)
-                this.replication_factor = replication_factor;
+            Schema schema = getSchema(schemaName);
+            String replication = "1";
+            if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
+            {
+                replication = schema.getSchemaProperties().getProperty(CassandraConstants.REPLICATION_FACTOR);
+            }
+            return replication;
         }
 
         /**
          * @return the placement_strategy
          */
-        public String getPlacement_strategy()
+        public String getPlacement_strategy(String schemaName)
         {
-            return placement_strategy;
-        }
-
-        /**
-         * @return the invertedIndexingEnabled
-         */
-        @Deprecated
-        public boolean isInvertedIndexingEnabled()
-        {
-            return invertedIndexingEnabled;
-        }
-
-        /**
-         * @param invertedIndexingEnabled
-         *            the invertedIndexingEnabled to set
-         */
-        @Deprecated
-        public void setInvertedIndexingEnabled(boolean invertedIndexingEnabled)
-        {
-            this.invertedIndexingEnabled = invertedIndexingEnabled;
-        }
-
-        /**
-         * @param placement_strategy
-         *            the placement_strategy to set
-         */
-        public void setPlacement_strategy(String placement_strategy)
-        {
-            if (placement_strategy != null)
+            Schema schema = getSchema(schemaName);
+            String placementStrategy = SimpleStrategy.class.getName();
+            if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
             {
-                if (CassandraValidationClassMapper.getReplicationStrategies().contains(placement_strategy))
-                {
-                    this.placement_strategy = placement_strategy;
-                }
-                else
-                {
-                    this.placement_strategy = SimpleStrategy.class.getName();
-                    log.warn("Give a valid replica placement strategy," + placement_strategy
-                            + "is not a valid replica placement strategy");
-                }
+                placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
             }
+            return placementStrategy;
         }
 
-        /**
-         * @return the dataCenterToNode
-         */
-        public Map<String, String> getDataCenters()
+        public boolean isCounterColumn(String schemaName, String cfName)
         {
-            if (dataCentersInfo == null)
+            Table t = getColumnFamily(schemaName, cfName);
+            if (t != null)
             {
-                dataCentersInfo = new HashMap<String, String>();
+                return t.getProperties().getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS)
+                        .equalsIgnoreCase(CounterColumnType.class.getSimpleName()) ? true : false;
             }
-            return dataCentersInfo;
-        }
-
-        public void addDataCenter(String dataCenters)
-        {
-            if (dataCenters != null)
-            {
-                StringTokenizer stk = new StringTokenizer(dataCenters, ",");
-                while (stk.hasMoreTokens())
-                {
-                    String dCName;
-                    String noOfNode;
-                    String[] token = { "dCName", "noOfNode" };
-                    Map<String, String> dataCeneter = new HashMap<String, String>();
-                    StringTokenizer tokenizer = new StringTokenizer(stk.nextToken(), ":");
-
-                    int count = 0;
-                    while (tokenizer.hasMoreTokens())
-                    {
-                        dataCeneter.put(token[count++], tokenizer.nextToken());
-                    }
-                    dCName = dataCeneter.get(token[0]);
-                    noOfNode = dataCeneter.get(token[1]);
-                    if (dCName != null && noOfNode != null)
-                    {
-                        getDataCenters().put(dCName, noOfNode);
-                    }
-                    else
-                    {
-                        log.warn("You have choosen placement strategy : "
-                                + NetworkTopologyStrategy.class.getSimpleName()
-                                + " but not provided datacenters information, kundera will use default property ");
-                        return;
-                    }
-                }
-            }
-        }
-
-        public boolean isCounterColumn(String cfName)
-        {
-            return getColumnFamilyProperties().containsKey(cfName)
-                    && getColumnFamilyProperties().get(cfName).getDefault_validation_class()
-                            .equalsIgnoreCase(CounterColumnType.class.getSimpleName()) ? true : false;
+            return false;
         }
 
         public DataStore getDataStore()
@@ -380,7 +149,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 for (Schema schema : getDataStore().getSchemas())
                 {
-                    if (schema != null && schemaName.equals(schema.getName()))
+                    if (schema != null && schemaName.equals(schema.getName()) && schema.getSchemaProperties() != null
+                            && schema.getSchemaProperties() != null)
                     {
                         result = Boolean.parseBoolean((String) schema.getSchemaProperties().get(
                                 CassandraConstants.INVERTED_INDEXING_ENABLED));
@@ -388,7 +158,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-
             return result;
         }
 
@@ -416,7 +185,42 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            return CassandraConstants.CQL_VERSION_2_0;
+            return CassandraConstants.CQL_VERSION_3_0;
+        }
+
+        public Schema getSchema(String schemaName)
+        {
+            if (getDataStore() != null)
+            {
+                List<Schema> schemas = getDataStore().getSchemas();
+                if (schemas != null && !schemas.isEmpty())
+                {
+                    for (Schema s : schemas)
+                    {
+                        if (s != null && s.getName() != null && s.getName().equalsIgnoreCase(schemaName))
+                        {
+                            return s;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public Table getColumnFamily(String schemaName, String cfName)
+        {
+            Schema schema = getSchema(schemaName);
+            if (schema != null && schema.getTables() != null)
+            {
+                for (Table t : schema.getTables())
+                {
+                    if (t != null && t.getName() != null && t.getName().equalsIgnoreCase(cfName))
+                    {
+                        return t;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

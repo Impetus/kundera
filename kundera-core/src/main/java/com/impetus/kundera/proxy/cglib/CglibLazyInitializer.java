@@ -357,6 +357,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             }
             else
             {
+                if(log.isDebugEnabled())
                 log.debug("Proxy >> Initialization >> " + persistentClass.getName() + "_" + id);
 
                 // TODO: consider not calling em.find from here. Not sure 'why',

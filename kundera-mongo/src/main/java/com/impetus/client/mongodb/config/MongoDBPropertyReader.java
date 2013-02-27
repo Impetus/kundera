@@ -15,14 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.mongodb.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,7 +28,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
-import com.mongodb.ReadPreference;
 
 /**
  * Mongo Property Reader reads mongo properties from property file
@@ -64,21 +57,6 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
         }
     }
 
-    public void onProperties(Properties properties)
-    {
-        if (properties != null)
-        {
-            log.warn("Use of properties file is Deprecated ,please use xml file instead ");
-            msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
-            msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
-            msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
-        }
-        else
-        {
-            log.warn("No property file found in class path, kundera will use default property");
-        }
-    }
-
     /**
      * MongoDBSchemaMetadata class holds property related to metadata
      * 
@@ -87,17 +65,6 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
      */
     public class MongoDBSchemaMetadata
     {
-
-        private static final String READ_PREFERENCE_SECONDARY = "secondary";
-
-        private static final String READ_PREFERENCE_PRIMARY = "primary";
-
-        private List<MongoDBConnection> connections;
-
-        private int socketTimeout = 0;
-
-        private ReadPreference preference = ReadPreference.PRIMARY;
-
         private ClientProperties clientProperties;
 
         public MongoDBSchemaMetadata()
@@ -120,185 +87,6 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
         private void setClientProperties(ClientProperties clientProperties)
         {
             this.clientProperties = clientProperties;
-        }
-
-        private MongoDBSchemaMetadata(final String connectionStr)
-        {
-            String[] tokens = { "host", "port" };
-            Map<String, String> hostPort = new HashMap<String, String>();
-            // parse connectionStr
-            StringTokenizer connections = new StringTokenizer(connectionStr, ",");
-            while (connections.hasMoreTokens())
-            {
-                StringTokenizer connection = new StringTokenizer(connections.nextToken(), ":");
-                int count = 0;
-                while (connection.hasMoreTokens())
-                {
-                    hostPort.put(tokens[count++], connection.nextToken());
-                }
-                addConnection(hostPort.get(tokens[0]), hostPort.get(tokens[1]));
-            }
-        }
-
-        private void addConnection(String host, String port)
-        {
-            if (connections == null)
-            {
-                connections = new ArrayList<MongoDBPropertyReader.MongoDBSchemaMetadata.MongoDBConnection>();
-            }
-            MongoDBConnection connection = null;
-            if (host != null && port != null)
-            {
-                connection = new MongoDBConnection(host, port);
-            }
-            else
-            {
-                // TODO
-                return;
-            }
-
-            if (connection != null && !connections.contains(connection))
-            {
-                connections.add(connection);
-            }
-        }
-
-        /**
-         * @return the connections
-         */
-        public List<MongoDBConnection> getConnections()
-        {
-            return connections;
-        }
-
-        /**
-         * @return the timeOut
-         */
-        public int getSocketTimeOut()
-        {
-            return socketTimeout;
-        }
-
-        /**
-         * @param timeOut
-         *            the timeOut to set
-         */
-        private void setSocketTimeOut(String timeOut)
-        {
-            try
-            {
-                if (timeOut != null)
-                {
-                    this.socketTimeout = Integer.parseInt(timeOut);
-                }
-            }
-            catch (NumberFormatException nfe)
-            {
-                log.warn("socket timeout should be numeric");
-            }
-        }
-
-        /**
-         * @return the preference
-         */
-        public ReadPreference getReadPreference()
-        {
-            return preference;
-        }
-
-        /**
-         * @param preference
-         *            the preference to set
-         */
-        private void setReadPreference(String preference)
-        {
-            if (preference != null)
-            {
-                if (preference.equalsIgnoreCase(READ_PREFERENCE_PRIMARY))
-                {
-                    this.preference = ReadPreference.PRIMARY;
-                }
-                else if (preference.equalsIgnoreCase(READ_PREFERENCE_SECONDARY))
-                {
-                    this.preference = ReadPreference.SECONDARY;
-                }
-                else
-                {
-                    log.warn("Incorrect Read Preference specified. Only primary/ secondary allowed");
-                }
-            }
-        }
-
-        /**
-         * MongoDBCOnnection class
-         * 
-         * @author kuldeep.mishra
-         * 
-         */
-        public class MongoDBConnection
-        {
-            private String host;
-
-            private String port;
-
-            MongoDBConnection(String host, String port)
-            {
-                this.host = host;
-                this.port = port;
-            }
-
-            /**
-             * @return the host
-             */
-            public String getHost()
-            {
-                return host;
-            }
-
-            /**
-             * @return the port
-             */
-            public String getPort()
-            {
-                return port;
-            }
-
-            @Override
-            public boolean equals(Object o)
-            {
-                if (o == null)
-                {
-                    return false;
-                }
-
-                if (!(o instanceof MongoDBConnection))
-                {
-                    return false;
-                }
-
-                MongoDBConnection connection = (MongoDBConnection) o;
-                if (connection.host != null && connection.host.equals(this.host) && connection.port != null
-                        && connection.port.equals(this.port))
-                {
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public int hashCode()
-            {
-                return HashCodeBuilder.reflectionHashCode(this.host + this.port);
-            }
-
-            @Override
-            public String toString()
-            {
-                StringBuilder builder = new StringBuilder(host);
-                builder.append(":");
-                builder.append(port);
-                return builder.toString();
-            }
         }
 
         public DataStore getDataStore()

@@ -38,7 +38,6 @@ import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -65,7 +64,7 @@ public class HBaseSchemaOperationTest
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
-    private final boolean useLucene = true;
+    private final boolean useLucene = false;
 
     private static HBaseAdmin admin;
 
@@ -83,7 +82,7 @@ public class HBaseSchemaOperationTest
         cli.startCluster();
         if (admin == null)
         {
-            admin = cli.utility.getHBaseAdmin();
+            admin = HBaseCli.utility.getHBaseAdmin();
         }
     }
 
@@ -93,7 +92,7 @@ public class HBaseSchemaOperationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration("HBaseSchemaOperationTest");
+        configuration = new SchemaConfiguration(null, "HBaseSchemaOperationTest");
 
     }
 
@@ -103,7 +102,7 @@ public class HBaseSchemaOperationTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        cli.stopCluster();
+        HBaseCli.stopCluster();
 
         // admin = null;
     }
@@ -116,7 +115,7 @@ public class HBaseSchemaOperationTest
     {
         // schemaManager.dropSchema();
         // HBaseCli.stopCluster();
-        // admin= null;
+        // admin = null;
     }
 
     @Test
@@ -127,15 +126,12 @@ public class HBaseSchemaOperationTest
 
         HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
         Assert.assertNotNull(descriptor.getFamilies());
-        Assert.assertEquals(2, descriptor.getFamilies().size());
-        List<String> columns = new ArrayList<String>();
-        columns.add("AGE");
-        columns.add("PERSON_NAME");
+        Assert.assertEquals(1, descriptor.getFamilies().size());
         for (HColumnDescriptor columnDescriptor : descriptor.getFamilies())
         {
             Assert.assertNotNull(columnDescriptor);
             Assert.assertNotNull(columnDescriptor.getNameAsString());
-            Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
+            Assert.assertEquals("HbaseEntitySimple", columnDescriptor.getNameAsString());
         }
 
         admin.disableTable(HBASE_ENTITY_SIMPLE);
@@ -152,17 +148,14 @@ public class HBaseSchemaOperationTest
 
         HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
         Assert.assertNotNull(descriptor.getFamilies());
-        Assert.assertEquals(2, descriptor.getFamilies().size());
-        List<String> columns = new ArrayList<String>();
-        columns.add("AGE");
-        columns.add("PERSON_NAME");
+        Assert.assertEquals(1, descriptor.getFamilies().size());
         for (HColumnDescriptor columnDescriptor : descriptor.getFamilies())
         {
             Assert.assertNotNull(columnDescriptor);
             Assert.assertNotNull(columnDescriptor.getNameAsString());
-            Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
+            Assert.assertEquals("HbaseEntitySimple", columnDescriptor.getNameAsString());
         }
-        ClientResolver.getClientFactory(persistenceUnit).getSchemaManager().dropSchema();
+        ((HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit, null)).destroy();
         Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
     }
 
@@ -190,7 +183,7 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("update");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
@@ -199,7 +192,7 @@ public class HBaseSchemaOperationTest
         Assert.assertNotNull(descriptor.getFamilies());
         Assert.assertEquals(2, descriptor.getFamilies().size());
         List<String> columns = new ArrayList<String>();
-        columns.add("AGE");
+        columns.add("HbaseEntitySimple");
         columns.add("PERSON_NAME");
         for (HColumnDescriptor columnDescriptor : descriptor.getFamilies())
         {
@@ -221,10 +214,8 @@ public class HBaseSchemaOperationTest
     public void testValidate() throws IOException
     {
         HTableDescriptor descriptor1 = new HTableDescriptor(HBASE_ENTITY_SIMPLE);
-        HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("PERSON_NAME");
+        HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("HbaseEntitySimple");
         descriptor1.addFamily(columnDescriptor1);
-        HColumnDescriptor columnDescriptor2 = new HColumnDescriptor("AGE");
-        descriptor1.addFamily(columnDescriptor2);
         if (admin.isTableAvailable(HBASE_ENTITY_SIMPLE))
         {
             admin.disableTable(HBASE_ENTITY_SIMPLE);
@@ -235,10 +226,9 @@ public class HBaseSchemaOperationTest
         Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
         HTableDescriptor descriptor2 = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
         Assert.assertNotNull(descriptor2.getFamilies());
-        Assert.assertEquals(2, descriptor2.getFamilies().size());
+        Assert.assertEquals(1, descriptor2.getFamilies().size());
         List<String> columns = new ArrayList<String>();
-        columns.add("AGE");
-        columns.add("PERSON_NAME");
+        columns.add("HbaseEntitySimple");
         for (HColumnDescriptor columnDescriptor : descriptor2.getFamilies())
         {
             Assert.assertNotNull(columnDescriptor);
@@ -247,7 +237,7 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("validate");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
         schemaManager.exportSchema();
         if (!admin.isTableDisabled(HBASE_ENTITY_SIMPLE))
         {
@@ -263,7 +253,7 @@ public class HBaseSchemaOperationTest
         try
         {
             HTableDescriptor descriptor1 = new HTableDescriptor(HBASE_ENTITY_SIMPLE);
-            HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("PERSON_NAME");
+            HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("HbaseEntitySimple");
             descriptor1.addFamily(columnDescriptor1);
             if (admin.isTableAvailable(HBASE_ENTITY_SIMPLE))
             {
@@ -279,11 +269,11 @@ public class HBaseSchemaOperationTest
             {
                 Assert.assertNotNull(columnDescriptor);
                 Assert.assertNotNull(columnDescriptor.getNameAsString());
-                Assert.assertEquals("PERSON_NAME", columnDescriptor.getNameAsString());
+                Assert.assertEquals("HbaseEntitySimple", columnDescriptor.getNameAsString());
             }
 
             getEntityManagerFactory("validate");
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
             schemaManager.exportSchema();
         }
         catch (SchemaGenerationException sgex)
@@ -327,6 +317,7 @@ public class HBaseSchemaOperationTest
             clientMetadata.setLuceneIndexDir(null);
         }
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         // appMetadata = null;
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
@@ -335,7 +326,8 @@ public class HBaseSchemaOperationTest
         p.putAll(props);
         puMetadata.setProperties(p);
         Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("HBaseSchemaOperationTest", puMetadata);
+        metadata.put(persistenceUnit, null);
+        metadata.put(persistenceUnit, puMetadata);
         appMetadata.addPersistenceUnitMetadata(metadata);
 
         Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
@@ -348,7 +340,7 @@ public class HBaseSchemaOperationTest
 
         EntityMetadata m = new EntityMetadata(HBaseEntitySimple.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(HBaseEntitySimple.class, m);
 
         m.setPersistenceUnit(persistenceUnit);
@@ -364,9 +356,10 @@ public class HBaseSchemaOperationTest
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
-        String[] persistenceUnits = { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        // String[] persistenceUnits = { persistenceUnit };
         configuration.configure();
+        // new ClientFactoryConfiguraton(null, persistenceUnits).configure();
+
         return null;
     }
 }

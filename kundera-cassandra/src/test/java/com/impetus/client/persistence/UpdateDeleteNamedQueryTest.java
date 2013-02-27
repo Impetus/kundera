@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -26,6 +28,14 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
+import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +68,49 @@ public class UpdateDeleteNamedQueryTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
+//        CassandraCli.createKeySpace("KunderaExamples");
+
+        loadData();
+    }
+
+    /**
+     * @throws TException
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * 
+     */
+    private void loadData() throws InvalidRequestException, TException, SchemaDisagreementException
+    {
+        KsDef ksDef = null;
+        CfDef user_Def = new CfDef();
+        user_Def.name = "users";
+        user_Def.keyspace = "KunderaExamples";
+        user_Def.setComparator_type("UTF8Type");
+        user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("birth_date".getBytes()), "IntegerType");
+        columnDef.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef);
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("state".getBytes()), "UTF8Type");
+        columnDef1.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef1);
+
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("full_name".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef2);
+
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        cfDefs.add(user_Def);
+
+        ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+        // Set replication factor
+        if (ksDef.strategy_options == null)
+        {
+            ksDef.strategy_options = new LinkedHashMap<String, String>();
+        }
+        // Set replication factor, the value MUST be an integer
+        ksDef.strategy_options.put("replication_factor", "1");
+        CassandraCli.client.system_add_keyspace(ksDef);
     }
 
     @Test
@@ -66,20 +118,20 @@ public class UpdateDeleteNamedQueryTest
     {
         EntityManager em = getEntityManagerFactory().createEntityManager();
 
-        String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
-        Query q1 = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
-        q1.executeUpdate();
-
-        String idxSql = "CREATE INDEX ON users (birth_date)";
-        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        q1.executeUpdate();
-
-        idxSql = "CREATE INDEX ON users (state)";
-        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        q1.executeUpdate();
+//        String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
+//        Query q1 = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
+//        q1.executeUpdate();
+//
+//        String idxSql = "CREATE INDEX ON users (birthDate)";
+//        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+//        q1.executeUpdate();
+//
+//        idxSql = "CREATE INDEX ON users (state)";
+//        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+//        q1.executeUpdate();
 
         CassandraEntitySample entity = new CassandraEntitySample();
-        entity.setBirth_date(100112);
+        entity.setBirth_date(new Integer(100112));
         entity.setFull_name("impetus_emp");
         entity.setKey("k");
         entity.setState("UP");
@@ -130,7 +182,7 @@ public class UpdateDeleteNamedQueryTest
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+                "com.impetus.client.cassandra.thrift.ThriftClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
@@ -153,7 +205,7 @@ public class UpdateDeleteNamedQueryTest
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySample.class, m);
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
@@ -168,7 +220,7 @@ public class UpdateDeleteNamedQueryTest
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
         String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

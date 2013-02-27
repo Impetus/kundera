@@ -17,10 +17,16 @@ package com.impetus.kundera.metadata.processor.relation;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.MapKeyClass;
+import javax.persistence.MapKeyJoinColumn;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -51,21 +57,71 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
-        ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
-
-        Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
-        // now, check annotations
-        if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
+        ManyToMany m2mAnnotation = relationField.getAnnotation(ManyToMany.class);
+        
+        boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
+        boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
+        boolean isJoinedByMap = false;
+        if(m2mAnnotation != null && relationField.getType().isAssignableFrom(Map.class))
         {
-            targetEntity = ann.targetEntity();
+            /*if(! relationField.isAnnotationPresent(MapKeyJoinColumn.class))
+            {
+                throw new InvalidEntityDefinitionException("All @ManyToMany relationship whose field type is Map, must be annotated with @MapKeyJoinColumn");
+            }*/
+            isJoinedByMap = true;
+        }        
+
+        Class<?> targetEntity = null;
+        Class<?> mapKeyClass = null;
+        
+        if(! isJoinedByMap)
+        {           
+            
+            targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
+        } 
+        else
+        {
+            List<Class<?>> genericClasses = PropertyAccessorHelper.getGenericClasses(relationField);            
+            
+            if(! genericClasses.isEmpty() && genericClasses.size() == 2)
+            {
+                mapKeyClass = genericClasses.get(0);
+                targetEntity = genericClasses.get(1);
+            }
+            
+            MapKeyClass mapKeyClassAnn = relationField.getAnnotation(MapKeyClass.class);           
+            
+            //Check for Map key class specified at annotation            
+            if (mapKeyClass == null && mapKeyClassAnn != null && mapKeyClassAnn.value() != null && ! mapKeyClassAnn.value().getSimpleName().equals("void"))
+            {
+                mapKeyClass = mapKeyClassAnn.value();
+            }
+            
+            if(mapKeyClass == null)
+            {
+                throw new InvalidEntityDefinitionException("For a Map relationship field," +
+                		" it is mandatory to specify Map key class either using @MapKeyClass annotation or through generics");
+            }
+            
+        }
+            
+        // Check for target class specified at annotation
+        if (targetEntity == null && null != m2mAnnotation.targetEntity() && !m2mAnnotation.targetEntity().getSimpleName().equals("void"))
+        {
+            targetEntity = m2mAnnotation.targetEntity();
+        }
+        
+        if(targetEntity == null)
+        {
+            throw new InvalidEntityDefinitionException("Could not determine target entity class for relationship." +
+            		" It should either be specified using targetEntity attribute of @ManyToMany or through generics");
         }
 
         validate(targetEntity);
-        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
-                Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
+        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), m2mAnnotation.fetch(),
+                Arrays.asList(m2mAnnotation.cascade()), Boolean.TRUE, m2mAnnotation.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
 
-        boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
-        boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
+        
 
         if (isJoinedByFK)
         {
@@ -73,18 +129,40 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
                     "@JoinColumn not allowed for ManyToMany relationship. Use @JoinTable instead");
 
         }
-        else if (isJoinedByTable)
+        
+        if (isJoinedByTable)
         {
             JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
 
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
         }
-        else if (relation.getMappedBy() == null || relation.getMappedBy().isEmpty())
+        
+        if(isJoinedByMap)
+        {
+            relation.setMapKeyJoinClass(mapKeyClass);
+            
+            MapKeyJoinColumn mapKeyJoinColumnAnn = relationField.getAnnotation(MapKeyJoinColumn.class);
+            if(mapKeyJoinColumnAnn != null)
+            {
+                String mapKeyJoinColumnName = mapKeyJoinColumnAnn.name();
+                if (!StringUtils.isEmpty(mapKeyJoinColumnName))
+                {
+                    relation.setJoinColumnName(mapKeyJoinColumnName);
+                }
+                else
+                {
+                    throw new InvalidEntityDefinitionException("It's mandatory to specify name attribute with @MapKeyJoinColumn annotation");
+                }
+            }
+            
+        }
+        
+        else if (!isJoinedByTable && ! isJoinedByMap && (relation.getMappedBy() == null || relation.getMappedBy().isEmpty()))
         {
             throw new InvalidEntityDefinitionException(
                     "It's manadatory to use @JoinTable with parent side of ManyToMany relationship.");
-        }
+        }       
 
         metadata.addRelation(relationField.getName(), relation);
 

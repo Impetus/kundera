@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +33,10 @@ import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
 /**
  * The Class BaseMetadataProcessor.
@@ -102,11 +107,37 @@ public class IndexProcessor implements MetadataProcessor
         log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
 
         // scan for fields
+        
+        EntityType entityType  = (EntityType) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
+        
+        Set<Attribute> attributes = entityType.getAttributes();
+        for(Attribute attrib : attributes)
+        {
+            if(!attrib.isAssociation())
+            {
+                String colName = attrib.getName();
+                if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty()
+                        && indexedColumnsMap.containsKey(colName))
+                {
+                    com.impetus.kundera.index.Index indexedColumn = indexedColumnsMap.get(colName);
+                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute)attrib).getJPAColumnName(), indexedColumn.type(),
+                            indexedColumn.max(), indexedColumn.min(), (Field)attrib.getJavaMember()));
+                    
+                } else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
+                        && columnsNameToBeIndexed.contains(colName))
+                {
+                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute)attrib).getJPAColumnName(), null, null, null, (Field)attrib.getJavaMember()));
+                }
+            }
+            
+        }
+        /*
         for (Field f : clazz.getDeclaredFields())
         {
             if (f.isAnnotationPresent(Column.class))
             {
                 String fieldName = f.getName();
+                String colName = getIndexName(f, fieldName);
                 if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty()
                         && indexedColumnsMap.containsKey(fieldName))
                 {
@@ -115,12 +146,12 @@ public class IndexProcessor implements MetadataProcessor
                             indexedColumn.max(), indexedColumn.min(), f));
                 }
                 else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
-                        && columnsNameToBeIndexed.contains(fieldName))
+                        && columnsNameToBeIndexed.contains(colName))
                 {
                     metadata.addIndexProperty(populatePropertyIndex(fieldName, null, null, null, f));
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -213,4 +244,26 @@ public class IndexProcessor implements MetadataProcessor
         }
     }
 
+    /**
+     * Gets the index name.
+     * 
+     * @param f
+     *            the f
+     * @param alias
+     *            the alias
+     * @return the index name
+     */
+    private String getIndexName(Field f, String alias)
+    {
+        if (f.isAnnotationPresent(Column.class))
+        {
+            Column c = f.getAnnotation(Column.class);
+            alias = c.name().trim();
+            if (alias.isEmpty())
+            {
+                alias = f.getName();
+            }
+        }
+        return alias;
+    }
 }

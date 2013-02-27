@@ -83,6 +83,7 @@ public class ApplicationMetadata
         }
         else
         {
+            if(logger.isDebugEnabled())
             logger.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
                     + clazz + ". Noting needs to be done");
         }
@@ -361,7 +362,6 @@ public class ApplicationMetadata
      */
     public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
     {
-
         if (metaModelBuilder.containsKey(persistenceUnit))
         {
             return metaModelBuilder.get(persistenceUnit);
@@ -374,4 +374,16 @@ public class ApplicationMetadata
         }
     }
 
+    /**
+     * 
+     */
+    public void unloadApplicationMatadata(final String pu)
+    {
+        this.metamodelMap.remove(pu);
+        this.metaModelBuilder.remove(pu);
+        this.namedNativeQueries = null;
+        this.clazzToPuMap = null;
+        this.persistenceUnitMetadataMap.remove(pu);
+        this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
+    }
 }

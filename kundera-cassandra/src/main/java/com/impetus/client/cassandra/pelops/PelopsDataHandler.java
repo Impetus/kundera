@@ -52,11 +52,23 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /** The log. */
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
+    /** Holds external properties */
+    private Map<String, Object> externalProperty;
+
+    /**
+     * @param externalProperties
+     */
+    public PelopsDataHandler(Map<String, Object> externalProperties)
+    {
+        this.externalProperty = externalProperties;
+    }
+
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit()));
+        Selector selector = Pelops
+                .createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit(), externalProperty));
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 

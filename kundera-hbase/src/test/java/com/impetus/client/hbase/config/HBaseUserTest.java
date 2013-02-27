@@ -4,6 +4,8 @@
 package com.impetus.client.hbase.config;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -46,7 +48,7 @@ public class HBaseUserTest
     {
         cli = new HBaseCli();
         cli.startCluster();
-        emf = Persistence.createEntityManagerFactory("XmlPropertyTest");
+
     }
 
     /**
@@ -55,32 +57,22 @@ public class HBaseUserTest
     @After
     public void tearDown() throws Exception
     {
-        cli.dropTable("USERXYZ");
-        emf.close();
+
     }
 
     @Test
-    public void test()
+    public void test() throws IOException
     {
+        emf = Persistence.createEntityManagerFactory("XmlPropertyTest");
         try
         {
             HTableDescriptor hTableDescriptor = HBaseCli.utility.getHBaseAdmin().getTableDescriptor(
-                    "USERXYZ".getBytes());
+                    "HBASEUSERXYZ".getBytes());
             int count = 0;
             for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
             {
-                if (columnDescriptor.getNameAsString().equalsIgnoreCase("address"))
+                if (columnDescriptor.getNameAsString().equalsIgnoreCase("HBASEUSERXYZ"))
                 {
-                    Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompactionCompressionType());
-                    Assert.assertEquals(Integer.parseInt("1234567"), columnDescriptor.getTimeToLive());
-                    Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompressionType());
-                    Assert.assertEquals(Integer.parseInt("5"), columnDescriptor.getMaxVersions());
-                    Assert.assertEquals(Integer.parseInt("2"), columnDescriptor.getMinVersions());
-                    count++;
-                }
-                else
-                {
-                    Assert.assertEquals("age", columnDescriptor.getNameAsString());
                     Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompactionCompressionType());
                     Assert.assertEquals(Integer.parseInt("12345678"), columnDescriptor.getTimeToLive());
                     Assert.assertEquals(Algorithm.valueOf("GZ"), columnDescriptor.getCompressionType());
@@ -89,7 +81,7 @@ public class HBaseUserTest
                     count++;
                 }
             }
-            Assert.assertEquals(2, count);
+            Assert.assertEquals(1, count);
         }
         catch (TableNotFoundException tnfe)
         {
@@ -99,5 +91,33 @@ public class HBaseUserTest
         {
             logger.error("Error during UserTest, caused by :" + ie);
         }
+        finally
+        {
+            emf.close();
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
+            cli.dropTable("HBASEUSERXYZ");
+        }
+    }
+
+    @Test
+    public void testUsingExternalProperty() throws IOException
+    {
+        Map<String, String> puProperties = new HashMap<String, String>();
+        puProperties.put("kundera.ddl.auto.prepare", "create-drop");
+        puProperties.put("kundera.keyspace", "KunderaHbaseKeyspace");
+        emf = Persistence.createEntityManagerFactory("XmlPropertyTest", puProperties);
+        try
+        {
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
+        }
+        catch (TableNotFoundException tnfe)
+        {
+            logger.error("Error during UserTest, caused by :" + tnfe);
+        }
+        catch (IOException ie)
+        {
+            logger.error("Error during UserTest, caused by :" + ie);
+        }
+        emf.close();
     }
 }

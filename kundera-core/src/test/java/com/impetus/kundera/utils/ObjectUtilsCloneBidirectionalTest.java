@@ -309,7 +309,7 @@ public class ObjectUtilsCloneBidirectionalTest
         EntityMetadata m12 = new EntityMetadata(AlbumBi_1_M_1_M.class);
         EntityMetadata m13 = new EntityMetadata(PhotoBi_1_M_1_M.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(Store.class, m);
         processor.process(BillingCounter.class, m1);
         processor.process(PhotographerBi_1_M_1_M.class, m11);

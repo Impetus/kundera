@@ -20,9 +20,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.impetus.client.crud.PersonCassandra.Day;
-
 import junit.framework.Assert;
+
+import com.impetus.client.crud.PersonCassandra.Day;
 
 /**
  * The Class BaseTest.

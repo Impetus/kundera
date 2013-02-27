@@ -80,7 +80,7 @@ public class CassandraSchemaManagerValidateEntityTest
         getEntityManagerFactory();
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
-        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         boolean valid = manager.validateEntity(ValidCounterColumnFamily.class);
         Assert.assertTrue(valid);
         valid = manager.validateEntity(InvalidCounterColumnEntity.class);
@@ -102,7 +102,7 @@ public class CassandraSchemaManagerValidateEntityTest
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCounterColumn");
-        props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, "kundera-cassandra.properties");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, "kunderaTest.xml");
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
 
@@ -127,7 +127,7 @@ public class CassandraSchemaManagerValidateEntityTest
         EntityMetadata m = new EntityMetadata(ValidCounterColumnFamily.class);
         EntityMetadata m1 = new EntityMetadata(InvalidCounterColumnEntity.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(ValidCounterColumnFamily.class, m);
         processor.process(InvalidCounterColumnEntity.class, m1);
         m.setPersistenceUnit(persistenceUnit);

@@ -62,14 +62,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -109,7 +107,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
 
     /** The cql version. */
-    private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
+    private String cqlVersion = CassandraConstants.CQL_VERSION_3_0;
 
     /** The consistency level. */
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
@@ -123,17 +121,21 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
+    protected Map<String, Object> externalProperties;
+
     /**
      * constructor using fields.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param externalProperties
      */
-    protected CassandraClientBase(String persistenceUnit)
+    protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        batchSize = puMetadata.getBatchSize();
+        this.externalProperties = externalProperties;
+        setBatchSize(persistenceUnit, this.externalProperties);
         cqlVersion = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
-                : CassandraConstants.CQL_VERSION_2_0;
+                : CassandraConstants.CQL_VERSION_3_0;
     }
 
     /**
@@ -160,11 +162,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * On counter column.
-     *
-     * @param m the m
-     * @param isRelation the is relation
-     * @param relations the relations
-     * @param ks the ks
+     * 
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
+     * @param ks
+     *            the ks
      * @return the list
      */
     protected List<Object> onCounterColumn(EntityMetadata m, boolean isRelation, List<String> relations,
@@ -176,9 +182,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
                     .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
             entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
-
-            // populateDataForSuperCounter(m, qCounterSuperColumnResults,
-            // entities, isRelation, relations);
 
             for (Bytes key : qCounterSuperColumnResults.keySet())
             {
@@ -197,8 +200,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     ColumnOrSuperColumnHelper.COUNTER_COLUMN);
             entities = new ArrayList<Object>(qCounterColumnResults.size());
 
-            // populateDataForCounter(m, qCounterColumnResults, entities,
-            // isRelation, relations, dataHandler);
             for (Bytes key : qCounterColumnResults.keySet())
             {
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
@@ -213,12 +214,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Compute entity via columns.
-     *
-     * @param m the m
-     * @param isRelation the is relation
-     * @param relations the relations
-     * @param entities the entities
-     * @param qResults the q results
+     * 
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
+     * @param entities
+     *            the entities
+     * @param qResults
+     *            the q results
      */
     protected void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<Column>> qResults)
@@ -240,12 +246,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Compute entity via super columns.
-     *
-     * @param m the m
-     * @param isRelation the is relation
-     * @param relations the relations
-     * @param entities the entities
-     * @param qResults the q results
+     * 
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
+     * @param entities
+     *            the entities
+     * @param qResults
+     *            the q results
      */
     protected void computeEntityViaSuperColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<SuperColumn>> qResults)
@@ -269,10 +280,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Adds relation foreign key values as thrift column/ value to thrift row.
-     *
-     * @param metadata the metadata
-     * @param tf the tf
-     * @param relations the relations
+     * 
+     * @param metadata
+     *            the metadata
+     * @param tf
+     *            the tf
+     * @param relations
+     *            the relations
      */
     protected void addRelationsToThriftRow(EntityMetadata metadata, ThriftRow tf, List<RelationHolder> relations)
     {
@@ -288,18 +302,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                 if (linkName != null && linkValue != null)
                 {
-                    // if (metadata.getEmbeddedColumnsAsList().isEmpty())
-                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty()/*
-                                                                                      * metadata
-                                                                                      * .
-                                                                                      * getEmbeddedColumnsAsList
-                                                                                      * (
-                                                                                      * )
-                                                                                      * .
-                                                                                      * isEmpty
-                                                                                      * (
-                                                                                      * )
-                                                                                      */)
+                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty())
                     {
                         if (metadata.isCounterColumnType())
                         {
@@ -339,9 +342,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Populate counter fkey.
-     *
-     * @param rlName the rl name
-     * @param rlValue the rl value
+     * 
+     * @param rlName
+     *            the rl name
+     * @param rlValue
+     *            the rl value
      * @return the counter column
      */
     private CounterColumn populateCounterFkey(String rlName, Object rlValue)
@@ -354,50 +359,53 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Deletes record for given primary key from counter column family.
-     *
-     * @param pKey the key
-     * @param metadata the metadata
-     * @param consistencyLevel the consistency level
+     * 
+     * @param pKey
+     *            the key
+     * @param metadata
+     *            the metadata
+     * @param consistencyLevel
+     *            the consistency level
      */
     protected void deleteRecordFromCounterColumnFamily(Object pKey, EntityMetadata metadata,
             ConsistencyLevel consistencyLevel)
     {
         ColumnPath path = new ColumnPath(metadata.getTableName());
 
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
         try
         {
-            conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
-            Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(metadata.getSchema());
-            cassandra_client.remove_counter(
-                    (CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(), path,
-                    consistencyLevel);
+            pooledConnection = getPooledConection(metadata.getPersistenceUnit());
+            conn = getConnection(pooledConnection);
+
+            conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
+                    path, consistencyLevel);
 
         }
         catch (InvalidRequestException ire)
         {
-            log.error("Error during executing delete, Caused by :" + ire.getMessage());
+            log.error("Error during executing delete, Caused by :" + ire);
             throw new PersistenceException(ire);
         }
         catch (UnavailableException ue)
         {
-            log.error("Error during executing delete, Caused by :" + ue.getMessage());
+            log.error("Error during executing delete, Caused by :" + ue);
             throw new PersistenceException(ue);
         }
         catch (TimedOutException toe)
         {
-            log.error("Error during executing delete, Caused by :" + toe.getMessage());
+            log.error("Error during executing delete, Caused by :" + toe);
             throw new PersistenceException(toe);
         }
         catch (TException te)
         {
-            log.error("Error during executing delete, Caused by :" + te.getMessage());
+            log.error("Error during executing delete, Caused by :" + te);
             throw new PersistenceException(te);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
     }
 
@@ -411,13 +419,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param columns
      *            List of columns
      */
-    protected void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
+    protected void createIndexesOnColumns(String schemaName, String tableName, String poolName, List<Column> columns)
     {
-        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
+        Object pooledConnection = null;
         try
         {
-            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
-            KsDef ksDef = api.describe_keyspace(keyspace);
+            Cassandra.Client api = null;
+            pooledConnection = getPooledConection(persistenceUnit);
+            api = getConnection(pooledConnection);
+            KsDef ksDef = api.describe_keyspace(schemaName);
             List<CfDef> cfDefs = ksDef.getCf_defs();
 
             // Column family definition on which secondary index creation is
@@ -440,13 +450,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 throw new PersistenceException("Join table does not exist in database");
             }
-            // //create a column family, in case it is not already available.
-            // if(columnFamilyDefToUpdate == null)
-            // {
-            // isNew = true;
-            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
-            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
-            // }
+            // create a column family, in case it is not already available.
 
             // Get list of indexes already created
             List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
@@ -488,44 +492,47 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (isUpdatable)
             {
                 api.system_update_column_family(columnFamilyDefToUpdate);
-            }// } else
-             // {
-             // api.system_add_column_family(columnFamilyDefToUpdate);
-             // }
+            }
 
         }
         catch (InvalidRequestException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (SchemaDisagreementException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (TException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (NotFoundException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
         }
         catch (PropertyAccessException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
 
+        }
+        finally
+        {
+            releaseConnection(pooledConnection);
         }
     }
 
     /**
      * Finds an entiry from database.
-     *
-     * @param entityClass the entity class
-     * @param rowId the row id
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param rowId
+     *            the row id
      * @return the object
      */
     public Object find(Class entityClass, Object rowId)
@@ -537,10 +544,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Finds a {@link List} of entities from database.
-     *
-     * @param <E> the element type
-     * @param entityClass the entity class
-     * @param rowIds the row ids
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param rowIds
+     *            the row ids
      * @return the list
      */
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
@@ -591,7 +601,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval" + e.getMessage());
+            log.error("Error on retrieval ", e);
             throw new PersistenceException(e);
         }
 
@@ -600,11 +610,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find.
-     *
-     * @param <E> the element type
-     * @param entityClass the entity class
-     * @param superColumnMap the super column map
-     * @param dataHandler the data handler
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param superColumnMap
+     *            the super column map
+     * @param dataHandler
+     *            the data handler
      * @return the list
      */
     public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap, CassandraDataHandler dataHandler)
@@ -637,11 +651,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Executes Query.
-     *
-     * @param cqlQuery the cql query
-     * @param clazz the clazz
-     * @param relationalField the relational field
-     * @param dataHandler the data handler
+     * 
+     * @param cqlQuery
+     *            the cql query
+     * @param clazz
+     *            the clazz
+     * @param relationalField
+     *            the relational field
+     * @param dataHandler
+     *            the data handler
      * @return the list
      */
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
@@ -651,21 +669,33 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
         CqlResult result = null;
         List returnedEntities = null;
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
         String persistenceUnit = entityMetadata.getPersistenceUnit();
-        String schema = entityMetadata.getSchema();
         try
         {
-            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-            Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(schema);
-            cassandra_client.set_cql_version(getCqlVersion());
+            pooledConnection = getPooledConection(persistenceUnit);
+            conn = getConnection(pooledConnection);
+            conn.set_cql_version(getCqlVersion());
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
-            result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-                    org.apache.cassandra.thrift.Compression.NONE);
+            if (log.isDebugEnabled())
+            {
+                log.info("executing query " + cqlQuery);
+            }
+            if (getCqlVersion().equals(CassandraConstants.CQL_VERSION_2_0)
+                    && !metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE);
+            }
+            else
+            {
+                result = conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+            }
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
             {
                 returnedEntities = new ArrayList<Object>(result.getRowsSize());
@@ -677,8 +707,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                     if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
                     {
-                        rowKey = PropertyAccessorHelper.getObject(
-                                entityMetadata.getIdAttribute().getBindableJavaType(), row.getKey());
+                        // rowKey = PropertyAccessorHelper.getObject(
+                        // entityMetadata.getIdAttribute().getBindableJavaType(),
+                        // row.getKey());
                     }
                     // String rowKeys = Bytes.toUTF8(row.getKey());
                     ThriftRow thriftRow = null;
@@ -701,43 +732,46 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     {
                         returnedEntities.add(entity);
                     }
+                    else
+                    {
+                        returnedEntities.add(row.getColumns().get(0));
+                    }
                 }
             }
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (TException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         catch (Exception e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            e.printStackTrace();
+            log.error("Error while executing native CQL query Caused by:", e);
             throw new PersistenceException(e);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
         return returnedEntities;
 
@@ -745,13 +779,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Populate data.
-     *
-     * @param m the m
-     * @param qResults the q results
-     * @param entities the entities
-     * @param isRelational the is relational
-     * @param relationNames the relation names
-     * @param dataHandler the data handler
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
+     * @param dataHandler
+     *            the data handler
      */
     protected void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
@@ -788,11 +828,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Object e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                             new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
-
-                    // Object e = dataHandler
-                    // .fromColumnThriftRow(m.getEntityClazz(), m, new
-                    // ThriftRow(id, m.getTableName(), columns,
-                    // null, null, null), relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -813,14 +848,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Populate entities from key slices.
-     *
-     * @param m the m
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param keys the keys
-     * @param dataHandler the data handler
+     * 
+     * @param m
+     *            the m
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param keys
+     *            the keys
+     * @param dataHandler
+     *            the data handler
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     protected List populateEntitiesFromKeySlices(EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<KeySlice> keys, CassandraDataHandler dataHandler) throws Exception
@@ -853,7 +894,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     protected void onpersistOverCompositeKey(EntityMetadata entityMetadata, Object entity,
-            Cassandra.Client cassandra_client) throws InvalidRequestException, TException, UnavailableException,
+            Cassandra.Client cassandra_client,  List<RelationHolder> rlHolders) throws InvalidRequestException, TException, UnavailableException,
             TimedOutException, SchemaDisagreementException, UnsupportedEncodingException
     {
         cassandra_client.set_cql_version(getCqlVersion());
@@ -861,19 +902,37 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         String insert_Query = translator.INSERT_QUERY;
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
-        HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity,
-                entityMetadata, TranslationType.ALL);
+        HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
+                TranslationType.ALL);
+        
+        String columnNames = translation.get(TranslationType.COLUMN);
+        String columnValues = translation.get(TranslationType.VALUE);
+        StringBuilder columnNameBuilder = new StringBuilder(columnNames);
+        StringBuilder columnValueBuilder = new StringBuilder(columnValues);
+        
+        for(RelationHolder rl : rlHolders)
+        {
+            columnNameBuilder.append(",");
+            columnValueBuilder.append(",");
+            translator.appendColumnName(columnNameBuilder, rl.getRelationName());
+            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
+        }
+        
+        translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
+        translation.put(TranslationType.VALUE, columnValueBuilder.toString());
+        
         
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
                 translation.get(TranslationType.VALUE));
-        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS,
-                translation.get(TranslationType.COLUMN));
-        cassandra_client.execute_cql_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE);
+        insert_Query = StringUtils
+                .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
+        cassandra_client.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
+                Compression.NONE, consistencyLevel);
     }
 
     /**
      * Gets the cql version.
-     *
+     * 
      * @return the cqlVersion
      */
     protected String getCqlVersion()
@@ -883,8 +942,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Sets the cql version.
-     *
-     * @param cqlVersion the cqlVersion to set
+     * 
+     * @param cqlVersion
+     *            the cqlVersion to set
      */
     public void setCqlVersion(String cqlVersion)
     {
@@ -893,8 +953,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Sets the consistency level.
-     *
-     * @param cLevel the new consistency level
+     * 
+     * @param cLevel
+     *            the new consistency level
      */
     public void setConsistencyLevel(ConsistencyLevel cLevel)
     {
@@ -930,7 +991,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Gets the consistency level.
-     *
+     * 
      * @return the consistency level
      */
     protected ConsistencyLevel getConsistencyLevel()
@@ -940,11 +1001,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * On delete query.
-     *
-     * @param metadata the metadata
-     * @param metaModel the meta model
-     * @param compoundKeyObject the compound key object
-     * @param compoundKey the compound key
+     * 
+     * @param metadata
+     *            the metadata
+     * @param metaModel
+     *            the meta model
+     * @param compoundKeyObject
+     *            the compound key object
+     * @param compoundKey
+     *            the compound key
      */
     protected void onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object compoundKeyObject,
             ManagedType compoundKey)
@@ -964,12 +1029,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * On where clause.
-     *
-     * @param metadata the metadata
-     * @param compoundKeyObject the compound key object
-     * @param translator the translator
-     * @param queryBuilder the query builder
-     * @param compoundKey the compound key
+     * 
+     * @param metadata
+     *            the metadata
+     * @param compoundKeyObject
+     *            the compound key object
+     * @param translator
+     *            the translator
+     * @param queryBuilder
+     *            the query builder
+     * @param compoundKey
+     *            the compound key
      */
     private void onWhereClause(EntityMetadata metadata, Object compoundKeyObject, CQLTranslator translator,
             StringBuilder queryBuilder, ManagedType compoundKey)
@@ -984,7 +1054,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             Attribute attribute = compoundKey.getAttribute(field.getName());
             String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-            // System.out.println("DD");
             translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
         }
 
@@ -994,12 +1063,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find.
-     *
-     * @param entityClass the entity class
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param metadata the metadata
-     * @param rowIds the row ids
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param metadata
+     *            the metadata
+     * @param rowIds
+     *            the row ids
      * @return the list
      */
     public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq,
@@ -1007,11 +1081,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Load super columns.
-     *
-     * @param keyspace the keyspace
-     * @param columnFamily the column family
-     * @param rowId the row id
-     * @param superColumnNames the super column names
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            the column family
+     * @param rowId
+     *            the row id
+     * @param superColumnNames
+     *            the super column names
      * @return the list
      */
     protected abstract List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
@@ -1019,23 +1097,32 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Query related methods.
-     *
-     * @param cqlQuery the cql query
-     * @param clazz the clazz
-     * @param relationalField the relational field
+     * 
+     * @param cqlQuery
+     *            the cql query
+     * @param clazz
+     *            the clazz
+     * @param relationalField
+     *            the relational field
      * @return the list
      */
     public abstract List executeQuery(String cqlQuery, Class clazz, List<String> relationalField);
 
     /**
      * Find.
-     *
-     * @param ixClause the ix clause
-     * @param m the m
-     * @param isRelation the is relation
-     * @param relations the relations
-     * @param maxResult the max result
-     * @param columns the columns
+     * 
+     * @param ixClause
+     *            the ix clause
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
+     * @param maxResult
+     *            the max result
+     * @param columns
+     *            the columns
      * @return the list
      */
     public abstract List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
@@ -1043,26 +1130,37 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find by range.
-     *
-     * @param muinVal the muin val
-     * @param maxVal the max val
-     * @param m the m
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param columns the columns
-     * @param conditions the conditions
+     * 
+     * @param muinVal
+     *            the muin val
+     * @param maxVal
+     *            the max val
+     * @param m
+     *            the m
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param columns
+     *            the columns
+     * @param conditions
+     *            the conditions
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
             List<String> relations, List<String> columns, List<IndexExpression> conditions) throws Exception;
 
     /**
      * Search in inverted index.
-     *
-     * @param columnFamilyName the column family name
-     * @param m the m
-     * @param indexClauseMap the index clause map
+     * 
+     * @param columnFamilyName
+     *            the column family name
+     * @param m
+     *            the m
+     * @param indexClauseMap
+     *            the index clause map
      * @return the list
      */
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
@@ -1070,12 +1168,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param conditions the conditions
-     * @param maxResult the max result
-     * @param columns the columns
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param conditions
+     *            the conditions
+     * @param maxResult
+     *            the max result
+     * @param columns
+     *            the columns
      * @return the list
      */
     public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames,
@@ -1083,16 +1186,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Gets the data handler.
-     *
+     * 
      * @return the data handler
      */
     protected abstract CassandraDataHandler getDataHandler();
 
     /**
      * Delete.
-     *
-     * @param entity the entity
-     * @param pKey the key
+     * 
+     * @param entity
+     *            the entity
+     * @param pKey
+     *            the key
      */
     protected abstract void delete(Object entity, Object pKey);
 
@@ -1105,8 +1210,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     /**
      * Adds the batch.
-     *
-     * @param node the node
+     * 
+     * @param node
+     *            the node
      */
     public void addBatch(Node node)
     {
@@ -1126,7 +1232,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     /**
      * Gets the batch size.
-     *
+     * 
      * @return the batch size
      */
     public int getBatchSize()
@@ -1137,17 +1243,33 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /*
      * (non-Javadoc)
      * 
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
+    public void clear()
+    {
+        if (nodes != null)
+        {
+            nodes.clear();
+            nodes = null;
+            nodes = new ArrayList<Node>();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
      */
     /**
      * Execute batch.
-     *
+     * 
      * @return the int
      */
     public int executeBatch()
     {
         String persistenceUnit = null;
-        IPooledConnection conn = null;
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
 
         Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
 
@@ -1163,10 +1285,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     persistenceUnit = metadata.getPersistenceUnit();
                     isUpdate = node.isUpdate();
 
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(metadata.getPersistenceUnit());
+
                     // delete can not be executed in batch
                     if (node.isInState(RemovedState.class))
                     {
                         delete(entity, id);
+                    }
+                    else if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+                    {
+                        List<RelationHolder> relationHolders = getRelationHolders(node);
+                        onPersist(metadata, entity, id, relationHolders);
                     }
                     else
                     {
@@ -1181,38 +1311,34 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (!mutationMap.isEmpty())
             {
-                conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-                PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getPersistenceUnitMetadata(persistenceUnit);
-                Cassandra.Client cassandra_client = conn.getAPI();
-                cassandra_client.set_keyspace(puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
-
-                cassandra_client.batch_mutate(mutationMap, consistencyLevel);
+                pooledConnection = getPooledConection(persistenceUnit);
+                conn = getConnection(pooledConnection);
+                conn.batch_mutate(mutationMap, consistencyLevel);
             }
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while persisting record. Details: " + e.getMessage());
+            log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
         }
         finally
         {
-            PelopsUtils.releaseConnection(conn);
+            releaseConnection(pooledConnection);
         }
 
         return mutationMap.size();
@@ -1220,12 +1346,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Prepare mutation.
-     *
-     * @param entityMetadata the entity metadata
-     * @param entity the entity
-     * @param id the id
-     * @param relationHolders the relation holders
-     * @param mutationMap the mutation map
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param relationHolders
+     *            the relation holders
+     * @param mutationMap
+     *            the mutation map
      * @return the map
      */
     protected Map<ByteBuffer, Map<String, List<Mutation>>> prepareMutation(EntityMetadata entityMetadata,
@@ -1252,7 +1383,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error during persisting record, Details:" + e.getMessage());
+            log.error("Error during persisting record, Details:" + e);
             throw new KunderaException(e);
         }
 
@@ -1289,7 +1420,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 }
             }
         }
-
         else
         /********* Handling for column family and super column family *********/
         {
@@ -1322,7 +1452,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         // Create Mutation Map
         Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
         columnFamilyValues.put(columnFamily, insertion_list);
-        Bytes b = CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass());
+        Bytes b = CassandraUtilities.toBytes(tf.getId(), entityMetadata.getIdAttribute().getBindableJavaType());
         mutationMap.put(b.getBytes(), columnFamilyValues);
 
         return mutationMap;
@@ -1340,8 +1470,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties(com.impetus.kundera.client.Client, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
      */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
@@ -1351,32 +1485,87 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Returns raw cassandra client from thrift connection pool.
-     *
-     * @param persistenceUnit persistence unit.
-     * @param schema schema or keyspace.
+     * 
+     * @param persistenceUnit
+     *            persistence unit.
+     * @param schema
+     *            schema or keyspace.
      * @return raw cassandra client.
      */
     protected Cassandra.Client getRawClient(final String persistenceUnit, final String schema)
     {
-        IPooledConnection connection = PelopsUtils.getCassandraConnection(persistenceUnit);
-        Cassandra.Client client = connection.getAPI();
+        Cassandra.Client client = null;
+        Object pooledConnection;
+        pooledConnection = getPooledConection(persistenceUnit);
+        client = getConnection(pooledConnection);
         try
         {
-            client.set_keyspace(schema);
             client.set_cql_version(getCqlVersion());
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error during borrowing a connection, Details:" + irex.getMessage());
+            log.error("Error during borrowing a connection, Details:" + irex);
             throw new KunderaException(irex);
         }
         catch (TException tex)
         {
-            log.error("Error during borrowing a connection, Details:" + tex.getMessage());
+            log.error("Error during borrowing a connection, Details:" + tex);
             throw new KunderaException(tex);
         }
-
+        finally
+        {
+            releaseConnection(pooledConnection);
+        }
         return client;
 
     }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = null;
+        if (puProperties != null)
+        {
+            batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                    : null;
+            if (batch_Size != null)
+            {
+                batchSize = Integer.valueOf(batch_Size);
+                if (batchSize == 0)
+                {
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                }
+            }
+        }
+        else if (batch_Size == null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
+        }
+    }
+
+    private Cassandra.Client getConnection(Object connection)
+    {
+        if (connection != null)
+        {
+            if (connection.getClass().isAssignableFrom(Cassandra.Client.class))
+            {
+                return (Cassandra.Client) connection;
+            }
+            else
+            {
+                return ((IPooledConnection) connection).getAPI();
+            }
+        }
+
+        throw new KunderaException("Invalid configuration!, no available pooled connection found for:"
+                + this.getClass().getSimpleName());
+    }
+
+    protected abstract Object getPooledConection(String persistenceUnit);
+
+    protected abstract void releaseConnection(Object conn);
 }

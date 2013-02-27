@@ -103,7 +103,7 @@ public class LongAccessor implements PropertyAccessor<Long>
     @Override
     public Long getCopy(Object object)
     {
-        return object != null ? new Long((Long)object) : null;
+        return object != null ? (Long)object : null;
     }
 
     public Long getInstance(Class<?> clazz)

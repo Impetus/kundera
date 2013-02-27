@@ -88,7 +88,7 @@ public class HBaseSchemaManagerTest
         {
             admin = cli.utility.getHBaseAdmin();
         }
-        configuration = new SchemaConfiguration("hbase");
+        configuration = new SchemaConfiguration(null, "hbase");
 
     }
 
@@ -121,9 +121,6 @@ public class HBaseSchemaManagerTest
         try
         {
             getEntityManagerFactory("create");
-            // schemaManager = new
-            // HBaseSchemaManager(HBaseClientFactory.class.getName());
-            // schemaManager.exportSchema();
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
@@ -212,7 +209,7 @@ public class HBaseSchemaManagerTest
         EntityMetadata m8 = new EntityMetadata(HBaseEntityPersonUni1To1PK.class);
         EntityMetadata m9 = new EntityMetadata(HBaseEntityAddressUni1To1PK.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(HBaseEntitySimple.class, m);
         processor.process(HBaseEntitySuper.class, m1);
         processor.process(HBaseEntityAddressUni1To1.class, m2);
@@ -248,14 +245,14 @@ public class HBaseSchemaManagerTest
         metaModel.addEntityMetadata(HBaseEntityAddressUni1To1PK.class, m9);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        
+
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         String[] persistenceUnits = { persistenceUnit };
-        new ClientFactoryConfiguraton(persistenceUnits).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
         configuration.configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);

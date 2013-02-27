@@ -96,9 +96,8 @@ public class EntityTransactionTest extends BaseTest
     public void onRollback() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-//        em.setFlushMode(FlushModeType.COMMIT);
-        em.getTransaction().begin();
 
+        em.getTransaction().begin();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -108,6 +107,9 @@ public class EntityTransactionTest extends BaseTest
 
         // roll back.
         em.getTransaction().rollback();
+
+        em.getTransaction().begin();
+
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNull(p);
 
@@ -139,7 +141,6 @@ public class EntityTransactionTest extends BaseTest
     public void onCommit() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-//        em.setFlushMode(FlushModeType.COMMIT);
 
         em.getTransaction().begin();
 
@@ -156,11 +157,14 @@ public class EntityTransactionTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
 
+        em.getTransaction().begin();
+
         ((PersonCassandra) p2).setPersonName("rollback");
         em.merge(p2);
 
         // roll back, should roll back person name for p2!
         em.getTransaction().rollback();
+
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
 

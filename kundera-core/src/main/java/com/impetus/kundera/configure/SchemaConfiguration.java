@@ -16,6 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +36,13 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.TableInfo;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -47,6 +51,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Schema configuration implementation to support ddl_schema_creation
@@ -62,8 +67,11 @@ public class SchemaConfiguration implements Configuration
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(SchemaConfiguration.class);
 
-    /** Holding persistence unit instances. */
-    private String[] persistenceUnits;
+    /** Holding instance for persistence units. */
+    protected String[] persistenceUnits;
+
+    /** Holding persistenceUnit properties */
+    protected Map externalPropertyMap;
 
     /**
      * pu to schema metadata map .
@@ -76,9 +84,10 @@ public class SchemaConfiguration implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    public SchemaConfiguration(String... persistenceUnits)
+    public SchemaConfiguration(Map externalProperties, String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
+        this.externalPropertyMap = externalProperties;
     }
 
     @Override
@@ -96,50 +105,61 @@ public class SchemaConfiguration implements Configuration
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
-            if (getSchemaProperty(persistenceUnit) != null)
+            log.info("Configuring schema export for: " + persistenceUnit);
+            List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
+
+            Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
+
+            // Iterate each entity metadata.
+            for (EntityMetadata entityMetadata : entityMetadataMap.values())
             {
-                log.info("Configuring schema export for: " + persistenceUnit);
-                List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
+                // get entity metadata(table info as well as columns)
+                // if table info exists, get it from map.
+                boolean found = false;
+                Type type = entityMetadata.getType();
+                // Class idClassName =
+                // entityMetadata.getIdColumn().getField().getType();
+                Class idClassName = entityMetadata.getIdAttribute().getJavaType();
+                TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
+                        type.name(), idClassName);
 
-                Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
-
-                // Iterate each entity metadata.
-                for (EntityMetadata entityMetadata : entityMetadataMap.values())
+                // check for tableInfos not empty and contains the present
+                // tableInfo.
+                if (!tableInfos.isEmpty() && tableInfos.contains(tableInfo))
                 {
-                    // get entity metadata(table info as well as columns)
-                    // if table info exists, get it from map.
-                    boolean found = false;
-                    Type type = entityMetadata.getType();
-                    // Class idClassName =
-                    // entityMetadata.getIdColumn().getField().getType();
-                    Class idClassName = entityMetadata.getIdAttribute().getJavaType();
-                    TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
-                            type.name(), idClassName);
-
-                    // check for tableInfos not empty and contains the present
-                    // tableInfo.
-                    if (!tableInfos.isEmpty() && tableInfos.contains(tableInfo))
-                    {
-                        found = true;
-                        int idx = tableInfos.indexOf(tableInfo);
-                        tableInfo = tableInfos.get(idx);
-                        addColumnToTableInfo(entityMetadata, type, tableInfo);
-                    }
-                    else
-                    {
-                        addColumnToTableInfo(entityMetadata, type, tableInfo);
-                    }
-
-                    List<Relation> relations = entityMetadata.getRelations();
-                    parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
-
-                    if (!found)
-                    {
-                        tableInfos.add(tableInfo);
-                    }
+                    found = true;
+                    int idx = tableInfos.indexOf(tableInfo);
+                    tableInfo = tableInfos.get(idx);
+                    addColumnToTableInfo(entityMetadata, type, tableInfo);
                 }
-                puToSchemaMetadata.put(persistenceUnit, tableInfos);
-                ClientResolver.getClientFactory(persistenceUnit).getSchemaManager().exportSchema();
+                else
+                {
+                    addColumnToTableInfo(entityMetadata, type, tableInfo);
+                }
+
+                List<Relation> relations = entityMetadata.getRelations();
+                parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
+
+                if (!found)
+                {
+                    tableInfos.add(tableInfo);
+                }
+            }
+            puToSchemaMetadata.put(persistenceUnit, tableInfos);
+        }
+        for (String persistenceUnit : persistenceUnits)
+        {
+            Map<String, Object> externalProperties = getExternalProperties(persistenceUnit);
+            if (getSchemaProperty(persistenceUnit, externalProperties) != null
+                    && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
+            {
+                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit, externalProperties);
+                SchemaManager schemaManager = clientFactory != null ? clientFactory
+                        .getSchemaManager(externalProperties) : null;
+                if (schemaManager != null)
+                {
+                    schemaManager.exportSchema();
+                }
             }
         }
     }
@@ -177,7 +197,7 @@ public class SchemaConfiguration implements Configuration
                     Type targetEntityType = targetEntityMetadata.getType();
                     // Class idClass =
                     // targetEntityMetadata.getIdColumn().getField().getType();
-                    Class idClass = entityMetadata.getIdAttribute().getJavaType();
+                    Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
                     TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
                             targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass);
 
@@ -207,11 +227,15 @@ public class SchemaConfiguration implements Configuration
             // if relation type is many to many and relation via join table.
             else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
             {
-                String joinTableName = relation.getJoinTableMetadata().getJoinTableName();
-                TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(), null);
-                if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
+                String joinTableName = joinTableMetadata != null ? joinTableMetadata.getJoinTableName() : null;
+                if (joinTableName != null)
                 {
-                    tableInfos.add(joinTableInfo);
+                    TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(), null);
+                    if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                    {
+                        tableInfos.add(joinTableInfo);
+                    }
                 }
             }
         }
@@ -272,24 +296,27 @@ public class SchemaConfiguration implements Configuration
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
+            if (!attr.isAssociation())
             {
-                EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
-
-                EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
-                        attr.getJavaType());
-
-                if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
+                if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
                 {
-                    tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
+                    EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
+
+                    EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
+                            attr.getJavaType());
+
+                    if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
+                    {
+                        tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
+                    }
                 }
-            }
-            else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
-            {
-                ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(attr.getName()) : null);
-                if (!tableInfo.getColumnMetadatas().contains(columnInfo))
+                else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                    tableInfo.addColumnInfo(columnInfo);
+                    ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(((AbstractAttribute)attr).getJPAColumnName()) : null);
+                    if (!tableInfo.getColumnMetadatas().contains(columnInfo))
+                    {
+                        tableInfo.addColumnInfo(columnInfo);
+                    }
                 }
             }
         }
@@ -393,17 +420,60 @@ public class SchemaConfiguration implements Configuration
      * getKunderaProperty method return auto schema generation property for give
      * persistence unit.
      * 
+     * @param externalProperties
+     * 
      * @param String
      *            persistenceUnit.
      * @return value of kundera auto ddl in form of String.
      */
-    private String getSchemaProperty(String persistenceUnit)
+    private String getSchemaProperty(String persistenceUnit, Map<String, Object> externalProperties)
     {
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String KUNDERA_DDL_AUTO_PREPARE = persistenceUnitMetadata != null ? persistenceUnitMetadata
-                .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        String autoDdlOption = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        if (autoDdlOption == null)
+        {
+            autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
+                    .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        }
+        return autoDdlOption;
+    }
 
-        return KUNDERA_DDL_AUTO_PREPARE;
+    /**
+     * @param puProperty
+     */
+    private Map<String, Object> getExternalProperties(String pu)
+    {
+        Map<String, Object> puProperty;
+        if (persistenceUnits.length > 1 && externalPropertyMap != null)
+        {
+            puProperty = (Map<String, Object>) externalPropertyMap.get(pu);
+
+            // if property found then return it, if it is null by pass it, else
+            // throw invalidConfiguration.
+            if (puProperty != null)
+            {
+                return fetchPropertyMap(puProperty);
+            }
+        }
+        return externalPropertyMap;
+    }
+
+    /**
+     * @param puProperty
+     * @return
+     */
+    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
+    {
+        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
+        {
+            return puProperty;
+        }
+        else
+        {
+            throw new InvalidConfigurationException(
+                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
+        }
     }
 }

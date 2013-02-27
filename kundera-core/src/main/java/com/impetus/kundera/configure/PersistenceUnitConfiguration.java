@@ -54,7 +54,7 @@ public class PersistenceUnitConfiguration implements Configuration
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();
 
     /** Holding instance for persistence units. */
-    private String[] persistenceUnits;
+    protected String[] persistenceUnits;
 
     /**
      * Constructor parameterised with persistence units.
@@ -90,9 +90,9 @@ public class PersistenceUnitConfiguration implements Configuration
                 {
                     log.error("Unconfigured persistence unit: " + persistenceUnit
                             + " please validate with persistence.xml");
-                    throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
+                    throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
-                metadatas.get(persistenceUnit);
+//                metadatas.get(persistenceUnit);
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);

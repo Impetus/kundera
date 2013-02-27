@@ -52,7 +52,17 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
     private static final Log log = LogFactory.getLog(PelopsInvertedIndexHandler.class);
-    
+
+    private Map<String, Object> externalProperty;
+
+    /**
+     * @param externalProperties
+     */
+    public PelopsInvertedIndexHandler(Map<String, Object> externalProperties)
+    {
+        this.externalProperty = externalProperties;
+    }
+
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
@@ -62,17 +72,16 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
         if (invertedIndexingApplicable)
         {
-
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(entityMetadata.getTableName());
 
-            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit));
+            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
 
             List<ThriftRow> indexThriftyRows = ((PelopsDataHandler) cdHandler).toIndexThriftRow(node.getData(),
                     entityMetadata, indexColumnFamily);
 
             for (ThriftRow thriftRow : indexThriftyRows)
             {
-                
+
                 List<Column> thriftColumns = thriftRow.getColumns();
                 List<SuperColumn> thriftSuperColumns = thriftRow.getSuperColumns();
                 if (thriftColumns != null && !thriftColumns.isEmpty())
@@ -91,7 +100,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                                 CassandraUtilities.toBytes(thriftRow.getId(), thriftRow.getId().getClass()),
                                 Bytes.fromByteArray(sc.getName()), sc.getColumns());
                     }
-                }       
+                }
 
             }
             mutator.execute(consistencyLevel);
@@ -106,8 +115,8 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      * @return
      */
     @Override
-    public List<SearchResult> search(EntityMetadata m, String persistenceUnit,
-            ConsistencyLevel consistencyLevel, Map<Boolean, List<IndexClause>> indexClauseMap)
+    public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
         return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
     }
@@ -127,8 +136,8 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      */
     @Override
     public void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
-            String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns, byte[] start,
-            byte[] finish)
+            String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns,
+            byte[] start, byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
         SliceRange sliceRange = new SliceRange();
@@ -136,14 +145,16 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         sliceRange.setFinish(finish);
         colPredicate.setSlice_range(sliceRange);
 
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
-        List<SuperColumn> allThriftSuperColumns = selector.getSuperColumnsFromRow(columnFamilyName, rowKey, colPredicate,
-                consistencyLevel);
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
+        List<SuperColumn> allThriftSuperColumns = selector.getSuperColumnsFromRow(columnFamilyName, rowKey,
+                colPredicate, consistencyLevel);
 
         for (SuperColumn superColumn : allThriftSuperColumns)
         {
-            if(superColumn == null) continue;            
-            if(superColumn.getName() == searchSuperColumnName) {
+            if (superColumn == null)
+                continue;
+            if (superColumn.getName() == searchSuperColumnName)
+            {
                 thriftSuperColumns.add(superColumn);
             }
         }
@@ -166,20 +177,21 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     public SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
             byte[] superColumnName, String persistenceUnit)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
         SuperColumn thriftSuperColumn = null;
         try
-        {            
-            thriftSuperColumn = selector.getSuperColumnFromRow(columnFamilyName, rowKey, Bytes.fromByteArray(superColumnName), consistencyLevel);
-            
+        {
+            thriftSuperColumn = selector.getSuperColumnFromRow(columnFamilyName, rowKey,
+                    Bytes.fromByteArray(superColumnName), consistencyLevel);
+
         }
         catch (NotFoundException e)
         {
-            log.error("Error while fetching super column for Row " + rowKey + ";Details:" + e.getMessage());            
+            log.error("Error while fetching super column for Row " + rowKey + ";Details:" + e.getMessage());
             return null;
         }
         catch (PelopsException e)
-        {            
+        {
             log.error("Error while fetching super column for Row " + rowKey + ";Details:" + e.getMessage());
             return null;
         }
@@ -195,9 +207,8 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     public void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName, String persistenceUnit,
             ConsistencyLevel consistencyLevel, byte[] columnName)
     {
-        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit));
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
         mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(superColumnName));
         mutator.execute(consistencyLevel);
     }
-
 }

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +40,15 @@ public class RDBMSClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
+        externalProperties = null;
     }
 
     @Override
-    public void initialize()
-    {        
+    public void initialize(Map<String, Object> externalProperty)
+    {
         reader = new RDBMSEntityReader();
         ((RDBMSEntityReader) reader).setFilter("where");
+        setExternalProperties(externalProperty);
     }
 
     @Override
@@ -55,13 +59,11 @@ public class RDBMSClientFactory extends GenericClientFactory
         return null;
     }
 
-
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, externalProperties);
     }
-
 
     @Override
     public boolean isThreadSafe()
@@ -70,7 +72,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     }
 
     @Override
-    public SchemaManager getSchemaManager()
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
         return null;
     }

@@ -18,6 +18,7 @@ package com.impetus.kundera.persistence;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,8 @@ import javax.persistence.FetchType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.collection.PersistentSet;
+import org.hibernate.collection.internal.PersistentSet;
+import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
@@ -38,6 +39,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -107,51 +109,27 @@ public class AbstractEntityReader
 
         for (Relation relation : m.getRelations())
         {
-            // Check whether that relation is already populated or not, before
-            // proceeding further.
-            Field f = relation.getProperty();
-
-            Object object = PropertyAccessorHelper.getObject(entity, f);
-            
-            if (object == null || object instanceof HibernateProxy || object instanceof PersistentSet || object instanceof PersistentCollection)
+            // validate relation
+            ForeignKey type = relation.getType();
+            if (isTraversalRequired(relationsMap, type))
             {
-                //If fetch type is LAZY, just populate proxy object
+                // Check whether that relation is already populated or not,
+                // before
+                // proceeding further.
+                Field f = relation.getProperty();
+                Object object = PropertyAccessorHelper.getObject(entity, f);
 
-                FetchType fetch = relation.getFetchType();
-                /*
-                 * if (fetch.equals(FetchType.LAZY) ) { String relationName =
-                 * MetadataUtils.getMappedName(m, relation); Object
-                 * relationValue = relationsMap != null ?
-                 * relationsMap.get(relationName) : null;
-                 * 
-                 * if(relationValue != null) {
-                 * log.debug("Creating proxy for >> " +
-                 * m.getEntityClazz().getName() + "#" +
-                 * relation.getProperty().getName() + "_" + relationValue);
-                 * 
-                 * String entityName = m.getEntityClazz().getName() + "_" +
-                 * entityId + "#" + relation.getProperty().getName();
-                 * 
-                 * Object proxy = getLazyEntity(entityName,
-                 * relation.getTargetEntity(), m.getReadIdentifierMethod(),
-                 * m.getWriteIdentifierMethod(), relationValue, pd);
-                 * //System.out.println(proxy);
-                 * PropertyAccessorHelper.set(entity, relation.getProperty(),
-                 * proxy); }
-                 * 
-                 * } else {
-                 */
-                if (relation.isRelatedViaJoinTable())
+                //Populate Many-to-many relationships
+                if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
                 {
-                    // M-M relationship. Relationship entities are always
-                    // fetched
-                    // from Join Table.
-
                     // First, Save this entity to persistence cache
-                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-                    associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
+                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);                       
+                    associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
                 }
-                else
+                
+                //Populate other type of relationships
+                else if(object == null || object instanceof HibernateProxy || object instanceof PersistentSet
+                        || object instanceof PersistentCollection)
                 {
                     String relationName = MetadataUtils.getMappedName(m, relation);
                     Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
@@ -161,38 +139,50 @@ public class AbstractEntityReader
 
                     if (relationValue != null)
                     {
-                        // 1-1 or M-1 relationship, because ID is held at this
+                        // 1-1 or M-1 relationship, because ID is held at
+                        // this
                         // side
                         // of entity and hence
                         // relationship entities would be retrieved from
                         // database
                         // based on these IDs already available
-                        associationBuilder
-                                .populateRelationFromValue(entity, pd, relation, relationValue, childMetadata);
+                        associationBuilder.populateRelationFromValue(entity, pd, relation, relationValue,
+                                childMetadata);
 
                     }
                     else
                     {
-                        // 1-M relationship, since ID is stored at other side of
-                        // entity and as a result relation value will be null
-                        // This requires running query (either Lucene or Native
-                        // based on secondary indexes supported by underlying
+                        // 1-M relationship, since ID is stored at other
+                        // side of
+                        // entity and as a result relation value will be
+                        // null
+                        // This requires running query (either Lucene or
+                        // Native
+                        // based on secondary indexes supported by
+                        // underlying
                         // database)
-                        // Running query returns all those associated entities
+                        // Running query returns all those associated
+                        // entities
                         // that
                         // hold parent entity ID as foreign key
                         associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName,
                                 childMetadata);
                     }
-
-                }
-                // }
+                }              
 
             }
-
         }
-
         return entity;
+    }
+
+    /**
+     * @param relationsMap
+     * @param type
+     * @return
+     */
+    private boolean isTraversalRequired(Map<String, Object> relationsMap, ForeignKey type)
+    {
+        return !(relationsMap == null && (type.equals(ForeignKey.ONE_TO_ONE) || type.equals(ForeignKey.MANY_TO_ONE)));
     }
 
     /**

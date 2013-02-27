@@ -47,7 +47,6 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
 import com.impetus.kundera.query.KunderaTypedQuery;
@@ -58,7 +57,7 @@ import com.impetus.kundera.query.QueryImpl;
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements EntityManager, EntityTransaction, ResourceManager
+public class EntityManagerImpl implements EntityManager, ResourceManager
 {
 
     /** The Constant log. */
@@ -90,9 +89,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
 
     private PersistenceCache persistenceCache;
 
-    FlushManager flushStackManager;
+    private UserTransaction utx;
 
-    UserTransaction utx;
+    private EntityTransaction entityTransaction;
 
     /**
      * Instantiates a new entity manager impl.
@@ -104,7 +103,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
-        logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        }
         session = new EntityManagerSession((Cache) factory.getCache());
         persistenceCache = new PersistenceCache();
         persistenceCache.setPersistenceContextType(persistenceContextType);
@@ -118,13 +120,20 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
 
-        logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        }
     }
 
     private void onLookUp(PersistenceUnitTransactionType transactionType)
     {
         if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
         {
+            if (entityTransaction == null)
+            {
+                this.entityTransaction = new KunderaEntityTransaction(this);
+            }
             Context ctx;
             try
             {
@@ -146,8 +155,14 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
 
                 }
 
+                if (((KunderaJTAUserTransaction) utx).isTransactionInProgress())
+                {
+                    entityTransaction.begin();
+                }
+
                 this.setFlushMode(FlushModeType.COMMIT);
                 ((KunderaJTAUserTransaction) utx).setImplementor(this);
+
             }
             catch (NamingException e)
             {
@@ -204,7 +219,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         catch (Exception ex)
         {
             // onRollBack.
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -230,7 +245,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
 
         if (e == null)
         {
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new IllegalArgumentException("Entity to be merged must not be null.");
         }
 
@@ -241,8 +256,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         catch (Exception ex)
         {
             // on Rollback
-            getPersistenceDelegator().rollback();
-
+            doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -277,7 +291,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         catch (Exception ex)
         {
             // on rollback.
-            getPersistenceDelegator().rollback();
+            doRollback();
             throw new KunderaException(ex);
         }
     }
@@ -547,7 +561,13 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         {
             throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
         }
-        return this;
+
+        if (this.entityTransaction == null)
+        {
+            this.entityTransaction = new KunderaEntityTransaction(this);
+        }
+
+        return this.entityTransaction;
     }
 
     /*
@@ -901,7 +921,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
      * 
      * @return the persistence delegator
      */
-    private PersistenceDelegator getPersistenceDelegator()
+    PersistenceDelegator getPersistenceDelegator()
     {
         return persistenceDelegator;
     }
@@ -922,10 +942,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public void doCommit()
     {
-
         checkClosed();
-        persistenceDelegator.commit();
-
+        this.entityTransaction.commit();
     }
 
     /*
@@ -937,51 +955,14 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     public void doRollback()
     {
         checkClosed();
-        persistenceDelegator.rollback();
-    }
-
-    // ///////////////////////////////////////////////////////////////////////
-    /** Methods from {@link EntityTransaction} interface */
-    // ///////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void begin()
-    {
-        persistenceDelegator.begin();
-    }
-
-    @Override
-    public void commit()
-    {
-        doCommit();
-    }
-
-    @Override
-    public boolean getRollbackOnly()
-    {
-        if (!isActive())
+        if (this.entityTransaction != null)
         {
-            throw new IllegalStateException("No active transaction found");
+            this.entityTransaction.rollback();
         }
-        return persistenceDelegator.getRollbackOnly();
-    }
-
-    @Override
-    public void setRollbackOnly()
-    {
-        persistenceDelegator.setRollbackOnly();
-    }
-
-    @Override
-    public boolean isActive()
-    {
-        return isOpen() && persistenceDelegator.isActive();
-    }
-
-    @Override
-    public void rollback()
-    {
-        doRollback();
+        else
+        {
+            this.persistenceDelegator.rollback();
+        }
     }
 
     /**

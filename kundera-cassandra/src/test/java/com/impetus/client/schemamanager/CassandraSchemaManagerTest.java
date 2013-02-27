@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.client.schemamanager.entites.CassandraEmbeddedPersonUniMto1;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1FK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1ToM;
@@ -51,6 +52,7 @@ import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1ToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUniMto1;
+import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.client.schemamanager.entites.CassandraEntitySuper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
@@ -61,6 +63,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -90,16 +93,14 @@ public class CassandraSchemaManagerTest
     }
 
     /**
-     * Tear down.
-     * 
-     * @throws Exception
-     *             the exception
+     * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.client.system_drop_keyspace(_KEYSPACE);
+        CassandraCli.dropKeySpace(_KEYSPACE);
     }
+
 
     /**
      * Test schema operation.
@@ -140,6 +141,8 @@ public class CassandraSchemaManagerTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1PK", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEmbeddedPersonUniMto1", _KEYSPACE));
+        
     }
 
     /**
@@ -189,7 +192,8 @@ public class CassandraSchemaManagerTest
         clazzToPu.put(CassandraEntityAddressBi1To1PK.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressBi1ToM.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressBiMTo1.class.getName(), pus);
-
+        clazzToPu.put(CassandraEmbeddedPersonUniMto1.class.getName(), pus);
+        
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m1 = new EntityMetadata(CassandraEntitySuper.class);
@@ -209,8 +213,9 @@ public class CassandraSchemaManagerTest
         EntityMetadata m15 = new EntityMetadata(CassandraEntityPersonBi1To1PK.class);
         EntityMetadata m16 = new EntityMetadata(CassandraEntityPersonBi1ToM.class);
         EntityMetadata m17 = new EntityMetadata(CassandraEntityPersonBiMTo1.class);
+        EntityMetadata m18 = new EntityMetadata(CassandraEmbeddedPersonUniMto1.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(CassandraEntitySuper.class, m1);
         processor.process(CassandraEntityAddressUni1To1.class, m2);
         processor.process(CassandraEntityAddressUni1ToM.class, m3);
@@ -228,7 +233,11 @@ public class CassandraSchemaManagerTest
         processor.process(CassandraEntityPersonBi1To1PK.class, m15);
         processor.process(CassandraEntityPersonBi1ToM.class, m16);
         processor.process(CassandraEntityPersonBiMTo1.class, m17);
+        processor.process(CassandraEmbeddedPersonUniMto1.class, m18);
 
+        IndexProcessor indexProcessor = new IndexProcessor();
+        indexProcessor.process(CassandraEntityPersonUniMto1.class, m5);
+        
         m1.setPersistenceUnit(_PU);
         m2.setPersistenceUnit(_PU);
         m3.setPersistenceUnit(_PU);
@@ -265,15 +274,15 @@ public class CassandraSchemaManagerTest
         metaModel.addEntityMetadata(CassandraEntityPersonBi1To1PK.class, m15);
         metaModel.addEntityMetadata(CassandraEntityPersonBi1ToM.class, m16);
         metaModel.addEntityMetadata(CassandraEntityPersonBiMTo1.class, m17);
-
+        metaModel.addEntityMetadata(CassandraEmbeddedPersonUniMto1.class, m18);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_PU).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_PU).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_PU).getMappedSuperClassTypes());
 
         appMetadata.getMetamodelMap().put(_PU, metaModel);
 
-        new ClientFactoryConfiguraton(_PU).configure();
-        new SchemaConfiguration(_PU).configure();
+        new ClientFactoryConfiguraton(null, _PU).configure();
+        new SchemaConfiguration(null, _PU).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

@@ -613,7 +613,7 @@ public class StudentCassandraCharTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraChar";
             cfDef.keyspace = keyspace;
-//            cfDef.setKey_validation_class("UTF8Type");
+            // cfDef.setKey_validation_class("UTF8Type");
 
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
@@ -677,26 +677,7 @@ public class StudentCassandraCharTest extends CassandraBase
 
     public void dropSchema()
     {
-        try
-        {
-            CassandraCli.client.system_drop_keyspace(keyspace);
-        }
-        catch (InvalidRequestException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

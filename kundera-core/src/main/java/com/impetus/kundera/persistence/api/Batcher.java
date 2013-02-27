@@ -47,5 +47,10 @@ public interface Batcher
      * @return batch size as integer
      */
     int getBatchSize();
+    
+    /**
+     * In case user asked for 
+     */
+    void clear();
 
 }

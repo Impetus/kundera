@@ -76,16 +76,16 @@ public class AbstractPropertyReaderTest
             if (store.getName().equalsIgnoreCase("HBase"))
             {
                 Assert.assertNotNull(store.getSchemas());
-                Assert.assertEquals(1, store.getSchemas().size());
-                Assert.assertEquals("USERXYZ", store.getSchemas().get(0).getName());
+                Assert.assertEquals(2, store.getSchemas().size());
+                Assert.assertEquals("HBASEUSERXYZ", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
-                Assert.assertEquals(2, store.getSchemas().get(0).getTables().size());
-                Assert.assertEquals("age", store.getSchemas().get(0).getTables().get(0).getName());
-                Assert.assertEquals("address", store.getSchemas().get(0).getTables().get(1).getName());
+                Assert.assertEquals(1, store.getSchemas().get(0).getTables().size());
+                Assert.assertEquals("HBASEUSERXYZ", store.getSchemas().get(0).getTables().get(0).getName());
+
                 Assert.assertNotNull(store.getSchemas().get(0).getTables().get(0).getProperties());
-                Assert.assertNotNull(store.getSchemas().get(0).getTables().get(1).getProperties());
+
                 Assert.assertEquals(5, store.getSchemas().get(0).getTables().get(0).getProperties().size());
-                Assert.assertEquals(5, store.getSchemas().get(0).getTables().get(1).getProperties().size());
+
                 Assert.assertNull(store.getSchemas().get(0).getDataCenters());
                 Assert.assertNull(store.getSchemas().get(0).getSchemaProperties());
                 Assert.assertNotNull(store.getConnection());
@@ -108,17 +108,17 @@ public class AbstractPropertyReaderTest
             else if (store.getName().equalsIgnoreCase("Cassandra"))
             {
                 Assert.assertNotNull(store.getSchemas());
-                Assert.assertEquals(1, store.getSchemas().size());
+                Assert.assertEquals(3, store.getSchemas().size());
                 Assert.assertEquals("KunderaCassandraXmlTest", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
                 Assert.assertEquals(1, store.getSchemas().get(0).getTables().size());
-                Assert.assertEquals("USERXYZ", store.getSchemas().get(0).getTables().get(0).getName());
+                Assert.assertEquals("CASSANDRAUSERXYZ", store.getSchemas().get(0).getTables().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables().get(0).getProperties());
                 Assert.assertEquals(7, store.getSchemas().get(0).getTables().get(0).getProperties().size());
                 Assert.assertNotNull(store.getSchemas().get(0).getDataCenters());
                 Assert.assertEquals(2, store.getSchemas().get(0).getDataCenters().size());
                 Assert.assertNotNull(store.getSchemas().get(0).getSchemaProperties());
-                Assert.assertEquals(3, store.getSchemas().get(0).getSchemaProperties().size());
+                Assert.assertEquals(4, store.getSchemas().get(0).getSchemaProperties().size());
             }
         }
     }

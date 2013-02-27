@@ -66,7 +66,7 @@ public class TableProcessorTest
 
         EntityMetadata metadata = new EntityMetadata(EntitySample.class);
         metadata.setPersistenceUnit("rdbms");
-        TableProcessor tableProcessor = new TableProcessor();
+        TableProcessor tableProcessor = new TableProcessor(null);
         tableProcessor.process(EntitySample.class, metadata);
 
         // Get application metadata

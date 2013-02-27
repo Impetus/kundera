@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -71,18 +72,18 @@ public class KunderaPersistence implements PersistenceProvider
         // list may not be intended
         synchronized (persistenceUnit)
         {
-            // if (!loaded)
-            // {
-            // loaded = true;
-            // initializeKundera(persistenceUnit);
-
-            // }
-
-            initializeKundera(persistenceUnit);
+            try
+            {
+            initializeKundera(persistenceUnit, map);
 
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;
+            }catch(PersistenceUnitConfigurationException pcex)
+            {
+                // Means it is not for kundera persistence!
+                return null;
+            }
         }
     }
 
@@ -92,7 +93,7 @@ public class KunderaPersistence implements PersistenceProvider
      * @param persistenceUnit
      *            Persistence Unit/ Comma separated persistence units
      */
-    private void initializeKundera(String persistenceUnit)
+    private void initializeKundera(String persistenceUnit, Map props)
     {
         // Invoke Application MetaData
         logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) "
@@ -100,7 +101,7 @@ public class KunderaPersistence implements PersistenceProvider
 
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
-        new Configurator(persistenceUnits).configure();
+        new Configurator(props, persistenceUnits).configure();
 
     }
 

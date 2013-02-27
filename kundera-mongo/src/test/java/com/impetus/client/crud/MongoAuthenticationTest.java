@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 
 /**

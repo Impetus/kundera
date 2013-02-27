@@ -245,13 +245,14 @@ public class ObjectUtilsCloneUnidirectionalTest
     private void assertObjectReferenceInequality(PhotographerUni_1_M_1_M p1, PhotographerUni_1_M_1_M p2)
     {
 
-        Assert.assertFalse(p1 == p2);        
+        Assert.assertFalse(p1 == p2);
         Assert.assertFalse(p1.getPhotographerName() == p2.getPhotographerName());
         Assert.assertFalse(p1.getPersonalDetail() == p2.getPersonalDetail());
         Assert.assertFalse(p1.getPersonalDetail().getPersonalDetailId() == p2.getPersonalDetail().getPersonalDetailId());
         Assert.assertFalse(p1.getPersonalDetail().getName() == p2.getPersonalDetail().getName());
         Assert.assertFalse(p1.getPersonalDetail().getPassword() == p2.getPersonalDetail().getPassword());
-        Assert.assertFalse(p1.getPersonalDetail().getRelationshipStatus() == p2.getPersonalDetail().getRelationshipStatus());
+        Assert.assertFalse(p1.getPersonalDetail().getRelationshipStatus() == p2.getPersonalDetail()
+                .getRelationshipStatus());
         Assert.assertFalse(p1.getTweets() == p2.getTweets());
 
         for (int i = 0; i < p1.getTweets().size(); i++)
@@ -272,8 +273,8 @@ public class ObjectUtilsCloneUnidirectionalTest
             Assert.assertFalse(p1Album == p2Album);
             Assert.assertFalse(p1Album.getAlbumId() == p2Album.getAlbumId());
             Assert.assertFalse(p1Album.getAlbumName() == p2Album.getAlbumName());
-            Assert.assertFalse(p1Album.getAlbumDescription() == p2Album.getAlbumDescription());       
-            
+            Assert.assertFalse(p1Album.getAlbumDescription() == p2Album.getAlbumDescription());
+
             Assert.assertFalse(p1.getAlbums().get(i).getPhotos() == p2.getAlbums().get(i).getPhotos());
 
             for (int j = 0; j < p1.getAlbums().get(i).getPhotos().size(); j++)
@@ -331,7 +332,7 @@ public class ObjectUtilsCloneUnidirectionalTest
         EntityMetadata m1 = new EntityMetadata(AlbumUni_1_M_1_M.class);
         EntityMetadata m2 = new EntityMetadata(PhotoUni_1_M_1_M.class);
 
-        TableProcessor processor = new TableProcessor();
+        TableProcessor processor = new TableProcessor(null);
         processor.process(PhotographerUni_1_M_1_M.class, m);
         processor.process(AlbumUni_1_M_1_M.class, m1);
         processor.process(PhotoUni_1_M_1_M.class, m2);

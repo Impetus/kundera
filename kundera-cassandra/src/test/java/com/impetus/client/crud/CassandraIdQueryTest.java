@@ -55,6 +55,8 @@ public class CassandraIdQueryTest extends BaseTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -90,9 +92,12 @@ public class CassandraIdQueryTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
-         findByIdGTAndAgeGTAndLT();
-         findByIdGTEAndAge();
-         findByIdLTEAndAge();
+        findByIdAndAgeGTAndLT();
+        findByIdGTAndAgeGTAndLT();
+        findByIdAndAge();
+        findByIdAndAgeGT();
+        findByIdGTEAndAge();
+        findByIdLTEAndAge();
     }
 
     /**
@@ -439,6 +444,68 @@ public class CassandraIdQueryTest extends BaseTest
     /**
      * 
      */
+    private void findByIdAndAge()
+    {
+        String qry = "Select p.personName, p.age from PersonCassandra p where p.personId = 1 and p.age = 10";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        for (PersonCassandra person : persons)
+        {
+            Assert.assertEquals(new Integer(10), person.getAge());
+            Assert.assertEquals("1", person.getPersonId());
+            Assert.assertEquals("vivek", person.getPersonName());
+            Assert.assertEquals(10, person.getAge().intValue());
+            Assert.assertNull(person.getA());
+        }
+    }
+
+    /**
+     * 
+     */
+    private void findByIdAndAgeGT()
+    {
+        String qry = "Select p.personName, p.age from PersonCassandra p where p.personId = 1 and p.age > 5";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        for (PersonCassandra person : persons)
+        {
+            Assert.assertEquals(new Integer(10), person.getAge());
+            Assert.assertEquals("1", person.getPersonId());
+            Assert.assertEquals("vivek", person.getPersonName());
+            Assert.assertEquals(10, person.getAge().intValue());
+            Assert.assertNull(person.getA());
+        }
+    }
+    /**
+     * 
+     */
+    private void findByIdAndAgeGTAndLT()
+    {
+        String qry = "Select p.personName from PersonCassandra p where p.personId = 1 and p.personName = vivek and p.age >=10 and p.age <= 20";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        int count = 0;
+        for (PersonCassandra person : persons)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertNull(person.getAge());
+                Assert.assertEquals("vivek", person.getPersonName());
+                count++;
+            }
+        }
+        Assert.assertEquals(1, count);
+    }
+
+    /**
+     * 
+     */
     private void findByIdLTEAndAge()
     {
         String qry = "Select p.personName, p.age from PersonCassandra p where p.personId <= 3 and p.age = 10";
@@ -458,8 +525,6 @@ public class CassandraIdQueryTest extends BaseTest
     private void init() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);

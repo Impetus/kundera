@@ -42,6 +42,7 @@ public class CassandraPrimeUser
     @Column 
     private Date tweetDate;
 
+    
     public CassandraPrimeUser()
     {
     }
@@ -90,4 +91,6 @@ public class CassandraPrimeUser
     {
         this.tweetDate = tweetDate;
     }
+
+    
 }

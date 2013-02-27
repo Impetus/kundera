@@ -27,6 +27,7 @@ public class StudentHBaseBooleanTest extends Base
     private static final String table = "StudentHBaseBoolean";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -200,13 +201,11 @@ public class StudentHBaseBooleanTest extends Base
         int count = 0;
         for (StudentHBaseBoolean student : students)
         {/*
-            if (student.getId().equals(getMaxValue(Boolean.class)))
-            {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
-                count++;
-            }
-            else */if (student.getId().equals(getMinValue(Boolean.class)))
+          * if (student.getId().equals(getMaxValue(Boolean.class))) {
+          * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+          * Assert.assertEquals("Kuldeep", student.getName()); count++; } else
+          */
+            if (student.getId().equals(getMinValue(Boolean.class)))
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -543,8 +542,7 @@ public class StudentHBaseBooleanTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        cli.addColumnFamily(table, "NAME");
-        cli.addColumnFamily(table, "AGE");
+        
     }
 
     public void dropSchema()

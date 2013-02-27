@@ -32,6 +32,7 @@ public interface MetadataProcessor
      *            the clazz
      * @param metadata
      *            the metadata
+     * @param puProperties
      */
     void process(Class<?> clazz, EntityMetadata metadata);
 }

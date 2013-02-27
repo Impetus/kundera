@@ -20,7 +20,8 @@ import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import net.dataforte.cassandra.pool.ConnectionPool;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -30,15 +31,12 @@ import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -53,8 +51,11 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
 
-    public ThriftDataHandler()
+    private ConnectionPool pool;
+
+    public ThriftDataHandler(ConnectionPool pool)
     {
+        this.pool = pool;
     }
 
     /*
@@ -69,32 +70,23 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
-
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-
-        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet();
-
         // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
 
         Object e = null;
 
-        IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
-        Cassandra.Client cassandra_client = conn.getAPI();
-        cassandra_client.set_keyspace(m.getSchema());
+        Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
 
         SlicePredicate predicate = new SlicePredicate();
         predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
 
         ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
-        List<ColumnOrSuperColumn> columnOrSuperColumns = cassandra_client.get_slice(key,
-                new ColumnParent(m.getTableName()), predicate, consistencyLevel);
+        List<ColumnOrSuperColumn> columnOrSuperColumns = conn.get_slice(key, new ColumnParent(m.getTableName()),
+                predicate, consistencyLevel);
 
         Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
         e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns);
-        PelopsUtils.releaseConnection(conn);
+        PelopsUtils.releaseConnection(pool, conn);
         return e;
     }
 
@@ -128,5 +120,4 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         }
         return e;
     }
-
 }

@@ -74,6 +74,8 @@ public abstract class QueryImpl implements Query
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     private Set<Parameter<?>> parameters;
+    
+    private Map<String, Object> hints = new HashMap<String, Object>();
 
     /**
      * Default maximum result to fetch.
@@ -137,6 +139,7 @@ public abstract class QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
+        if(log.isDebugEnabled())
         log.info("On getResultList() executing query: " + query);
         List results = null;
 
@@ -228,7 +231,7 @@ public abstract class QueryImpl implements Query
         String luceneQ = getLuceneQueryFromJPAQuery();
         Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
-        if (kunderaQuery.isAliasOnly())
+        if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
         {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
@@ -239,8 +242,7 @@ public abstract class QueryImpl implements Query
         else
         {
             return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
-
-        }
+        } 
         return result;
     }
 
@@ -436,7 +438,7 @@ public abstract class QueryImpl implements Query
      *            the is greater than
      * @return the string
      */
-    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan)
     {
         String appender = " ";
         StringBuilder sb = new StringBuilder();
@@ -542,7 +544,7 @@ public abstract class QueryImpl implements Query
                         //
                         // if (column != null)
                         // {
-                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue());
+                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue().toString());
                         // }
                         persistenceDelegeator.merge(result);
                     }
@@ -600,16 +602,14 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
-    /* @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object) */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object)
+    /**
+     * Sets hint name and value into hints map and returns instance of {@link Query}
      */
     @Override
     public Query setHint(String hintName, Object value)
     {
-        throw new NotImplementedException("TODO");
+        hints.put(hintName, value);
+        return this;
     }
 
     /* @see javax.persistence.Query#setMaxResults(int) */
@@ -742,15 +742,13 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#getHints()
+    /**
+     * Returns a {@link Map} containing query hints set by user
      */
     @Override
     public Map<String, Object> getHints()
     {
-        throw new NotImplementedException("TODO");
+        return hints;
     }
 
     /*

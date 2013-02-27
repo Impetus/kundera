@@ -84,4 +84,9 @@ public class ObjectGraph
         return nodeMapping;
     }
 
+    public void clear()
+    {
+        nodeMapping.clear();
+        nodeMapping=null;
+    }
 }

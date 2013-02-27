@@ -15,13 +15,13 @@ public class BigDecimalDataGenerator implements DataGenerator<BigDecimal>
     @Override
     public BigDecimal maxValue()
     {
-        return BigDecimal.TEN;
+        return new BigDecimal(23.45);
     }
 
     @Override
     public BigDecimal minValue()
     {
-        return BigDecimal.ONE;
+        return new BigDecimal(0.001);
     }
 
     @Override

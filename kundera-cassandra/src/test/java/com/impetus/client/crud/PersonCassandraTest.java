@@ -35,6 +35,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -48,8 +49,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.thrift.CQLTranslator;
+import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.index.LuceneQueryUtils;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -87,6 +96,8 @@ public class PersonCassandraTest extends BaseTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -101,12 +112,6 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onInsertCassandra() throws Exception
     {
-        // cassandraSetUp();
-        // CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
-
-        // KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(SEC_IDX_CASSANDRA_TEST);
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -117,6 +122,7 @@ public class PersonCassandraTest extends BaseTest
         col.put("2", p2);
         col.put("3", p3);
 
+        em.clear();
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
@@ -132,27 +138,49 @@ public class PersonCassandraTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
-        
+
+        testCountResult();
         // perform merge after query.
-        for(PersonCassandra person : persons)
+        for (PersonCassandra person : persons)
         {
             person.setPersonName("after merge");
             em.merge(person);
         }
-        
+
         em.clear();
-        
-        
+
+        // select rowid test
+        selectIdQuery();
+
+        em.clear();
+
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("after merge", p.getPersonName());
-        
+
         // Delete without WHERE clause.
-        
+
         String deleteQuery = "DELETE from PersonCassandra";
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
-        
+
+    }
+
+    private void testCountResult()
+    {
+        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        CQLTranslator translator = new CQLTranslator();
+
+        String query = "select count(*) from " + translator.ensureCase(new StringBuilder(), "PERSON").toString();
+        Query q = em.createNativeQuery(query, PersonCassandra.class);
+        List noOfRows = q.getResultList();
+        Assert.assertEquals(new Long(3),
+                PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+        Assert.assertEquals("count",
+                PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
+
     }
 
     /**
@@ -164,8 +192,8 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onMergeCassandra() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        loadData();
+        // CassandraCli.cassandraSetUp();
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -173,6 +201,7 @@ public class PersonCassandraTest extends BaseTest
         em.persist(p2);
         em.persist(p3);
 
+        em.clear();
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
@@ -189,9 +218,9 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        CassandraCli.initClient();
-        loadData();
+        // CassandraCli.cassandraSetUp();
+        // CassandraCli.initClient();
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -205,7 +234,7 @@ public class PersonCassandraTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-        em.remove(p1);
+        em.remove(p);
         em.clear();
 
         TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
@@ -232,9 +261,9 @@ public class PersonCassandraTest extends BaseTest
     {
         // cassandraSetUp();
         // CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
-
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
+        CassandraCli.client.set_keyspace("KunderaExamples");
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -302,8 +331,8 @@ public class PersonCassandraTest extends BaseTest
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -332,8 +361,8 @@ public class PersonCassandraTest extends BaseTest
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -363,8 +392,8 @@ public class PersonCassandraTest extends BaseTest
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
 
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -389,8 +418,8 @@ public class PersonCassandraTest extends BaseTest
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -409,6 +438,33 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
+    private void selectIdQuery()
+    {/*
+      * String query = "select p.personId from PersonCassandra p"; Query q =
+      * em.createQuery(query); List<PersonCassandra> results =
+      * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * 
+      * query =
+      * "Select p.personId from PersonCassandra p where p.personName = vivek";
+      * // // find by name. q = em.createQuery(query); results =
+      * q.getResultList(); Assert.assertNotNull(results);
+      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * Assert.assertNull(results.get(0).getAge());
+      * 
+      * q = em.createQuery(
+      * "Select p.personId from PersonCassandra p where p.personName = vivek and p.age > "
+      * + 10); results = q.getResultList(); Assert.assertNotNull(results);
+      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(2,
+      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
+      * Assert.assertNull(results.get(0).getPersonName());
+      * Assert.assertNull(results.get(0).getAge());
+      */
+    }
+
     /**
      * Tear down.
      * 
@@ -425,7 +481,7 @@ public class PersonCassandraTest extends BaseTest
       * em = null; emf = null;
       */
         // emf.close();
-        CassandraCli.dropKeySpace("KunderaExamples");
+         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     /**
@@ -445,7 +501,6 @@ public class PersonCassandraTest extends BaseTest
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
         user_Def.name = "PERSON";

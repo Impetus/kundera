@@ -69,7 +69,7 @@ public class OTOUniAssociationTest extends TwinAssociation
      * 
      */
     // private static final String KEYSPACE = "KUNDERATESTS";
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*"addHbase",*/ "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","redis", "addCassandra", "addMongo"/*, "addHbase"*/};
 
     /**
      * Inits the.
@@ -109,9 +109,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         {
             e.printStackTrace();
             Assert.fail(e.getMessage());
-
         }
-
     }
 
     protected void insert()
@@ -217,8 +215,8 @@ public class OTOUniAssociationTest extends TwinAssociation
     {
         try
         {
-            // PersonnelUni1To1FK p = (PersonnelUni1To1FK)
-            // dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");
+            PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");
+            Assert.assertNotNull(p);
             dao.remove("unionetoonefk_1", PersonnelUni1To1FK.class);
 
             PersonnelUni1To1FK pAfterRemoval = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class,
@@ -227,6 +225,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             Assert.fail();
         }
     }

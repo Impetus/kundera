@@ -91,7 +91,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher
 {
-
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
 
@@ -122,13 +121,14 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * @param persistenceUnit
      *            the persistence unit
      */
-    public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
+    public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit,
+            Map<String, Object> externalProperties)
     {
-        super(persistenceUnit);
+        super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler();
-        this.invertedIndexHandler = new PelopsInvertedIndexHandler();
+        this.dataHandler = new PelopsDataHandler(externalProperties);
+        this.invertedIndexHandler = new PelopsInvertedIndexHandler(externalProperties);
         this.reader = reader;
     }
 
@@ -208,7 +208,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             else
             {
-                RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit(),
+                        externalProperties));
                 rowDeletor.deleteRow(metadata.getTableName(),
                         CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()),
                         getConsistencyLevel());
@@ -239,13 +240,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public void persistJoinTable(JoinTableData joinTableData)
     {
 
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
         Mutator mutator = Pelops.createMutator(poolName);
 
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
-
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass());
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
@@ -265,7 +266,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 columns.add(column);
             }
 
-            createIndexesOnColumns(joinTableName, poolName, columns);
+            createIndexesOnColumns(entityMetadata.getSchema(), joinTableName, poolName, columns);
             // Object pk = key;
 
             mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(key)),
@@ -278,10 +279,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // List<Column> columns = selector.getColumnsFromRow(joinTableName,
-        // Bytes.fromUTF8(parentId.toString()),
-        // Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
+
         List<Column> columns = selector.getColumnsFromRow(joinTableName,
                 Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
                 Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());
@@ -294,7 +294,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
@@ -328,7 +329,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-    // Incorrect
+    @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
@@ -337,7 +338,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit(),
+                externalProperties));
         // rowDeletor.deleteRow(tableName, columnValue.toString(),
         // getConsistencyLevel());
         rowDeletor.deleteRow(tableName, CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
@@ -361,7 +363,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List<Object> findByRelation(String colName, Object colValue, Class clazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
@@ -429,7 +432,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 client.set_cql_version(getCqlVersion());
                 client.set_keyspace(metadata.getSchema());
-                onpersistOverCompositeKey(metadata, entity, client);
+                onpersistOverCompositeKey(metadata, entity, client,rlHolders);
             }
             catch (InvalidRequestException e)
             {
@@ -479,7 +482,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             addRelationsToThriftRow(metadata, tf, rlHolders);
 
-            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit(),
+                    externalProperties));
             if (metadata.isCounterColumnType())
             {
                 List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
@@ -563,7 +567,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
         rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
 
@@ -615,7 +620,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             int maxResult, List<String> columns)
     {
         // ixClause can be 0,1 or more!
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         if (columns != null && !columns.isEmpty())
@@ -631,7 +637,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                 try
                 {
-                    IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                    IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit(),
+                            externalProperties));
                     // thrift.get
                     IPooledConnection connection = thrift.getConnection();
                     org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
@@ -737,7 +744,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions) throws Exception
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Selector selector = Pelops.createSelector(PelopsUtils
+                .generatePoolName(getPersistenceUnit(), externalProperties));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         if (columns != null && !columns.isEmpty())
@@ -783,94 +791,14 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
+    protected IPooledConnection getPooledConection(String persistenceUnit)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // List<Column> columns = selector.getColumnsFromRow(joinTableName,
-        // Bytes.fromUTF8(parentId.toString()),
-        // Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
-        List<Column> columns = selector.getColumnsFromRow(tableName,
-                Bytes.fromByteArray(PropertyAccessorHelper.getBytes(pKeyColumnValue)),
-                Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());
+        return PelopsUtils.getCassandraConnection(persistenceUnit, externalProperties);
 
-        List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
-        return foreignKeys;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
-     */
-    @Override
-    @Deprecated
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
+    protected void releaseConnection(Object conn)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
-        String childIdStr = (String) columnValue;
-
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, Selector.newIndexExpression(columnName
-                + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
-                Bytes.fromByteArray(childIdStr.getBytes())));
-
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
-                getConsistencyLevel());
-
-        List<Object> rowKeys = new ArrayList<Object>();
-
-        // iterate through complete map and
-        Iterator<Bytes> rowIter = qResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata
-                    .getIdAttribute().getJavaMember());
-            Object value = accessor.fromBytes(metadata.getIdAttribute().getJavaType(), rowKey.toByteArray());
-
-            rowKeys.add(value);
-        }
-
-        if (rowKeys != null && !rowKeys.isEmpty())
-        {
-            return rowKeys.toArray(new Object[0]);
-        }
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
-     * java.lang.String, java.lang.Object)
-     */
-    @Override
-    @Deprecated
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
-        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // rowDeletor.deleteRow(tableName, columnValue.toString(),
-        // getConsistencyLevel());
-        rowDeletor.deleteRow(tableName, CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
-                getConsistencyLevel());
-
+        PelopsUtils.releaseConnection((IPooledConnection) conn);
     }
 }

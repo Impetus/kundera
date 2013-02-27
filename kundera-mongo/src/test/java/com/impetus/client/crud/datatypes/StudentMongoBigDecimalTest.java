@@ -33,7 +33,7 @@ public class StudentMongoBigDecimalTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-        em.remove(em.find(StudentMongoBigDecimal.class, getMinValue(BigDecimal.class)));       
+        em.remove(em.find(StudentMongoBigDecimal.class, getMinValue(BigDecimal.class)));
         emf.close();
     }
 
@@ -194,7 +194,7 @@ public class StudentMongoBigDecimalTest extends MongoBase
         q.setParameter(2, getMaxValue(BigDecimal.class));
         students = q.getResultList();
         Assert.assertNotNull(students);
-        Assert.assertEquals(2, students.size());
+        Assert.assertEquals(3, students.size());
         int count = 0;
         for (StudentMongoBigDecimal student : students)
         {
@@ -210,8 +210,15 @@ public class StudentMongoBigDecimalTest extends MongoBase
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
             }
+            else
+            {
+                Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getRandomValue(short.class), student.getAge());
+                Assert.assertEquals(getRandomValue(String.class), student.getName());
+                count++;
+            }
         }
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(3, count);
         em.close();
     }
 

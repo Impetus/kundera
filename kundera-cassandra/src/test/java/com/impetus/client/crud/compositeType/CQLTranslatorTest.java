@@ -77,6 +77,7 @@ public class CQLTranslatorTest
     @After
     public void tearDown()
     {
+        CassandraCli.dropKeySpace("CompositeCassandra");
         emf.close();
     }
 }

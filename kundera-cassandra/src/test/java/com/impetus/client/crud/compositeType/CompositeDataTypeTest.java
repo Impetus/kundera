@@ -103,7 +103,7 @@ public class CompositeDataTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        // loadData();
+        loadData();
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
     }
 
@@ -181,7 +181,7 @@ public class CompositeDataTypeTest
 
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
-        user.setTweetDate(new Date());
+        user.setTweetDate(currentDate);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
@@ -418,9 +418,9 @@ public class CompositeDataTypeTest
      * create column family script for compound key.
      */
     private void loadData()
-    {
+    {/*
         CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+        String cql_Query = "create columnfamily \"CompositeUserDataType\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
                 + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
         try
         {
@@ -436,7 +436,7 @@ public class CompositeDataTypeTest
         }
         CassandraCli.executeCqlQuery(cql_Query);
 
-    }
+    */}
 
     /**
      * Prepare data.

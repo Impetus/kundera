@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;

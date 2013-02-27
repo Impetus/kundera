@@ -15,8 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType.association;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -26,15 +30,20 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.compositeType.CassandraCompositeTypeTest;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
-import com.impetus.client.crud.compositeType.CassandraPrimeUser;
+import com.impetus.client.crud.compositeType.CassandraEmbeddedAssociation;
+import com.impetus.client.persistence.CassandraCli;
 
 /**
  * @author vivek.mishra
@@ -53,14 +62,16 @@ public class UserInfoTest
     @Before
     public void setUp() throws Exception
     {
-//        emf = Persistence.createEntityManagerFactory("composite_pu");
+        CassandraCli.cassandraSetUp();
+        CassandraCli.initClient();
+        loadData();
+        Map<String, String> props = new HashMap<String, String>(1);
+        props.put("kundera.ddl.auto.prepare", "");
+        emf = Persistence.createEntityManagerFactory("composite_pu",props);
     }
 
+
     @Test
-    public void dummytest(){
-        
-    }
-//    @Test
     public void onCRUD()
     {
         EntityManager em = emf.createEntityManager();
@@ -69,24 +80,25 @@ public class UserInfoTest
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
+        CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, timeLine);
-        em.persist(userInfo);
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
+        timeLine.setUserInfo(userInfo);
+        em.persist(timeLine);
         em.clear();
 
         // Find
-        UserInfo result = em.find(UserInfo.class, "mevivs_info");
+        CassandraEmbeddedAssociation result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
-        Assert.assertEquals("Vivek", result.getFirstName());
-        Assert.assertEquals(31, result.getAge());
+        Assert.assertEquals(currentDate, result.getTweetDate());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        Assert.assertEquals("Vivek", result.getUserInfo().getFirstName());
+        Assert.assertEquals(31, result.getUserInfo().getAge());
 
-        result.setFirstName("Kuldeep");
-        result.setAge(23);
+        result.getUserInfo().setFirstName("Kuldeep");
+        result.getUserInfo().setAge(23);
 
         em.merge(result);
 
@@ -94,22 +106,22 @@ public class UserInfoTest
 
         // Find
         result = null;
-        result = em.find(UserInfo.class, "mevivs_info");
+        result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
-        Assert.assertEquals("Kuldeep", result.getFirstName());
-        Assert.assertEquals(23, result.getAge());
+        Assert.assertEquals(currentDate, result.getTweetDate());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        Assert.assertEquals("Kuldeep", result.getUserInfo().getFirstName());
+        Assert.assertEquals(23, result.getUserInfo().getAge());
 
         em.remove(result);
 
         em.clear();
-        result = em.find(UserInfo.class, "mevivs_info");
+        result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNull(result);
 
     }
 
-    // @Test
+     @Test
     public void onQuery()
     {
         EntityManager em = emf.createEntityManager();
@@ -118,147 +130,33 @@ public class UserInfoTest
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
+        CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(new Date());
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, timeLine);
-        em.persist(userInfo);
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
+        timeLine.setUserInfo(userInfo);
+        em.persist(timeLine);
 
         em.clear(); // optional,just to clear persistence cache.
-        final String noClause = "Select u from UserInfo u";
-
-        final String withClauseOnNoncomposite = "Select u from UserInfo u where u.age = ?1";
-
-        // NOSQL Intelligence to teach that query is invalid because partition
-        // key is not present?
-        final String withAllCompositeColClause = "Select u from UserInfo u where u.userInfoId = :id";
-
-        // query over 1 composite and 1 non-column
-
-        // query with no clause.
-        Query q = em.createQuery(noClause);
-        List<UserInfo> results = q.getResultList();
+        
+        final String noClause = "Select t from CassandraEmbeddedAssociation t";
+        
+        Query query = em.createQuery(noClause);
+        List<CassandraEmbeddedAssociation> results = query.getResultList();
+        Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals(31, results.get(0).getAge());
-        Assert.assertEquals("Vivek", results.get(0).getFirstName());
-        Assert.assertEquals("Mishra", results.get(0).getLastName());
-        Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals("Vivek", results.get(0).getUserInfo().getFirstName());
+        Assert.assertEquals(31, results.get(0).getUserInfo().getAge());
 
-        // Query with composite key clause.
-        q = em.createQuery(withClauseOnNoncomposite);
-        q.setParameter(1, 31);
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(31, results.get(0).getAge());
-        Assert.assertEquals("Vivek", results.get(0).getFirstName());
-        Assert.assertEquals("Mishra", results.get(0).getLastName());
-        Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
-
-        // Query with composite key clause.
-        q = em.createQuery(withAllCompositeColClause);
-        q.setParameter("id", "mevivs_info");
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(31, results.get(0).getAge());
-        Assert.assertEquals("Vivek", results.get(0).getFirstName());
-        Assert.assertEquals("Mishra", results.get(0).getLastName());
-        Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
-
-        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.firstName from UserInfo u where u.userInfoId = :id";
-        // Query with composite key clause.
-        q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
-        q.setParameter("id", "mevivs_info");
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(0, results.get(0).getAge());
-        Assert.assertEquals("Vivek", results.get(0).getFirstName());
-        Assert.assertEquals(null, results.get(0).getLastName());
-        Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-
-        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.lastName from UserInfo u where u.userInfoId = :id";
-        // Query with composite key clause.
-        q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
-        q.setParameter("id", "mevivs_info");
-        results = q.getResultList();
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(0, results.get(0).getAge());
-        Assert.assertEquals(null, results.get(0).getFirstName());
-        Assert.assertEquals("Mishra", results.get(0).getLastName());
-        Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-
-        em.remove(userInfo);
+        em.remove(timeLine);
 
         em.clear();// optional,just to clear persistence cache.
+        
+        UserInfo user_Info = em.find(UserInfo.class, "mevivs_info");
+        Assert.assertNull(user_Info);
     }
 
-    // @Test
-    public void onNamedQueryTest()
-    {
-        updateNamed();
-        deleteNamed();
-
-    }
-
-    /**
-     * @return
-     */
-    private void updateNamed()
-    {
-        EntityManager em = emf.createEntityManager();
-
-        // Persist
-        UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser timeLine = new CassandraPrimeUser(key);
-        timeLine.setTweetBody("my first tweet");
-        timeLine.setTweetDate(new Date());
-
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, timeLine);
-        em.persist(userInfo);
-
-        em = emf.createEntityManager();
-
-        String updateQuery = "Update UserInfo u SET u.firstName=Kuldeep where u.firstName= :beforeUpdate";
-        Query q = em.createQuery(updateQuery);
-        q.setParameter("beforeUpdate", "Vivek");
-        q.executeUpdate();
-
-        UserInfo result = em.find(UserInfo.class, "mevivs_info");
-        Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
-        Assert.assertEquals("Kuldeep", result.getFirstName());
-        Assert.assertEquals(31, result.getAge());
-        em.close();
-    }
-
-    /**
-     * 
-     */
-    private void deleteNamed()
-    {
-        UUID timeLineId = UUID.randomUUID();
-        Date currentDate = new Date();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-
-        String deleteQuery = "Delete From UserInfo u where u.firstName= :firstName";
-        EntityManager em = emf.createEntityManager();
-        Query q = em.createQuery(deleteQuery);
-        q.setParameter("firstName", "Kuldeep");
-        q.executeUpdate();
-
-        UserInfo result = em.find(UserInfo.class, "mevivs_info");
-        Assert.assertNull(result);
-        em.close();
-    }
 
     /**
      * @throws java.lang.Exception
@@ -266,6 +164,40 @@ public class UserInfoTest
     @After
     public void tearDown() throws Exception
     {
+        CassandraCli.dropKeySpace("CompositeCassandra");
+        emf.close();
     }
 
+    /**
+     * Loads data.
+     * 
+     * @throws InvalidRequestException   
+     * @throws SchemaDisagreementException
+     * @throws TException
+     */
+    private void loadData() throws InvalidRequestException, SchemaDisagreementException, TException
+    {
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        CfDef cfDef = new CfDef("CompositeCassandra", "UserInfo");
+        cfDef.setKey_validation_class("UTF8Type");
+        cfDef.setDefault_validation_class("UTF8Type");
+        cfDef.setComparator_type("UTF8Type");
+        cfDefs.add(cfDef);
+        org.apache.cassandra.thrift.KsDef ksDef = new org.apache.cassandra.thrift.KsDef("CompositeCassandra",
+                "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+     
+        if (ksDef.strategy_options == null)
+        {
+            ksDef.strategy_options = new LinkedHashMap<String, String>();
+        }
+        ksDef.strategy_options.put("replication_factor", "1");
+        
+        CassandraCli.getClient().system_add_keyspace(ksDef);
+
+        CassandraCli.executeCqlQuery("USE \"CompositeCassandra\"");
+
+        CassandraCli
+                .executeCqlQuery("CREATE TABLE \"CompositeUser\" (\"userId\" varchar,\"tweetId\" int,\"timeLineId\" uuid, \"tweetBody\" varchar, \"tweetDate\" timestamp, \"userInfo_id\" varchar,\"first_name\" varchar,\"last_name\" varchar, \"age\" int, PRIMARY KEY (\"userId\", \"tweetId\",\"timeLineId\"))");
+
+    }
 }

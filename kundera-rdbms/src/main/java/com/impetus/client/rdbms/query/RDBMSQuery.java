@@ -71,6 +71,7 @@ public class RDBMSQuery extends QueryImpl implements Query
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         // retrieve
+        if(log.isDebugEnabled())
         log.debug("On handleAssociation() retrieve associations ");
 
         initializeReader();
@@ -88,6 +89,7 @@ public class RDBMSQuery extends QueryImpl implements Query
      */
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
+        if(log.isDebugEnabled())
         log.debug("on start of fetching non associated entities");
 
         List<Object> result = null;

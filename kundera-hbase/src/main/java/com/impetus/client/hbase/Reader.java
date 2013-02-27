@@ -43,7 +43,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter,String... columns) throws IOException;
 
     /**
      * Load data.
@@ -58,7 +58,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter,String... columns) throws IOException;
 
     /**
      * Load all.
@@ -71,12 +71,13 @@ public interface Reader
      *            the start row
      * @param endRow
      *            the end row
-     * @param columns 
+     * @param columns
      * @return the list
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily, String[] columns) throws IOException;
+    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
+            String qualifier, String[] columns) throws IOException;
 
     /**
      * Scan row keys.
@@ -93,5 +94,6 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName, final Class rowKeyClazz) throws IOException;
+    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
+            final String columnName, final Class rowKeyClazz) throws IOException;
 }

@@ -188,7 +188,7 @@ public class IndexManager
      */
     public final Map<String, String> search(String query, int start, int count)
     {
-        return indexer.search(query, start, count, false);
+        return indexer != null ? indexer.search(query, start, count, false):null;
     }
 
     /**
@@ -206,7 +206,7 @@ public class IndexManager
      */
     public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
     {
-        return indexer.search(query, start, count, fetchRelation);
+        return indexer != null ? indexer.search(query, start, count, fetchRelation):null;
     }
 
     /**

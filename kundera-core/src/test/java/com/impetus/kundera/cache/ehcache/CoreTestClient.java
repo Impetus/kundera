@@ -75,28 +75,7 @@ public class CoreTestClient implements Client<LuceneQuery>
         // TODO Auto-generated method stub
 
     }
-
-    @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-        // TODO Auto-generated method stub
-    }
-
+   
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {

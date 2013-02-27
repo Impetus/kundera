@@ -15,12 +15,17 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.util.Map;
 import java.util.Properties;
 
-import org.scale7.cassandra.pelops.Cluster;
-import org.scale7.cassandra.pelops.IConnection;
-import org.scale7.cassandra.pelops.Pelops;
-import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+import net.dataforte.cassandra.pool.ConnectionPool;
+import net.dataforte.cassandra.pool.PoolConfiguration;
+import net.dataforte.cassandra.pool.PoolProperties;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
@@ -30,6 +35,7 @@ import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -43,31 +49,56 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class ThriftClientFactory extends GenericClientFactory
 {
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
+
+    /** Cassandra pool */
+    private ConnectionPool pool;
 
     @Override
-    public SchemaManager getSchemaManager()
+    public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
         if (schemaManager == null)
         {
-            schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName());
+            initializePropertyReader();
+            setExternalProperties(externalProperty);
+            schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;
+    }
+
+    /**
+     * 
+     */
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new CassandraPropertyReader();
+            propertyReader.read(getPersistenceUnit());
+        }
     }
 
     @Override
     public void destroy()
     {
         indexManager.close();
-        getSchemaManager().dropSchema();
+        if (schemaManager != null)
+        {
+            getSchemaManager(externalProperties).dropSchema();
+        }
         schemaManager = null;
+        externalProperties = null;
+        // Pelops.shutdown();
+        // Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit()));
     }
 
     @Override
-    public void initialize()
+    public void initialize(Map<String, Object> externalProperty)
     {
         reader = new CassandraEntityReader();
-        propertyReader = new CassandraPropertyReader();
-        propertyReader.read(getPersistenceUnit());
+        initializePropertyReader();
+        setExternalProperties(externalProperty);
     }
 
     @Override
@@ -77,31 +108,53 @@ public class ThriftClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
-
-        if (Pelops.getDbConnPool(poolName) == null)
+        String contactNodes = null;
+        String defaultPort = null;
+        String keyspace = null;
+        if (externalProperties != null)
         {
-            Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
-                    PelopsUtils.getAuthenticationRequest(props)), false);
-
-            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
-
-            // Add pool with specified policy. null means default operand
-            // policy.
-            Pelops.addPool(poolName, cluster, keyspace, policy, null);
-
+            contactNodes = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            keyspace = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-        // TODO return a thrift pool
+
+        if (contactNodes == null)
+        {
+            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null)
+        {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (keyspace == null)
+        {
+            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+
+        onValidation(contactNodes, defaultPort);
+
+        PoolConfiguration prop = new PoolProperties();
+        prop.setHost(contactNodes);
+        prop.setPort(Integer.parseInt(defaultPort));
+        prop.setKeySpace(keyspace);
+
+        PelopsUtils.setPoolConfigPolicy(persistenceUnitMetadata, prop, externalProperties);
+        try
+        {
+            pool = new ConnectionPool(prop);
+        }
+        catch (TException e)
+        {
+            logger.error("Error during pool creation: caused by ", e);
+            throw new ClientLoaderException(e);
+        }
         return null;
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ThriftClient(indexManager, reader, persistenceUnit);
+        return new ThriftClient(indexManager, reader, persistenceUnit, pool, externalProperties);
     }
 
     @Override
@@ -109,5 +162,4 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         return false;
     }
-
 }

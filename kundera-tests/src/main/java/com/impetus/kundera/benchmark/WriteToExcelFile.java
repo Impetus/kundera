@@ -20,9 +20,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import jxl.CellView;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
@@ -35,6 +32,9 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * WriteToExcelFile class responsible create a excel file and write content into

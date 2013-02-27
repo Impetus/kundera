@@ -23,7 +23,6 @@ import javax.persistence.Table;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Person.
  */

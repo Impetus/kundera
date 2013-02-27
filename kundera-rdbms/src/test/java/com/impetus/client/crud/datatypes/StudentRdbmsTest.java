@@ -121,6 +121,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
         // find by id.
         StudentEntityDef s = em.find(StudentRdbms.class, studentId1);
         assertOnDataTypes((StudentRdbms) s);
+        em.clear();
 
         // // find by name.
         assertFindByName(em, "StudentRdbms", StudentRdbms.class, "Amresh", "studentName");

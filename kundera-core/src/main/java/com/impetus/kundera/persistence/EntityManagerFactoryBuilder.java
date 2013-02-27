@@ -90,6 +90,7 @@ public class EntityManagerFactoryBuilder
             }
         }
 
+        if(LOG.isDebugEnabled())
         LOG.info("Building EntityManagerFactory for name: " + puMetadata.getPersistenceUnitName() + ", and Properties:"
                 + props);
         return new EntityManagerFactoryImpl(puMetadata, props);

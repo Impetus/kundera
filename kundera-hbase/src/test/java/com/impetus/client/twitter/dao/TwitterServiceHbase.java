@@ -67,6 +67,7 @@ public class TwitterServiceHbase extends SuperDaoHbase implements TwitterHbase
     {
         if (em != null)
         {
+            em.clear();
             em.close();
             em = null;
         }

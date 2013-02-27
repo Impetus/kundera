@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
@@ -156,8 +159,9 @@ public class HBaseQuery extends QueryImpl implements Query
         // Called only in case of standalone entity.
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
+        // start with 1 as first element is alias.
+        List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
         Map<Boolean, Filter> filter = translator.getFilter();
-        String[] columns = getTranslatedColumns(m, getKunderaQuery().getResult());
         if (translator.isFindById && (filter == null && columns == null))
         {
             List results = new ArrayList();
@@ -172,7 +176,7 @@ public class HBaseQuery extends QueryImpl implements Query
         if (translator.isFindById && filter == null && columns != null)
         {
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                    columns);
+                    columns.toArray(new String[columns.size()]));
         }
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
@@ -183,11 +187,12 @@ public class HBaseQuery extends QueryImpl implements Query
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns);
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
                 }
                 else
                 {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null, columns);
+                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null,
+                            columns.toArray(new String[columns.size()]));
                 }
             }
             else
@@ -201,7 +206,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns);
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
                 }
                 else
                 {
@@ -210,7 +215,8 @@ public class HBaseQuery extends QueryImpl implements Query
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m);
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m,
+                            columns.toArray(new String[columns.size()]));
                 }
             }
         }
@@ -227,31 +233,79 @@ public class HBaseQuery extends QueryImpl implements Query
      * @param m
      * @return
      */
-    private String[] getTranslatedColumns(EntityMetadata m, String[] columns)
+    private List<String> getTranslatedColumns(EntityMetadata m, String[] columns, final int startWith)
     {
+        List<String> translatedColumns = new ArrayList<String>();
         if (columns != null)
         {
-            String[] translatedColumns = new String[columns.length - 1];
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             EntityType entity = metaModel.entity(m.getEntityClazz());
             int count = 0;
-            for (int i = 1; i < columns.length; i++)
+            for (int i = startWith; i < columns.length; i++)
             {
                 if (columns[i] != null)
                 {
-                    Attribute col = entity.getAttribute(columns[i]);
-                    if (col == null)
+                    String fieldName = null;
+                    String embeddedFieldName = null;
+                    // used string tokenizer to check for embedded column.
+                    StringTokenizer stringTokenizer = new StringTokenizer(columns[i], ".");
+                    // if need to select embedded columns
+                    if (stringTokenizer.countTokens() > 1)
                     {
-                        throw new QueryHandlerException("column type is null for: " + columns[i]);
+                        fieldName = stringTokenizer.nextToken();
+                        embeddedFieldName = stringTokenizer.nextToken();
+                        Attribute col = entity.getAttribute(fieldName); // get
+                                                                        // embedded
+                                                                        // column
+                        EmbeddableType embeddableType = metaModel.embeddable(col.getJavaType()); // get
+                                                                                                 // embeddable
+                                                                                                 // type
+                        Attribute attribute = embeddableType.getAttribute(embeddedFieldName);
+                        translatedColumns.add(((AbstractAttribute) attribute).getJPAColumnName());
+
                     }
-                    translatedColumns[count++] = ((AbstractAttribute) col).getJPAColumnName();
+                    else
+                    {
+                        // For all columns
+                        fieldName = columns[i];
+                        Attribute col = entity.getAttribute(fieldName);
+                        onEmbeddable(translatedColumns, metaModel, col,
+                                metaModel.isEmbeddable(((AbstractAttribute) col).getBindableJavaType()));
+
+                    }
+
                 }
             }
-            return translatedColumns;
         }
-        return null;
+        return translatedColumns;
+    }
+
+    /**
+     * @param translatedColumns
+     * @param metaModel
+     * @param col
+     */
+    private void onEmbeddable(List<String> translatedColumns, MetamodelImpl metaModel, Attribute col,
+            boolean isEmbeddable)
+    {
+
+        if (isEmbeddable)
+        {
+            EmbeddableType embeddableType = metaModel.embeddable(col.getJavaType());
+
+            Set<Attribute> attributes = embeddableType.getAttributes();
+
+            for (Attribute attribute : attributes)
+            {
+                translatedColumns.add(((AbstractAttribute) attribute).getJPAColumnName());
+            }
+        }
+        else
+        {
+            translatedColumns.add(((AbstractAttribute) col).getJPAColumnName());
+        }
     }
 
     /**
@@ -299,9 +353,9 @@ public class HBaseQuery extends QueryImpl implements Query
         void translate(KunderaQuery query, EntityMetadata m)
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-            boolean isIdColumn = false;
             for (Object obj : query.getFilterClauseQueue())
             {
+                boolean isIdColumn = false;
                 // parse for filter(e.g. where) clause.
 
                 if (obj instanceof FilterClause)
@@ -309,17 +363,20 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
-                    if ((!isIdColumn || isIdColumn) && idColumn.equalsIgnoreCase(name))
+
+                    // StringTokenizer tokenizer = new StringTokenizer(name,
+                    // ".");
+                    // if (tokenizer.countTokens() > 1)
+                    // {
+                    // tokenizer.nextToken();
+                    // name = tokenizer.nextToken();
+                    // }
+                    if (/* (!isIdColumn) || */idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
                     }
-                    else
-                    {
-                        isIdColumn = false;
-                    }
 
                     onParseFilter(condition, name, value, isIdColumn, m);
-
                 }
                 else
                 {
@@ -369,14 +426,24 @@ public class HBaseQuery extends QueryImpl implements Query
         private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
         {
             CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn);
-
             byte[] valueInBytes = getBytes(name, m, value);
+
             if (!isIdColumn)
             {
-                // Filter f = new SingleColumnValueFilter(name.getBytes(),
-                // name.getBytes(), operator, valueInBytes);
-                Filter f = new SingleColumnValueFilter(Bytes.toBytes(name), Bytes.toBytes(name), operator, valueInBytes);
+                List<String> columns = null;
+                if (new StringTokenizer(name, ".").countTokens() > 1)
+                {
+                    columns = getTranslatedColumns(m, new String[] { name }, 0);
+                }
+
+                if (columns != null && !columns.isEmpty())
+                {
+                    name = columns.get(0);
+                }
+                Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
+                        valueInBytes);
                 addToFilter(f);
+
             }
             else
             {
@@ -451,28 +518,43 @@ public class HBaseQuery extends QueryImpl implements Query
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());
-        Field f = null;
+        // Field f = null;
+        Class fieldClazz = null;
         boolean isId = false;
         if (idCol.getName().equals(jpaFieldName))
         {
-            f = (Field) idCol.getJavaMember();
+            Field f = (Field) idCol.getJavaMember();
+            fieldClazz = f.getType();
             isId = true;
         }
         else
         {
-            String fieldName = m.getFieldName(jpaFieldName);
-            Attribute col = entity.getAttribute(fieldName);
-            // Column col = m.getColumn(jpaFieldName);
-            if (col == null)
+            StringTokenizer tokenizer = new StringTokenizer(jpaFieldName, ".");
+            String embeddedFieldName = null;
+            if (tokenizer.countTokens() > 1)
             {
-                throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+                embeddedFieldName = tokenizer.nextToken();
+                String fieldName = tokenizer.nextToken();
+                Attribute embeddableAttribute = entity.getAttribute(embeddedFieldName);
+                EmbeddableType embeddableType = metaModel.embeddable(embeddableAttribute.getJavaType());
+                Attribute embeddedAttribute = embeddableType.getAttribute(fieldName);
+                jpaFieldName = ((AbstractAttribute) embeddedAttribute).getJPAColumnName();
+                fieldClazz = ((AbstractAttribute) embeddedAttribute).getBindableJavaType();
             }
-            f = (Field) col.getJavaMember();
+            else
+            {
+
+                String fieldName = m.getFieldName(jpaFieldName);
+                Attribute col = entity.getAttribute(fieldName);
+                // Column col = m.getColumn(jpaFieldName);
+                fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
+                // f = (Field) col.getJavaMember();
+            }
         }
 
-        if (f != null && f.getType() != null)
+        if (fieldClazz != null /* && f.getType() != null */)
         {
-            return HBaseUtils.getBytes(value, f.getType());
+            return HBaseUtils.getBytes(value, fieldClazz);
         }
         else
         {

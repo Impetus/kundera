@@ -27,7 +27,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "PREFERENCE", schema = "KunderaExamples@hbaseTest")
+@Table(name = "PREFERENCE", schema = "KunderaExamples@twibaseTest")
 public class PreferenceHBase
 {
     @Id

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -128,11 +129,21 @@ public abstract class ClientBase
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();
 
-                if (linkName != null && linkValue != null && !isSharedByPrimaryKey
-                        && (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE)))
+                if (linkName != null && linkValue != null && !isSharedByPrimaryKey)
                 {
-                    RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
-                    relationsHolder.add(relationHolder);
+                    if(multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))
+                    {
+                        RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
+                        relationsHolder.add(relationHolder);
+                    }
+                    else if(multiplicity.equals(ForeignKey.MANY_TO_MANY) 
+                            && ((Field)childNodeLink.getLinkProperty(LinkProperty.PROPERTY)).getType().isAssignableFrom(Map.class))
+                    {                        
+                        Object relationTo = ((Node)children.get(childNodeLink)).getData();
+                        RelationHolder relationHolder = new RelationHolder(linkName, relationTo,linkValue);
+                        relationsHolder.add(relationHolder);
+                    }                
+                    
                 }
             }
         }
@@ -145,38 +156,44 @@ public abstract class ClientBase
      */
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+        
+        if (indexManager != null)
         {
-            Map<NodeLink, Node> parents = node.getParents();
-            if (parents != null)
+            if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
             {
-                for (NodeLink parentNodeLink : parents.keySet())
+                Map<NodeLink, Node> parents = node.getParents();
+                if (parents != null)
                 {
-                    indexManager.update(entityMetadata, node.getData(), parentNodeLink
-                            .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
+                    for (NodeLink parentNodeLink : parents.keySet())
+                    {
+                        
+                        indexManager.update(entityMetadata, node.getData(), parentNodeLink
+                                .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
+                    }
+
                 }
-
-            }
-            else if (node.getChildren() != null)
-            {
-
-                Map<NodeLink, Node> children = node.getChildren();
-                for (NodeLink childNodeLink : children.keySet())
+                else if (node.getChildren() != null)
                 {
-                    if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
+
+                    Map<NodeLink, Node> children = node.getChildren();
+                    for (NodeLink childNodeLink : children.keySet())
                     {
-                        indexManager.update(entityMetadata, node.getData(), childNodeLink
-                                .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink).getDataClass());
-                    }
-                    else
-                    {
-                        indexManager.update(entityMetadata, node.getData(), null, null);
+                        if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
+                        {
+                            indexManager.update(entityMetadata, node.getData(), childNodeLink
+                                    .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink)
+                                    .getDataClass());
+                        }
+                        else
+                        {
+                            indexManager.update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
+                        }
                     }
                 }
-            }
-            else
-            {
-                indexManager.update(entityMetadata, node.getData(), null, null);
+                else
+                {
+                    indexManager.update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
+                }
             }
         }
     }

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
@@ -29,6 +30,7 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -81,13 +83,12 @@ public final class CassandraCli
     public static void cassandraSetUp() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-
         if (!checkIfServerRunning())
         {
             cassandra = new EmbeddedCassandraService();
             cassandra.start();
-            initClient();
         }
+        initClient();
     }
 
     /**
@@ -121,26 +122,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error(e1.getMessage());
+                log.error(e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error(ess.getMessage());
+                log.error(ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error(sde.getMessage());
+                log.error(sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
 
     }
@@ -182,7 +183,7 @@ public final class CassandraCli
             // do nothing.
         }
     }
-    
+
     /**
      * Drop out key space.
      * 
@@ -194,20 +195,41 @@ public final class CassandraCli
         try
         {
             client.system_drop_keyspace(keyspaceName);
+            // deleteCassandraFolders("/var/lib/cassandra/data/");
+            // deleteCassandraFolders("/var/lib/cassandra/data/system/");
+            // deleteCassandraFolders("/var/lib/cassandra/commitlog/");
+            // deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
+            // deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            return;
         }
         catch (SchemaDisagreementException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
+    }
 
+    private static void deleteCassandraFolders(String dir)
+    {
+        // System.out.println("Cleaning up folder " + dir);
+        File directory = new File(dir);
+        // Get all files in directory
+        File[] files = directory.listFiles();
+        for (File file : files)
+        {
+            // Delete each file
+            if (!file.delete())
+            {
+                // Failed to delete file
+                // System.out.println("Failed to delete " + file);
+            }
+        }
     }
 
     public static boolean keyspaceExist(String keySpaceName)
@@ -222,11 +244,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e);
         }
         return false;
     }
@@ -305,7 +327,8 @@ public final class CassandraCli
         try
         {
             getClient().set_cql_version("3.0.0");
-            getClient().execute_cql_query(ByteBuffer.wrap(cqlQuery.getBytes("UTF-8")), Compression.NONE);
+            getClient().execute_cql3_query(ByteBuffer.wrap(cqlQuery.getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
         catch (InvalidRequestException e)
         {
