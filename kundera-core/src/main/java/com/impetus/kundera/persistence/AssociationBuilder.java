@@ -402,8 +402,11 @@ public final class AssociationBuilder
         {
             for(Object child : ((Map)relObject).values())
             {
-                Object childId = PropertyAccessorHelper.getId(child, childMetadata);
-                PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId); 
+                if(child != null)
+                {
+                    Object childId = PropertyAccessorHelper.getId(child, childMetadata);
+                    PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId);
+                }                 
             }
         }
     }

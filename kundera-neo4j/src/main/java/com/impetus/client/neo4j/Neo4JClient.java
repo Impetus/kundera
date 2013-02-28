@@ -181,7 +181,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
         // Find Node for this particular entity
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        Node node = mapper.searchNode(key, m, graphDb, false);
+        Node node = mapper.searchNode(key, m, graphDb, true);
         if (node != null)
         {
             // Remove this particular node, if not already deleted in current
