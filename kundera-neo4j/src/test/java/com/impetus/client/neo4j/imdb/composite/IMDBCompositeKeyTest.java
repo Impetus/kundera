@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb.composite;
 
+import java.io.File;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -25,8 +26,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
 
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case for entities that hold composite keys  
@@ -61,8 +66,12 @@ public class IMDBCompositeKeyTest
     @After
     public void tearDown() throws Exception
     {   
-        em.close();             
-        emf.close();      
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        
+        em.close();
+        emf.close();
+           
     }  
     
     @Test

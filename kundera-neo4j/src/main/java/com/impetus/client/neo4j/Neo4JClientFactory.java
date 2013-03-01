@@ -96,14 +96,14 @@ public class Neo4JClientFactory extends GenericClientFactory
                 builder.setConfig(config);                
                 
                 graphDb = builder.newGraphDatabase();               
-                registerShutdownHook(graphDb);   
+                //registerShutdownHook(graphDb);   
             }        
         }        
         
         if(graphDb == null)
         {
             graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(datastoreFilePath);
-            registerShutdownHook(graphDb);           
+            //registerShutdownHook(graphDb);           
         }       
         
         return graphDb;
@@ -179,7 +179,7 @@ public class Neo4JClientFactory extends GenericClientFactory
      * Note however that you can’t create multiple instances pointing to the same database.
      * @param graphDb
      */
-    private static void registerShutdownHook(final GraphDatabaseService graphDb)
+    /*private static void registerShutdownHook(final GraphDatabaseService graphDb)
     {
         Runtime.getRuntime().addShutdownHook(new Thread()
         {
@@ -189,6 +189,6 @@ public class Neo4JClientFactory extends GenericClientFactory
                 graphDb.shutdown();
             }
         });
-    }   
+    } */  
 
 }

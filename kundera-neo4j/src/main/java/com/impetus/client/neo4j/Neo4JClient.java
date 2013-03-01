@@ -784,9 +784,17 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
-    private GraphDatabaseService getConnection()
+    public GraphDatabaseService getConnection()
     {
-        return ((Neo4JTransaction) resource).getGraphDb();
+        if(resource != null)
+        {
+            return ((Neo4JTransaction) resource).getGraphDb();
+        }
+        else
+        {
+            return factory.getConnection();
+        }
+        
     }
 
 }

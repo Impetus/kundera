@@ -16,7 +16,6 @@
 package com.impetus.client.neo4j.imdb;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +63,12 @@ public class IMDBBatchInsertionTest
     @After
     public void tearDown() throws Exception
     {        
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        
         em.close();
-        emf.close();    
+        emf.close();  
+   
     }  
     
     @Test

@@ -38,8 +38,7 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
     @Before
     public void setUp() throws Exception
     {           
-        emf = Persistence.createEntityManagerFactory(IMDB_PU);      
-        em = emf.createEntityManager();
+        init();
         
         //Prepare and insert data
         populateActors();
@@ -67,8 +66,8 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
             em.getTransaction().commit();
         }       
         
-        em.close();     
-        emf.close();      
+        em.close();
+        emf.close();
     } 
     
     @Test
