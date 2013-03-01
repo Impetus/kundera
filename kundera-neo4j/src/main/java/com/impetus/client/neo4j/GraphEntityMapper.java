@@ -681,7 +681,7 @@ public final class GraphEntityMapper
         Node node = null;
         if(nodesFound.hasNext())
         {
-            node = nodesFound.next();
+            node = nodesFound.next();            
         }
         else
         {
@@ -696,7 +696,10 @@ public final class GraphEntityMapper
         {
             return node;
         }
-        
+        catch(IllegalStateException e)
+        {
+            return node;
+        }        
         return getNonProxyNode(nodesFound);       
     }
 

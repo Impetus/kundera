@@ -226,13 +226,10 @@ public class ObjectUtils
                     Object targetRelationObject = null;
 
                     Class<?> relationObjectClass = relation.getProperty().getType();
-                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
-
-                    if (!Collection.class.isAssignableFrom(relationObjectClass))
-                    {
-                        targetRelationObject = deepCopyUsingMetadata(sourceRelationObject, copiedObjectMap);
-                    }
-                    else
+                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();                
+                    
+                    
+                    if (Collection.class.isAssignableFrom(relationObjectClass))
                     {
                         targetRelationObject = actualRelationObjectClass.newInstance();
                         Method m = actualRelationObjectClass.getMethod("add", Object.class);
@@ -242,7 +239,28 @@ public class ObjectUtils
                             Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
 
                             m.invoke(targetRelationObject, copyTargetRelObj);
-                        }
+                        }                  
+
+                    }
+                    else if(Map.class.isAssignableFrom(relationObjectClass))
+                    {
+                        targetRelationObject = actualRelationObjectClass.newInstance();
+                        Method m = actualRelationObjectClass.getMethod("put", new Class<?>[]{Object.class, Object.class});
+
+                        for (Object keyObj : ((Map) sourceRelationObject).keySet())
+                        {
+                            Object valObj = ((Map) sourceRelationObject).get(keyObj);                      
+                            
+                            Object copyTargetKeyObj = deepCopyUsingMetadata(keyObj, copiedObjectMap);
+                            Object copyTargetValueObj = deepCopyUsingMetadata(valObj, copiedObjectMap);
+
+                            m.invoke(targetRelationObject, new Object[]{copyTargetKeyObj, copyTargetValueObj});
+                        }                  
+
+                    }                    
+                    else
+                    {
+                        targetRelationObject = deepCopyUsingMetadata(sourceRelationObject, copiedObjectMap);
                     }
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
