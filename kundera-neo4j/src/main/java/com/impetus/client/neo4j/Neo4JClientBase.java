@@ -32,18 +32,19 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Base class for all Neo4J clients
+ * 
  * @author amresh.singh
  */
 public abstract class Neo4JClientBase extends ClientBase implements ClientPropertiesSetter
 {
     private static Log log = LogFactory.getLog(Neo4JClientBase.class);
-    
+
     /** Batch size. */
     protected int batchSize;
-    
+
     /** list of nodes for batch processing. */
     protected List<Node> nodes = new ArrayList<Node>();
-    
+
     protected boolean isEntityForNeo4J(EntityMetadata entityMetadata)
     {
         String persistenceUnit = entityMetadata.getPersistenceUnit();
@@ -54,9 +55,8 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
             return true;
         }
         return false;
-    }  
-    
-    
+    }
+
     /**
      * @param persistenceUnit
      * @param puProperties
@@ -93,7 +93,6 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
             nodes = null;
             nodes = new ArrayList<Node>();
         }
-    } 
-    
-    
+    }
+
 }

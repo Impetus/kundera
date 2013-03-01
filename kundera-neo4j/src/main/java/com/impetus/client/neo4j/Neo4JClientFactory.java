@@ -39,15 +39,15 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Factory of Neo4J client(s) 
+ * Factory of Neo4J client(s)
+ * 
  * @author amresh.singh
  */
 public class Neo4JClientFactory extends GenericClientFactory
-{    
+{
 
     /** The logger. */
     private static Logger log = LoggerFactory.getLogger(Neo4JClientFactory.class);
-    
 
     @Override
     public void initialize(Map<String, Object> puProperties)
@@ -57,55 +57,58 @@ public class Neo4JClientFactory extends GenericClientFactory
     }
 
     /**
-     * Create Neo4J Embedded Graph DB instance, that acts as a Neo4J connection repository for Neo4J
-     * If a Neo4j specfic client properties file is specified in persistence.xml, it initializes DB instance with those properties.
-     * Other DB instance is initialized with default properties. 
+     * Create Neo4J Embedded Graph DB instance, that acts as a Neo4J connection
+     * repository for Neo4J If a Neo4j specfic client properties file is
+     * specified in persistence.xml, it initializes DB instance with those
+     * properties. Other DB instance is initialized with default properties.
      */
     @Override
     protected Object createPoolOrConnection()
     {
-        if(log.isInfoEnabled()) log.info("Initializing Neo4J database connection...");
+        if (log.isInfoEnabled())
+            log.info("Initializing Neo4J database connection...");
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
         String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
-        if(StringUtils.isEmpty(datastoreFilePath))
+        if (StringUtils.isEmpty(datastoreFilePath))
         {
-            throw new PersistenceUnitConfigurationException("For Neo4J, it's mandatory to specify kundera.datastore.file.path property in persistence.xml");
+            throw new PersistenceUnitConfigurationException(
+                    "For Neo4J, it's mandatory to specify kundera.datastore.file.path property in persistence.xml");
         }
-        
+
         Neo4JSchemaMetadata nsmd = Neo4JPropertyReader.nsmd;
         ClientProperties cp = nsmd != null ? nsmd.getClientProperties() : null;
-        
+
         GraphDatabaseService graphDb = (GraphDatabaseService) getConnectionPoolOrConnection();
-        
+
         if (cp != null && graphDb == null)
         {
-            DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;      
-         
+            DataStore dataStore = nsmd != null ? nsmd.getDataStore() : null;
+
             Properties properties = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
                     .getProperties() : null;
-                    
-            if(properties != null)
+
+            if (properties != null)
             {
-                Map<String, String> config = new HashMap<String, String>((Map)properties);      
-                
+                Map<String, String> config = new HashMap<String, String>((Map) properties);
+
                 GraphDatabaseBuilder builder = new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(datastoreFilePath);
-                builder.setConfig(config);                
-                
-                graphDb = builder.newGraphDatabase();               
-                //registerShutdownHook(graphDb);   
-            }        
-        }        
-        
-        if(graphDb == null)
+                builder.setConfig(config);
+
+                graphDb = builder.newGraphDatabase();
+                // registerShutdownHook(graphDb);
+            }
+        }
+
+        if (graphDb == null)
         {
             graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(datastoreFilePath);
-            //registerShutdownHook(graphDb);           
-        }       
-        
+            // registerShutdownHook(graphDb);
+        }
+
         return graphDb;
     }
 
@@ -120,7 +123,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     {
         return true;
     }
-    
+
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
@@ -131,23 +134,24 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        //Not required for multithreaded clients
+        // Not required for multithreaded clients
     }
-    
+
     /**
      * Retrieves {@link GraphDatabaseService} instance
+     * 
      * @return
      */
     GraphDatabaseService getConnection()
     {
         return (GraphDatabaseService) getConnectionPoolOrConnection();
     }
-    
+
     void setConnection(GraphDatabaseService graphDb)
     {
         setConnectionPoolOrConnection(graphDb);
-    }    
-        
+    }
+
     /**
      * 
      */
@@ -159,7 +163,7 @@ public class Neo4JClientFactory extends GenericClientFactory
             propertyReader.read(getPersistenceUnit());
         }
     }
-    
+
     /**
      * @param puProperties
      */
@@ -170,25 +174,21 @@ public class Neo4JClientFactory extends GenericClientFactory
             this.externalProperties = puProperties;
         }
     }
-    
+
     /**
-     * Registers a shutdown hook for the Neo4j instance so that it
-     * shuts down nicely when the VM exits (even if you "Ctrl-C" the
-     * running example before it's completed)
-     * The EmbeddedGraphDatabase instance can be shared among multiple threads.
-     * Note however that you can’t create multiple instances pointing to the same database.
+     * Registers a shutdown hook for the Neo4j instance so that it shuts down
+     * nicely when the VM exits (even if you "Ctrl-C" the running example before
+     * it's completed) The EmbeddedGraphDatabase instance can be shared among
+     * multiple threads. Note however that you can’t create multiple instances
+     * pointing to the same database.
+     * 
      * @param graphDb
      */
-    /*private static void registerShutdownHook(final GraphDatabaseService graphDb)
-    {
-        Runtime.getRuntime().addShutdownHook(new Thread()
-        {
-            @Override
-            public void run()
-            {
-                graphDb.shutdown();
-            }
-        });
-    } */  
+    /*
+     * private static void registerShutdownHook(final GraphDatabaseService
+     * graphDb) { Runtime.getRuntime().addShutdownHook(new Thread() {
+     * 
+     * @Override public void run() { graphDb.shutdown(); } }); }
+     */
 
 }

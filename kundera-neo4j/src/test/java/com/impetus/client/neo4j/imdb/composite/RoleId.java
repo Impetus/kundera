@@ -20,16 +20,17 @@ import javax.persistence.Embeddable;
 
 /**
  * Class Holding Identity attributes for roles
+ * 
  * @author amresh.singh
  */
 @Embeddable
 public class RoleId
 {
-    @Column(name="FIRST_NAME")
+    @Column(name = "FIRST_NAME")
     private String firstName;
-    
-    @Column(name="LAST_NAME")
-    private String lastName;  
+
+    @Column(name = "LAST_NAME")
+    private String lastName;
 
     public RoleId()
     {
@@ -55,7 +56,8 @@ public class RoleId
     }
 
     /**
-     * @param firstName the firstName to set
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
@@ -71,13 +73,14 @@ public class RoleId
     }
 
     /**
-     * @param lastName the lastName to set
+     * @param lastName
+     *            the lastName to set
      */
     public void setLastName(String lastName)
     {
         this.lastName = lastName;
     }
-    
+
     public boolean equals(Object o)
     {
         if (!(o instanceof RoleId))
@@ -86,9 +89,9 @@ public class RoleId
         }
 
         RoleId that = (RoleId) o;
-        
+
         return (this.firstName == that.firstName || this.firstName.equals(that.firstName))
-                &&(this.lastName == that.lastName || this.lastName.equals(that.lastName));           
+                && (this.lastName == that.lastName || this.lastName.equals(that.lastName));
     }
 
     public int hashCode()
@@ -96,6 +99,6 @@ public class RoleId
         int h1 = (firstName == null) ? 0 : firstName.hashCode();
         int h2 = (lastName == null) ? 0 : lastName.hashCode();
         return h1 + 31 * h2;
-    }  
-    
+    }
+
 }

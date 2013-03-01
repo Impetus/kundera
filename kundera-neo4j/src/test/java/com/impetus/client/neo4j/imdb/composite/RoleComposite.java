@@ -26,32 +26,35 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Role Relationship entity class
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table
-@IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
+@IndexCollection(columns = { @Index(name = "roleType", type = "KEYS") })
 public class RoleComposite
 {
     @EmbeddedId
     private RoleId roleId;
-    
-    @Column(name="ROLE_TYPE")
-    private String roleType;   
-    
+
+    @Column(name = "ROLE_TYPE")
+    private String roleType;
+
     @OneToOne
     private ActorComposite actor;
-    
+
     @OneToOne
     private MovieComposite movie;
-    
-    public RoleComposite() {}
-    
+
+    public RoleComposite()
+    {
+    }
+
     public RoleComposite(RoleId id, String roleType)
     {
         this.roleId = id;
         this.roleType = roleType;
-    }   
+    }
 
     /**
      * @return the roleId
@@ -62,7 +65,8 @@ public class RoleComposite
     }
 
     /**
-     * @param roleId the roleId to set
+     * @param roleId
+     *            the roleId to set
      */
     public void setRoleId(RoleId roleId)
     {
@@ -78,7 +82,8 @@ public class RoleComposite
     }
 
     /**
-     * @param roleType the roleType to set
+     * @param roleType
+     *            the roleType to set
      */
     public void setRoleType(String roleType)
     {
@@ -94,7 +99,8 @@ public class RoleComposite
     }
 
     /**
-     * @param actor the actor to set
+     * @param actor
+     *            the actor to set
      */
     public void setActor(ActorComposite actor)
     {
@@ -110,14 +116,14 @@ public class RoleComposite
     }
 
     /**
-     * @param movie the movie to set
+     * @param movie
+     *            the movie to set
      */
     public void setMovie(MovieComposite movie)
     {
         this.movie = movie;
-    } 
-    
-    
+    }
+
     public boolean equals(Object o)
     {
         if (!(o instanceof RoleComposite))
@@ -126,10 +132,10 @@ public class RoleComposite
         }
 
         RoleComposite that = (RoleComposite) o;
-        
+
         return (this.roleId == that.roleId || this.roleId.equals(that.roleId))
-                &&(this.roleType == that.roleType || this.roleType.equals(that.roleType));   
-        
+                && (this.roleType == that.roleType || this.roleType.equals(that.roleType));
+
     }
 
     public int hashCode()
@@ -138,7 +144,5 @@ public class RoleComposite
         int h2 = (roleType == null) ? 0 : roleType.hashCode();
         return h1 + 31 * h2;
     }
-    
-    
 
 }

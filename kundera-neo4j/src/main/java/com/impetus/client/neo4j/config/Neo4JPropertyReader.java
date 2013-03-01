@@ -23,9 +23,9 @@ import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
 
-
 /**
- * XML Property reader for Neo4J specific configuration 
+ * XML Property reader for Neo4J specific configuration
+ * 
  * @author amresh.singh
  */
 public class Neo4JPropertyReader extends AbstractPropertyReader implements PropertyReader
@@ -36,15 +36,15 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
 
     /** Neo4J schema metadata instance */
     public static Neo4JSchemaMetadata nsmd;
-    
+
     public Neo4JPropertyReader()
     {
         nsmd = new Neo4JSchemaMetadata();
-    } 
-    
+    }
 
     /**
-     * Sets Client properties from XML configuration file into {@link Neo4JSchemaMetadata}
+     * Sets Client properties from XML configuration file into
+     * {@link Neo4JSchemaMetadata}
      */
     @Override
     protected void onXml(ClientProperties cp)
@@ -53,9 +53,8 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
         {
             nsmd.setClientProperties(cp);
         }
-    }    
-    
-    
+    }
+
     /**
      * Holds property related to Neo4J specific configuration file
      * 
@@ -65,6 +64,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
     public class Neo4JSchemaMetadata
     {
         private static final String NEO4J_DATASTORE = "neo4j";
+
         private ClientProperties clientProperties;
 
         public Neo4JSchemaMetadata()
@@ -90,7 +90,9 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
         }
 
         /**
-         * Returns datastore instance for given {@link ClientProperties} for Neo4j
+         * Returns datastore instance for given {@link ClientProperties} for
+         * Neo4j
+         * 
          * @return
          */
         public DataStore getDataStore()
@@ -106,7 +108,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
                 }
             }
             return null;
-        }       
+        }
     }
 
 }

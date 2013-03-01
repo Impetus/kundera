@@ -22,6 +22,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Cypher implementation of {@link Neo4JNativeQuery}
+ * 
  * @author amresh.singh
  */
 public class Neo4JCypherQuery implements Neo4JNativeQuery

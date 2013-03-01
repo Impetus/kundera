@@ -19,18 +19,19 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * Class Holding Identity attributes for actors 
+ * Class Holding Identity attributes for actors
+ * 
  * @author amresh.singh
  */
 @Embeddable
 public class ActorId
 {
-    @Column(name="ACTOR_ID_PREFIX")
+    @Column(name = "ACTOR_ID_PREFIX")
     private String prefix;
-    
-    @Column(name="ACTOR_ID_SUFFIX")
+
+    @Column(name = "ACTOR_ID_SUFFIX")
     private int suffix;
-    
+
     public ActorId()
     {
     }
@@ -55,7 +56,8 @@ public class ActorId
     }
 
     /**
-     * @param prefix the prefix to set
+     * @param prefix
+     *            the prefix to set
      */
     public void setPrefix(String prefix)
     {
@@ -71,13 +73,12 @@ public class ActorId
     }
 
     /**
-     * @param suffix the suffix to set
+     * @param suffix
+     *            the suffix to set
      */
     public void setSuffix(int suffix)
     {
         this.suffix = suffix;
     }
-    
-    
 
 }

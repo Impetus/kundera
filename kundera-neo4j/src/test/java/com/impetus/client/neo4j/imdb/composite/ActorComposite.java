@@ -31,38 +31,43 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Actor Node Entity class 
+ * Actor Node Entity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table   //Ignored for Neo4J
-@IndexCollection(columns={@Index(name = "name", type = "KEYS")})
+@Table
+// Ignored for Neo4J
+@IndexCollection(columns = { @Index(name = "name", type = "KEYS") })
 public class ActorComposite
 {
-    @EmbeddedId   
+    @EmbeddedId
     private ActorId actorId;
-    
-    @Column(name="ACTOR_NAME")
+
+    @Column(name = "ACTOR_NAME")
     private String name;
-    
-    public ActorComposite() {}
-    
+
+    public ActorComposite()
+    {
+    }
+
     public ActorComposite(ActorId actorId, String actorName)
     {
         this.actorId = actorId;
         this.name = actorName;
     }
-    
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
-    @MapKeyJoinColumn(name="ACTS_IN")
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @MapKeyJoinColumn(name = "ACTS_IN")
     private Map<RoleComposite, MovieComposite> movies;
-    
+
     public void addMovie(RoleComposite role, MovieComposite movie)
     {
-        if(movies == null) movies = new HashMap<RoleComposite, MovieComposite>();
+        if (movies == null)
+            movies = new HashMap<RoleComposite, MovieComposite>();
         movies.put(role, movie);
-    }   
+    }
 
     /**
      * @return the actorId
@@ -73,7 +78,8 @@ public class ActorComposite
     }
 
     /**
-     * @param actorId the actorId to set
+     * @param actorId
+     *            the actorId to set
      */
     public void setActorId(ActorId actorId)
     {
@@ -89,7 +95,8 @@ public class ActorComposite
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -105,11 +112,12 @@ public class ActorComposite
     }
 
     /**
-     * @param movies the movies to set
+     * @param movies
+     *            the movies to set
      */
     public void setMovies(Map<RoleComposite, MovieComposite> movies)
     {
         this.movies = movies;
-    }   
+    }
 
 }

@@ -28,14 +28,14 @@ import org.junit.Test;
  * @author amresh.singh
  */
 public class IMDBTransactionTest extends IMDBTestBase
-{  
+{
 
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
-    {        
+    {
         emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();
     }
@@ -45,17 +45,16 @@ public class IMDBTransactionTest extends IMDBTestBase
      */
     @After
     public void tearDown() throws Exception
-    {            
-        
+    {
+
         em.getTransaction().begin();
         em.remove(actor1);
         em.remove(actor2);
         em.getTransaction().commit();
 
         em.close();
-        emf.close();     
-    }  
-    
+        emf.close();
+    }
 
     @Test
     public void withTransaction()
@@ -117,7 +116,7 @@ public class IMDBTransactionTest extends IMDBTestBase
     {
         /** Prepare data */
         populateActors();
-        
+
         /** Insert records without a transaction */
         try
         {
@@ -188,5 +187,5 @@ public class IMDBTransactionTest extends IMDBTestBase
 
         }
 
-    }   
+    }
 }

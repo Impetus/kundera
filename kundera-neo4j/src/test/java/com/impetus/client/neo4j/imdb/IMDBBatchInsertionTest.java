@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,33 +27,36 @@ import javax.persistence.Persistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Test case demonstrating batch insertion in Neo4J 
+ * Test case demonstrating batch insertion in Neo4J
+ * 
  * @author amresh.singh
  */
 public class IMDBBatchInsertionTest
 {
     private static final String IMDB_PU = "imdb";
+
     EntityManagerFactory emf;
-    EntityManager em; 
-    final int n = 4;   //Number of actors
-    
+
+    EntityManager em;
+
+    final int n = 4; // Number of actors
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
-    {      
+    {
         Map properties = new HashMap();
-        properties.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");        
-        emf = Persistence.createEntityManagerFactory(IMDB_PU, properties);        
-        em = emf.createEntityManager();        
+        properties.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
+        emf = Persistence.createEntityManagerFactory(IMDB_PU, properties);
+        em = emf.createEntityManager();
     }
 
     /**
@@ -62,105 +64,95 @@ public class IMDBBatchInsertionTest
      */
     @After
     public void tearDown() throws Exception
-    {        
+    {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
-        
+
         em.close();
-        emf.close();  
-   
-    }  
-    
+        emf.close();
+
+    }
+
     @Test
     public void batchTest()
     {
-        
-        List<Actor> actors = prepareData(n);       
-        
-        /*for(Actor actor : actors)
-        {
-            if(actor != null)
-            {
-                em.persist(actor);
-            }
-        }     
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
-        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);   
-        try
-        {
-            if(datastoreFilePath != null) 
-            {                
-                FileUtils.deleteRecursively(new File(datastoreFilePath));                
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        } */     
-        
-        
-        /*for(int i = 1; i <= n; i++)
-        {
-            Actor actor = em.find(Actor.class, i);
-            Assert.assertNotNull(actor);
-            Assert.assertEquals(i, actor.getId());
-            Assert.assertEquals("Actor " + i, actor.getName());
-            
-            Assert.assertNotNull(actor.getMovies());
-            Assert.assertFalse(actor.getMovies().isEmpty());
-           // Assert.assertEquals(2, actor.getMovies().size());
-        }*/     
+
+        List<Actor> actors = prepareData(n);
+
+        /*
+         * for(Actor actor : actors) { if(actor != null) { em.persist(actor); }
+         * } PersistenceUnitMetadata puMetadata =
+         * KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU); String
+         * datastoreFilePath =
+         * puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH
+         * ); try { if(datastoreFilePath != null) {
+         * FileUtils.deleteRecursively(new File(datastoreFilePath)); } } catch
+         * (IOException e) { e.printStackTrace(); }
+         */
+
+        /*
+         * for(int i = 1; i <= n; i++) { Actor actor = em.find(Actor.class, i);
+         * Assert.assertNotNull(actor); Assert.assertEquals(i, actor.getId());
+         * Assert.assertEquals("Actor " + i, actor.getName());
+         * 
+         * Assert.assertNotNull(actor.getMovies());
+         * Assert.assertFalse(actor.getMovies().isEmpty()); //
+         * Assert.assertEquals(2, actor.getMovies().size()); }
+         */
     }
-    
+
     /**
      * n = number of Actors
+     * 
      * @param n
      * @return
      */
     private List<Actor> prepareData(int n)
     {
-        List<Actor> actors = new ArrayList<Actor>(); actors.add(0, null);
-        List<Movie> movies = new ArrayList<Movie>(); movies.add(0, null);
-        List<Role> roles = new ArrayList<Role>();    roles.add(0, null);
-        
-        
-        for(int i = 1; i <= (n+1); i++)
+        List<Actor> actors = new ArrayList<Actor>();
+        actors.add(0, null);
+        List<Movie> movies = new ArrayList<Movie>();
+        movies.add(0, null);
+        List<Role> roles = new ArrayList<Role>();
+        roles.add(0, null);
+
+        for (int i = 1; i <= (n + 1); i++)
         {
-            Movie movie = new Movie("" + i, "Movie " + i, (2000+i));
+            Movie movie = new Movie("" + i, "Movie " + i, (2000 + i));
             movies.add(i, movie);
         }
-        
-        for(int i = 1; i <= 2*n; i++)
+
+        for (int i = 1; i <= 2 * n; i++)
         {
             Role role = new Role("Role " + i, "Role Type " + i);
             roles.add(i, role);
         }
-        
-        for(int i = 1; i <= n; i++)
+
+        for (int i = 1; i <= n; i++)
         {
             Actor actor = new Actor(i, "Actor " + i);
-            actors.add(i, actor);      
-            
-        } 
-        
-        for(int i = 1; i <=n; i++)
+            actors.add(i, actor);
+
+        }
+
+        for (int i = 1; i <= n; i++)
         {
             Actor actor = actors.get(i);
-            actor.addMovie(roles.get(2*i -1), movies.get(i)); 
-            actor.addMovie(roles.get(2 * i), movies.get(i + 1));           
-            
-            if(i == 1)
+            actor.addMovie(roles.get(2 * i - 1), movies.get(i));
+            actor.addMovie(roles.get(2 * i), movies.get(i + 1));
+
+            if (i == 1)
             {
                 movies.get(i).addActor(roles.get(i), actor);
             }
             else
             {
-                movies.get(i).addActor(roles.get(2*i - 2), actors.get(i - 1));
-                movies.get(i).addActor(roles.get(2*i -1), actors.get(i));
-            }            
+                movies.get(i).addActor(roles.get(2 * i - 2), actors.get(i - 1));
+                movies.get(i).addActor(roles.get(2 * i - 1), actors.get(i));
+            }
         }
-        movies.get(n + 1).addActor(roles.get(2 * n), actors.get(n));      
-        
+        movies.get(n + 1).addActor(roles.get(2 * n), actors.get(n));
+
         return actors;
     }
 

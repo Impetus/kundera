@@ -46,19 +46,23 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Test case for {@link GraphEntityMapper} 
+ * Test case for {@link GraphEntityMapper}
+ * 
  * @author amresh.singh
  */
 public class GraphEntityMapperTest
-{   
+{
     static EntityManagerFactory emf;
-    static EntityManager em;   
+
+    static EntityManager em;
+
     static Neo4JClient client;
-    
+
     GraphEntityMapper mapper;
+
     GraphDatabaseService graphDb;
-    
-    final static String PU = "neo4jTest";  
+
+    final static String PU = "neo4jTest";
 
     /**
      * @throws java.lang.Exception
@@ -66,10 +70,10 @@ public class GraphEntityMapperTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(PU);      
-        em = emf.createEntityManager();   
+        emf = Persistence.createEntityManagerFactory(PU);
+        em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        client = (Neo4JClient)clients.get(PU);    
+        client = (Neo4JClient) clients.get(PU);
     }
 
     /**
@@ -79,11 +83,11 @@ public class GraphEntityMapperTest
     public static void tearDownAfterClass() throws Exception
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(PU);
-        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);     
-        
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+
         em.close();
         emf.close();
-        
+
         if (datastoreFilePath != null)
             FileUtils.deleteRecursively(new File(datastoreFilePath));
     }
@@ -95,7 +99,7 @@ public class GraphEntityMapperTest
     public void setUp() throws Exception
     {
         mapper = new GraphEntityMapper(new Neo4JIndexManager());
-        graphDb = client.getConnection();        
+        graphDb = client.getConnection();
     }
 
     /**
@@ -108,53 +112,59 @@ public class GraphEntityMapperTest
         graphDb = null;
     }
 
-
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#getNodeFromEntity(java.lang.Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, boolean)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#getNodeFromEntity(java.lang.Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, boolean)}
+     * .
      */
     @Test
     public void testGetNodeFromEntity()
     {
         Actor actor = new Actor();
         actor.setId(1);
-        actor.setName("Keenu Reeves");        
-        
+        actor.setName("Keenu Reeves");
+
         Transaction tx = graphDb.beginTx();
-        Node node = mapper.getNodeFromEntity(actor, graphDb, KunderaMetadataManager.getEntityMetadata(Actor.class), false);
+        Node node = mapper.getNodeFromEntity(actor, graphDb, KunderaMetadataManager.getEntityMetadata(Actor.class),
+                false);
         Assert.assertNotNull(node);
         Assert.assertEquals(1, node.getProperty("ACTOR_ID"));
         Assert.assertEquals("Keenu Reeves", node.getProperty("ACTOR_NAME"));
-        
+
         node.delete();
-        
+
         tx.success();
         tx.finish();
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#createProxyNode(java.lang.Object, java.lang.Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#createProxyNode(java.lang.Object, java.lang.Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata)}
+     * .
      */
     @Test
     public void testCreateProxyNode()
     {
         EntityMetadata sourceM = KunderaMetadataManager.getEntityMetadata(Actor.class);
         EntityMetadata targetM = KunderaMetadataManager.getEntityMetadata(Movie.class);
-        
+
         Transaction tx = graphDb.beginTx();
         Node proxyNode = mapper.createProxyNode(1, "A", graphDb, sourceM, targetM);
-        
+
         Assert.assertNotNull(proxyNode);
         Assert.assertEquals(1, proxyNode.getProperty("ACTOR_ID"));
         Assert.assertEquals("A", proxyNode.getProperty("MOVIE_ID"));
         Assert.assertEquals("$PROXY_NODE$", proxyNode.getProperty("$NODE_TYPE$"));
-        
+
         proxyNode.delete();
         tx.success();
         tx.finish();
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#getEntityFromNode(org.neo4j.graphdb.Node, com.impetus.kundera.metadata.model.EntityMetadata)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#getEntityFromNode(org.neo4j.graphdb.Node, com.impetus.kundera.metadata.model.EntityMetadata)}
+     * .
      */
     @Test
     public void testGetEntityFromNode()
@@ -163,21 +173,23 @@ public class GraphEntityMapperTest
         Node node = graphDb.createNode();
         node.setProperty("ACTOR_ID", 1);
         node.setProperty("ACTOR_NAME", "Amresh Singh");
-        
-        Actor actor = (Actor)mapper.getEntityFromNode(node, KunderaMetadataManager.getEntityMetadata(Actor.class));
-        
+
+        Actor actor = (Actor) mapper.getEntityFromNode(node, KunderaMetadataManager.getEntityMetadata(Actor.class));
+
         Assert.assertNotNull(actor);
         Assert.assertEquals(1, actor.getId());
         Assert.assertEquals("Amresh Singh", actor.getName());
-        
+
         node.delete();
         tx.success();
         tx.finish();
-        
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#getEntityFromRelationship(org.neo4j.graphdb.Relationship, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.Relation)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#getEntityFromRelationship(org.neo4j.graphdb.Relationship, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.Relation)}
+     * .
      */
     @Test
     public void testGetEntityFromRelationship()
@@ -186,92 +198,117 @@ public class GraphEntityMapperTest
         Node sourceNode = graphDb.createNode();
         sourceNode.setProperty("ACTOR_ID", 1);
         sourceNode.setProperty("ACTOR_NAME", "Amresh Singh");
-        
+
         Node targetNode = graphDb.createNode();
         targetNode.setProperty("MOVIE_ID", "M1");
         targetNode.setProperty("TITLE", "Matrix Reloaded");
         targetNode.setProperty("YEAR", 1999);
-        
+
         Relationship rel = sourceNode.createRelationshipTo(targetNode, DynamicRelationshipType.withName("ACTS_IN"));
         rel.setProperty("ROLE_NAME", "Neo");
         rel.setProperty("ROLE_TYPE", "Lead Actor");
-        
-        Role role = (Role)mapper.getEntityFromRelationship(rel, KunderaMetadataManager.getEntityMetadata(Actor.class),
+
+        Role role = (Role) mapper.getEntityFromRelationship(rel, KunderaMetadataManager.getEntityMetadata(Actor.class),
                 KunderaMetadataManager.getEntityMetadata(Actor.class).getRelation("movies"));
-        
+
         Assert.assertNotNull(role);
         Assert.assertEquals("Neo", role.getRoleName());
         Assert.assertEquals("Lead Actor", role.getRoleType());
-        
+
         rel.delete();
         sourceNode.delete();
         targetNode.delete();
-        
+
         tx.success();
         tx.finish();
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#createNodeProperties(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#createNodeProperties(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)}
+     * .
      */
     @Test
     public void testCreateNodeProperties()
     {
-      
+        Actor actor = new Actor();
+        actor.setId(1);
+        actor.setName("Keenu Reeves");
+
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Actor.class);
+
+        Map<String, Object> props = mapper.createNodeProperties(actor, m);
+        Assert.assertNotNull(props);
+        Assert.assertFalse(props.isEmpty());
+        Assert.assertEquals(1, props.get("ACTOR_ID"));
+        Assert.assertEquals("Keenu Reeves", props.get("ACTOR_NAME"));
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#populateRelationshipProperties(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata, org.neo4j.graphdb.Relationship, java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#populateRelationshipProperties(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata, org.neo4j.graphdb.Relationship, java.lang.Object)}
+     * .
      */
     @Test
     public void testPopulateRelationshipProperties()
     {
-      
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#createRelationshipProperties(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#createRelationshipProperties(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object)}
+     * .
      */
     @Test
     public void testCreateRelationshipProperties()
     {
-      
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#toNeo4JProperty(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#toNeo4JProperty(java.lang.Object)}
+     * .
      */
     @Test
     public void testToNeo4JProperty()
     {
-       
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#fromNeo4JObject(java.lang.Object, java.lang.reflect.Field)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#fromNeo4JObject(java.lang.Object, java.lang.reflect.Field)}
+     * .
      */
     @Test
     public void testFromNeo4JObject()
     {
-     
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#searchNode(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, org.neo4j.graphdb.GraphDatabaseService, boolean)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#searchNode(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, org.neo4j.graphdb.GraphDatabaseService, boolean)}
+     * .
      */
     @Test
     public void testSearchNode()
     {
-       
+
     }
 
     /**
-     * Test method for {@link com.impetus.client.neo4j.GraphEntityMapper#getMatchingNodeFromIndexHits(org.neo4j.graphdb.index.IndexHits, boolean)}.
+     * Test method for
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#getMatchingNodeFromIndexHits(org.neo4j.graphdb.index.IndexHits, boolean)}
+     * .
      */
     @Test
     public void testGetMatchingNodeFromIndexHits()
     {
-       
+
     }
 
 }

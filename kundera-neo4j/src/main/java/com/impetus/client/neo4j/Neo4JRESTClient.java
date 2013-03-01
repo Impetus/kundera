@@ -26,9 +26,10 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
- * Client implementation of Neo4J using Neo4J REST API
- * (See Neo4j REST API in http://www.neo4j.org/develop/drivers) 
- * (See http://docs.neo4j.org/chunked/milestone/server-java-rest-client-example.html)
+ * Client implementation of Neo4J using Neo4J REST API (See Neo4j REST API in
+ * http://www.neo4j.org/develop/drivers) (See
+ * http://docs.neo4j.org/chunked/milestone/server-java-rest-client-example.html)
+ * 
  * @author amresh.singh
  */
 public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuery>
@@ -39,13 +40,12 @@ public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuer
     private Neo4JRESTClientFactory factory;
 
     private EntityReader reader;
-    
+
     Neo4JRESTClient(final Neo4JRESTClientFactory factory)
     {
         this.factory = factory;
         reader = new Neo4JEntityReader();
     }
-    
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
@@ -126,5 +126,5 @@ public class Neo4JRESTClient extends Neo4JClientBase implements Client<Neo4JQuer
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
     }
-    
+
 }

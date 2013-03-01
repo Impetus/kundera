@@ -16,7 +16,8 @@
 package com.impetus.client.neo4j.config;
 
 /**
- * Different index modes available in Neo4J 
+ * Different index modes available in Neo4J
+ * 
  * @author amresh.singh
  */
 public enum IndexMode

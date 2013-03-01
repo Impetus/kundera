@@ -17,6 +17,7 @@ package com.impetus.client.neo4j;
 
 /**
  * Provides functionality for setting Client properties for Neo4J
+ * 
  * @author amresh.singh
  */
 public class Neo4JClientProperties

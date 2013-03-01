@@ -52,7 +52,8 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        if(log.isInfoEnabled()) log.info("Getting Service root for Neo4J REST connection");
+        if (log.isInfoEnabled())
+            log.info("Getting Service root for Neo4J REST connection");
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
@@ -76,22 +77,23 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
             port = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         }
 
-        final String SERVER_ROOT_URI = "http://" + host + ":" + port + "/db/data/"; 
-        
-        
+        final String SERVER_ROOT_URI = "http://" + host + ":" + port + "/db/data/";
+
         WebResource resource = (WebResource) getConnectionPoolOrConnection();
-        
-        if(resource == null)
+
+        if (resource == null)
         {
             resource = com.sun.jersey.api.client.Client.create().resource(SERVER_ROOT_URI);
-        }       
-        
+        }
+
         WebResource.Builder builder = resource.path(SERVER_ROOT_URI).accept(MediaType.APPLICATION_JSON);
-        
+
         ClientResponse response = (ClientResponse) builder.get(ClientResponse.class);
-        
-        if(response.getStatus() == 200) {
-            if(log.isInfoEnabled()) log.info(String.format("GET on [%s], status code [%d]", SERVER_ROOT_URI, response.getStatus()));            
+
+        if (response.getStatus() == 200)
+        {
+            if (log.isInfoEnabled())
+                log.info(String.format("GET on [%s], status code [%d]", SERVER_ROOT_URI, response.getStatus()));
         }
         else
         {
@@ -114,7 +116,7 @@ public class Neo4JRESTClientFactory extends GenericClientFactory
     {
         return true;
     }
-    
+
     @Override
     public void destroy()
     {

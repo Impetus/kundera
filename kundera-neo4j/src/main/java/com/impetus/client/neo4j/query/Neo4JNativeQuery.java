@@ -22,11 +22,12 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Interface for Neo4J Native queries
+ * 
  * @author amresh.singh
  */
 public interface Neo4JNativeQuery
-{    
-    
+{
+
     public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m);
 
 }

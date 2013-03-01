@@ -34,10 +34,11 @@ public class Neo4JNativeQueryFactory
         {
             return new Neo4JCypherQuery();
         }
-        /*else if (queryType.equals(Neo4JQueryType.GREMLIN))
-        {
-
-        }*/
+        /*
+         * else if (queryType.equals(Neo4JQueryType.GREMLIN)) {
+         * 
+         * }
+         */
         else
         {
             throw new QueryHandlerException("Invalid Query Type:" + queryType

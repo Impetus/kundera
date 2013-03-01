@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
-import javax.transaction.NotSupportedException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -52,7 +51,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
-import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -60,7 +58,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AssociationBuilder;
 import com.impetus.kundera.persistence.EntityReader;
@@ -149,7 +146,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         List entities = new ArrayList<E>();
-        for(Object key : keys)
+        for (Object key : keys)
         {
             entities.add(find(entityClass, key));
         }
@@ -313,11 +310,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         else
                         {
                             // Create Proxy nodes for insert requests
-                            if(!isUpdate)
+                            if (!isUpdate)
                             {
                                 targetNode = mapper.createProxyNode(id, targetNodeKey, graphDb, entityMetadata,
                                         targetNodeMetadata);
-                            }                            
+                            }
                         }
 
                         if (targetNode != null)
@@ -541,32 +538,33 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
                     for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
                             DynamicRelationshipType.withName(relation.getJoinColumnName())))
-                    {                        
-                        if(relationship == null)
+                    {
+                        if (relationship == null)
                         {
                             continue;
                         }
-                        
-                        //Target Entity
+
+                        // Target Entity
                         Node endNode = relationship.getEndNode();
-                        if(endNode == null)
+                        if (endNode == null)
                         {
                             continue;
                         }
                         Object targetEntity = nodeIdToEntityMap.get(endNode.getId());
-                        if(targetEntity == null)
+                        if (targetEntity == null)
                         {
                             targetEntity = mapper.getEntityFromNode(endNode, targetEntityMetadata);
-                        }                        
-                        
-                        //Relationship Entity
+                        }
+
+                        // Relationship Entity
                         Object relationshipEntity = mapper.getEntityFromRelationship(relationship, m, relation);
-                        
-                        //If this relationship is bidirectional, put source entity into Map field for target entity                        
+
+                        // If this relationship is bidirectional, put source
+                        // entity into Map field for target entity
                         Field bidirectionalField = new AssociationBuilder().getBiDirectionalField(m.getEntityClazz(),
                                 targetEntityClass);
                         Map<Object, Object> sourceEntitiesMap = new HashMap<Object, Object>();
-                        if(bidirectionalField != null)
+                        if (bidirectionalField != null)
                         {
                             for (Relationship incomingRelationship : endNode.getRelationships(Direction.INCOMING,
                                     DynamicRelationshipType.withName(relation.getJoinColumnName())))
@@ -581,8 +579,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                 sourceEntitiesMap.put(relationshipEntity, sourceEntity);
                             }
                             PropertyAccessorHelper.set(targetEntity, bidirectionalField, sourceEntitiesMap);
-                        }              
-                        
+                        }
 
                         // Set references to Target and owning entity in
                         // relationship entity
@@ -713,10 +710,10 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
             for (Node node : hits)
             {
-                if(node != null)
+                if (node != null)
                 {
                     entities.add(getEntityWithAssociationFromNode(m, node));
-                }                
+                }
             }
         }
         else
@@ -753,7 +750,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         Map<Long, Object> nodeIdToEntityMap = new HashMap<Long, Object>();
 
         Object entity = mapper.getEntityFromNode(node, m);
-        
+
         nodeIdToEntityMap.put(node.getId(), entity);
         populateRelations(m, entity, relationMap, node, nodeIdToEntityMap);
 
@@ -786,7 +783,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
     public GraphDatabaseService getConnection()
     {
-        if(resource != null)
+        if (resource != null)
         {
             return ((Neo4JTransaction) resource).getGraphDb();
         }
@@ -794,7 +791,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         {
             return factory.getConnection();
         }
-        
+
     }
 
 }

@@ -15,19 +15,10 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.io.File;
-
-import javax.persistence.Persistence;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
-
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case using IMDB example for CRUD Demonstrates M-2-M Association between
