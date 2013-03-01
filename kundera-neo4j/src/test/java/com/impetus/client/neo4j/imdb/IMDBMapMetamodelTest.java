@@ -16,8 +16,6 @@
 package com.impetus.client.neo4j.imdb;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.Metamodel;
 
@@ -34,14 +32,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * Test case for validating correctness of Metamodel for Map data type 
  * @author amresh.singh
  */
-public class IMDBMapMetamodelTest
+public class IMDBMapMetamodelTest extends IMDBTestBase
 {
-
-    EntityManagerFactory emf;
-    EntityManager em;   
-    
-
-
     /**
      * @throws java.lang.Exception
      */

@@ -26,7 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.neo4j.imdb.Actor;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**

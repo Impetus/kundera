@@ -15,12 +15,18 @@
  */
 package com.impetus.client.neo4j.query;
 
+import java.util.List;
+
+import com.impetus.client.neo4j.Neo4JClient;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
- * Enum for different native query types supported in Neo4J 
- * Currently, only Lucene is supported, rest are for future use.
+ * Interface for Neo4J Native queries
  * @author amresh.singh
  */
-public enum Neo4JQueryTypes
-{
-    LUCENE, CYPHER, GREMLIN
+public interface Neo4JNativeQuery
+{    
+    
+    public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m);
+
 }

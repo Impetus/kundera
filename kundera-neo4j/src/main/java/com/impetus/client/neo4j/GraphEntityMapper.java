@@ -18,6 +18,7 @@ package com.impetus.client.neo4j;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -25,16 +26,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.Column;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
@@ -49,6 +53,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -58,7 +63,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public final class GraphEntityMapper
 {     
-    private static final String COMPOSITE_KEY_SEPARATOR = "-";
+    /** Separator between constituents of composite key*/
+    private static final String COMPOSITE_KEY_SEPARATOR = "$CKS$";
     
     private static final String PROXY_NODE_TYPE_KEY = "$NODE_TYPE$";
     private static final String PROXY_NODE_VALUE = "$PROXY_NODE$";
@@ -75,34 +81,45 @@ public final class GraphEntityMapper
 
     /**
      * Fetches(and converts) {@link Node} instance from Entity object
-     * 
+     * If it's a update operation, node is searched and attributes populated
+     * Otherwise Node is created into database (replacing any existing node) with
+     * attributes populated
      */
-    public Node fromEntity(Object entity, List<RelationHolder> relations, GraphDatabaseService graphDb, EntityMetadata m, boolean isUpdate)
+    public Node getNodeFromEntity(Object entity, GraphDatabaseService graphDb, EntityMetadata m, boolean isUpdate)
     {        
         
         //Construct top level node first, making sure unique ID in the index
         Node node = null;
+        Object key = PropertyAccessorHelper.getId(entity, m);
         if(! isUpdate)
         {
-            node = getOrCreateNodeWithUniqueFactory(entity, m, graphDb);
+            node = getOrCreateNodeWithUniqueFactory(entity, key, m, graphDb);
         }
         else
         {
-            Object key = PropertyAccessorHelper.getId(entity, m);
-            node = searchNode(key, m, graphDb);
+            
+            node = searchNode(key, m, graphDb, true);
         }        
         
-        populateNodeProperties(entity, m, node);  
+        if(node != null)
+        {
+            populateNodeProperties(entity, m, node);
+        }         
         
         return node;
     }  
     
+    /**
+     * Create "Proxy" nodes into Neo4J.
+     * Proxy nodes are defined as nodes in Neo4J that refer to a record in some other database.
+     * They cater to polyglot persistence cases.
+     */
     public Node createProxyNode(Object sourceNodeId, Object targetNodeId, GraphDatabaseService graphDb, 
             EntityMetadata sourceEntityMetadata, EntityMetadata targetEntityMetadata)
     {
         
         String sourceNodeIdColumnName = ((AbstractAttribute) sourceEntityMetadata.getIdAttribute()).getJPAColumnName();
-        String targetNodeIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();;
+        String targetNodeIdColumnName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
         
         Node node = graphDb.createNode();
         node.setProperty(PROXY_NODE_TYPE_KEY, PROXY_NODE_VALUE);
@@ -111,11 +128,13 @@ public final class GraphEntityMapper
         return node;
     }
 
+    
+    
     /**
      * 
      * Converts a {@link Node} instance to entity object
      */
-    public Object toEntity(Node node, EntityMetadata m)
+    public Object getEntityFromNode(Node node, EntityMetadata m)
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -131,7 +150,7 @@ public final class GraphEntityMapper
             entity = m.getEntityClazz().newInstance();
             
             for(Attribute attribute : attributes)
-            {       
+            {
                 Field field = (Field) attribute.getJavaMember();  
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 
@@ -152,13 +171,17 @@ public final class GraphEntityMapper
         catch (InstantiationException e)
         {            
             log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
-            throw new EntityReaderException("Error while converting Neo4j object to entity");
+            throw new EntityReaderException("Error while converting Neo4j object to entity", e);
         }
         catch (IllegalAccessException e)
         {
             log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
-            throw new EntityReaderException("Error while converting Neo4j object to entity");
-        }  
+            throw new EntityReaderException("Error while converting Neo4j object to entity", e);
+        } catch(NotFoundException e)
+        {
+            log.info(e.getMessage());
+            return null;
+        }
         
         
         return entity;
@@ -168,7 +191,7 @@ public final class GraphEntityMapper
      * 
      * Converts a {@link Relationship} object to corresponding entity object
      */
-    public Object toEntity(Relationship relationship, EntityMetadata topLevelEntityMetadata, Relation relation)
+    public Object getEntityFromRelationship(Relationship relationship, EntityMetadata topLevelEntityMetadata, Relation relation)
     {
         EntityMetadata relationshipEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getMapKeyJoinClass());
         
@@ -223,12 +246,48 @@ public final class GraphEntityMapper
     }
     
     /**
+     * Creates a Map containing all properties (and their values) for a given entity
+     * @param entity
+     * @param m
+     * @return
+     */
+    public Map<String, Object> createNodeProperties(Object entity, EntityMetadata m)
+    {
+        Map<String, Object> props = new HashMap<String, Object>();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());      
+        
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        //Iterate over entity attributes
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
+        for(Attribute attribute : attributes)
+        {       
+            Field field = (Field) attribute.getJavaMember();
+            
+            //Set Node level properties
+            if(! attribute.isCollection() && ! attribute.isAssociation())
+            {
+                
+                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
+                Object value = PropertyAccessorHelper.getObject(entity, field);                
+                if(value != null)
+                {
+                    props.put(columnName, toNeo4JProperty(value));                    
+                }                                
+            }           
+        }
+        return props;        
+    }
+    
+    /**
      * Populates Node properties from Entity object
      * @param entity
      * @param m
      * @param node
      */
-    public void populateNodeProperties(Object entity, EntityMetadata m, Node node)
+    private void populateNodeProperties(Object entity, EntityMetadata m, Node node)
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -282,7 +341,7 @@ public final class GraphEntityMapper
                 {
                     //Populate Embedded attribute value into relationship 
                     Object id = PropertyAccessorHelper.getId(relationshipObj, relMetadata);
-                    Object serializedIdValue = serializeIdAttributeValue(relMetadata, id);
+                    Object serializedIdValue = serializeIdAttributeValue(relMetadata, metaModel, id);
                     relationship.setProperty(columnName, serializedIdValue);
                     
                     //Populate attributes of embedded fields into relationship
@@ -308,41 +367,7 @@ public final class GraphEntityMapper
        
     } 
     
-    /**
-     * Creates a Map containing all properties (and their values) for a given entity
-     * @param entity
-     * @param m
-     * @return
-     */
-    public Map<String, Object> createNodeProperties(Object entity, EntityMetadata m)
-    {
-        Map<String, Object> props = new HashMap<String, Object>();
-        
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());      
-        
-        EntityType entityType = metaModel.entity(m.getEntityClazz());
-        
-        //Iterate over entity attributes
-        Set<Attribute> attributes = entityType.getSingularAttributes();     
-        for(Attribute attribute : attributes)
-        {       
-            Field field = (Field) attribute.getJavaMember();
-            
-            //Set Node level properties
-            if(! attribute.isCollection() && ! attribute.isAssociation())
-            {
-                
-                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
-                Object value = PropertyAccessorHelper.getObject(entity, field);                
-                if(value != null)
-                {
-                    props.put(columnName, toNeo4JProperty(value));                    
-                }                                
-            }           
-        }
-        return props;        
-    }
+    
     
     /**
      * Creates a Map containing all properties (and their values) for a given relationship entity
@@ -354,19 +379,23 @@ public final class GraphEntityMapper
     public Map<String, Object> createRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata targetEntityMetadata,
             Object relationshipEntity)
     {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());     
+        EntityType entityType = metaModel.entity(relationshipEntity.getClass());
         Map<String, Object> relationshipProperties = new HashMap<String, Object>();
         
-        for (Field f : relationshipEntity.getClass().getDeclaredFields())
-        {
+        Set<Attribute> attributes = entityType.getSingularAttributes();     
+        for(Attribute attribute : attributes)
+        {       
+            Field f = (Field) attribute.getJavaMember();
             if (!f.getType().equals(entityMetadata.getEntityClazz())
                     && !f.getType().equals(targetEntityMetadata.getEntityClazz()))
-            {
-                String relPropertyName = f.getAnnotation(Column.class) != null ? f.getAnnotation(
-                        Column.class).name() : f.getName();
+            {                
+                String relPropertyName = ((AbstractAttribute) attribute).getJPAColumnName();
                 Object value = PropertyAccessorHelper.getObject(relationshipEntity, f);                                            
-                relationshipProperties.put(relPropertyName, toNeo4JProperty(value));                                           
+                relationshipProperties.put(relPropertyName, toNeo4JProperty(value));  
             }
-        }
+        }        
         return relationshipProperties;
     }
     
@@ -374,15 +403,12 @@ public final class GraphEntityMapper
      * 
      * Gets (if available) or creates a node for the given entity
      */
-    private Node getOrCreateNodeWithUniqueFactory(final Object entity, final EntityMetadata m, GraphDatabaseService graphDb)
-    {
-        final Object id = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());       
-        final String idColumnName = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();   
-       
-         
-        
+    private Node getOrCreateNodeWithUniqueFactory(final Object entity, final Object id, final EntityMetadata m, GraphDatabaseService graphDb)
+    {               
+        final String idColumnName = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();       
         final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());      
+        final String idUniqueValue = serializeIdAttributeValue(m, metaModel, id);
         
         UniqueFactory<Node> factory = new UniqueFactory.UniqueNodeFactory(graphDb, m.getIndexName())
         {            
@@ -395,8 +421,7 @@ public final class GraphEntityMapper
                 //Set Embeddable ID attribute
                 if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                 {                   
-                    //Populate embedded field value in serialized format
-                    String idUniqueValue = serializeIdAttributeValue(m, id);
+                    //Populate embedded field value in serialized format                    
                     created.setProperty(idColumnName, idUniqueValue);
                     
                     //Populated all other attributes of embedded into this node 
@@ -419,8 +444,7 @@ public final class GraphEntityMapper
         };        
         
         if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-        {                      
-            String idUniqueValue = serializeIdAttributeValue(m, id);
+        {           
             return factory.getOrCreate(idColumnName, idUniqueValue);
         }
         else
@@ -431,34 +455,43 @@ public final class GraphEntityMapper
     }
 
     /**
+     * Prepares ID column value for embedded IDs by combining its attributes
      * @param m
      * @param id
      * @param metaModel
      * @return
      */
-    private String serializeIdAttributeValue(final EntityMetadata m, Object id)
-    {/*
-        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit()); */ 
-        Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
+    private String serializeIdAttributeValue(final EntityMetadata m, MetamodelImpl metaModel, Object id)
+    { 
+        if (! metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            return null;
+        }
         
+        Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();        
         String idUniqueValue = "";
                
         for(Field embeddedField : embeddableClass.getDeclaredFields())
-        {
-            /*Column columnAnn = embeddedField.getAnnotation(Column.class);
-            String columnName = columnAnn == null || columnAnn.name() == null ? embeddedField.getName() : columnAnn.name();*/         
+        {                    
             
             Object value = PropertyAccessorHelper.getObject(id, embeddedField);
-            idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
+            if (value != null && !StringUtils.isEmpty(value.toString()))
+                idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
         }
         
-        if(idUniqueValue.endsWith(COMPOSITE_KEY_SEPARATOR)) idUniqueValue = idUniqueValue.substring(0, idUniqueValue.length() - 1);
+        if(idUniqueValue.endsWith(COMPOSITE_KEY_SEPARATOR)) idUniqueValue = idUniqueValue.substring(0, idUniqueValue.length() - COMPOSITE_KEY_SEPARATOR.length());
         return idUniqueValue;
-    }
-
+    } 
+    
+    /**
+     * Prepares Embedded ID field from value prepared via serializeIdAttributeValue method.
+     */
     private Object deserializeIdAttributeValue(final EntityMetadata m, String idValue)
     {
+        if(idValue == null)
+        {
+            return null;
+        }
         Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
         Object embeddedObject = null;
         try
@@ -468,22 +501,27 @@ public final class GraphEntityMapper
         catch (InstantiationException e)
         {
             log.error("Error while instantiating " + embeddableClass + ". Did you define no argument constructor? Details:" + e.getMessage());
-            return embeddedObject;
+            throw new IllegalArgumentException("Error while instantiating " + embeddableClass + ". Did you define no argument constructor?", e);
         }
         catch (IllegalAccessException e)
         {
             log.error("Error while instantiating " + embeddableClass + ".? Details:" + e.getMessage());
-            return embeddedObject;
+            throw new IllegalArgumentException("Error while instantiating " + embeddableClass, e);
         }
 
-        String[] tokens = idValue.split(COMPOSITE_KEY_SEPARATOR);
-
+        List<String> tokens = new ArrayList<String>();
+        StringTokenizer st = new StringTokenizer((String) idValue, COMPOSITE_KEY_SEPARATOR);
+        while(st.hasMoreTokens())
+        {
+            tokens.add((String)st.nextElement());
+        }
+        
         int count = 0;
         for (Field embeddedField : embeddableClass.getDeclaredFields())
         {
-            if(count < tokens.length)
+            if(count < tokens.size())
             {
-                String value = tokens[count++];
+                String value = tokens.get(count++);
                 PropertyAccessorHelper.set(embeddedObject, embeddedField, value);
             }            
         }
@@ -575,17 +613,16 @@ public final class GraphEntityMapper
     /**
      * Searches a node from the database for a given key
      */
-    public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb)
+    public Node searchNode(Object key, EntityMetadata m, GraphDatabaseService graphDb, boolean skipProxy)
     {
-        Node node = null;  
-
+        Node node = null;
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         
         final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());  
         if(metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
-            key = serializeIdAttributeValue(m, key);
+            key = serializeIdAttributeValue(m, metaModel, key);
         }        
         
         if (indexer.isNodeAutoIndexingEnabled(graphDb))
@@ -593,33 +630,74 @@ public final class GraphEntityMapper
             // Get the Node auto index
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
             IndexHits<Node> nodesFound = autoNodeIndex.get(idColumnName, key);
-            if (nodesFound == null || nodesFound.size() == 0)
-            {
-                return null;
-            }            
-            else
-            {
-                node = nodesFound.getSingle();
-            }
-            nodesFound.close();
+            node = getMatchingNodeFromIndexHits(nodesFound, skipProxy);            
         }
         else
         {
             //Searching within manually created indexes
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
-            IndexHits<Node> hits = nodeIndex.get(idColumnName, key);
-            if(hits == null || hits.size() == 0)
-            {
-                return null;
-            }
-            else
-            {
-                node = hits.getSingle();
-            } 
-            hits.close();
+            IndexHits<Node> nodesFound = nodeIndex.get(idColumnName, key);
+            node = getMatchingNodeFromIndexHits(nodesFound, skipProxy);            
         }
 
         return node;
+    }
+
+    /**
+     * Fetches first Non-proxy node from Index Hits
+     * @param skipProxy 
+     * @param nodesFound
+     * @return
+     */
+    protected Node getMatchingNodeFromIndexHits(IndexHits<Node> nodesFound, boolean skipProxy)
+    {
+        Node node = null;
+        try
+        {
+            if (nodesFound == null || nodesFound.size() == 0 || ! nodesFound.hasNext())
+            {
+                return null;
+            }            
+            else
+            {                
+                if (skipProxy)
+                    node = getNonProxyNode(nodesFound);
+                else
+                    node = nodesFound.next();
+            }
+        }
+        finally
+        {
+            nodesFound.close();
+        }       
+        return node;
     }  
+    
+    /**
+     * Fetches Non-proxy nodes from index hits
+     */
+    private Node getNonProxyNode(IndexHits<Node> nodesFound)
+    {
+        Node node = null;
+        if(nodesFound.hasNext())
+        {
+            node = nodesFound.next();
+        }
+        else
+        {
+            return null;
+        }
+                
+        try
+        {
+            Object proxyNodeProperty = node.getProperty(PROXY_NODE_TYPE_KEY);
+        }
+        catch (NotFoundException e)
+        {
+            return node;
+        }
+        
+        return getNonProxyNode(nodesFound);       
+    }
 
 }

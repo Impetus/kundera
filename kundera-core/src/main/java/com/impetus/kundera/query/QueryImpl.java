@@ -74,6 +74,8 @@ public abstract class QueryImpl implements Query
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     private Set<Parameter<?>> parameters;
+    
+    private Map<String, Object> hints = new HashMap<String, Object>();
 
     /**
      * Default maximum result to fetch.
@@ -435,7 +437,7 @@ public abstract class QueryImpl implements Query
      *            the is greater than
      * @return the string
      */
-    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan)
     {
         String appender = " ";
         StringBuilder sb = new StringBuilder();
@@ -599,16 +601,14 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
-    /* @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object) */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object)
+    /**
+     * Sets hint name and value into hints map and returns instance of {@link Query}
      */
     @Override
     public Query setHint(String hintName, Object value)
     {
-        throw new NotImplementedException("TODO");
+        hints.put(hintName, value);
+        return this;
     }
 
     /* @see javax.persistence.Query#setMaxResults(int) */
@@ -741,15 +741,13 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#getHints()
+    /**
+     * Returns a {@link Map} containing query hints set by user
      */
     @Override
     public Map<String, Object> getHints()
     {
-        throw new NotImplementedException("TODO");
+        return hints;
     }
 
     /*

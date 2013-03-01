@@ -64,12 +64,11 @@ public class IMDBDaoImpl extends BaseDao {
         closeEntityManager();
     }
 
-    public void remove(Object pKey, Class clazz)
+    public void remove(Object entity)
     {
-        em = getEntityManager(persistenceUnit);        
-        Object obj = em.find(clazz, pKey);
+        em = getEntityManager(persistenceUnit);       
         em.getTransaction().begin();
-        em.remove(obj);
+        em.remove(entity);
         em.getTransaction().commit();
         closeEntityManager();
     }

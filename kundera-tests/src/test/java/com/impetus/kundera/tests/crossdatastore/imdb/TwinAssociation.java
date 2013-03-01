@@ -132,16 +132,15 @@ public abstract class TwinAssociation extends AssociationBase
                 }
                 
                 switchPersistenceUnits(c);
-               // insert();
-                /*find();                
+                insert();
+                find();                
                 update();
                 remove();
-                tearDownInternal(ALL_PUs_UNDER_TEST);*/
+                tearDownInternal(ALL_PUs_UNDER_TEST);
             }
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             log.error(e);
             Assert.fail("Failure caused by:" + e.getMessage());
         }

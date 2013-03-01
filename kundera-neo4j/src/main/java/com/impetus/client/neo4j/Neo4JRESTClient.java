@@ -18,8 +18,6 @@ package com.impetus.client.neo4j;
 import java.util.List;
 import java.util.Map;
 
-import org.neo4j.graphdb.Node;
-
 import com.impetus.client.neo4j.query.Neo4JQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;

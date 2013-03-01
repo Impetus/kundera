@@ -1341,6 +1341,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         finally
         {
+            clear();            
             releaseConnection(pooledConnection);
         }
 

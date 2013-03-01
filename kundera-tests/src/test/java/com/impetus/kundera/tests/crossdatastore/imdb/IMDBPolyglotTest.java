@@ -43,7 +43,7 @@ import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Role;
 
-public class MTMBiAssociationTest extends TwinAssociation
+public class IMDBPolyglotTest extends TwinAssociation
 
 {  
     Set<Actor> actors = new HashSet<Actor>(); 
@@ -74,6 +74,12 @@ public class MTMBiAssociationTest extends TwinAssociation
     public void testCRUD()
     {
         tryOperation(ALL_PUs_UNDER_TEST);
+    }
+    
+    @Test
+    public void dummyTest()
+    {
+        
     }
 
     @Override
@@ -110,8 +116,11 @@ public class MTMBiAssociationTest extends TwinAssociation
     @Override
     protected void remove()
     {        
-        dao.remove(1, Actor.class);
-        dao.remove(2, Actor.class);
+        Actor actor1 = (Actor) dao.find(Actor.class, 1);
+        Actor actor2 = (Actor) dao.find(Actor.class, 2);
+        
+        dao.remove(actor1);
+        dao.remove(actor2);
         
         Actor actor1Deleted = (Actor) dao.find(Actor.class, 1);
         Actor actor2Deleted = (Actor) dao.find(Actor.class, 2);
@@ -200,19 +209,6 @@ public class MTMBiAssociationTest extends TwinAssociation
         cfDef2.name = MOVIE;
         cfDef2.keyspace = KEYSPACE;
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef1);
-        //
-        // ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID"
-        // .getBytes()), "IntegerType");
-        // columnDef3.index_type = IndexType.KEYS;
-        // cfDef2.addToColumn_metadata(columnDef3);
-
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
-
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);
 
@@ -221,15 +217,12 @@ public class MTMBiAssociationTest extends TwinAssociation
             ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
             CassandraCli.client.set_keyspace(KEYSPACE);
             List<CfDef> cfDefss = ksDef.getCf_defs();
-            // CassandraCli.client.set_keyspace("KunderaTests");
+
             for (CfDef cfDef : cfDefss)
             {
-
                 if (cfDef.getName().equalsIgnoreCase(MOVIE))
                 {
-
                     CassandraCli.client.system_drop_column_family(MOVIE);
-
                 }
             }
             CassandraCli.client.system_add_column_family(cfDef2);

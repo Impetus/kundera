@@ -23,8 +23,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.Table;
@@ -38,7 +36,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 
 @Entity
-@Table(name="")   //Ignored for Neo4J
+@Table(name="ACTOR")   //Ignored for Neo4J
 @IndexCollection(columns={@Index(name = "name", type = "KEYS")})
 public class Actor
 {
@@ -57,10 +55,7 @@ public class Actor
         this.name = actorName;
     }
     
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
-    /*@JoinTable(name = "ACTOR_MOVIE",  //Ignored in case Movie isn't stored in Neo4J
-            joinColumns = { @JoinColumn(name = "ACTOR_ID") },
-            inverseJoinColumns = { @JoinColumn(name = "MOVIE_ID") })*/
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)     
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<Role, Movie> movies;
     

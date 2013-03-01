@@ -33,8 +33,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.client.neo4j.imdb.Movie;
-import com.impetus.client.neo4j.imdb.Role;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 

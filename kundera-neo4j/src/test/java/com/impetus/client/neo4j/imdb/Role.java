@@ -18,6 +18,7 @@ package com.impetus.client.neo4j.imdb;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -39,8 +40,10 @@ public class Role
     @Column(name="ROLE_TYPE")
     private String roleType;   
     
+    @OneToOne
     private Actor actor;
     
+    @OneToOne
     private Movie movie;
     
     public Role() {}
