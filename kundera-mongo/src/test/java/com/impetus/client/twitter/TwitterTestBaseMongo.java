@@ -115,7 +115,7 @@ public abstract class TwitterTestBaseMongo extends TestCase
         // Insert, Find and Update
         addAllUserInfo();
         getUserById();
-//        updateUser();
+        updateUser();
 
         // Queries
         getAllUsers();
@@ -172,8 +172,9 @@ public abstract class TwitterTestBaseMongo extends TestCase
     {
         twitter.createEntityManager();
         UserMongo user1 = twitter.findUserById(userId1);
-        //TODO: this needs to uncomment only after fixing update issue on associations
-//        assertUpdatedUser1(user1);
+        // TODO: this needs to uncomment only after fixing update issue on
+        // associations
+        // assertUpdatedUser1(user1);
 
         twitter.removeUser(user1);
 
@@ -181,8 +182,9 @@ public abstract class TwitterTestBaseMongo extends TestCase
         Assert.assertNull(user1AfterRemoval);
 
         UserMongo user2 = twitter.findUserById(userId2);
-        //TODO: this needs to uncomment only after fixing update issue on associations
-//        assertUpdatedUser1(user1);
+        // TODO: this needs to uncomment only after fixing update issue on
+        // associations
+        // assertUpdatedUser1(user1);
 
         twitter.removeUser(user2);
 
@@ -206,12 +208,13 @@ public abstract class TwitterTestBaseMongo extends TestCase
             Assert.assertNotNull(u);
             if (u.getUserId().equals(userId1))
             {
-                //TODO: this needs to uncomment only after fixing update issue on associations
-//                assertUpdatedUser1(u);
+                // TODO: this needs to uncomment only after fixing update issue
+                // on associations
+                // assertUpdatedUser1(u);
             }
             else if (u.getUserId().equals(userId2))
             {
-//                assertUser2(u);
+                // assertUser2(u);
             }
         }
         twitter.closeEntityManager();
@@ -330,8 +333,8 @@ public abstract class TwitterTestBaseMongo extends TestCase
         assertFalse(tweetsUser2.isEmpty());
 
         // TODO : uncomment
-//        assertEquals(3, tweetsUser1.size());
-        assertEquals(2, tweetsUser1.size());
+        assertEquals(3, tweetsUser1.size());
+        // assertEquals(2, tweetsUser1.size());
         assertEquals(2, tweetsUser2.size());
     }
 

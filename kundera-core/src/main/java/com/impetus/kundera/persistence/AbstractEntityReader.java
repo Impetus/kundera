@@ -18,13 +18,10 @@ package com.impetus.kundera.persistence;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.persistence.FetchType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -268,12 +265,4 @@ public class AbstractEntityReader
         }
 
     }
-
-    private KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, Object id, PersistenceDelegator pd)
-    {
-        return KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
-                .getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod, id, pd);
-    }
-
 }

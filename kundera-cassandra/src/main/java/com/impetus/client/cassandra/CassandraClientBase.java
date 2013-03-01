@@ -36,6 +36,7 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -68,6 +69,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -89,6 +91,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -894,8 +897,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     protected void onpersistOverCompositeKey(EntityMetadata entityMetadata, Object entity,
-            Cassandra.Client cassandra_client,  List<RelationHolder> rlHolders) throws InvalidRequestException, TException, UnavailableException,
-            TimedOutException, SchemaDisagreementException, UnsupportedEncodingException
+            Cassandra.Client cassandra_client, List<RelationHolder> rlHolders) throws InvalidRequestException,
+            TException, UnavailableException, TimedOutException, SchemaDisagreementException,
+            UnsupportedEncodingException
     {
         cassandra_client.set_cql_version(getCqlVersion());
         CQLTranslator translator = new CQLTranslator();
@@ -904,24 +908,23 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
                 TranslationType.ALL);
-        
+
         String columnNames = translation.get(TranslationType.COLUMN);
         String columnValues = translation.get(TranslationType.VALUE);
         StringBuilder columnNameBuilder = new StringBuilder(columnNames);
         StringBuilder columnValueBuilder = new StringBuilder(columnValues);
-        
-        for(RelationHolder rl : rlHolders)
+
+        for (RelationHolder rl : rlHolders)
         {
             columnNameBuilder.append(",");
             columnValueBuilder.append(",");
             translator.appendColumnName(columnNameBuilder, rl.getRelationName());
             translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
         }
-        
+
         translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
         translation.put(TranslationType.VALUE, columnValueBuilder.toString());
-        
-        
+
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
                 translation.get(TranslationType.VALUE));
         insert_Query = StringUtils
@@ -1518,6 +1521,69 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         return client;
 
+    }
+
+    public Long getGeneratedValue(TableGeneratorDiscriptor discriptor, String pu)
+    {
+        Cassandra.Client conn = getRawClient(pu, discriptor.getSchema());
+        try
+        {
+            conn.set_keyspace(discriptor.getSchema());
+            ColumnPath columnPath = new ColumnPath(discriptor.getTable());
+            columnPath.setColumn(discriptor.getValueColumnName().getBytes());
+            long latestCount = 0l;
+
+            try
+            {
+                latestCount = conn.get(ByteBuffer.wrap(discriptor.getPkColumnValue().getBytes()), columnPath,
+                        getConsistencyLevel()).counter_column.value;
+            }
+            catch (NotFoundException e)
+            {
+                latestCount = 0;
+            }
+            ColumnParent columnParent = new ColumnParent(discriptor.getTable());
+
+            CounterColumn counterColumn = new CounterColumn(
+                    ByteBuffer.wrap(discriptor.getValueColumnName().getBytes()), 1);
+
+            conn.add(ByteBuffer.wrap(discriptor.getPkColumnValue().getBytes()), columnParent, counterColumn,
+                    getConsistencyLevel());
+
+            if (latestCount == 0)
+            {
+                return (long) discriptor.getInitialValue();
+            }
+            else
+            {
+                return (latestCount + 1) * discriptor.getAllocationSize();
+            }
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while using keyspace. Details:", e);
+            throw new KunderaException("Error while using keyspace", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while using keyspace. Details:", e);
+            throw new KunderaException("Error while using keyspace", e);
+        }
+
+        catch (UnavailableException e)
+        {
+            log.error("Error while reading counter value from table " + discriptor.getTable() + ". Details:", e);
+            throw new KunderaException("Error while reading counter value from table", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while adding counter value to table " + discriptor.getTable() + ". Details:", e);
+            throw new KunderaException("Error while adding counter value to table ", e);
+        }
+        finally
+        {
+            releaseConnection(conn);
+        }
     }
 
     /**

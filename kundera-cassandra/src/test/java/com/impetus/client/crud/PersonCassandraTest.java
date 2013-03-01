@@ -56,6 +56,7 @@ import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.LuceneQueryUtils;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
@@ -95,6 +96,7 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
+    	KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();

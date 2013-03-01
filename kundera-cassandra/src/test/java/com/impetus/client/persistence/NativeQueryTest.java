@@ -77,8 +77,14 @@ public class NativeQueryTest
     public void testCreateNativeQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
         String nativeSql = "Select * from Cassandra c";
 
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
@@ -98,8 +104,14 @@ public class NativeQueryTest
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
 
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();
@@ -126,8 +138,14 @@ public class NativeQueryTest
         // String useNativeSql = "USE test";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
 
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();
@@ -154,8 +172,14 @@ public class NativeQueryTest
         // String useNativeSql = "USE test";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();

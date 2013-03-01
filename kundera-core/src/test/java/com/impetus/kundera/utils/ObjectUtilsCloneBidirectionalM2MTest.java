@@ -58,7 +58,7 @@ public class ObjectUtilsCloneBidirectionalM2MTest
     private static Logger log = LoggerFactory.getLogger(ObjectUtilsCloneBidirectionalM2MTest.class);
 
     // Configurator configurator = new Configurator("kunderatest");
-    EntityMetadata metadata;
+//    EntityMetadata metadata;
 
     private String _persistenceUnit = "kunderatest";
 
@@ -126,7 +126,7 @@ public class ObjectUtilsCloneBidirectionalM2MTest
 
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
-        metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
+//        metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
         PhotographerBi_1_M_M_M a2 = (PhotographerBi_1_M_M_M) ObjectUtils.deepCopy(a1);
         long t4 = System.currentTimeMillis();
         log.info("Time taken by Kundera to copy 1 entity:" + (t4 - t3));

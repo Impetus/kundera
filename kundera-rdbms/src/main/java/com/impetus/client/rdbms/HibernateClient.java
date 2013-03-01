@@ -237,6 +237,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
         Transaction tx = null;
+        
         s = /* getStatelessSession() */getSessionFactory().openStatelessSession();
         tx = s.beginTransaction();
         try

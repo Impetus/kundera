@@ -23,6 +23,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraph;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
@@ -71,11 +75,11 @@ public class ObjectGraphTest
         String b2Id = ObjectGraphUtils.getNodeId("A2", b2.getClass());
         String b3Id = ObjectGraphUtils.getNodeId("A3", b3.getClass());
 
-        Node headNode = new Node(storeId, store, pc, "1");
+        Node headNode = new Node(storeId, store, null, pc, "1");
 
-        Node child1 = new Node(b1Id, b1, pc, "A1");
-        Node child2 = new Node(b2Id, b2, pc, "A2");
-        Node child3 = new Node(b3Id, b3, pc, "A3");
+        Node child1 = new Node(b1Id, b1, null, pc, "A1");
+        Node child2 = new Node(b2Id, b2, null, pc, "A2");
+        Node child3 = new Node(b3Id, b3, null, pc, "A3");
 
         NodeLink linkB1 = new NodeLink(storeId, b1Id);
         NodeLink linkB2 = new NodeLink(storeId, b2Id);

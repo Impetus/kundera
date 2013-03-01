@@ -63,9 +63,7 @@ public class Node implements NodeStateContext
     // Whether this node is dirty
     private boolean dirty;
 
-    // Whether this is a head node
-    private boolean isHeadNode;
-
+    // Whether this node for update.
     private boolean isUpdate;
 
     /*
@@ -74,20 +72,21 @@ public class Node implements NodeStateContext
     private int depth;
 
     /** Client for this node */
-    Client client;
+    private Client client;
 
     // Reference to Persistence cache where this node is stored
     private PersistenceCache persistenceCache;
 
+    // Whether graph is completely traversed or not.
     private boolean isGraphCompleted;
 
-    PersistenceDelegator pd;
+    private PersistenceDelegator pd;
 
     private Node originalNode;
 
     private boolean isProcessed;
 
-    public Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
+    private Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
     {
         initializeNode(nodeId, data, primaryKey);
         setPersistenceCache(pc);
@@ -96,7 +95,7 @@ public class Node implements NodeStateContext
         this.currentNodeState = new TransientState();
     }
 
-    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc, Object primaryKey)
+    Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc, Object primaryKey)
     {
         initializeNode(nodeId, data, primaryKey);
         setPersistenceCache(pc);
@@ -110,7 +109,6 @@ public class Node implements NodeStateContext
         {
             this.currentNodeState = initialNodeState;
         }
-
     }
 
     public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc,
@@ -136,7 +134,7 @@ public class Node implements NodeStateContext
     {
         this.nodeId = nodeId;
         this.data = data;
-        this.dataClass = data.getClass();
+        this.dataClass = data != null ? data.getClass() : null;
         this.dirty = true;
         this.entityId = primaryKey;
     }
@@ -358,22 +356,22 @@ public class Node implements NodeStateContext
         this.dirty = dirty;
     }
 
-    /**
-     * @return the depth
-     */
-    public int getDepth()
-    {
-        return depth;
-    }
+    // /**
+    // * @return the depth
+    // */
+    // private int getDepth()
+    // {
+    // return depth;
+    // }
 
-    /**
-     * @param depth
-     *            the depth to set
-     */
-    public void setDepth(int depth)
-    {
-        this.depth = depth;
-    }
+    // /**
+    // * @param depth
+    // * the depth to set
+    // */
+    // public void setDepth(int depth)
+    // {
+    // this.depth = depth;
+    // }
 
     /**
      * @return the client
@@ -550,7 +548,7 @@ public class Node implements NodeStateContext
     /**
      * @return the isGraphCompleted
      */
-    public boolean isGraphCompleted()
+    boolean isGraphCompleted()
     {
         return isGraphCompleted;
     }
@@ -559,7 +557,7 @@ public class Node implements NodeStateContext
      * @param isGraphCompleted
      *            the isGraphCompleted to set
      */
-    public void setGraphCompleted(boolean isGraphCompleted)
+    void setGraphCompleted(boolean isGraphCompleted)
     {
         this.isGraphCompleted = isGraphCompleted;
     }
@@ -614,7 +612,7 @@ public class Node implements NodeStateContext
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);
         cloneCopy.setDataClass(this.dataClass);
-        cloneCopy.setDepth(this.depth);
+        // cloneCopy.setDepth(this.depth);
         cloneCopy.setTraversed(this.traversed);
 
         return cloneCopy;

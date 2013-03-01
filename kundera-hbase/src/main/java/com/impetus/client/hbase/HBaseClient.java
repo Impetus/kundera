@@ -51,6 +51,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -60,6 +61,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -71,7 +73,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
+        TableGenerator
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -213,13 +216,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 E e = null;
                 try
                 {
-
                     List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
                             entityMetadata, entityId, null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
-                        // entities.add(e);
                     }
                 }
                 catch (IOException ioex)
@@ -405,7 +406,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> relations)
     {
         String tableName = entityMetadata.getTableName();
-       
+
         try
         {
             // Write data to HBase
@@ -774,5 +775,29 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
+    }
+
+    @Override
+    public Long generate(TableGeneratorDiscriptor discriptor)
+    {
+        try
+        {
+            HTable hTable = ((HBaseDataHandler) handler).gethTable(discriptor.getTable());
+            Long latestCount = hTable.incrementColumnValue(discriptor.getPkColumnValue().getBytes(), discriptor
+                    .getTable().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
+            if (latestCount == 1)
+            {
+                return (long) discriptor.getInitialValue();
+            }
+            else
+            {
+                return (latestCount - 1) * discriptor.getAllocationSize();
+            }
+        }
+        catch (IOException e)
+        {
+            log.error("Error while executing batch insert/update, Caused by: " + e);
+            throw new KunderaException(e);
+        }
     }
 }

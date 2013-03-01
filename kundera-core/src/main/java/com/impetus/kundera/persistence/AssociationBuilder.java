@@ -72,41 +72,42 @@ final class AssociationBuilder
     void populateRelationForM2M(Object entity, EntityMetadata entityMetadata, PersistenceDelegator delegator,
             Relation relation, Object relObject)
     {
-        //For M-M relationship of Collection type, relationship entities are always fetched from Join Table.
-        if(relation.getPropertyType().isAssignableFrom(Collection.class) || relation.getPropertyType().isAssignableFrom(Set.class))
+        // For M-M relationship of Collection type, relationship entities are
+        // always fetched from Join Table.
+        if (relation.getPropertyType().isAssignableFrom(Collection.class)
+                || relation.getPropertyType().isAssignableFrom(Set.class))
         {
-           if(relation.isRelatedViaJoinTable() && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet
-                   || relObject instanceof PersistentCollection))
-           {
-               populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
-           }
-           else
-           {
-               log.error("A M2M relationship of Collection type must be joined by JoinTable, relationships won't be set");
-           } 
-            
-        }
-        else if(relation.getPropertyType().isAssignableFrom(Map.class) && relObject instanceof Map)
-        {
-            if(relation.isRelatedViaJoinTable())
+            if (relation.isRelatedViaJoinTable()
+                    && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet || relObject instanceof PersistentCollection))
             {
-                //TODO: Implement Map relationships via Join Table (not supported as of now)
+                populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
+            }
+            else
+            {
+                log.error("A M2M relationship of Collection type must be joined by JoinTable, relationships won't be set");
+            }
+
+        }
+        else if (relation.getPropertyType().isAssignableFrom(Map.class) && relObject instanceof Map)
+        {
+            if (relation.isRelatedViaJoinTable())
+            {
+                // TODO: Implement Map relationships via Join Table (not
+                // supported as of now)
             }
             else
             {
                 EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-                
-                for(Object child : ((Map)relObject).values())
+
+                for (Object child : ((Map) relObject).values())
                 {
                     Object childId = PropertyAccessorHelper.getId(child, childMetadata);
-                    PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId); 
+                    PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId);
                 }
             }
-        }       
+        }
 
     }
-
-    
 
     /**
      * @param entity
@@ -197,7 +198,7 @@ final class AssociationBuilder
 
         // If child has any bidirectional relationship, process them here
         Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
-        
+
         boolean traversalRequired = true;
         boolean isBidirectionalRelation = (biDirectionalField != null);
 
@@ -223,8 +224,9 @@ final class AssociationBuilder
                 // PropertyAccessorHelper.set(child,
                 // reverseRelation.getProperty(), entity);
             }
-            
-            traversalRequired = reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) || reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE);
+
+            traversalRequired = reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE)
+                    || reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE);
 
         }
 
@@ -251,35 +253,37 @@ final class AssociationBuilder
                 && !childMetadata.isRelationViaJoinTable())
         {
             // There is no relation (not even via Join Table), nothing to do
-            if(log.isDebugEnabled())
-            log.info("Nothing to do, simply moving to next:");
+            if (log.isDebugEnabled())
+                log.info("Nothing to do, simply moving to next:");
         }
 
-        else if ( traversalRequired && associatedEntities != null)
+        else if (traversalRequired && associatedEntities != null)
         {
             // These entities has associated entities, find them recursively.
             for (Object associatedEntity : associatedEntities)
             {
-                
-                associatedEntity = pd.getReader(childClient).recursivelyFindEntities(associatedEntity, null,
+
+                associatedEntity = childClient.getReader().recursivelyFindEntities(associatedEntity, null,
                         childMetadata, pd);
             }
         }
 
     }
-    
+
     /**
-     * Populates a relationship of type {@link Collection} (i.e. those of type {@link Set} or {@link List})    
+     * Populates a relationship of type {@link Collection} (i.e. those of type
+     * {@link Set} or {@link List})
      */
     private void populateCollectionFromJoinTable(Object entity, EntityMetadata entityMetadata,
             PersistenceDelegator delegator, Relation relation)
     {
-        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();        
+        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
         Client pClient = delegator.getClient(entityMetadata);
-        
-        String schema=entityMetadata.getSchema();
-        if(jtMetadata == null) {
-            EntityMetadata owningEntityMetadata = delegator.getMetadata(relation.getTargetEntity());
+
+        String schema = entityMetadata.getSchema();
+        if (jtMetadata == null)
+        {
+            EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
             jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
             schema = owningEntityMetadata.getSchema();
@@ -295,15 +299,14 @@ final class AssociationBuilder
         // EntityMetadata relMetadata =
         // delegator.getMetadata(relation.getTargetEntity());
 
-        
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName,
-                inverseJoinColumnName, entityId);
+        List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName, inverseJoinColumnName,
+                entityId);
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)
         {
-            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
+            EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
 
             Object child = delegator.find(relation.getTargetEntity(), foreignKey);
             Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
@@ -354,7 +357,8 @@ final class AssociationBuilder
         String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass().getCanonicalName()
                 .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
 
-        Map<String, String> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(query): new HashMap<String, String>();
+        Map<String, String> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
+                query) : new HashMap<String, String>();
         Set<String> rsSet = results != null ? new HashSet<String>(results.values()) : new HashSet<String>();
 
         if (childClass.equals(entity.getClass()))

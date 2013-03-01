@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,23 +31,29 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Table;
 import javax.persistence.metamodel.Metamodel;
+import javax.transaction.NotSupportedException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.GeneratedValueProcesser;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.InvalidConfigurationException;
@@ -243,6 +250,7 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
+        processGeneratedValueAnnotation(classes, persistenceUnit);
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
 
     }
@@ -257,12 +265,7 @@ public class MetamodelConfiguration implements Configuration
     {
         for (Class clazz : classes)
         {
-            String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
-            String pu = null;
-            if (schema != null && schema.indexOf("@") > 0)
-            {
-                pu = schema.substring(schema.indexOf("@") + 1, schema.length());
-            }
+            String pu = getPersistenceUnitOfEntity(clazz);
             EntityValidator validator = new EntityValidatorImpl(getExternalProperties(persistenceUnit));
             if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
                     && persistenceUnit.equalsIgnoreCase(pu))
@@ -270,6 +273,17 @@ public class MetamodelConfiguration implements Configuration
                 validator.validateEntity(clazz);
             }
         }
+    }
+
+    private String getPersistenceUnitOfEntity(Class clazz)
+    {
+        String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
+        String pu = null;
+        if (schema != null && schema.indexOf("@") > 0)
+        {
+            pu = schema.substring(schema.indexOf("@") + 1, schema.length());
+        }
+        return pu;
     }
 
     /**
@@ -461,6 +475,32 @@ public class MetamodelConfiguration implements Configuration
         {
             throw new InvalidConfigurationException(
                     "For cross data store persistence, please specify as: Map {pu,Map of properties}");
+        }
+    }
+
+    private void processGeneratedValueAnnotation(List<Class<?>> classes, String persistenceUnit)
+    {
+        GeneratedValueProcesser processer = new GeneratedValueProcesser();
+        for (Class clazz : classes)
+        {
+            String pu = getPersistenceUnitOfEntity(clazz);
+            if (pu != null && pu.equals(persistenceUnit))
+            {
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
+                Field f = (Field) m.getIdAttribute().getJavaMember();
+
+                if (f.isAnnotationPresent(GeneratedValue.class))
+                {
+                    try
+                    {
+                        processer.process(clazz, f, m);
+                    }
+                    catch (NotSupportedException nse)
+                    {
+                        throw new KunderaException(nse);
+                    }
+                }
+            }
         }
     }
 }

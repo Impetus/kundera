@@ -70,26 +70,33 @@ public class NativeQueryCQLV3Test
     {
         CassandraCli.cassandraSetUp();
         // CassandraCli.initClient();
-//         CassandraCli.dropKeySpace(schema);
+        // CassandraCli.dropKeySpace(schema);
         // CassandraCli.createKeySpace(schema);
         String nativeSql = "CREATE KEYSPACE " + schema
                 + " with replication = {'class':'SimpleStrategy', 'replication_factor':1}";
-//        strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1"
+        // strategy_class = 'SimpleStrategy' and
+        // strategy_options:replication_factor=1"
         CassandraCli.executeCqlQuery(nativeSql);
     }
 
     /**
      * Test create insert column family query.
      */
-//    @Test
+    @Test
     public void testCreateInsertColumnFamilyQueryVersion3()
     {
         // CassandraCli.dropKeySpace("KunderaExamples");
 
         String useNativeSql = "USE " + schema;
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
 
         Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
         PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
@@ -144,7 +151,7 @@ public class NativeQueryCQLV3Test
         q.getResultList();
 
         // select all
-        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970";
+        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970 Allow Filtering";
         q = em.createNativeQuery(selectAll, CassandraEntity.class);
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -215,14 +222,19 @@ public class NativeQueryCQLV3Test
     @Test
     public void testCQLBatch()
     {
-
         String useNativeSql = "USE " + schema;
         EntityManagerFactory emf = getEntityManagerFactory();
         String createColumnFamily = "CREATE TABLE CassandraBatchEntity ( user_name varchar PRIMARY KEY, password varchar, name varchar)";
         String batchOps = "BEGIN BATCH INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user2', 'ch@ngem3b', 'second user') UPDATE CassandraBatchEntity SET password = 'ps22dhds' WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password) VALUES ('user3', 'ch@ngem3c') DELETE name FROM CassandraBatchEntity WHERE user_name = 'user2' INSERT INTO CassandraBatchEntity (user_name, password, name) VALUES ('user4', 'ch@ngem3c', 'Andrew') APPLY BATCH";
 
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
+        EntityManager em = emf.createEntityManager()/*
+                                                     * new
+                                                     * EntityManagerImpl(emf,
+                                                     * PersistenceUnitTransactionType
+                                                     * .RESOURCE_LOCAL,
+                                                     * PersistenceContextType
+                                                     * .EXTENDED)
+                                                     */;
 
         Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
         PelopsClient pc = (PelopsClient) clientMap.get("cassandra");

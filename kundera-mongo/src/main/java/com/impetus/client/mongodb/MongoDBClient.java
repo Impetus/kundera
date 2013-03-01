@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
@@ -33,6 +34,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -58,7 +60,8 @@ import com.mongodb.WriteConcern;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter,
+        AutoGenerator
 {
     /** The mongo db. */
     private DB mongoDb;
@@ -210,7 +213,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
-        if(log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
             log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
         }
@@ -327,7 +330,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     // TODO i need to discuss with Amresh before modifying it.
                     entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
-                            mongoQuery, result, orderBy,maxResult, keys));
+                            mongoQuery, result, orderBy, maxResult, keys));
                     return entities;
                 }
             }
@@ -546,20 +549,22 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return batchSize;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.api.Batcher#clear()
      */
     @Override
     public void clear()
     {
-        if(nodes != null)
+        if (nodes != null)
         {
             nodes.clear();
-            nodes=null;
+            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -801,5 +806,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
             batchSize = puMetadata.getBatchSize();
         }
+    }
+
+    @Override
+    public Object generate()
+    {
+        // return auto generated id used by mongodb.
+        return new ObjectId().toString();
     }
 }

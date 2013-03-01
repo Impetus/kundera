@@ -22,8 +22,11 @@ import java.util.Map;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,9 +85,9 @@ public class EntityValidatorImpl implements EntityValidator
         {
             return;
         }
-        
-        if(log.isDebugEnabled())
-        log.debug("Validating " + clazz.getName());
+
+        if (log.isDebugEnabled())
+            log.debug("Validating " + clazz.getName());
 
         // Is Entity?
         if (!clazz.isAnnotationPresent(Entity.class))
@@ -120,13 +123,22 @@ public class EntityValidatorImpl implements EntityValidator
                         + " must have either @Id field or @EmbeddedId field");
             }
 
-            if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class))
+            if (field.isAnnotationPresent(Id.class))
+            {
+                keys.add(field);
+                // validate @GeneratedValue annotation if given
+                if (field.isAnnotationPresent(GeneratedValue.class))
+                {
+                    validateGeneratedValueAnnotation(clazz, field);
+                }
+            }
+            else if (field.isAnnotationPresent(EmbeddedId.class))
             {
                 keys.add(field);
             }
         }
 
-        if (keys.size() == 0)
+        if (keys.size() < 0)
         {
             throw new InvalidEntityDefinitionException(clazz.getName() + " must have an @Id field.");
         }
@@ -146,6 +158,56 @@ public class EntityValidatorImpl implements EntityValidator
         classes.add(clazz);
     }
 
+    private void validateGeneratedValueAnnotation(final Class<?> clazz, Field field)
+    {
+        Table table = clazz.getAnnotation(Table.class);
+        String schemaName = table.schema();
+        schemaName = schemaName.substring(0, schemaName.indexOf('@'));
+        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+        if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
+        {
+            if (!(field.isAnnotationPresent(TableGenerator.class) || field.isAnnotationPresent(SequenceGenerator.class)
+                    || clazz.isAnnotationPresent(TableGenerator.class) || clazz
+                        .isAnnotationPresent(SequenceGenerator.class)))
+            {
+                throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
+            }
+            else
+            {
+                checkForGenerator(clazz, field, generatedValue, schemaName);
+            }
+        }
+    }
+
+    private void checkForGenerator(final Class<?> clazz, Field field, GeneratedValue generatedValue, String schemaName)
+    {
+        TableGenerator tableGenerator = field.getAnnotation(TableGenerator.class);
+        SequenceGenerator sequenceGenerator = field.getAnnotation(SequenceGenerator.class);
+        if (tableGenerator == null || !tableGenerator.name().equals(generatedValue.generator()))
+        {
+            tableGenerator = clazz.getAnnotation(TableGenerator.class);
+        }
+        if (sequenceGenerator == null || !sequenceGenerator.name().equals(generatedValue.generator()))
+        {
+            sequenceGenerator = clazz.getAnnotation(SequenceGenerator.class);
+        }
+
+        if ((tableGenerator == null && sequenceGenerator == null)
+                || (tableGenerator != null && !tableGenerator.name().equals(generatedValue.generator()))
+                || (sequenceGenerator != null && !sequenceGenerator.name().equals(generatedValue.generator())))
+        {
+            throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
+        }
+        else if ((tableGenerator != null && !tableGenerator.schema().isEmpty() && !tableGenerator.schema().equals(
+                schemaName))
+                || (sequenceGenerator != null && !sequenceGenerator.schema().isEmpty() && !sequenceGenerator.schema()
+                        .equals(schemaName)))
+        {
+            throw new InvalidEntityDefinitionException("Generator " + generatedValue.generator() + " in entity : "
+                    + clazz.getName() + " has different schema name ,it should be same as entity have");
+        }
+    }
+
     @Override
     public void validateEntity(Class<?> clazz)
     {
@@ -154,7 +216,7 @@ public class EntityValidatorImpl implements EntityValidator
         {
             SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit(), puProperties)
                     .getSchemaManager(puProperties);
-            if (schemaManager != null &&  !schemaManager.validateEntity(clazz))
+            if (schemaManager != null && !schemaManager.validateEntity(clazz))
             {
                 log.warn("Validation for : " + clazz + " failed , any operation on this class will result in fail.");
             }

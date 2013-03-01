@@ -34,18 +34,14 @@ public class ObjectGraphUtils
 
     public static String getNodeId(Object pk, Class<?> objectClass)
     {
-
         StringBuffer strBuffer = new StringBuffer(objectClass.getName());
         strBuffer.append(Constants.NODE_ID_SEPARATOR);
         strBuffer.append(pk);
         return strBuffer.toString();
-
     }
 
     public static Object getEntityId(String nodeId)
     {
-
         return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());
     }
-
 }

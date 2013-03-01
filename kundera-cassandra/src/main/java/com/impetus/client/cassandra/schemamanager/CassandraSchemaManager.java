@@ -1017,9 +1017,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         Properties cFProperties = getColumnFamilyProperties(tableInfo);
         String defaultValidationClass = null;
-
-        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.COLUMN_FAMILY.name()))
-
+        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+        {
+            if (isCounterColumnType(tableInfo, defaultValidationClass))
+            {
+                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
+            }
+            cfDef.setColumn_type("Super");
+        }
+        else if (tableInfo.getType() != null)
         {
             defaultValidationClass = cFProperties != null ? cFProperties
                     .getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS) : null;
@@ -1050,14 +1056,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cfDef.setColumn_metadata(columnDefs);
             }
         }
-        else if (tableInfo.getType() != null)
-        {
-            if (isCounterColumnType(tableInfo, defaultValidationClass))
-            {
-                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
-            }
-            cfDef.setColumn_type("Super");
-        }
         setColumnFamilyProperties(cfDef, cFProperties, null);
         return cfDef;
     }
@@ -1074,8 +1072,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
     {
         return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
-                || (defaultValidationClass != null && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class
-                        .getSimpleName()) || defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getName())));
+                || (defaultValidationClass != null
+                        && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getSimpleName()) || defaultValidationClass
+                                .equalsIgnoreCase(CounterColumnType.class.getName())) || (tableInfo.getType()
+                        .equals(CounterColumnType.class.getSimpleName())));
     }
 
     /**

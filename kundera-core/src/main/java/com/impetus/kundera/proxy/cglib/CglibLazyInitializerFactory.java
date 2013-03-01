@@ -51,11 +51,12 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
      * , java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method,
      * java.lang.String, com.impetus.kundera.persistence.PersistenceDelegator)
      */
+
+    // TODO not used any where.
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
             Method setIdentifierMethod, Object id, PersistenceDelegator pd)
     {
-
         return (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
                 new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, pd);
     }

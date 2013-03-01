@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.neo4j.imdb.Actor;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for entities that hold composite keys  
@@ -50,6 +51,7 @@ public class IMDBCompositeKeyTest
     @Before
     public void setUp() throws Exception
     {           
+    	KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory(IMDB_PU);      
         em = emf.createEntityManager();       
     }

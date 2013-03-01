@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -131,19 +133,20 @@ public abstract class ClientBase
 
                 if (linkName != null && linkValue != null && !isSharedByPrimaryKey)
                 {
-                    if(multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))
+                    if (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))
                     {
                         RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
                         relationsHolder.add(relationHolder);
                     }
-                    else if(multiplicity.equals(ForeignKey.MANY_TO_MANY) 
-                            && ((Field)childNodeLink.getLinkProperty(LinkProperty.PROPERTY)).getType().isAssignableFrom(Map.class))
-                    {                        
-                        Object relationTo = ((Node)children.get(childNodeLink)).getData();
-                        RelationHolder relationHolder = new RelationHolder(linkName, relationTo,linkValue);
+                    else if (multiplicity.equals(ForeignKey.MANY_TO_MANY)
+                            && ((Field) childNodeLink.getLinkProperty(LinkProperty.PROPERTY)).getType()
+                                    .isAssignableFrom(Map.class))
+                    {
+                        Object relationTo = ((Node) children.get(childNodeLink)).getData();
+                        RelationHolder relationHolder = new RelationHolder(linkName, relationTo, linkValue);
                         relationsHolder.add(relationHolder);
-                    }                
-                    
+                    }
+
                 }
             }
         }
@@ -156,7 +159,7 @@ public abstract class ClientBase
      */
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-        
+
         if (indexManager != null)
         {
             if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
@@ -166,7 +169,7 @@ public abstract class ClientBase
                 {
                     for (NodeLink parentNodeLink : parents.keySet())
                     {
-                        
+
                         indexManager.update(entityMetadata, node.getData(), parentNodeLink
                                 .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
                     }
@@ -186,7 +189,8 @@ public abstract class ClientBase
                         }
                         else
                         {
-                            indexManager.update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
+                            indexManager
+                                    .update(entityMetadata, node.getData(), node.getEntityId(), node.getDataClass());
                         }
                     }
                 }

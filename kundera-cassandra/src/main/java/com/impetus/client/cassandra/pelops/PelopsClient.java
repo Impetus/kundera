@@ -32,6 +32,7 @@ import javax.persistence.metamodel.EmbeddableType;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
@@ -41,6 +42,7 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -70,12 +72,14 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -89,7 +93,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher
+public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
@@ -432,7 +436,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 client.set_cql_version(getCqlVersion());
                 client.set_keyspace(metadata.getSchema());
-                onpersistOverCompositeKey(metadata, entity, client,rlHolders);
+                onpersistOverCompositeKey(metadata, entity, client, rlHolders);
             }
             catch (InvalidRequestException e)
             {
@@ -800,5 +804,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     protected void releaseConnection(Object conn)
     {
         PelopsUtils.releaseConnection((IPooledConnection) conn);
+    }
+
+    @Override
+    public Long generate(TableGeneratorDiscriptor discriptor)
+    {
+        return getGeneratedValue(discriptor, getPersistenceUnit());
     }
 }

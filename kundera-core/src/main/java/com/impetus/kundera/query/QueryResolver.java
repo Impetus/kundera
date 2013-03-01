@@ -58,6 +58,10 @@ public class QueryResolver
      */
     public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator)
     {
+        if (jpaQuery == null)
+        {
+            throw new QueryHandlerException("Query String should not be null ");
+        }
         kunderaQuery = new KunderaQuery();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
@@ -79,7 +83,7 @@ public class QueryResolver
         else
         {
             Class mappedClass = appMetadata.getMappedClass(jpaQuery);
-            
+
             pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
         }

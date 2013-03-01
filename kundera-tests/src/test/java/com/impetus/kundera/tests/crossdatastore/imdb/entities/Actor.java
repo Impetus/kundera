@@ -38,7 +38,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 
 @Entity
-@Table   //Ignored for Neo4J
+@Table(name="")   //Ignored for Neo4J
 @IndexCollection(columns={@Index(name = "name", type = "KEYS")})
 public class Actor
 {

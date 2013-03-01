@@ -38,6 +38,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -701,7 +702,12 @@ public class KunderaQuery
      */
     public final EntityMetadata getEntityMetadata()
     {
-        return KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        if (metadata == null)
+        {
+            throw new KunderaException("Unable to load entity metadata for :" + entityClass);
+        }
+        return metadata;
     }
 
     /**

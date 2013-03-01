@@ -235,7 +235,6 @@ public abstract class QueryImpl implements Query
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
             result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
-
         }
         else
         {
@@ -383,7 +382,7 @@ public abstract class QueryImpl implements Query
     {
         for (Object r : resultList)
         {
-            EnhanceEntity e = new EnhanceEntity(r, persistenceDelegeator.getId(r, m), null);
+            EnhanceEntity e = new EnhanceEntity(r, PropertyAccessorHelper.getId(r, m), null);
             ls.add(e);
         }
     }

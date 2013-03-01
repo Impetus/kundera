@@ -36,6 +36,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -477,7 +478,7 @@ public class FlushManager
                     Client client = delegator.getClient(metadata);
                     
                     // do manual rollback, if data is processed, and running without transaction or with kundera's default transaction support!
-                    if (node.isProcessed() && (!delegator.isTransactionInProgress() || delegator.defaultTransactionSupported(metadata.getPersistenceUnit())))
+                    if (node.isProcessed() && (!delegator.isTransactionInProgress() || MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit())))
                     {
                         if (node.getOriginalNode() == null)
                         {
