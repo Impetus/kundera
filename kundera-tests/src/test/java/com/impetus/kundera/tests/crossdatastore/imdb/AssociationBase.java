@@ -16,12 +16,14 @@
 package com.impetus.kundera.tests.crossdatastore.imdb;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Metamodel;
@@ -37,6 +39,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
+import redis.clients.jedis.Jedis;
+
+import com.impetus.client.crud.RDBMSCli;
+import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -45,6 +51,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
+import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.imdb.dao.IMDBDaoImpl;
 
 /**
@@ -70,11 +77,15 @@ public abstract class AssociationBase
 
     /** The col families. */
     private String[] colFamilies;
+    
+    protected RDBMSCli cli;
 
     protected List<Object> col = new ArrayList<Object>();
 
-    protected String persistenceUnits = "imdbCassandra,imdbNeo4J";
-    protected static final String[] ALL_PUs_UNDER_TEST = new String[] {"imdbCassandra", "imdbNeo4J"};
+    protected String persistenceUnits = "imdbNeo4J,imdbCassandra,addMongo,redis";
+    //protected String persistenceUnits = "imdbNeo4J,imdbHbase";
+    protected static final String[] ALL_PUs_UNDER_TEST = new String[] {"imdbNeo4J", "addMongo", "imdbCassandra", "redis"};
+    //protected static final String[] ALL_PUs_UNDER_TEST = new String[] {"imdbNeo4J", "imdbHbase"};
 
     /**
      * Sets the up internal.
@@ -83,17 +94,28 @@ public abstract class AssociationBase
      *            the new up internal
      */
     protected void setUpInternal(String... colFamilies)
-    {       
+    {     
+        if (!HBaseCli.isStarted())
+        {
+            HBaseCli.startCluster();
+        }
+        HBaseCli.createTable("MOVIE");
+        HBaseCli.addColumnFamily("MOVIE", "TITLE");
+        HBaseCli.addColumnFamily("MOVIE", "YEAR");
+        
         dao = new IMDBDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
         em = null;
         dao.closeEntityManager();
         dao.closeEntityManagerFactory();
-
+        
         em = dao.getEntityManager(persistenceUnits);
-        this.colFamilies = colFamilies;
+        this.colFamilies = colFamilies;    
+        
     }
+
+    
 
     /**
      * Switch over persistence units.
@@ -167,7 +189,25 @@ public abstract class AssociationBase
                         }
                     }
 
-                }                
+                } 
+                
+                if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
+                {
+                    createRDBMSSchema();
+
+                }
+                
+                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
+                {
+                    if (!HBaseCli.isStarted())
+                    {
+                        HBaseCli.startCluster();
+                    }
+                    HBaseCli.createTable("MOVIE");
+                    HBaseCli.addColumnFamily("MOVIE", "TITLE");
+                    HBaseCli.addColumnFamily("MOVIE", "YEAR");
+
+                }
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
                 mAdd.setSchema(schema != null ? schema : KEYSPACE);                
                 log.warn(clazz.getSimpleName() + " in " + pu);
@@ -198,19 +238,25 @@ public abstract class AssociationBase
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            truncateColumnFamily();
+            truncateCassandra();
+            
+            truncateRdbms();
+            
+            shutDownRdbmsServer();
+            
+            truncateRedis();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
             CleanupUtilities.cleanLuceneDirectory(pu);
-        }
+        }        
     }
 
     /**
      * 
      */
-    private void truncateColumnFamily()
+    private void truncateCassandra()
     {
         String[] columnFamily = new String[] {ACTOR, MOVIE};
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
@@ -250,5 +296,104 @@ public abstract class AssociationBase
             TimedOutException, SchemaDisagreementException;
 
     protected abstract void loadDataForMovie() throws TException, InvalidRequestException, UnavailableException,
-    TimedOutException, SchemaDisagreementException;  
+    TimedOutException, SchemaDisagreementException;
+    
+    protected void shutDownRdbmsServer() 
+    {
+        if (cli != null)
+        {
+            try
+            {
+                if(AUTO_MANAGE_SCHEMA)
+                {
+                    cli.dropSchema(KEYSPACE);
+                }                
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    cli.closeConnection();
+                }
+                catch (SQLException e1)
+                {                    
+                }
+            }
+            finally
+            {
+                try
+                {
+                    cli.closeConnection();
+                }
+                catch (SQLException e)
+                {                   
+                }
+            }
+
+        }
+    }
+    
+    private void truncateRdbms()
+    {
+        try
+        {
+            cli.update("DELETE FROM IMDB.MOVIE");
+            cli.update("DROP TABLE IMDB.MOVIE");
+
+        }
+        catch (Exception e)
+        {
+            
+        }
+    }
+    
+    /**
+     * 
+     */
+    protected void createRDBMSSchema()
+    {
+        try
+        {
+            if(AUTO_MANAGE_SCHEMA)
+            {
+                cli = new RDBMSCli(KEYSPACE);
+                cli.createSchema(KEYSPACE);
+                
+                try
+                {
+                    cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
+                }
+                catch (Exception e)
+                {
+                    cli.update("DELETE FROM IMDB.MOVIE");
+                    cli.update("DROP TABLE IMDB.MOVIE");
+                    cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
+                }           
+                
+            }
+            
+        }
+        catch (Exception e)
+        {
+            log.error("Error in RDBMS cli ", e);
+        }
+    }
+    
+    private void truncateRedis()
+
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata("redis");
+        Properties props = puMetadata.getProperties();
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+        connection.auth(password);
+        connection.connect();
+        connection.flushDB();
+    }
 }

@@ -367,6 +367,10 @@ public final class AssociationBuilder
                     {
                         //Find target entity from database 
                         Object targetEntity = targetEntityClient.find(childMetadata.getEntityClazz(), targetEntityKey);
+                        if(targetEntity != null && targetEntity instanceof EnhanceEntity)
+                        {
+                            targetEntity = ((EnhanceEntity)targetEntity).getEntity();                             
+                        }                       
                         
                         //Set source and target entities into Map key entity
                         Object mapKeyEntity = relationValueMap.get(targetEntityKey);
