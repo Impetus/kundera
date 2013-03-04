@@ -37,21 +37,23 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Entity Class for Actor 
+ * Entity Class for Actor
+ * 
  * @author amresh.singh
  */
 @Entity
-@Table   //Ignored for Neo4J
-@IndexCollection(columns={@Index(name = "name", type = "KEYS")})
+@Table
+// Ignored for Neo4J
+@IndexCollection(columns = { @Index(name = "name", type = "KEYS") })
 public class ActorAllDataType
 {
     @Id
-    @Column(name="ACTOR_ID")   
+    @Column(name = "ACTOR_ID")
     private int id;
-    
-    @Column(name="ACTOR_NAME")
+
+    @Column(name = "ACTOR_NAME")
     private String name;
-    
+
     @Column(name = "DEPARTMENT_ID")
     private long departmentId;
 
@@ -104,20 +106,17 @@ public class ActorAllDataType
 
     @Column(name = "GRADUATION_DAY")
     private Calendar graduationDay;
-    
-    
+
     public ActorAllDataType()
     {
     }
-    
 
     public ActorAllDataType(int id, String name, long departmentId, boolean isExceptional, char grade,
             byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
             Date enrolmentTime, Date joiningDateAndTime, Integer yearsSpent, Long uniqueId, Double monthlySalary,
-            BigInteger jobAttempts,
-            BigDecimal accumulatedWealth, Calendar graduationDay)
+            BigInteger jobAttempts, BigDecimal accumulatedWealth, Calendar graduationDay)
     {
-        
+
         super();
         this.id = id;
         this.name = name;
@@ -136,16 +135,17 @@ public class ActorAllDataType
         this.monthlySalary = monthlySalary;
         this.jobAttempts = jobAttempts;
         this.accumulatedWealth = accumulatedWealth;
-        this.graduationDay = graduationDay;        
+        this.graduationDay = graduationDay;
     }
-    
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
-    @MapKeyJoinColumn(name="ACTS_IN")
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @MapKeyJoinColumn(name = "ACTS_IN")
     private Map<RoleAllDataType, MovieAllDataType> movies;
-    
+
     public void addMovie(RoleAllDataType role, MovieAllDataType movie)
     {
-        if(movies == null) movies = new HashMap<RoleAllDataType, MovieAllDataType>();
+        if (movies == null)
+            movies = new HashMap<RoleAllDataType, MovieAllDataType>();
         movies.put(role, movie);
     }
 
@@ -158,7 +158,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(int id)
     {
@@ -174,7 +175,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -190,7 +192,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param departmentId the departmentId to set
+     * @param departmentId
+     *            the departmentId to set
      */
     public void setDepartmentId(long departmentId)
     {
@@ -206,7 +209,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param isExceptional the isExceptional to set
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
@@ -222,7 +226,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param grade the grade to set
+     * @param grade
+     *            the grade to set
      */
     public void setGrade(char grade)
     {
@@ -238,7 +243,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param digitalSignature the digitalSignature to set
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
@@ -254,7 +260,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param rating the rating to set
+     * @param rating
+     *            the rating to set
      */
     public void setRating(short rating)
     {
@@ -270,7 +277,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param compliance the compliance to set
+     * @param compliance
+     *            the compliance to set
      */
     public void setCompliance(float compliance)
     {
@@ -286,7 +294,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param height the height to set
+     * @param height
+     *            the height to set
      */
     public void setHeight(double height)
     {
@@ -302,7 +311,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param enrolmentDate the enrolmentDate to set
+     * @param enrolmentDate
+     *            the enrolmentDate to set
      */
     public void setEnrolmentDate(java.util.Date enrolmentDate)
     {
@@ -318,7 +328,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param enrolmentTime the enrolmentTime to set
+     * @param enrolmentTime
+     *            the enrolmentTime to set
      */
     public void setEnrolmentTime(java.util.Date enrolmentTime)
     {
@@ -334,7 +345,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param joiningDateAndTime the joiningDateAndTime to set
+     * @param joiningDateAndTime
+     *            the joiningDateAndTime to set
      */
     public void setJoiningDateAndTime(java.util.Date joiningDateAndTime)
     {
@@ -350,7 +362,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param yearsSpent the yearsSpent to set
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
@@ -366,7 +379,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param uniqueId the uniqueId to set
+     * @param uniqueId
+     *            the uniqueId to set
      */
     public void setUniqueId(Long uniqueId)
     {
@@ -382,7 +396,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param monthlySalary the monthlySalary to set
+     * @param monthlySalary
+     *            the monthlySalary to set
      */
     public void setMonthlySalary(Double monthlySalary)
     {
@@ -398,7 +413,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param jobAttempts the jobAttempts to set
+     * @param jobAttempts
+     *            the jobAttempts to set
      */
     public void setJobAttempts(BigInteger jobAttempts)
     {
@@ -414,7 +430,8 @@ public class ActorAllDataType
     }
 
     /**
-     * @param accumulatedWealth the accumulatedWealth to set
+     * @param accumulatedWealth
+     *            the accumulatedWealth to set
      */
     public void setAccumulatedWealth(BigDecimal accumulatedWealth)
     {
@@ -430,13 +447,13 @@ public class ActorAllDataType
     }
 
     /**
-     * @param graduationDay the graduationDay to set
+     * @param graduationDay
+     *            the graduationDay to set
      */
     public void setGraduationDay(Calendar graduationDay)
     {
         this.graduationDay = graduationDay;
     }
-
 
     /**
      * @return the movies
@@ -446,14 +463,13 @@ public class ActorAllDataType
         return movies;
     }
 
-
     /**
-     * @param movies the movies to set
+     * @param movies
+     *            the movies to set
      */
     public void setMovies(Map<RoleAllDataType, MovieAllDataType> movies)
     {
         this.movies = movies;
-    }    
-    
+    }
 
 }

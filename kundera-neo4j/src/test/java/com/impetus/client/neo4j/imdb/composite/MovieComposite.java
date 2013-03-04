@@ -29,42 +29,46 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Movie Node entity class 
+ * Movie Node entity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table
-@IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
+@IndexCollection(columns = { @Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS") })
 public class MovieComposite
 {
     @EmbeddedId
     private MovieId movieId;
-    
-    @Column(name="TITLE")
+
+    @Column(name = "TITLE")
     private String title;
-    
-    @Column(name="YEAR")
-    private int year;      
-    
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy="movies")
+
+    @Column(name = "YEAR")
+    private int year;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "movies")
     private Map<RoleComposite, ActorComposite> actors;
-    
-    public MovieComposite() {}
+
+    public MovieComposite()
+    {
+    }
+
     public MovieComposite(MovieId id, String title, int year)
     {
         this.movieId = id;
         this.title = title;
         this.year = year;
     }
-    
+
     public void addActor(RoleComposite role, ActorComposite actor)
     {
-        if(actors == null) actors = new HashMap<RoleComposite, ActorComposite>();
+        if (actors == null)
+            actors = new HashMap<RoleComposite, ActorComposite>();
         actors.put(role, actor);
-    }   
+    }
 
-    
     /**
      * @return the movieId
      */
@@ -72,14 +76,16 @@ public class MovieComposite
     {
         return movieId;
     }
+
     /**
-     * @param movieId the movieId to set
+     * @param movieId
+     *            the movieId to set
      */
     public void setMovieId(MovieId movieId)
     {
         this.movieId = movieId;
     }
-    
+
     /**
      * @return the title
      */
@@ -89,7 +95,8 @@ public class MovieComposite
     }
 
     /**
-     * @param title the title to set
+     * @param title
+     *            the title to set
      */
     public void setTitle(String title)
     {
@@ -105,7 +112,8 @@ public class MovieComposite
     }
 
     /**
-     * @param year the year to set
+     * @param year
+     *            the year to set
      */
     public void setYear(int year)
     {
@@ -121,11 +129,12 @@ public class MovieComposite
     }
 
     /**
-     * @param actors the actors to set
+     * @param actors
+     *            the actors to set
      */
     public void setActors(Map<RoleComposite, ActorComposite> actors)
     {
         this.actors = actors;
-    }   
+    }
 
 }

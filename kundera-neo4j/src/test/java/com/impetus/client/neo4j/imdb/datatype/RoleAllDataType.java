@@ -32,25 +32,25 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Role Entity containing all data types 
+ * Role Entity containing all data types
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table
-@IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
+@IndexCollection(columns = { @Index(name = "roleType", type = "KEYS") })
 public class RoleAllDataType
 {
     @Id
-    @Column(name="ROLE_NAME")
+    @Column(name = "ROLE_NAME")
     private String roleName;
-    
-    @Column(name="ROLE_TYPE")
-    private String roleType;   
-    
-    
-    @Column(name="ROLE_CODE")
+
+    @Column(name = "ROLE_TYPE")
+    private String roleType;
+
+    @Column(name = "ROLE_CODE")
     private int roleCode;
-    
+
     @Column(name = "ROLE_LOCATION_ID")
     private long roleLocationId;
 
@@ -103,18 +103,18 @@ public class RoleAllDataType
 
     @Column(name = "GRADUATION_DAY")
     private Calendar graduationDay;
-    
+
     @OneToOne
     private ActorAllDataType actor;
-    
+
     @OneToOne
     private MovieAllDataType movie;
-    
+
     public RoleAllDataType()
     {
-        
+
     }
-    
+
     public RoleAllDataType(String roleName, String roleType, int roleCode, long roleLocationId, boolean isExceptional,
             char grade, byte digitalSignature, short rating, float compliance, double imdbRating, Date roleStartDate,
             Date roleStartTime, Date scriptReadTime, Integer yearsSpent, Long uniqueId, Double remuneration,
@@ -139,9 +139,9 @@ public class RoleAllDataType
         this.remuneration = remuneration;
         this.rehearsalAttempts = rehearsalAttempts;
         this.toBePaidForRole = toBePaidForRole;
-        this.graduationDay = graduationDay;        
+        this.graduationDay = graduationDay;
     }
-    
+
     /**
      * @return the roleName
      */
@@ -151,7 +151,8 @@ public class RoleAllDataType
     }
 
     /**
-     * @param roleName the roleName to set
+     * @param roleName
+     *            the roleName to set
      */
     public void setRoleName(String roleName)
     {
@@ -167,15 +168,13 @@ public class RoleAllDataType
     }
 
     /**
-     * @param roleType the roleType to set
+     * @param roleType
+     *            the roleType to set
      */
     public void setRoleType(String roleType)
     {
         this.roleType = roleType;
     }
-    
-    
-
 
     /**
      * @return the roleCode
@@ -185,15 +184,14 @@ public class RoleAllDataType
         return roleCode;
     }
 
-
     /**
-     * @param roleCode the roleCode to set
+     * @param roleCode
+     *            the roleCode to set
      */
     public void setRoleCode(int roleCode)
     {
         this.roleCode = roleCode;
     }
-
 
     /**
      * @return the roleLocationId
@@ -203,15 +201,14 @@ public class RoleAllDataType
         return roleLocationId;
     }
 
-
     /**
-     * @param roleLocationId the roleLocationId to set
+     * @param roleLocationId
+     *            the roleLocationId to set
      */
     public void setRoleLocationId(long roleLocationId)
     {
         this.roleLocationId = roleLocationId;
     }
-
 
     /**
      * @return the isExceptional
@@ -221,15 +218,14 @@ public class RoleAllDataType
         return isExceptional;
     }
 
-
     /**
-     * @param isExceptional the isExceptional to set
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
         this.isExceptional = isExceptional;
     }
-
 
     /**
      * @return the grade
@@ -239,15 +235,14 @@ public class RoleAllDataType
         return grade;
     }
 
-
     /**
-     * @param grade the grade to set
+     * @param grade
+     *            the grade to set
      */
     public void setGrade(char grade)
     {
         this.grade = grade;
     }
-
 
     /**
      * @return the digitalSignature
@@ -257,15 +252,14 @@ public class RoleAllDataType
         return digitalSignature;
     }
 
-
     /**
-     * @param digitalSignature the digitalSignature to set
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
         this.digitalSignature = digitalSignature;
     }
-
 
     /**
      * @return the rating
@@ -275,15 +269,14 @@ public class RoleAllDataType
         return rating;
     }
 
-
     /**
-     * @param rating the rating to set
+     * @param rating
+     *            the rating to set
      */
     public void setRating(short rating)
     {
         this.rating = rating;
     }
-
 
     /**
      * @return the compliance
@@ -293,15 +286,14 @@ public class RoleAllDataType
         return compliance;
     }
 
-
     /**
-     * @param compliance the compliance to set
+     * @param compliance
+     *            the compliance to set
      */
     public void setCompliance(float compliance)
     {
         this.compliance = compliance;
     }
-
 
     /**
      * @return the imdbRating
@@ -311,15 +303,14 @@ public class RoleAllDataType
         return imdbRating;
     }
 
-
     /**
-     * @param imdbRating the imdbRating to set
+     * @param imdbRating
+     *            the imdbRating to set
      */
     public void setImdbRating(double imdbRating)
     {
         this.imdbRating = imdbRating;
     }
-
 
     /**
      * @return the roleStartDate
@@ -329,15 +320,14 @@ public class RoleAllDataType
         return roleStartDate;
     }
 
-
     /**
-     * @param roleStartDate the roleStartDate to set
+     * @param roleStartDate
+     *            the roleStartDate to set
      */
     public void setRoleStartDate(java.util.Date roleStartDate)
     {
         this.roleStartDate = roleStartDate;
     }
-
 
     /**
      * @return the roleStartTime
@@ -347,15 +337,14 @@ public class RoleAllDataType
         return roleStartTime;
     }
 
-
     /**
-     * @param roleStartTime the roleStartTime to set
+     * @param roleStartTime
+     *            the roleStartTime to set
      */
     public void setRoleStartTime(java.util.Date roleStartTime)
     {
         this.roleStartTime = roleStartTime;
     }
-
 
     /**
      * @return the scriptReadTime
@@ -365,15 +354,14 @@ public class RoleAllDataType
         return scriptReadTime;
     }
 
-
     /**
-     * @param scriptReadTime the scriptReadTime to set
+     * @param scriptReadTime
+     *            the scriptReadTime to set
      */
     public void setScriptReadTime(java.util.Date scriptReadTime)
     {
         this.scriptReadTime = scriptReadTime;
     }
-
 
     /**
      * @return the yearsSpent
@@ -383,15 +371,14 @@ public class RoleAllDataType
         return yearsSpent;
     }
 
-
     /**
-     * @param yearsSpent the yearsSpent to set
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
         this.yearsSpent = yearsSpent;
     }
-
 
     /**
      * @return the uniqueId
@@ -401,15 +388,14 @@ public class RoleAllDataType
         return uniqueId;
     }
 
-
     /**
-     * @param uniqueId the uniqueId to set
+     * @param uniqueId
+     *            the uniqueId to set
      */
     public void setUniqueId(Long uniqueId)
     {
         this.uniqueId = uniqueId;
     }
-
 
     /**
      * @return the remuneration
@@ -419,15 +405,14 @@ public class RoleAllDataType
         return remuneration;
     }
 
-
     /**
-     * @param remuneration the remuneration to set
+     * @param remuneration
+     *            the remuneration to set
      */
     public void setRemuneration(Double remuneration)
     {
         this.remuneration = remuneration;
     }
-
 
     /**
      * @return the rehearsalAttempts
@@ -437,15 +422,14 @@ public class RoleAllDataType
         return rehearsalAttempts;
     }
 
-
     /**
-     * @param rehearsalAttempts the rehearsalAttempts to set
+     * @param rehearsalAttempts
+     *            the rehearsalAttempts to set
      */
     public void setRehearsalAttempts(BigInteger rehearsalAttempts)
     {
         this.rehearsalAttempts = rehearsalAttempts;
     }
-
 
     /**
      * @return the toBePaidForRole
@@ -455,15 +439,14 @@ public class RoleAllDataType
         return toBePaidForRole;
     }
 
-
     /**
-     * @param toBePaidForRole the toBePaidForRole to set
+     * @param toBePaidForRole
+     *            the toBePaidForRole to set
      */
     public void setToBePaidForRole(BigDecimal toBePaidForRole)
     {
         this.toBePaidForRole = toBePaidForRole;
     }
-
 
     /**
      * @return the graduationDay
@@ -473,15 +456,14 @@ public class RoleAllDataType
         return graduationDay;
     }
 
-
     /**
-     * @param graduationDay the graduationDay to set
+     * @param graduationDay
+     *            the graduationDay to set
      */
     public void setGraduationDay(Calendar graduationDay)
     {
         this.graduationDay = graduationDay;
     }
-
 
     /**
      * @return the actor
@@ -491,15 +473,14 @@ public class RoleAllDataType
         return actor;
     }
 
-
     /**
-     * @param actor the actor to set
+     * @param actor
+     *            the actor to set
      */
     public void setActor(ActorAllDataType actor)
     {
         this.actor = actor;
     }
-
 
     /**
      * @return the movie
@@ -509,14 +490,13 @@ public class RoleAllDataType
         return movie;
     }
 
-
     /**
-     * @param movie the movie to set
+     * @param movie
+     *            the movie to set
      */
     public void setMovie(MovieAllDataType movie)
     {
         this.movie = movie;
-    } 
-    
+    }
 
 }

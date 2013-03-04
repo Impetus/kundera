@@ -126,9 +126,11 @@ public abstract class TwinAssociation extends AssociationBase
                     String puForActor = c.get(Actor.class);
                     String puForMovie = c.get(Movie.class);                   
                     
-                    if(puForActor.equals("imdbCassandra") && puForMovie.equals("imdbNeo4J")) {
+                    if( !puForActor.equals("imdbNeo4J") ||  puForMovie.equals("imdbNeo4J"))
+                    {
                         continue;
-                    }
+                    }         
+                   
                 }
                 
                 switchPersistenceUnits(c);
@@ -142,6 +144,7 @@ public abstract class TwinAssociation extends AssociationBase
         catch (Exception e)
         {
             log.error(e);
+            e.printStackTrace();
             Assert.fail("Failure caused by:" + e.getMessage());
         }
     }

@@ -23,6 +23,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Lucene implementation of {@link Neo4JNativeQuery}
+ * 
  * @author amresh.singh
  */
 public class Neo4JLuceneQuery implements Neo4JNativeQuery
@@ -32,9 +33,9 @@ public class Neo4JLuceneQuery implements Neo4JNativeQuery
     public List<Object> executeNativeQuery(String nativeQuery, Neo4JClient client, EntityMetadata m)
     {
         List<Object> entities = new ArrayList<Object>();
-        
+
         entities = client.executeLuceneQuery(m, nativeQuery);
-        
+
         return entities;
     }
 }

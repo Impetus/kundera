@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j;
 
-
 import java.lang.reflect.Field;
 
 import javax.persistence.EntityManagerFactory;
@@ -34,7 +33,8 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
 
 /**
- * Test case for {@link Neo4JClientFactory} 
+ * Test case for {@link Neo4JClientFactory}
+ * 
  * @author amresh.singh
  */
 public class Neo4JClientFactoryTest

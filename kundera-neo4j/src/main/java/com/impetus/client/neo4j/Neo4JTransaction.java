@@ -27,64 +27,68 @@ import org.neo4j.graphdb.Transaction;
 import com.impetus.kundera.persistence.TransactionResource;
 
 /**
- * Defines transaction boundaries for Neo4J client, in case  
- * user opts for transaction support (kundera.transaction.resource)
+ * Defines transaction boundaries for Neo4J client, in case user opts for
+ * transaction support (kundera.transaction.resource)
+ * 
  * @author amresh.singh
  */
 public class Neo4JTransaction implements TransactionResource
 {
     /** Whether this transaction is currently in progress */
-    private boolean isTransactionInProgress;  
-    
+    private boolean isTransactionInProgress;
+
     /** IDs of nodes participating in this transaction */
     private List<Long> nodeIds;
-    
+
     private Map<Object, Node> processedNodes;
-    
-    /** Instance of {@link GraphDatabaseService} from which this transaction was spawned */
+
+    /**
+     * Instance of {@link GraphDatabaseService} from which this transaction was
+     * spawned
+     */
     GraphDatabaseService graphDb = null;
-    
+
     /** Neo4J Transaction instance */
     Transaction tx = null;
-    
+
     @Override
     public void onBegin()
     {
-        if(graphDb != null && ! isTransactionInProgress)
+        if (graphDb != null && !isTransactionInProgress)
         {
             tx = graphDb.beginTx();
             nodeIds = new ArrayList<Long>();
             processedNodes = new HashMap<Object, Node>();
         }
-        
+
         isTransactionInProgress = true;
     }
 
     @Override
     public void onCommit()
     {
-        if(tx != null && isTransactionInProgress)
+        if (tx != null && isTransactionInProgress)
         {
             tx.success();
             tx.finish();
             nodeIds.clear();
             processedNodes.clear();
         }
-        
+
         isTransactionInProgress = false;
     }
 
     @Override
     public void onRollback()
     {
-        if(tx != null && isTransactionInProgress)
+        if (tx != null && isTransactionInProgress)
         {
             tx.failure();
             tx.finish();
             nodeIds.clear();
             processedNodes.clear();
-        }        
-        
+        }
+
         tx = null;
         isTransactionInProgress = false;
     }
@@ -116,29 +120,32 @@ public class Neo4JTransaction implements TransactionResource
     }
 
     /**
-     * @param graphDb the graphDb to set
+     * @param graphDb
+     *            the graphDb to set
      */
     public void setGraphDb(GraphDatabaseService graphDb)
     {
         this.graphDb = graphDb;
-    }  
+    }
 
     /**
-     * @param nodeIds the nodeIds to set
+     * @param nodeIds
+     *            the nodeIds to set
      */
     public void addNodeId(Long nodeId)
     {
-        if(nodeIds == null)
+        if (nodeIds == null)
         {
             nodeIds = new ArrayList<Long>();
         }
         nodeIds.add(nodeId);
     }
-    
+
     public boolean containsNodeId(Long nodeId)
     {
-        if(nodeIds == null) return false;
-        
+        if (nodeIds == null)
+            return false;
+
         return nodeIds.contains(nodeId);
     }
 
@@ -147,23 +154,24 @@ public class Neo4JTransaction implements TransactionResource
      */
     public Node getProcessedNode(Object key)
     {
-        if(processedNodes == null || processedNodes.isEmpty())
+        if (processedNodes == null || processedNodes.isEmpty())
         {
             return null;
-        }        
+        }
         return processedNodes.get(key);
     }
 
     /**
-     * @param processedNodes the processedNodes to set
+     * @param processedNodes
+     *            the processedNodes to set
      */
     public void addProcessedNode(Object key, Node processedNode)
     {
-        if(processedNodes == null)
+        if (processedNodes == null)
         {
             processedNodes = new HashMap<Object, Node>();
         }
         processedNodes.put(key, processedNode);
-    }  
-    
+    }
+
 }

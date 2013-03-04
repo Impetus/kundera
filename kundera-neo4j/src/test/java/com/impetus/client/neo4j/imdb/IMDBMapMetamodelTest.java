@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.Metamodel;
 
@@ -29,7 +28,8 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
- * Test case for validating correctness of Metamodel for Map data type 
+ * Test case for validating correctness of Metamodel for Map data type
+ * 
  * @author amresh.singh
  */
 public class IMDBMapMetamodelTest extends IMDBTestBase
@@ -41,8 +41,8 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory("imdb");
-        em = emf.createEntityManager();        
-        
+        em = emf.createEntityManager();
+
     }
 
     /**
@@ -54,33 +54,31 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
         em.close();
         emf.close();
     }
-    
+
     @Test
     public void testMetamodel()
-    {       
+    {
         EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Actor.class);
         Assert.assertNotNull(m1);
         Assert.assertEquals(Actor.class, m1.getEntityClazz());
         Assert.assertEquals(Role.class, m1.getRelation("movies").getMapKeyJoinClass());
         Assert.assertEquals(Movie.class, m1.getRelation("movies").getTargetEntity());
         Assert.assertEquals("ACTS_IN", m1.getRelation("movies").getJoinColumnName());
-        
-        
+
         EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(Movie.class);
         Assert.assertNotNull(m2);
         Assert.assertEquals(Movie.class, m2.getEntityClazz());
         Assert.assertEquals(Role.class, m2.getRelation("actors").getMapKeyJoinClass());
         Assert.assertEquals(Actor.class, m2.getRelation("actors").getTargetEntity());
         Assert.assertNull(m2.getRelation("actors").getJoinColumnName());
-        
+
         EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(Role.class);
         Assert.assertNotNull(m3);
-        Assert.assertEquals(Role.class, m3.getEntityClazz());        
-        
-        
+        Assert.assertEquals(Role.class, m3.getEntityClazz());
+
         Metamodel mm = KunderaMetadataManager.getMetamodel("imdb");
-        Assert.assertNotNull(mm);    
-        
-    }   
+        Assert.assertNotNull(mm);
+
+    }
 
 }
