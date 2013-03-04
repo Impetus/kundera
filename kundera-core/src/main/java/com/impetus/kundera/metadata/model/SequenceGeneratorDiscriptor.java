@@ -39,7 +39,6 @@ public class SequenceGeneratorDiscriptor
 
     public SequenceGeneratorDiscriptor(SequenceGenerator sequenceGenerator, String defaultSchemaName)
     {
-        this.name = sequenceGenerator.name();
         this.initialValue = sequenceGenerator.initialValue();
         this.allocationSize = sequenceGenerator.allocationSize();
         this.sequenceName = sequenceGenerator.sequenceName().isEmpty() ? default_sequence_name : sequenceGenerator

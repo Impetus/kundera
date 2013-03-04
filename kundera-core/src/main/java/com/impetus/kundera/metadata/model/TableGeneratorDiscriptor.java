@@ -52,7 +52,6 @@ public class TableGeneratorDiscriptor
 
     public TableGeneratorDiscriptor(TableGenerator tableGenerator, String defaultSchemaName, String defaultPkColumnValue)
     {
-        this.name = tableGenerator.name();
         this.table = tableGenerator.table().isEmpty() ? default_table_name : tableGenerator.table();
         this.schema = tableGenerator.schema().isEmpty() ? defaultSchemaName : tableGenerator.schema();
         this.pkColumnName = tableGenerator.pkColumnName().isEmpty() ? default_pkColumn_name : tableGenerator
