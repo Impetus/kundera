@@ -25,13 +25,10 @@
 	</persistence-unit>
 	<persistence-unit name="imdbBatch">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.neo4j.imdb.Actor</class>
-		<class>com.impetus.client.neo4j.imdb.Movie</class>
-		<class>com.impetus.client.neo4j.imdb.Role</class>
 		<properties>			
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="7474" />
-			<property name="kundera.datastore.file.path" value="target/imdb.db" />			
+			<property name="kundera.datastore.file.path" value="target/imdbBatch.db" />			
 			<property name="kundera.dialect" value="neo4j" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.neo4j.Neo4JClientFactory" />

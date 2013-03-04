@@ -27,7 +27,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
@@ -50,7 +49,7 @@ public class Neo4JClientTest
     GraphEntityMapper mapper;
 
     final static String PU = "neo4jTest";
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -103,7 +102,7 @@ public class Neo4JClientTest
     @Test
     public void testOnPersist()
     {
-        
+
     }
 
     /**

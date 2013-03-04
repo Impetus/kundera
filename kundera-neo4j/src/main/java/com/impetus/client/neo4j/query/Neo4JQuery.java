@@ -39,6 +39,8 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class Neo4JQuery extends QueryImpl implements Query
 {
+    private static final String NATIVE_QUERY_TYPE = "native.query.type";
+
     Neo4JQueryType queryType;
 
     /**
@@ -49,9 +51,9 @@ public class Neo4JQuery extends QueryImpl implements Query
     {
         super(query, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
-        if (getHints().containsKey("native.query.type"))
+        if (getHints().containsKey(NATIVE_QUERY_TYPE))
         {
-            queryType = (Neo4JQueryType) getHints().get("native.query.type");
+            queryType = (Neo4JQueryType) getHints().get(NATIVE_QUERY_TYPE);
         }
         else
         {

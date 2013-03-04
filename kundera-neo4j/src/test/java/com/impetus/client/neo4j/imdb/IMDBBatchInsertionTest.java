@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import javax.persistence.Persistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -39,7 +41,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class IMDBBatchInsertionTest
 {
-    private static final String IMDB_PU = "imdb";
+    private static final String IMDB_BATCH_PU = "imdbBatch";
 
     EntityManagerFactory emf;
 
@@ -55,7 +57,7 @@ public class IMDBBatchInsertionTest
     {
         Map properties = new HashMap();
         properties.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
-        emf = Persistence.createEntityManagerFactory(IMDB_PU, properties);
+        emf = Persistence.createEntityManagerFactory(IMDB_BATCH_PU, properties);
         em = emf.createEntityManager();
     }
 
@@ -65,12 +67,14 @@ public class IMDBBatchInsertionTest
     @After
     public void tearDown() throws Exception
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_BATCH_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();
         emf.close();
 
+        if (datastoreFilePath != null)
+            FileUtils.deleteRecursively(new File(datastoreFilePath));
     }
 
     @Test
@@ -79,26 +83,13 @@ public class IMDBBatchInsertionTest
 
         List<Actor> actors = prepareData(n);
 
-        /*
-         * for(Actor actor : actors) { if(actor != null) { em.persist(actor); }
-         * } PersistenceUnitMetadata puMetadata =
-         * KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU); String
-         * datastoreFilePath =
-         * puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH
-         * ); try { if(datastoreFilePath != null) {
-         * FileUtils.deleteRecursively(new File(datastoreFilePath)); } } catch
-         * (IOException e) { e.printStackTrace(); }
-         */
-
-        /*
-         * for(int i = 1; i <= n; i++) { Actor actor = em.find(Actor.class, i);
-         * Assert.assertNotNull(actor); Assert.assertEquals(i, actor.getId());
-         * Assert.assertEquals("Actor " + i, actor.getName());
-         * 
-         * Assert.assertNotNull(actor.getMovies());
-         * Assert.assertFalse(actor.getMovies().isEmpty()); //
-         * Assert.assertEquals(2, actor.getMovies().size()); }
-         */
+        for (Actor actor : actors)
+        {
+            if (actor != null)
+            {
+                em.persist(actor);
+            }
+        }
     }
 
     /**
