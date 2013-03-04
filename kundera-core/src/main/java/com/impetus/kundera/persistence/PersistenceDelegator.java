@@ -42,6 +42,7 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -63,7 +64,7 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KeyValue;
+import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
@@ -121,6 +122,8 @@ public final class PersistenceDelegator
 
     private Coordinator coordinator;
 
+    private IdGenerator idGenerator;
+
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -135,6 +138,7 @@ public final class PersistenceDelegator
         this.eventDispatcher = new EntityEventDispatcher();
         this.graphBuilder = new ObjectGraphBuilder(pc);
         this.persistenceCache = pc;
+        this.idGenerator = new IdGenerator();
     }
 
     /***********************************************************************/
@@ -154,11 +158,7 @@ public final class PersistenceDelegator
         }
         EntityMetadata metadata = getMetadata(e.getClass());
 
-        Object id = generateId(e, metadata);
-        if (id != null)
-        {
-            PropertyAccessorHelper.setId(e, metadata, id);
-        }
+        idGenerator.setGeneratedIdIfApplicable(e, metadata, getClient(metadata));
 
         if (!validator.isValidEntityObject(e))
         // Validate entity
@@ -203,54 +203,6 @@ public final class PersistenceDelegator
         if (log.isDebugEnabled())
         {
             log.debug("Data persisted successfully for entity : " + e.getClass());
-        }
-    }
-
-    private Object generateId(Object e, EntityMetadata m)
-    {
-        Object id = PropertyAccessorHelper.getId(e, m);
-        Field f = (Field) m.getIdAttribute().getJavaMember();
-        if (f.isAnnotationPresent(GeneratedValue.class))
-        {
-            Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
-            KeyValue keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
-            Client client = getClient(m);
-            if (keyValue != null)
-            {
-                GenerationType type = keyValue.getStrategy();
-                if (type.equals(GenerationType.TABLE) && client instanceof TableGenerator)
-                {
-                    Object generate = ((TableGenerator) client).generate(keyValue.getTableDiscriptor());
-					return PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
-							generate.getClass(), generate);
-                }
-                else if ((type.equals(GenerationType.SEQUENCE)) && client instanceof SequenceGenerator)
-                {
-                    Object generate = ((SequenceGenerator) client).generate(keyValue.getSequenceDiscriptor());
-					return PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
-							generate.getClass(), generate);
-                }
-                else if (type.equals(GenerationType.AUTO) && client instanceof AutoGenerator)
-                {
-                    Object generate = ((AutoGenerator) client).generate();
-					return PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
-							generate.getClass(), generate);
-                }
-                else if (type.equals(GenerationType.IDENTITY) && client instanceof IdentityGenerator)
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new IllegalArgumentException(GenerationType.class.getSimpleName() + "." + type
-                            + " Strategy not supported by this client :" + client.getClass().getName());
-                }
-            }
-            return null;
-        }
-        else
-        {
-            return id;
         }
     }
 

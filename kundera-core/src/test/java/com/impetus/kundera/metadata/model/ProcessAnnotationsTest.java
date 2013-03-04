@@ -56,7 +56,7 @@ public class ProcessAnnotationsTest
         Metamodel metamodel = KunderaMetadataManager.getMetamodel("GeneratedValue");
 
         // for entity GeneratedIdDefault.
-        KeyValue keyValue = ((MetamodelImpl) metamodel).getKeyValue(GeneratedIdDefault.class.getName());
+        IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(GeneratedIdDefault.class.getName());
         Assert.assertNotNull(keyValue);
         Assert.assertEquals(GenerationType.AUTO, keyValue.getStrategy());
         Assert.assertNull(keyValue.getTableDiscriptor());

@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.generator;
 
-import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 
-public interface TableGenerator extends Generator
+/**
+ * @author Kuldeep Mishra
+ * 
+ */
+public interface Generator
 {
-    public Object generate(TableGeneratorDiscriptor discriptor);
+    
 }

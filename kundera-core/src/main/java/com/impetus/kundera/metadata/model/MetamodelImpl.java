@@ -57,7 +57,7 @@ public class MetamodelImpl implements Metamodel
     /** The mapped super class types. */
     private Map<Class<?>, ManagedType<?>> mappedSuperClassTypes;
 
-    private Map<String, KeyValue> keyValues;
+    private Map<String, IdDiscriptor> keyValues;
 
     /*
      * (non-Javadoc)
@@ -403,7 +403,7 @@ public class MetamodelImpl implements Metamodel
     /**
      * @return the keyValues
      */
-    public KeyValue getKeyValue(String entityName)
+    public IdDiscriptor getKeyValue(String entityName)
     {
         if (keyValues != null)
         {
@@ -412,16 +412,29 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
+//    /**
+//     * @param keyValues
+//     *            the keyValues to set
+//     */
+//    public void addKeyValue(String entityName, KeyDiscriptor keyValue)
+//    {
+//        if (keyValues == null)
+//        {
+//            keyValues = new HashMap<String, KeyDiscriptor>();
+//        }
+//        this.keyValues.put(entityName, keyValue);
+//    }
+
     /**
      * @param keyValues
      *            the keyValues to set
      */
-    public void addKeyValue(String entityName, KeyValue keyValue)
+    public void addKeyValues(Map<String, IdDiscriptor> keyDiscriptors)
     {
         if (keyValues == null)
         {
-            keyValues = new HashMap<String, KeyValue>();
+            keyValues = new HashMap<String, IdDiscriptor>();
         }
-        this.keyValues.put(entityName, keyValue);
+        this.keyValues.putAll(keyDiscriptors);
     }
 }
