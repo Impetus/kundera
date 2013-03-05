@@ -539,10 +539,22 @@ public class CassQuery extends QueryImpl implements Query
         addWhereClause(builder);
 
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
-
+        
+//        onLimit(builder);
 
         result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
         return result;
+    }
+
+    /**
+     * Add provided max result limit.
+     * 
+     * @param builder string builder.
+     */
+    private void onLimit(StringBuilder builder)
+    {
+            builder.append(CQLTranslator.LIMIT);
+            builder.append(this.maxResult);
     }
 
     /**
@@ -650,7 +662,14 @@ public class CassQuery extends QueryImpl implements Query
 
         if (allowFiltering)
         {
+            onLimit(builder);
+            builder.append(" ");
             translator.buildFilteringClause(builder);
+//            builder.append(",");
+//            onLimit(builder);
+        } else
+        {
+            onLimit(builder);
         }
         
         
