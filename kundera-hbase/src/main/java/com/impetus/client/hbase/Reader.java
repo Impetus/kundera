@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.filter.Filter;
 
 // TODO: Auto-generated Javadoc
@@ -43,7 +44,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter,String... columns) throws IOException;
+    List<HBaseData> LoadData(HTableInterface hTable, String columnFamily, Object rowKey, Filter filter,String... columns) throws IOException;
 
     /**
      * Load data.
@@ -58,7 +59,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter,String... columns) throws IOException;
+    List<HBaseData> LoadData(HTableInterface hTable, Object rowKey, Filter filter,String... columns) throws IOException;
 
     /**
      * Load all.
@@ -76,7 +77,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
+    List<HBaseData> loadAll(HTableInterface hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
             String qualifier, String[] columns) throws IOException;
 
     /**
@@ -94,6 +95,6 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
+    Object[] scanRowKeys(final HTableInterface hTable, final Filter filter, final String columnFamilyName,
             final String columnName, final Class rowKeyClazz) throws IOException;
 }

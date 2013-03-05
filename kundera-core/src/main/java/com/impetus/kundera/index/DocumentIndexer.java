@@ -43,7 +43,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author animesh.kumar
  */
-public abstract class DocumentIndexer implements Indexer
+public abstract class DocumentIndexer implements com.impetus.kundera.index.lucene.Indexer
 {
 
     /** log for this class. */

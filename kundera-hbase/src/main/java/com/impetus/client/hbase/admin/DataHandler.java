@@ -66,6 +66,26 @@ public interface DataHandler
             throws IOException;
 
     /**
+     * Populates data for give column family, column name, and HBase table name.
+     * 
+     * @param tableName
+     *            the table name
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @return the object
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    List readData(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,String... columns)
+            throws IOException;
+
+    /**
      * @param tableName
      * @param clazz
      * @param m

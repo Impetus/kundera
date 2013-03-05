@@ -97,7 +97,7 @@ public final class PersistenceDelegator
 
     private PersistenceValidator validator;
 
-    private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     // Whether a transaction is in progress
     private boolean isTransactionInProgress;

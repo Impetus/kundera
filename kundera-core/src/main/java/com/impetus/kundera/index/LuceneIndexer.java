@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.metamodel.EmbeddableType;
@@ -280,7 +281,7 @@ public class LuceneIndexer extends DocumentIndexer
     
     @SuppressWarnings("deprecation")
     @Override
-    public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
+    public final Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation)
     {
 
         reader = getIndexReader();
@@ -293,7 +294,7 @@ public class LuceneIndexer extends DocumentIndexer
         log.debug("Searching index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
         // Set<String> entityIds = new HashSet<String>();
-        Map<String, String> indexCol = new HashMap<String, String>();
+        Map<String, Object> indexCol = new HashMap<String, Object>();
 
         if (reader == null)
         {
@@ -476,7 +477,7 @@ public class LuceneIndexer extends DocumentIndexer
     public boolean entityExistsInIndex(Class<?> entityClass)
     {
         String luceneQuery = "+" + ENTITY_CLASS_FIELD + ":" + entityClass.getCanonicalName().toLowerCase();
-        Map<String, String> results;
+        Map<String, Object> results;
         try
         {
             results = search(luceneQuery, 0, 10, false);
@@ -656,6 +657,24 @@ public class LuceneIndexer extends DocumentIndexer
         // {
         // throw new IndexingException(e.getMessage());
         // }
+    }
+
+    @Override
+    public void index(Class entityClazz, Map<String, Object> values)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unIndex(Class entityClazz, Object key)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, Object> search(String luceneQuery, int start, int end)
+    {
+        throw new UnsupportedOperationException();
     }
 
 }

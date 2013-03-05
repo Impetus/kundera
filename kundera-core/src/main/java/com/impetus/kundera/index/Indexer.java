@@ -17,77 +17,46 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
-import com.impetus.kundera.metadata.model.EntityMetadata;
-
 /**
- * Interface to define the behavior of an Indexer.
+ * Indexer interface. Any custom implementation for this interface can be plugged-in by configuring kundera.indexer.class property
+ * in persistence.xml. Once this is enabled in persistence provider, Kundera will automatically delegate index related requests to 
+ * configure indexer interface implementation but will keep functioning for any database specific requests. 
+ * For example, developer may rely upon custom index implementation for inverted indexes(e.g. @Id attributes) but entity data population
+ * will be handled by Kundera
  * 
- * @author animesh.kumar
+ * @author vivek.mishra
+ *
  */
 public interface Indexer
 {
 
     /**
-     * Unindexed an entity with key:id.
+     * Index a document for given entity class and collection of values.
      * 
-     * @param metadata
-     *            the metadata
-     * @param id
-     *            the id
+     * @param entityClazz entity class
+     * 
+     * @param values map of values containing field name as key and it's value.
      */
-
-    void unindex(EntityMetadata metadata, Object id);
+    void index(final Class entityClazz, final Map<String, Object> values);
 
     /**
-     * Indexes and object.
+     * Executes lucene query and returns inverted indices as output.
      * 
-     * @param metadata
-     *            the metadata
-     * @param object
-     *            the object
+     * @param queryString  lucene query.
+     * @param start        start counter
+     * @param end          end counter
+     * @return             collection containing stored index value.   
      */
-    void index(EntityMetadata metadata, Object object);
+    Map<String, Object> search(final String queryString, int start, int count);
 
     /**
-     * Indexes and object.
+     * Deletes index for given entity class.
      * 
-     * @param metadata
-     *            the meta data.
-     * @param object
-     *            the object.
-     * @param parentId
-     *            parent Id.
-     * @param clazz
-     *            parent class.
-     */
-    void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz);
-
-    /**
-     * Searches for an object. Note that the "query" must be in Indexer
-     * specified form.
+     * @param entityClazz entity class
      * 
-     * @param luceneQuery
-     *            the lucene query
-     * @param start
-     *            the start
-     * @param count
-     *            the count
-     * @param fetchRelation
-     *            the fetch relation
-     * @return the list
+     * @param key  stored index value
      */
+    void unIndex(final Class entityClazz, final Object key);
 
-    Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation);
-
-    boolean entityExistsInIndex(Class<?> entityClass);
-
-    /**
-     * Close on index writer/reader.
-     */
     void close();
-
-    /**
-     * Flushes out indexes.
-     */
-    void flush();
 }

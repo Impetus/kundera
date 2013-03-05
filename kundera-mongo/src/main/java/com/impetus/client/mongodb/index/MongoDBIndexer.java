@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.index.lucene.Indexer;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 
@@ -113,7 +113,7 @@ public class MongoDBIndexer implements Indexer
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @Override
-    public Map<String, String> search(String query, int start, int count, boolean fetchRelation)
+    public Map<String, Object> search(String query, int start, int count, boolean fetchRelation)
     {
         throw new PersistenceException(
                 "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
@@ -156,6 +156,27 @@ public class MongoDBIndexer implements Indexer
     {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void index(Class entityClazz, Map<String, Object> values)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Map<String, Object> search(String luceneQuery, int start, int count)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void unIndex(Class entityClazz, Object key)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

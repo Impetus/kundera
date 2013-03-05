@@ -42,6 +42,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -218,12 +219,40 @@ public class HBaseDataHandler implements DataHandler
 
         Object entity = null;
 
-        HTable hTable = null;
+        HTableInterface hTable = null;
 
         hTable = gethTable(tableName);
 
         // Load raw data from HBase
         List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, this.filter, columns);
+        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+        return output;
+    }
+
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#readData(java.lang.String,
+     * java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata,
+     * java.lang.String, java.util.List)
+     */
+    @Override
+    public List readData(final String tableName, Class clazz, EntityMetadata m, final List<Object> rowKey,
+            List<String> relationNames, String... columns) throws IOException
+    {
+
+        List output = null;
+
+        Object entity = null;
+
+        HTableInterface hTable = null;
+
+        hTable = gethTable(tableName);
+
+        // Load raw data from HBase
+        List<HBaseData> results = ((HBaseReader)hbaseReader).loadAll(hTable, rowKey,tableName, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -242,7 +271,7 @@ public class HBaseDataHandler implements DataHandler
             String[] columns) throws IOException
     {
         List output = null;
-        HTable hTable = null;
+        HTableInterface hTable = null;
         Object entity = null;
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
@@ -267,7 +296,7 @@ public class HBaseDataHandler implements DataHandler
             List<RelationHolder> relations) throws IOException
     {
 
-        HTable hTable = gethTable(tableName);
+        HTableInterface hTable = gethTable(tableName);
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -316,7 +345,7 @@ public class HBaseDataHandler implements DataHandler
     @Override
     public void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns) throws IOException
     {
-        HTable hTable = gethTable(tableName);
+        HTableInterface hTable = gethTable(tableName);
 
         hbaseWriter.writeColumns(hTable, rowId, columns);
 
@@ -336,7 +365,7 @@ public class HBaseDataHandler implements DataHandler
     {
         List<E> foreignKeys = new ArrayList<E>();
 
-        HTable hTable = null;
+        HTableInterface hTable = null;
 
         // Load raw data from Join Table in HBase
         try
@@ -404,9 +433,9 @@ public class HBaseDataHandler implements DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public HTable gethTable(final String tableName) throws IOException
+    public HTableInterface gethTable(final String tableName) throws IOException
     {
-        return (HTable) hTablePool.getTable(tableName);
+        return hTablePool.getTable(tableName);
     }
 
     /**
@@ -415,7 +444,7 @@ public class HBaseDataHandler implements DataHandler
      * @param hTable
      *            HBase Table instance
      */
-    private void puthTable(HTable hTable) throws IOException
+    private void puthTable(HTableInterface hTable) throws IOException
     {
         hTablePool.putTable(hTable);
     }
@@ -740,7 +769,7 @@ public class HBaseDataHandler implements DataHandler
      * @return
      * @throws IOException
      */
-    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTable hTable, Object entity,
+    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTableInterface hTable, Object entity,
             List<String> relationNames, List<HBaseData> results) throws IOException
     {
         try
@@ -906,7 +935,7 @@ public class HBaseDataHandler implements DataHandler
     public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
             final Class rowKeyClazz) throws IOException
     {
-        HTable hTable = null;
+        HTableInterface hTable = null;
         hTable = gethTable(tableName);
         return hbaseReader.scanRowKeys(hTable, filterList, columnFamilyName, columnName, rowKeyClazz);
     }
@@ -1046,7 +1075,7 @@ public class HBaseDataHandler implements DataHandler
      * @param data
      * @throws IOException
      */
-    public void batch_insert(Map<HTable, List<HBaseDataWrapper>> data) throws IOException
+    public void batch_insert(Map<HTableInterface, List<HBaseDataWrapper>> data) throws IOException
     {
         hbaseWriter.persistRows(data);
 

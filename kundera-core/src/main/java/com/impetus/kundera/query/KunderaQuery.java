@@ -478,7 +478,7 @@ public class KunderaQuery
                 }
 
                 FilterClause filterClause = new FilterClause(
-                        MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName : indexName + "." + columnName,
+                        /*MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName : indexName + "." +*/ columnName,
                         condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 

@@ -33,6 +33,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -91,6 +92,16 @@ public class ConfiguratorTest
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
     }
 
+/*    @Test
+    public void testEntityListener()
+    {
+        getEntityManagerFactory();
+        EntityListenersProcessor listener = new EntityListenersProcessor();
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonnelDTO.class);
+        listener.process(PersonnelDTO.class, m);
+        
+    }
+*/    
     /**
      * Test invalid configure.
      */

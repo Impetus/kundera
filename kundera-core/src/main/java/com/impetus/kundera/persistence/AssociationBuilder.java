@@ -426,9 +426,9 @@ public final class AssociationBuilder
         String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass().getCanonicalName()
                 .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
 
-        Map<String, String> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
-                query) : new HashMap<String, String>();
-        Set<String> rsSet = results != null ? new HashSet<String>(results.values()) : new HashSet<String>();
+        Map<String, Object> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
+                query) : new HashMap<String, Object>();
+        Set rsSet = results != null ? new HashSet (results.values()) : new HashSet();
 
         if (childClass.equals(entity.getClass()))
         {

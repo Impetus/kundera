@@ -238,8 +238,8 @@ public class AbstractEntityReader
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
-        Map<String, String> results = client.getIndexManager().search(luceneQueryFromJPAQuery);
-        Set<String> rSet = new HashSet<String>(results.values());
+        Map<String, Object> results = client.getIndexManager().search(luceneQueryFromJPAQuery);
+        Set rSet = new HashSet (results.values());
         return rSet;
     }
 

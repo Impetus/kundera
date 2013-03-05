@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.persistence.metamodel.Attribute;
 
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 
 import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.kundera.db.RelationHolder;
@@ -51,7 +52,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
+    void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
             throws IOException;
 
     /**
@@ -71,7 +72,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
+    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
             throws IOException;
 
     /**
@@ -89,7 +90,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException;
+    void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException;
 
     /**
      * Write relations.
@@ -105,7 +106,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
+    void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException;
 
     /**
@@ -123,7 +124,7 @@ public interface Writer
      *             Signals that an I/O exception has occurred.
      * @deprecated
      */
-    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+    public void writeForeignKeys(HTableInterface hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException;
 
     /**
@@ -139,7 +140,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, Object rowKey, Map<String, Object> columns) throws IOException;
+    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns) throws IOException;
 
     /**
      * Delete.
@@ -151,7 +152,7 @@ public interface Writer
      * @param columnFamily
      *            the column family
      */
-    void delete(HTable hTable, Object rowKey, String columnFamily);
+    void delete(HTableInterface hTable, Object rowKey, String columnFamily);
 
     /**
      * method to perform batch insert/update.
@@ -159,5 +160,5 @@ public interface Writer
      * @param rows  data rows
      * @throws IOException  throws io exception.
      */
-    void persistRows(Map<HTable,List<HBaseDataWrapper>> rows) throws IOException;
+    void persistRows(Map<HTableInterface,List<HBaseDataWrapper>> rows) throws IOException;
 }

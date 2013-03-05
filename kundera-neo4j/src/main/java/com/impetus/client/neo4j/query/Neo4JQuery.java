@@ -144,22 +144,23 @@ public class Neo4JQuery extends QueryImpl implements Query
                     }
                     else if (filter.getCondition().equalsIgnoreCase(">"))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), false, true));
+                                    // TODO: Amresh need to look for "String.class" parameter.
+                        sb.append(appendRange(filter.getValue().toString(), false, true, String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase(">="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, true));
+                        sb.append(appendRange(filter.getValue().toString(), true, true,String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase("<"))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), false, false));
+                        sb.append(appendRange(filter.getValue().toString(), false, false,String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase("<="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, false));
+                        sb.append(appendRange(filter.getValue().toString(), true, false,String.class));
                         appended = true;
                     }
 

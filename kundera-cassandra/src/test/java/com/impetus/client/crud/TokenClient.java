@@ -1,8 +1,12 @@
 package com.impetus.client.crud;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -15,6 +19,10 @@ public class TokenClient
     private String id;
     @Column(name = "client_name")
     private String clientName;
+    
+    @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
+    private Set<Token> tokens;
+
     public String getId()
     {
         return id;
@@ -31,7 +39,13 @@ public class TokenClient
     {
         this.clientName = clientName;
     }
-    
-    
+    public Set<Token> getTokens()
+    {
+        return tokens;
+    }
+    public void setTokens(Set<Token> tokens)
+    {
+        this.tokens = tokens;
+    }
     
 }

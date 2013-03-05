@@ -86,6 +86,8 @@ public final class CQLTranslator
     public static final String WITH_CLAUSE = " WITH ";
 
     public static final String QUOTE_STR = "'";
+    
+    public static final String LIMIT = " LIMIT ";
 
     public CQLTranslator()
     {

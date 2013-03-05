@@ -143,6 +143,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             log.info("Resetting after commit.");
             threadLocal.set(null);
             timerThead.set(null);
+            isTransactionInProgress = false;
         }
     }
 
@@ -192,6 +193,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
                 log.info("Resetting after rollback.");
                 threadLocal.set(null);
                 timerThead.set(null);
+                isTransactionInProgress = false;
             }
         }
         else
