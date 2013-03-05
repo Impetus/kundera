@@ -86,7 +86,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getSequenceDiscriptor());
         Assert.assertEquals(50, keyValue.getSequenceDiscriptor().getAllocationSize());
         Assert.assertEquals(1, keyValue.getSequenceDiscriptor().getInitialValue());
-        Assert.assertEquals("seq_gen", keyValue.getSequenceDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getSequenceDiscriptor().getSchemaName());
         Assert.assertEquals("sequence_name", keyValue.getSequenceDiscriptor().getSequenceName());
         Assert.assertNull(keyValue.getSequenceDiscriptor().getCatalog());
@@ -100,7 +99,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getTableDiscriptor());
         Assert.assertEquals(50, keyValue.getTableDiscriptor().getAllocationSize());
         Assert.assertEquals(0, keyValue.getTableDiscriptor().getInitialValue());
-        Assert.assertEquals("table_gen", keyValue.getTableDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getTableDiscriptor().getSchema());
         Assert.assertEquals("kundera_sequences", keyValue.getTableDiscriptor().getTable());
         Assert.assertEquals("sequence_name", keyValue.getTableDiscriptor().getPkColumnName());
@@ -118,7 +116,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getSequenceDiscriptor());
         Assert.assertEquals(20, keyValue.getSequenceDiscriptor().getAllocationSize());
         Assert.assertEquals(80, keyValue.getSequenceDiscriptor().getInitialValue());
-        Assert.assertEquals("id_gen", keyValue.getSequenceDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getSequenceDiscriptor().getSchemaName());
         Assert.assertEquals("newSequence", keyValue.getSequenceDiscriptor().getSequenceName());
         Assert.assertNull(keyValue.getSequenceDiscriptor().getCatalog());
@@ -132,7 +129,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getTableDiscriptor());
         Assert.assertEquals(30, keyValue.getTableDiscriptor().getAllocationSize());
         Assert.assertEquals(100, keyValue.getTableDiscriptor().getInitialValue());
-        Assert.assertEquals("id_gen", keyValue.getTableDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getTableDiscriptor().getSchema());
         Assert.assertEquals("kundera", keyValue.getTableDiscriptor().getTable());
         Assert.assertEquals("sequence", keyValue.getTableDiscriptor().getPkColumnName());
@@ -150,7 +146,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getSequenceDiscriptor());
         Assert.assertEquals(50, keyValue.getSequenceDiscriptor().getAllocationSize());
         Assert.assertEquals(1, keyValue.getSequenceDiscriptor().getInitialValue());
-        Assert.assertNull(keyValue.getSequenceDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getSequenceDiscriptor().getSchemaName());
         Assert.assertEquals("sequence_name", keyValue.getSequenceDiscriptor().getSequenceName());
         Assert.assertNull(keyValue.getSequenceDiscriptor().getCatalog());
@@ -164,7 +159,6 @@ public class ProcessAnnotationsTest
         Assert.assertNotNull(keyValue.getTableDiscriptor());
         Assert.assertEquals(50, keyValue.getTableDiscriptor().getAllocationSize());
         Assert.assertEquals(0, keyValue.getTableDiscriptor().getInitialValue());
-        Assert.assertNull(keyValue.getTableDiscriptor().getName());
         Assert.assertEquals("KunderaTest", keyValue.getTableDiscriptor().getSchema());
         Assert.assertEquals("kundera_sequences", keyValue.getTableDiscriptor().getTable());
         Assert.assertEquals("sequence_name", keyValue.getTableDiscriptor().getPkColumnName());

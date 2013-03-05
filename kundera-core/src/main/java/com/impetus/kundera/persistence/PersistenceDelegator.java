@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.persistence;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -28,8 +27,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.persistence.FlushModeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
@@ -37,21 +34,15 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
-import com.impetus.kundera.generator.AutoGenerator;
-import com.impetus.kundera.generator.IdentityGenerator;
-import com.impetus.kundera.generator.SequenceGenerator;
-import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -64,8 +55,6 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.IdDiscriptor;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -78,7 +67,6 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.QueryResolver;
 import com.impetus.kundera.utils.ObjectUtils;
 
@@ -161,7 +149,6 @@ public final class PersistenceDelegator
         idGenerator.setGeneratedIdIfApplicable(e, metadata, getClient(metadata));
 
         if (!validator.isValidEntityObject(e))
-        // Validate entity
         {
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");

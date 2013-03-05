@@ -113,7 +113,7 @@ public class MongoGeneratedIdTest
         catch (KunderaException e)
         {
             Assert.assertEquals(
-                    "java.lang.IllegalArgumentException: " + GenerationType.class.getSimpleName() + "."
+                    "java.lang.UnsupportedOperationException: " + GenerationType.class.getSimpleName() + "."
                             + GenerationType.IDENTITY + " Strategy not supported by this client :"
                             + MongoDBClient.class.getName(), e.getMessage());
         }

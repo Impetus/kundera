@@ -102,7 +102,7 @@ public class ObjectGraphBuilder
 
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
-        String nodeId = ObjectGraphUtils.getNodeId(id, entity);
+        String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
         Node node = graph.getNode(nodeId);
 
         // If this node is already there in graph (may happen for bidirectional

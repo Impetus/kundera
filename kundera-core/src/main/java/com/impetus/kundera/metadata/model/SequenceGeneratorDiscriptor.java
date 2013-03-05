@@ -17,6 +17,13 @@ package com.impetus.kundera.metadata.model;
 
 import javax.persistence.SequenceGenerator;
 
+/**
+ * SequenceGeneratorDiscriptor class holds the information about sequence
+ * generator.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public class SequenceGeneratorDiscriptor
 {
     private static final int default_initial_value = 1;
@@ -24,8 +31,6 @@ public class SequenceGeneratorDiscriptor
     private static final String default_sequence_name = "sequence_name";
 
     private static final int default_allocation_size = 50;
-
-    private String name;
 
     private int initialValue;
 
@@ -52,14 +57,6 @@ public class SequenceGeneratorDiscriptor
         this.allocationSize = default_allocation_size;
         this.sequenceName = default_sequence_name;
         this.schemaName = defaultSchemaName;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
     }
 
     /**

@@ -18,6 +18,13 @@ package com.impetus.kundera.metadata.model;
 import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * TableGeneratorDiscriptor class holds the information about table
+ * generator.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public class TableGeneratorDiscriptor
 {
     private static final String default_table_name = "kundera_sequences";
@@ -29,8 +36,6 @@ public class TableGeneratorDiscriptor
     private static final int default_allocation_size = 50;
 
     private static final int default_initial_value = 0;
-
-    private String name;
 
     private String table;
 
@@ -73,14 +78,6 @@ public class TableGeneratorDiscriptor
         this.pkColumnValue = defaultPkColumnValue;
         this.initialValue = default_initial_value;
         this.allocationSize = default_allocation_size;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
     }
 
     /**

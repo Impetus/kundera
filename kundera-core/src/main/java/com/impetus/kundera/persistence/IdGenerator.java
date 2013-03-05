@@ -58,10 +58,6 @@ public class IdGenerator
             case IDENTITY:
                 throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
                         + " Strategy not supported by this client :" + client.getClass().getName());
-            default:
-
-                throw new IllegalArgumentException(GenerationType.class.getSimpleName() + "." + type
-                        + " Strategy not supported by this client :" + client.getClass().getName());
             }
         }
     }
@@ -73,7 +69,10 @@ public class IdGenerator
             Object generatedId = ((AutoGenerator) client).generate();
             try
             {
+                generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
+                        generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
+                return;
             }
             catch (IllegalArgumentException iae)
             {
@@ -81,6 +80,8 @@ public class IdGenerator
                 throw new KunderaException("Unknown data type for ids : " + m.getIdAttribute().getJavaType(), iae);
             }
         }
+        throw new IllegalArgumentException(GenerationType.class.getSimpleName() + "." + GenerationType.AUTO
+                + " Strategy not supported by this client :" + client.getClass().getName());
     }
 
     private void onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
@@ -90,7 +91,10 @@ public class IdGenerator
             Object generatedId = ((SequenceGenerator) client).generate(keyValue.getSequenceDiscriptor());
             try
             {
+                generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
+                        generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
+                return;
             }
             catch (IllegalArgumentException iae)
             {
@@ -99,6 +103,8 @@ public class IdGenerator
                         iae);
             }
         }
+        throw new IllegalArgumentException(GenerationType.class.getSimpleName() + "." + GenerationType.SEQUENCE
+                + " Strategy not supported by this client :" + client.getClass().getName());
     }
 
     private void onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
@@ -108,7 +114,10 @@ public class IdGenerator
             Object generatedId = ((TableGenerator) client).generate(keyValue.getTableDiscriptor());
             try
             {
+                generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
+                        generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
+                return;
             }
             catch (IllegalArgumentException iae)
             {
@@ -117,5 +126,7 @@ public class IdGenerator
                         iae);
             }
         }
+        throw new IllegalArgumentException(GenerationType.class.getSimpleName() + "." + GenerationType.TABLE
+                + " Strategy not supported by this client :" + client.getClass().getName());
     }
 }

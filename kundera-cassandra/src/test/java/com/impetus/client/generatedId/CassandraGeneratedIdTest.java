@@ -97,7 +97,7 @@ public class CassandraGeneratedIdTest
         catch (KunderaException e)
         {
             Assert.assertEquals(
-                    "java.lang.IllegalArgumentException: " + GenerationType.class.getSimpleName() + "."
+                    "java.lang.UnsupportedOperationException: " + GenerationType.class.getSimpleName() + "."
                             + GenerationType.IDENTITY + " Strategy not supported by this client :"
                             + ThriftClient.class.getName(), e.getMessage());
         }
