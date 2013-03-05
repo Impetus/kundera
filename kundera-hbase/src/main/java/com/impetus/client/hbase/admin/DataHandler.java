@@ -82,7 +82,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,String... columns)
+    List readAll(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,String... columns)
             throws IOException;
 
     /**

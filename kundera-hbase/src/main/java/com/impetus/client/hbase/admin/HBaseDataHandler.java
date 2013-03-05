@@ -239,7 +239,7 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public List readData(final String tableName, Class clazz, EntityMetadata m, final List<Object> rowKey,
+    public List readAll(final String tableName, Class clazz, EntityMetadata m, final List<Object> rowKey,
             List<String> relationNames, String... columns) throws IOException
     {
 

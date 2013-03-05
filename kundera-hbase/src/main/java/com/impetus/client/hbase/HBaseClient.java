@@ -181,7 +181,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     List results;
                     try
                     {
-                        results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                        results = handler.readAll(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
                                 entityMetadata, Arrays.asList(rowIds), entityMetadata.getRelationNames());
                     }
                     catch (IOException e1)
