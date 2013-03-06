@@ -440,9 +440,7 @@ public final class PersistenceDelegator
                         isBatch = true;
                         ((Batcher) (node.getClient())).addBatch(node);
                     }
-                    else if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
-                    {
-                        if (isTransactionInProgress
+                    else if (isTransactionInProgress
                                 && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit()))
                         {
                             onSynchronization(node, metadata);
@@ -451,7 +449,7 @@ public final class PersistenceDelegator
                         {
                             node.flush();
                         }
-                    }
+                    //}
 
                 }
             }

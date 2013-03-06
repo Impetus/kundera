@@ -79,6 +79,7 @@ public class OTMCRUDTest
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getClient());
         
+        em.clear();
         String query="Select t from Token t";
         Query q = em.createQuery(query);
         List<Token> results = q.getResultList();

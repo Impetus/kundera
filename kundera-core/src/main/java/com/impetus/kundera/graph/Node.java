@@ -523,32 +523,33 @@ public class Node implements NodeStateContext
         if (isDirty())
         {
             getCurrentNodeState().handleFlush(this);
-            // Update Link value for all nodes attached to this one
-            Map<NodeLink, Node> parents = this.getParents();
-            Map<NodeLink, Node> children = this.getChildren();
-
-            // update links.
-            if (parents != null && !parents.isEmpty())
-            {
-                for (NodeLink parentNodeLink : parents.keySet())
-                {
-                    if (!parentNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
-                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
-                }
-            }
-
-            if (children != null && !children.isEmpty())
-            {
-                for (NodeLink childNodeLink : children.keySet())
-                {
-                    if (!childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
-                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
-                }
-            }
 
             this.isProcessed = true;
         }
-    }
+
+        // Update Link value for all nodes attached to this one
+        Map<NodeLink, Node> parents = this.getParents();
+        Map<NodeLink, Node> children = this.getChildren();
+
+        // update links.
+        if (parents != null && !parents.isEmpty())
+        {
+            for (NodeLink parentNodeLink : parents.keySet())
+            {
+                if (!parentNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
+                    parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
+            }
+        }
+
+        if (children != null && !children.isEmpty())
+        {
+            for (NodeLink childNodeLink : children.keySet())
+            {
+                if (!childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
+                    childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
+            }
+        }
+}
 
     // Overridden methods from
 
