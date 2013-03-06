@@ -187,10 +187,7 @@ public class KunderaTransaction implements Transaction
 
     void setImplementor(ResourceManager implementor)
     {
-        if(!implementors.contains(implementor))
-        {
-            implementors.add(implementor);
-        }
+        implementors.add(implementor);
     }
 
     /**
