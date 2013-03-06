@@ -114,12 +114,11 @@ public class EjbJTAContextTest
     {
 
         userTransaction = (UserTransaction) initialContext.lookup("java:comp/UserTransaction");
-//        em.setFlushMode(FlushModeType.COMMIT);
 
         userTransaction.begin();
 
         
-        for (i = 0; i < 1; i++)
+        for (i = 0; i < 100; i++)
         {
            Runnable r =  onExecute();
            r.run();
@@ -129,7 +128,7 @@ public class EjbJTAContextTest
 
         userTransaction.begin();
         // As data is commited, hence it should return values with other session.
-        for (i = 0; i < 1; i++)
+        for (i = 0; i < 100; i++)
         {
         EntityManager em1 = emf.createEntityManager();
         Assert.assertNotNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
