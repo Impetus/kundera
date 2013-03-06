@@ -23,7 +23,9 @@ import java.util.Set;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -139,7 +141,7 @@ public class ObjectGraphBuilder
                 node.setData(/* nodeDataCopy */entity);
                 node.setDirty(true);
             }
-            else if(node.isProcessed())
+            else if (node.isProcessed())
             {
                 node.setDirty(false);
             }
@@ -163,44 +165,45 @@ public class ObjectGraphBuilder
             // Child Object set in this entity
             Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            if (childObject != null)
-            {
-                // This child object could be either an entity(1-1 or M-1) or a
-                // collection/ Map of entities(1-M or M-M)
-                if (Collection.class.isAssignableFrom(childObject.getClass()))
+                if (childObject != null && !(childObject instanceof HibernateProxy))
                 {
-                    // For each entity in the collection, construct a child node
-                    // and add to graph
-                    Collection childrenObjects = (Collection) childObject;
+                    // This child object could be either an entity(1-1 or M-1)
+                    // or a
+                    // collection/ Map of entities(1-M or M-M)
+                    if (Collection.class.isAssignableFrom(childObject.getClass()))
+                    {
+                        // For each entity in the collection, construct a child
+                        // node
+                        // and add to graph
+                        Collection childrenObjects = (Collection) childObject;
 
-                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                        if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
 
-                        for (Object childObj : childrenObjects)
-                        {
-                            if (childObj != null)
+                            for (Object childObj : childrenObjects)
                             {
-                                addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
+                                if (childObj != null)
+                                {
+                                    addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
+                                }
+                            }
+                    }
+                    else if (Map.class.isAssignableFrom(childObject.getClass()))
+                    {
+                        Map childrenObjects = (Map) childObject;
+                        if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                        {
+                            for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
+                            {
+                                addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
                             }
                         }
-                }
-                else if (Map.class.isAssignableFrom(childObject.getClass()))
-                {
-                    Map childrenObjects = (Map) childObject;
-                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    }
+                    else
                     {
-                        for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
-                        {
-                            addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
-                        }
+                        // Construct child node and add to graph
+                        addChildNodesToGraph(graph, node, relation, childObject, initialNodeState);
                     }
                 }
-                else
-                {
-                    // Construct child node and add to graph
-                    addChildNodesToGraph(graph, node, relation, childObject, initialNodeState);
-                }
-            }
-
         }
 
         // Means compelte graph is build.

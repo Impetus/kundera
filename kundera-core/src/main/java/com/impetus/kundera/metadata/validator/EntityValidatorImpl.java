@@ -162,19 +162,23 @@ public class EntityValidatorImpl implements EntityValidator
     {
         Table table = clazz.getAnnotation(Table.class);
         String schemaName = table.schema();
-        schemaName = schemaName.substring(0, schemaName.indexOf('@'));
-        GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-        if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
+        if (schemaName != null && schemaName.indexOf('@') > 0)
         {
-            if (!(field.isAnnotationPresent(TableGenerator.class) || field.isAnnotationPresent(SequenceGenerator.class)
-                    || clazz.isAnnotationPresent(TableGenerator.class) || clazz
-                        .isAnnotationPresent(SequenceGenerator.class)))
+            schemaName = schemaName.substring(0, schemaName.indexOf('@'));
+            GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+            if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
             {
-                throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
-            }
-            else
-            {
-                checkForGenerator(clazz, field, generatedValue, schemaName);
+                if (!(field.isAnnotationPresent(TableGenerator.class)
+                        || field.isAnnotationPresent(SequenceGenerator.class)
+                        || clazz.isAnnotationPresent(TableGenerator.class) || clazz
+                            .isAnnotationPresent(SequenceGenerator.class)))
+                {
+                    throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
+                }
+                else
+                {
+                    checkForGenerator(clazz, field, generatedValue, schemaName);
+                }
             }
         }
     }
