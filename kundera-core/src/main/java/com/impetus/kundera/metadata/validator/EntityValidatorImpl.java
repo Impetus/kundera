@@ -168,8 +168,7 @@ public class EntityValidatorImpl implements EntityValidator
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
             if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
             {
-                if (!(field.isAnnotationPresent(TableGenerator.class)
-                        || field.isAnnotationPresent(SequenceGenerator.class)
+                if (!(field.isAnnotationPresent(TableGenerator.class) || field.isAnnotationPresent(SequenceGenerator.class)
                         || clazz.isAnnotationPresent(TableGenerator.class) || clazz
                             .isAnnotationPresent(SequenceGenerator.class)))
                 {
@@ -180,7 +179,7 @@ public class EntityValidatorImpl implements EntityValidator
                     checkForGenerator(clazz, field, generatedValue, schemaName);
                 }
             }
-        }
+        }        
     }
 
     private void checkForGenerator(final Class<?> clazz, Field field, GeneratedValue generatedValue, String schemaName)

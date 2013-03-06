@@ -21,9 +21,11 @@ import java.util.Map;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.utils.ObjectUtils;
@@ -521,6 +523,29 @@ public class Node implements NodeStateContext
         if (isDirty())
         {
             getCurrentNodeState().handleFlush(this);
+            // Update Link value for all nodes attached to this one
+            Map<NodeLink, Node> parents = this.getParents();
+            Map<NodeLink, Node> children = this.getChildren();
+
+            // update links.
+            if (parents != null && !parents.isEmpty())
+            {
+                for (NodeLink parentNodeLink : parents.keySet())
+                {
+                    if (!parentNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
+                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
+                }
+            }
+
+            if (children != null && !children.isEmpty())
+            {
+                for (NodeLink childNodeLink : children.keySet())
+                {
+                    if (!childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
+                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
+                }
+            }
+
             this.isProcessed = true;
         }
     }

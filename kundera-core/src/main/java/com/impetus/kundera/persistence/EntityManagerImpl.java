@@ -873,7 +873,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                             + "] for :{java:comp/UserTransaction} lookup" + this.utx.getClass());
                 }
 
-                if (((KunderaJTAUserTransaction) this.utx).isTransactionInProgress() && !this.entityTransaction.isActive())
+                if (!this.entityTransaction.isActive())
                 {
                     this.entityTransaction.begin();
                 }

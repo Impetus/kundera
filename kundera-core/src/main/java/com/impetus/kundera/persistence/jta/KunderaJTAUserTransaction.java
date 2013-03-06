@@ -48,12 +48,6 @@ import com.impetus.kundera.persistence.ResourceManager;
 public class KunderaJTAUserTransaction implements UserTransaction, Referenceable, Serializable
 {
 
-    /**
-     * boolean variable to hold reference for GLOBAL transaction is in progress
-     * on not.
-     */
-    private boolean isTransactionInProgress;
-
     /** The thread local. */
     private static transient ThreadLocal<KunderaTransaction> threadLocal = new ThreadLocal<KunderaTransaction>();
 
@@ -98,7 +92,6 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         if(log.isDebugEnabled())
         log.info("beginning JTA transaction");
 
-        isTransactionInProgress = true;
         Transaction tx = threadLocal.get();
         if (tx != null)
         {
@@ -143,7 +136,6 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             log.info("Resetting after commit.");
             threadLocal.set(null);
             timerThead.set(null);
-            isTransactionInProgress = false;
         }
     }
 
@@ -171,8 +163,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public void rollback() throws IllegalStateException, SecurityException, SystemException
     {
-        if (isTransactionInProgress)
-        {
+
             try
             {
                 Transaction tx = threadLocal.get();
@@ -193,14 +184,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
                 log.info("Resetting after rollback.");
                 threadLocal.set(null);
                 timerThead.set(null);
-                isTransactionInProgress = false;
             }
-        }
-        else
-        {
-
-            throw new KunderaException("No transaction in progress.");
-        }
     }
 
     /*
@@ -285,8 +269,4 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         return UserTransactionFactory.getReference(this);
     }
 
-    public boolean isTransactionInProgress()
-    {
-        return isTransactionInProgress;
-    }
 }

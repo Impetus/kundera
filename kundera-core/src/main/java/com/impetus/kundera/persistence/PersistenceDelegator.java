@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -433,6 +434,7 @@ public final class PersistenceDelegator
                     EntityMetadata metadata = getMetadata(node.getDataClass());
                     node.setClient(getClient(metadata));
 
+
                     // if batch size is defined.
                     if ((node.getClient() instanceof Batcher) && ((Batcher) (node.getClient())).getBatchSize() > 0)
                     {
@@ -452,27 +454,6 @@ public final class PersistenceDelegator
                         }
                     }
 
-                    // Update Link value for all nodes attached to this one
-                    Map<NodeLink, Node> parents = node.getParents();
-                    Map<NodeLink, Node> children = node.getChildren();
-
-                    if (parents != null && !parents.isEmpty())
-                    {
-                        for (NodeLink parentNodeLink : parents.keySet())
-                        {
-                            if (!parentNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
-                                parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, node.getEntityId());
-                        }
-                    }
-
-                    if (children != null && !children.isEmpty())
-                    {
-                        for (NodeLink childNodeLink : children.keySet())
-                        {
-                            if (!childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
-                                childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, node.getEntityId());
-                        }
-                    }
                 }
             }
 
