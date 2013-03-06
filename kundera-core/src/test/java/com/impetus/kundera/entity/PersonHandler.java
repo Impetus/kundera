@@ -19,7 +19,7 @@ import javax.persistence.PrePersist;
 
 public class PersonHandler
 {
-    
+
     @PrePersist
     public void handledPrePersist(PersonnelDTO user)
     {

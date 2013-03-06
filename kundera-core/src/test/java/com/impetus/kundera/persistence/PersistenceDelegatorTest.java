@@ -45,7 +45,7 @@ public class PersistenceDelegatorTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-    	KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory("kunderatest");
     }
 
@@ -88,8 +88,7 @@ public class PersistenceDelegatorTest
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals(
-                    "com.impetus.kundera.KunderaException: Unable to load entity metadata for :class com.impetus.kundera.configure.CoreEntityAddressUni1To1",
+            Assert.assertEquals("com.impetus.kundera.KunderaException: Entitymatadata should not be null",
                     e.getMessage());
         }
 

@@ -39,6 +39,7 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -536,6 +537,10 @@ public final class PersistenceDelegator
     public Client getClient(EntityMetadata m)
     {
         // // Persistence Unit used to retrieve client
+        if (m == null)
+        {
+            throw new KunderaException("Entitymatadata should not be null");
+        }
         String persistenceUnit = m.getPersistenceUnit();
         //
         Client client = clientMap.get(persistenceUnit);

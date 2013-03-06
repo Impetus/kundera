@@ -162,7 +162,7 @@ public class EntityValidatorImpl implements EntityValidator
     {
         Table table = clazz.getAnnotation(Table.class);
         String schemaName = table.schema();
-        if(schemaName != null && schemaName.indexOf("@") > 0)
+        if (schemaName != null && schemaName.indexOf('@') > 0)
         {
             schemaName = schemaName.substring(0, schemaName.indexOf('@'));
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);

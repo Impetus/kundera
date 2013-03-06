@@ -77,7 +77,7 @@ public final class HBaseCli
             conf.set("zookeeper.session.timeout", "180000");
             conf.set("hbase.zookeeper.peerport", "2888");
             conf.set("hbase.zookeeper.property.clientPort", "2181");
-            conf.set("dfs.datanode.data.dir.perm", "775");
+            conf.set("dfs.datanode.data.dir.perm", "755");
             try
             {
                 masterDir = new File(workingDirectory, "hbase");

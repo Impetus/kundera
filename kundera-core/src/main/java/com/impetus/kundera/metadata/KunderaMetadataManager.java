@@ -155,6 +155,8 @@ public class KunderaMetadataManager
                     + " name under <class></class> tag in persistence.xml for RDBMS "
                     + "persistence unit. Returning null value.");
 
-        throw new KunderaException("Unable to load entity metadata for :" + entityClass);
+        return null;
+        // throw new KunderaException("Unable to load entity metadata for :" +
+        // entityClass);
     }
 }

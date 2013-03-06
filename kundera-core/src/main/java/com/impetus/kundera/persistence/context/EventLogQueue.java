@@ -117,7 +117,6 @@ class EventLogQueue
         if (insertEvents == null)
         {
             insertEvents = new HashMap<Object, EventLog>();
-            ;
         }
 
         insertEvents.put(log.getEntityId(), log);

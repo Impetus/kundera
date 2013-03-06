@@ -76,12 +76,6 @@ public class IMDBPolyglotTest extends TwinAssociation
         tryOperation(ALL_PUs_UNDER_TEST);
     }
     
-    @Test
-    public void dummyTest()
-    {
-        
-    }
-
     @Override
     protected void insert()
     {
