@@ -99,7 +99,8 @@ public abstract class AssociationBase
 
     public static String persistenceUnits = "";
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, CASSANDRA_PU, MONGO_PU, REDIS_PU, HBASE_PU, RDBMS_PU};    
+    //public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, CASSANDRA_PU, MONGO_PU, REDIS_PU, HBASE_PU, RDBMS_PU}; 
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, HBASE_PU};
 
     public static void buildPersistenceUnitsList()
     {
@@ -129,19 +130,9 @@ public abstract class AssociationBase
             HBaseCli.createTable("MOVIE");
             HBaseCli.addColumnFamily("MOVIE", "TITLE");
             HBaseCli.addColumnFamily("MOVIE", "YEAR");
-
-            HBaseCli.stopCluster();
-            HBaseCli.startCluster();
         }
 
         dao = new IMDBDaoImpl(persistenceUnits);
-
-        HBaseCli.createTable("MOVIE");
-        HBaseCli.addColumnFamily("MOVIE", "TITLE");
-        HBaseCli.addColumnFamily("MOVIE", "YEAR");
-        
-        dao = new IMDBDaoImpl(persistenceUnits);
-
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
         em = null;
@@ -224,7 +215,6 @@ public abstract class AssociationBase
                             loadDataForActor();
                         }
                     }
-
                 }
 
                 if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
