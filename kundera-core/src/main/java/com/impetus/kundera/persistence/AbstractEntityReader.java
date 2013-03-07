@@ -16,7 +16,6 @@
 package com.impetus.kundera.persistence;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,13 +33,11 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.KunderaProxy;
 
 /**
  * The Class AbstractEntityReader.
@@ -108,24 +105,23 @@ public class AbstractEntityReader
         {
             // validate relation
             ForeignKey type = relation.getType();
+            Field f = relation.getProperty();
             if (isTraversalRequired(relationsMap, type))
             {
                 // Check whether that relation is already populated or not,
-                // before
-                // proceeding further.
-                Field f = relation.getProperty();
+                // before proceeding further.
                 Object object = PropertyAccessorHelper.getObject(entity, f);
 
-                //Populate Many-to-many relationships
+                // Populate Many-to-many relationships
                 if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
                 {
                     // First, Save this entity to persistence cache
-                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);                       
+                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
                     associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
                 }
-                
-                //Populate other type of relationships
-                else if(object == null || object instanceof HibernateProxy || object instanceof PersistentSet
+
+                // Populate other type of relationships
+                else if (object == null || object instanceof HibernateProxy || object instanceof PersistentSet
                         || object instanceof PersistentCollection)
                 {
                     String relationName = MetadataUtils.getMappedName(m, relation);
@@ -137,14 +133,11 @@ public class AbstractEntityReader
                     if (relationValue != null)
                     {
                         // 1-1 or M-1 relationship, because ID is held at
-                        // this
-                        // side
-                        // of entity and hence
+                        // this side of entity and hence
                         // relationship entities would be retrieved from
-                        // database
-                        // based on these IDs already available
-                        associationBuilder.populateRelationFromValue(entity, pd, relation, relationValue,
-                                childMetadata);
+                        // database based on these IDs already available
+                        associationBuilder
+                                .populateRelationFromValue(entity, pd, relation, relationValue, childMetadata);
 
                     }
                     else
@@ -165,8 +158,12 @@ public class AbstractEntityReader
                         associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName,
                                 childMetadata);
                     }
-                }              
+                }
 
+            }
+            else if (relation.isJoinedByPrimaryKey())
+            {
+                PropertyAccessorHelper.set(entity, f, pd.findById(relation.getTargetEntity(), entityId));
             }
         }
         return entity;
@@ -239,7 +236,7 @@ public class AbstractEntityReader
         // go to client and get relation with values.!
         // populate EnhanceEntity
         Map<String, Object> results = client.getIndexManager().search(luceneQueryFromJPAQuery);
-        Set rSet = new HashSet (results.values());
+        Set rSet = new HashSet(results.values());
         return rSet;
     }
 

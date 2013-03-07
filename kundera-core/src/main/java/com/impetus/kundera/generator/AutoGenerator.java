@@ -15,7 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.generator;
 
+/**
+ * {@link AutoGenerator} interface , all client should implement this interface
+ * in order to support auto generation strategy.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public interface AutoGenerator extends Generator
 {
+    /**
+     * generate id, Its totally client responsibility to generate Id, using client
+     * specific strategy.
+     * 
+     * @param discriptor
+     * @return
+     */
     public Object generate();
 }

@@ -17,7 +17,21 @@ package com.impetus.kundera.generator;
 
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 
+/**
+ * {@link IdentityGenerator} interface , all client should implement this
+ * interface in order to support identity generation strategy.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public interface IdentityGenerator extends Generator
 {
+    /**
+     * generate id on the basis of {@SequenceGeneratorDiscriptor
+     * } property.
+     * 
+     * @param discriptor
+     * @return
+     */
     public Object generate(SequenceGeneratorDiscriptor discriptor);
 }

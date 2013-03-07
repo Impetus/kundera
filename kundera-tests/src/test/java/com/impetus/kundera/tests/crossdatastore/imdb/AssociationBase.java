@@ -97,6 +97,7 @@ public abstract class AssociationBase
     {     
         if (!HBaseCli.isStarted())
         {
+        	HBaseCli.stopCluster();
             HBaseCli.startCluster();
         }
         HBaseCli.createTable("MOVIE");
