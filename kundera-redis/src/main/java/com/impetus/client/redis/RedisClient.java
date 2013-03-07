@@ -705,7 +705,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 				if (node.isDirty()) {
 					// delete can not be executed in batch
 					if (node.isInState(RemovedState.class)) {
-						onDelete(node.getData(), node.getEntityId(), connection);
+						onDelete(node.getData(), node.getEntityId(), pipeLine != null ? pipeLine :connection);
 					} else {
 
 						List<RelationHolder> relationHolders = getRelationHolders(node);
@@ -713,7 +713,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 								.getEntityMetadata(node.getDataClass());
 
 						onPersist(metadata, node.getData(), node.getEntityId(),
-								relationHolders, connection);
+								relationHolders, pipeLine != null ? pipeLine :connection);
 					}
 				}
 			}
@@ -1049,28 +1049,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 		String valueAsStr = PropertyAccessorHelper.getString(embeddedObject,
 				(Field) attrib.getJavaMember());
 		byte[] name;
-		if (embeddedAttrib == null) {
-			name = getEncodedBytes(((AbstractAttribute) attrib)
-					.getJPAColumnName());
-		} else {
-			name = getEncodedBytes(getHashKey(embeddedAttrib.getName(),
-					((AbstractAttribute) attrib).getJPAColumnName()));
-		}
-		// add column name as key and value as value
-		wrapper.addColumn(name, value);
-		// // {tablename:columnname,hashcode} for value
-		wrapper.addIndex(
-				getHashKey(entityMetadata.getTableName(),
-						((AbstractAttribute) attrib).getJPAColumnName()),
-				getDouble(valueAsStr));
+        if (value != null)
+        {
+            if (embeddedAttrib == null)
+            {
+                name = getEncodedBytes(((AbstractAttribute) attrib).getJPAColumnName());
+            }
+            else
+            {
+                name = getEncodedBytes(getHashKey(embeddedAttrib.getName(),
+                        ((AbstractAttribute) attrib).getJPAColumnName()));
+            }
+            // add column name as key and value as value
+            wrapper.addColumn(name, value);
+            // // {tablename:columnname,hashcode} for value
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
+                    getDouble(valueAsStr));
 
-		wrapper.addIndex(
-				getHashKey(
-						entityMetadata.getTableName(),
-						getHashKey(
-								((AbstractAttribute) attrib).getJPAColumnName(),
-								valueAsStr)), getDouble(valueAsStr));
-
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(),
+                            getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
+                    getDouble(valueAsStr));
+        }
 	}
 
 	/**

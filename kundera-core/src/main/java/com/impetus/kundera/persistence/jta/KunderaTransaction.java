@@ -16,7 +16,9 @@
 package com.impetus.kundera.persistence.jta;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -41,7 +43,7 @@ import com.impetus.kundera.persistence.ResourceManager;
 public class KunderaTransaction implements Transaction
 {
 
-    private List<ResourceManager> implementors = new ArrayList<ResourceManager>();
+    private Set<ResourceManager> implementors = new HashSet<ResourceManager>();
 
     private boolean setRollBackOnly;
 
@@ -186,7 +188,6 @@ public class KunderaTransaction implements Transaction
     void setImplementor(ResourceManager implementor)
     {
         implementors.add(implementor);
-//        this.implementor = implementor;
     }
 
     /**

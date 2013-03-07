@@ -50,6 +50,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -87,13 +88,8 @@ public class RedisClientTest {
 		emf = Persistence.createEntityManagerFactory(REDIS_PU);
 	}
 
-	@Test
-	public void testDummy() {
-
-	}
-
-	// @Test
-	// @PerfTest(invocations = 10)
+	 @Test
+	 @PerfTest(invocations = 10)
 	public void testCRUD() {
 		logger.info("On testInsert");
 		EntityManager em = emf.createEntityManager();
@@ -105,7 +101,7 @@ public class RedisClientTest {
 		em.close();
 	}
 
-	// @Test
+	 @Test
 	public void testCRUDWithBatch() {
 		Map<String, String> batchProperty = new HashMap<String, String>(1);
 		batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
@@ -237,40 +233,10 @@ public class RedisClientTest {
 		object.setAge(32);
 		object.setPersonId(ROW_KEY);
 		object.setPersonName(originalName);
-
-		Constructor constructor = null;
-		try {
-			constructor = Node.class.getConstructor(String.class, Object.class,
-					NodeState.class, PersistenceCache.class, Object.class);
-
-			constructor.setAccessible(true);
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		Node node = null;
-		try {
-			node = (Node) constructor.newInstance(nodeId, object, null, null,
-					object.getPersonId());
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		client.persist(node);
+                
+                Node node = new Node(nodeId, PersonRedis.class, new TransientState(), null, ROW_KEY);
+                node.setData(object);
+                client.persist(node);
 
 		PersonRedis result = (PersonRedis) client.find(PersonRedis.class,
 				ROW_KEY);

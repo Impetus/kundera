@@ -876,10 +876,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                 if (!this.entityTransaction.isActive())
                 {
                     this.entityTransaction.begin();
+                    this.setFlushMode(FlushModeType.COMMIT);
+                    ((KunderaJTAUserTransaction) this.utx).setImplementor(this);
                 }
 
-                this.setFlushMode(FlushModeType.COMMIT);
-                ((KunderaJTAUserTransaction) this.utx).setImplementor(this);
 
             }
             catch (NamingException e)
