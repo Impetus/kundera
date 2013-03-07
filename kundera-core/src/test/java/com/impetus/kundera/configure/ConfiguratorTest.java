@@ -20,6 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -92,16 +96,22 @@ public class ConfiguratorTest
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
     }
 
-/*    @Test
+    @Test
     public void testEntityListener()
     {
-        getEntityManagerFactory();
-        EntityListenersProcessor listener = new EntityListenersProcessor();
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonnelDTO.class);
-        listener.process(PersonnelDTO.class, m);
+        EntityManagerFactory emf = getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
+        PersonnelDTO dto = new PersonnelDTO();
+        dto.setFirstName("Vivek");
+        dto.setLastName("vivek");
+        dto.setPersonId("1_p");
+        em.persist(dto);
+        PersonnelDTO result = em.find(PersonnelDTO.class, "1_p");
+        Assert.assertNotNull(result);
+        Assert.assertEquals("Mishra", result.getLastName());
         
     }
-*/    
+    
     /**
      * Test invalid configure.
      */
@@ -144,33 +154,8 @@ public class ConfiguratorTest
      * 
      * @return the entity manager factory
      */
-    private EntityManagerFactoryImpl getEntityManagerFactory()
+    private EntityManagerFactory getEntityManagerFactory()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(_persistenceUnit);
-        clazzToPu.put(PersonnelDTO.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        EntityMetadata m = new EntityMetadata(PersonnelDTO.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(PersonnelDTO.class, m);
-
-        m.setPersistenceUnit(_persistenceUnit);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PersonnelDTO.class, m);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
-        return null;
+        return Persistence.createEntityManagerFactory(_persistenceUnit);
     }
 }

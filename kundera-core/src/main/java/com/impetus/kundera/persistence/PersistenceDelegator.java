@@ -159,8 +159,13 @@ public final class PersistenceDelegator
         // Get entity metadata.
 
         // Invoke Pre-Persist Events.
+        try
+        {
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-
+        } catch(Exception es)
+        {
+            es.printStackTrace();
+        }
         // Create an object graph of the entity object.
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
 

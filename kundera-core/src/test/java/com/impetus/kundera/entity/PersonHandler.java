@@ -23,7 +23,7 @@ public class PersonHandler
     @PrePersist
     public void handledPrePersist(PersonnelDTO user)
     {
-        System.out.println("Invoked");
+        user.setLastName("Mishra");
     }
 
 }
