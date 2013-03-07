@@ -1049,28 +1049,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 		String valueAsStr = PropertyAccessorHelper.getString(embeddedObject,
 				(Field) attrib.getJavaMember());
 		byte[] name;
-		if (embeddedAttrib == null) {
-			name = getEncodedBytes(((AbstractAttribute) attrib)
-					.getJPAColumnName());
-		} else {
-			name = getEncodedBytes(getHashKey(embeddedAttrib.getName(),
-					((AbstractAttribute) attrib).getJPAColumnName()));
-		}
-		// add column name as key and value as value
-		wrapper.addColumn(name, value);
-		// // {tablename:columnname,hashcode} for value
-		wrapper.addIndex(
-				getHashKey(entityMetadata.getTableName(),
-						((AbstractAttribute) attrib).getJPAColumnName()),
-				getDouble(valueAsStr));
+        if (value != null)
+        {
+            if (embeddedAttrib == null)
+            {
+                name = getEncodedBytes(((AbstractAttribute) attrib).getJPAColumnName());
+            }
+            else
+            {
+                name = getEncodedBytes(getHashKey(embeddedAttrib.getName(),
+                        ((AbstractAttribute) attrib).getJPAColumnName()));
+            }
+            // add column name as key and value as value
+            wrapper.addColumn(name, value);
+            // // {tablename:columnname,hashcode} for value
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
+                    getDouble(valueAsStr));
 
-		wrapper.addIndex(
-				getHashKey(
-						entityMetadata.getTableName(),
-						getHashKey(
-								((AbstractAttribute) attrib).getJPAColumnName(),
-								valueAsStr)), getDouble(valueAsStr));
-
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(),
+                            getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
+                    getDouble(valueAsStr));
+        }
 	}
 
 	/**
