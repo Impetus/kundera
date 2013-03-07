@@ -705,7 +705,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 				if (node.isDirty()) {
 					// delete can not be executed in batch
 					if (node.isInState(RemovedState.class)) {
-						onDelete(node.getData(), node.getEntityId(), connection);
+						onDelete(node.getData(), node.getEntityId(), pipeLine != null ? pipeLine :connection);
 					} else {
 
 						List<RelationHolder> relationHolders = getRelationHolders(node);
@@ -713,7 +713,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>,
 								.getEntityMetadata(node.getDataClass());
 
 						onPersist(metadata, node.getData(), node.getEntityId(),
-								relationHolders, connection);
+								relationHolders, pipeLine != null ? pipeLine :connection);
 					}
 				}
 			}
