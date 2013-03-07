@@ -32,6 +32,13 @@ import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+/**
+ * Generate id for entity when {@GeneratedValue} annotation
+ * given.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public class IdGenerator
 {
     /** The Constant log. */
@@ -62,6 +69,13 @@ public class IdGenerator
         }
     }
 
+    /**
+     * Generate Id when given auto generation strategy.
+     * 
+     * @param m
+     * @param client
+     * @param e
+     */
     private void onAutoGenerator(EntityMetadata m, Client<?> client, Object e)
     {
         if (client instanceof AutoGenerator)
@@ -84,6 +98,14 @@ public class IdGenerator
                 + " Strategy not supported by this client :" + client.getClass().getName());
     }
 
+    /**
+     * Generate Id when given sequence generation strategy.
+     * 
+     * @param m
+     * @param client
+     * @param keyValue
+     * @param e
+     */
     private void onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof SequenceGenerator)
@@ -107,6 +129,14 @@ public class IdGenerator
                 + " Strategy not supported by this client :" + client.getClass().getName());
     }
 
+    /**
+     * Generate Id when given table generation strategy.
+     * 
+     * @param m
+     * @param client
+     * @param keyValue
+     * @param e
+     */
     private void onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof TableGenerator)

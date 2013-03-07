@@ -17,6 +17,12 @@ package com.impetus.kundera.metadata.model;
 
 import javax.persistence.GenerationType;
 
+/**
+ * Class IdDiscriptor holds all information about generating id.
+ * 
+ * @author Kuldeep.kumar
+ * 
+ */
 public class IdDiscriptor
 {
     private GenerationType strategy;

@@ -42,6 +42,9 @@ public class PrimeUserDataType
     @Column 
     private Date tweetDate;
 
+    @Column
+    private Boolean isActive;
+    
     public PrimeUserDataType()
     {
     }
@@ -90,4 +93,16 @@ public class PrimeUserDataType
     {
         this.tweetDate = tweetDate;
     }
+
+    public Boolean getIsActive()
+    {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive)
+    {
+        this.isActive = isActive;
+    }
+
+    
 }

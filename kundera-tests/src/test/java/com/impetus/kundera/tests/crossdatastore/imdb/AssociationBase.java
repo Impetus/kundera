@@ -120,6 +120,7 @@ public abstract class AssociationBase
     protected void setUpInternal(String... colFamilies)
     {
         if (persistenceUnits.indexOf(HBASE_PU) > 0 && AUTO_MANAGE_SCHEMA)
+
         {
             if (!HBaseCli.isStarted())
             {
@@ -128,9 +129,19 @@ public abstract class AssociationBase
             HBaseCli.createTable("MOVIE");
             HBaseCli.addColumnFamily("MOVIE", "TITLE");
             HBaseCli.addColumnFamily("MOVIE", "YEAR");
+
+            HBaseCli.stopCluster();
+            HBaseCli.startCluster();
         }
 
         dao = new IMDBDaoImpl(persistenceUnits);
+
+        HBaseCli.createTable("MOVIE");
+        HBaseCli.addColumnFamily("MOVIE", "TITLE");
+        HBaseCli.addColumnFamily("MOVIE", "YEAR");
+        
+        dao = new IMDBDaoImpl(persistenceUnits);
+
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
         em = null;

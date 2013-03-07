@@ -35,12 +35,7 @@ public class RedisCompositeKeyTest {
 		emf = Persistence.createEntityManagerFactory(REDIS_PU);
 	}
 
-	@Test
-	public void testDummy() {
-
-	}
-
-	// @Test
+	 @Test
 	public void testCRUD() {
 		logger.info("On testCRUD");
 		EntityManager em = emf.createEntityManager();

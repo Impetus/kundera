@@ -190,7 +190,7 @@ public class FlushManager
                         {
                             String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
                             String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                            Object entityId = node.getEntityId(); 
+                            Object entityId = node.getEntityId();
                             Object childId = childNode.getEntityId();
                             Set<Object> childValues = new HashSet<Object>();
                             childValues.add(childId);
@@ -232,6 +232,7 @@ public class FlushManager
                     // Node childNode =
                     // mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                     Node childNode = children.get(nodeLink);
+
                     addNodesToFlushStack(childNode, eventType);
                 }
             }
