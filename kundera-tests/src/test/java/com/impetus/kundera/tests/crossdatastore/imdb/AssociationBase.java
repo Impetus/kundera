@@ -95,7 +95,7 @@ public abstract class AssociationBase
      */
     protected void setUpInternal(String... colFamilies)
     {     
-        if (!HBaseCli.isStarted())
+/*        if (!HBaseCli.isStarted())
         {
         	HBaseCli.stopCluster();
             HBaseCli.startCluster();
@@ -104,7 +104,7 @@ public abstract class AssociationBase
         HBaseCli.addColumnFamily("MOVIE", "TITLE");
         HBaseCli.addColumnFamily("MOVIE", "YEAR");
         
-        dao = new IMDBDaoImpl(persistenceUnits);
+*/        dao = new IMDBDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
         em = null;
