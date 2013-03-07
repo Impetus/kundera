@@ -131,6 +131,7 @@ public class CompositeDataTypeTest
         PrimeUserDataType user = new PrimeUserDataType(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
+        user.setIsActive(true);
         em.persist(user);
 
         em.clear(); // optional,just to clear persistence cache.
@@ -140,6 +141,7 @@ public class CompositeDataTypeTest
         Assert.assertEquals("my first tweet", result.getTweetBody());
         // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
+        Assert.assertTrue(result.getIsActive());
 
         em.clear();// optional,just to clear persistence cache.
 
