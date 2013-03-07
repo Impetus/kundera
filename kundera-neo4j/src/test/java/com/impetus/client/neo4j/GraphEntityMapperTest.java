@@ -114,7 +114,7 @@ public class GraphEntityMapperTest
 
     /**
      * Test method for
-     * {@link com.impetus.client.neo4j.GraphEntityMapper#getNodeFromEntity(java.lang.Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, boolean)}
+     * {@link com.impetus.client.neo4j.GraphEntityMapper#getNodeFromEntity(java.lang.Object, Object, org.neo4j.graphdb.GraphDatabaseService, com.impetus.kundera.metadata.model.EntityMetadata, boolean)}
      * .
      */
     @Test
@@ -125,7 +125,7 @@ public class GraphEntityMapperTest
         actor.setName("Keenu Reeves");
 
         Transaction tx = graphDb.beginTx();
-        Node node = mapper.getNodeFromEntity(actor, graphDb, KunderaMetadataManager.getEntityMetadata(Actor.class),
+        Node node = mapper.getNodeFromEntity(actor, 1, graphDb, KunderaMetadataManager.getEntityMetadata(Actor.class),
                 false);
         Assert.assertNotNull(node);
         Assert.assertEquals(1, node.getProperty("ACTOR_ID"));

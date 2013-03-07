@@ -62,10 +62,13 @@ import com.impetus.kundera.tests.crossdatastore.imdb.dao.IMDBDaoImpl;
 public abstract class AssociationBase
 {
     protected static final String KEYSPACE = "imdb";
+
     protected static final String MOVIE = "MOVIE";
+
     protected static final String ACTOR = "ACTOR";
 
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
+
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     protected EntityManager em;
@@ -77,15 +80,36 @@ public abstract class AssociationBase
 
     /** The col families. */
     private String[] colFamilies;
-    
+
     protected RDBMSCli cli;
 
     protected List<Object> col = new ArrayList<Object>();
 
-    protected String persistenceUnits = "imdbNeo4J,imdbCassandra,addMongo,redis";
-    //protected String persistenceUnits = "imdbNeo4J,imdbHbase";
-    protected static final String[] ALL_PUs_UNDER_TEST = new String[] {"imdbNeo4J", "addMongo", "imdbCassandra", "redis"};
-    //protected static final String[] ALL_PUs_UNDER_TEST = new String[] {"imdbNeo4J", "imdbHbase"};
+    public static final String CASSANDRA_PU = "imdbCassandra";
+
+    public static final String HBASE_PU = "imdbHbase";
+
+    public static final String MONGO_PU = "addMongo";
+
+    public static final String RDBMS_PU = "imdbRDBMS";
+
+    public static final String REDIS_PU = "redis";
+
+    public static final String NEO4J_PU = "imdbNeo4J";
+
+    public static String persistenceUnits = "";
+
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, CASSANDRA_PU, MONGO_PU, REDIS_PU, HBASE_PU, RDBMS_PU};    
+
+    public static void buildPersistenceUnitsList()
+    {
+        for (String pu : ALL_PUs_UNDER_TEST)
+        {
+            persistenceUnits = persistenceUnits + pu + ",";
+        }
+        persistenceUnits = persistenceUnits.substring(0, persistenceUnits.length() - 1);
+    }
+    
 
     /**
      * Sets the up internal.
@@ -94,28 +118,29 @@ public abstract class AssociationBase
      *            the new up internal
      */
     protected void setUpInternal(String... colFamilies)
-    {     
-        if (!HBaseCli.isStarted())
+    {
+        if (persistenceUnits.indexOf(HBASE_PU) > 0 && AUTO_MANAGE_SCHEMA)
         {
-            HBaseCli.startCluster();
+            if (!HBaseCli.isStarted())
+            {
+                HBaseCli.startCluster();
+            }
+            HBaseCli.createTable("MOVIE");
+            HBaseCli.addColumnFamily("MOVIE", "TITLE");
+            HBaseCli.addColumnFamily("MOVIE", "YEAR");
         }
-        HBaseCli.createTable("MOVIE");
-        HBaseCli.addColumnFamily("MOVIE", "TITLE");
-        HBaseCli.addColumnFamily("MOVIE", "YEAR");
-        
+
         dao = new IMDBDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
         em = null;
         dao.closeEntityManager();
         dao.closeEntityManagerFactory();
-        
-        em = dao.getEntityManager(persistenceUnits);
-        this.colFamilies = colFamilies;    
-        
-    }
 
-    
+        em = dao.getEntityManager(persistenceUnits);
+        this.colFamilies = colFamilies;
+
+    }
 
     /**
      * Switch over persistence units.
@@ -133,8 +158,8 @@ public abstract class AssociationBase
             InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
     {
         if (entityPuCol != null)
-        {                        
-            
+        {
+
             Iterator<Class> iter = entityPuCol.keySet().iterator();
             log.warn("\n\nInvocation for:\n--------------------------------");
             while (iter.hasNext())
@@ -189,27 +214,15 @@ public abstract class AssociationBase
                         }
                     }
 
-                } 
-                
+                }
+
                 if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
                 {
                     createRDBMSSchema();
 
-                }
-                
-                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
-                {
-                    if (!HBaseCli.isStarted())
-                    {
-                        HBaseCli.startCluster();
-                    }
-                    HBaseCli.createTable("MOVIE");
-                    HBaseCli.addColumnFamily("MOVIE", "TITLE");
-                    HBaseCli.addColumnFamily("MOVIE", "YEAR");
-
-                }
+                }                
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-                mAdd.setSchema(schema != null ? schema : KEYSPACE);                
+                mAdd.setSchema(schema != null ? schema : KEYSPACE);
                 log.warn(clazz.getSimpleName() + " in " + pu);
             }
         }
@@ -234,23 +247,27 @@ public abstract class AssociationBase
         if (!em.isOpen())
         {
             em = dao.getEntityManager(persistenceUnits);
-        }       
+        }
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            truncateCassandra();
-            
-            truncateRdbms();
-            
-            shutDownRdbmsServer();
-            
-            truncateRedis();
+            if (persistenceUnits.indexOf(CASSANDRA_PU) > 0)
+                truncateCassandra();
+
+            if (persistenceUnits.indexOf(RDBMS_PU) > 0)
+            {
+
+                truncateRdbms();
+                shutDownRdbmsServer();
+            }
+            if (persistenceUnits.indexOf(REDIS_PU) > 0)
+                truncateRedis();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
             CleanupUtilities.cleanLuceneDirectory(pu);
-        }        
+        }
     }
 
     /**
@@ -258,9 +275,9 @@ public abstract class AssociationBase
      */
     private void truncateCassandra()
     {
-        String[] columnFamily = new String[] {ACTOR, MOVIE};
+        String[] columnFamily = new String[] { ACTOR, MOVIE };
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
-    }   
+    }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
             SchemaDisagreementException, TException
@@ -288,7 +305,7 @@ public abstract class AssociationBase
     {
         log.warn("Truncating....");
         CassandraCli.dropColumnFamily("ACTOR", KEYSPACE);
-        CassandraCli.dropColumnFamily("MOVIE", KEYSPACE);        
+        CassandraCli.dropColumnFamily("MOVIE", KEYSPACE);
         CassandraCli.dropKeySpace(KEYSPACE);
     }
 
@@ -296,18 +313,18 @@ public abstract class AssociationBase
             TimedOutException, SchemaDisagreementException;
 
     protected abstract void loadDataForMovie() throws TException, InvalidRequestException, UnavailableException,
-    TimedOutException, SchemaDisagreementException;
-    
-    protected void shutDownRdbmsServer() 
+            TimedOutException, SchemaDisagreementException;
+
+    protected void shutDownRdbmsServer()
     {
         if (cli != null)
         {
             try
             {
-                if(AUTO_MANAGE_SCHEMA)
+                if (AUTO_MANAGE_SCHEMA)
                 {
                     cli.dropSchema(KEYSPACE);
-                }                
+                }
             }
             catch (Exception e)
             {
@@ -316,7 +333,7 @@ public abstract class AssociationBase
                     cli.closeConnection();
                 }
                 catch (SQLException e1)
-                {                    
+                {
                 }
             }
             finally
@@ -326,13 +343,13 @@ public abstract class AssociationBase
                     cli.closeConnection();
                 }
                 catch (SQLException e)
-                {                   
+                {
                 }
             }
 
         }
     }
-    
+
     private void truncateRdbms()
     {
         try
@@ -343,10 +360,10 @@ public abstract class AssociationBase
         }
         catch (Exception e)
         {
-            
+
         }
     }
-    
+
     /**
      * 
      */
@@ -354,11 +371,11 @@ public abstract class AssociationBase
     {
         try
         {
-            if(AUTO_MANAGE_SCHEMA)
+            if (AUTO_MANAGE_SCHEMA)
             {
                 cli = new RDBMSCli(KEYSPACE);
                 cli.createSchema(KEYSPACE);
-                
+
                 try
                 {
                     cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
@@ -368,17 +385,17 @@ public abstract class AssociationBase
                     cli.update("DELETE FROM IMDB.MOVIE");
                     cli.update("DROP TABLE IMDB.MOVIE");
                     cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
-                }           
-                
+                }
+
             }
-            
+
         }
         catch (Exception e)
         {
             log.error("Error in RDBMS cli ", e);
         }
     }
-    
+
     private void truncateRedis()
 
     {

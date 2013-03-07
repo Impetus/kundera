@@ -133,7 +133,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
         Object entity = null;
         Node node = mapper.searchNode(key, m, graphDb, true);
-        if (node != null)
+
+        if (node != null && !((Neo4JTransaction) resource).containsNodeId(node.getId()))
 
         {
             entity = getEntityWithAssociationFromNode(m, node);
@@ -273,7 +274,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         {
 
             // Top level node
-            Node node = mapper.getNodeFromEntity(entity, graphDb, entityMetadata, isUpdate);
+            Node node = mapper.getNodeFromEntity(entity, id, graphDb, entityMetadata, isUpdate);
 
             if (node != null)
             {
@@ -706,31 +707,41 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if (!indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
         {
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
-            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
 
-            for (Node node : hits)
-            {
-                if (node != null)
-                {
-                    entities.add(getEntityWithAssociationFromNode(m, node));
-                }
-            }
+            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
+            addEntityFromIndexHits(m, entities, hits);
         }
         else
         {
-            IndexHits<Node> hits;
 
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-            hits = autoNodeIndex.query(luceneQuery);
-
-            for (Node node : hits)
-            {
-
-                entities.add(getEntityWithAssociationFromNode(m, node));
-            }
+            IndexHits<Node> hits = autoNodeIndex.query(luceneQuery);
+            addEntityFromIndexHits(m, entities, hits);
 
         }
         return entities;
+    }
+
+    /**
+     * @param m
+     * @param entities
+     * @param hits
+     */
+    protected void addEntityFromIndexHits(EntityMetadata m, List<Object> entities, IndexHits<Node> hits)
+    {
+        for (Node node : hits)
+        {
+            if (node != null)
+            {
+                Object entity = getEntityWithAssociationFromNode(m, node);
+                if (entity != null)
+                {
+
+                    entities.add(entity);
+
+                }
+            }
+        }
     }
 
     /**
@@ -756,7 +767,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
         nodeIdToEntityMap.clear();
 
-        if (!relationMap.isEmpty())
+        if (!relationMap.isEmpty() && entity != null)
         {
             return new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationMap);
         }

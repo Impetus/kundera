@@ -84,16 +84,19 @@ public final class GraphEntityMapper
      * update operation, node is searched and attributes populated Otherwise
      * Node is created into database (replacing any existing node) with
      * attributes populated
+     * 
+     * @param id
+     *            TODO
      */
-    public Node getNodeFromEntity(Object entity, GraphDatabaseService graphDb, EntityMetadata m, boolean isUpdate)
+    public Node getNodeFromEntity(Object entity, Object key, GraphDatabaseService graphDb, EntityMetadata m,
+            boolean isUpdate)
     {
 
         // Construct top level node first, making sure unique ID in the index
         Node node = null;
-        Object key = PropertyAccessorHelper.getId(entity, m);
         if (!isUpdate)
         {
-            node = getOrCreateNodeWithUniqueFactory(entity, key, m, graphDb);
+            node = getOrCreateNodeWithUniqueFactory(entity, key, m, graphDb);            
         }
         else
         {
@@ -581,8 +584,6 @@ public final class GraphEntityMapper
      */
     public Object toNeo4JProperty(Object source)
     {
-
-        Class<?> sourceClass = source.getClass();
         if (source instanceof BigDecimal || source instanceof BigInteger)
         {
             return source.toString();
@@ -594,9 +595,9 @@ public final class GraphEntityMapper
         }
         if (source instanceof Date)
         {
+            Class<?> sourceClass = source.getClass();
             return PropertyAccessorHelper.fromSourceToTargetClass(String.class, sourceClass, source);
         }
-
         return source;
     }
 

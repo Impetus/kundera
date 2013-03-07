@@ -21,6 +21,7 @@ import java.util.List;
 import javax.persistence.Query;
 
 import com.impetus.client.neo4j.Neo4JClient;
+import com.impetus.client.neo4j.Neo4JEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -42,6 +43,9 @@ public class Neo4JQuery extends QueryImpl implements Query
     private static final String NATIVE_QUERY_TYPE = "native.query.type";
 
     Neo4JQueryType queryType;
+
+    /** The reader. */
+    private EntityReader reader;
 
     /**
      * @param query
@@ -86,14 +90,17 @@ public class Neo4JQuery extends QueryImpl implements Query
             String luceneQuery = getLuceneQuery(kunderaQuery);
             entities = ((Neo4JClient) client).executeLuceneQuery(m, luceneQuery);
         }
-
-        return entities;
+        return setRelationEntities(entities, client, m);
     }
 
     @Override
     protected EntityReader getReader()
     {
-        return null;
+        if (reader == null)
+        {
+            reader = new Neo4JEntityReader();
+        }
+        return reader;
     }
 
     @Override
@@ -127,7 +134,6 @@ public class Neo4JQuery extends QueryImpl implements Query
                 {
                     boolean appended = false;
                     FilterClause filter = (FilterClause) object;
-                    // sb.append("+");
                     // property
                     sb.append(filter.getProperty());
 
@@ -144,23 +150,24 @@ public class Neo4JQuery extends QueryImpl implements Query
                     }
                     else if (filter.getCondition().equalsIgnoreCase(">"))
                     {
-                                    // TODO: Amresh need to look for "String.class" parameter.
+                        // TODO: Amresh need to look for "String.class"
+                        // parameter.
                         sb.append(appendRange(filter.getValue().toString(), false, true, String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase(">="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, true,String.class));
+                        sb.append(appendRange(filter.getValue().toString(), true, true, String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase("<"))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), false, false,String.class));
+                        sb.append(appendRange(filter.getValue().toString(), false, false, String.class));
                         appended = true;
                     }
                     else if (filter.getCondition().equalsIgnoreCase("<="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, false,String.class));
+                        sb.append(appendRange(filter.getValue().toString(), true, false, String.class));
                         appended = true;
                     }
 

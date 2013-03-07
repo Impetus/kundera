@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.metamodel.EntityType;
@@ -82,6 +81,9 @@ public abstract class TwinAssociation extends AssociationBase
             }
         }
     }
+    
+    
+    
 
     /**
      * Try operation.
@@ -134,10 +136,27 @@ public abstract class TwinAssociation extends AssociationBase
                 }
                 
                 switchPersistenceUnits(c);
+                
+                //CRUD
                 insert();
                 find();                
+                
+                
+                
+                //Queries
+                findAllActors();                
+                findActorByID();                
+                findActorByName();
+                findActorByIDAndNamePositive();
+                findActorByIDAndNameNegative();
+                findActorWithMatchingName();                
+                findActorWithinGivenIdRange();                
+                findSelectedFields();                
+                
                 update();
                 remove();
+                
+                
                 tearDownInternal(ALL_PUs_UNDER_TEST);
             }
         }
@@ -160,6 +179,24 @@ public abstract class TwinAssociation extends AssociationBase
 
     /** Remove Person */
     protected abstract void remove();
+    
+    protected abstract void findAllActors();
+    
+    protected abstract void findActorByID();
+    
+    protected abstract  void findActorByName();
+    
+    protected abstract  void findActorByIDAndNamePositive();
+    
+    protected abstract  void findActorByIDAndNameNegative();
+    
+    protected abstract  void findActorWithMatchingName();
+    
+    protected abstract  void findActorWithinGivenIdRange();
+    
+   
+    protected abstract  void findSelectedFields();
+    
 
     private Map<Class<?>, EntityType<?>> getManagedTypes(MetamodelImpl metaModel)
     {
