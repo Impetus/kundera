@@ -158,6 +158,12 @@ public class EntityValidatorImpl implements EntityValidator
         classes.add(clazz);
     }
 
+    /**
+     * validate generated value annotation if given.
+     * 
+     * @param clazz
+     * @param field
+     */
     private void validateGeneratedValueAnnotation(final Class<?> clazz, Field field)
     {
         Table table = clazz.getAnnotation(Table.class);
@@ -182,6 +188,14 @@ public class EntityValidatorImpl implements EntityValidator
         }        
     }
 
+    /**
+     * Validate for generator.
+     * 
+     * @param clazz
+     * @param field
+     * @param generatedValue
+     * @param schemaName
+     */
     private void checkForGenerator(final Class<?> clazz, Field field, GeneratedValue generatedValue, String schemaName)
     {
         TableGenerator tableGenerator = field.getAnnotation(TableGenerator.class);
