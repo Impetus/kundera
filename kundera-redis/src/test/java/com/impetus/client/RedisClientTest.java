@@ -134,9 +134,18 @@ public class RedisClientTest {
 						object.getPersonName());
 			}
 		}
+                em.flush();
+                em.clear();
+                em.close();
+                em = null;
+                
+                emf.close();
+                
+                emf=null;
+                batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
+                emf = Persistence.createEntityManagerFactory(REDIS_PU, batchProperty);
 
-		em.close();
-	}
+	 }
 
 	@Test
 	public void testPersistJoinTableData() {
