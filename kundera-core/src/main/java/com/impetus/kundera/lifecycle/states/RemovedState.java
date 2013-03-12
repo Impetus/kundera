@@ -18,6 +18,7 @@ package com.impetus.kundera.lifecycle.states;
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 
@@ -90,11 +91,9 @@ public class RemovedState extends NodeState
         // Flush this node to database
         Client client = nodeStateContext.getClient();
 
-        Node node = (Node) nodeStateContext;
+        Node node = (Node) nodeStateContext;       
 
-        Object entityId = node.getEntityId();
-
-        client.delete(node.getData(), entityId);
+        ((ClientBase)client).deleteNode(node);
 
         // Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);

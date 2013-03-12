@@ -18,6 +18,7 @@ package com.impetus.kundera.lifecycle.states;
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.NodeStateContext;
@@ -180,7 +181,7 @@ public class ManagedState extends NodeState
 
         // Flush this node to database
         Client client = nodeStateContext.getClient();
-        client.persist((Node) nodeStateContext);
+        ((ClientBase)client).persistNode((Node) nodeStateContext);
 
         // logNodeEvent("FLUSHED", this, nodeStateContext.getNodeId());
 

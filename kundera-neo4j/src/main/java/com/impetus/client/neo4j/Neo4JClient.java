@@ -260,11 +260,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      * Writes an entity to database
      */
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
     {
         if (log.isDebugEnabled())
             log.debug("Persisting " + entity);
 
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        
         // All Modifying Neo4J operations must be executed within a transaction
         checkActiveTransaction();
 
@@ -422,7 +424,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                     {
                         // Neo4J allows only batch insertion, follow usual path
                         // for normal updates
-                        persist(graphNode);
+                        persistNode(graphNode);
                     }
                     else
                     {

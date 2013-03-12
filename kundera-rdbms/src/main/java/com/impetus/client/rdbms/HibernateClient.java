@@ -234,8 +234,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     @Override
-    protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
+    public void persist(Object entity, Object id, List<RelationHolder> relationHolders)
     {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        
         Transaction tx = null;
         
         s = /* getStatelessSession() */getSessionFactory().openStatelessSession();

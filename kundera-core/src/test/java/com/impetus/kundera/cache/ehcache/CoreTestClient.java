@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -12,6 +12,13 @@ import com.impetus.kundera.query.LuceneQuery;
 
 public class CoreTestClient implements Client<LuceneQuery>
 {
+
+    
+    
+    @Override
+    public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+    }
 
     @Override
     public Object find(Class entityClass, Object key)
@@ -60,13 +67,6 @@ public class CoreTestClient implements Client<LuceneQuery>
     {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public void persist(Node node)
-    {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

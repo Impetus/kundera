@@ -211,8 +211,7 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public List readData(final String tableName, Class clazz, EntityMetadata m, final Object rowKey,
-            List<String> relationNames, String... columns) throws IOException
+    public List readData(EntityMetadata m, final Object rowKey, List<String> relationNames, String... columns) throws IOException
     {
 
         List output = null;
@@ -221,11 +220,11 @@ public class HBaseDataHandler implements DataHandler
 
         HTableInterface hTable = null;
 
-        hTable = gethTable(tableName);
+        hTable = gethTable(m.getTableName());
 
         // Load raw data from HBase
         List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, this.filter, columns);
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+        output = onRead(m.getTableName(), m.getEntityClazz(), m, output, hTable, entity, relationNames, results);
         return output;
     }
 
@@ -292,11 +291,10 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public void writeData(String tableName, EntityMetadata m, Object entity, Object rowId,
-            List<RelationHolder> relations) throws IOException
+    public void writeData(EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations) throws IOException
     {
 
-        HTableInterface hTable = gethTable(tableName);
+        HTableInterface hTable = gethTable(m.getTableName());
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -313,7 +311,7 @@ public class HBaseDataHandler implements DataHandler
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashSet<Attribute>(), entity, null);
         List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
 
-        preparePersistentData(tableName, entity, rowId, metaModel, attributes, columnWrapper, persistentData);
+        preparePersistentData(m.getTableName(), entity, rowId, metaModel, attributes, columnWrapper, persistentData);
 
         hbaseWriter.writeColumns(hTable, columnWrapper.getRowKey(), columnWrapper.getColumns(), entity);
 

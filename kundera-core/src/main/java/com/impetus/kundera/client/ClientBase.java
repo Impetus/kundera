@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -70,20 +68,29 @@ public abstract class ClientBase
     {
         return persistenceUnit;
     }
+    
+    public void deleteNode(Node node)
+    {
+        Object entity = node.getData();
+        Object id = node.getEntityId();
+        //EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());        
+        List<RelationHolder> relationHolders = getRelationHolders(node);
+        delete(entity, id, relationHolders);        
+    }
 
     /**
      * Method to handle
      * 
      * @param node
      */
-    public void persist(Node node)
+    public void persistNode(Node node)
     {
         Object entity = node.getData();
         Object id = node.getEntityId();
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
-        onPersist(metadata, entity, id, relationHolders);
+        persist(entity, id, relationHolders);
         indexNode(node, metadata);
     }
 
@@ -205,17 +212,15 @@ public abstract class ClientBase
     /**
      * Method to be implemented by inherited classes. On receiving persist event
      * specific client need to implement this method.
-     * 
-     * @param entityMetadata
-     *            entity metadata.
      * @param entity
      *            entity object.
-     * @param id
+     * @param key
      *            entity id.
      * @param rlHolders
      *            relation holders. This field is only required in case Entity
      *            is holding up any associations with other entities.
      */
-    protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
-            List<RelationHolder> rlHolders);
+    protected abstract void persist(Object entity, Object key, List<RelationHolder> rlHolders);
+    
+    protected abstract void delete(Object entity, Object pKey, List<RelationHolder> rlHolders);
 }

@@ -96,7 +96,7 @@ public class Neo4JClientTest
 
     /**
      * Test method for
-     * {@link com.impetus.client.neo4j.Neo4JClient#onPersist(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Object, java.util.List)}
+     * {@link com.impetus.client.neo4j.Neo4JClient#persist(java.lang.Object, java.lang.Object, java.util.List)}
      * .
      */
     @Test

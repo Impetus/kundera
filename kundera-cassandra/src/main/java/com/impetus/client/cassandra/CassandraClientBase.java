@@ -1299,7 +1299,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     else if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
                     {
                         List<RelationHolder> relationHolders = getRelationHolders(node);
-                        onPersist(metadata, entity, id, relationHolders);
+                        persist(entity, id, relationHolders);
                     }
                     else
                     {

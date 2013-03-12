@@ -122,24 +122,16 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.invertedIndexHandler = new ThriftInvertedIndexHandler(pool);
         this.reader = reader;
         this.pool = pool;
-    }
-
-    /**
-     * Persists and indexes a {@link Node} to database
-     */
-    @Override
-    public void persist(Node node)
-    {
-        super.persist(node);
-    }
+    }   
 
     /**
      * Persists a {@link Node} to database
      */
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
     {
-
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        
         Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
         try
         {

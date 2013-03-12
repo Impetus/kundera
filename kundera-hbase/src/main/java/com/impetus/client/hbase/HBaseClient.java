@@ -142,7 +142,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 return null;
             }
             results = handler
-                    .readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
+                    .readData(entityMetadata, rowId, relationNames);
             if (results != null)
             {
                 enhancedEntity = results.get(0);
@@ -226,8 +226,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 E e = null;
                 try
                 {
-                    List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                            entityMetadata, entityId, null);
+                    List results = handler.readData(entityMetadata, entityId,
+                            null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
@@ -285,8 +285,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
         try
         {
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null, relationNames,
-                    columns);
+            results = handler.readData(entityMetadata, null, relationNames, columns);
         }
         catch (IOException ioex)
         {
@@ -402,9 +401,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     /**
      * On persist.
-     * 
-     * @param entityMetadata
-     *            the entity metadata
      * @param entity
      *            the entity
      * @param id
@@ -413,14 +409,14 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the relations
      */
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> relations)
+    public void persist(Object entity, Object id, List<RelationHolder> relations)
     {
-        String tableName = entityMetadata.getTableName();
-
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        
         try
         {
             // Write data to HBase
-            handler.writeData(tableName, entityMetadata, entity, id, relations);
+            handler.writeData(entityMetadata, entity, id, relations);
         }
         catch (IOException e)
         {

@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -473,7 +474,7 @@ public class FlushManager
                         }
                         else
                         {
-                            client.persist(node.getOriginalNode());
+                            ((ClientBase)client).persistNode(node.getOriginalNode());
                         }
                     }
                     // mark it null for garbage collection.

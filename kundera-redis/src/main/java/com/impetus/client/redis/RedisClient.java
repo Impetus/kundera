@@ -117,8 +117,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * java.util.List)
      */
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
     {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        
         Object connection = getConnection();
         // Create a hashset and populate data into it
         //
@@ -354,7 +356,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         Object connection = getConnection();
         Pipeline pipeLine = null;

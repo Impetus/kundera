@@ -514,9 +514,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
     {
         Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         collections = onPersist(collections, entity, id, entityMetadata, rlHolders, isUpdate);
         onFlushCollection(collections);
     }

@@ -20,7 +20,7 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
-import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -35,6 +35,19 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
  */
 public interface Client<Q extends Query>
 {
+    /**
+     * Method to be implemented by inherited classes. On receiving persist event
+     * specific client need to implement this method.
+     * @param entity
+     *            entity object.
+     * @param key
+     *            entity id.
+     * @param rlHolders
+     *            relation holders. This field is only required in case Entity
+     *            is holding up any associations with other entities.
+     */
+    void persist(Object entity, Object key, List<RelationHolder> rlHolders);
+    
 
     /**
      * Retrieve columns from a column-family row.
@@ -96,7 +109,7 @@ public interface Client<Q extends Query>
      * @throws Exception
      *             the exception
      */
-    void delete(Object entity, Object pKey);
+    void delete(Object entity, Object pKey, List<RelationHolder> rlHolders);
 
     /**
      * Gets the persistence unit.
@@ -112,13 +125,6 @@ public interface Client<Q extends Query>
      */
     IndexManager getIndexManager();
 
-    /**
-     * Data node to persist entity with specific client.
-     * 
-     * @param node
-     *            data node.
-     */
-    void persist(Node node);
 
     void persistJoinTable(JoinTableData joinTableData);
 

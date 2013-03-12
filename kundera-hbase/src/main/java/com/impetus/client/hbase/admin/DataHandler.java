@@ -47,11 +47,6 @@ public interface DataHandler
 
     /**
      * Populates data for give column family, column name, and HBase table name.
-     * 
-     * @param tableName
-     *            the table name
-     * @param clazz
-     *            the clazz
      * @param m
      *            the m
      * @param rowKey
@@ -62,7 +57,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,String... columns)
+    List readData(EntityMetadata m, Object rowKey, List<String> relatationNames, String... columns)
             throws IOException;
 
     /**
@@ -100,9 +95,6 @@ public interface DataHandler
 
     /**
      * Write data.
-     * 
-     * @param tableName
-     *            the table name
      * @param m
      *            the m
      * @param entity
@@ -111,10 +103,11 @@ public interface DataHandler
      *            the row id
      * @param relations
      *            the relations
+     * 
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeData(String tableName, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations)
+    void writeData(EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations)
             throws IOException;
 
     /**

@@ -245,7 +245,7 @@ public class RedisClientTest {
                 
                 Node node = new Node(nodeId, PersonRedis.class, new TransientState(), null, ROW_KEY);
                 node.setData(object);
-                client.persist(node);
+                client.persistNode(node);
 
 		PersonRedis result = (PersonRedis) client.find(PersonRedis.class,
 				ROW_KEY);
