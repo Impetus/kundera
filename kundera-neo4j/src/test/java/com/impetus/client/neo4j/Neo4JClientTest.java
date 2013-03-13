@@ -204,7 +204,7 @@ public class Neo4JClientTest
 
     /**
      * Test method for
-     * {@link com.impetus.client.neo4j.Neo4JClient#getQueryImplementor()}.
+     * {@link com.impetus.client.neo4j.Neo4JClient#getDefaultQueryImplementor()}.
      */
     @Test
     public void testGetQueryImplementor()

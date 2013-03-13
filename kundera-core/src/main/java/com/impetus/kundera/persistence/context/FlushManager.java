@@ -470,7 +470,7 @@ public class FlushManager
                             // String entityId =
                             // ObjectGraphUtils.getEntityId(node.getNodeId());
                             Object entityId = node.getEntityId();
-                            client.delete(node.getData(), entityId);
+                            client.delete(node.getData(), entityId, null);
                         }
                         else
                         {

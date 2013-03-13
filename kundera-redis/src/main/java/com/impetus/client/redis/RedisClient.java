@@ -74,7 +74,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author vivek.mishra
  */
-public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter,
+public class RedisClient extends ClientBase implements Client, Batcher, ClientPropertiesSetter,
         TransactionBinder, SequenceGenerator
 {
     /**
@@ -333,7 +333,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         throw new UnsupportedOperationException("Method not supported!");
     }
@@ -729,7 +729,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     }
 
     @Override
-    public Class<RedisQuery> getQueryImplementor()
+    public Class<RedisQuery> getDefaultQueryImplementor()
     {
         return RedisQuery.class;
     }

@@ -74,7 +74,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
+public class HBaseClient extends ClientBase implements Client, Batcher, ClientPropertiesSetter,
         TableGenerator
 {
     /** the log used by this class. */
@@ -213,24 +213,24 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    public List find(Class<?> entityClass, Map<String, String> col)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        List<E> entities = new ArrayList<E>();
+        List entities = new ArrayList();
         Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(entityMetadata);
         for (String columnFamilyName : col.keySet())
         {
             String entityId = col.get(columnFamilyName);
             if (entityId != null)
             {
-                E e = null;
+                Object e = null;
                 try
                 {
                     List results = handler.readData(entityMetadata, entityId,
                             null);
                     if (results != null)
                     {
-                        e = (E) results.get(0);
+                        e = results.get(0);
                     }
                 }
                 catch (IOException ioex)
@@ -249,7 +249,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 }
                 else
                 {
-                    entities.add((E) columnFamilyValue);
+                    entities.add(columnFamilyValue);
                 }
             }
         }
@@ -499,7 +499,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         deleteByColumn(metadata.getSchema(), metadata.getTableName(),
@@ -566,7 +566,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<HBaseQuery> getQueryImplementor()
+    public Class<HBaseQuery> getDefaultQueryImplementor()
     {
         return HBaseQuery.class;
     }
@@ -668,7 +668,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     Object entity = node.getData();
                     if (node.isInState(RemovedState.class))
                     {
-                        delete(entity, rowKey);
+                        delete(entity, rowKey, null);
                     }
                     else
                     {

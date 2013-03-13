@@ -93,7 +93,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
+public class PelopsClient extends CassandraClientBase implements Client, Batcher, TableGenerator
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
@@ -187,7 +187,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         if (!isOpen())
         {
@@ -352,7 +352,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
@@ -406,7 +406,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public Class<CassQuery> getQueryImplementor()
+    public Class<CassQuery> getDefaultQueryImplementor()
     {
         return CassQuery.class;
     }

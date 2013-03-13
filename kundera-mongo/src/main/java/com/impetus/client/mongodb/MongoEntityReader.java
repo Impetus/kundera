@@ -30,33 +30,10 @@ import com.impetus.kundera.persistence.EntityReader;
  */
 public class MongoEntityReader extends AbstractEntityReader implements EntityReader
 {
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#populateRelation(com.impetus
-     * .kundera.metadata.model.EntityMetadata, java.util.List, boolean,
-     * com.impetus.kundera.client.Client)
-     */
+ 
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method supported not required for mongo");
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-     * com.impetus.kundera.client.Client)
-     */
-    @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
-    {
-        return super.findById(primaryKey, m, client);
-    }
-
 }

@@ -33,7 +33,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
  * 
  * @author vivek.mishra
  */
-public interface Client<Q extends Query>
+public interface Client
 {
     /**
      * Method to be implemented by inherited classes. On receiving persist event
@@ -63,6 +63,18 @@ public interface Client<Q extends Query>
      *             the exception
      */
     Object find(Class entityClass, Object key);
+    
+    /**
+     * Delete.
+     * 
+     * @param entity
+     *            the entity
+     * @param pKey
+     *            the key
+     * @throws Exception
+     *             the exception
+     */
+    void delete(Object entity, Object pKey, List<RelationHolder> rlHolders);
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -92,24 +104,14 @@ public interface Client<Q extends Query>
      * @throws Exception
      *             the exception
      */
-    <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap);
+    List find(Class<?> entityClass, Map<String, String> embeddedColumnMap);
 
     /**
      * Shutdown.
      */
     void close();
 
-    /**
-     * Delete.
-     * 
-     * @param entity
-     *            the entity
-     * @param pKey
-     *            the key
-     * @throws Exception
-     *             the exception
-     */
-    void delete(Object entity, Object pKey, List<RelationHolder> rlHolders);
+    
 
     /**
      * Gets the persistence unit.
@@ -211,6 +213,6 @@ public interface Client<Q extends Query>
      * 
      * @return class instance of configured query interface.
      */
-    Class<Q> getQueryImplementor();
+    Class getDefaultQueryImplementor();
 
 }

@@ -20,9 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.persistence.Query;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -94,7 +96,7 @@ public class QueryResolver
 
         try
         {
-            query = getQuery(jpaQuery, persistenceDelegator, m);
+            query = getQueryImplementation(jpaQuery, persistenceDelegator, m);
         }
         catch (SecurityException e)
         {
@@ -161,16 +163,38 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
+    public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
             throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
             InstantiationException, IllegalAccessException, InvocationTargetException
     {
-        Query query;
-        Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
+        //Check whether a custom query implementor has been specified
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(m.getPersistenceUnit());
+        String queryImplClassStr = puMetadata.getProperty(PersistenceProperties.KUNDERA_QUERY_IMPL_CLASS);        
+        
+        Class defaultQueryImplementor = persistenceDelegator.getClient(m).getDefaultQueryImplementor();
+        
+        //If a custom query implementor class is specified, return its instance
+        //Otherwise return default implementation
+        Class queryImplementor = null;
+        if(StringUtils.isEmpty(queryImplClassStr))
+        {
+            queryImplementor = defaultQueryImplementor;
+        }
+        else
+        {
+            queryImplementor = Class.forName(queryImplClassStr);
+        }       
 
         @SuppressWarnings("rawtypes")
-        Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
-        query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator);
+        Constructor constructor = queryImplementor.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
+        if(constructor == null)
+        {
+            log.warn("Costructor not specified in " + queryImplementor
+                    + " as per required signature. Default implementation " + defaultQueryImplementor + " will be used");
+            constructor = defaultQueryImplementor.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
+        }
+        Query query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator);
 
         return query;
     }

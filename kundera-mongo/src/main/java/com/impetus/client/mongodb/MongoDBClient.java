@@ -60,7 +60,7 @@ import com.mongodb.WriteConcern;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter,
+public class MongoDBClient extends ClientBase implements Client, Batcher, ClientPropertiesSetter,
         AutoGenerator
 {
     /** The mongo db. */
@@ -355,7 +355,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
 
@@ -437,7 +437,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    public List find(Class<?> entityClass, Map<String, String> col)
     {
         throw new NotImplementedException("Not yet implemented");
     }
@@ -508,7 +508,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<MongoDBQuery> getQueryImplementor()
+    public Class<MongoDBQuery> getDefaultQueryImplementor()
     {
         return MongoDBQuery.class;
     }
@@ -582,7 +582,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 // delete can not be executed in batch
                 if (node.isInState(RemovedState.class))
                 {
-                    delete(node.getData(), node.getEntityId());
+                    delete(node.getData(), node.getEntityId(), null);
                 }
                 else
                 {

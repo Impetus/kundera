@@ -43,20 +43,6 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method is not supported");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-     * com.impetus.kundera.client.Client)
-     */
-    @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
-    {
-        return super.findById(primaryKey, m, client);
-    }
+    }   
 
 }

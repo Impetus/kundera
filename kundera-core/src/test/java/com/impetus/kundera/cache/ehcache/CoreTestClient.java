@@ -10,7 +10,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.query.LuceneQuery;
 
-public class CoreTestClient implements Client<LuceneQuery>
+public class CoreTestClient implements Client
 {
 
     
@@ -35,7 +35,7 @@ public class CoreTestClient implements Client<LuceneQuery>
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         // TODO Auto-generated method stub
         return null;
@@ -49,7 +49,7 @@ public class CoreTestClient implements Client<LuceneQuery>
     }
 
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         // TODO Auto-generated method stub
 
@@ -91,7 +91,7 @@ public class CoreTestClient implements Client<LuceneQuery>
     }
 
     @Override
-    public Class<LuceneQuery> getQueryImplementor()
+    public Class<LuceneQuery> getDefaultQueryImplementor()
     {
         // TODO Auto-generated method stub
         return null;

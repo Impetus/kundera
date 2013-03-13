@@ -70,11 +70,14 @@ public class ManagedState extends NodeState
         // Fetch Node data from Client
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
         Object entityId = nodeStateContext.getEntityId();
-
-        EntityReader reader = client.getReader();
-        EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
+        
+        EnhanceEntity ee = null;        
+        Object o = client.find(nodeDataClass, entityId);        
+        if(o != null)
+        {
+            ee = o instanceof EnhanceEntity ? (EnhanceEntity) o : new EnhanceEntity(o, entityId, null);
+        }
 
         if (ee != null && ee.getEntity() != null)
         {
@@ -122,8 +125,14 @@ public class ManagedState extends NodeState
         {
             return;
         }
-        EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
-
+        
+        EnhanceEntity ee = null;        
+        Object o = client.find(nodeDataClass, entityId);        
+        if(o != null)
+        {
+            ee = o instanceof EnhanceEntity ? (EnhanceEntity) o : new EnhanceEntity(o, entityId, null);
+        }
+        
         // Recursively retrieve relationship entities (if there are any)
         if (ee != null && ee.getEntity() != null)
         {

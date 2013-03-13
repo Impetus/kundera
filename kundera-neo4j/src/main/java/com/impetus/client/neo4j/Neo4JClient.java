@@ -74,7 +74,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, TransactionBinder, Batcher
+public class Neo4JClient extends Neo4JClientBase implements Client, TransactionBinder, Batcher
 {
 
     private static Log log = LogFactory.getLog(Neo4JClient.class);
@@ -155,7 +155,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         throw new UnsupportedOperationException("Embedded attributes not supported in Neo4J as of now");
     }
@@ -170,7 +170,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      * Deletes an entity from database
      */
     @Override
-    public void delete(Object entity, Object key)
+    public void delete(Object entity, Object key, List<RelationHolder> rlHolders)
     {
         // All Modifying Neo4J operations must be executed within a transaction
         checkActiveTransaction();
@@ -251,7 +251,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     @Override
-    public Class<Neo4JQuery> getQueryImplementor()
+    public Class<Neo4JQuery> getDefaultQueryImplementor()
     {
         return Neo4JQuery.class;
     }
@@ -418,7 +418,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                     // Delete can not be executed in batch, deleting normally
                     if (graphNode.isInState(RemovedState.class))
                     {
-                        delete(graphNode.getData(), graphNode.getEntityId());
+                        delete(graphNode.getData(), graphNode.getEntityId(), null);
                     }
                     else if (graphNode.isUpdate())
                     {

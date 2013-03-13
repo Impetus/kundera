@@ -92,7 +92,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
+public class ThriftClient extends CassandraClientBase implements Client, Batcher, TableGenerator
 {
 
     /** log for this class. */
@@ -343,7 +343,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Finds a {@link List} of entities from database for given super columns
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
@@ -608,7 +608,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         if (!isOpen())
         {
@@ -738,7 +738,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public Class<CassQuery> getQueryImplementor()
+    public Class<CassQuery> getDefaultQueryImplementor()
     {
         return CassQuery.class;
     }

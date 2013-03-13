@@ -44,7 +44,7 @@ public class IdGenerator
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(PersistenceDelegator.class);
 
-    void setGeneratedIdIfApplicable(Object e, EntityMetadata m, Client<?> client)
+    void setGeneratedIdIfApplicable(Object e, EntityMetadata m, Client client)
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
@@ -76,7 +76,7 @@ public class IdGenerator
      * @param client
      * @param e
      */
-    private void onAutoGenerator(EntityMetadata m, Client<?> client, Object e)
+    private void onAutoGenerator(EntityMetadata m, Client client, Object e)
     {
         if (client instanceof AutoGenerator)
         {
@@ -106,7 +106,7 @@ public class IdGenerator
      * @param keyValue
      * @param e
      */
-    private void onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
+    private void onSequenceGenerator(EntityMetadata m, Client client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof SequenceGenerator)
         {
@@ -137,7 +137,7 @@ public class IdGenerator
      * @param keyValue
      * @param e
      */
-    private void onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
+    private void onTableGenerator(EntityMetadata m, Client client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof TableGenerator)
         {

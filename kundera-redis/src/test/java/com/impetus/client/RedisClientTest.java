@@ -223,7 +223,7 @@ public class RedisClientTest {
 		PersonRedis result = (PersonRedis) client.find(PersonRedis.class,
 				ROW_KEY);
 		Assert.assertNotNull(result);
-		client.delete(result, ROW_KEY);
+		client.delete(result, ROW_KEY, null);
 		result = (PersonRedis) client.find(PersonRedis.class, ROW_KEY);
 		Assert.assertNull(result);
 	}

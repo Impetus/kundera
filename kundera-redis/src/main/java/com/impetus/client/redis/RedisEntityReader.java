@@ -32,29 +32,10 @@ import com.impetus.kundera.persistence.EntityReader;
 public class RedisEntityReader extends AbstractEntityReader implements EntityReader
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.EntityReader#populateRelation(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
-     */
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         // TODO Auto-generated method stub
         return null;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-     * com.impetus.kundera.client.Client)
-     */
-    @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
-    {
-        return super.findById(primaryKey, m, client);
-    }
-
-
 }

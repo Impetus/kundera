@@ -32,12 +32,6 @@ public class Neo4JEntityReader extends AbstractEntityReader implements EntityRea
 {
 
     @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
-    {
-        return super.findById(primaryKey, m, client);
-    }
-
-    @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method supported not required for Neo4J");

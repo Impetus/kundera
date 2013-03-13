@@ -1202,7 +1202,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param pKey
      *            the key
      */
-    protected abstract void delete(Object entity, Object pKey);
+    protected abstract void delete(Object entity, Object pKey, List<RelationHolder> rlHolders);
 
     /*
      * (non-Javadoc)
@@ -1294,7 +1294,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     // delete can not be executed in batch
                     if (node.isInState(RemovedState.class))
                     {
-                        delete(entity, id);
+                        delete(entity, id, null);
                     }
                     else if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
                     {

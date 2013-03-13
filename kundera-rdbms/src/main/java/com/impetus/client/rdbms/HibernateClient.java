@@ -67,7 +67,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  * 
  * @author vivek.mishra
  */
-public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
+public class HibernateClient extends ClientBase implements Client
 {
 
     /** The conf. */
@@ -155,7 +155,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object pKey, List<RelationHolder> rlHolders)
     {
         s = getSessionFactory().openStatelessSession();
         Transaction tx = s.beginTransaction();
@@ -228,7 +228,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    public List find(Class<?> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
     }
@@ -554,7 +554,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<RDBMSQuery> getQueryImplementor()
+    public Class<RDBMSQuery> getDefaultQueryImplementor()
     {
         return RDBMSQuery.class;
     }
