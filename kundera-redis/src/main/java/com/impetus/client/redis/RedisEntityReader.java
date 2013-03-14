@@ -38,4 +38,10 @@ public class RedisEntityReader extends AbstractEntityReader implements EntityRea
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        return super.findById(primaryKey, m, client);
+    }
 }

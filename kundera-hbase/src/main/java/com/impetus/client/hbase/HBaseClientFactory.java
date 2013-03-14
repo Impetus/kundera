@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBasePropertyReader;
+import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -127,9 +128,10 @@ public class HBaseClientFactory extends GenericClientFactory
     }
 
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected void populateDatastoreSpecificObjects(Client client)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties);
+        ((HBaseClient) client).setHbaseConfiguration(conf);
+        ((HBaseClient) client).sethTablePool(hTablePool);        
     }
 
     @Override
@@ -163,6 +165,14 @@ public class HBaseClientFactory extends GenericClientFactory
             schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;
+    }
+    
+    
+
+    @Override
+    protected Class<?> getDefaultClientImplementation()
+    {
+        return HBaseClient.class;
     }
 
     /**

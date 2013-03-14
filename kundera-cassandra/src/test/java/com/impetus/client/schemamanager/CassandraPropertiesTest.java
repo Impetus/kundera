@@ -31,7 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.CassandraClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.Doctor;
 import com.impetus.kundera.Constants;
@@ -140,7 +140,7 @@ public class CassandraPropertiesTest
         Map<String, Object> props = new HashMap<String, Object>();
         // String pu = pu;
         props.put(Constants.PERSISTENCE_UNIT_NAME, pu);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CassandraClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, keyspace);

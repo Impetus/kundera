@@ -30,6 +30,11 @@ import com.impetus.kundera.persistence.EntityReader;
  */
 public class Neo4JEntityReader extends AbstractEntityReader implements EntityReader
 {
+    @Override
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        return super.findById(primaryKey, m, client);
+    }
 
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)

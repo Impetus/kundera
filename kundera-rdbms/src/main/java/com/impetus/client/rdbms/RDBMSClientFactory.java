@@ -54,15 +54,19 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-
         // Do nothing.
         return null;
     }
+    @Override
+    protected void populateDatastoreSpecificObjects(Client client)
+    {
+        //Nothing to set here that is database specific
+    }
 
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected Class<?> getDefaultClientImplementation()
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, externalProperties);
+        return HibernateClient.class;
     }
 
     @Override

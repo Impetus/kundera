@@ -23,12 +23,11 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.InvalidRequestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.CassandraClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
@@ -110,7 +109,7 @@ public class CassandraSchemaManagerMTMTest
     {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.PERSISTENCE_UNIT_NAME, _persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CassandraClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, _keyspace);

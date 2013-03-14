@@ -21,7 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.CassandraClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.Constants;
@@ -81,7 +81,7 @@ public class ActorTest
     public void test() throws NotFoundException, InvalidRequestException, TException, UnsupportedEncodingException
     {
         getEntityManagerFactory("create");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
+        schemaManager = new CassandraSchemaManager(CassandraClientFactory.class.getName(), null);
         schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -111,7 +111,7 @@ public class ActorTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "CassandraSchemaOperationTest";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CassandraClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");

@@ -83,14 +83,13 @@ public class HBaseClient extends ClientBase implements Client, Batcher, ClientPr
     /** The handler. */
     private DataHandler handler;
 
-    /** The reader. */
-    private EntityReader reader;
-
     private List<Node> nodes = new ArrayList<Node>();
 
-    private int batchSize;
-
-    private Map<String, Object> puProperties;
+    private int batchSize;    
+    
+    HBaseConfiguration hbaseConfiguration;
+    
+    HTablePool hTablePool;
 
     /**
      * Instantiates a new h base client.
@@ -114,9 +113,9 @@ public class HBaseClient extends ClientBase implements Client, Batcher, ClientPr
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
-        this.puProperties = puProperties;
+        this.externalProperties = puProperties;
 
-        getBatchSize(persistenceUnit, this.puProperties);
+        getBatchSize(persistenceUnit, this.externalProperties);
     }
 
     /*
@@ -752,6 +751,40 @@ public class HBaseClient extends ClientBase implements Client, Batcher, ClientPr
             executeBatch();
             nodes.clear();
         }
+    }  
+    
+
+    /**
+     * @return the hbaseConfiguration
+     */
+    public HBaseConfiguration getHbaseConfiguration()
+    {
+        return hbaseConfiguration;
+    }
+
+    /**
+     * @param hbaseConfiguration the hbaseConfiguration to set
+     */
+    public void setHbaseConfiguration(HBaseConfiguration hbaseConfiguration)
+    {
+        this.hbaseConfiguration = hbaseConfiguration;
+    }   
+    
+
+    /**
+     * @return the hTablePool
+     */
+    public HTablePool gethTablePool()
+    {
+        return hTablePool;
+    }
+
+    /**
+     * @param hTablePool the hTablePool to set
+     */
+    public void sethTablePool(HTablePool hTablePool)
+    {
+        this.hTablePool = hTablePool;
     }
 
     /**

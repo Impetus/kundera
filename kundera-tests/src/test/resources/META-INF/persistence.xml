@@ -14,7 +14,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+				value="com.impetus.client.cassandra.CassandraClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -32,7 +32,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+				value="com.impetus.client.cassandra.CassandraClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -66,7 +66,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+				value="com.impetus.client.cassandra.CassandraClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -159,7 +159,7 @@
 			<property name="kundera.keyspace" value="Pickr" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+				value="com.impetus.client.cassandra.CassandraClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -223,7 +223,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 <!--			<property name="kundera.ddl.auto.prepare" value="create" />-->
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+				value="com.impetus.client.cassandra.CassandraClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />

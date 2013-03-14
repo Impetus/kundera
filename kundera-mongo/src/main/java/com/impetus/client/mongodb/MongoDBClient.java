@@ -83,7 +83,7 @@ public class MongoDBClient extends ClientBase implements Client, Batcher, Client
 
     private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();
 
-    private Map<String, Object> puProperties;
+    
 
     /**
      * Instantiates a new mongo db client.
@@ -105,11 +105,10 @@ public class MongoDBClient extends ClientBase implements Client, Batcher, Client
         this.indexManager = mgr;
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
-        this.puProperties = puProperties;
+        this.externalProperties = puProperties;
         handler = new MongoDBDataHandler();
 
-        populateBatchSize(persistenceUnit, this.puProperties);
-
+        populateBatchSize(persistenceUnit, this.externalProperties);
     }
 
     @Override

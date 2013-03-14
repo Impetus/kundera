@@ -82,13 +82,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     }
 
-    @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
-    {
-        return super.findById(primaryKey, m, client);
-
-    }
-
     /**
      * Method responsible for reading back entity and relations using secondary
      * indexes(if it holds any relation), else retrieve row keys using lucene.
@@ -344,5 +337,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         expressions.removeAll(rowExpressions);
         return rowKeys;
         
+    }
+    
+    @Override
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        return super.findById(primaryKey, m, client);
     }
 }

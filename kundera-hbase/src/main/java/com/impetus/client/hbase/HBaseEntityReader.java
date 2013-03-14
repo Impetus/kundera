@@ -43,6 +43,12 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method is not supported");
-    }   
+    }
+
+    @Override
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        return super.findById(primaryKey, m, client);
+    }
 
 }

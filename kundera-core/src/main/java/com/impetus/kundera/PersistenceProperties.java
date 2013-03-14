@@ -39,6 +39,9 @@ public interface PersistenceProperties
 
     /** The Constant Kundera Client factory */
     public static final String KUNDERA_CLIENT_FACTORY = "kundera.client.lookup.class";
+    
+    /** The Constant Kundera Client factory */
+    public static final String KUNDERA_CLIENT = "kundera.client.class";
 
     /** The Constant KUNDERA_CACHE_PROVIDER_CLASS. */
     public static final String KUNDERA_CACHE_PROVIDER_CLASS = "kundera.cache.provider.class";

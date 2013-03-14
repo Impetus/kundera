@@ -112,10 +112,18 @@ public class Neo4JClientFactory extends GenericClientFactory
         return graphDb;
     }
 
+    
+
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected void populateDatastoreSpecificObjects(Client client)
     {
-        return new Neo4JClient(this, externalProperties, persistenceUnit);
+        //Nothing to set here that is database specific
+    }
+
+    @Override
+    protected Class<?> getDefaultClientImplementation()
+    {
+        return Neo4JClient.class;
     }
 
     @Override

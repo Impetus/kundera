@@ -72,6 +72,19 @@ public interface EntityReader
     Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
             PersistenceDelegator pd);
 
- 
+    /**
+     * Find by id.
+     * 
+     * @param primaryKey
+     *            the primary key
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param client
+     *            the client
+     * @return the enhance entity
+     */
+    EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client);
 
 }

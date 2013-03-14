@@ -125,18 +125,19 @@ public class RedisClientFactory extends GenericClientFactory
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java
-     * .lang.String)
-     */
+    
+    
+    
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected void populateDatastoreSpecificObjects(Client client)
     {
-        logger.info("instantiating client instance");
-        return new RedisClient(this, persistenceUnit);
+        //Nothing to set here that is database specific
+    }
+
+    @Override
+    protected Class<?> getDefaultClientImplementation()
+    {
+        return RedisClient.class;
     }
 
     /**

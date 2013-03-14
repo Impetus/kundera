@@ -25,12 +25,14 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
 /**
@@ -147,32 +149,95 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     @Override
     public Client getClientInstance()
     {
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        String clientClassName = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT);
+        
+        Class<?> clientClass = null;
+        if (!StringUtils.isEmpty(clientClassName))
+        {
+            try
+            {
+                clientClass = Class.forName(clientClassName);
+            }
+            catch (ClassNotFoundException e)
+            {
+                logger.warn(PersistenceProperties.KUNDERA_CLIENT
+                        + " property specified by user is not a valid Client class. Default implementation will be used");
+            }
+
+            if (!clientClass.isAssignableFrom(Client.class))
+            {
+                logger.warn(PersistenceProperties.KUNDERA_CLIENT
+                        + " property specified by user is not a valid Client class because it doesn't implement Client interface." +
+                        		" Default implementation will be used");
+                clientClass = null;
+            }
+        }
+
+        if (clientClass == null)
+        {
+            clientClass = getDefaultClientImplementation();
+        }
+            
         // if threadsafe recycle the same single instance; if not create a new
         // instance
-
         if (isThreadSafe())
         {
             logger.info("Returning threadsafe used client instance for persistence unit : " + persistenceUnit);
             if (client == null)
             {
-                client = instantiateClient(persistenceUnit);
+                constructClient(clientClass);
             }
         }
         else
         {
             logger.debug("Returning fresh client instance for persistence unit : " + persistenceUnit);
-            client = instantiateClient(persistenceUnit);
+            constructClient(clientClass);
         }
 
+        return client;
+    }
+    
+    private Client constructClient(Class<?> clientClass)
+    {
+        try
+        {
+            client = (Client)clientClass.newInstance();
+        }
+        catch (InstantiationException e)
+        {
+            logger.error("Unable to create instance of " + clientClass);
+            throw new ClientLoaderException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error("Unable to create instance of " + clientClass);
+            throw new ClientLoaderException(e);
+        }
+        
+        ((ClientBase) client).setExternalProperties(externalProperties);
+        ((ClientBase) client).setIndexManager(indexManager);
+        ((ClientBase) client).setPersistenceUnit(persistenceUnit);
+        ((ClientBase) client).setReader(reader);
+        ((ClientBase) client).setFactory(this);
+        
+        populateDatastoreSpecificObjects(client);
+        
         return client;
     }
 
     /**
      * Instantiate client.
-     * 
-     * @return the client
+     * @param client TODO
      */
-    protected abstract Client instantiateClient(String persistenceUnit);
+    protected abstract void populateDatastoreSpecificObjects(Client client);
+    
+    /**
+     * Default client implementation that client factories are required to provide
+     * This will be used in case user hasn't specified any client implementation
+     * @return
+     */
+    protected abstract Class<?> getDefaultClientImplementation();
 
     /**
      * Checks if is client thread safe.

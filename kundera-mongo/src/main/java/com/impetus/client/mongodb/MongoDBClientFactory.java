@@ -76,9 +76,9 @@ public class MongoDBClientFactory extends GenericClientFactory
     }
 
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected void populateDatastoreSpecificObjects(Client client)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties);
+        ((MongoDBClient) client).setMongoDb(mongoDB);           
     }
 
     /**
@@ -263,6 +263,14 @@ public class MongoDBClientFactory extends GenericClientFactory
             schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty);
         }
         return schemaManager;
+    }
+    
+    
+
+    @Override
+    protected Class<?> getDefaultClientImplementation()
+    {
+        return MongoDBClient.class;
     }
 
     /**

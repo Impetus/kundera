@@ -25,11 +25,13 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * Base class for all Client implementations providing common utility methods to
@@ -43,11 +45,18 @@ public abstract class ClientBase
 
     /** The index manager. */
     protected IndexManager indexManager;
+    
+    /** The reader. */
+    protected EntityReader reader;
 
     /** persistence unit */
     protected String persistenceUnit;
 
     protected boolean isUpdate;
+    
+    protected Map<String, Object> externalProperties;
+    
+    protected ClientFactory factory;
 
     /*
      * (non-Javadoc)
@@ -57,7 +66,62 @@ public abstract class ClientBase
     public final IndexManager getIndexManager()
     {
         return indexManager;
+    } 
+    
+
+    /**
+     * @param indexManager the indexManager to set
+     */
+    public void setIndexManager(IndexManager indexManager)
+    {
+        this.indexManager = indexManager;
     }
+
+
+    /**
+     * @param reader the reader to set
+     */
+    public void setReader(EntityReader reader)
+    {
+        this.reader = reader;
+    }
+
+
+    /**
+     * @param persistenceUnit the persistenceUnit to set
+     */
+    public void setPersistenceUnit(String persistenceUnit)
+    {
+        this.persistenceUnit = persistenceUnit;
+    }
+
+
+
+    /**
+     * @param externalProperties the externalProperties to set
+     */
+    public void setExternalProperties(Map<String, Object> externalProperties)
+    {
+        this.externalProperties = externalProperties;
+    }
+    
+    /**
+     * @return the factory
+     */
+    public ClientFactory getFactory()
+    {
+        return factory;
+    }
+
+
+    /**
+     * @param factory the factory to set
+     */
+    public void setFactory(ClientFactory factory)
+    {
+        this.factory = factory;
+    }
+
 
     /*
      * (non-Javadoc)

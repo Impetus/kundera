@@ -27,8 +27,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.CassandraClientFactory;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.schemamanager.entites.InvalidCounterColumnEntity;
 import com.impetus.client.schemamanager.entites.ValidCounterColumnFamily;
@@ -80,7 +80,7 @@ public class CassandraSchemaManagerValidateEntityTest
         getEntityManagerFactory();
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
-        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
+        CassandraSchemaManager manager = new CassandraSchemaManager(CassandraClientFactory.class.getName(), null);
         boolean valid = manager.validateEntity(ValidCounterColumnFamily.class);
         Assert.assertTrue(valid);
         valid = manager.validateEntity(InvalidCounterColumnEntity.class);

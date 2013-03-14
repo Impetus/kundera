@@ -105,10 +105,7 @@ public class PelopsClient extends CassandraClientBase implements Client, Batcher
     private PelopsDataHandler dataHandler;
 
     /** Handler for Inverted indexing */
-    private InvertedIndexHandler invertedIndexHandler;
-
-    /** The reader. */
-    private EntityReader reader;
+    private InvertedIndexHandler invertedIndexHandler;   
 
     /** The timestamp. */
     private long timestamp;

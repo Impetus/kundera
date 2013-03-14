@@ -54,7 +54,36 @@ public class AbstractEntityReader
     protected String luceneQueryFromJPAQuery;
 
     AssociationBuilder associationBuilder;
-   
+
+    /**
+     * Retrieves an entity from ID
+     * 
+     * @param primaryKey
+     * @param m
+     * @param client
+     * @return
+     */
+    protected EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        try
+        {
+            Object o = client.find(m.getEntityClazz(), primaryKey);
+
+            if (o == null)
+            {
+                // No entity found
+                return null;
+            }
+            else
+            {
+                return o instanceof EnhanceEntity ? (EnhanceEntity) o : new EnhanceEntity(o, getId(o, m), null);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new EntityReaderException(e);
+        }
+    }
 
     /**
      * Recursively fetches associated entities for a given <code>entity</code>
