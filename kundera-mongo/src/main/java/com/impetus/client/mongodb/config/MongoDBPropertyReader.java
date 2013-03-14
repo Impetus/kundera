@@ -120,7 +120,7 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
                     {
                         for (Table table : schema.getTables())
                         {
-                            if (table.getProperties() != null)
+                            if (table.getProperties() != null && tableName.equals(table.getName()))
                             {
                                 return Boolean.parseBoolean(table.getProperties().getProperty(MongoDBConstants.CAPPED));
                             }

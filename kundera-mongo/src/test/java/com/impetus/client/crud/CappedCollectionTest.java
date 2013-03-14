@@ -31,8 +31,6 @@ import org.junit.Test;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBConstants;
-import com.impetus.client.mongodb.MongoEntityReader;
-import com.impetus.client.mongodb.schemamanager.MongoDBEntitySimple;
 import com.impetus.kundera.client.Client;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
@@ -73,13 +71,14 @@ public class CappedCollectionTest
     public void tearDown() throws Exception
     {
         truncateMongo();
+        emf.close();
     }
     
     @Test
     public void testCappedCollection()
     {
         //Validate schema
-        DBCollection collection = db.getCollection("MongoDBEntitySimple");
+        DBCollection collection = db.getCollection("MongoDBCappedEntity");
         Assert.assertTrue(collection.isCapped());
         CommandResult stats = collection.getStats();       
         
@@ -99,7 +98,7 @@ public class CappedCollectionTest
         //Insert "Max" records successfully
         for(int i = 1; i <= max; i++)
         {
-            MongoDBEntitySimple entity = new MongoDBEntitySimple();
+            MongoDBCappedEntity entity = new MongoDBCappedEntity();
             entity.setPersonId(i + "");
             entity.setPersonName("Person_Name_" + i);
             entity.setAge((short)i);
@@ -108,23 +107,23 @@ public class CappedCollectionTest
         }
         
         //Insert one more record and check whether it replaces first one
-        MongoDBEntitySimple entity = new MongoDBEntitySimple();
+        MongoDBCappedEntity entity = new MongoDBCappedEntity();
         entity.setPersonId((max + 1) + "");
         entity.setPersonName("Person_Name_" + (max + 1));
         entity.setAge((short) (max + 1));        
         em.persist(entity);
         
         em.clear();
-        MongoDBEntitySimple firstRecord = em.find(MongoDBEntitySimple.class, "1");
+        MongoDBCappedEntity firstRecord = em.find(MongoDBCappedEntity.class, "1");
         Assert.assertNull(firstRecord);
         
-        MongoDBEntitySimple lastRecord = em.find(MongoDBEntitySimple.class, "" + (max + 1));
+        MongoDBCappedEntity lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
         Assert.assertNotNull(lastRecord);        
        
         //Deleting documents within a capped collection should simply ignore, as is done by native API
         em.remove(lastRecord);
         em.clear();
-        lastRecord = em.find(MongoDBEntitySimple.class, "" + (max + 1));
+        lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
         Assert.assertNotNull(lastRecord);     
                 
     }

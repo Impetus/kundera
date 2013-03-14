@@ -14,7 +14,7 @@
 					<name>KunderaMongoSchemaGeneration</name>
 					<tables>
 						<table>
-							<name>MongoDBEntitySimple</name>
+							<name>MongoDBCappedEntity</name>
 							<properties>
 								<property name="capped" value="true"></property>
 								<property name="size" value="10240"></property>
