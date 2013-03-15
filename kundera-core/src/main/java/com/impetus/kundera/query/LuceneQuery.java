@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -100,7 +101,7 @@ public class LuceneQuery extends QueryImpl implements Query
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-        Map<String, Object> searchFilter = client.getIndexManager().search(q, -1, maxResult);
+        Map<String, Object> searchFilter = ((ClientBase) client).getIndexManager().search(q, -1, maxResult);
 
         if (kunderaQuery.isAliasOnly())
         {

@@ -29,6 +29,7 @@ import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -235,7 +236,7 @@ public class AbstractEntityReader
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
-        Map<String, Object> results = client.getIndexManager().search(luceneQueryFromJPAQuery);
+        Map<String, Object> results = ((ClientBase)client).getIndexManager().search(luceneQueryFromJPAQuery);
         Set rSet = new HashSet(results.values());
         return rSet;
     }

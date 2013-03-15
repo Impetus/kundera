@@ -202,7 +202,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     {
         try
         {
-            client = (Client)clientClass.newInstance();
+            client = (Client) clientClass.newInstance();
         }
         catch (InstantiationException e)
         {

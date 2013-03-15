@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -233,7 +234,7 @@ public abstract class QueryImpl implements Query
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
+        Map<String, Object> searchFilter = ((ClientBase) client).getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
         if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
         {
@@ -424,7 +425,7 @@ public abstract class QueryImpl implements Query
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
-        Map<String, Object> results = client.getIndexManager().search(luceneQuery);
+        Map<String, Object> results = ((ClientBase) client).getIndexManager().search(luceneQuery);
         Set rSet = new HashSet (results.values());
         return rSet;
     }

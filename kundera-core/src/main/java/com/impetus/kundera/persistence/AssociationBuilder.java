@@ -33,10 +33,12 @@ import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.index.DocumentIndexer;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneQueryUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -163,7 +165,7 @@ public final class AssociationBuilder
         // Since ID is stored at other side of the relationship, we have to
         // query that table
 
-        if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
+        if (MetadataUtils.useSecondryIndex(childMetadata.getPersistenceUnit()))
         {
             // Pass this entity id as a value to be searched for
             associatedObjects = pd.find(childClass, entityId, relationName);
@@ -257,7 +259,7 @@ public final class AssociationBuilder
             for (Object associatedEntity : associatedEntities)
             {
 
-                associatedEntity = childClient.getReader().recursivelyFindEntities(associatedEntity, null,
+                associatedEntity = ((ClientBase) childClient).getReader().recursivelyFindEntities(associatedEntity, null,
                         childMetadata, pd);
             }
         }
@@ -426,9 +428,9 @@ public final class AssociationBuilder
         String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass().getCanonicalName()
                 .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
 
-        Map<String, Object> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
-                query) : new HashMap<String, Object>();
-        Set rsSet = results != null ? new HashSet (results.values()) : new HashSet();
+        IndexManager indexManager = ((ClientBase) childClient).getIndexManager();
+        Map<String, Object> results = indexManager != null ? indexManager.search(query) : new HashMap<String, Object>();
+        Set rsSet = results != null ? new HashSet(results.values()) : new HashSet();
 
         if (childClass.equals(entity.getClass()))
         {

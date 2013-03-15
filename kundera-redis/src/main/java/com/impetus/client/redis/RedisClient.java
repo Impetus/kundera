@@ -729,7 +729,7 @@ public class RedisClient extends ClientBase implements Client, Batcher, ClientPr
     }
 
     @Override
-    public Class<RedisQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return RedisQuery.class;
     }

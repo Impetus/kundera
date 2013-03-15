@@ -114,7 +114,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             // if it is not a parent.
             String sqlQuery = null;
-            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 sqlQuery = getSqlQueryFromJPA(m, relationNames, null);
             }
@@ -135,7 +135,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         else
         {
-            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 try
                 {

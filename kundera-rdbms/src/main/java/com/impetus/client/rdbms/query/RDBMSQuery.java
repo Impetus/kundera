@@ -98,7 +98,7 @@ public class RDBMSQuery extends QueryImpl implements Query
 
         try
         {
-            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 List<String> relations = new ArrayList<String>();
                 List r = ((HibernateClient) client).find(

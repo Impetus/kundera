@@ -251,7 +251,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client, TransactionB
     }
 
     @Override
-    public Class<Neo4JQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return Neo4JQuery.class;
     }

@@ -554,7 +554,7 @@ public class HibernateClient extends ClientBase implements Client
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<RDBMSQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return RDBMSQuery.class;
     }

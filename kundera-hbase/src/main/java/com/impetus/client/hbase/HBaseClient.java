@@ -565,7 +565,7 @@ public class HBaseClient extends ClientBase implements Client, Batcher, ClientPr
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<HBaseQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return HBaseQuery.class;
     }

@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
@@ -109,22 +107,6 @@ public interface Client
      */
     void close();
 
-    
-
-    /**
-     * Gets the persistence unit.
-     * 
-     * @return the persistence unit
-     */
-    String getPersistenceUnit();
-
-    /**
-     * Gets the index manager.
-     * 
-     * @return the index manager
-     */
-    IndexManager getIndexManager();
-
 
     void persistJoinTable(JoinTableData joinTableData);
 
@@ -197,13 +179,6 @@ public interface Client
      * @return the list list of entities.
      */
     List<Object> findByRelation(String colName, Object colValue, Class entityClazz);
-
-    /**
-     * Returns entity reader instance bind to specific client.
-     * 
-     * @return reader entity reader.
-     */
-    EntityReader getReader();
 
     /**
      * Returns query implementor class, required for initializing client

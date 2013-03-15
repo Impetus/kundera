@@ -507,7 +507,7 @@ public class MongoDBClient extends ClientBase implements Client, Batcher, Client
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<MongoDBQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return MongoDBQuery.class;
     }

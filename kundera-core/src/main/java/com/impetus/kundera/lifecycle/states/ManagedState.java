@@ -73,7 +73,7 @@ public class ManagedState extends NodeState
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass); 
         Object entityId = nodeStateContext.getEntityId();
         
-        EntityReader reader = client.getReader(); 
+        EntityReader reader = ((ClientBase) client).getReader(); 
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client); 
 
         if (ee != null && ee.getEntity() != null)
@@ -117,7 +117,7 @@ public class ManagedState extends NodeState
 
         Object nodeData = null; // Node data
 
-        EntityReader reader = client.getReader();
+        EntityReader reader = ((ClientBase) client).getReader();
         
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client); 
         

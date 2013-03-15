@@ -730,15 +730,9 @@ public class ThriftClient extends CassandraClientBase implements Client, Batcher
         }
 
     }
-
+ 
     @Override
-    public EntityReader getReader()
-    {
-        return reader;
-    }
-
-    @Override
-    public Class<CassQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return CassQuery.class;
     }

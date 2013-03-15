@@ -123,16 +123,22 @@ public abstract class ClientBase
     }
 
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
-     */
+
     public String getPersistenceUnit()
     {
         return persistenceUnit;
-    }
+    }   
     
+    
+    /**
+     * @return the reader
+     */
+    public EntityReader getReader()
+    {
+        return reader;
+    }
+
+
     public void deleteNode(Node node)
     {
         Object entity = node.getData();

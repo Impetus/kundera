@@ -391,19 +391,9 @@ public class PelopsClient extends CassandraClientBase implements Client, Batcher
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getReader()
-     */
-    @Override
-    public EntityReader getReader()
-    {
-        return reader;
-    }
 
     @Override
-    public Class<CassQuery> getDefaultQueryImplementor()
+    public Class<?> getDefaultQueryImplementor()
     {
         return CassQuery.class;
     }

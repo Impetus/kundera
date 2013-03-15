@@ -4,16 +4,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.query.LuceneQuery;
 
-public class CoreTestClient implements Client
-{
-
-    
+public class CoreTestClient extends ClientBase implements Client
+{    
     
     @Override
     public void persist(Object entity, Object id, List<RelationHolder> rlHolders)
@@ -56,20 +53,6 @@ public class CoreTestClient implements Client
     }
 
     @Override
-    public String getPersistenceUnit()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public IndexManager getIndexManager()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
         // TODO Auto-generated method stub
@@ -78,13 +61,6 @@ public class CoreTestClient implements Client
    
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public EntityReader getReader()
     {
         // TODO Auto-generated method stub
         return null;
