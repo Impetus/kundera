@@ -1274,7 +1274,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Cassandra.Client conn = null;
         Object pooledConnection = null;
 
-        Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+        /**
+         * Key -> Entity Class
+         * Value -> Map containing Row ID as Key and Mutation List as Value
+         */
+        Map<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>> batchMutationMap = 
+            new HashMap<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>>();
+
+        int recordsExecuted = 0;
 
         try
         {
@@ -1304,7 +1311,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     else
                     {
                         List<RelationHolder> relationHolders = getRelationHolders(node);
+                        Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
                         mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
+
+                        recordsExecuted += mutationMap.size();
+                        if (! batchMutationMap.containsKey(metadata.getEntityClazz()))
+                        {
+                            batchMutationMap.put(metadata.getEntityClazz(), mutationMap);
+                        }
+                        else
+                        {
+                            batchMutationMap.get(metadata.getEntityClazz()).putAll(mutationMap);
+                        }
+
                         indexNode(node, metadata);
                     }
                 }
@@ -1312,11 +1331,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             // Write Mutation map to database
 
-            if (!mutationMap.isEmpty())
+            if (!batchMutationMap.isEmpty())
             {
                 pooledConnection = getPooledConection(persistenceUnit);
                 conn = getConnection(pooledConnection);
-                conn.batch_mutate(mutationMap, consistencyLevel);
+
+                for (Class<?> entityClass : batchMutationMap.keySet())
+                {
+                    conn.batch_mutate(batchMutationMap.get(entityClass), consistencyLevel);
+                }
+
             }
         }
         catch (InvalidRequestException e)
@@ -1341,11 +1365,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         finally
         {
-            clear();            
+            clear();
             releaseConnection(pooledConnection);
         }
 
-        return mutationMap.size();
+        return recordsExecuted;
     }
 
     /**
@@ -1395,7 +1419,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         String columnFamily = entityMetadata.getTableName();
         // Create Insertion List
-        List<Mutation> insertion_list = new ArrayList<Mutation>();
+        List<Mutation> mutationList = new ArrayList<Mutation>();
 
         /*********** Handling for counter column family ************/
 
@@ -1410,7 +1434,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     Mutation mut = new Mutation();
                     mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_column(column));
-                    insertion_list.add(mut);
+                    mutationList.add(mut);
                 }
             }
 
@@ -1420,7 +1444,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     Mutation mut = new Mutation();
                     mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_super_column(sc));
-                    insertion_list.add(mut);
+                    mutationList.add(mut);
                 }
             }
         }
@@ -1437,7 +1461,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     Mutation mut = new Mutation();
                     mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
-                    insertion_list.add(mut);
+                    mutationList.add(mut);
                 }
             }
 
@@ -1448,19 +1472,19 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     Mutation mut = new Mutation();
                     mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
-                    insertion_list.add(mut);
+                    mutationList.add(mut);
                 }
             }
         }
 
         // Create Mutation Map
         Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
-        columnFamilyValues.put(columnFamily, insertion_list);
+        columnFamilyValues.put(columnFamily, mutationList);
         Bytes b = CassandraUtilities.toBytes(tf.getId(), entityMetadata.getIdAttribute().getBindableJavaType());
         mutationMap.put(b.getBytes(), columnFamilyValues);
 
         return mutationMap;
-    }
+    }    
 
     /**
      * Check on batch limit.
