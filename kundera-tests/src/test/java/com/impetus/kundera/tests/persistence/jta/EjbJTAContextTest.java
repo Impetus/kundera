@@ -67,6 +67,7 @@ public class EjbJTAContextTest
 
     private EntityManager em;
 
+    private Integer i=0;
     /**
      * @throws java.lang.Exception
      */
@@ -88,7 +89,7 @@ public class EjbJTAContextTest
         // initialContext.bind("inject", this);
         // initialContext.bind("java:comp/UserTransaction", new
         // KunderaJTAUserTransaction());
-
+        
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
 
@@ -106,6 +107,73 @@ public class EjbJTAContextTest
         loadData();
     }
 
+    @Test
+    public void testConcurrentPersist() throws NotSupportedException, SystemException, NamingException,
+            SecurityException, IllegalStateException, RollbackException, HeuristicMixedException,
+            HeuristicRollbackException
+    {
+
+        userTransaction = (UserTransaction) initialContext.lookup("java:comp/UserTransaction");
+
+        userTransaction.begin();
+
+        
+        for (i = 0; i < 100; i++)
+        {
+           Runnable r =  onExecute();
+           r.run();
+        }
+        
+        userTransaction.commit();
+
+        userTransaction.begin();
+        // As data is commited, hence it should return values with other session.
+        for (i = 0; i < 100; i++)
+        {
+        EntityManager em1 = emf.createEntityManager();
+        Assert.assertNotNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
+        }
+    }
+
+    private Runnable onExecute()
+    {
+        Runnable r = new Runnable()
+        {
+
+
+            @Override
+            public void run()
+            {
+                PersonnelOToOFKEntityJTA person = new PersonnelOToOFKEntityJTA();
+                person.setPersonId("1_p" + i);
+                person.setPersonName("crossdata-store");
+                HabitatOToOFKEntityJTA address = new HabitatOToOFKEntityJTA();
+                address.setAddressId("1_a" + i);
+                address.setStreet("my street");
+                person.setAddress(address);
+                try
+                {
+                    em.persist(person);
+                }
+                catch (Exception ex)
+                {
+                    HabitatOToOFKEntityJTA found = em.find(HabitatOToOFKEntityJTA.class, "1_a" + i);
+                    Assert.assertNull(found);
+                }
+                
+//                // As data is not commited, hence it should return null with other session.
+                EntityManager em1 = emf.createEntityManager();
+                Assert.assertNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
+            }
+
+        };
+        
+        return r;
+    }
+
+    
+    
+    
     @Test
     public void testPersist() throws NotSupportedException, SystemException, NamingException, SecurityException,
             IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException
@@ -140,6 +208,9 @@ public class EjbJTAContextTest
     @After
     public void tearDown() throws Exception
     {
+        initialContext.unbind("java:comp/UserTransaction");
+        initialContext.destroySubcontext("java:comp");
+
         CassandraCli.dropKeySpace("KunderaTests");
     }
 

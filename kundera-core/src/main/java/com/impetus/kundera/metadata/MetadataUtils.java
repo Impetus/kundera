@@ -33,6 +33,8 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.annotations.Index;
@@ -41,6 +43,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -91,7 +94,6 @@ public class MetadataUtils
             columnNameToFieldMap.put(((AbstractAttribute) column).getJPAColumnName(), (Field) column.getJavaMember());
         }
         return columnNameToFieldMap;
-
     }
 
     /**
@@ -103,19 +105,9 @@ public class MetadataUtils
      */
     public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
     {
-
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
         getEmbeddableType(m, null, superColumnNameToFieldMap);
-        // for (Map.Entry<String, EmbeddedColumn> entry :
-        // m.getEmbeddedColumnsMap().entrySet())
-        // {
-        // EmbeddedColumn scMetadata = entry.getValue();
-        // superColumnNameToFieldMap.put(scMetadata.getName(),
-        // scMetadata.getField());
-        //
-        // }
         return superColumnNameToFieldMap;
-
     }
 
     /**
@@ -571,7 +563,34 @@ public class MetadataUtils
                 return true;
             }
         }
-
         return false;
+    }
+
+    /**
+     * If client specific to parameterized persistence unit does not support
+     * transaction, return true else will return false.
+     * 
+     * @param persistenceUnit
+     * @return
+     */
+    public static boolean defaultTransactionSupported(final String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+
+        String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
+
+        if (txResource == null)
+        {
+            return true;
+        }
+        else if (txResource.isEmpty())
+        {
+            throw new IllegalArgumentException("Property " + PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE
+                    + " is blank");
+        }
+        else
+        {
+            return false;
+        }
     }
 }

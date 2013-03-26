@@ -26,92 +26,90 @@ import com.impetus.kundera.entity.PersonnelDTO;
  * 
  * @author amresh.singh
  */
-public class EntityManagerSessionTest extends TestCase
-{
+public class EntityManagerSessionTest extends TestCase {
 
-    /** The ems. */
-    EntityManagerSession ems;
+	/** The ems. */
+	EntityManagerSession ems;
 
-    /** The cache provider. */
-    CacheProvider cacheProvider;
+	/** The cache provider. */
+	CacheProvider cacheProvider;
 
-    /** The cache. */
-    Cache cache;
+	/** The cache. */
+	Cache cache;
 
-    /** The cache resource. */
-    String cacheResource = "/ehcache-test.xml";;
+	/** The cache resource. */
+	String cacheResource = "/ehcache-test.xml";;
 
-    /** The cache provider class name. */
-    String cacheProviderClassName = "com.impetus.kundera.cache.ehcache.EhCacheProvider";
+	/** The cache provider class name. */
+	String cacheProviderClassName = "com.impetus.kundera.cache.ehcache.EhCacheProvider";
 
-    /** The person1. */
-    PersonnelDTO person1;
+	/** The person1. */
+	PersonnelDTO person1;
 
-    /** The person2. */
-    PersonnelDTO person2;
+	/** The person2. */
+	PersonnelDTO person2;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception
-    {
-        super.setUp();
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
 
-        Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
-        cacheProvider = cacheProviderClass.newInstance();
-        cacheProvider.init(cacheResource);
+		Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class
+				.forName(cacheProviderClassName);
+		cacheProvider = cacheProviderClass.newInstance();
+		cacheProvider.init(cacheResource);
 
-        cache = (Cache) cacheProvider.createCache("Kundera");
-        ems = new EntityManagerSession(cache);
+		cache = (Cache) cacheProvider.createCache("Kundera");
+		ems = new EntityManagerSession(cache);
 
-        person1 = new PersonnelDTO("1", "Amresh", "Singh");
-        person2 = new PersonnelDTO("2", "Vivek", "Mishra");
-    }
+		person1 = new PersonnelDTO("1", "Amresh", "Singh");
+		person2 = new PersonnelDTO("2", "Vivek", "Mishra");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see junit.framework.TestCase#tearDown()
-     */
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-        ems.clear();
-        cacheProvider.shutdown();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		ems.clear();
+		cacheProvider.shutdown();
+		cache = null;
+	}
 
-    /**
-     * Test.
-     */
-    public void test()
-    {
-        assertNotNull(ems);
+	/**
+	 * Test.
+	 */
+	public void test() {
+		assertNotNull(ems);
 
-        // Store objects into session
-        ems.store(person1.getPersonId(), person1);
-        assertEquals(1, ems.getL2Cache().size());
-        ems.store(person2.getPersonId(), person2);
-        assertEquals(2, ems.getL2Cache().size());
+		// Store objects into session
+		ems.store(person1.getPersonId(), person1);
+		assertEquals(1, ems.getL2Cache().size());
+		ems.store(person2.getPersonId(), person2);
+		assertEquals(2, ems.getL2Cache().size());
 
-        // Lookup object from session
-        PersonnelDTO p1 = ems.lookup(PersonnelDTO.class, person1.getPersonId());
-        assertNotNull(p1);
-        assertEquals(person1.getPersonId(), p1.getPersonId());
-        assertEquals(person1.getFirstName(), p1.getFirstName());
-        assertEquals(person1.getLastName(), p1.getLastName());
+		// Lookup object from session
+		PersonnelDTO p1 = ems.lookup(PersonnelDTO.class, person1.getPersonId());
+		assertNotNull(p1);
+		assertEquals(person1.getPersonId(), p1.getPersonId());
+		assertEquals(person1.getFirstName(), p1.getFirstName());
+		assertEquals(person1.getLastName(), p1.getLastName());
 
-        // Remove object from session
-        ems.remove(PersonnelDTO.class, person1.getPersonId());
-        assertNotNull(ems);
-        assertEquals(1, ems.getL2Cache().size());
+		// Remove object from session
+		ems.remove(PersonnelDTO.class, person1.getPersonId());
+		assertNotNull(ems);
+		assertEquals(1, ems.getL2Cache().size());
 
-        // Clear session
-        ems.clear();
-        assertNotNull(ems);
-        assertEquals(0, ems.getL2Cache().size());
+		// Clear session
+		ems.clear();
+		assertNotNull(ems);
+		assertEquals(0, ems.getL2Cache().size());
 
-    }
+	}
 
 }

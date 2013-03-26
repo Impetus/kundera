@@ -550,7 +550,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         PersonLuceneCassandra o = new PersonLuceneCassandra();
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
-        o.setAge(age);
+        o.setAge(age+"");
         o.setDay(com.impetus.client.crud.PersonLuceneCassandra.Day.MONDAY);
         return o;
     }

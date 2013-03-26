@@ -38,7 +38,7 @@ public class PersistenceValidator
      *            Instance of entity object
      * @return True if entity object is valid, false otherwise
      */
-    public boolean isValidEntityObject(Object entity)
+    boolean isValidEntityObject(Object entity)
     {
         if (entity == null)
         {
@@ -47,12 +47,6 @@ public class PersistenceValidator
         }
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        if (metadata == null)
-        {
-            log.error(entity.getClass()
-                    + " is not a JPA managed object as we couldn't find metadata for it. This object can't be persisted");
-            return false;
-        }
 
         Object id = PropertyAccessorHelper.getId(entity, metadata);
         if (id == null)
@@ -60,6 +54,7 @@ public class PersistenceValidator
             log.error("Entity to be persisted can't have Primary key set to null.");
             return false;
         }
+
         return true;
     }
 

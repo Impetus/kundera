@@ -51,10 +51,11 @@ public class IMDBPolyglotTest extends TwinAssociation
     @BeforeClass
     public static void init() throws Exception
     {
-
+        buildPersistenceUnitsList();
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(Actor.class);
-        clazzz.add(Movie.class);
+        clazzz.add(Movie.class);       
+        
         init(clazzz, ALL_PUs_UNDER_TEST);
     }
 
@@ -76,12 +77,6 @@ public class IMDBPolyglotTest extends TwinAssociation
         tryOperation(ALL_PUs_UNDER_TEST);
     }
     
-    @Test
-    public void dummyTest()
-    {
-        
-    }
-
     @Override
     protected void insert()
     {
@@ -127,6 +122,91 @@ public class IMDBPolyglotTest extends TwinAssociation
         
         Assert.assertNull(actor1Deleted);
         Assert.assertNull(actor2Deleted);
+    }
+    
+    
+    @Override
+    public void findAllActors()
+    {
+        
+        List<Actor> actors = dao.findAllActors();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(2, actors.size());
+    }
+
+    @Override
+    public void findActorByID()
+    {        
+        List<Actor> actors = dao.findActorByID();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());
+        assertActor2(actors.get(0));
+    }
+
+    @Override
+    public void findActorByName()
+    {        
+        List<Actor> actors = dao.findActorByName();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());
+        assertActor1(actors.get(0));
+    }
+
+    @Override
+    public void findActorByIDAndNamePositive()
+    {        
+        List<Actor> actors = dao.findActorByIDAndNamePositive();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());
+        assertActor1(actors.get(0));
+    }
+    
+    @Override
+    public void findActorByIDAndNameNegative()
+    {        
+        List<Actor> actors = dao.findActorByIDAndNameNegative();        
+        Assert.assertTrue(actors == null || actors.isEmpty());
+    }
+
+    @Override
+    public void findActorWithMatchingName()
+    {        
+        List<Actor> actors = dao.findActorWithMatchingName();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(1, actors.size());
+        assertActor2(actors.get(0));
+    }
+
+    @Override
+    public void findActorWithinGivenIdRange()
+    {        
+        List<Actor> actors = dao.findActorWithinGivenIdRange();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(2, actors.size());
+        // assertActor2(actors.get(0));
+    }
+
+
+    @Override
+    public void findSelectedFields()
+    {        
+        List<Actor> actors = dao.findSelectedFields();
+        Assert.assertNotNull(actors);
+        Assert.assertFalse(actors.isEmpty());
+        Assert.assertEquals(2, actors.size());
+
+        for (Actor actor : actors)
+        {
+            Assert.assertNotNull(actor);
+            Assert.assertNotNull(actor.getId());
+            Assert.assertNotNull(actor.getName());
+        }
     }
 
     /**
@@ -302,4 +382,32 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
     }  
+    
+    /**
+     * @param actor2
+     */
+    protected void assertActor2(Actor actor2)
+    {
+        Assert.assertNotNull(actor2);
+        Assert.assertEquals(2, actor2.getId());
+        Assert.assertEquals("Emmanuelle Béart", actor2.getName());
+        Map<Role, Movie> movies2 = actor2.getMovies();
+        Assert.assertFalse(movies2 == null || movies2.isEmpty());
+        Assert.assertEquals(2, movies2.size());
+       
+    }
+
+    /**
+     * @param actor1
+     */
+    protected void assertActor1(Actor actor1)
+    {
+        Assert.assertNotNull(actor1);
+        Assert.assertEquals(1, actor1.getId());
+        Assert.assertEquals("Tom Cruise", actor1.getName());
+        Map<Role, Movie> movies1 = actor1.getMovies();
+        Assert.assertFalse(movies1 == null || movies1.isEmpty());
+        Assert.assertEquals(2, movies1.size());
+        
+    }
  }

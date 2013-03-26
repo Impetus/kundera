@@ -117,6 +117,10 @@ public class ManagedState extends NodeState
         Object nodeData = null; // Node data
 
         EntityReader reader = client.getReader();
+        if (reader == null)
+        {
+            return;
+        }
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
 
         // Recursively retrieve relationship entities (if there are any)
@@ -129,21 +133,7 @@ public class ManagedState extends NodeState
             {
                 // There is no relation (not even via Join Table), Construct
                 // Node out of this enhance entity,
-                // put into Persistence Cache, and just return.
-
                 nodeData = entity;
-                nodeStateContext.setData(nodeData);
-                nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
-                nodeStateContext.setDirty(false); // This node is fresh and
-                                                  // hence NOT dirty
-
-                // One time set as required for rollback.
-                // Object original = ObjectUtils.deepCopy((Node)
-                // nodeStateContext);
-                Object original = ((Node) nodeStateContext).clone();
-                ((Node) nodeStateContext).setOriginalNode((Node) original);
-
-                return;
             }
 
             else

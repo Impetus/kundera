@@ -44,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
@@ -67,13 +66,13 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     private EntityManagerFactory factory;
 
     /** The closed. */
-    private boolean closed = false;
+    private boolean closed;
 
     /** Flush mode for this EM, default is AUTO. */
-    FlushModeType flushMode = FlushModeType.AUTO;
+    private FlushModeType flushMode = FlushModeType.AUTO;
 
-    /** The session. */
-    private EntityManagerSession session;
+    // /** The session. */
+    // private EntityManagerSession session;
 
     /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
@@ -98,79 +97,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      * 
      * @param factory
      *            the factory
+     * @param properties
+     *            the properties
      */
-    public EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
+    EntityManagerImpl(EntityManagerFactory factory, Map properties, PersistenceUnitTransactionType transactionType,
             PersistenceContextType persistenceContextType)
     {
-        this.factory = factory;
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        }
-        session = new EntityManagerSession((Cache) factory.getCache());
-        persistenceCache = new PersistenceCache();
-        persistenceCache.setPersistenceContextType(persistenceContextType);
+        this(factory, transactionType, persistenceContextType);
+        this.properties = properties;
 
-        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
-
-        for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
-        {
-            persistenceDelegator.loadClient(pu);
-        }
-        this.persistenceContextType = persistenceContextType;
-        this.transactionType = transactionType;
-
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
-        }
-    }
-
-    private void onLookUp(PersistenceUnitTransactionType transactionType)
-    {
-        if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
-        {
-            if (entityTransaction == null)
-            {
-                this.entityTransaction = new KunderaEntityTransaction(this);
-            }
-            Context ctx;
-            try
-            {
-
-                ctx = new InitialContext();
-
-                utx = (KunderaJTAUserTransaction) ctx.lookup("java:comp/UserTransaction");
-
-                if (utx == null)
-                {
-                    throw new KunderaException(
-                            "Lookup for UserTransaction returning null for :{java:comp/UserTransaction}");
-                }
-                if (!(utx instanceof KunderaJTAUserTransaction))
-                {
-
-                    throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
-                            + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
-
-                }
-
-                if (((KunderaJTAUserTransaction) utx).isTransactionInProgress())
-                {
-                    entityTransaction.begin();
-                }
-
-                this.setFlushMode(FlushModeType.COMMIT);
-                ((KunderaJTAUserTransaction) utx).setImplementor(this);
-
-            }
-            catch (NamingException e)
-            {
-                logger.error("Error during initialization of entity manager, Caused by:" + e.getMessage());
-                throw new KunderaException(e);
-            }
-
-        }
+        getPersistenceDelegator().populateClientProperties(this.properties);
     }
 
     /**
@@ -178,16 +114,32 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      * 
      * @param factory
      *            the factory
-     * @param properties
-     *            the properties
      */
-    public EntityManagerImpl(EntityManagerFactory factory, Map properties,
-            PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
+    EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
+            PersistenceContextType persistenceContextType)
     {
-        this(factory, transactionType, persistenceContextType);
-        this.properties = properties;
+        this.factory = factory;
+        this.persistenceContextType = persistenceContextType;
+        this.transactionType = transactionType;
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        }
+        // session = new EntityManagerSession((Cache) factory.getCache());
+        this.persistenceCache = new PersistenceCache();
+        this.persistenceCache.setPersistenceContextType(persistenceContextType);
 
-        getPersistenceDelegator().populateClientProperties(this.properties);
+        this.persistenceDelegator = new PersistenceDelegator(this.persistenceCache);
+
+        for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
+        {
+            this.persistenceDelegator.loadClient(pu);
+        }
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        }
     }
 
     /**
@@ -211,7 +163,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
         checkTransactionNeeded();
-
         try
         {
             getPersistenceDelegator().persist(e);
@@ -242,13 +193,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
         checkTransactionNeeded();
-
-        if (e == null)
-        {
-            doRollback();
-            throw new IllegalArgumentException("Entity to be merged must not be null.");
-        }
-
         try
         {
             return getPersistenceDelegator().merge(e);
@@ -277,13 +221,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
         checkTransactionNeeded();
-
-        // TODO Check for validity also as per JPA
-        if (e == null)
-        {
-            throw new IllegalArgumentException("Entity to be removed must not be null.");
-        }
-
         try
         {
             getPersistenceDelegator().remove(e);
@@ -317,12 +254,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
         checkTransactionNeeded();
-        // TODO Check for validity also as per JPA
-        if (primaryKey == null)
-        {
-            throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
-        }
-
         return getPersistenceDelegator().findById(entityClass, primaryKey);
     }
 
@@ -351,11 +282,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         checkClosed();
         checkTransactionNeeded();
 
-        if (primaryKey == null)
-        {
-            throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
-        }
-
         // Store current properties in a variable for post-find reset
         Map<String, Object> currentProperties = getProperties();
 
@@ -377,6 +303,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
     {
+        checkClosed();
         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
     }
 
@@ -389,6 +316,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
     {
+        checkClosed();
         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
     }
 
@@ -401,12 +329,12 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public final void clear()
     {
         checkClosed();
-        session.clear();
+        // session.clear();
 
         // TODO Do we need a client and persistenceDelegator close here?
-        if (!PersistenceUnitTransactionType.JTA.equals(transactionType))
+        if (!PersistenceUnitTransactionType.JTA.equals(this.transactionType))
         {
-            persistenceDelegator.clear();
+            getPersistenceDelegator().clear();
         }
     }
 
@@ -414,15 +342,15 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public final void close()
     {
         checkClosed();
-        session.clear();
-        session = null;
-        persistenceDelegator.close();
-
-        if (!PersistenceUnitTransactionType.JTA.equals(transactionType))
+        // session.clear();
+        // session = null;
+        if (!PersistenceUnitTransactionType.JTA.equals(this.transactionType))
         {
-            persistenceDelegator.clear();
+            getPersistenceDelegator().clear();
         }
-        closed = true;
+        getPersistenceDelegator().close();
+
+        this.closed = true;
     }
 
     /**
@@ -451,15 +379,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Query createQuery(String query)
     {
+        checkClosed();
         checkTransactionNeeded();
-        return persistenceDelegator.createQuery(query);
+        return getPersistenceDelegator().createQuery(query);
     }
 
     @Override
     public final void flush()
     {
         checkClosed();
-        persistenceDelegator.doFlush();
+        getPersistenceDelegator().doFlush();
     }
 
     /*
@@ -470,7 +399,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Object getDelegate()
     {
-        return persistenceDelegator.getDelegate();
+        checkClosed();
+        return getPersistenceDelegator().getDelegate();
     }
 
     /*
@@ -481,8 +411,9 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Query createNamedQuery(String name)
     {
+        checkClosed();
         checkTransactionNeeded();
-        return persistenceDelegator.createQuery(name);
+        return getPersistenceDelegator().createQuery(name);
     }
 
     /*
@@ -493,6 +424,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Query createNativeQuery(String sqlString)
     {
+        checkClosed();
         throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead.");
     }
 
@@ -505,6 +437,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Query createNativeQuery(String sqlString, Class resultClass)
     {
+        checkClosed();
         checkTransactionNeeded();
         // Add to meta data first.
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -514,7 +447,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
         }
 
-        return persistenceDelegator.createQuery(sqlString);
+        return getPersistenceDelegator().createQuery(sqlString);
 
     }
 
@@ -527,6 +460,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final Query createNativeQuery(String sqlString, String resultSetMapping)
     {
+        checkClosed();
         throw new NotImplementedException("ResultSetMapping currently not supported by Kundera. "
                 + "Please use createNativeQuery(String sqlString, Class resultClass) instead.");
     }
@@ -540,12 +474,14 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final <T> T getReference(Class<T> entityClass, Object primaryKey)
     {
+        checkClosed();
         throw new NotImplementedException("getReference currently not supported by Kundera");
     }
 
     @Override
     public final FlushModeType getFlushMode()
     {
+        checkClosed();
         return this.flushMode;
     }
 
@@ -557,6 +493,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final EntityTransaction getTransaction()
     {
+        checkClosed();
         if (this.transactionType == PersistenceUnitTransactionType.JTA)
         {
             throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
@@ -566,7 +503,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         {
             this.entityTransaction = new KunderaEntityTransaction(this);
         }
-
         return this.entityTransaction;
     }
 
@@ -578,7 +514,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final void joinTransaction()
     {
-        if (utx != null)
+        checkClosed();
+        if (this.utx != null)
         {
             return;
         }
@@ -586,7 +523,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         {
             throw new TransactionRequiredException("No transaction in progress");
         }
-
     }
 
     /*
@@ -598,6 +534,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final void lock(Object entity, LockModeType lockMode)
     {
+        checkClosed();
         throw new NotImplementedException("lock currently not supported by Kundera");
     }
 
@@ -622,11 +559,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         checkClosed();
 
         checkTransactionNeeded();
-
-        if (!getPersistenceDelegator().contains(entity))
-        {
-            throw new IllegalArgumentException("This is not a valid or managed entity, can't be refreshed");
-        }
 
         getPersistenceDelegator().refresh(entity);
     }
@@ -676,6 +608,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
+        checkClosed();
         throw new NotImplementedException("lock currently not supported by Kundera");
     }
 
@@ -688,6 +621,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType)
     {
+        checkClosed();
         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
 
     }
@@ -701,6 +635,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
+        checkClosed();
         throw new NotImplementedException("LockModeType currently not supported by Kundera");
     }
 
@@ -721,6 +656,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
 
+        if (entity == null)
+        {
+            throw new IllegalArgumentException("Entity is null, can't detach it");
+        }
         getPersistenceDelegator().detach(entity);
     }
 
@@ -732,6 +671,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public LockModeType getLockMode(Object paramObject)
     {
+        checkClosed();
         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
     }
 
@@ -750,6 +690,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public void setProperty(String paramString, Object paramObject)
     {
+        checkClosed();
         if (getProperties() == null)
         {
             this.properties = new HashMap<String, Object>();
@@ -769,6 +710,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
     {
+        checkClosed();
         throw new NotImplementedException("Criteria Query currently not supported by Kundera");
     }
 
@@ -806,14 +748,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public <T> T unwrap(Class<T> paramClass)
     {
+        checkClosed();
         throw new NotImplementedException("unwrap currently not supported by Kundera");
     }
 
     @Override
     public final void setFlushMode(FlushModeType flushMode)
     {
+        checkClosed();
         this.flushMode = flushMode;
-        persistenceDelegator.setFlushMode(flushMode);
+        getPersistenceDelegator().setFlushMode(flushMode);
     }
 
     /**
@@ -826,7 +770,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public Map<String, Object> getProperties()
     {
-        return properties;
+        checkClosed();
+        return this.properties;
     }
 
     /*
@@ -837,7 +782,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public EntityManagerFactory getEntityManagerFactory()
     {
-        return factory;
+        checkClosed();
+        return this.factory;
     }
 
     /*
@@ -848,7 +794,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public CriteriaBuilder getCriteriaBuilder()
     {
-        return factory.getCriteriaBuilder();
+        checkClosed();
+        return getEntityManagerFactory().getCriteriaBuilder();
     }
 
     /*
@@ -859,7 +806,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public Metamodel getMetamodel()
     {
-        return factory.getMetamodel();
+        checkClosed();
+        return getEntityManagerFactory().getMetamodel();
     }
 
     /*
@@ -888,12 +836,59 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         onLookUp(transactionType);
 
-        if ((this.persistenceContextType != PersistenceContextType.TRANSACTION)
-                || (persistenceDelegator.isTransactionInProgress()))
+        if ((getPersistenceContextType() != PersistenceContextType.TRANSACTION)
+                || (getPersistenceDelegator().isTransactionInProgress()))
+        {
             return;
-
+        }
         throw new TransactionRequiredException(
                 "no transaction is in progress for a TRANSACTION type persistence context");
+    }
+
+    private void onLookUp(PersistenceUnitTransactionType transactionType)
+    {
+        //TODO transaction should not be null;
+        if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
+        {
+            if (this.entityTransaction == null)
+            {
+                this.entityTransaction = new KunderaEntityTransaction(this);
+            }
+            Context ctx;
+            try
+            {
+                ctx = new InitialContext();
+
+                this.utx = (UserTransaction) ctx.lookup("java:comp/UserTransaction");
+
+                if (this.utx == null)
+                {
+                    throw new KunderaException(
+                            "Lookup for UserTransaction returning null for :{java:comp/UserTransaction}");
+                }
+                //TODO what is need to check?
+                if (!(this.utx instanceof KunderaJTAUserTransaction))
+                {
+                    throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
+                            + "] for :{java:comp/UserTransaction} lookup" + this.utx.getClass());
+                }
+
+                if (!this.entityTransaction.isActive())
+                {
+                    this.entityTransaction.begin();
+                    this.setFlushMode(FlushModeType.COMMIT);
+                    ((KunderaJTAUserTransaction) this.utx).setImplementor(this);
+                }
+
+
+            }
+            catch (NamingException e)
+            {
+                logger.error("Error during initialization of entity manager, Caused by:", e);
+                throw new KunderaException(e);
+            }
+
+        }
     }
 
     /**
@@ -903,18 +898,18 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      */
     private String getPersistenceUnit()
     {
-        return (String) this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
+        return (String) getEntityManagerFactory().getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
-    /**
-     * Gets the session.
-     * 
-     * @return the session
-     */
-    private EntityManagerSession getSession()
-    {
-        return session;
-    }
+    // /**
+    // * Gets the session.
+    // *
+    // * @return the session
+    // */
+    // private EntityManagerSession getSession()
+    // {
+    // return session;
+    // }
 
     /**
      * Gets the persistence delegator.
@@ -923,15 +918,16 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      */
     PersistenceDelegator getPersistenceDelegator()
     {
-        return persistenceDelegator;
+        checkClosed();
+        return this.persistenceDelegator;
     }
 
     /**
      * @return the persistenceContextType
      */
-    public PersistenceContextType getPersistenceContextType()
+    private PersistenceContextType getPersistenceContextType()
     {
-        return persistenceContextType;
+        return this.persistenceContextType;
     }
 
     /*
@@ -961,7 +957,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         else
         {
-            this.persistenceDelegator.rollback();
+            getPersistenceDelegator().rollback();
         }
     }
 
@@ -987,5 +983,4 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         throw new IllegalArgumentException("Mismatch in expected return type. Expected:" + paramClass
                 + " But actual class is:" + ((QueryImpl) q).getKunderaQuery().getEntityClass());
     }
-
 }

@@ -14,11 +14,11 @@
 					<name>KunderaMongoSchemaGeneration</name>
 					<tables>
 						<table>
-							<name>MongoDBEntitySimple</name>
+							<name>MongoDBCappedEntity</name>
 							<properties>
 								<property name="capped" value="true"></property>
 								<property name="size" value="10240"></property>
-								<property name="max" value="1000"></property>
+								<property name="max" value="10"></property>
 							</properties>
 						</table>
 					</tables>

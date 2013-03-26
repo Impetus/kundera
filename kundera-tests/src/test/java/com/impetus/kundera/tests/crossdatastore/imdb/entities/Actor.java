@@ -55,7 +55,7 @@ public class Actor
         this.name = actorName;
     }
     
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)     
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)     
     @MapKeyJoinColumn(name="ACTS_IN")
     private Map<Role, Movie> movies;
     

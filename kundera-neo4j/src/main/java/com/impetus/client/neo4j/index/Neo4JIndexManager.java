@@ -114,10 +114,10 @@ public class Neo4JIndexManager
         }
     }
 
-    public void indexNodeUsingBatchIndexer(BatchInserterIndexProvider indexProvider,
-            EntityMetadata entityMetadata, long nodeId, Map<String, Object> nodeProperties, boolean nodeAutoIndexingEnabled)
+    public void indexNodeUsingBatchIndexer(BatchInserterIndexProvider indexProvider, EntityMetadata entityMetadata,
+            long nodeId, Map<String, Object> nodeProperties, boolean nodeAutoIndexingEnabled)
     {
-        BatchInserterIndex nodeIndex = null;       
+        BatchInserterIndex nodeIndex = null;
 
         if (!nodeAutoIndexingEnabled && entityMetadata.isIndexable())
         {
@@ -130,30 +130,29 @@ public class Neo4JIndexManager
         }
 
         if (nodeIndex != null)
-            nodeIndex.add(nodeId, nodeProperties);        
+            nodeIndex.add(nodeId, nodeProperties);
     }
-    
-    
+
     public void indexRelationshipUsingBatchIndexer(BatchInserterIndexProvider indexProvider,
-            EntityMetadata entityMetadata, long relationshipId, Map<String, Object> relationshipProperties, boolean relationshipAutoIndexingEnabled)
-    {       
+            EntityMetadata entityMetadata, long relationshipId, Map<String, Object> relationshipProperties,
+            boolean relationshipAutoIndexingEnabled)
+    {
         BatchInserterIndex relationshipIndex = null;
 
         if (!relationshipAutoIndexingEnabled && entityMetadata.isIndexable())
         {
-            relationshipIndex = indexProvider.relationshipIndex(entityMetadata.getIndexName(), MapUtil.stringMap( "type", "exact"));
+            relationshipIndex = indexProvider.relationshipIndex(entityMetadata.getIndexName(),
+                    MapUtil.stringMap("type", "exact"));
         }
         else
         {
-            relationshipIndex = indexProvider.relationshipIndex("relationship_auto_index", MapUtil.stringMap( "type", "exact"));            
+            relationshipIndex = indexProvider.relationshipIndex("relationship_auto_index",
+                    MapUtil.stringMap("type", "exact"));
         }
 
         if (relationshipIndex != null)
             relationshipIndex.add(relationshipId, relationshipProperties);
     }
-    
-    
-    
 
     /**
      * If node auto-indexing is disabled, Update index for this node manually
@@ -252,7 +251,7 @@ public class Neo4JIndexManager
                 entityMetadata.getPersistenceUnit());
 
         // ID attribute has to be indexed necessarily
-        String idColumnName = ((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         nodeIndex.add(node, idColumnName, node.getProperty(idColumnName));
 
         // Index all other fields, for whom indexing is enabled
@@ -262,7 +261,7 @@ public class Neo4JIndexManager
             if (!attribute.isCollection() && !attribute.isAssociation()
                     && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
             {
-                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 nodeIndex.add(node, columnName, node.getProperty(columnName));
             }
         }
@@ -283,7 +282,7 @@ public class Neo4JIndexManager
                 entityMetadata.getPersistenceUnit());
 
         // ID attribute has to be indexed first
-        String idColumnName = ((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         relationshipIndex.add(relationship, idColumnName, relationship.getProperty(idColumnName));
 
         // Index all other fields, for whom indexing is enabled
@@ -293,7 +292,7 @@ public class Neo4JIndexManager
             if (!attribute.isCollection() && !attribute.isAssociation()
                     && entityMetadata.getIndexProperties().keySet().contains(field.getName()))
             {
-                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 relationshipIndex.add(relationship, columnName, relationship.getProperty(columnName));
             }
         }

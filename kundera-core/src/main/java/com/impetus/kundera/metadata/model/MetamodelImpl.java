@@ -42,7 +42,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 @StaticMetamodel(value = MetamodelImpl.class)
 public class MetamodelImpl implements Metamodel
 {
-
     /** The entity metadata map. */
     Map<Class<?>, EntityMetadata> entityMetadataMap;
 
@@ -57,6 +56,8 @@ public class MetamodelImpl implements Metamodel
 
     /** The mapped super class types. */
     private Map<Class<?>, ManagedType<?>> mappedSuperClassTypes;
+
+    private Map<String, IdDiscriptor> keyValues;
 
     /*
      * (non-Javadoc)
@@ -397,5 +398,43 @@ public class MetamodelImpl implements Metamodel
 
         }
         return embeddableAttibutes;
+    }
+
+    /**
+     * @return the keyValues
+     */
+    public IdDiscriptor getKeyValue(String entityName)
+    {
+        if (keyValues != null)
+        {
+            return this.keyValues.get(entityName);
+        }
+        return null;
+    }
+
+//    /**
+//     * @param keyValues
+//     *            the keyValues to set
+//     */
+//    public void addKeyValue(String entityName, KeyDiscriptor keyValue)
+//    {
+//        if (keyValues == null)
+//        {
+//            keyValues = new HashMap<String, KeyDiscriptor>();
+//        }
+//        this.keyValues.put(entityName, keyValue);
+//    }
+
+    /**
+     * @param keyValues
+     *            the keyValues to set
+     */
+    public void addKeyValues(Map<String, IdDiscriptor> keyDiscriptors)
+    {
+        if (keyValues == null)
+        {
+            keyValues = new HashMap<String, IdDiscriptor>();
+        }
+        this.keyValues.putAll(keyDiscriptors);
     }
 }

@@ -94,15 +94,12 @@ final class MongoDBDataHandler
             // Populate primary key column
             Object rowKey = document.get("_id");
             Class<?> rowKeyValueClass = rowKey.getClass();
-
-            Class<?> idClass = m.getIdAttribute().getJavaType();
-
-            Map<String, Object> relationValue = null;
-
-            rowKey = MongoDBUtils.populateValue(rowKey, idClass);
-
+            Class<?> idClass = null;
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
+            Map<String, Object> relationValue = null;
+            idClass = m.getIdAttribute().getJavaType();
+            rowKey = MongoDBUtils.populateValue(rowKey, idClass);
 
             if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
             {
@@ -121,6 +118,7 @@ final class MongoDBDataHandler
             {
                 rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
                 PropertyAccessorHelper.setId(entity, m, rowKey);
+
             }
 
             // Populate entity columns
@@ -575,22 +573,25 @@ final class MongoDBDataHandler
     {
 
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-
-        if (column.isCollection())
+        if(embeddedObject != null)
         {
-            Collection embeddedCollection = (Collection) embeddedObject;
-            // means it is case of element collection
-            dbObj.put(
-                    ((AbstractAttribute) column).getJPAColumnName(),
-                    DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
-                            embeddableType.getAttributes()));
-        }
-        else
-        {
-            dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
-                    DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
-        }
+            if (column.isCollection())
+            {
+                Collection embeddedCollection = (Collection) embeddedObject;
+                // means it is case of element collection
 
+                dbObj.put(
+                        ((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
+                                embeddableType.getAttributes()));
+            }
+            else
+            {
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
+            }
+        }        
+        
         return dbObj;
     }
 

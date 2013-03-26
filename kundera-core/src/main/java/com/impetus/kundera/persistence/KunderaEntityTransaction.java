@@ -39,7 +39,7 @@ public class KunderaEntityTransaction implements EntityTransaction
         BEGIN, COMMIT, ROLLBACK, PREPARE;
     }
 
-    public KunderaEntityTransaction(EntityManager entityManager)
+    KunderaEntityTransaction(EntityManager entityManager)
     {
         this.entityManager = entityManager;
     }
@@ -52,7 +52,6 @@ public class KunderaEntityTransaction implements EntityTransaction
     @Override
     public void begin()
     {
-
         if (isActive())
         {
             throw new IllegalStateException("Transaction is already active");
@@ -143,5 +142,4 @@ public class KunderaEntityTransaction implements EntityTransaction
     {
         this.rollbackOnly =true;
     }
-
 }

@@ -1107,6 +1107,11 @@ public abstract class CassandraDataHandlerBase
                 Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),
                         (byte[]) thriftColumnValue);
                 relations.put(thriftColumnName, value);
+                
+                if(entity == null)
+                {
+                    entity = initialize(m, entity, null);
+                }
                 // prepare EnhanceEntity and return it
             }
 

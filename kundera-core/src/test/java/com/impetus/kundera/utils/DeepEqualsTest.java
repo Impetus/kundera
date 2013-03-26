@@ -594,8 +594,8 @@ public class DeepEqualsTest extends TestCase
     }
 
 
-    @Test
-    public void testPerf()
+//    @Test
+    public void perf()
     {
         Pet p1 = null;
         long t1 = System.currentTimeMillis();

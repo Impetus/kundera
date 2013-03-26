@@ -2,8 +2,8 @@ Overview
 =========
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
-* To make working with NoSQL as simple as working with SQL
-*	To serve as JPA Compliant mapping solution for NoSQL Datastores.
+*  To make working with NoSQL as simple as working with SQL
+*   To serve as JPA Compliant mapping solution for NoSQL Datastores.
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
@@ -15,11 +15,11 @@ Up and running in 5 minutes
 ============================
 If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow below steps from [this link] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes "Getting started in 5 minutes"):
 
-+	Set up Cassandra server.
-+	Download and include Kundera Jar
++ Set up Cassandra server.
++ Download and include Kundera Jar
 + Write persistence.xml file
 + Write Entity class
-+	Moment of Truth!
++ Moment of Truth!
 
 
 Currently Supported Datasources
@@ -27,11 +27,24 @@ Currently Supported Datasources
 *	Cassandra
 *	MongoDB
 *	HBase
-* Relational databases
+*  Redis
+*  Neo4j
+*  Relational databases
+
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.3 is released tag.
+####Please Note: trunk is current development branch. 2.4 is released tag.
+
+#### 08-Mar-2013 - Kundera 2.4 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.3:
+
+* Support for Neo4j graph database
+* Primary key auto-generation
+* Support for JoinByPrimaryKey relationship
+* Custom Secondary indexing hooks
+* Hadoop 0.94.3 migration
+
 
 #### 24-Jan-2013 - Kundera 2.3 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.2:

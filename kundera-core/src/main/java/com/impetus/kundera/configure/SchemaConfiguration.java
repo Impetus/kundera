@@ -43,6 +43,7 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
+import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -97,7 +98,6 @@ public class SchemaConfiguration implements Configuration
      */
     public void configure()
     {
-
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
@@ -119,7 +119,8 @@ public class SchemaConfiguration implements Configuration
                 Type type = entityMetadata.getType();
                 // Class idClassName =
                 // entityMetadata.getIdColumn().getField().getType();
-                Class idClassName = entityMetadata.getIdAttribute().getJavaType();
+                Class idClassName = entityMetadata.getIdAttribute() != null ? entityMetadata.getIdAttribute()
+                        .getJavaType() : null;
                 TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
                         type.name(), idClassName);
 
@@ -144,6 +145,9 @@ public class SchemaConfiguration implements Configuration
                 {
                     tableInfos.add(tableInfo);
                 }
+                // Add table for GeneratedValue if opted TableStrategy
+                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName);
+
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
         }
@@ -160,6 +164,22 @@ public class SchemaConfiguration implements Configuration
                 {
                     schemaManager.exportSchema();
                 }
+            }
+        }
+    }
+
+    private void addTableGenerator(ApplicationMetadata appMetadata, String persistenceUnit, List<TableInfo> tableInfos,
+            EntityMetadata entityMetadata, Class idClassName)
+    {
+        Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
+        IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(entityMetadata.getEntityClazz().getName());
+        if (keyValue != null && keyValue.getTableDiscriptor() != null)
+        {
+            TableInfo tableGeneratorDiscriptor = new TableInfo(keyValue.getTableDiscriptor().getTable(), false,
+                    "CounterColumnType", idClassName);
+            if (!tableInfos.contains(tableGeneratorDiscriptor))
+            {
+                tableInfos.add(tableGeneratorDiscriptor);
             }
         }
     }
@@ -312,7 +332,8 @@ public class SchemaConfiguration implements Configuration
                 }
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                    ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.get(((AbstractAttribute)attr).getJPAColumnName()) : null);
+                    ColumnInfo columnInfo = getColumn(attr,
+                            columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                     {
                         tableInfo.addColumnInfo(columnInfo);

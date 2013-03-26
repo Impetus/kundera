@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -65,7 +65,7 @@ public class HBaseWriter implements Writer
      * java.lang.Object)
      */
     @Override
-    public void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+    public void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns,
 
     Object columnFamilyObj) throws IOException
     {
@@ -82,7 +82,7 @@ public class HBaseWriter implements Writer
      * javax.persistence.metamodel.Attribute, java.lang.Object)
      */
     @Override
-    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
+    public void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
             throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -100,7 +100,7 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
-    public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
@@ -137,7 +137,7 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Map)
      */
     @Override
-    public void writeColumns(HTable htable, Object rowKey, Map<String, Object> columns) throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns) throws IOException
     {
 
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -165,7 +165,7 @@ public class HBaseWriter implements Writer
      * .client.HTable, java.lang.Object, boolean, java.util.List)
      */
     @Override
-    public void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
+    public void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -209,7 +209,7 @@ public class HBaseWriter implements Writer
      * .client.HTable, java.lang.String, java.util.Map)
      */
     @Override
-    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+    public void writeForeignKeys(HTableInterface hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException
     {
         Put p = new Put(Bytes.toBytes(rowKey));
@@ -270,7 +270,7 @@ public class HBaseWriter implements Writer
      * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
      * .HTable, java.lang.String, java.lang.String)
      */
-    public void delete(HTable hTable, Object rowKey, String columnFamily)
+    public void delete(HTableInterface hTable, Object rowKey, String columnFamily)
     {
         try
         {
@@ -292,10 +292,10 @@ public class HBaseWriter implements Writer
      * @see com.impetus.client.hbase.Writer#persistRows(java.util.Map)
      */
     @Override
-    public void persistRows(Map<HTable, List<HBaseDataWrapper>> rows) throws IOException
+    public void persistRows(Map<HTableInterface, List<HBaseDataWrapper>> rows) throws IOException
     {
         List<Put> dataSet = new ArrayList<Put>(rows.size());
-        for (HTable hTable : rows.keySet())
+        for (HTableInterface hTable : rows.keySet())
         {
             List<HBaseDataWrapper> row = rows.get(hTable);
             for (HBaseDataWrapper data : row)

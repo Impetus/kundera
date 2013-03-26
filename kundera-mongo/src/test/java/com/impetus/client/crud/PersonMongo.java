@@ -17,6 +17,8 @@ package com.impetus.client.crud;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -46,6 +48,10 @@ public class PersonMongo
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+
+    @Column(name = "ENUM")
+    @Enumerated(EnumType.STRING)
+    private Day day = Day.FRIDAY;
 
     /**
      * Gets the person id.
@@ -104,6 +110,16 @@ public class PersonMongo
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    enum Day
+    {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+    }
+
+    public Day getDay()
+    {
+        return day;
     }
 
 }

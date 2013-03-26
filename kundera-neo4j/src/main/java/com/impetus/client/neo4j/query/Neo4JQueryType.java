@@ -16,8 +16,9 @@
 package com.impetus.client.neo4j.query;
 
 /**
- * Enum for different native query types supported in Neo4J 
- * Currently, only Lucene is supported, rest are for future use.
+ * Enum for different native query types supported in Neo4J Currently, only
+ * Lucene is supported, rest are for future use.
+ * 
  * @author amresh.singh
  */
 public enum Neo4JQueryType

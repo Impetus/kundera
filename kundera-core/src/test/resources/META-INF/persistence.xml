@@ -92,13 +92,39 @@
 			<property name="kundera.client.property" value="kunderaTest.xml" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="metaDataTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaMetaDataTest" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.client.property" value="kunderaTest.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="GeneratedValue">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdDefault</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdStrategyAuto</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdStrategyIdentity</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdStrategySequence</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdStrategyTable</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithSequenceGenerator</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithTableGenerator</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutSequenceGenerator</class>
+		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutTableGenerator</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />

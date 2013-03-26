@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.PersonMongo.Day;
 import com.impetus.client.utils.MongoUtils;
 
 public class PersonMongoTest extends BaseTest
@@ -77,6 +78,7 @@ public class PersonMongoTest extends BaseTest
         em.clear();
         PersonMongo p = findById(PersonMongo.class, "1", em);
         Assert.assertNotNull(p);
+        Assert.assertEquals(Day.FRIDAY, p.getDay());
         Assert.assertEquals("vivek", p.getPersonName());
         assertFindByName(em, "PersonMongo", PersonMongo.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonMongo", PersonMongo.class, "vivek", "10", "personName");

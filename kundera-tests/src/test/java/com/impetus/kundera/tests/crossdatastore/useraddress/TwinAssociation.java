@@ -136,7 +136,7 @@ public abstract class TwinAssociation extends AssociationBase
         {
             e.printStackTrace();
             log.error(e);
-            Assert.fail("Failure caused by:" + e.getMessage());
+            Assert.fail("Failure caused by:" + e);
         }
     }
 

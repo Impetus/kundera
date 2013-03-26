@@ -20,21 +20,20 @@ import javax.persistence.Embeddable;
 
 /**
  * Class Holding Identity attributes for movies
+ * 
  * @author amresh.singh
  */
 @Embeddable
 public class MovieId
 {
-    @Column(name="CERTIFICATION")
+    @Column(name = "CERTIFICATION")
     private char certification;
-    
-    @Column(name="SERIAL_NUMBER")
+
+    @Column(name = "SERIAL_NUMBER")
     private long serialNumber;
-    
-    
 
     public MovieId()
-    {        
+    {
     }
 
     /**
@@ -57,7 +56,8 @@ public class MovieId
     }
 
     /**
-     * @param certification the certification to set
+     * @param certification
+     *            the certification to set
      */
     public void setCertification(char certification)
     {
@@ -73,13 +73,12 @@ public class MovieId
     }
 
     /**
-     * @param serialNumber the serialNumber to set
+     * @param serialNumber
+     *            the serialNumber to set
      */
     public void setSerialNumber(long serialNumber)
     {
         this.serialNumber = serialNumber;
     }
-    
-    
 
 }

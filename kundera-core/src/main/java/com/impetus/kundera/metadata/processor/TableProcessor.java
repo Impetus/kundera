@@ -73,8 +73,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     public void process(Class clazz, EntityMetadata metadata)
     {
 
-        if(LOG.isDebugEnabled())
-        LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
+        if (LOG.isDebugEnabled())
+            LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
         populateMetadata(metadata, clazz, puProperties);
 
     }
@@ -246,6 +246,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
             entityMetadata.setIdAttribute((SingularAttribute) attrib);
+            
             // populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }

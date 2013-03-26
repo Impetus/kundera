@@ -86,6 +86,8 @@ public final class CQLTranslator
     public static final String WITH_CLAUSE = " WITH ";
 
     public static final String QUOTE_STR = "'";
+    
+    public static final String LIMIT = " LIMIT ";
 
     public CQLTranslator()
     {
@@ -342,7 +344,7 @@ public final class CQLTranslator
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                     || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    || fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class))
+                    /*|| fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class)*/)
             {
                 builder.append("'");
 

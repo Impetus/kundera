@@ -369,6 +369,56 @@ public class CassandraCompositeTypeTest
     }
 
     @Test
+    public void onLimit()
+    {
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        user1.setTweetBody("my first tweet");
+        user1.setTweetDate(currentDate);
+        em.persist(user1);
+
+        key = new CassandraCompoundKey("mevivs", 2, timeLineId);
+        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        user2.setTweetBody("my first tweet");
+        user2.setTweetDate(currentDate);
+        em.persist(user2);
+
+        key = new CassandraCompoundKey("mevivs", 3, timeLineId);
+        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        user3.setTweetBody("my first tweet");
+        user3.setTweetDate(currentDate);
+        em.persist(user3);
+
+        em.flush();
+
+        // em.clear(); // optional,just to clear persistence cache.
+
+        // em = emf.createEntityManager();
+        em.clear();
+        
+
+        final String noClause = "Select u from CassandraPrimeUser u";
+        Query q = em.createQuery(noClause);
+        List<CassandraPrimeUser> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        // With limit
+        q = em.createQuery(noClause);
+        q.setMaxResults(2);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+    }
+    @Test
     public void onBatchInsert()
     {
         EntityManager em = emf.createEntityManager();

@@ -32,8 +32,9 @@ public class ObjectGraph
     // Each node contains link to parent/ child nodes it is related to
     private Map<String, Node> nodeMapping;
 
-    public ObjectGraph()
+    ObjectGraph()
     {
+        clear();
         nodeMapping = new HashMap<String, Node>();
     }
 
@@ -54,7 +55,7 @@ public class ObjectGraph
      * @param nodeId
      * @return
      */
-    public Node getNode(String nodeId)
+    Node getNode(String nodeId)
     {
         return nodeMapping.get(nodeId);
     }
@@ -71,7 +72,7 @@ public class ObjectGraph
      * @param headNode
      *            the headNode to set
      */
-    public void setHeadNode(Node headNode)
+    void setHeadNode(Node headNode)
     {
         this.headNode = headNode;
     }
@@ -86,7 +87,10 @@ public class ObjectGraph
 
     public void clear()
     {
-        nodeMapping.clear();
-        nodeMapping=null;
+        if (nodeMapping != null)
+        {
+            nodeMapping.clear();
+            nodeMapping = null;
+        }
     }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -50,8 +51,8 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter, String... columns)
-            throws IOException
+    public List<HBaseData> LoadData(HTableInterface hTable, String columnFamily, Object rowKey, Filter filter,
+            String... columns) throws IOException
     {
         List<HBaseData> results = null;
 
@@ -85,7 +86,8 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter, String... columns) throws IOException
+    public List<HBaseData> LoadData(HTableInterface hTable, Object rowKey, Filter filter, String... columns)
+            throws IOException
     {
         return LoadData(hTable, Bytes.toString(hTable.getTableName()), rowKey, filter, columns);
     }
@@ -98,8 +100,8 @@ public class HBaseReader implements Reader
      * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
-    public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
-            String qualifier, String[] columns) throws IOException
+    public List<HBaseData> loadAll(HTableInterface hTable, Filter filter, byte[] startRow, byte[] endRow,
+            String columnFamily, String qualifier, String[] columns) throws IOException
     {
         List<HBaseData> results = null;
         Scan s = null;
@@ -198,7 +200,7 @@ public class HBaseReader implements Reader
     }
 
     @Override
-    public Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
+    public Object[] scanRowKeys(final HTableInterface hTable, final Filter filter, final String columnFamilyName,
             final String columnName, final Class rowKeyClazz) throws IOException
     {
         List<Object> rowKeys = new ArrayList<Object>();
@@ -223,4 +225,49 @@ public class HBaseReader implements Reader
         }
         return null;
     }
+
+    public List<HBaseData> loadAll(HTableInterface hTable, List<Object> rows, String columnFamily, String[] columns)
+            throws IOException
+    {
+        List<HBaseData> results = null;
+
+        HBaseData data = null;
+
+        List<Get> getRequest = new ArrayList<Get>();
+        for (Object rowKey : rows)
+        {
+            if (rowKey != null)
+            {
+                byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
+                Get request = new Get(rowKeyBytes);
+                getRequest.add(request);
+            }
+        }
+        Result[] rawResult = hTable.get(getRequest);
+
+        for (Result result : rawResult)
+        {
+            List<KeyValue> values = result.list();
+
+            if (values != null)
+            {
+                for (KeyValue value : values)
+                {
+                    data = new HBaseData(columnFamily != null ? columnFamily : new String(value.getFamily()),
+                            value.getRow());
+                    break;
+                }
+
+                data.setColumns(values);
+                if (results == null)
+                {
+                    results = new ArrayList<HBaseData>();
+                }
+                results.add(data);
+            }
+        }
+        return results;
+
+    }
+
 }

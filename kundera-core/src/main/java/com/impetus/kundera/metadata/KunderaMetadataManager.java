@@ -20,6 +20,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -45,7 +46,11 @@ public class KunderaMetadataManager
      */
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
-        return KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        if (persistenceUnit != null)
+        {
+            return KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        }
+        return null;
     }
 
     /**
@@ -122,6 +127,10 @@ public class KunderaMetadataManager
      */
     public static EntityMetadata getEntityMetadata(Class entityClass)
     {
+        if (entityClass == null)
+        {
+            throw new KunderaException("Invalid class provided " + entityClass);
+        }
         List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(
                 entityClass);
 
@@ -139,14 +148,15 @@ public class KunderaMetadataManager
                 }
             }
         }
-        if(log.isDebugEnabled())
-        log.warn("No Entity metadata found for the class " + entityClass
-                + ". Any CRUD operation on this entity will fail."
-                + "If your entity is for RDBMS, make sure you put fully qualified entity class"
-                + " name under <class></class> tag in persistence.xml for RDBMS "
-                + "persistence unit. Returning null value.");
+        if (log.isDebugEnabled())
+            log.warn("No Entity metadata found for the class " + entityClass
+                    + ". Any CRUD operation on this entity will fail."
+                    + "If your entity is for RDBMS, make sure you put fully qualified entity class"
+                    + " name under <class></class> tag in persistence.xml for RDBMS "
+                    + "persistence unit. Returning null value.");
+
         return null;
-
+        // throw new KunderaException("Unable to load entity metadata for :" +
+        // entityClass);
     }
-
 }

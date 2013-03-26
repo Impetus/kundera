@@ -15,11 +15,18 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -61,7 +68,7 @@ public class IndexManager
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
-            indexer.unindex(metadata, key);
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
         }
 
     }
@@ -79,17 +86,43 @@ public class IndexManager
 
         try
         {
-            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()) && indexer != null
+                    && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
             {
                 Object id = PropertyAccessorHelper.getId(entity, metadata);
 
-                boolean documentExists = indexer.entityExistsInIndex(entity.getClass());
+                boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                        .entityExistsInIndex(entity.getClass());
                 if (documentExists)
                 {
-                    indexer.unindex(metadata, id);
-                    indexer.flush();
+                    ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
+                    ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                 }
-                indexer.index(metadata, entity, parentId.toString(), clazz);
+                ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                        .index(metadata, entity, parentId.toString(), clazz);
+            }
+            else
+            {
+                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getMetamodel(metadata.getPersistenceUnit());
+
+                Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
+                Map<String, Object> indexCollection = new HashMap<String, Object>();
+                Object id = PropertyAccessorHelper.getId(entity, metadata);
+                for (String columnName : indexProperties.keySet())
+                {
+                    PropertyIndex index = indexProperties.get(columnName);
+                    java.lang.reflect.Field property = index.getProperty();
+                    // String propertyName = index.getName();
+                    Object obj = PropertyAccessorHelper.getObject(entity, property);
+                    indexCollection.put(columnName, obj);
+                    
+                }
+                
+                indexCollection.put(DocumentIndexer.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase());
+                indexCollection.put(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), id);
+
+                indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
         catch (PropertyAccessException e)
@@ -110,7 +143,7 @@ public class IndexManager
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
-            indexer.index(metadata, entity);
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity);
         }
     }
 
@@ -130,7 +163,7 @@ public class IndexManager
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
-            indexer.index(metadata, entity, parentId, clazz);
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity, parentId, clazz);
         }
     }
 
@@ -142,8 +175,9 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, String> search(String query)
+    public final Map<String, Object> search(String query)
     {
+
         return search(query, Constants.INVALID, Constants.INVALID, false);
     }
 
@@ -155,7 +189,7 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, String> fetchRelation(String query)
+    public final Map<String, Object> fetchRelation(String query)
     {
         // TODO: need to return list.
         return search(query, Constants.INVALID, Constants.INVALID, true);
@@ -170,7 +204,7 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int count)
+    public final Map<String, Object> search(String query, int count)
     {
         return search(query, Constants.INVALID, count, false);
     }
@@ -186,9 +220,17 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count)
+    public final Map<String, Object> search(String query, int start, int count)
     {
-        return indexer != null ? indexer.search(query, start, count, false):null;
+        if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+        {
+            return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start, count,
+                    false) : null;
+        }
+        else
+        {
+            return indexer.search(query, start, count);
+        }
     }
 
     /**
@@ -204,9 +246,17 @@ public class IndexManager
      *            the fetch relation
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
+    public final Map<String, Object> search(String query, int start, int count, boolean fetchRelation)
     {
-        return indexer != null ? indexer.search(query, start, count, fetchRelation):null;
+        if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+        {
+            return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start, count,
+                    fetchRelation) : null;
+        }
+        else
+        {
+            return indexer.search(query, start, count);
+        }
     }
 
     /**
@@ -216,12 +266,12 @@ public class IndexManager
     {
         if (indexer != null)
         {
-            indexer.flush();
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
         }
     }
 
     /**
-     * Closes the transaction alongwith RAM directory.
+     * Closes the transaction along with RAM directory.
      */
     public void close() throws IndexingException
     {

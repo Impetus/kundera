@@ -63,7 +63,7 @@ public class PersonLuceneCassandra
 
     /** The age. */
     @Column(name = "AGE")
-    private Integer age;
+    private String age;
 
     @Column(name = "AGEss")
     private byte[] a;
@@ -134,7 +134,7 @@ public class PersonLuceneCassandra
     /**
      * @return the age
      */
-    public Integer getAge()
+    public String getAge()
     {
         return age;
     }
@@ -143,7 +143,7 @@ public class PersonLuceneCassandra
      * @param age
      *            the age to set
      */
-    public void setAge(int age)
+    public void setAge(String age)
     {
         this.age = age;
     }

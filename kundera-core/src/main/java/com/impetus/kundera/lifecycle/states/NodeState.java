@@ -20,9 +20,6 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -36,8 +33,6 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
  */
 public abstract class NodeState
 {
-    private static Log log = LogFactory.getLog(NodeState.class);
-
     public enum OPERATION
     {
         PERSIST, MERGE, REMOVE, REFRESH, DETACH
@@ -79,16 +74,15 @@ public abstract class NodeState
     /**
      * @param nodeStateContext
      */
-    protected void moveNodeToNextState(NodeStateContext nodeStateContext, NodeState nextState)
+    void moveNodeToNextState(NodeStateContext nodeStateContext, NodeState nextState)
     {
         nodeStateContext.setCurrentNodeState(nextState);
-        // logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
     }
 
     /**
      * @param nodeStateContext
      */
-    protected void recursivelyPerformOperation(NodeStateContext nodeStateContext, OPERATION operation)
+    void recursivelyPerformOperation(NodeStateContext nodeStateContext, OPERATION operation)
     {
         Map<NodeLink, Node> children = nodeStateContext.getChildren();
         if (children != null)
@@ -141,18 +135,4 @@ public abstract class NodeState
             }
         }
     }
-
-    public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId)
-    {
-        if(log.isDebugEnabled())
-        log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> "
-                + nextState.getClass().getSimpleName());
-    }
-
-    public void logNodeEvent(String eventType, NodeState currentState, String nodeId)
-    {
-        if(log.isDebugEnabled())
-        log.debug("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
-    }
-
 }

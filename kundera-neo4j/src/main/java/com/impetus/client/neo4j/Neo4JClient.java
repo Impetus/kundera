@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceException;
-import javax.transaction.NotSupportedException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -52,7 +51,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
-import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -60,7 +58,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AssociationBuilder;
 import com.impetus.kundera.persistence.EntityReader;
@@ -136,7 +133,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
         Object entity = null;
         Node node = mapper.searchNode(key, m, graphDb, true);
-        if (node != null)
+
+        if (node != null && !((Neo4JTransaction) resource).containsNodeId(node.getId()))
 
         {
             entity = getEntityWithAssociationFromNode(m, node);
@@ -149,7 +147,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         List entities = new ArrayList<E>();
-        for(Object key : keys)
+        for (Object key : keys)
         {
             entities.add(find(entityClass, key));
         }
@@ -181,7 +179,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
         // Find Node for this particular entity
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        Node node = mapper.searchNode(key, m, graphDb, false);
+        Node node = mapper.searchNode(key, m, graphDb, true);
         if (node != null)
         {
             // Remove this particular node, if not already deleted in current
@@ -276,7 +274,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         {
 
             // Top level node
-            Node node = mapper.getNodeFromEntity(entity, graphDb, entityMetadata, isUpdate);
+            Node node = mapper.getNodeFromEntity(entity, id, graphDb, entityMetadata, isUpdate);
 
             if (node != null)
             {
@@ -313,11 +311,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         else
                         {
                             // Create Proxy nodes for insert requests
-                            if(!isUpdate)
+                            if (!isUpdate)
                             {
                                 targetNode = mapper.createProxyNode(id, targetNodeKey, graphDb, entityMetadata,
                                         targetNodeMetadata);
-                            }                            
+                            }
                         }
 
                         if (targetNode != null)
@@ -541,32 +539,33 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
                     for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
                             DynamicRelationshipType.withName(relation.getJoinColumnName())))
-                    {                        
-                        if(relationship == null)
+                    {
+                        if (relationship == null)
                         {
                             continue;
                         }
-                        
-                        //Target Entity
+
+                        // Target Entity
                         Node endNode = relationship.getEndNode();
-                        if(endNode == null)
+                        if (endNode == null)
                         {
                             continue;
                         }
                         Object targetEntity = nodeIdToEntityMap.get(endNode.getId());
-                        if(targetEntity == null)
+                        if (targetEntity == null)
                         {
                             targetEntity = mapper.getEntityFromNode(endNode, targetEntityMetadata);
-                        }                        
-                        
-                        //Relationship Entity
+                        }
+
+                        // Relationship Entity
                         Object relationshipEntity = mapper.getEntityFromRelationship(relationship, m, relation);
-                        
-                        //If this relationship is bidirectional, put source entity into Map field for target entity                        
+
+                        // If this relationship is bidirectional, put source
+                        // entity into Map field for target entity
                         Field bidirectionalField = new AssociationBuilder().getBiDirectionalField(m.getEntityClazz(),
                                 targetEntityClass);
                         Map<Object, Object> sourceEntitiesMap = new HashMap<Object, Object>();
-                        if(bidirectionalField != null)
+                        if (bidirectionalField != null)
                         {
                             for (Relationship incomingRelationship : endNode.getRelationships(Direction.INCOMING,
                                     DynamicRelationshipType.withName(relation.getJoinColumnName())))
@@ -581,8 +580,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                 sourceEntitiesMap.put(relationshipEntity, sourceEntity);
                             }
                             PropertyAccessorHelper.set(targetEntity, bidirectionalField, sourceEntitiesMap);
-                        }              
-                        
+                        }
 
                         // Set references to Target and owning entity in
                         // relationship entity
@@ -709,31 +707,41 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if (!indexer.isNodeAutoIndexingEnabled(graphDb) && m.isIndexable())
         {
             Index<Node> nodeIndex = graphDb.index().forNodes(m.getIndexName());
-            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
 
-            for (Node node : hits)
-            {
-                if(node != null)
-                {
-                    entities.add(getEntityWithAssociationFromNode(m, node));
-                }                
-            }
+            IndexHits<Node> hits = nodeIndex.query(luceneQuery);
+            addEntityFromIndexHits(m, entities, hits);
         }
         else
         {
-            IndexHits<Node> hits;
 
             ReadableIndex<Node> autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
-            hits = autoNodeIndex.query(luceneQuery);
-
-            for (Node node : hits)
-            {
-
-                entities.add(getEntityWithAssociationFromNode(m, node));
-            }
+            IndexHits<Node> hits = autoNodeIndex.query(luceneQuery);
+            addEntityFromIndexHits(m, entities, hits);
 
         }
         return entities;
+    }
+
+    /**
+     * @param m
+     * @param entities
+     * @param hits
+     */
+    protected void addEntityFromIndexHits(EntityMetadata m, List<Object> entities, IndexHits<Node> hits)
+    {
+        for (Node node : hits)
+        {
+            if (node != null)
+            {
+                Object entity = getEntityWithAssociationFromNode(m, node);
+                if (entity != null)
+                {
+
+                    entities.add(entity);
+
+                }
+            }
+        }
     }
 
     /**
@@ -753,13 +761,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         Map<Long, Object> nodeIdToEntityMap = new HashMap<Long, Object>();
 
         Object entity = mapper.getEntityFromNode(node, m);
-        
+
         nodeIdToEntityMap.put(node.getId(), entity);
         populateRelations(m, entity, relationMap, node, nodeIdToEntityMap);
 
         nodeIdToEntityMap.clear();
 
-        if (!relationMap.isEmpty())
+        if (!relationMap.isEmpty() && entity != null)
         {
             return new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationMap);
         }
@@ -784,9 +792,17 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
-    private GraphDatabaseService getConnection()
+    public GraphDatabaseService getConnection()
     {
-        return ((Neo4JTransaction) resource).getGraphDb();
+        if (resource != null)
+        {
+            return ((Neo4JTransaction) resource).getGraphDb();
+        }
+        else
+        {
+            return factory.getConnection();
+        }
+
     }
 
 }

@@ -91,9 +91,9 @@ public class RemovedState extends NodeState
         Client client = nodeStateContext.getClient();
 
         Node node = (Node) nodeStateContext;
-        // String entityId = ObjectGraphUtils.getEntityId(node.getNodeId());
+
         Object entityId = node.getEntityId();
-        
+
         client.delete(node.getData(), entityId);
 
         // Since node is flushed, mark it as NOT dirty
@@ -101,9 +101,6 @@ public class RemovedState extends NodeState
 
         // Remove this node from Persistence Cache
         nodeStateContext.getPersistenceCache().getMainCache().removeNodeFromCache(node);
-
-        // logNodeEvent("DELETED", this, nodeStateContext.getNodeId());
-
     }
 
     @Override

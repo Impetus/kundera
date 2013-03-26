@@ -98,7 +98,8 @@ public class EntityListenersProcessor implements MetadataProcessor
                     {
 
                         // find valid jpa annotations for this method
-                        List<Class<?>> jpaAnnotations = getValidJPAAnnotationsFromMethod(entityListener, method, 1);
+                        List<Class<?>> jpaAnnotations = getValidJPAAnnotationsFromMethod(entityListener, method, 1,
+                                entityClass);
 
                         // add them all to metadata
                         for (Class<?> jpaAnnotation : jpaAnnotations)
@@ -118,7 +119,7 @@ public class EntityListenersProcessor implements MetadataProcessor
         for (Method method : entityClass.getDeclaredMethods())
         {
             // find valid jpa annotations for this method
-            List<Class<?>> jpaAnnotations = getValidJPAAnnotationsFromMethod(entityClass, method, 0);
+            List<Class<?>> jpaAnnotations = getValidJPAAnnotationsFromMethod(entityClass, method, 0, entityClass);
             // add them all to metadata
             for (Class<?> jpaAnnotation : jpaAnnotations)
             {
@@ -163,7 +164,8 @@ public class EntityListenersProcessor implements MetadataProcessor
      * 
      * @return the valid jpa annotations from method
      */
-    private List<Class<?>> getValidJPAAnnotationsFromMethod(Class<?> clazz, Method method, int numberOfParams)
+    private List<Class<?>> getValidJPAAnnotationsFromMethod(Class<?> clazz, Method method, int numberOfParams,
+            Class<?> entityClazz)
     {
         List<Class<?>> annotations = new ArrayList<Class<?>>();
 
@@ -213,7 +215,7 @@ public class EntityListenersProcessor implements MetadataProcessor
                 if (numberOfParams == 1)
                 {
                     Class<?> parameter = paramTypes[0];
-                    if (!parameter.getName().equals("java.lang.Object"))
+                    if (!(parameter != null && parameter.isAssignableFrom(entityClazz)))
                     {
                         log.info("Skipped method(" + clazz.getName() + "." + method.getName()
                                 + ") Must have only 1 \"Object\" type parameter.");

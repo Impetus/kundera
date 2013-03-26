@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.jta;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
@@ -38,7 +43,7 @@ import com.impetus.kundera.persistence.ResourceManager;
 public class KunderaTransaction implements Transaction
 {
 
-    private ResourceManager implementor;
+    private Set<ResourceManager> implementors = new HashSet<ResourceManager>();
 
     private boolean setRollBackOnly;
 
@@ -69,21 +74,27 @@ public class KunderaTransaction implements Transaction
     {
         if (!setRollBackOnly)
         {
-            if (implementor != null)
+            for (ResourceManager implementor : implementors)
             {
-                implementor.doCommit();
-                status = Status.STATUS_COMMITTED;
+                if (implementor != null)
+                {
+                    implementor.doCommit();
+                }
             }
+            status = Status.STATUS_COMMITTED;
         }
         else
         {
             if(log.isDebugEnabled())
             log.debug("Transaction is set for rollback only, processing rollback.");
 
-            if (implementor != null)
+            for (ResourceManager implementor : implementors)
             {
-                implementor.doRollback();
-                status = Status.STATUS_ROLLEDBACK;
+                if (implementor != null)
+                {
+                    implementor.doRollback();
+                    status = Status.STATUS_ROLLEDBACK;
+                }
             }
         }
 
@@ -152,10 +163,13 @@ public class KunderaTransaction implements Transaction
     @Override
     public void rollback() throws IllegalStateException, SystemException
     {
-        if (implementor != null)
+        for (ResourceManager implementor : implementors)
         {
-            implementor.doRollback();
-            status = Status.STATUS_ROLLEDBACK;
+            if (implementor != null)
+            {
+                implementor.doRollback();
+                status = Status.STATUS_ROLLEDBACK;
+            }
         }
     }
 
@@ -173,7 +187,7 @@ public class KunderaTransaction implements Transaction
 
     void setImplementor(ResourceManager implementor)
     {
-        this.implementor = implementor;
+        implementors.add(implementor);
     }
 
     /**

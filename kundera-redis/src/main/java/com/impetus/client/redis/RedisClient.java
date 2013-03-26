@@ -50,6 +50,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.SequenceGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -57,6 +58,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
@@ -73,7 +75,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author vivek.mishra
  */
 public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter,
-        TransactionBinder
+        TransactionBinder, SequenceGenerator
 {
     /**
      * Reference to redis client factory.
@@ -120,6 +122,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         Object connection = getConnection();
         // Create a hashset and populate data into it
         //
+
         Pipeline pipeLine = null;
         try
         {
@@ -553,7 +556,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 if (columnValues != null && !columnValues.isEmpty())
                 {
                     results.addAll(columnValues); // Currently returning list of
-                                                  // string as known issue with
+                                                  // string as known issue
+                                                  // with
                                                   // joint table concept!
                 }
 
@@ -779,7 +783,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     // delete can not be executed in batch
                     if (node.isInState(RemovedState.class))
                     {
-                        onDelete(node.getData(), node.getEntityId(), connection);
+                        onDelete(node.getData(), node.getEntityId(), pipeLine != null ? pipeLine : connection);
                     }
                     else
                     {
@@ -787,7 +791,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         List<RelationHolder> relationHolders = getRelationHolders(node);
                         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
 
-                        onPersist(metadata, node.getData(), node.getEntityId(), relationHolders, connection);
+                        onPersist(metadata, node.getData(), node.getEntityId(), relationHolders,
+                                pipeLine != null ? pipeLine : connection);
                     }
                 }
             }
@@ -926,7 +931,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
         try
         {
-
             if (name != null)
             {
                 return name.getBytes(Constants.CHARSET_UTF8);
@@ -1108,7 +1112,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
             }
             else if (attributes.size() == 1) // means it is only a key! weird
-                                             // but possible negative scenario
+                                             // but possible negative
+                                             // scenario
             {
                 byte[] value = PropertyAccessorHelper.get(entity, (Field) attr.getJavaMember());
                 byte[] name;
@@ -1152,24 +1157,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         byte[] value = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
         String valueAsStr = PropertyAccessorHelper.getString(embeddedObject, (Field) attrib.getJavaMember());
         byte[] name;
-        if (embeddedAttrib == null)
+        if (value != null)
         {
-            name = getEncodedBytes(((AbstractAttribute) attrib).getJPAColumnName());
-        }
-        else
-        {
-            name = getEncodedBytes(getHashKey(embeddedAttrib.getName(), ((AbstractAttribute) attrib).getJPAColumnName()));
-        }
-        // add column name as key and value as value
-        wrapper.addColumn(name, value);
-        // // {tablename:columnname,hashcode} for value
-        wrapper.addIndex(getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
-                getDouble(valueAsStr));
+            if (embeddedAttrib == null)
+            {
+                name = getEncodedBytes(((AbstractAttribute) attrib).getJPAColumnName());
+            }
+            else
+            {
+                name = getEncodedBytes(getHashKey(embeddedAttrib.getName(),
+                        ((AbstractAttribute) attrib).getJPAColumnName()));
+            }
+            // add column name as key and value as value
+            wrapper.addColumn(name, value);
+            // // {tablename:columnname,hashcode} for value
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
+                    getDouble(valueAsStr));
 
-        wrapper.addIndex(
-                getHashKey(entityMetadata.getTableName(),
-                        getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)), getDouble(valueAsStr));
-
+            wrapper.addIndex(
+                    getHashKey(entityMetadata.getTableName(),
+                            getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
+                    getDouble(valueAsStr));
+        }
     }
 
     /**
@@ -1270,6 +1280,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (entity != null)
         {
+            Class javaType = entityMetadata.getIdAttribute().getJavaType();
+
+            if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                key = PropertyAccessorFactory.getPropertyAccessor(javaType).fromString(javaType, key.toString());
+            }
             PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
         }
         if (!relations.isEmpty())
@@ -1728,4 +1744,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    @Override
+    public Object generate(SequenceGeneratorDiscriptor discriptor)
+    {
+        Jedis jedis = factory.getConnection();
+
+        Long latestCount = jedis.incr(getEncodedBytes(discriptor.getSequenceName()));
+        if (latestCount == 1)
+        {
+            return discriptor.getInitialValue();
+        }
+        else
+        {
+            return (latestCount - 1) * discriptor.getAllocationSize();
+        }
+    }
 }

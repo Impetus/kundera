@@ -44,6 +44,7 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -69,6 +70,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -76,6 +78,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -89,7 +92,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher
+public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
 {
 
     /** log for this class. */
@@ -136,6 +139,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
+
         Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
         try
         {
@@ -147,13 +151,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
-                onpersistOverCompositeKey(entityMetadata, entity, conn,rlHolders);
+                onpersistOverCompositeKey(entityMetadata, entity, conn, rlHolders);
             }
             else
             {
                 prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
                 // Write Mutation map to database
-//                conn.set_cql_version("3.0.0");
+                // conn.set_cql_version("3.0.0");
                 conn.batch_mutate(mutationMap, getConsistencyLevel());
             }
             mutationMap.clear();
@@ -487,10 +491,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
                 columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
                 .fromUTF8(childIdStr).getBytes());
-        
+
         List<IndexExpression> expressions = new ArrayList<IndexExpression>();
         expressions.add(ie);
-        
+
         IndexClause ix = new IndexClause();
         ix.setStart_key(Bytes.EMPTY.toByteArray());
         ix.setCount(1000);
@@ -554,7 +558,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
         List<IndexExpression> expressions = new ArrayList<IndexExpression>();
         expressions.add(ie);
-        
+
         IndexClause ix = new IndexClause();
         ix.setStart_key(Bytes.EMPTY.toByteArray());
         ix.setCount(1000);
@@ -1017,5 +1021,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     protected void releaseConnection(Object conn)
     {
         PelopsUtils.releaseConnection(this.pool, (Cassandra.Client) conn);
+    }
+
+    @Override
+    public Long generate(TableGeneratorDiscriptor discriptor)
+    {
+        return getGeneratedValue(discriptor,getPersistenceUnit());
     }
 }

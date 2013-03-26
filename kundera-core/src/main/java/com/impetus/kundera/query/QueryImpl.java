@@ -16,6 +16,8 @@
 package com.impetus.kundera.query;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -33,6 +35,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -229,20 +233,21 @@ public abstract class QueryImpl implements Query
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
+        Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
         if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
         {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
-            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+//            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+            result = (List<Object>) client.findAll(m.getEntityClazz(), uniquePKs.toArray());
 
         }
         else
         {
             return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
-        } 
+        }
         return result;
     }
 
@@ -275,6 +280,12 @@ public abstract class QueryImpl implements Query
     {
         StringBuffer sb = new StringBuffer();
 
+        EntityMetadata metadata = getKunderaQuery().getEntityMetadata();
+
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+
+        EntityType entity = metaModel.entity(metadata.getEntityClazz());
         for (Object object : kunderaQuery.getFilterClauseQueue())
         {
             if (object instanceof FilterClause)
@@ -283,6 +294,8 @@ public abstract class QueryImpl implements Query
                 FilterClause filter = (FilterClause) object;
                 sb.append("+");
                 // property
+                sb.append(metadata.getIndexName());
+                sb.append(".");
                 sb.append(filter.getProperty());
 
                 // joiner
@@ -298,22 +311,30 @@ public abstract class QueryImpl implements Query
                 }
                 else if (filter.getCondition().equalsIgnoreCase(">"))
                 {
-                    sb.append(appendRange(filter.getValue().toString(), false, true));
+                    String fieldName = metadata.getFieldName(filter.getProperty());
+//                    ;
+                    sb.append(appendRange(filter.getValue().toString(), false, true, entity.getAttribute(fieldName).getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase(">="))
                 {
-                    sb.append(appendRange(filter.getValue().toString(), true, true));
+                    String fieldName = metadata.getFieldName(filter.getProperty());
+//                    entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), true, true,entity.getAttribute(fieldName).getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<"))
                 {
-                    sb.append(appendRange(filter.getValue().toString(), false, false));
+                    String fieldName = metadata.getFieldName(filter.getProperty());
+//                    entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), false, false,entity.getAttribute(fieldName).getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<="))
                 {
-                    sb.append(appendRange(filter.getValue().toString(), true, false));
+                    String fieldName = metadata.getFieldName(filter.getProperty());
+//                    entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), true, false,entity.getAttribute(fieldName).getJavaType()));
                     appended = true;
                 }
 
@@ -385,7 +406,7 @@ public abstract class QueryImpl implements Query
     {
         for (Object r : resultList)
         {
-            EnhanceEntity e = new EnhanceEntity(r, persistenceDelegeator.getId(r, m), null);
+            EnhanceEntity e = new EnhanceEntity(r, PropertyAccessorHelper.getId(r, m), null);
             ls.add(e);
         }
     }
@@ -403,8 +424,8 @@ public abstract class QueryImpl implements Query
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
-        Map<String, String> results = client.getIndexManager().search(luceneQuery);
-        Set<String> rSet = new HashSet<String>(results.values());
+        Map<String, Object> results = client.getIndexManager().search(luceneQuery);
+        Set rSet = new HashSet (results.values());
         return rSet;
     }
 
@@ -438,7 +459,7 @@ public abstract class QueryImpl implements Query
      *            the is greater than
      * @return the string
      */
-    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan,Class clazz)
     {
         String appender = " ";
         StringBuilder sb = new StringBuilder();
@@ -448,7 +469,19 @@ public abstract class QueryImpl implements Query
         sb.append(appender);
         sb.append("TO");
         sb.append(appender);
-        sb.append(isGreaterThan ? "null" : value);
+        if (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
+                || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
+                || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
+                || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
+                || clazz.isAssignableFrom(BigInteger.class))
+        {
+            sb.append(isGreaterThan ? "*" : value);
+
+        }
+        else
+        {
+            sb.append(isGreaterThan ? "null" : value);
+        }
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }

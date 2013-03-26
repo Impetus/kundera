@@ -26,6 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraph;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;

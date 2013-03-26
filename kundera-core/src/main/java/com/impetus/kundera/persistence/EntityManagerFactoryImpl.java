@@ -27,7 +27,6 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
-import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -59,7 +58,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /** Whether or not the factory has been closed. */
-    private boolean closed = false;
+    private boolean closed;
 
     /**
      * Persistence Unit Properties Overriden by user provided factory
@@ -78,24 +77,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     private String[] persistenceUnits;
 
     // Transaction type
-    PersistenceUnitTransactionType transactionType;
+    private PersistenceUnitTransactionType transactionType;
 
     private final KunderaPersistenceUnitUtil util;
 
     private final PersistenceUtilHelper.MetadataCache cache = new PersistenceUtilHelper.MetadataCache();
-
-    /**
-     * This one is generally called via the PersistenceProvider.
-     * 
-     * @param persistenceUnitInfo
-     *            only using persistenceUnit for now
-     * @param props
-     *            the props
-     */
-    public EntityManagerFactoryImpl(PersistenceUnitInfo persistenceUnitInfo, Map props)
-    {
-        this(persistenceUnitInfo != null ? persistenceUnitInfo.getPersistenceUnitName() : null, props);
-    }
 
     /**
      * Use this if you want to construct this directly.
@@ -105,7 +91,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @param properties
      *            the properties
      */
-    public EntityManagerFactoryImpl(String persistenceUnit, Map properties)
+    public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
         if (properties == null)
         {
@@ -118,8 +104,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         // Initialize L2 cache
-        cacheProvider = initSecondLevelCache();
-        cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        this.cacheProvider = initSecondLevelCache();
+        this.cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
 
         // Invoke Client Loaders
         // logger.info("Loading Client(s) For Persistence Unit(s) " +
@@ -146,8 +132,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         this.util = new KunderaPersistenceUnitUtil(cache);
 
-        if(logger.isDebugEnabled())
-        logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
+        if (logger.isDebugEnabled())
+            logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
     /**
@@ -246,7 +232,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public CriteriaBuilder getCriteriaBuilder()
     {
-        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+        if (isOpen())
+        {
+            throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     /**
@@ -261,7 +251,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        if (isOpen())
+        {
+            return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     /**
@@ -277,7 +271,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Map<String, Object> getProperties()
     {
-        return properties;
+        if (isOpen())
+        {
+            return properties;
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     /**
@@ -292,7 +290,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Cache getCache()
     {
-        return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        if (isOpen())
+        {
+            return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     /**
@@ -315,28 +317,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     }
 
     /**
-     * @return the transactionType
-     */
-    public PersistenceUnitTransactionType getTransactionType()
-    {
-        return transactionType;
-    }
-
-    /**
-     * @param transactionType
-     *            the transactionType to set
-     */
-    public void setTransactionType(PersistenceUnitTransactionType transactionType)
-    {
-        this.transactionType = transactionType;
-    }
-
-    /**
      * Inits the second level cache.
      * 
      * @return the cache provider
      */
-    @SuppressWarnings("unchecked")
     private CacheProvider initSecondLevelCache()
     {
         String classResourceName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
@@ -346,7 +330,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)
         {
-
             try
             {
                 Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
@@ -366,7 +349,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             {
                 throw new CacheException(e);
             }
-
         }
         if (cacheProvider == null)
         {
@@ -402,9 +384,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
                 return fetchPropertyMap(puProperty);
             }
         }
-
         return properties;
-
     }
 
     /**

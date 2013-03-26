@@ -36,6 +36,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -56,10 +57,10 @@ public class FlushManager
      * Stack containing Nodes to be flushed Entities are always flushed from the
      * top, there way to bottom until stack is empty.
      */
-//    private FlushStack flushStack;
+    // private FlushStack flushStack;
 
-    Deque<Node> stackQueue ;
-    
+    Deque<Node> stackQueue;
+
     /**
      * Map containing data required for inserting records for each join table.
      * Key -> Name of Join Table Value -> records to be persisted in the join
@@ -78,9 +79,9 @@ public class FlushManager
      */
     public FlushManager()
     {
-//        flushStack = new FlushStack();
+        // flushStack = new FlushStack();
         stackQueue = new ArrayDeque<Node>();
-//        joinTableDataMap = new HashMap<String, JoinTableData>();
+        // joinTableDataMap = new HashMap<String, JoinTableData>();
     }
 
     /**
@@ -156,19 +157,18 @@ public class FlushManager
                 {
                     addNodesToFlushStack(childNode, eventType);
                 }
-
             }
 
             // Process Many-To-Many children
             for (NodeLink nodeLink : manyToManyChildren.keySet())
             {
-                if (!node.isTraversed() && ! (Boolean)nodeLink.getLinkProperty(LinkProperty.IS_RELATED_VIA_JOIN_TABLE))
+                if (!node.isTraversed() && !(Boolean) nodeLink.getLinkProperty(LinkProperty.IS_RELATED_VIA_JOIN_TABLE))
                 {
                     // Push this node to stack
                     node.setTraversed(true);
                     stackQueue.push(node);
-                    logEvent(node, eventType);                
-                }   
+                    logEvent(node, eventType);
+                }
 
                 Node childNode = children.get(nodeLink);
 
@@ -179,34 +179,19 @@ public class FlushManager
                     // Table
                     if (node.isDirty() && !node.isTraversed())
                     {
-                        //M-2-M relation fields that are Set or List are joined by join table.
-                        //M-2-M relation fields that are Map aren't joined by Join table        
-                        
+                        // M-2-M relation fields that are Set or List are joined
+                        // by join table.
+                        // M-2-M relation fields that are Map aren't joined by
+                        // Join table
+
                         JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
                                 .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
                         if (jtmd != null)
                         {
                             String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
                             String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                            Object entityId = node.getEntityId(); /*
-                                                                   * ObjectGraphBuilder
-                                                                   * .
-                                                                   * getEntityId
-                                                                   * (
-                                                                   * node.getNodeId
-                                                                   * ());
-                                                                   */
-                            Object childId = childNode.getEntityId();/*
-                                                                      * ObjectGraphBuilder
-                                                                      * .
-                                                                      * getEntityId
-                                                                      * (
-                                                                      * childNode
-                                                                      * .
-                                                                      * getNodeId
-                                                                      * ());
-                                                                      */
-
+                            Object entityId = node.getEntityId();
+                            Object childId = childNode.getEntityId();
                             Set<Object> childValues = new HashSet<Object>();
                             childValues.add(childId);
 
@@ -239,7 +224,7 @@ public class FlushManager
                 {
                     // Push this node to stack
                     node.setTraversed(true);
-//                    flushStack.push(node);
+                    // flushStack.push(node);
                     stackQueue.push(node);
                     logEvent(node, eventType);
 
@@ -247,6 +232,7 @@ public class FlushManager
                     // Node childNode =
                     // mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                     Node childNode = children.get(nodeLink);
+
                     addNodesToFlushStack(childNode, eventType);
                 }
             }
@@ -258,7 +244,7 @@ public class FlushManager
                 {
                     // Push this node to stack
                     node.setTraversed(true);
-//                    flushStack.push(node);
+                    // flushStack.push(node);
                     stackQueue.push(node);
                     logEvent(node, eventType);
                 }
@@ -293,9 +279,9 @@ public class FlushManager
                 else if (!childNode.isDirty())
                 {
                     childNode.setTraversed(true);
-//                    flushStack.push(childNode);
+                    // flushStack.push(childNode);
                     stackQueue.push(childNode);
-                  logEvent(childNode, eventType);
+                    logEvent(childNode, eventType);
                 }
             }
         }
@@ -307,39 +293,36 @@ public class FlushManager
         if (!node.isTraversed() && node.isDirty())
         {
             node.setTraversed(true);
-//           flushStack.push(node);
-           stackQueue.push(node);
-          logEvent(node, eventType);
+            // flushStack.push(node);
+            stackQueue.push(node);
+            logEvent(node, eventType);
         }
 
     }
 
-/*    *//**
+    /*    *//**
      * Gets the flush stack.
      * 
      * @return the flushStack
-     *//*
-    public FlushStack getFlushStack()
-    {
-        return flushStack;
-    }
-*/
+     */
+    /*
+     * public FlushStack getFlushStack() { return flushStack; }
+     */
     public Deque<Node> getFlushStack()
     {
         return stackQueue;
     }
-    
-/*    *//**
+
+    /*    *//**
      * Sets the flush stack.
      * 
      * @param flushStack
      *            the flushStack to set
-     *//*
-    public void setFlushStack(FlushStack flushStack)
-    {
-        this.flushStack = flushStack;
-    }
-*/
+     */
+    /*
+     * public void setFlushStack(FlushStack flushStack) { this.flushStack =
+     * flushStack; }
+     */
     /**
      * Gets the join table data map.
      * 
@@ -356,18 +339,16 @@ public class FlushManager
      */
     public void clearFlushStack()
     {
-        if(stackQueue != null && !stackQueue.isEmpty())
+        if (stackQueue != null && !stackQueue.isEmpty())
         {
             stackQueue.clear();
-//            stackQueue=null;
-//            stackQueue = new ArrayDeque<Node>();
+            // stackQueue=null;
+            // stackQueue = new ArrayDeque<Node>();
         }
-        /*if (flushStack != null)
-        {
-            flushStack.clear();
-             flushStack = null;
-             flushStack = new FlushStack();
-        }*/
+        /*
+         * if (flushStack != null) { flushStack.clear(); flushStack = null;
+         * flushStack = new FlushStack(); }
+         */
         if (joinTableDataCollection != null && !joinTableDataCollection.isEmpty())
         {
             joinTableDataCollection.clear();
@@ -378,8 +359,8 @@ public class FlushManager
         if (eventLogQueue != null)
         {
             eventLogQueue.clear();
-//             eventLogQueue = null;
-//             eventLogQueue = new EventLogQueue();
+            // eventLogQueue = null;
+            // eventLogQueue = new EventLogQueue();
         }
     }
 
@@ -475,9 +456,13 @@ public class FlushManager
                     Class clazz = node.getDataClass();
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
                     Client client = delegator.getClient(metadata);
-                    
-                    // do manual rollback, if data is processed, and running without transaction or with kundera's default transaction support!
-                    if (node.isProcessed() && (!delegator.isTransactionInProgress() || delegator.defaultTransactionSupported(metadata.getPersistenceUnit())))
+
+                    // do manual rollback, if data is processed, and running
+                    // without transaction or with kundera's default transaction
+                    // support!
+                    if (node.isProcessed()
+                            && (!delegator.isTransactionInProgress() || MetadataUtils
+                                    .defaultTransactionSupported(metadata.getPersistenceUnit())))
                     {
                         if (node.getOriginalNode() == null)
                         {
@@ -524,23 +509,21 @@ public class FlushManager
      * @param invJoinColumnValues
      *            the inv join column values
      */
-    private void addJoinTableData(OPERATION operation, String schemaName, String joinTableName,
-            String joinColumnName, String invJoinColumnName, Class<?> entityClass, Object joinColumnValue,
-            Set<Object> invJoinColumnValues)
+    private void addJoinTableData(OPERATION operation, String schemaName, String joinTableName, String joinColumnName,
+            String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
     {
-/*        JoinTableData joinTableData = joinTableDataCollection.get(joinTableName);
-        if (joinTableData == null)
-        {
-*/           JoinTableData joinTableData = new JoinTableData(operation, schemaName, joinTableName, joinColumnName, invJoinColumnName,
-                    entityClass);
-            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
-            joinTableDataCollection.add(joinTableData);
-/*        }
-        else
-        {
-            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
-        }
-*/
+        /*
+         * JoinTableData joinTableData =
+         * joinTableDataCollection.get(joinTableName); if (joinTableData ==
+         * null) {
+         */JoinTableData joinTableData = new JoinTableData(operation, schemaName, joinTableName, joinColumnName,
+                invJoinColumnName, entityClass);
+        joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
+        joinTableDataCollection.add(joinTableData);
+        /*
+         * } else { joinTableData.addJoinTableRecord(joinColumnValue,
+         * invJoinColumnValues); }
+         */
     }
 
     /**
@@ -561,7 +544,7 @@ public class FlushManager
     private void rollbackJoinTableData(PersistenceDelegator delegator)
     {
         // on deleting join table data.
-//        Map<String, JoinTableData> joinTableDataMap = getJoinTableDataMap();
+        // Map<String, JoinTableData> joinTableDataMap = getJoinTableDataMap();
         for (JoinTableData jtData : joinTableDataCollection)
         {
             if (jtData.isProcessed())

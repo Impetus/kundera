@@ -8,7 +8,7 @@ public class DateDataGenerator implements DataGenerator<Date>
 
     private static final Date MIN_DATE = new Date(0L);
 
-    private static final Date MAX_DATE = new Date(Integer.MAX_VALUE);
+    private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
 
     private static final Date DATE = new Date(LONG_DATA_GENERATOR.randomValue());
 

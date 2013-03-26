@@ -82,7 +82,6 @@ public class EntityManagerImplTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
     }

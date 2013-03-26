@@ -23,7 +23,9 @@ import java.util.Set;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -54,7 +56,7 @@ public class ObjectGraphBuilder
     {
         // Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();
-//        this.persistenceCache = persistenceCache;
+        // this.persistenceCache = persistenceCache;
 
         // Recursively build object graph and get head node.
         Node headNode = getNode(entity, objectGraph, initialNodeState);
@@ -99,43 +101,33 @@ public class ObjectGraphBuilder
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        if (entityMetadata == null)
-        {
-            return null;
-        }
+
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-        String nodeId = ObjectGraphUtils.getNodeId(id, entity);
+
+        String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
+        Node node = graph.getNode(nodeId);
 
         // If this node is already there in graph (may happen for bidirectional
         // relationship, do nothing and return null)
-        Node node = graph.getNode(nodeId);
         if (node != null)
         {
             if (node.isGraphCompleted())
             {
                 return node;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
-        /*
-         * Node node = graph.getNode(nodeId); if(node != null) { return node; }
-         */
 
         // Construct this Node first, if one not already there in Persistence
         // Cache
-        node = null;
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
 
         // Make a deep copy of entity data
-//        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
+        // Object nodeDataCopy = ObjectUtils.deepCopy(entity);
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, /*nodeDataCopy*/entity, initialNodeState, persistenceCache, id);
-
+            node = new Node(nodeId, /* nodeDataCopy */entity, initialNodeState, persistenceCache, id);
         }
         else
         {
@@ -146,10 +138,10 @@ public class ObjectGraphBuilder
             // If dirty, set the entity data into node and mark it as dirty
             if (!DeepEquals.deepEquals(node.getData(), entity))
             {
-                node.setData(/*nodeDataCopy*/entity);
+                node.setData(/* nodeDataCopy */entity);
                 node.setDirty(true);
             }
-            else if(node.isProcessed())
+            else if (node.isProcessed())
             {
                 node.setDirty(false);
             }
@@ -173,28 +165,36 @@ public class ObjectGraphBuilder
             // Child Object set in this entity
             Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            if (childObject != null)
+            if (childObject != null && !(childObject instanceof HibernateProxy))
             {
-                // This child object could be either an entity(1-1 or M-1) or a
+
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
+                if (metadata != null && relation.isJoinedByPrimaryKey())
+                {
+                    PropertyAccessorHelper.setId(childObject, metadata,
+                            PropertyAccessorHelper.getId(entity, entityMetadata));
+                }
+                // This child object could be either an entity(1-1 or M-1)
+                // or a
                 // collection/ Map of entities(1-M or M-M)
                 if (Collection.class.isAssignableFrom(childObject.getClass()))
                 {
-                    // For each entity in the collection, construct a child node
+                    // For each entity in the collection, construct a child
+                    // node
                     // and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
-                    if(childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
-                    
-                    for (Object childObj : childrenObjects)
-                    {
-                        if (childObj != null)
-                        {
-                            addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
-                        }
-                    }
+                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
 
+                        for (Object childObj : childrenObjects)
+                        {
+                            if (childObj != null)
+                            {
+                                addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
+                            }
+                        }
                 }
-                else if(Map.class.isAssignableFrom(childObject.getClass()))
+                else if (Map.class.isAssignableFrom(childObject.getClass()))
                 {
                     Map childrenObjects = (Map) childObject;
                     if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
@@ -203,7 +203,7 @@ public class ObjectGraphBuilder
                         {
                             addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
                         }
-                    }                  
+                    }
                 }
                 else
                 {
@@ -211,7 +211,6 @@ public class ObjectGraphBuilder
                     addChildNodesToGraph(graph, node, relation, childObject, initialNodeState);
                 }
             }
-
         }
 
         // Means compelte graph is build.
@@ -228,28 +227,29 @@ public class ObjectGraphBuilder
     private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject,
             NodeState initialNodeState)
     {
-        
-        if(childObject instanceof Map.Entry)
+
+        if (childObject instanceof Map.Entry)
         {
             Map.Entry entry = (Map.Entry) childObject;
             Object relObject = entry.getKey();
             Object entityObject = entry.getValue();
-            
+
             Node childNode = getNode(entityObject, graph, initialNodeState);
-            
-            if(childNode != null)
+
+            if (childNode != null)
             {
-                if( ! StringUtils.isEmpty(relation.getMappedBy()) 
-                        && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) == null) {
+                if (!StringUtils.isEmpty(relation.getMappedBy())
+                        && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) == null)
+                {
                     return;
                 }
-                
+
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
-                
+
                 nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
 
                 // Add Parent node to this child
@@ -280,8 +280,7 @@ public class ObjectGraphBuilder
                 node.addChildNode(nodeLink, childNode);
             }
         }
-        
-        
+
     }
 
     /**

@@ -245,5 +245,37 @@
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 		</properties>
 	</persistence-unit>
-
+	<persistence-unit name="imdbRDBMS">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:imdb" />
+			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.connection.pool_size" value="10" />
+			<property name="hibernate.connection.autocommit" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="imdbHbase">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="2181" />
+			<property name="kundera.keyspace" value="imdb" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+<!--			<property name="kundera.ddl.auto.prepare" value="create" />-->
+		</properties>
+	</persistence-unit>
+	
 </persistence>

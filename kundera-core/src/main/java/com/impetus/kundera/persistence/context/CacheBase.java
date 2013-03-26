@@ -27,6 +27,10 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraph;
+import com.impetus.kundera.graph.ObjectGraphUtils;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**
@@ -50,14 +54,25 @@ public class CacheBase
 
     public Node getNodeFromCache(String nodeId)
     {
-
         Node node = nodeMappings.get(nodeId);
-
-        // if (node != null)
-        // {
-        // // logCacheEvent("FETCHED FROM ", nodeId);
-        // }
         return node;
+    }
+
+    public Node getNodeFromCache(Object entity)
+    {
+        if (entity == null)
+        {
+            throw new IllegalArgumentException("Entity is null, can't check whether it's in persistence context");
+        }
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        Object primaryKey = PropertyAccessorHelper.getId(entity, entityMetadata);
+
+        if (primaryKey == null)
+        {
+            throw new IllegalArgumentException("Primary key not set into entity");
+        }
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
+        return getNodeFromCache(nodeId);
     }
 
     public void addNodeToCache(Node node)
@@ -98,7 +113,6 @@ public class CacheBase
 
             nodeMappings.put(node.getNodeId(), node);
             logCacheEvent("ADDED TO ", node.getNodeId());
-
         }
         else
         {
@@ -112,7 +126,6 @@ public class CacheBase
         {
             node.getPersistenceCache().getMainCache().addHeadNode(node);
         }
-
     }
 
     public void removeNodeFromCache(Node node)
@@ -133,7 +146,6 @@ public class CacheBase
 
     public void addGraphToCache(ObjectGraph graph, PersistenceCache persistenceCache)
     {
-
         // Add each node in the graph to cache
         for (String key : graph.getNodeMapping().keySet())
         {
@@ -147,15 +159,13 @@ public class CacheBase
                 persistenceCache.getMainCache().getHeadNodes().remove(thisNode);
             }
         }
-
         // Add head Node to list of head nodes
         addHeadNode(graph.getHeadNode());
-
     }
 
     private void logCacheEvent(String eventType, String nodeId)
     {
-        if(log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
             log.debug("Node: " + nodeId + ":: " + eventType + " Persistence Context");
         }

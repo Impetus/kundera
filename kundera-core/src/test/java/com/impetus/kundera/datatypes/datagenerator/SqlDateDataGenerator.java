@@ -18,7 +18,7 @@ public class SqlDateDataGenerator implements DataGenerator<Date>
     public Date maxValue()
     {
 
-        return new Date(Integer.MAX_VALUE);
+        return new Date(Long.MAX_VALUE);
     }
 
     @Override

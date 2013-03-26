@@ -17,7 +17,6 @@ package com.impetus.client.neo4j.imdb;
 
 import java.util.List;
 
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import org.junit.After;
@@ -38,8 +37,7 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(IMDB_PU);
-        em = emf.createEntityManager();
+        init();
 
         // Prepare and insert data
         populateActors();
@@ -145,8 +143,8 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
 
     private void findActorWithinGivenIdRange()
     {
-        //Records are inclusive of range boundaries
-        Query query = em.createNativeQuery("ACTOR_ID:[1 TO 2]", Actor.class); 
+        // Records are inclusive of range boundaries
+        Query query = em.createNativeQuery("ACTOR_ID:[1 TO 2]", Actor.class);
         List<Actor> actors = query.getResultList();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -156,8 +154,8 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
     private void findMoviesBetweenAPeriod()
     {
         // Between
-        //Records are exclusive of range boundaries
-        Query query = em.createNativeQuery("YEAR:{1989 TO 2007}", Movie.class);       
+        // Records are exclusive of range boundaries
+        Query query = em.createNativeQuery("YEAR:{1989 TO 2007}", Movie.class);
         List<Movie> movies = query.getResultList();
         Assert.assertNotNull(movies);
         Assert.assertFalse(movies.isEmpty());
@@ -168,7 +166,7 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
     private void findMoviesGreaterThanLessThanYear()
     {
         // Greater-than/ Less Than
-        Query query = em.createNativeQuery("YEAR:[2005 TO 2010]", Movie.class);       
+        Query query = em.createNativeQuery("YEAR:[2005 TO 2010]", Movie.class);
         List<Movie> movies = query.getResultList();
         Assert.assertNotNull(movies);
         Assert.assertFalse(movies.isEmpty());
@@ -177,7 +175,7 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
 
     private void findMoviesUsingIdOrTitle()
     {
-        Query query = em.createNativeQuery("MOVIE_ID:m1 OR TITLE:Miss*", Movie.class);        
+        Query query = em.createNativeQuery("MOVIE_ID:m1 OR TITLE:Miss*", Movie.class);
         List<Movie> movies = query.getResultList();
         Assert.assertNotNull(movies);
         Assert.assertFalse(movies.isEmpty());
@@ -192,7 +190,7 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
 
     private void findMoviesUsingIdOrTitleOrYear()
     {
-        Query query = em.createNativeQuery("MOVIE_ID:m1 OR TITLE:Miss* OR YEAR:2009", Movie.class);        
+        Query query = em.createNativeQuery("MOVIE_ID:m1 OR TITLE:Miss* OR YEAR:2009", Movie.class);
         List<Movie> movies = query.getResultList();
         Assert.assertNotNull(movies);
         Assert.assertFalse(movies.isEmpty());

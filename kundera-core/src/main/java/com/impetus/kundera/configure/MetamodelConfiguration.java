@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Table;
 import javax.persistence.metamodel.Metamodel;
 
@@ -41,12 +43,15 @@ import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.InvalidConfigurationException;
@@ -206,6 +211,7 @@ public class MetamodelConfiguration implements Configuration
         Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
         Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl) metamodel).getEntityNameToClassMap();
         Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
+        Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap = new HashMap<String, IdDiscriptor>();
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
         if (resources != null)
@@ -220,7 +226,7 @@ public class MetamodelConfiguration implements Configuration
                     while ((is = itr.next()) != null)
                     {
                         classes.addAll(scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap,
-                                persistenceUnit, client, puToClazzMap));
+                                persistenceUnit, client, puToClazzMap, entityNameToKeyDiscriptorMap));
                     }
                 }
                 catch (IOException e)
@@ -234,7 +240,7 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
-
+        ((MetamodelImpl) metamodel).addKeyValues(entityNameToKeyDiscriptorMap);
         // assign JPA metamodel.
         ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getEmbeddables());
@@ -243,6 +249,7 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
+        // processGeneratedValueAnnotation(classes, persistenceUnit);
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
 
     }
@@ -257,12 +264,7 @@ public class MetamodelConfiguration implements Configuration
     {
         for (Class clazz : classes)
         {
-            String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
-            String pu = null;
-            if (schema != null && schema.indexOf("@") > 0)
-            {
-                pu = schema.substring(schema.indexOf("@") + 1, schema.length());
-            }
+            String pu = getPersistenceUnitOfEntity(clazz);
             EntityValidator validator = new EntityValidatorImpl(getExternalProperties(persistenceUnit));
             if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
                     && persistenceUnit.equalsIgnoreCase(pu))
@@ -270,6 +272,17 @@ public class MetamodelConfiguration implements Configuration
                 validator.validateEntity(clazz);
             }
         }
+    }
+
+    private String getPersistenceUnitOfEntity(Class clazz)
+    {
+        String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
+        String pu = null;
+        if (schema != null && schema.indexOf("@") > 0)
+        {
+            pu = schema.substring(schema.indexOf("@") + 1, schema.length());
+        }
+        return pu;
     }
 
     /**
@@ -283,6 +296,7 @@ public class MetamodelConfiguration implements Configuration
      *            the entity metadata map
      * @param entityNameToClassMap
      *            the entity name to class map
+     * @param keyDiscriptor
      * @param persistence
      *            unit the persistence unit.
      * @throws IOException
@@ -290,7 +304,8 @@ public class MetamodelConfiguration implements Configuration
      */
     private List<Class<?>> scanClassAndPutMetadata(InputStream bits, Reader reader,
             Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
-            String persistenceUnit, String client, Map<String, List<String>> clazzToPuMap) throws IOException
+            String persistenceUnit, String client, Map<String, List<String>> clazzToPuMap,
+            Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap) throws IOException
     {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
@@ -351,6 +366,8 @@ public class MetamodelConfiguration implements Configuration
                                 {
                                     entityMetadataMap.put(clazz, metadata);
                                     mapClazztoPu(clazz, persistenceUnit, clazzToPuMap);
+                                    processGeneratedValueAnnotation(clazz, persistenceUnit, metadata,
+                                            entityNameToKeyDiscriptorMap);
                                 }
                             }
                         }
@@ -358,7 +375,6 @@ public class MetamodelConfiguration implements Configuration
 
                     // TODO :
                     onValidateClientProperties(classes, clazz, persistenceUnit);
-
                 }
             }
         }
@@ -461,6 +477,22 @@ public class MetamodelConfiguration implements Configuration
         {
             throw new InvalidConfigurationException(
                     "For cross data store persistence, please specify as: Map {pu,Map of properties}");
+        }
+    }
+
+    private void processGeneratedValueAnnotation(Class<?> clazz, String persistenceUnit, EntityMetadata m,
+            Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap)
+    {
+        GeneratedValueProcessor processer = new GeneratedValueProcessor();
+        String pu = getPersistenceUnitOfEntity(clazz);
+        if (pu != null && pu.equals(persistenceUnit))
+        {
+            Field f = (Field) m.getIdAttribute().getJavaMember();
+
+            if (f.isAnnotationPresent(GeneratedValue.class))
+            {
+                processer.process(clazz, f, m, entityNameToKeyDiscriptorMap);
+            }
         }
     }
 }

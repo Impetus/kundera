@@ -27,88 +27,85 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Person Entity Class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="PERSON_LOCATION", schema = "KunderaExamples@mongoTest")
-@IndexCollection(columns = { @Index(name = "currentLocation", type = "GEO2D")})
-public class Person
-{
-    @Id
-    @Column(name = "PERSON_ID")
-    private int personId;    
-    
-    @Column(name = "PERSON_NAME")
-    private String name;
-  
-    @Column(name = "CURRENT_LOCATION")
-    private Point currentLocation;
+@Table(name = "PERSON_LOCATION", schema = "KunderaExamples@mongoTest")
+@IndexCollection(columns = { @Index(name = "currentLocation", type = "GEO2D") })
+public class Person {
+	@Id
+	@Column(name = "PERSON_ID")
+	private int personId;
 
-    @Embedded
-    private Vehicle vehicle;
-    /**
-     * @return the personId
-     */
-    public int getPersonId()
-    {
-        return personId;
-    }
+	@Column(name = "PERSON_NAME")
+	private String name;
 
-    /**
-     * @param personId the personId to set
-     */
-    public void setPersonId(int personId)
-    {
-        this.personId = personId;
-    }
+	@Column(name = "CURRENT_LOCATION")
+	private Point currentLocation;
 
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
+	@Embedded
+	private Vehicle vehicle;
 
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
-    }
+	/**
+	 * @return the personId
+	 */
+	public int getPersonId() {
+		return personId;
+	}
 
-    /**
-     * @return the currentLocation
-     */
-    public Point getCurrentLocation()
-    {
-        return currentLocation;
-    }
+	/**
+	 * @param personId
+	 *            the personId to set
+	 */
+	public void setPersonId(int personId) {
+		this.personId = personId;
+	}
 
-    /**
-     * @param currentLocation the currentLocation to set
-     */
-    public void setCurrentLocation(Point currentLocation)
-    {
-        this.currentLocation = currentLocation;
-    }
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @return the vehicle
-     */
-    public Vehicle getVehicle()
-    {
-        return vehicle;
-    }
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * @param vehicle the vehicle to set
-     */
-    public void setVehicle(Vehicle vehicle)
-    {
-        this.vehicle = vehicle;
-    }   
-    
+	/**
+	 * @return the currentLocation
+	 */
+	public Point getCurrentLocation() {
+		return currentLocation;
+	}
+
+	/**
+	 * @param currentLocation
+	 *            the currentLocation to set
+	 */
+	public void setCurrentLocation(Point currentLocation) {
+		this.currentLocation = currentLocation;
+	}
+
+	/**
+	 * @return the vehicle
+	 */
+	public Vehicle getVehicle() {
+		return vehicle;
+	}
+
+	/**
+	 * @param vehicle
+	 *            the vehicle to set
+	 */
+	public void setVehicle(Vehicle vehicle) {
+		this.vehicle = vehicle;
+	}
+
 }

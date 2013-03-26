@@ -7,8 +7,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
-
 /**
  * @author Kuldeep Mishra
  * 
@@ -35,7 +33,7 @@ public class ZkShutDownTest
     @Test
     public void test()
     {
-        HBaseCli.cleanUp();
+//        HBaseCli.cleanUp();
     }
 
 }

@@ -29,32 +29,32 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Movie entity containing all data type fields 
+ * Movie entity containing all data type fields
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table
-@IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
+@IndexCollection(columns = { @Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS") })
 public class MovieAllDataType
 {
     @Id
-    @Column(name="MOVIE_ID")
+    @Column(name = "MOVIE_ID")
     private String id;
-    
-    @Column(name="TITLE")
+
+    @Column(name = "TITLE")
     private String title;
-    
-    @Column(name="YEAR")
-    private int year;      
-    
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy="movies")
+
+    @Column(name = "YEAR")
+    private int year;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "movies")
     private Map<RoleAllDataType, ActorAllDataType> actors;
-    
+
     public MovieAllDataType()
     {
     }
-    
-    
+
     public MovieAllDataType(String id, String title, int year)
     {
         super();
@@ -63,11 +63,10 @@ public class MovieAllDataType
         this.year = year;
     }
 
-
-
     public void addActor(RoleAllDataType role, ActorAllDataType actor)
     {
-        if(actors == null) actors = new HashMap<RoleAllDataType, ActorAllDataType>();
+        if (actors == null)
+            actors = new HashMap<RoleAllDataType, ActorAllDataType>();
         actors.put(role, actor);
     }
 
@@ -80,7 +79,8 @@ public class MovieAllDataType
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(String id)
     {
@@ -96,7 +96,8 @@ public class MovieAllDataType
     }
 
     /**
-     * @param title the title to set
+     * @param title
+     *            the title to set
      */
     public void setTitle(String title)
     {
@@ -112,7 +113,8 @@ public class MovieAllDataType
     }
 
     /**
-     * @param year the year to set
+     * @param year
+     *            the year to set
      */
     public void setYear(int year)
     {
@@ -128,11 +130,12 @@ public class MovieAllDataType
     }
 
     /**
-     * @param actors the actors to set
+     * @param actors
+     *            the actors to set
      */
     public void setActors(Map<RoleAllDataType, ActorAllDataType> actors)
     {
         this.actors = actors;
-    }  
+    }
 
 }

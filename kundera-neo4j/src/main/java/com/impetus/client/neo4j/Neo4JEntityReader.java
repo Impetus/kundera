@@ -24,14 +24,12 @@ import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 
 /**
- * Entity Reader for Neo4J 
+ * Entity Reader for Neo4J
+ * 
  * @author amresh.singh
  */
-public class Neo4JEntityReader  extends AbstractEntityReader implements EntityReader
+public class Neo4JEntityReader extends AbstractEntityReader implements EntityReader
 {
-
-    
-    
 
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
@@ -43,7 +41,6 @@ public class Neo4JEntityReader  extends AbstractEntityReader implements EntityRe
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method supported not required for Neo4J");
-    }  
-    
+    }
 
 }

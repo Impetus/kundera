@@ -20,12 +20,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -89,8 +93,26 @@ public class ConfiguratorTest
         Assert.assertEquals(kundera_client, puMetadata.getClient());
         Assert.assertEquals(true, puMetadata.getExcludeUnlistedClasses());
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
+//        emf.close();
     }
 
+//    @Test
+    public void testEntityListener()
+    {
+        EntityManagerFactory emf = getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
+        PersonnelDTO dto = new PersonnelDTO();
+        dto.setFirstName("Vivek");
+        dto.setLastName("vivek");
+        dto.setPersonId("1_p");
+        em.persist(dto);
+        PersonnelDTO result = em.find(PersonnelDTO.class, "1_p");
+        Assert.assertNotNull(result);
+        Assert.assertEquals("Mishra", result.getLastName());
+        emf.close();
+        
+    }
+    
     /**
      * Test invalid configure.
      */
@@ -123,43 +145,56 @@ public class ConfiguratorTest
     @After
     public void tearDown() throws Exception
     {
+        
     }
 
     /**
+    * Gets the entity manager factory.
+    *
+    * @param useLucene
+    * @param property
+    *
+    * @return the entity manager factory
+    */
+        private EntityManagerFactoryImpl getEntityManagerFactory()
+        {
+            ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+            Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
+
+            List<String> pus = new ArrayList<String>();
+            pus.add(_persistenceUnit);
+            clazzToPu.put(PersonnelDTO.class.getName(), pus);
+
+            appMetadata.setClazzToPuMap(clazzToPu);
+
+            EntityMetadata m = new EntityMetadata(PersonnelDTO.class);
+
+            TableProcessor processor = new TableProcessor(null);
+            processor.process(PersonnelDTO.class, m);
+
+            m.setPersistenceUnit(_persistenceUnit);
+
+            MetamodelImpl metaModel = new MetamodelImpl();
+            metaModel.addEntityMetadata(PersonnelDTO.class, m);
+
+            metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+            metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+            metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
+
+            appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
+            return null;
+        }
+   /* *//**
      * Gets the entity manager factory.
      * 
      * @param useLucene
      * @param property
      * 
      * @return the entity manager factory
-     */
-    private EntityManagerFactoryImpl getEntityManagerFactory()
+     *//*
+    private EntityManagerFactory getEntityManagerFactory()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(_persistenceUnit);
-        clazzToPu.put(PersonnelDTO.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        EntityMetadata m = new EntityMetadata(PersonnelDTO.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(PersonnelDTO.class, m);
-
-        m.setPersistenceUnit(_persistenceUnit);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PersonnelDTO.class, m);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
-        return null;
-    }
+        return Persistence.createEntityManagerFactory(_persistenceUnit);
+    }*/
 }

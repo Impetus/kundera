@@ -110,7 +110,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
-            if (tableInfo.isIndexable())
+            boolean isCappedCollection = isCappedCollection(tableInfo);
+            if (tableInfo.isIndexable() && ! isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
             }
@@ -147,7 +148,12 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 collection = db.createCollection(tableInfo.getTableName(), options);
             }
             collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
-            createIndexes(tableInfo, collection);
+            
+            boolean isCappedCollection = isCappedCollection(tableInfo);
+            if (tableInfo.isIndexable() && ! isCappedCollection)
+            {
+                createIndexes(tableInfo, collection);
+            }            
         }
     }
 
@@ -219,8 +225,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     private DBObject setCollectionProperties(TableInfo tableInfo)
     {
-        boolean isCappedCollection = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd
-                .isCappedCollection(databaseName, tableInfo.getTableName()) : false;
+        boolean isCappedCollection = isCappedCollection(tableInfo);
         DBObject options = new BasicDBObject();
         if (isCappedCollection)
         {
@@ -233,6 +238,16 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             options.put(MongoDBConstants.MAX, max);
         }
         return options;
+    }
+
+    /**
+     * Checks whether the given table is a capped collection
+     */
+    protected boolean isCappedCollection(TableInfo tableInfo)
+    {
+        boolean isCappedCollection = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd
+                .isCappedCollection(databaseName, tableInfo.getTableName()) : false;
+        return isCappedCollection;
     }
 
     /**

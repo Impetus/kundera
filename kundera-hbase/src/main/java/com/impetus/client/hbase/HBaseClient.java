@@ -18,6 +18,7 @@ package com.impetus.client.hbase;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
@@ -51,6 +52,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -60,6 +62,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -71,7 +74,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
+        TableGenerator
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -167,30 +171,39 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         {
             return null;
         }
-        for (Object rowKey : rowIds)
-        {
+//        for (Object rowKey : rowIds)
+//        {
             E e = null;
-            try
+            /*try
             {
                 if (rowKey != null)
-                {
-                    List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                            entityMetadata, rowKey, entityMetadata.getRelationNames());
-                    if (results != null)
+                {*/
+                    List results;
+                    try
                     {
-                        e = (E) results.get(0);
-                        entities.add(e);
+                        results = handler.readAll(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                                entityMetadata, Arrays.asList(rowIds), entityMetadata.getRelationNames());
                     }
-                }
-            }
+                    catch (IOException e1)
+                    {
+                        log.error("Error during find All, Caused by:" , e1);
+                        throw new KunderaException(e1);
+                    }
+/*                    if (results != null)
+                    {
+//                        e = (E) results.get(0);
+                        entities.addAll(results);
+                    }
+//*/                /*}*/
+            /*}
             catch (IOException ioex)
             {
                 log.error("Error during find All, Caused by:" + ioex);
                 throw new KunderaException(ioex);
-            }
+            }*/
 
-        }
-        return entities;
+//        }
+        return results;
     }
 
     /*
@@ -213,13 +226,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 E e = null;
                 try
                 {
-
                     List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
                             entityMetadata, entityId, null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
-                        // entities.add(e);
                     }
                 }
                 catch (IOException ioex)
@@ -405,7 +416,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> relations)
     {
         String tableName = entityMetadata.getTableName();
-       
+
         try
         {
             // Write data to HBase
@@ -648,7 +659,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public int executeBatch()
     {
 
-        Map<HTable, List<HBaseDataWrapper>> data = new HashMap<HTable, List<HBaseDataWrapper>>();
+        Map<HTableInterface, List<HBaseDataWrapper>> data = new HashMap<HTableInterface, List<HBaseDataWrapper>>();
 
         try
         {
@@ -656,7 +667,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 if (node.isDirty())
                 {
-                    HTable hTable = null;
+                    HTableInterface hTable = null;
                     Object rowKey = node.getEntityId();
                     Object entity = node.getData();
                     if (node.isInState(RemovedState.class))
@@ -774,5 +785,29 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
+    }
+
+    @Override
+    public Long generate(TableGeneratorDiscriptor discriptor)
+    {
+        try
+        {
+            HTableInterface hTable = ((HBaseDataHandler) handler).gethTable(discriptor.getTable());
+            Long latestCount = hTable.incrementColumnValue(discriptor.getPkColumnValue().getBytes(), discriptor
+                    .getTable().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
+            if (latestCount == 1)
+            {
+                return (long) discriptor.getInitialValue();
+            }
+            else
+            {
+                return (latestCount - 1) * discriptor.getAllocationSize();
+            }
+        }
+        catch (IOException e)
+        {
+            log.error("Error while executing batch insert/update, Caused by: " + e);
+            throw new KunderaException(e);
+        }
     }
 }
