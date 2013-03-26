@@ -15,26 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.TableGenerator;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.persistence.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.impetus.kundera.utils.ReflectUtils.collectFieldsInClassHierarchy;
 
 /**
  * Validates entity for JPA rules.
@@ -104,7 +99,9 @@ public class EntityValidatorImpl implements EntityValidator
         // must have a default no-argument constructor
         try
         {
-            clazz.getConstructor();
+            if(!Modifier.isAbstract(clazz.getModifiers())){
+                clazz.getConstructor();
+            }
         }
         catch (NoSuchMethodException nsme)
         {
@@ -115,7 +112,7 @@ public class EntityValidatorImpl implements EntityValidator
         // Check for @Key and ensure that there is just 1 @Key field of String
         // type.
         List<Field> keys = new ArrayList<Field>();
-        for (Field field : clazz.getDeclaredFields())
+        for (Field field : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class, Inheritance.class))
         {
             if (field.isAnnotationPresent(Id.class) && field.isAnnotationPresent(EmbeddedId.class))
             {

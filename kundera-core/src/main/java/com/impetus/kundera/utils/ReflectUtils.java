@@ -15,15 +15,17 @@
  ******************************************************************************/
 package com.impetus.kundera.utils;
 
+import com.impetus.kundera.KunderaException;
+import org.apache.commons.lang.ArrayUtils;
+
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import com.impetus.kundera.KunderaException;
-
 /**
  * The Class ReflectUtils.
- * 
+ *
  * @author animesh.kumar
  */
 public class ReflectUtils
@@ -39,12 +41,12 @@ public class ReflectUtils
 
     /**
      * Checks for interface "has" in class "in".
-     * 
+     *
      * @param has
      *            the has
      * @param in
      *            the in
-     * 
+     *
      * @return true, if exists?
      */
     public static boolean hasInterface(Class<?> has, Class<?> in)
@@ -75,10 +77,10 @@ public class ReflectUtils
 
     /**
      * Gets the type arguments.
-     * 
+     *
      * @param property
      *            the property
-     * 
+     *
      * @return the type arguments
      */
     public static Type[] getTypeArguments(Field property)
@@ -93,12 +95,12 @@ public class ReflectUtils
 
     /**
      * Checks for super "has" in class "in".
-     * 
+     *
      * @param has
      *            the has
      * @param in
      *            the in
-     * 
+     *
      * @return true, if exists?
      */
     public static boolean hasSuperClass(Class<?> has, Class<?> in)
@@ -119,7 +121,7 @@ public class ReflectUtils
 
     /**
      * Loads class with className using classLoader.
-     * 
+     *
      * @param className
      *            the class name
      * @param classLoader
@@ -163,7 +165,7 @@ public class ReflectUtils
 
     /**
      * Strip enhancer class.
-     * 
+     *
      * @param c
      *            the c
      * @return the class
@@ -190,4 +192,41 @@ public class ReflectUtils
         return c;
     }
 
+
+    /**
+     * Checks if a class has one of the provided annotations
+     * @param clazz source class
+     * @param annotations annotations to be found
+     * @return true if class has at least one of the presented annotations
+     */
+    public static boolean isAnnotationPresent(final Class<?> clazz, Class<? extends Annotation>... annotations){
+        for(Class<? extends Annotation> annotation : annotations){
+            if(clazz.getAnnotation(annotation) != null){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Collects all the fields from classes within class hierarchy
+     * Gets the fields from source class and its parents only if the specified annotation is present on the parent
+     * classes
+     *
+     * @param sourceClass base class to start the fields collecting
+     * @param onlyWithAnnotations collects the fields from the parent classes only if any of these annotations is present
+     * @return all found fields
+     */
+    public static Field[] collectFieldsInClassHierarchy(final Class<?> sourceClass,
+                                                        Class<? extends Annotation>... onlyWithAnnotations) {
+        Field[] fields = {};
+        Class<?> clazz = sourceClass;
+        while (clazz != null) {
+            if (clazz == sourceClass || isAnnotationPresent(clazz, onlyWithAnnotations)) {
+                fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return fields;
+    }
 }

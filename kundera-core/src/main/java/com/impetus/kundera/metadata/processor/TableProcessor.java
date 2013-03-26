@@ -15,29 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
-import javassist.Modifier;
-
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.GeneratedValue;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PersistenceException;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.transaction.NotSupportedException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -49,6 +26,18 @@ import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import javassist.Modifier;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.persistence.*;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+import java.lang.reflect.Field;
+import java.util.Map;
+
+import static com.impetus.kundera.utils.ReflectUtils.collectFieldsInClassHierarchy;
 
 /**
  * Metadata processor class for persistent entities.
@@ -133,7 +122,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     .getMetaModelBuilder(metadata.getPersistenceUnit());
             metaModelBuilder.process(clazz);
 
-            for (Field f : clazz.getDeclaredFields())
+            for (Field f : collectFieldsInClassHierarchy(clazz, MappedSuperclass.class, Inheritance.class))
             {
                 if (f != null && !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
                         && !f.isAnnotationPresent(Transient.class))
