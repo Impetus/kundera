@@ -582,9 +582,15 @@ public abstract class CassandraDataHandlerBase
             {
                 if (column != null)
                 {
-                    // entity = initialize(tr, m, entity);
-                    entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
-
+                    // entity = initialize(tr, m, entity);                          
+                    
+                    String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+                    if("key".equals(thriftColumnName) && tr.getId() == null)
+                    {
+                        entity = initialize(m, entity, null);     
+                        PropertyAccessorHelper.setId(entity, m, column.getValue());
+                    }                    
+                    entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations); 
                 }
             }
 
@@ -1029,10 +1035,12 @@ public abstract class CassandraDataHandlerBase
                 MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getMetamodel(m.getPersistenceUnit());
                 String fieldName = m.getFieldName(thriftColumnName);
-                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;              
+                
+                
                 if (attribute != null)
                 {
-                    entity = initialize(m, entity, null);
+                    entity = initialize(m, entity, null);                    
                     String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                     if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                             && thriftColumnName.equals(idColumnName))
@@ -1045,7 +1053,7 @@ public abstract class CassandraDataHandlerBase
                 {
                     if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                     {
-                        entity = initialize(m, entity, null);
+                        entity = initialize(m, entity, null);                        
                         EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
                         try
                         {
