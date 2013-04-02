@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -46,8 +45,6 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
@@ -58,7 +55,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.CacheBase;
@@ -161,8 +157,9 @@ public final class PersistenceDelegator
         // Invoke Pre-Persist Events.
         try
         {
-        getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-        } catch(Exception es)
+            getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+        }
+        catch (Exception es)
         {
             es.printStackTrace();
         }
@@ -439,7 +436,6 @@ public final class PersistenceDelegator
                     EntityMetadata metadata = getMetadata(node.getDataClass());
                     node.setClient(getClient(metadata));
 
-
                     // if batch size is defined.
                     if ((node.getClient() instanceof Batcher) && ((Batcher) (node.getClient())).getBatchSize() > 0)
                     {
@@ -447,16 +443,14 @@ public final class PersistenceDelegator
                         ((Batcher) (node.getClient())).addBatch(node);
                     }
                     else if (isTransactionInProgress
-                                && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit()))
-                        {
-                            onSynchronization(node, metadata);
-                        }
-                        else
-                        {
-                            node.flush();
-                        }
-                    //}
-
+                            && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit()))
+                    {
+                        onSynchronization(node, metadata);
+                    }
+                    else
+                    {
+                        node.flush();
+                    }
                 }
             }
 
@@ -832,7 +826,7 @@ public final class PersistenceDelegator
                     {
                         for (Object pk : jtData.getJoinTableRecords().keySet())
                         {
-                            client.deleteByColumn(jtData.getSchemaName(), jtData.getJoinTableName(),
+                            client.deleteByColumn(m.getSchema(), jtData.getJoinTableName(),
                                     ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), pk);
                         }
                         jtData.setProcessed(true);

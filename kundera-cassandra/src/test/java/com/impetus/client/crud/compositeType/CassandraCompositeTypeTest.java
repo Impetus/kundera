@@ -102,6 +102,7 @@ public class CassandraCompositeTypeTest
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
+//        user.setNickName(NickName.KK);
         em.persist(user);
         em.flush();
 

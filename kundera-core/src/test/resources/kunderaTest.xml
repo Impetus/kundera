@@ -29,7 +29,6 @@
 						<property name="strategy.class" value="SimpleStrategy" />
 						<property name="replcation.factor" value="1" />
 						<property name="durable.writes" value="true" />
-						<property name="inverted.indexing.enabled" value="true" />
 					</properties>
 					<dataCenters>
 						<dataCenter>
@@ -54,7 +53,16 @@
 								<property name="comparator.type" value="UTF8Type"></property>
 							</properties>
 						</table>
-
+						<table>
+							<name>CASSANDRASUPERUSER</name>
+							<properties>
+								<property name="default.validation.class" value="UTF8Type"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+								<property name="comment" value="User Super Column Family"></property>
+								<property name="comparator.type" value="BytesType"></property>
+								<property name="subcomparator.type" value="BytesType"></property>
+							</properties>
+						</table>
 					</tables>
 				</schema>
 				<schema>

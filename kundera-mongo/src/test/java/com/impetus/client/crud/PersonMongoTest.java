@@ -68,6 +68,22 @@ public class PersonMongoTest extends BaseTest
         Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
         Object p3 = prepareMongoInstance("3", 15);
+        
+        Query findQuery = em.createQuery("Select p from PersonMongo p");
+        List<PersonMongo> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+
+        findQuery = em.createQuery("Select p from PersonMongo p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
+        findQuery = em.createQuery("Select p.age from PersonMongo p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);

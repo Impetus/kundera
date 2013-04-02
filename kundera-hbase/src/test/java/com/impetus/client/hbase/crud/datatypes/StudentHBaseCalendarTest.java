@@ -359,8 +359,8 @@ public class StudentHBaseCalendarTest extends Base
                 + getPartialValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
-        Assert.assertNull(students);
-      
+        Assert.assertNotNull(students);
+        Assert.assertTrue(students.isEmpty());      
         em.close();
     }
 
@@ -375,7 +375,8 @@ public class StudentHBaseCalendarTest extends Base
                 + getPartialValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
-        Assert.assertNull(students);
+        Assert.assertNotNull(students);
+        Assert.assertTrue(students.isEmpty());
 
         em.close();
 

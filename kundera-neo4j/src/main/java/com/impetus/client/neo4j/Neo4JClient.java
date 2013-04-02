@@ -527,7 +527,6 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             Class<?> targetEntityClass = relation.getTargetEntity();
             EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);
             Field property = relation.getProperty();
-
             if (relation.getPropertyType().isAssignableFrom(Map.class))
             {
                 Map<Object, Object> targetEntitiesMap = new HashMap<Object, Object>();

@@ -47,7 +47,7 @@ public abstract class BaseTest
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
         o.setAge(age);
-        o.setDay(Day.MONDAY);
+        o.setDay(Day.THURSDAY);
         return o;
     }
 

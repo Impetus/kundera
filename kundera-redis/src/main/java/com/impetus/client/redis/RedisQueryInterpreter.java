@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**

@@ -195,26 +195,11 @@ public class MongoDBClientFactory extends GenericClientFactory
 
             PopulateMongoOptions.populateMongoOptions(mo, p);
         }
-        // else if (metadata != null && metadata.getConnections() != null &&
-        // !metadata.getConnections().isEmpty())
-        // {
-        // addrs = new ArrayList<ServerAddress>();
-        // for (MongoDBConnection connection : metadata.getConnections())
-        // {
-        // logger.info("Connecting to mongodb at " + connection.getHost() +
-        // " on port " + connection.getPort());
-        // addrs.add(new ServerAddress(connection.getHost(),
-        // Integer.parseInt(connection.getPort())));
-        // }
-        // mongo = new Mongo(addrs);
-        // mo = mongo.getMongoOptions();
-        // mo.socketTimeout = metadata.getSocketTimeOut();
-        // mongo.setReadPreference(metadata.getReadPreference());
-        // }
         else
         {
             logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
             mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+            mo = mongo.getMongoOptions();
         }
         // setting server property.
 

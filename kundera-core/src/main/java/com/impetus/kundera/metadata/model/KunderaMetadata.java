@@ -125,7 +125,16 @@ public class KunderaMetadata
 
     public void unloadKunderaMetadata(final String pu)
     {
-        this.clientMetadata.remove(pu);
+        ClientMetadata clientMetadata = getClientMetadata(pu);
+        if (clientMetadata != null)
+        {
+            this.clientMetadata.remove(pu);
+            clientMetadata.setClientImplementor(null);
+            clientMetadata.setIndexImplementor(null);
+            clientMetadata.setLuceneIndexDir(null);
+            clientMetadata = null;
+        }
+        // this.clientMetadata.clear();
         this.getApplicationMetadata().unloadApplicationMatadata(pu);
     }
 }

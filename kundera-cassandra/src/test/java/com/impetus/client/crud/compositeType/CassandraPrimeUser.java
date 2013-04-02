@@ -20,38 +20,46 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 @Entity
-@Table(name="CompositeUser", schema = "CompositeCassandra@composite_pu")
-//@Index(index = true,columns = { "tweetBody","tweetDate" })
+@Table(name = "CompositeUser", schema = "CompositeCassandra@composite_pu")
+// @Index(index = true,columns = { "tweetBody","tweetDate" })
 public class CassandraPrimeUser
 {
-    
+
     @EmbeddedId
     private CassandraCompoundKey key;
-    
+
     @Column
     private String tweetBody;
-    
-    @Column 
+
+    @Column
     private Date tweetDate;
 
-    
+    @Column
+    private String name;
+
+//    @Column
+//    @Enumerated(EnumType.STRING)
+//    private NickName nickName;
+
     public CassandraPrimeUser()
     {
     }
-    
+
     public CassandraPrimeUser(CassandraCompoundKey key)
     {
         this.key = key;
     }
-    
+
     /**
      * @return the key
      */
@@ -77,7 +85,8 @@ public class CassandraPrimeUser
     }
 
     /**
-     * @param tweetBody the tweetBody to set
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -85,12 +94,38 @@ public class CassandraPrimeUser
     }
 
     /**
-     * @param tweetDate the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
         this.tweetDate = tweetDate;
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+//    public NickName getNickName()
+//    {
+//        return nickName;
+//    }
+//
+//    public void setNickName(NickName nickName)
+//    {
+//        this.nickName = nickName;
+//    }
+//
+//    enum NickName
+//    {
+//        KK, VM, AS;
+//    }
+    
     
 }

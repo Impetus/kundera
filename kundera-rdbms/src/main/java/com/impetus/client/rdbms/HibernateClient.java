@@ -18,7 +18,6 @@ package com.impetus.client.rdbms;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 
 import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
@@ -52,8 +48,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
@@ -61,6 +55,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.vividsolutions.jtsexample.io.gml2.KMLReaderExample;
 
 /**
  * The Class HibernateClient.
@@ -69,10 +64,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  */
 public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
-
-    /** The conf. */
-    private Configuration conf;
-
     /** The sf. */
     private SessionFactory sf;
 
@@ -81,8 +72,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     /** The reader. */
     private EntityReader reader;
-
-    private ServiceRegistry serviceRegistry;
 
     private Map<String, Object> puProperties;
 
@@ -101,24 +90,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            Map<String, Object> puProperties)
+            SessionFactory sf, Map<String, Object> puProperties)
     {
-        conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
-        Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                persistenceUnit)).getEntityNameToClassMap().values();
-        // to keep hibernate happy! As in our case all scanned classes are not
-        // meant for rdbms, so initally i have set depth to zero!
-        conf.setProperty("hibernate.max_fetch_depth", "0");
-
-        serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
-        // / sessionFactory =
-        // configuration.buildSessionFactory(serviceRegistry);
-        for (Class<?> c : classes)
-        {
-            conf.addAnnotatedClass(c);
-        }
-        sf = conf.buildSessionFactory(serviceRegistry);
-
+        this.sf = sf;
         // TODO . once we clear this persistenceUnit stuff we need to simply
         // modify this to have a properties or even pass an EMF!
         this.persistenceUnit = persistenceUnit;
@@ -138,14 +112,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.indexManager.flush();
         if (s != null)
         {
-            s.close();
+            s.close();            
             s = null;
-
         }
-        if (sf != null && !sf.isClosed())
-        {
-            sf.close();
-        }
+        puProperties = null;
     }
 
     /*
@@ -237,8 +207,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
         Transaction tx = null;
-        
-        s = /* getStatelessSession() */getSessionFactory().openStatelessSession();
+
+        s = getSessionFactory().openStatelessSession();
         tx = s.beginTransaction();
         try
         {
@@ -279,7 +249,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (HibernateException e)
         {
-            log.info(e.getMessage());
+            log.error(e);
+            e.printStackTrace();
             throw new PersistenceException(e);
         }
         finally
@@ -293,7 +264,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String schemaName = joinTableData.getSchemaName();
+        String schemaName = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass()).getSchema();
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -342,8 +313,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             Object columnValue, Class entityClazz)
     {
         String childIdStr = (String) columnValue;
-        // EntityMetadata m =
-        // KunderaMetadataManager.getEntityMetadata(entityClazz);
         StringBuffer sqlQuery = new StringBuffer();
         sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(getFromClause(schemaName, tableName))
                 .append(" WHERE ").append(columnName).append("='").append(childIdStr).append("'");
@@ -357,7 +326,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         primaryKeys = query.list();
 
-        // s.close();
         if (primaryKeys != null && !primaryKeys.isEmpty())
         {
             return primaryKeys.toArray(new Object[0]);
@@ -383,7 +351,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
         tx.commit();
-
     }
 
     /**
@@ -427,19 +394,16 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         break;
                     }
                 }
-
             }
 
             if (!joinTableRecordsExists)
             {
-
                 query.append("INSERT INTO ").append(getFromClause(schemaName, joinTableName)).append("(")
                         .append(joinColumnName).append(",").append(inverseJoinColumnName).append(")")
                         .append(" VALUES('").append(parentId).append("','").append(childId).append("')");
 
                 s.createSQLQuery(query.toString()).executeUpdate();
             }
-
         }
         tx.commit();
     }
@@ -449,13 +413,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * 
      * @return the session instance
      */
-    /*
-     * private Session getStatefulSession() { Session s = null; if
-     * (sf.isClosed()) { s = sf.openSession(); } else { s =
-     * sf.getCurrentSession(); if (s.isOpen()) { s = sf.openSession(); } }
-     * return s; }
-     */
-
     private StatelessSession getStatelessSession()
     {
         return s != null ? s : getSessionFactory().openStatelessSession();
@@ -474,7 +431,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
-        // Session s = getSessionInstance();
         List<Object[]> result = new ArrayList<Object[]>();
 
         s = getSessionFactory().openStatelessSession();
@@ -498,7 +454,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 {
                     q.addScalar(name != null ? name : r);
                 }
-                // }
             }
         }
 
@@ -519,7 +474,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         String aliasName = "_" + tableName;
         StringBuilder queryBuilder = new StringBuilder("Select ");
         queryBuilder.append(aliasName);
-        queryBuilder.append(".*");
+        queryBuilder.append(".* ");
         queryBuilder.append("From ");
         queryBuilder.append(getFromClause(m.getSchema(), tableName));
         queryBuilder.append(" ");
@@ -645,11 +600,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     private SessionFactory getSessionFactory()
     {
-        if (sf != null && sf.isClosed())
-        {
-            sf = conf.buildSessionFactory(serviceRegistry);
-        }
-
         return sf;
     }
 }

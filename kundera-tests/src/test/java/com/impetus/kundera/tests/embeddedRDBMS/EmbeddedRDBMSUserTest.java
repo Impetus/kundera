@@ -145,6 +145,7 @@ public class EmbeddedRDBMSUserTest
         personalDetail.setName("bigdata");
         personalDetail.setPassword("xxxxxx");
         personalDetail.setPersonalDetailId("1");
+        personalDetail.setAge(null);
         user.setPersonalDetail(personalDetail);
     }
 
@@ -279,13 +280,13 @@ public class EmbeddedRDBMSUserTest
         // cli.update("USE testdb");
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150))");
+            cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150),age INT)");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.user");
             cli.update("DROP TABLE KUNDERATESTS.user");
-            cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150))");
+            cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150),age INT)");
         }
     }
 

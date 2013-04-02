@@ -45,7 +45,7 @@ public class PickrImpl implements Pickr
     @Override
     public void addPhotographer(Object p)
     {
-
+        closeEntityManager();
         EntityManager em = getEntityManager();
         em.persist(p);
         closeEntityManager();
@@ -106,6 +106,7 @@ public class PickrImpl implements Pickr
     @Override
     public void close()
     {
+        closeEntityManager();
         emf.close();
     }
 

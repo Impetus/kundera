@@ -97,9 +97,7 @@ public class KunderaQuery
     private List<SortOrdering> sortOrders;
 
     /** Persistence Unit(s). */
-    // String[] persistenceUnits;
-
-    String persistenceUnit;
+    private String persistenceUnit;
 
     // contains a Queue of alternate FilterClause object and Logical Strings
     // (AND, OR etc.)
@@ -174,7 +172,7 @@ public class KunderaQuery
     public final void setOrdering(String ordering)
     {
         this.ordering = ordering;
-        parseOrdering(ordering);
+        parseOrdering(this.ordering);
     }
 
     /**
@@ -271,7 +269,6 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
-
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -308,19 +305,15 @@ public class KunderaQuery
                         {
                             return clause.getValue();
                         }
-
                     }
                     break;
                 }
             }
-
             if (match == null)
             {
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
-
             }
         }
-
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -353,9 +346,10 @@ public class KunderaQuery
      */
     private void initEntityClass()
     {
-        // String result = getResult();
-        // String from = getFrom();
-
+        if (from == null)
+        {
+            throw new JPQLParseException("Bad query format FROM clause is mandatory for SELECT queries");
+        }
         String fromArray[] = from.split(" ");
 
         if (!this.isDeleteUpdate)
@@ -399,7 +393,7 @@ public class KunderaQuery
 
         EntityMetadata metadata = model.getEntityMetadata(entityClass);
 
-        if (!metadata.isIndexable())
+        if (metadata != null && !metadata.isIndexable())
         {
             throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it."
                     + " Check whether it was properly annotated for indexing.");
@@ -412,7 +406,7 @@ public class KunderaQuery
     private void initFilter()
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        String indexName = metadata.getIndexName();
+        // String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
 
@@ -425,7 +419,7 @@ public class KunderaQuery
 
         // parse and structure for "between" clause , if present, else it will
         // return original clause
-        clauses = parseFilterForBetweenClause(clauses, indexName);
+        clauses = parseFilterForBetweenClause(clauses/* , indexName */);
         // clauses = parseFilterForInClause(clauses, indexName);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
@@ -478,8 +472,10 @@ public class KunderaQuery
                 }
 
                 FilterClause filterClause = new FilterClause(
-                        /*MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName : indexName + "." +*/ columnName,
-                        condition, tokens.get(2));
+                /*
+                 * MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName
+                 * : indexName + "." +
+                 */columnName, condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 
                 onTypedParameter(tokens, filterClause, property);
@@ -953,7 +949,6 @@ public class KunderaQuery
 
         sortOrders = new ArrayList<KunderaQuery.SortOrdering>();
         while (tokenizer.hasMoreTokens())
-
         {
             String order = (String) tokenizer.nextElement();
             StringTokenizer token = new StringTokenizer(order, space);
@@ -962,7 +957,6 @@ public class KunderaQuery
             String colName = (String) token.nextElement();
             while (token.hasMoreElements())
             {
-
                 String nextOrder = (String) token.nextElement();
 
                 // more spaces given.
@@ -979,7 +973,6 @@ public class KunderaQuery
                     }
                 }
             }
-
             sortOrders.add(new SortOrdering(colName, orderType));
         }
     }
@@ -1036,7 +1029,6 @@ public class KunderaQuery
      */
     public enum SortOrder
     {
-
         /** The ASC. */
         ASC,
         /** The DESC. */
@@ -1084,7 +1076,11 @@ public class KunderaQuery
      *            table name
      * @return tokens converted to "<=" and ">=" clause
      */
-    private List<String> parseFilterForBetweenClause(List<String> tokens, String indexName)
+    private List<String> parseFilterForBetweenClause(List<String> tokens/*
+                                                                         * ,
+                                                                         * String
+                                                                         * indexName
+                                                                         */)
     {
         final String between = "BETWEEN";
 

@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.twitter.entities.PersonalDetailHbase;
 
 public class HbaseAssociationTest
@@ -31,6 +32,8 @@ public class HbaseAssociationTest
     @Before
     public void setUp()
     {
+        HBaseCli  cli = new HBaseCli();
+        cli.startCluster();
         emf = Persistence.createEntityManagerFactory(HBASE_PU);
     }
 

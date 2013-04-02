@@ -171,38 +171,34 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         {
             return null;
         }
-//        for (Object rowKey : rowIds)
-//        {
-            E e = null;
-            /*try
-            {
-                if (rowKey != null)
-                {*/
-                    List results;
-                    try
-                    {
-                        results = handler.readAll(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                                entityMetadata, Arrays.asList(rowIds), entityMetadata.getRelationNames());
-                    }
-                    catch (IOException e1)
-                    {
-                        log.error("Error during find All, Caused by:" , e1);
-                        throw new KunderaException(e1);
-                    }
-/*                    if (results != null)
-                    {
-//                        e = (E) results.get(0);
-                        entities.addAll(results);
-                    }
-//*/                /*}*/
-            /*}
-            catch (IOException ioex)
-            {
-                log.error("Error during find All, Caused by:" + ioex);
-                throw new KunderaException(ioex);
-            }*/
+        // for (Object rowKey : rowIds)
+        // {
+        E e = null;
+        /*
+         * try { if (rowKey != null) {
+         */
+        List results;
+        try
+        {
+            results = handler.readAll(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
+                    Arrays.asList(rowIds), entityMetadata.getRelationNames());
+        }
+        catch (IOException e1)
+        {
+            log.error("Error during find All, Caused by:", e1);
+            throw new KunderaException(e1);
+        }
+        /*
+         * if (results != null) { // e = (E) results.get(0);
+         * entities.addAll(results); } //
+         *//* } */
+        /*
+         * } catch (IOException ioex) {
+         * log.error("Error during find All, Caused by:" + ioex); throw new
+         * KunderaException(ioex); }
+         */
 
-//        }
+        // }
         return results;
     }
 
@@ -293,7 +289,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             log.error("Error during find All, Caused by:" + ioex);
             throw new KunderaException(ioex);
         }
-        return results;
+        return results != null ? results : new ArrayList();
 
     }
 
@@ -316,12 +312,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             String[] columns)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        List<String> relationNames = entityMetadata.getRelationNames();
+        // List<String> relationNames = entityMetadata.getRelationNames();
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = null;
-        List results = null;
+        // Object enhancedEntity = null;
+        List results = new ArrayList();
 
         if (isFindKeyOnly(metadata, columns))
         {
@@ -386,7 +382,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void close()
     {
         handler.shutdown();
-
+        puProperties = null;
     }
 
     /**
@@ -648,6 +644,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             nodes = null;
             nodes = new ArrayList<Node>();
         }
+        puProperties = null;
     }
 
     /*

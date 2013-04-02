@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.query.LuceneQuery;
 
-public class CoreTestClient implements Client<LuceneQuery>
+public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
 {
 
     @Override
@@ -55,12 +58,6 @@ public class CoreTestClient implements Client<LuceneQuery>
         return null;
     }
 
-    @Override
-    public IndexManager getIndexManager()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public void persist(Node node)
@@ -124,6 +121,13 @@ public class CoreTestClient implements Client<LuceneQuery>
      */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         // TODO Auto-generated method stub
         

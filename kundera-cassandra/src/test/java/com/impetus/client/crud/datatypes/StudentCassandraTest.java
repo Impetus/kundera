@@ -597,7 +597,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             q.setParameter(2, 78575785897L);
             q.setParameter(3, 78575785899L);
             results = q.getResultList();
-            Assert.assertNull(results);
+            Assert.assertNotNull(results);
+            Assert.assertTrue(results.isEmpty());
             em.clear();
             // query on big integer.
             query = "Select s from StudentCassandra s where s.bigInteger =?1";
@@ -612,7 +613,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             // invalid.
             q.setParameter(1, new BigInteger("1234567823"));
             results = q.getResultList();
-            Assert.assertNull(results);
+            Assert.assertNotNull(results);
+            Assert.assertTrue(results.isEmpty());
 
             updateQueryTest();
         }

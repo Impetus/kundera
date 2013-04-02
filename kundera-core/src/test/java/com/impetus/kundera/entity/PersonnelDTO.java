@@ -29,7 +29,6 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "person", schema = "kunderatest@kunderatest")
-@EntityListeners({PersonHandler.class})
 public class PersonnelDTO
 {
 

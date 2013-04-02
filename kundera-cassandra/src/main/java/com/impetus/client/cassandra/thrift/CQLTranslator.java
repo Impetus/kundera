@@ -24,7 +24,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javassist.Modifier;
+
 import javax.persistence.PersistenceException;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
@@ -47,6 +50,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * CQL translator interface, to translate all CRUD operations into CQL queries.
@@ -86,7 +90,7 @@ public final class CQLTranslator
     public static final String WITH_CLAUSE = " WITH ";
 
     public static final String QUOTE_STR = "'";
-    
+
     public static final String LIMIT = " LIMIT ";
 
     public CQLTranslator()
@@ -194,10 +198,12 @@ public final class CQLTranslator
                     Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
                     for (Field compositeColumn : field.getType().getDeclaredFields())
                     {
-                        onTranslation(type, builder, columnBuilder,
-                                ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
-                                        .getJPAColumnName(), compoundKeyObj, compositeColumn);
-
+                        if (!ReflectUtils.isTransientOrStatic(compositeColumn))
+                        {
+                            onTranslation(type, builder, columnBuilder,
+                                    ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
+                                            .getJPAColumnName(), compoundKeyObj, compositeColumn);
+                        }
                     }
 
                 }
@@ -210,12 +216,10 @@ public final class CQLTranslator
             else
             {
                 AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
-                
-                if(!attrib.isAssociation())
+
+                if (!attrib.isAssociation())
                 {
-                onTranslation(type, builder, columnBuilder,
-                        attrib.getJPAColumnName(), record,
-                        field);
+                    onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
                 }
 
             }
@@ -297,9 +301,10 @@ public final class CQLTranslator
 
         case VALUE:
 
-            appendColumnValue(builder, compoundKeyObj, compositeColumn);
-            builder.append(","); // because only key columns
-
+            if (appendColumnValue(builder, compoundKeyObj, compositeColumn))
+            {
+                builder.append(","); // because only key columns
+            }
             break;
         }
     }
@@ -344,7 +349,10 @@ public final class CQLTranslator
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                     || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    /*|| fieldClazz.isAssignableFrom(boolean.class) || fieldClazz.isAssignableFrom(Boolean.class)*/)
+            /*
+             * || fieldClazz.isAssignableFrom(boolean.class) ||
+             * fieldClazz.isAssignableFrom(Boolean.class)
+             */)
             {
                 builder.append("'");
 

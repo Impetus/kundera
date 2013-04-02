@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.RedisCompoundKey;
 import com.impetus.client.entities.RedisEmbeddedUser;
-import com.impetus.client.entities.RedisPrimeUser;
 
 /**
  * The Class RedisEmbeddableTest.

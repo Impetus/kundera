@@ -28,7 +28,7 @@
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaExamples" />
 			<property name="kundera.dialect" value="cassandra" />
-			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 			<property name="kundera.cache.provider.class"

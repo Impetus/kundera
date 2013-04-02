@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.collection.internal.PersistentSet;
@@ -35,6 +36,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -124,11 +126,29 @@ public class AbstractEntityReader
                 else if (object == null || object instanceof HibernateProxy || object instanceof PersistentSet
                         || object instanceof PersistentCollection)
                 {
-                    String relationName = MetadataUtils.getMappedName(m, relation);
-                    Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
+                    Field biDirectionalField = associationBuilder.getBiDirectionalField(relation.getTargetEntity(),
+                            entity.getClass());
+                    boolean isBidirectionalRelation = (biDirectionalField != null);
 
                     Class<?> childClass = relation.getTargetEntity();
                     EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
+
+                    Object relationValue = null;
+                    String relationName = null;
+
+                    if (isBidirectionalRelation
+                            && !StringUtils.isBlank(relation.getMappedBy())
+                            && (relation.getType().equals(ForeignKey.ONE_TO_ONE) || relation.getType().equals(
+                                    ForeignKey.MANY_TO_ONE)))
+                    {
+                        relationName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+                    }
+                    else
+                    {
+                        relationName = MetadataUtils.getMappedName(m, relation);
+                    }
+
+                    relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
 
                     if (relationValue != null)
                     {
