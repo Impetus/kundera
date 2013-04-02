@@ -15,9 +15,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.mongodb.utils.MongoDBUtils;
-import com.impetus.client.utils.MongoUtils;
-
 /**
  * @author Kuldeep Mishra
  * 
