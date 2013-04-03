@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
+package com.impetus.client.crud.batch;
 
 
 import java.nio.ByteBuffer;
@@ -135,6 +135,7 @@ public class CassandraBatchProcessorTest
     @After
     public void tearDown() throws Exception
     {
+        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
@@ -184,10 +185,10 @@ public class CassandraBatchProcessorTest
             for (CfDef cfDef1 : cfDefn)
             {
 
-                if (cfDef1.getName().equalsIgnoreCase("PERSON"))
+                if (cfDef1.getName().equalsIgnoreCase("PERSON_BATCH"))
                 {
 
-                    CassandraCli.client.system_drop_column_family("PERSON");
+                    CassandraCli.client.system_drop_column_family("PERSON_BATCH");
 
                 }
             }

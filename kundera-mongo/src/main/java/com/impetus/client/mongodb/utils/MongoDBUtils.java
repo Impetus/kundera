@@ -67,7 +67,7 @@ public class MongoDBUtils
      */
     public static Object populateValue(Object valObj, Class clazz)
     {
-        if (isUTF8Value(clazz))
+        if (isUTF8Value(clazz) || clazz.isEnum())
         {
             return valObj.toString();
         }

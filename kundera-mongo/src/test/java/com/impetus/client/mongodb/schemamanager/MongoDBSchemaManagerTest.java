@@ -79,14 +79,19 @@ public class MongoDBSchemaManagerTest
     public void testCreate()
     {
         DBCollection collection = db.getCollection("MongoDBEntitySimple");
-        Assert.assertTrue(collection.isCapped());
         Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
-        Assert.assertEquals(3, collection.getIndexInfo().size());
+        Assert.assertEquals(4, collection.getIndexInfo().size());
         int count = 0;
         for (DBObject dbObject : collection.getIndexInfo())
         {
-            if (dbObject.get("name").equals("PERSON_NAME_1"))
+
+            if (dbObject.get("name").equals("_id_"))
+                {                    
+                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("_id", 1)));
+                    count++;
+                }
+            else if (dbObject.get("name").equals("PERSON_NAME_1"))
             {
                 Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
                 Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
@@ -108,7 +113,7 @@ public class MongoDBSchemaManagerTest
                 count++;
             }
         }
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(4, count);
     }
 
     /**

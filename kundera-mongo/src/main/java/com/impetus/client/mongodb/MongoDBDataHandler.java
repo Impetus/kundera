@@ -573,23 +573,25 @@ final class MongoDBDataHandler
     {
 
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-
-        if (column.isCollection())
+        if(embeddedObject != null)
         {
-            Collection embeddedCollection = (Collection) embeddedObject;
-            // means it is case of element collection
+            if (column.isCollection())
+            {
+                Collection embeddedCollection = (Collection) embeddedObject;
+                // means it is case of element collection
 
-            dbObj.put(
-                    ((AbstractAttribute) column).getJPAColumnName(),
-                    DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
-                            embeddableType.getAttributes()));
-        }
-        else
-        {
-            dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
-                    DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
-        }
-
+                dbObj.put(
+                        ((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
+                                embeddableType.getAttributes()));
+            }
+            else
+            {
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
+            }
+        }        
+        
         return dbObj;
     }
 
