@@ -108,19 +108,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 persistenceUnit)).getEntityNameToClassMap().values();
         // to keep hibernate happy! As in our case all scanned classes are not
         // meant for rdbms, so initally i have set depth to zero!
-        conf.setProperty("hibernate.max_fetch_depth", "0");
-        
-        if(puProperties != null && ! puProperties.isEmpty())
-        {
-            for(String key : puProperties.keySet())
-            {
-                Object value = puProperties.get(key);
-                if(value instanceof String)
-                {
-                    conf.setProperty(key, (String) value);
-                }            
-            }
-        }       
+        conf.setProperty("hibernate.max_fetch_depth", "0");             
 
         serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
         // / sessionFactory =
