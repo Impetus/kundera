@@ -189,18 +189,10 @@ public class PickrTestUni_1_1_1_1 extends PickrBaseTest
     }
 
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-            // HBaseCli.startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-
-            /**
+        /**
              * schema generation for cassandra.
              * */
 
@@ -306,11 +298,6 @@ public class PickrTestUni_1_1_1_1 extends PickrBaseTest
             // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
             // HBaseCli.addColumnFamily("ALBUM", "PHOTO_ID");
         }
-    }
 
-    @Override
-    protected void stopServer()
-    {
-        // HBaseCli.stopCluster();
-    }
+ 
 }

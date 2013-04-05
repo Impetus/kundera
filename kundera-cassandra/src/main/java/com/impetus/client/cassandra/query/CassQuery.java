@@ -22,7 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javassist.Modifier;
+
 import javax.persistence.Query;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -56,6 +59,7 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class CassQuery.
@@ -97,11 +101,11 @@ public class CassQuery extends QueryImpl implements Query
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        if(log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
             log.debug("on populateEntities cassandra query");
         }
-        List<Object> result = null;
+        List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         // if id attribute is embeddable, it is meant for CQL translation.
@@ -114,7 +118,7 @@ public class CassQuery extends QueryImpl implements Query
         if (!appMetadata.isNative(getJPAQuery()) && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
 
-            result = onQueryOverCompositeColumns(m, client, metaModel,null);
+            result = onQueryOverCompositeColumns(m, client, metaModel, null);
         }
         else
         {
@@ -174,7 +178,7 @@ public class CassQuery extends QueryImpl implements Query
     {
         List<EnhanceEntity> ls = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -182,8 +186,9 @@ public class CassQuery extends QueryImpl implements Query
         {
             ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
                     m.getEntityClazz(), null);
-        } else 
-            if (!appMetadata.isNative(getJPAQuery()) && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        }
+        else if (!appMetadata.isNative(getJPAQuery())
+                && metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
 
             ls = onQueryOverCompositeColumns(m, client, metaModel, m.getRelationNames());
@@ -265,8 +270,11 @@ public class CassQuery extends QueryImpl implements Query
                         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
                         for (Field field : fields)
                         {
-                            Attribute compositeColumn = compoundKey.getAttribute(field.getName());
-                            columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
+                            if (!ReflectUtils.isTransientOrStatic(field))
+                            {
+                                Attribute compositeColumn = compoundKey.getAttribute(field.getName());
+                                columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
+                            }
                         }
                     }
                     else
@@ -511,9 +519,10 @@ public class CassQuery extends QueryImpl implements Query
      *            the meta model
      * @return the list
      */
-    private List onQueryOverCompositeColumns(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
+    private List onQueryOverCompositeColumns(EntityMetadata m, Client client, MetamodelImpl metaModel,
+            List<String> relations)
     {
-        List<Object> result;
+        List<Object> result = new ArrayList<Object>();
 
         // select column will always be of entity field only!
         // where clause ordering
@@ -539,8 +548,8 @@ public class CassQuery extends QueryImpl implements Query
         addWhereClause(builder);
 
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
-        
-//        onLimit(builder);
+
+        // onLimit(builder);
 
         result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
         return result;
@@ -549,12 +558,13 @@ public class CassQuery extends QueryImpl implements Query
     /**
      * Add provided max result limit.
      * 
-     * @param builder string builder.
+     * @param builder
+     *            string builder.
      */
     private void onLimit(StringBuilder builder)
     {
-            builder.append(CQLTranslator.LIMIT);
-            builder.append(this.maxResult);
+        builder.append(CQLTranslator.LIMIT);
+        builder.append(this.maxResult);
     }
 
     /**
@@ -580,7 +590,7 @@ public class CassQuery extends QueryImpl implements Query
             StringBuilder builder, boolean isPresent, CQLTranslator translator)
     {
         String partitionKey = null;
-        boolean allowFiltering=false;
+        boolean allowFiltering = false;
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -598,21 +608,22 @@ public class CassQuery extends QueryImpl implements Query
                     Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
                     for (Field field : fields)
                     {
+                        if (!ReflectUtils.isTransientOrStatic(field))
+                        {
+                            Attribute compositeColumn = compoundKey.getAttribute(field.getName());
+                            translator.buildWhereClause(builder,
+                                    ((AbstractAttribute) compositeColumn).getJPAColumnName(), field, value);
+                            if (partitionKey == null)
+                            {
+                                partitionKey = compositeColumn.getName();
+                            }
 
-                        Attribute compositeColumn = compoundKey.getAttribute(field.getName());
-                        translator.buildWhereClause(builder, ((AbstractAttribute) compositeColumn).getJPAColumnName(),
-                                field, value);
-                        if (partitionKey == null)
-                        {
-                            partitionKey = compositeColumn.getName();
-                        }
-                        
-                        if(!allowFiltering)
-                        {
-                            allowFiltering= fieldName.equals(partitionKey);
+                            if (!allowFiltering)
+                            {
+                                allowFiltering = fieldName.equals(partitionKey);
+                            }
                         }
                     }
-
                 }
                 else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                         && StringUtils.contains(fieldName, '.'))
@@ -629,9 +640,9 @@ public class CassQuery extends QueryImpl implements Query
                     {
                         partitionKey = compoundKey.getAttribute(fieldName).getName();
                     }
-                    if(!allowFiltering)
+                    if (!allowFiltering)
                     {
-                        allowFiltering= fieldName.equals(partitionKey);
+                        allowFiltering = fieldName.equals(partitionKey);
                     }
                 }
                 else
@@ -641,11 +652,11 @@ public class CassQuery extends QueryImpl implements Query
 
                     if (partitionKey == null)
                     {
-                        partitionKey =  compositeColumn.getName();
+                        partitionKey = compositeColumn.getName();
                     }
-                    if(!allowFiltering)
+                    if (!allowFiltering)
                     {
-                        allowFiltering= fieldName.equals(partitionKey);
+                        allowFiltering = fieldName.equals(partitionKey);
                     }
 
                     translator.buildWhereClause(builder, fieldName, value, condition);
@@ -653,7 +664,6 @@ public class CassQuery extends QueryImpl implements Query
             }
         }
 
-        
         // String last AND clause.
         if (isPresent)
         {
@@ -665,14 +675,14 @@ public class CassQuery extends QueryImpl implements Query
             onLimit(builder);
             builder.append(" ");
             translator.buildFilteringClause(builder);
-//            builder.append(",");
-//            onLimit(builder);
-        } else
+            // builder.append(",");
+            // onLimit(builder);
+        }
+        else
         {
             onLimit(builder);
         }
-        
-        
+
         return isPresent;
     }
 

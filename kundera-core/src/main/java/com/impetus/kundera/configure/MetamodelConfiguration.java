@@ -43,7 +43,6 @@ import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
 import com.impetus.kundera.loader.MetamodelLoaderException;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -72,7 +71,7 @@ public class MetamodelConfiguration implements Configuration
     protected String[] persistenceUnits;
 
     /** Holding persistenceUnit properties */
-    protected Map externalProperyMap;
+    private Map externalProperyMap;
 
     /**
      * Constructor using persistence units as parameter.
@@ -213,7 +212,6 @@ public class MetamodelConfiguration implements Configuration
         Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
         Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap = new HashMap<String, IdDiscriptor>();
         List<Class<?>> classes = new ArrayList<Class<?>>();
-
         if (resources != null)
         {
             for (URL resource : resources)
@@ -231,7 +229,7 @@ public class MetamodelConfiguration implements Configuration
                 }
                 catch (IOException e)
                 {
-                    log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
+                    log.error("Error while retreiving and storing entity metadata. Details:", e);
                     throw new MetamodelLoaderException("Error while retreiving and storing entity metadata");
 
                 }

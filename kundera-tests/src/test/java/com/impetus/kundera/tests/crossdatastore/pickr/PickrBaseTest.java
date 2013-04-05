@@ -17,6 +17,7 @@ package com.impetus.kundera.tests.crossdatastore.pickr;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
+import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -53,7 +55,11 @@ public abstract class PickrBaseTest
 
     protected int photographerId;
 
+    protected static final String SCHEMA = "Pickr";
+
     protected String pu = "piccandra,picmysql,picongo";
+
+    protected RDBMSCli cli;
 
     private static Log log = LogFactory.getLog(PickrBaseTest.class);
 
@@ -61,10 +67,54 @@ public abstract class PickrBaseTest
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-            startServer();
+            CassandraCli.cassandraSetUp();
+            try
+            {
+                
+                cli = new RDBMSCli(SCHEMA);           
+
+                cli.createSchema(SCHEMA);
+            }
+            catch (Exception e)
+            {
+                log.error("Error in RDBMS cli ", e);
+            }
+            // HBaseCli.startCluster();
         }
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            createCassandraSchema();
+            createRDBMSTables();
+        }
+
         photographerId = 1;
         pickr = new PickrImpl(pu);
+    }
+
+    private void createRDBMSTables() throws SQLException
+    {
+        try
+        {
+            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER (PHOTOGRAPHER_ID INT PRIMARY KEY, PHOTOGRAPHER_NAME VARCHAR(256),ALBUM_ID VARCHAR(150))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM PICKR.PHOTOGRAPHER");
+            cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
+            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER (PHOTOGRAPHER_ID INT PRIMARY KEY, PHOTOGRAPHER_NAME VARCHAR(256),ALBUM_ID VARCHAR(150))");
+        }
+        try
+        {
+            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER_ALBUM (PHOTOGRAPHER_ID INT , ALBUM_ID VARCHAR(150))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM PICKR.PHOTOGRAPHER_ALBUM");
+            cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
+            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER_ALBUM (PHOTOGRAPHER_ID INT , ALBUM_ID VARCHAR(150))");
+        }
+
     }
 
     public void executeTests()
@@ -77,18 +127,26 @@ public abstract class PickrBaseTest
     }
 
     protected void tearDown() throws Exception
-    {
-        pickr.close();
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            stopServer();
-        }
-
+    {      
+        //pickr.close();        
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace("Pickr");
             truncateMongo();
+
+            deleteRDBMSSchemaAndTables();
+
         }
+
+        if (RUN_IN_EMBEDDED_MODE)
+        {
+            if (cli != null)
+            {
+                cli.closeConnection();
+            }
+        }
+        
+        
     }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
@@ -137,6 +195,35 @@ public abstract class PickrBaseTest
         }
     }
 
+    private void deleteRDBMSSchemaAndTables()
+    {
+
+        try
+        {
+            cli.update("DELETE FROM PICKR.PHOTOGRAPHER");
+            cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
+            cli.update("DELETE FROM PICKR.PHOTOGRAPHER_ALBUM");
+            cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
+            cli.dropSchema(SCHEMA);
+        }
+        catch (SQLException e)
+        {
+            if(cli != null && RUN_IN_EMBEDDED_MODE)
+            {
+                try
+                {
+                    cli.closeConnection();
+                }
+                catch (SQLException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+    }
+
     protected abstract void addPhotographer();
 
     protected abstract void updatePhotographer();
@@ -147,9 +234,6 @@ public abstract class PickrBaseTest
 
     protected abstract void deletePhotographer();
 
-    protected abstract void startServer() throws IOException, TException, InvalidRequestException,
+    protected abstract void createCassandraSchema() throws IOException, TException, InvalidRequestException,
             UnavailableException, TimedOutException, SchemaDisagreementException;
-
-    protected abstract void stopServer();
-
 }

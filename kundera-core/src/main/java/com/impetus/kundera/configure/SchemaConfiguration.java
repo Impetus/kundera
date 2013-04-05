@@ -69,10 +69,10 @@ public class SchemaConfiguration implements Configuration
     private static Logger log = LoggerFactory.getLogger(SchemaConfiguration.class);
 
     /** Holding instance for persistence units. */
-    protected String[] persistenceUnits;
+    private String[] persistenceUnits;
 
     /** Holding persistenceUnit properties */
-    protected Map externalPropertyMap;
+    private Map externalPropertyMap;
 
     /**
      * pu to schema metadata map .
@@ -157,7 +157,7 @@ public class SchemaConfiguration implements Configuration
             if (getSchemaProperty(persistenceUnit, externalProperties) != null
                     && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
             {
-                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit, externalProperties);
+                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
                 SchemaManager schemaManager = clientFactory != null ? clientFactory
                         .getSchemaManager(externalProperties) : null;
                 if (schemaManager != null)

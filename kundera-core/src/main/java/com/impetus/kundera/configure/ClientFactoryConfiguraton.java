@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,10 +36,10 @@ public class ClientFactoryConfiguraton implements Configuration
     private static Logger log = LoggerFactory.getLogger(ClientFactoryConfiguraton.class);
 
     /** Holding instance for persistence units. */
-    protected String[] persistenceUnits;
+    private String[] persistenceUnits;
 
     /** Holding persistenceUnit properties */
-    protected Map externalProperties;
+    private Map externalProperties;
 
     /**
      * Constructor parameterised with persistence units.

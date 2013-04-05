@@ -25,8 +25,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
-import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.PropertyReader;
 
 /**
  * Property reader responsible for: a) Reads property file (xml or .properties)

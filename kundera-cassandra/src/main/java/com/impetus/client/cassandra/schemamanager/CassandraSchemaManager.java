@@ -28,7 +28,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javassist.Modifier;
+
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -84,6 +87,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Manages auto schema operation defined in {@code ScheamOperationType}.
@@ -492,9 +496,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         for (Field f : fields)
         {
-            Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
-            translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
-            primaryKeyBuilder.append(" ,");
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
+                translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+                primaryKeyBuilder.append(" ,");
+            }
         }
 
         // should not be null.
@@ -1024,12 +1031,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
             }
             cfDef.setColumn_type("Super");
+            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
+            cfDef.setSubcomparator_type(UTF8Type.class.getSimpleName());
         }
         else if (tableInfo.getType() != null)
         {
             defaultValidationClass = cFProperties != null ? cFProperties
                     .getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS) : null;
             cfDef.setColumn_type("Standard");
+            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
             if (isCounterColumnType(tableInfo, defaultValidationClass))
             {
                 cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
@@ -1299,7 +1309,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
             }
 
-            String subComparatorType = cFProperties.getProperty(CassandraConstants.SUB_COMPARATOR_TYPE);
+            String subComparatorType = cFProperties.getProperty(CassandraConstants.SUBCOMPARATOR_TYPE);
             if (subComparatorType != null && ColumnFamilyType.valueOf(cfDef.getColumn_type()) == ColumnFamilyType.Super)
             {
                 if (builder != null)
@@ -1310,7 +1320,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 else
                 {
                     cfDef.setSubcomparator_type(subComparatorType);
-
                 }
             }
             String replicateOnWrite = cFProperties.getProperty(CassandraConstants.REPLICATE_ON_WRITE);

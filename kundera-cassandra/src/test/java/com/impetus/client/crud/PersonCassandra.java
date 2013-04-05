@@ -22,22 +22,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
-@IndexCollection(columns = { @com.impetus.kundera.index.Index(name = "personName"),
-        @com.impetus.kundera.index.Index(name = "age") })
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonCassandra
 {
-
-    private static final long serialVersionUID = 6068131491098913126L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(PersonCassandra.class);
-
     public static final String UID = "uid";
 
     public static final String EID = "eid";

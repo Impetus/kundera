@@ -26,12 +26,18 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CassandraCompoundKey
 {
-    @Column private String userId;
-    @Column private int tweetId;
-    @Column private UUID timeLineId;
+    @Column
+    private String userId;
 
-    
-    
+    @Column
+    private int tweetId;
+
+    @Column
+    private UUID timeLineId;
+
+    @Column
+    private transient String fullName;
+
     /**
      * 
      */
@@ -49,8 +55,9 @@ public class CassandraCompoundKey
         this.userId = userId;
         this.tweetId = tweetId;
         this.timeLineId = timeLineId;
+        this.fullName = "kuldeep";
     }
-    
+
     /**
      * @return the userId
      */
@@ -58,7 +65,7 @@ public class CassandraCompoundKey
     {
         return userId;
     }
-    
+
     /**
      * @return the tweetId
      */
@@ -66,7 +73,7 @@ public class CassandraCompoundKey
     {
         return tweetId;
     }
-    
+
     /**
      * @return the timeLineId
      */
@@ -75,4 +82,8 @@ public class CassandraCompoundKey
         return timeLineId;
     }
 
+    public String getFullName()
+    {
+        return this.fullName;
+    }
 }

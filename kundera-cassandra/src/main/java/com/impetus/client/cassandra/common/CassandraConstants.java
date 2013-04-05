@@ -52,7 +52,7 @@ public interface CassandraConstants
 
     public static final String COMPARATOR_TYPE = "comparator.type";
 
-    public static final String SUB_COMPARATOR_TYPE = "sub.comparator.type";
+    public static final String SUBCOMPARATOR_TYPE = "subcomparator.type";
 
     public static final String REPLICATE_ON_WRITE = "replicate.on.write";
 

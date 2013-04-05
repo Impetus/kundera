@@ -253,18 +253,9 @@ public class PickrTestUni_1_M_M_M extends PickrBaseTest
     }
 
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
-            TimedOutException, SchemaDisagreementException
+    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException,
+            UnavailableException, TimedOutException, SchemaDisagreementException
     {
-
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-            // HBaseCli.startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-
             /**
              * schema generation for cassandra.
              * */
@@ -279,6 +270,7 @@ public class PickrTestUni_1_M_M_M extends PickrBaseTest
             ColumnDef pColumnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTOGRAPHER_NAME".getBytes()), "UTF8Type");
             pColumnDef2.index_type = IndexType.KEYS;
             pCfDef.addToColumn_metadata(pColumnDef2);
+            pCfDef.setKey_validation_class("UTF8Type");
 
             CfDef aCfDef = new CfDef();
             aCfDef.name = "ALBUM";
@@ -370,11 +362,3 @@ public class PickrTestUni_1_M_M_M extends PickrBaseTest
 
         }
     }
-
-    @Override
-    protected void stopServer()
-    {
-        // HBaseCli.stopCluster();
-
-    }
-}

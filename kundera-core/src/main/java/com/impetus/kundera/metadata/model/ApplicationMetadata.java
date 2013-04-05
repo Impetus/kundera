@@ -15,13 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,9 +86,9 @@ public class ApplicationMetadata
         }
         else
         {
-            if(logger.isDebugEnabled())
-            logger.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
-                    + clazz + ". Noting needs to be done");
+            if (logger.isDebugEnabled())
+                logger.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
+                        + clazz + ". Noting needs to be done");
         }
     }
 
@@ -306,13 +309,13 @@ public class ApplicationMetadata
 
     private class QueryWrapper
     {
-        String queryName;
+        private String queryName;
 
-        String query;
+        private String query;
 
-        boolean isNativeQuery;
+        private boolean isNativeQuery;
 
-        Class entityClazz;
+        private Class entityClazz;
 
         /**
          * @param queryName
@@ -377,13 +380,43 @@ public class ApplicationMetadata
     /**
      * 
      */
-    public void unloadApplicationMatadata(final String pu)
+    void unloadApplicationMatadata(final String pu)
     {
-        this.metamodelMap.remove(pu);
-        this.metaModelBuilder.remove(pu);
-        this.namedNativeQueries = null;
-        this.clazzToPuMap = null;
-        this.persistenceUnitMetadataMap.remove(pu);
+        Metamodel metamodel = getMetamodel(pu);
+        if (metamodel != null)
+        {
+            this.metamodelMap.remove(pu);
+            ((MetamodelImpl) metamodel).setEntityMetadataMap(null);
+            ((MetamodelImpl) metamodel).setEntityNameToClassMap(null);
+            ((MetamodelImpl) metamodel).addKeyValues(new HashMap<String, IdDiscriptor>());
+        }
+        MetaModelBuilder builder = getMetaModelBuilder(pu);
+        if (builder != null)
+        {
+            this.metaModelBuilder.remove(pu);
+            builder = null;
+        }
+
+//        for (String className : clazzToPuMap.keySet())
+//        {
+//            List<String> pus = clazzToPuMap.get(className);
+//        }
+//        this.clazzToPuMap = null;
+
+        PersistenceUnitMetadata puMetadata = getPersistenceUnitMetadata(pu);
+        if (puMetadata != null)
+        {
+            this.persistenceUnitMetadataMap.remove(pu);
+            puMetadata.setClasses(new ArrayList<String>());
+            puMetadata.setExcludeUnlistedClasses(false);
+            puMetadata.setPackages(new ArrayList<String>());
+            puMetadata.setPersistenceUnitName(null);
+            puMetadata.setProperties(new Properties());
+            puMetadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
+            puMetadata.setProvider(null);
+            puMetadata = null;
+        }
+
         this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
     }
 }

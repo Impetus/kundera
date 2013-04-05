@@ -15,8 +15,13 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.util.Collection;
 import java.util.Map;
 
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +29,8 @@ import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * A factory for creating RDBMSClient objects.
@@ -36,9 +43,22 @@ public class RDBMSClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RDBMSClientFactory.class);
 
+    /** The conf. */
+    private Configuration conf;
+
+    /** The sf. */
+    private SessionFactory sf;
+
+    private ServiceRegistry serviceRegistry;
+
     @Override
     public void destroy()
     {
+        if (sf != null && !sf.isClosed())
+        {            
+            sf.close();
+            sf = null;
+        }
         indexManager.close();
         externalProperties = null;
     }
@@ -55,14 +75,27 @@ public class RDBMSClientFactory extends GenericClientFactory
     protected Object createPoolOrConnection()
     {
 
-        // Do nothing.
-        return null;
+        conf = new Configuration().addProperties(HibernateUtils.getProperties(getPersistenceUnit()));
+        Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                getPersistenceUnit())).getEntityNameToClassMap().values();
+        // to keep hibernate happy! As in our case all scanned classes are not
+        // meant for rdbms, so initally i have set depth to zero!
+        conf.setProperty("hibernate.max_fetch_depth", "0");
+
+        serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
+
+        for (Class<?> c : classes)
+        {
+            conf.addAnnotatedClass(c);
+        }
+        sf = conf.buildSessionFactory(serviceRegistry);
+        return sf;
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, externalProperties);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, sf, externalProperties);
     }
 
     @Override

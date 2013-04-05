@@ -71,22 +71,61 @@ public class CassandraSchemaGenerationUsingXmlTest
             Assert.assertTrue(ksDef.isDurable_writes());
             Assert.assertNotNull(ksDef.getCf_defs());
             Assert.assertNotNull(ksDef.getStrategy_options());
-            Assert.assertEquals(1, ksDef.getCf_defsSize());
+            Assert.assertEquals(4, ksDef.getCf_defsSize());
 
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 Assert.assertNotNull(cfDef);
-                Assert.assertEquals("CASSANDRAUSERXYZ", cfDef.getName());
-                Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
-                Assert.assertEquals("Standard", cfDef.getColumn_type());
-                Assert.assertEquals("User Column Family", cfDef.getComment());
-                Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
-                Assert.assertNull(cfDef.getSubcomparator_type());
-                Assert.assertEquals(2, cfDef.getColumn_metadataSize());
-                Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
-                Assert.assertTrue(cfDef.isReplicate_on_write());
-                Assert.assertEquals(16, cfDef.getMin_compaction_threshold());
-                Assert.assertEquals(64, cfDef.getMax_compaction_threshold());
+                if ("CASSANDRAUSERXYZ".equals(cfDef.getName()))
+                {
+                    Assert.assertEquals("CASSANDRAUSERXYZ", cfDef.getName());
+                    Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
+                    Assert.assertEquals("Standard", cfDef.getColumn_type());
+                    Assert.assertEquals("User Column Family", cfDef.getComment());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
+                    Assert.assertNull(cfDef.getSubcomparator_type());
+                    Assert.assertEquals(2, cfDef.getColumn_metadataSize());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                    Assert.assertTrue(cfDef.isReplicate_on_write());
+                    Assert.assertEquals(16, cfDef.getMin_compaction_threshold());
+                    Assert.assertEquals(64, cfDef.getMax_compaction_threshold());
+                }
+                else if ("CassandraDefaultUser".equals(cfDef.getName()))
+                {
+                    Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
+                    Assert.assertEquals("Standard", cfDef.getColumn_type());
+                    Assert.assertTrue(cfDef.getComment().isEmpty());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
+                    Assert.assertNull(cfDef.getSubcomparator_type());
+                    Assert.assertEquals(2, cfDef.getColumn_metadataSize());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                    Assert.assertTrue(cfDef.isReplicate_on_write());
+                    Assert.assertEquals(4, cfDef.getMin_compaction_threshold());
+                    Assert.assertEquals(32, cfDef.getMax_compaction_threshold());
+                }
+                else if ("CassandraDefaultSuperUser".equals(cfDef.getName()))
+                {
+                    Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
+                    Assert.assertEquals("Super", cfDef.getColumn_type());
+                    Assert.assertTrue(cfDef.getComment().isEmpty());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
+                    Assert.assertNotNull(cfDef.getSubcomparator_type());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getSubcomparator_type());
+                    Assert.assertEquals(0, cfDef.getColumn_metadataSize());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                }
+                else
+                {
+                    Assert.assertEquals("CASSANDRASUPERUSER", cfDef.getName());
+                    Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
+                    Assert.assertEquals("Super", cfDef.getColumn_type());
+                    Assert.assertEquals("User Super Column Family", cfDef.getComment());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getComparator_type());
+                    Assert.assertNotNull(cfDef.getSubcomparator_type());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getSubcomparator_type());
+                    Assert.assertEquals(0, cfDef.getColumn_metadataSize());
+                    Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                }
             }
 
         }

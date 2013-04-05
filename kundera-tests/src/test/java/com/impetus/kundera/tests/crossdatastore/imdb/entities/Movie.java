@@ -29,39 +29,44 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Movie Node entity class 
+ * Movie Node entity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="MOVIE", schema = "imdb")
-@IndexCollection(columns={@Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS")})
+@Table(name = "MOVIE", schema = "imdb")
+@IndexCollection(columns = { @Index(name = "title", type = "KEYS"), @Index(name = "year", type = "KEYS") })
 public class Movie
 {
     @Id
-    @Column(name="MOVIE_ID")
+    @Column(name = "MOVIE_ID")
     private String id;
-    
-    @Column(name="TITLE")
+
+    @Column(name = "TITLE")
     private String title;
-    
-    @Column(name="YEAR")
-    private int year;      
-    
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy="movies")
+
+    @Column(name = "YEAR")
+    private int year;
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "movies")
     private Map<Role, Actor> actors;
-    
-    public Movie() {}
+
+    public Movie()
+    {
+    }
+
     public Movie(String id, String title, int year)
     {
         this.id = id;
         this.title = title;
         this.year = year;
     }
-    
+
     public void addActor(Role role, Actor actor)
     {
-        if(actors == null) actors = new HashMap<Role, Actor>();
+        if (actors == null)
+            actors = new HashMap<Role, Actor>();
         actors.put(role, actor);
     }
 
@@ -74,7 +79,8 @@ public class Movie
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(String id)
     {
@@ -90,7 +96,8 @@ public class Movie
     }
 
     /**
-     * @param title the title to set
+     * @param title
+     *            the title to set
      */
     public void setTitle(String title)
     {
@@ -106,7 +113,8 @@ public class Movie
     }
 
     /**
-     * @param year the year to set
+     * @param year
+     *            the year to set
      */
     public void setYear(int year)
     {
@@ -122,11 +130,12 @@ public class Movie
     }
 
     /**
-     * @param actors the actors to set
+     * @param actors
+     *            the actors to set
      */
     public void setActors(Map<Role, Actor> actors)
     {
         this.actors = actors;
-    }   
+    }
 
 }

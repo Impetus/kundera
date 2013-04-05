@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.collection.internal.PersistentSet;
@@ -74,7 +75,7 @@ public final class AssociationBuilder
     {
         // For M-M relationship of Collection type, relationship entities are
         // always fetched from Join Table.
-        if (relation.getPropertyType().isAssignableFrom(Collection.class)
+        if (relation.getPropertyType().isAssignableFrom(List.class)
                 || relation.getPropertyType().isAssignableFrom(Set.class))
         {
             if (relation.isRelatedViaJoinTable()
@@ -88,7 +89,7 @@ public final class AssociationBuilder
             }
 
         }
-        else if(relation.getPropertyType().isAssignableFrom(Map.class))
+        else if (relation.getPropertyType().isAssignableFrom(Map.class))
         {
             if (relation.isRelatedViaJoinTable())
             {
@@ -97,7 +98,7 @@ public final class AssociationBuilder
             }
             else
             {
-                populateCollectionFromMap(entity, delegator, relation, relObject, relationsMap);                
+                populateCollectionFromMap(entity, delegator, relation, relObject, relationsMap);
             }
         }
 
@@ -162,7 +163,6 @@ public final class AssociationBuilder
 
         // Since ID is stored at other side of the relationship, we have to
         // query that table
-
         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
         {
             // Pass this entity id as a value to be searched for
@@ -219,8 +219,10 @@ public final class AssociationBuilder
                 // reverseRelation.getProperty(), entity);
             }
 
-            traversalRequired = reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE)
-                    || reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE);
+            traversalRequired = (reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) /*&& !StringUtils
+                    .isBlank(reverseRelation.getMappedBy())*/)
+                    || (reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE) /*&& !StringUtils.isBlank(reverseRelation
+                            .getMappedBy())*/);
 
         }
 
@@ -256,7 +258,6 @@ public final class AssociationBuilder
             // These entities has associated entities, find them recursively.
             for (Object associatedEntity : associatedEntities)
             {
-
                 associatedEntity = childClient.getReader().recursivelyFindEntities(associatedEntity, null,
                         childMetadata, pd);
             }
@@ -338,9 +339,11 @@ public final class AssociationBuilder
             throw new EntityReaderException(ex);
         }
     }
-    
+
     /**
-     * Populates a a relationship collection which is of type {@link Map} from relationsMap into entity
+     * Populates a a relationship collection which is of type {@link Map} from
+     * relationsMap into entity
+     * 
      * @param entity
      * @param delegator
      * @param relation
@@ -351,65 +354,72 @@ public final class AssociationBuilder
             Object relObject, Map<String, Object> relationsMap)
     {
         EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-        Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>();   //Map collection to be set into entity        
-        
-        if(relObject == null && relationsMap != null && ! relationsMap.isEmpty())
+        Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>(); // Map
+                                                                                   // collection
+                                                                                   // to
+                                                                                   // be
+                                                                                   // set
+                                                                                   // into
+                                                                                   // entity
+
+        if (relObject == null && relationsMap != null && !relationsMap.isEmpty())
         {
-            for(String relationName : relationsMap.keySet())
+            for (String relationName : relationsMap.keySet())
             {
-                Object relationValue = relationsMap.get(relationName);   
-                if(relationValue instanceof Map)
+                Object relationValue = relationsMap.get(relationName);
+                if (relationValue instanceof Map)
                 {
                     Map<Object, Object> relationValueMap = (Map<Object, Object>) relationValue;
-                    
-                    Client targetEntityClient = delegator.getClient(childMetadata);    //Client for target entity
-                    for(Object targetEntityKey : relationValueMap.keySet())
+
+                    Client targetEntityClient = delegator.getClient(childMetadata); // Client
+                                                                                    // for
+                                                                                    // target
+                                                                                    // entity
+                    for (Object targetEntityKey : relationValueMap.keySet())
                     {
-                        //Find target entity from database 
+                        // Find target entity from database
                         Object targetEntity = targetEntityClient.find(childMetadata.getEntityClazz(), targetEntityKey);
-                        if(targetEntity != null && targetEntity instanceof EnhanceEntity)
+                        if (targetEntity != null && targetEntity instanceof EnhanceEntity)
                         {
-                            targetEntity = ((EnhanceEntity)targetEntity).getEntity();                             
-                        }                       
-                        
-                        //Set source and target entities into Map key entity
+                            targetEntity = ((EnhanceEntity) targetEntity).getEntity();
+                        }
+
+                        // Set source and target entities into Map key entity
                         Object mapKeyEntity = relationValueMap.get(targetEntityKey);
                         Class<?> relationshipClass = relation.getMapKeyJoinClass();
-                        for(Field f : relationshipClass.getDeclaredFields())
+                        for (Field f : relationshipClass.getDeclaredFields())
                         {
-                            if(f.getType().equals(entity.getClass()))
+                            if (f.getType().equals(entity.getClass()))
                             {
                                 PropertyAccessorHelper.set(mapKeyEntity, f, entity);
                             }
-                            else if(f.getType().equals(childMetadata.getEntityClazz()))
+                            else if (f.getType().equals(childMetadata.getEntityClazz()))
                             {
                                 PropertyAccessorHelper.set(mapKeyEntity, f, targetEntity);
                             }
                         }
-                        
-                        //Finally, put map key and value into collection
+
+                        // Finally, put map key and value into collection
                         relationshipEntityMap.put(mapKeyEntity, targetEntity);
-                    }                  
+                    }
                 }
             }
             relObject = relationshipEntityMap;
-        }           
-        
-        
-        
-        //Set relationship collection into original entity
+        }
+
+        // Set relationship collection into original entity
         PropertyAccessorHelper.set(entity, relation.getProperty(), relObject);
-        
-        //Add target entities into persistence cache
-        if(relObject != null)
+
+        // Add target entities into persistence cache
+        if (relObject != null)
         {
-            for(Object child : ((Map)relObject).values())
+            for (Object child : ((Map) relObject).values())
             {
-                if(child != null)
+                if (child != null)
                 {
                     Object childId = PropertyAccessorHelper.getId(child, childMetadata);
                     PersistenceCacheManager.addEntityToPersistenceCache(child, delegator, childId);
-                }                 
+                }
             }
         }
     }
@@ -428,7 +438,7 @@ public final class AssociationBuilder
 
         Map<String, Object> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
                 query) : new HashMap<String, Object>();
-        Set rsSet = results != null ? new HashSet (results.values()) : new HashSet();
+        Set rsSet = results != null ? new HashSet(results.values()) : new HashSet();
 
         if (childClass.equals(entity.getClass()))
         {
@@ -463,7 +473,7 @@ public final class AssociationBuilder
                 Type[] types = type.getActualTypeArguments();
                 clazzz = (Class<?>) types[0];
             }
-            else if(Map.class.isAssignableFrom(clazzz))
+            else if (Map.class.isAssignableFrom(clazzz))
             {
                 ParameterizedType type = (ParameterizedType) field.getGenericType();
                 Type[] types = type.getActualTypeArguments();
@@ -475,7 +485,6 @@ public final class AssociationBuilder
                 break;
             }
         }
-
         return biDirectionalField;
     }
 

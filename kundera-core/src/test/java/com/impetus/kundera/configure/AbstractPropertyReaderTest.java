@@ -112,14 +112,14 @@ public class AbstractPropertyReaderTest
                 Assert.assertEquals(3, store.getSchemas().size());
                 Assert.assertEquals("KunderaCassandraXmlTest", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
-                Assert.assertEquals(1, store.getSchemas().get(0).getTables().size());
+                Assert.assertEquals(2, store.getSchemas().get(0).getTables().size());
                 Assert.assertEquals("CASSANDRAUSERXYZ", store.getSchemas().get(0).getTables().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables().get(0).getProperties());
                 Assert.assertEquals(7, store.getSchemas().get(0).getTables().get(0).getProperties().size());
                 Assert.assertNotNull(store.getSchemas().get(0).getDataCenters());
                 Assert.assertEquals(2, store.getSchemas().get(0).getDataCenters().size());
                 Assert.assertNotNull(store.getSchemas().get(0).getSchemaProperties());
-                Assert.assertEquals(4, store.getSchemas().get(0).getSchemaProperties().size());
+                Assert.assertEquals(3, store.getSchemas().get(0).getSchemaProperties().size());
             }
         }
     }

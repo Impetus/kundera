@@ -32,7 +32,6 @@ import javax.persistence.metamodel.EmbeddableType;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
@@ -42,7 +41,6 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -633,7 +631,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             slicePredicate = Selector.newColumnsPredicate(columns.toArray(new String[] {}));
         }
 
-        List<Object> entities = null;
+        List<Object> entities = new ArrayList<Object>();
         if (ixClause.isEmpty())
         {
             if (m.isCounterColumnType())

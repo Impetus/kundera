@@ -38,6 +38,7 @@ import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -155,7 +156,7 @@ public class HBaseSchemaOperationTest
             Assert.assertNotNull(columnDescriptor.getNameAsString());
             Assert.assertEquals("HbaseEntitySimple", columnDescriptor.getNameAsString());
         }
-        ((HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit, null)).destroy();
+        ((HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit)).destroy();
         Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
     }
 
@@ -357,6 +358,7 @@ public class HBaseSchemaOperationTest
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         // String[] persistenceUnits = { persistenceUnit };
+        new ClientFactoryConfiguraton(null, persistenceUnit).configure();
         configuration.configure();
         // new ClientFactoryConfiguraton(null, persistenceUnits).configure();
 

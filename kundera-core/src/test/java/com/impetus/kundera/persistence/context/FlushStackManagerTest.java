@@ -75,13 +75,11 @@ import com.impetus.kundera.persistence.context.EventLog.EventType;
  */
 public class FlushStackManagerTest
 {
-    PersistenceCache pc;
+    private PersistenceCache pc;
 
-    ObjectGraphBuilder graphBuilder;
+    private ObjectGraphBuilder graphBuilder;
 
     private String _persistenceUnit = "kunderatest";
-
-    // Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -91,7 +89,6 @@ public class FlushStackManagerTest
     {
         getEntityManagerFactory();
         new PersistenceUnitConfiguration("kunderatest").configure();
-        // new MetamodelConfiguration("kunderatest").configure();
         pc = new PersistenceCache();
         graphBuilder = new ObjectGraphBuilder(pc);
     }
@@ -102,6 +99,7 @@ public class FlushStackManagerTest
     @After
     public void tearDown() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

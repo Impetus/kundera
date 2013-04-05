@@ -336,18 +336,9 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
      * ()
      */
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-            // HBaseCli.startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-
             /**
              * schema generation for cassandra.
              * */
@@ -437,18 +428,7 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
                 log.error(e.getMessage());
             }
         }
-    }
+   
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#stopServer()
-     */
-    @Override
-    protected void stopServer()
-    {
-
-    }
 
 }

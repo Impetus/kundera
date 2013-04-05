@@ -325,7 +325,8 @@ public class MongoGISTest
 
         dao.createEntityManager();
         persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
-        Assert.assertNull(persons);
+        Assert.assertNotNull(persons);
+        Assert.assertTrue(persons.isEmpty());
         dao.closeEntityManager();
     }
 

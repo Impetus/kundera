@@ -150,18 +150,28 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public final void close()
     {
-        closed = true;
-
-        // Shut cache provider down
-        if (cacheProvider != null)
+        if (isOpen())
         {
-            cacheProvider.shutdown();
+            closed = true;
+
+            // Shut cache provider down
+            if (cacheProvider != null)
+            {
+                cacheProvider.shutdown();
+            }
+
+            for (String pu : persistenceUnits)
+            {
+                ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu)).destroy();
+                KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
+            }
+            this.persistenceUnits = null;
+            this.properties = null;
+
         }
-
-        for (String pu : persistenceUnits)
+        else
         {
-            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu, getExternalProperties(pu))).destroy();
-            KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
+            throw new IllegalStateException("entity manager factory has been closed");
         }
     }
 

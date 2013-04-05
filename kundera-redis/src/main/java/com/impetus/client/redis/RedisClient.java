@@ -369,7 +369,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 onDelete(entity, pKey, connection);
             }
-
         }
         finally
         {
@@ -377,7 +376,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 pipeLine.sync();
             }
-
             onCleanup(connection);
         }
     }
@@ -391,6 +389,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      *            entity metadata.
      * @param rowKey
      *            row key.
+     * @param relationHolders
      */
     private void deleteRelation(Object connection, EntityMetadata entityMetadata, String rowKey)
     {
@@ -413,6 +412,31 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
 
         }
+       /* Response<Map<String, String>> fields = null;
+        if (resource != null && resource.isActive())
+        {
+            fields = ((Transaction) connection).hgetAll(getHashKey(entityMetadata.getTableName(), rowKey));
+            if (connection != null)
+            {
+                ((Pipeline) connection).sync();
+            }
+            for (String field : fields.get().keySet())
+            {
+                ((Transaction) connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey), field);
+            }
+        }
+        else
+        {
+            fields = ((Pipeline) connection).hgetAll(getHashKey(entityMetadata.getTableName(), rowKey));
+            if (connection != null)
+            {
+                ((Pipeline) connection).sync();
+            }
+            for (String field : fields.get().keySet())
+            {
+                ((Pipeline) connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey), field);
+            }
+        }*/
     }
 
     @Override

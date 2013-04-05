@@ -8,6 +8,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<!-- <jar-file>/home/impetus/perf_n.jar</jar-file> <jar-file>/home/impetus/perf.jar</jar-file> -->
 		<class>com.impetus.kundera.entity.PersonnelDTO</class>
+		<class>com.impetus.kundera.entity.PersonnelListenerDTO</class>
 		<class>com.impetus.kundera.graph.Store</class>
 		<class>com.impetus.kundera.graph.BillingCounter</class>
 		<!-- <class>com.impetus.kundera.configure.CoreEntityAddressUni1To1</class> 

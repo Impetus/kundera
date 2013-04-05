@@ -21,7 +21,7 @@ public class PersonHandler
 {
 
     @PrePersist
-    public void handledPrePersist(PersonnelDTO user)
+    public void handledPrePersist(PersonnelListenerDTO user)
     {
         user.setLastName("Mishra");
     }

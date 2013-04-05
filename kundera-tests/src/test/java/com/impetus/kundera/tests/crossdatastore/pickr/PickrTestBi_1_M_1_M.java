@@ -51,6 +51,8 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
 {
     private static Log log = LogFactory.getLog(PickrTestBi_1_M_1_M.class);
 
+  
+
     @Before
     public void setUp() throws Exception
     {
@@ -249,17 +251,9 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
      * ()
      */
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            CassandraCli.cassandraSetUp();
-            // HBaseCli.startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
 
             /**
              * schema generation for cassandra.
@@ -365,21 +359,8 @@ public class PickrTestBi_1_M_1_M extends PickrBaseTest
             // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
             // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
             // HBaseCli.addColumnFamily("ALBUM", "PHOTOGRAPHER_ID");
-        }
+     
 
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#stopServer()
-     */
-    @Override
-    protected void stopServer()
-    {
-        // HBaseCli.stopCluster();
-
-    }
+    }   
 
 }

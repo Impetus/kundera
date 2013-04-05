@@ -15,11 +15,13 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -64,6 +66,22 @@ public class PersonRdbmsTest extends BaseTest
         Object p1 = prepareRDBMSInstance("1", 10);
         Object p2 = prepareRDBMSInstance("2", 20);
         Object p3 = prepareRDBMSInstance("3", 15);
+        
+        Query findQuery = em.createQuery("Select p from PersonRDBMS p");
+        List<PersonRDBMS> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+
+        findQuery = em.createQuery("Select p from PersonRDBMS p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
+        findQuery = em.createQuery("Select p.age from PersonRDBMS p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);

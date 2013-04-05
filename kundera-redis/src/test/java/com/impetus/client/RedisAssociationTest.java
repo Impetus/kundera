@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.AddressOTORedis;
 import com.impetus.client.entities.PersonOTORedis;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 public class RedisAssociationTest
@@ -34,6 +35,7 @@ public class RedisAssociationTest
     @Before
     public void setUp()
     {
+//        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
     }
     
