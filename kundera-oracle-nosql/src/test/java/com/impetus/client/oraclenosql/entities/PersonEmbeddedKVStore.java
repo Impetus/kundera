@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.examples.crud;
-
+package com.impetus.client.oraclenosql.entities;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Person entity with one embedded attribute 
  * @author amresh.singh
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaExamples@twikvstore")
-public class PersonKVStore
+@Table(name = "PERSON_EMBEDDED", schema = "KunderaExamples@twikvstore")
+public class PersonEmbeddedKVStore
 {
-    
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -42,6 +41,9 @@ public class PersonKVStore
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+    
+    @Embedded
+    private Office office;
 
     /**
      * Gets the person id.
@@ -98,6 +100,30 @@ public class PersonKVStore
     {
         this.age = age;
     }
+
+    /**
+     * @return the office
+     */
+    public Office getOffice()
+    {
+        return office;
+    }
+
+    /**
+     * @param office the office to set
+     */
+    public void setOffice(Office office)
+    {
+        this.office = office;
+    }
+
+    /**
+     * @param age the age to set
+     */
+    public void setAge(Integer age)
+    {
+        this.age = age;
+    }  
     
-    
+
 }

@@ -270,7 +270,7 @@ public class ObjectUtils
         }
         catch (InstantiationException e)
         {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
+            log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:" + e.getMessage());            
             return null;
         }
         catch (IllegalAccessException e)

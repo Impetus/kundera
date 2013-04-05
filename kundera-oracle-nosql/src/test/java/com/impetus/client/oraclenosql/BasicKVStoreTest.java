@@ -45,7 +45,7 @@ public class BasicKVStoreTest extends BaseKVStoreTest {
         
     }
 
-    //@Test
+    @Test
     public void testKVStore() {
         // fail("Not yet implemented");
         if (store==null) {

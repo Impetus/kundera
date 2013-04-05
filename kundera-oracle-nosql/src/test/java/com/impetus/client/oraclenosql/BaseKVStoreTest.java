@@ -53,7 +53,7 @@ public abstract class BaseKVStoreTest {
      *
      * @throws InterruptedException the interrupted exception
      */
-    //@Before
+    @Before
     public void setup() throws InterruptedException {
         String storeName = "kvstore";
         String hostName = "localhost";

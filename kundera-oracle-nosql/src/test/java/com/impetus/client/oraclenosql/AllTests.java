@@ -37,13 +37,13 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author amresh.singh
  */
 @RunWith(Suite.class)
-@SuiteClasses({ BasicKVStoreTest.class, EntityPersistenceKVStoreTest.class })
+@SuiteClasses({ BasicKVStoreTest.class, OracleNoSQLSingleEntityTest.class })
 public class AllTests {
 
     /** The kv lite. */
     protected static KVLite kvLite;
 
-    //@BeforeClass
+    @BeforeClass
     public static void setUpClass() {
         System.out.println("Master setup");
         String storeName = "kvstore";
@@ -65,7 +65,8 @@ public class AllTests {
             }
             // server not found running, try running it
             
-            //new KVLite("./kvroot", "kvstore", 5000, 5001, "localhost", "5010,5020", servicePortRange, 1, mountPoint, false);
+            kvLite = new KVLite("./kvroot", "kvstore", 5000, 5001, "localhost", "5005,5007", "", 1, "", false);
+           // new KVLite(kvroot, kvstore, registryPort, adminPort, hostname, haPortRange, servicePortRange, numPartitions, mountPoint, useThreads)
             try {
                 kvLite.start();
             } catch (Exception e2) {
@@ -76,7 +77,7 @@ public class AllTests {
 
     }
 
-    //@AfterClass
+    @AfterClass
     public static void tearDownClass() {
         System.out.println("Master tearDown");
         if (kvLite != null) {

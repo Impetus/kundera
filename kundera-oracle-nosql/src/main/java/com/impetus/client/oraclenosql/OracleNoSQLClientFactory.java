@@ -32,7 +32,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * <Prove description of functionality provided by this Type>
@@ -45,15 +44,11 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLClientFactory.class);
 
-    /** The index manager. */
-    IndexManager indexManager;
 
     /** The kvstore db. */
     private KVStore kvStore;
 
-    /** The reader. */
-    private EntityReader reader;  
-    
+   
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
@@ -64,12 +59,13 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     public void initialize(Map<String, Object> puProperties)
     {
         setExternalProperties(puProperties);
+        reader = new OracleNoSQLEntityReader();
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new OracleNoSQLClient(this, kvStore, externalProperties, getPersistenceUnit());
+        return new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit());
     }
 
     @Override
