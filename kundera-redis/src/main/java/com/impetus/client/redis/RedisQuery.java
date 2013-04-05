@@ -32,8 +32,8 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 

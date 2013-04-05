@@ -380,7 +380,8 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         q.setParameter(2, 78575785897L);
         q.setParameter(3, 78575785899L);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         // query on big integer.
         query = "Select s from StudentHbase s where s.bigInteger =?1";
@@ -405,7 +406,9 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         // invalid.
         q.setParameter(1, new BigInteger("1234567823"));
         results = q.getResultList();
-        Assert.assertNull(results);
+
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         updateQueryTest();
 
@@ -413,13 +416,13 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
 
     private void updateQueryTest()
     {/*
-        Query q = em.createQuery("update StudentHbase s set s.studentName = :oldName where s.studentName = :newName");
-        q.setParameter("newName", "NewAmresh");
-        q.setParameter("oldName", "Amresh");
-        int results = q.executeUpdate();
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results);
-    */}
+      * Query q = em.createQuery(
+      * "update StudentHbase s set s.studentName = :oldName where s.studentName = :newName"
+      * ); q.setParameter("newName", "NewAmresh"); q.setParameter("oldName",
+      * "Amresh"); int results = q.executeUpdate();
+      * Assert.assertNotNull(results); Assert.assertEquals(1, results);
+      */
+    }
 
     /**
      * On merge.

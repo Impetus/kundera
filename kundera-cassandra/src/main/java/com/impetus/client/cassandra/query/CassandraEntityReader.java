@@ -271,7 +271,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             }
         }
 
-        List<EnhanceEntity> enhanceEntityList = null;
+        List<EnhanceEntity> enhanceEntityList = new ArrayList<EnhanceEntity>();
         if (embeddedColumns != null && !embeddedColumns.isEmpty())
         {
             enhanceEntityList = client.find(m.getEntityClazz(), embeddedColumns);

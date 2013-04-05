@@ -347,13 +347,8 @@ public class MetadataUtils
             String joinColumn = relation.getJoinColumnName();
             if (joinColumn == null)
             {
-
                 Class clazz = relation.getTargetEntity();
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-                // joinColumn =
-                // relation.getType().equals(ForeignKey.ONE_TO_MANY) ?
-                // parentMetadata.getIdColumn().getName()
-                // : metadata.getIdColumn().getName();
 
                 joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? ((AbstractAttribute) parentMetadata
                         .getIdAttribute()).getJPAColumnName() : ((AbstractAttribute) metadata.getIdAttribute())

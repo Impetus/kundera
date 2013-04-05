@@ -69,6 +69,20 @@ public class PersonHBaseTest extends BaseTest
     @Test
     public void onInsertHbase() throws Exception
     {
+        Query findQuery = em.createQuery("Select p from PersonHBase p");
+        List<PersonHBase> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+
+        findQuery = em.createQuery("Select p from PersonHBase p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
+        findQuery = em.createQuery("Select p.age from PersonHBase p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
         init();
         em.clear();
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);

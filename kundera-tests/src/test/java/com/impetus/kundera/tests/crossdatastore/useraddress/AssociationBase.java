@@ -66,382 +66,407 @@ import com.mongodb.DB;
  * 
  * @author vivek.mishra
  */
-public abstract class AssociationBase {
-	private static final String KEYSPACE = "KunderaTests";
+public abstract class AssociationBase
+{
+    private static final String KEYSPACE = "KunderaTests";
 
-	public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-	public static final boolean AUTO_MANAGE_SCHEMA = true;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-	// public static final String[] ALL_PUs_UNDER_TEST = new String[] {
-	// /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
+    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
 
-	// public static final String[] ALL_PUs_UNDER_TEST = new String[] {
-	// "addCassandra"};
+    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // "addCassandra"};
 
-	// public static final String[] ALL_PUs_UNDER_TEST = new
-	// String[]{/*"rdbms",*/ "twissandra", "twihbase","twingo"};
-	/** The em. */
-	protected EntityManager em;
+    // public static final String[] ALL_PUs_UNDER_TEST = new
+    // String[]{/*"rdbms",*/ "twissandra", "twihbase","twingo"};
+    /** The em. */
+    protected EntityManager em;
 
-	/** The dao. */
-	protected UserAddressDaoImpl dao;
+    /** The dao. */
+    protected UserAddressDaoImpl dao;
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(AssociationBase.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(AssociationBase.class);
 
-	/** The col families. */
-	private String[] colFamilies;
+    /** The col families. */
+    private String[] colFamilies;
 
-	protected List<Object> col = new ArrayList<Object>();
+    protected List<Object> col = new ArrayList<Object>();
 
-	private String persistenceUnits = "rdbms,redis,addCassandra,addMongo";
+    private String persistenceUnits = "rdbms,redis,addCassandra,addMongo";
 
-	protected RDBMSCli cli;
+    protected RDBMSCli cli;
 
-	// private String persistenceUnits = "rdbms,addHbase";
+    // private String persistenceUnits = "rdbms,addHbase";
 
-	/**
-	 * Sets the up internal.
-	 * 
-	 * @param colFamilies
-	 *            the new up internal
-	 */
-	protected void setUpInternal(String... colFamilies) {
-		try {
-			cli = new RDBMSCli(KEYSPACE);
-			cli.createSchema(KEYSPACE);
-		} catch (Exception e) {
-			log.error("Error in RDBMS cli ", e);
-		}
+    /**
+     * Sets the up internal.
+     * 
+     * @param colFamilies
+     *            the new up internal
+     */
+    protected void setUpInternal(String... colFamilies)
+    {
+        try
+        {
+            cli = new RDBMSCli(KEYSPACE);
+            cli.createSchema(KEYSPACE);
+        }
+        catch (Exception e)
+        {
+            log.error("Error in RDBMS cli ", e);
+        }
 
-		// String persistenceUnits = "rdbms,twissandra";
-		dao = new UserAddressDaoImpl(persistenceUnits);
-		KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-		KunderaMetadata.INSTANCE.setCoreMetadata(null);
-		em = null;
-		dao.closeEntityManager();
-		dao.closeEntityManagerFactory();
+        // String persistenceUnits = "rdbms,twissandra";
+        dao = new UserAddressDaoImpl(persistenceUnits);
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        KunderaMetadata.INSTANCE.setCoreMetadata(null);
+        em = null;
+        dao.closeEntityManager();
+        dao.closeEntityManagerFactory();
 
-		em = dao.getEntityManager(persistenceUnits);
-		this.colFamilies = colFamilies;
-	}
+        em = dao.getEntityManager(persistenceUnits);
+        this.colFamilies = colFamilies;
+    }
 
-	/*    *//**
-	 * Switch over persistence units.
-	 * 
-	 * @param entityPuCol
-	 *            the entity pu col
-	 */
-	/*
-	 * protected void switchPersistenceUnits(Map<Class, String> entityPuCol) {
-	 * if (entityPuCol != null) { Iterator<Class> iter =
-	 * entityPuCol.keySet().iterator(); log.warn("Invocation for:"); while
-	 * (iter.hasNext()) { Class clazz = iter.next(); String pu =
-	 * entityPuCol.get(clazz); Map<String, Metamodel> metaModels =
-	 * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
-	 * EntityMetadata mAdd = null; for (Metamodel m : metaModels.values()) {
-	 * mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz); if (mAdd !=
-	 * null) { break; } } // EntityMetadata mAdd = //
-	 * KunderaMetadataManager.getMetamodel
-	 * (pu).getEntityMetadataMap().get(clazz); mAdd.setPersistenceUnit(pu);
-	 * KunderaMetadataManager.getMetamodel(pu).getEntityMetadataMap().put(clazz,
-	 * mAdd); log.warn("persistence unit:" + pu + "class::" +
-	 * clazz.getCanonicalName()); } } }
-	 */
+    /*    *//**
+     * Switch over persistence units.
+     * 
+     * @param entityPuCol
+     *            the entity pu col
+     */
+    /*
+     * protected void switchPersistenceUnits(Map<Class, String> entityPuCol) {
+     * if (entityPuCol != null) { Iterator<Class> iter =
+     * entityPuCol.keySet().iterator(); log.warn("Invocation for:"); while
+     * (iter.hasNext()) { Class clazz = iter.next(); String pu =
+     * entityPuCol.get(clazz); Map<String, Metamodel> metaModels =
+     * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
+     * EntityMetadata mAdd = null; for (Metamodel m : metaModels.values()) {
+     * mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz); if (mAdd !=
+     * null) { break; } } // EntityMetadata mAdd = //
+     * KunderaMetadataManager.getMetamodel
+     * (pu).getEntityMetadataMap().get(clazz); mAdd.setPersistenceUnit(pu);
+     * KunderaMetadataManager.getMetamodel(pu).getEntityMetadataMap().put(clazz,
+     * mAdd); log.warn("persistence unit:" + pu + "class::" +
+     * clazz.getCanonicalName()); } } }
+     */
 
-	/**
-	 * Switch over persistence units.
-	 * 
-	 * @param entityPuCol
-	 *            the entity pu col
-	 * @throws SchemaDisagreementException
-	 * @throws TimedOutException
-	 * @throws UnavailableException
-	 * @throws InvalidRequestException
-	 * @throws TException
-	 * @throws IOException
-	 */
-	protected void switchPersistenceUnits(Map<Class, String> entityPuCol)
-			throws IOException, TException, InvalidRequestException,
-			UnavailableException, TimedOutException,
-			SchemaDisagreementException {
-		if (entityPuCol != null) {
-			Iterator<Class> iter = entityPuCol.keySet().iterator();
-			log.warn("Invocation for:");
-			while (iter.hasNext()) {
-				Class clazz = iter.next();
-				String pu = entityPuCol.get(clazz);
-				// EntityMetadata mAdd = KunderaMetadataManager
-				// .getEntityMetadata(clazz);
+    /**
+     * Switch over persistence units.
+     * 
+     * @param entityPuCol
+     *            the entity pu col
+     * @throws SchemaDisagreementException
+     * @throws TimedOutException
+     * @throws UnavailableException
+     * @throws InvalidRequestException
+     * @throws TException
+     * @throws IOException
+     */
+    protected void switchPersistenceUnits(Map<Class, String> entityPuCol) throws IOException, TException,
+            InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        if (entityPuCol != null)
+        {
+            Iterator<Class> iter = entityPuCol.keySet().iterator();
+            log.warn("Invocation for:");
+            while (iter.hasNext())
+            {
+                Class clazz = iter.next();
+                String pu = entityPuCol.get(clazz);
+                // EntityMetadata mAdd = KunderaMetadataManager
+                // .getEntityMetadata(clazz);
 
-				Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE
-						.getApplicationMetadata().getMetamodelMap();
+                Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
 
-				EntityMetadata mAdd = KunderaMetadataManager
-						.getEntityMetadata(clazz);
-				for (Metamodel m : metaModels.values()) {
-					mAdd = ((MetamodelImpl) m).getEntityMetadataMap()
-							.get(clazz);
-					if (mAdd != null) {
-						break;
-					}
-				}
-				mAdd.setPersistenceUnit(pu);
-				Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>(
-						1);
-				List<String> pus = new ArrayList<String>(1);
-				pus.add(pu);
-				clazzToPu.put(clazz.getName(), pus);
-				KunderaMetadata.INSTANCE.getApplicationMetadata()
-						.setClazzToPuMap(clazzToPu);
+                EntityMetadata mAdd = KunderaMetadataManager.getEntityMetadata(clazz);
+                for (Metamodel m : metaModels.values())
+                {
+                    mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz);
+                    if (mAdd != null)
+                    {
+                        break;
+                    }
+                }
+                mAdd.setPersistenceUnit(pu);
+                Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>(1);
+                List<String> pus = new ArrayList<String>(1);
+                pus.add(pu);
+                clazzToPu.put(clazz.getName(), pus);
+                KunderaMetadata.INSTANCE.getApplicationMetadata().setClazzToPuMap(clazzToPu);
 
-				Metamodel metaModel = KunderaMetadata.INSTANCE
-						.getApplicationMetadata().getMetamodel(pu);
-				((MetamodelImpl) metaModel).addEntityMetadata(clazz, mAdd);
-				KunderaMetadata.INSTANCE.getApplicationMetadata()
-						.getMetamodelMap().put(pu, metaModel);
-				// KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu,
-				// clazz, mAdd);
-				PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE
-						.getApplicationMetadata()
-						.getPersistenceUnitMetadata(pu);
+                Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu);
+                ((MetamodelImpl) metaModel).addEntityMetadata(clazz, mAdd);
+                KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().put(pu, metaModel);
+                // KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu,
+                // clazz, mAdd);
+                PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getPersistenceUnitMetadata(pu);
 
-				String client = puMetadata.getProperties().getProperty(
-						PersistenceProperties.KUNDERA_CLIENT_FACTORY);
-				if (client
-						.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory")
-						|| client
-								.equalsIgnoreCase("com.impetus.client.cassandra.thrift.ThriftClientFactory")) {
-					if (RUN_IN_EMBEDDED_MODE) {
-						CassandraCli.cassandraSetUp();
-						CassandraCli.initClient();
+                String client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+                if (client.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory")
+                        || client.equalsIgnoreCase("com.impetus.client.cassandra.thrift.ThriftClientFactory"))
+                {
+                    if (RUN_IN_EMBEDDED_MODE)
+                    {
+                        CassandraCli.cassandraSetUp();
+                        CassandraCli.initClient();
 
-						// HBaseCli cli = new HBaseCli();
-						// cli.startCluster();
-					}
+                        // HBaseCli cli = new HBaseCli();
+                        // cli.startCluster();
+                    }
 
-					if (AUTO_MANAGE_SCHEMA) {
-						if (mAdd.getTableName().equalsIgnoreCase("ADDRESS")) {
-							loadDataForHABITAT();
-						} else if (mAdd.getTableName().equalsIgnoreCase(
-								"PERSONNEL")) {
-							loadDataForPERSONNEL();
-						}
-					}
+                    if (AUTO_MANAGE_SCHEMA)
+                    {
+                        if (mAdd.getTableName().equalsIgnoreCase("ADDRESS"))
+                        {
+                            loadDataForHABITAT();
+                        }
+                        else if (mAdd.getTableName().equalsIgnoreCase("PERSONNEL"))
+                        {
+                            loadDataForPERSONNEL();
+                        }
+                    }
 
-				}
-				if (client
-						.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory")
-						&& RUN_IN_EMBEDDED_MODE) {
-					if (!HBaseCli.isStarted()) {
-						// HBaseCli.startCluster();
-					}
-					// HBaseCli.createTable("PERSONNEL");
-					// HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
-					// HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
-					//
-					// HBaseCli.createTable("ADDRESS");
-					// HBaseCli.addColumnFamily("ADDRESS", "STREET");
-					// HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
-					//
-					// HBaseCli.createTable("PERSONNEL_ADDRESS");
-					// HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
-					// "ADDRESS_ID");
-					// HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
-					// "PERSON_ID");
-					// HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
-					// "JoinColumns");
+                }
+                if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
+                {
+                    if (!HBaseCli.isStarted())
+                    {
+                        // HBaseCli.startCluster();
+                    }
+                    // HBaseCli.createTable("PERSONNEL");
+                    // HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
+                    // HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
+                    //
+                    // HBaseCli.createTable("ADDRESS");
+                    // HBaseCli.addColumnFamily("ADDRESS", "STREET");
+                    // HBaseCli.addColumnFamily("ADDRESS", "PERSON_ID");
+                    //
+                    // HBaseCli.createTable("PERSONNEL_ADDRESS");
+                    // HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
+                    // "ADDRESS_ID");
+                    // HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
+                    // "PERSON_ID");
+                    // HBaseCli.addColumnFamily("PERSONNEL_ADDRESS",
+                    // "JoinColumns");
 
-				}
-				if (client
-						.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory")) {
-					try {
-						createSchemaForPERSONNEL();
-						createSchemaForHABITAT();
-					} catch (Exception e) {
-						log.error("error during creating table in HSQLDB", e);
-					}
+                }
+                if (client.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
+                {
+                    try
+                    {
+                        createSchemaForPERSONNEL();
+                        createSchemaForHABITAT();
+                    }
+                    catch (Exception e)
+                    {
+                        log.error("error during creating table in HSQLDB", e);
+                    }
 
-				}
-				String schema = puMetadata
-						.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-				mAdd.setSchema(schema != null ? schema : KEYSPACE);
-				// mAdd.setSchema(schema)
+                }
+                String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+                mAdd.setSchema(schema != null ? schema : KEYSPACE);
+                // mAdd.setSchema(schema)
 
-				log.warn("persistence unit:" + pu + " and class:"
-						+ clazz.getCanonicalName());
-			}
-		}
+                log.warn("persistence unit:" + pu + " and class:" + clazz.getCanonicalName());
+            }
+        }
 
-		dao.closeEntityManager();
-		em = dao.getEntityManager(persistenceUnits);
-	}
+        dao.closeEntityManager();
+        em = dao.getEntityManager(persistenceUnits);
+    }
 
-	/**
-	 * Tear down internal.
-	 * 
-	 * @param ALL_PUs_UNDER_TEST
-	 * 
-	 * @throws InvalidRequestException
-	 *             the invalid request exception
-	 * @throws SchemaDisagreementException
-	 *             the schema disagreement exception
-	 */
-	protected void tearDownInternal(String[] ALL_PUs_UNDER_TEST)
-			throws InvalidRequestException, SchemaDisagreementException {
-		if (!em.isOpen()) {
-			em = dao.getEntityManager(persistenceUnits);
-		}
-		truncateRdbms();
+    /**
+     * Tear down internal.
+     * 
+     * @param ALL_PUs_UNDER_TEST
+     * 
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     */
+    protected void tearDownInternal(String[] ALL_PUs_UNDER_TEST) throws InvalidRequestException,
+            SchemaDisagreementException
+    {
+        if (!em.isOpen())
+        {
+            em = dao.getEntityManager(persistenceUnits);
+        }
+        truncateRdbms();
 
-		truncateMongo();
+        truncateMongo();
 
-		truncateRedis();
+        truncateRedis();
 
-		if (AUTO_MANAGE_SCHEMA) {
-			truncateColumnFamily();
-		}
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            truncateColumnFamily();
+        }
 
-		for (String pu : ALL_PUs_UNDER_TEST) {
-			CleanupUtilities.cleanLuceneDirectory(pu);
-		}
+        for (String pu : ALL_PUs_UNDER_TEST)
+        {
+            CleanupUtilities.cleanLuceneDirectory(pu);
+        }
 
-		// dao.closeEntityManagerFactory();
+        // dao.closeEntityManagerFactory();
 
-	}
+    }
 
-	/**
+    /**
      * 
      */
-	private void truncateColumnFamily() {
-		String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL",
-				"PERSONNEL_ADDRESS" };
-		CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
-	}
+    private void truncateColumnFamily()
+    {
+        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS" };
+        CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
+    }
 
-	/**
+    /**
      * 
      */
-	private void truncateMongo() {
-		Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-		MongoDBClient client = (MongoDBClient) clients.get("addMongo");
-		if (client != null) {
-			try {
-				Field db = client.getClass().getDeclaredField("mongoDb");
-				if (!db.isAccessible()) {
-					db.setAccessible(true);
-				}
-				DB mongoDB = (DB) db.get(client);
-				mongoDB.getCollection("PERSONNEL").drop();
-				mongoDB.getCollection("ADDRESS").drop();
-				mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
-			} catch (SecurityException e) {
-				log.error(e);
-			} catch (NoSuchFieldException e) {
-				log.error(e);
-			} catch (IllegalArgumentException e) {
-				log.error(e);
-			} catch (IllegalAccessException e) {
-				log.error(e);
-			}
-		}
+    private void truncateMongo()
+    {
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        MongoDBClient client = (MongoDBClient) clients.get("addMongo");
+        if (client != null)
+        {
+            try
+            {
+                Field db = client.getClass().getDeclaredField("mongoDb");
+                if (!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                DB mongoDB = (DB) db.get(client);
+                mongoDB.getCollection("PERSONNEL").drop();
+                mongoDB.getCollection("ADDRESS").drop();
+                mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
+            }
+            catch (SecurityException e)
+            {
+                log.error(e);
+            }
+            catch (NoSuchFieldException e)
+            {
+                log.error(e);
+            }
+            catch (IllegalArgumentException e)
+            {
+                log.error(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                log.error(e);
+            }
+        }
 
-	}
+    }
 
-	private void truncateRedis()
+    private void truncateRedis()
 
-	{
-		PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE
-				.getApplicationMetadata().getPersistenceUnitMetadata("redis");
-		Properties props = puMetadata.getProperties();
-		String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd
-				.getHost() : (String) props
-				.get(PersistenceProperties.KUNDERA_NODES);
-		String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd
-				.getPort() : (String) props
-				.get(PersistenceProperties.KUNDERA_PORT);
-		String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd
-				.getPassword() : (String) props
-				.get(PersistenceProperties.KUNDERA_PASSWORD);
-		Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
-		connection.auth(password);
-		connection.connect();
-		connection.flushDB();
-	}
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata("redis");
+        Properties props = puMetadata.getProperties();
+        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+        connection.auth(password);
+        connection.connect();
+        connection.flushDB();
+    }
 
-	/**
+    /**
      * 
      */
-	private void truncateRdbms() {
-		try {
-			cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-			cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-			cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-			cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-			cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
-			cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
+    private void truncateRdbms()
+    {
+        try
+        {
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
 
-		} catch (Exception e) {
-			// do nothing..weird!!
-		}
+        }
+        catch (Exception e)
+        {
+            // do nothing..weird!!
+        }
 
-	}
+    }
 
-	protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs)
-			throws InvalidRequestException, SchemaDisagreementException,
-			TException {
-		ksDef = new KsDef(KEYSPACE, SimpleStrategy.class.getSimpleName(),
-				cfDefs);
-		// Set replication factor
-		if (ksDef.strategy_options == null) {
-			ksDef.strategy_options = new LinkedHashMap<String, String>();
-		}
-		// Set replication factor, the value MUST be an integer
-		ksDef.strategy_options.put("replication_factor", "1");
-		CassandraCli.client.system_add_keyspace(ksDef);
-	}
+    protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
+            SchemaDisagreementException, TException
+    {
+        ksDef = new KsDef(KEYSPACE, SimpleStrategy.class.getSimpleName(), cfDefs);
+        // Set replication factor
+        if (ksDef.strategy_options == null)
+        {
+            ksDef.strategy_options = new LinkedHashMap<String, String>();
+        }
+        // Set replication factor, the value MUST be an integer
+        ksDef.strategy_options.put("replication_factor", "1");
+        CassandraCli.client.system_add_keyspace(ksDef);
+    }
 
-	/**
-	 * Truncates schema.
-	 * 
-	 * @throws InvalidRequestException
-	 *             the invalid request exception
-	 * @throws SchemaDisagreementException
-	 *             the schema disagreement exception
-	 */
-	protected void truncateSchema() throws InvalidRequestException,
-			SchemaDisagreementException {
-		log.warn("Truncating....");
+    /**
+     * Truncates schema.
+     * 
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     */
+    protected void truncateSchema() throws InvalidRequestException, SchemaDisagreementException
+    {
+        log.warn("Truncating....");
 
-		CassandraCli.dropColumnFamily("PERSONNEL", KEYSPACE);
-		CassandraCli.dropColumnFamily("ADDRESS", KEYSPACE);
-		CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", KEYSPACE);
-		CassandraCli.dropKeySpace(KEYSPACE);
-	}
+        CassandraCli.dropColumnFamily("PERSONNEL", KEYSPACE);
+        CassandraCli.dropColumnFamily("ADDRESS", KEYSPACE);
+        CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", KEYSPACE);
+        CassandraCli.dropKeySpace(KEYSPACE);
+    }
 
-	protected abstract void loadDataForPERSONNEL() throws TException,
-			InvalidRequestException, UnavailableException, TimedOutException,
-			SchemaDisagreementException;
+    protected abstract void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException;
 
-	protected abstract void loadDataForHABITAT() throws TException,
-			InvalidRequestException, UnavailableException, TimedOutException,
-			SchemaDisagreementException;
+    protected abstract void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException;
 
-	protected abstract void createSchemaForPERSONNEL() throws SQLException;
+    protected abstract void createSchemaForPERSONNEL() throws SQLException;
 
-	protected abstract void createSchemaForHABITAT() throws SQLException;
+    protected abstract void createSchemaForHABITAT() throws SQLException;
 
-	protected void shutDownRdbmsServer() throws SQLException {
-		if (cli != null) {
-			try {
-				cli.dropSchema(KEYSPACE);
-			} catch (Exception e) {
-				cli.closeConnection();
-			} finally {
-				cli.closeConnection();
-			}
+    protected void shutDownRdbmsServer() throws SQLException
+    {
+        if (cli != null)
+        {
+            try
+            {
+                cli.dropSchema(KEYSPACE);
+            }
+            catch (Exception e)
+            {
+                cli.closeConnection();
+            }
+            finally
+            {
+                cli.closeConnection();
+            }
 
-		}
-	}
+        }
+    }
 }

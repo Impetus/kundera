@@ -403,7 +403,8 @@ public class StudentCassandrabooleanTest extends CassandraBase
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
-        Assert.assertNull(students);
+        Assert.assertNotNull(students);
+        Assert.assertTrue(students.isEmpty());
 
         em.close();
     }

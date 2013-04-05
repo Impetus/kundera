@@ -27,6 +27,7 @@ public class StudentHBasebooleanTest extends Base
     private static final String table = "StudentHBaseboolean";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -200,13 +201,15 @@ public class StudentHBasebooleanTest extends Base
         int count = 0;
         for (StudentHBaseboolean student : students)
         {
-//            if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
-//            {
-//                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-//                Assert.assertEquals("Kuldeep", student.getName());
-//                count++;
-//            }
-//            else if (student.getId() == ((Boolean) getMinValue(boolean.class)).booleanValue())
+            // if (student.getId() == ((Boolean)
+            // getMaxValue(boolean.class)).booleanValue())
+            // {
+            // Assert.assertEquals(getMaxValue(short.class), student.getAge());
+            // Assert.assertEquals("Kuldeep", student.getName());
+            // count++;
+            // }
+            // else if (student.getId() == ((Boolean)
+            // getMinValue(boolean.class)).booleanValue())
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -258,8 +261,8 @@ public class StudentHBasebooleanTest extends Base
         List<StudentHBaseboolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseboolean s where s.name = Kuldeep and s.age > " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseboolean s where s.name = Kuldeep and s.age > "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -392,7 +395,8 @@ public class StudentHBasebooleanTest extends Base
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
-        Assert.assertNull(students);
+        Assert.assertNotNull(students);
+        Assert.assertTrue(students.isEmpty());
 
         em.close();
     }
@@ -405,8 +409,8 @@ public class StudentHBasebooleanTest extends Base
         List<StudentHBaseboolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseboolean s where s.name = Kuldeep and s.age >= " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseboolean s where s.name = Kuldeep and s.age >= "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -542,7 +546,7 @@ public class StudentHBasebooleanTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

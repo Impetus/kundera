@@ -23,11 +23,9 @@ import java.util.Set;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Hibernate;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -56,7 +54,6 @@ public class ObjectGraphBuilder
     {
         // Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();
-        // this.persistenceCache = persistenceCache;
 
         // Recursively build object graph and get head node.
         Node headNode = getNode(entity, objectGraph, initialNodeState);
@@ -67,26 +64,6 @@ public class ObjectGraphBuilder
             objectGraph.setHeadNode(headNode);
         }
         return objectGraph;
-    }
-
-    public static String getNodeId(Object pk, Object nodeData)
-    {
-        StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
-        strBuffer.append(Constants.NODE_ID_SEPARATOR);
-        strBuffer.append(pk);
-        return strBuffer.toString();
-    }
-
-    public static String getNodeId(Object pk, Class<?> objectClass)
-    {
-
-        StringBuffer strBuffer = new StringBuffer(objectClass.getName());
-        strBuffer.append(Constants.NODE_ID_SEPARATOR);
-        strBuffer.append(pk);
-        return strBuffer.toString();
-
-        // return objectClass.getName() + Constants.NODE_ID_SEPARATOR +
-        // pk.toString();
     }
 
     /**
@@ -101,6 +78,12 @@ public class ObjectGraphBuilder
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+
+        // entity metadata could be null.
+        if (entityMetadata == null)
+        {
+            return null;
+        }
 
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
@@ -123,11 +106,10 @@ public class ObjectGraphBuilder
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
 
         // Make a deep copy of entity data
-        // Object nodeDataCopy = ObjectUtils.deepCopy(entity);
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, /* nodeDataCopy */entity, initialNodeState, persistenceCache, id);
+            node = new Node(nodeId, entity, initialNodeState, persistenceCache, id);
         }
         else
         {
@@ -138,7 +120,7 @@ public class ObjectGraphBuilder
             // If dirty, set the entity data into node and mark it as dirty
             if (!DeepEquals.deepEquals(node.getData(), entity))
             {
-                node.setData(/* nodeDataCopy */entity);
+                node.setData(entity);
                 node.setDirty(true);
             }
             else if (node.isProcessed())
@@ -148,11 +130,6 @@ public class ObjectGraphBuilder
 
             // If node is NOT in managed state, its data needs to be
             // replaced with the one provided in entity object
-            /*
-             * if(!
-             * node.getCurrentNodeState().getClass().equals(ManagedState.class))
-             * { node.setData(nodeDataCopy); node.setDirty(true); }
-             */
         }
 
         // Put this node into object graph
@@ -167,7 +144,6 @@ public class ObjectGraphBuilder
 
             if (childObject != null && !(childObject instanceof HibernateProxy))
             {
-
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
                 if (metadata != null && relation.isJoinedByPrimaryKey())
                 {
@@ -227,7 +203,6 @@ public class ObjectGraphBuilder
     private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject,
             NodeState initialNodeState)
     {
-
         if (childObject instanceof Map.Entry)
         {
             Map.Entry entry = (Map.Entry) childObject;
@@ -280,7 +255,6 @@ public class ObjectGraphBuilder
                 node.addChildNode(nodeLink, childNode);
             }
         }
-
     }
 
     /**
@@ -299,7 +273,6 @@ public class ObjectGraphBuilder
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());
         linkProperties.put(LinkProperty.PROPERTY, relation.getProperty());
-        // linkProperties.put(LinkProperty.BIDIRECTIONAL_PROPERTY, relation.ge);
         linkProperties.put(LinkProperty.CASCADE, relation.getCascades());
 
         if (relation.isRelatedViaJoinTable())
@@ -308,7 +281,6 @@ public class ObjectGraphBuilder
         }
 
         // TODO: Add more link properties as required
-
         return linkProperties;
     }
 }

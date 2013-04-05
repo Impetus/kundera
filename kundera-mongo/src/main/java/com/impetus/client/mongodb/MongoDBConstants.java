@@ -68,4 +68,5 @@ public interface MongoDBConstants
 
     public static final String MIN = "min";
 
+    public final static String WRITE_CONCERN = "write.concern";
 }

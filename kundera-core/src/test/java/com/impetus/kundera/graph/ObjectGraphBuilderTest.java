@@ -44,11 +44,9 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
  */
 public class ObjectGraphBuilderTest
 {
-    ObjectGraphBuilder graphBuilder;
+    private ObjectGraphBuilder graphBuilder;
 
     private String _persistenceUnit = "kunderatest";
-
-    // Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -56,12 +54,8 @@ public class ObjectGraphBuilderTest
     @Before
     public void setUp() throws Exception
     {
-        // configurator.configure();
-
         getEntityManagerFactory();
         new PersistenceUnitConfiguration("kunderatest").configure();
-        // new MetamodelConfiguration("kunderatest").configure();
-
         PersistenceCache persistenceCache = new PersistenceCache();
 
         graphBuilder = new ObjectGraphBuilder(persistenceCache);
@@ -73,7 +67,7 @@ public class ObjectGraphBuilderTest
     @After
     public void tearDown() throws Exception
     {
-
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     /**
@@ -102,16 +96,6 @@ public class ObjectGraphBuilderTest
 
         Assert.assertTrue(headNode.getParents() == null);
         Assert.assertEquals(3, headNode.getChildren().size());
-    }
-
-    /**
-     * Test method for
-     * {@link com.impetus.kundera.graph.ObjectGraphBuilder#getNodeId(java.lang.Object, java.lang.Object)}
-     * .
-     */
-    @Test
-    public void testGetNodeId()
-    {
     }
 
     /**

@@ -92,7 +92,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         if (log.isDebugEnabled())
             log.debug("on start of fetching non associated entities");
 
-        List<Object> result = null;
+        List<Object> result = new ArrayList<Object>();
 
         initializeReader();
 

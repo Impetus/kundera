@@ -22,7 +22,6 @@ import javassist.Modifier;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
-import javax.persistence.GeneratedValue;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
@@ -33,7 +32,6 @@ import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
-import javax.transaction.NotSupportedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

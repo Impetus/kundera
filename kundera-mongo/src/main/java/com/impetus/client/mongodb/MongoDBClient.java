@@ -392,6 +392,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
         this.indexManager.flush();
+        puProperties = null;
     }
 
     /**
@@ -563,6 +564,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes = null;
             nodes = new ArrayList<Node>();
         }
+        puProperties = null;
     }
 
     /*

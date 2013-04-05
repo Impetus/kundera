@@ -19,6 +19,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import javassist.Modifier;
+
+import javax.persistence.Transient;
+
 import com.impetus.kundera.KunderaException;
 
 /**
@@ -190,4 +194,9 @@ public class ReflectUtils
         return c;
     }
 
+    public static boolean isTransientOrStatic(Field field)
+    {
+        return field != null && (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())
+                || field.isAnnotationPresent(Transient.class));
+    }
 }

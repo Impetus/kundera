@@ -160,7 +160,8 @@ public class MongoCompositeTypeTest
         q = em.createQuery(withFirstCompositeColClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
@@ -172,14 +173,16 @@ public class MongoCompositeTypeTest
         q = em.createQuery(withSecondCompositeColClause);
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);

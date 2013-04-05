@@ -39,7 +39,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * JUnit for CQL translator test
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class CQLTranslatorTest
 {
@@ -56,7 +56,7 @@ public class CQLTranslatorTest
         CassandraCli.cassandraSetUp();
         emf = Persistence.createEntityManagerFactory("composite_pu");
     }
-    
+
     @Test
     public void testPrepareColumns()
     {
@@ -69,11 +69,12 @@ public class CQLTranslatorTest
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(CassandraPrimeUser.class);
-        String translatedSql = translator.prepareColumnOrColumnValues(user, entityMetadata,TranslationType.VALUE).get(TranslationType.VALUE);
-        String columnAsCsv = "'mevivs',1,"+timeLineId+",'my first tweet','"+currentDate.getTime()+"'";
+        String translatedSql = translator.prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE).get(
+                TranslationType.VALUE);
+        String columnAsCsv = "'mevivs',1," + timeLineId + ",'my first tweet','" + currentDate.getTime() + "'";
         Assert.assertEquals(columnAsCsv, translatedSql);
     }
-    
+
     @After
     public void tearDown()
     {

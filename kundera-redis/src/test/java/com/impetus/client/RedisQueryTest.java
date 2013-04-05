@@ -247,8 +247,8 @@ public class RedisQueryTest
         findWithOutWhereClause = "Select p from PersonRedis p";
         query = em.createQuery(findWithOutWhereClause);
         results = query.getResultList();
-        Assert.assertNull(results);
-
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
     }
 
     /**

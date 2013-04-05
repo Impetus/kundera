@@ -48,7 +48,7 @@ public class KunderaQueryParser
      * Record of the keyword currently being processed, so we can check for out
      * of order keywords.
      */
-    private int keywordPosition = -1;
+//    private int keywordPosition = -1;
 
     /**
      * Constructor for the Single-String parser.
@@ -286,7 +286,6 @@ public class KunderaQueryParser
             {
                 String[] colArr = tokenizeColumn(content);
                 addUpdateClause(colArr);
-                // query.setUpdateClause(content);
             }
         }
 

@@ -44,7 +44,6 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -827,7 +826,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns)
     {
-        List<Object> entities = null;
+        List<Object> entities = new ArrayList<Object>();
         Cassandra.Client conn = null;
         try
         {
@@ -1026,6 +1025,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public Long generate(TableGeneratorDiscriptor discriptor)
     {
-        return getGeneratedValue(discriptor,getPersistenceUnit());
+        return getGeneratedValue(discriptor, getPersistenceUnit());
     }
 }

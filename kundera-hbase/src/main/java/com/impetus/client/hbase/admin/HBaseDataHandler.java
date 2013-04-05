@@ -270,7 +270,7 @@ public class HBaseDataHandler implements DataHandler
     public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
             String[] columns) throws IOException
     {
-        List output = null;
+        List output = new ArrayList();
         HTableInterface hTable = null;
         Object entity = null;
         List<String> relationNames = m.getRelationNames();

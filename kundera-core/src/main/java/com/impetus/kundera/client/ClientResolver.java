@@ -62,12 +62,6 @@ public final class ClientResolver
         throw new ClientResolverException(" No client configured for:" + persistenceUnit);
     }
 
-
-    public static ClientFactory getClientFactory(String persistenceUnit)
-    {
-        return getClientFactory(persistenceUnit, null);
-    }
-    
     /**
      * Gets the client factory.
      * 
@@ -150,6 +144,11 @@ public final class ClientResolver
 
         logger.info("Finishing factory initialization");
         return clientFactory;
+    }
+
+    public static ClientFactory getClientFactory(String pu)
+    {
+        return clientFactories.get(pu);
     }
 
     /**

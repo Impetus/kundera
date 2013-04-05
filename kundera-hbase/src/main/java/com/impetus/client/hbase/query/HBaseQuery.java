@@ -170,8 +170,8 @@ public class HBaseQuery extends QueryImpl implements Query
             if (output != null)
             {
                 results.add(output);
-                return results;
             }
+            return results;
         }
         if (translator.isFindById && filter == null && columns != null)
         {

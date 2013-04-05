@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -102,7 +100,6 @@ public abstract class ClientBase
 
         if (parents != null && !parents.isEmpty())
         {
-
             for (NodeLink parentNodeLink : parents.keySet())
             {
                 String linkName = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
@@ -159,7 +156,6 @@ public abstract class ClientBase
      */
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-
         if (indexManager != null)
         {
             if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
@@ -173,11 +169,9 @@ public abstract class ClientBase
                         indexManager.update(entityMetadata, node.getData(), parentNodeLink
                                 .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
                     }
-
                 }
                 else if (node.getChildren() != null)
                 {
-
                     Map<NodeLink, Node> children = node.getChildren();
                     for (NodeLink childNodeLink : children.keySet())
                     {
@@ -218,4 +212,5 @@ public abstract class ClientBase
      */
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
+
 }

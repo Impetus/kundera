@@ -20,20 +20,24 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * @author Kuldeep Mishra
  * @version 1.0
  * 
  */
 @Entity
-@Table(name = "DOCTOR", schema = "KunderaExamplesTests1@secIdxCassandra")
+@Table(name = "DOCTOR", schema = "KunderaExamples@secIdxCassandraTest")
+@IndexCollection(columns = { @Index(name = "age"), @Index(name = "key") })
 public class Doctor
 {
     @Id
     private String id;
 
     @Column
-    private String name;
+    private String key;
 
     @Column
     private long age;
@@ -60,7 +64,7 @@ public class Doctor
      */
     public String getName()
     {
-        return name;
+        return key;
     }
 
     /**
@@ -69,7 +73,7 @@ public class Doctor
      */
     public void setName(String name)
     {
-        this.name = name;
+        this.key = name;
     }
 
     /**

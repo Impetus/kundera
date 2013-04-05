@@ -589,7 +589,8 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         q.setParameter(2, 78575785897L);
         q.setParameter(3, 78575785899L);
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
         // query on big integer.
         query = "Select s from StudentMongo s where s.bigInteger =?1";
@@ -604,7 +605,8 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         // invalid.
         q.setParameter(1, new BigInteger("1234567823"));
         results = q.getResultList();
-        Assert.assertNull(results);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
 
     }
 

@@ -20,6 +20,8 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import org.junit.experimental.categories.Category;
+
 /**
  * Entity class for user's personal details
  * 
@@ -41,17 +43,21 @@ public class PersonalDetail
     @Column(name = "rel_status")
     private String relationshipStatus;
 
+    @Column(name = "age")
+    private Short age;
+
     public PersonalDetail()
     {
 
     }
 
-    public PersonalDetail(String name, String password, String relationshipStatus)
+    public PersonalDetail(String name, String password, String relationshipStatus, Short age)
     {
         setPersonalDetailId(UUID.randomUUID().toString());
         setName(name);
         setPassword(password);
         setRelationshipStatus(relationshipStatus);
+        setAge(age);
     }
 
     /**
@@ -120,6 +126,16 @@ public class PersonalDetail
     public void setRelationshipStatus(String relationshipStatus)
     {
         this.relationshipStatus = relationshipStatus;
+    }
+
+    public Short getAge()
+    {
+        return age;
+    }
+
+    public void setAge(Short age)
+    {
+        this.age = age;
     }
 
 }

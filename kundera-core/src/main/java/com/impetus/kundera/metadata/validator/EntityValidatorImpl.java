@@ -147,12 +147,6 @@ public class EntityValidatorImpl implements EntityValidator
             throw new InvalidEntityDefinitionException(clazz.getName() + " can only have 1 @Id field.");
         }
 
-        // if (!keys.get(0).getType().equals(String.class))
-        // {
-        // throw new PersistenceException(clazz.getName() +
-        // " @Id must be of String type.");
-        // }
-
         // save in cache
 
         classes.add(clazz);
@@ -174,7 +168,8 @@ public class EntityValidatorImpl implements EntityValidator
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
             if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
             {
-                if (!(field.isAnnotationPresent(TableGenerator.class) || field.isAnnotationPresent(SequenceGenerator.class)
+                if (!(field.isAnnotationPresent(TableGenerator.class)
+                        || field.isAnnotationPresent(SequenceGenerator.class)
                         || clazz.isAnnotationPresent(TableGenerator.class) || clazz
                             .isAnnotationPresent(SequenceGenerator.class)))
                 {
@@ -185,7 +180,7 @@ public class EntityValidatorImpl implements EntityValidator
                     checkForGenerator(clazz, field, generatedValue, schemaName);
                 }
             }
-        }        
+        }
     }
 
     /**

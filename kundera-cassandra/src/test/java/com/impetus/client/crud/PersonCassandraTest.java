@@ -35,7 +35,6 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -50,16 +49,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.ThriftClient;
+import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.index.LuceneQueryUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -96,11 +93,11 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-    	KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
+        loadData();
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -117,6 +114,22 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
+
+        Query findQuery = em.createQuery("Select p from PersonCassandra p");
+        List<PersonCassandra> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+
+        findQuery = em.createQuery("Select p from PersonCassandra p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+        
+        findQuery = em.createQuery("Select p.age from PersonCassandra p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
+
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
@@ -128,6 +141,7 @@ public class PersonCassandraTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
+        Assert.assertEquals(Day.THURSDAY, p.getDay());
 
         em.clear();
         String qry = "Select p.personName from PersonCassandra p where p.personId >= 1";
@@ -483,7 +497,7 @@ public class PersonCassandraTest extends BaseTest
       * em = null; emf = null;
       */
         // emf.close();
-         CassandraCli.dropKeySpace("KunderaExamples");
+        CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     /**

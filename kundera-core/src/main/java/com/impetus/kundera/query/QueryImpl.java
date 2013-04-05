@@ -78,7 +78,7 @@ public abstract class QueryImpl implements Query
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     private Set<Parameter<?>> parameters;
-    
+
     private Map<String, Object> hints = new HashMap<String, Object>();
 
     /**
@@ -143,9 +143,9 @@ public abstract class QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
-        if(log.isDebugEnabled())
-        log.info("On getResultList() executing query: " + query);
-        List results = null;
+        if (log.isDebugEnabled())
+            log.info("On getResultList() executing query: " + query);
+        List results = new ArrayList();
 
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
@@ -164,7 +164,7 @@ public abstract class QueryImpl implements Query
         {
             onDeleteOrUpdate(results);
         }
-        return results != null && !results.isEmpty() ? results : null;
+        return results /*!= null && !results.isEmpty() ? results : null*/;
 
     }
 
@@ -240,7 +240,9 @@ public abstract class QueryImpl implements Query
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
-//            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+            // result = (List<Object>)
+            // persistenceDelegeator.find(m.getEntityClazz(),
+            // uniquePKs.toArray());
             result = (List<Object>) client.findAll(m.getEntityClazz(), uniquePKs.toArray());
 
         }
@@ -312,29 +314,33 @@ public abstract class QueryImpl implements Query
                 else if (filter.getCondition().equalsIgnoreCase(">"))
                 {
                     String fieldName = metadata.getFieldName(filter.getProperty());
-//                    ;
-                    sb.append(appendRange(filter.getValue().toString(), false, true, entity.getAttribute(fieldName).getJavaType()));
+                    // ;
+                    sb.append(appendRange(filter.getValue().toString(), false, true, entity.getAttribute(fieldName)
+                            .getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase(">="))
                 {
                     String fieldName = metadata.getFieldName(filter.getProperty());
-//                    entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), true, true,entity.getAttribute(fieldName).getJavaType()));
+                    // entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), true, true, entity.getAttribute(fieldName)
+                            .getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<"))
                 {
                     String fieldName = metadata.getFieldName(filter.getProperty());
-//                    entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), false, false,entity.getAttribute(fieldName).getJavaType()));
+                    // entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), false, false, entity.getAttribute(fieldName)
+                            .getJavaType()));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<="))
                 {
                     String fieldName = metadata.getFieldName(filter.getProperty());
-//                    entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), true, false,entity.getAttribute(fieldName).getJavaType()));
+                    // entity.getAttribute(fieldName).getJavaType();
+                    sb.append(appendRange(filter.getValue().toString(), true, false, entity.getAttribute(fieldName)
+                            .getJavaType()));
                     appended = true;
                 }
 
@@ -425,7 +431,7 @@ public abstract class QueryImpl implements Query
         // go to client and get relation with values.!
         // populate EnhanceEntity
         Map<String, Object> results = client.getIndexManager().search(luceneQuery);
-        Set rSet = new HashSet (results.values());
+        Set rSet = new HashSet(results.values());
         return rSet;
     }
 
@@ -459,7 +465,7 @@ public abstract class QueryImpl implements Query
      *            the is greater than
      * @return the string
      */
-    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan,Class clazz)
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan, Class clazz)
     {
         String appender = " ";
         StringBuilder sb = new StringBuilder();
@@ -544,53 +550,57 @@ public abstract class QueryImpl implements Query
     private void onDeleteOrUpdate(List results)
     {
 
-        if (!kunderaQuery.isUpdateClause())
+        if (results != null)
         {
-            // then case of delete
-            for (Object result : results)
+            if (!kunderaQuery.isUpdateClause())
             {
-                persistenceDelegeator.remove(result);
-            }
-        }
-        else
-        {
-            EntityMetadata entityMetadata = getEntityMetadata();
-            for (Object result : results)
-            {
-                for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+                // then case of delete
+                for (Object result : results)
                 {
-                    String columnName = c.getProperty();
-                    try
+                    persistenceDelegeator.remove(result);
+                }
+            }
+            else
+            {
+                EntityMetadata entityMetadata = getEntityMetadata();
+                for (Object result : results)
+                {
+                    for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
                     {
+                        String columnName = c.getProperty();
+                        try
+                        {
 
-                        DefaultEntityType entityType = (DefaultEntityType) KunderaMetadata.INSTANCE
-                                .getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit())
-                                .entity(entityMetadata.getEntityClazz());
+                            DefaultEntityType entityType = (DefaultEntityType) KunderaMetadata.INSTANCE
+                                    .getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit())
+                                    .entity(entityMetadata.getEntityClazz());
 
-                        // That will always be attribute name.
+                            // That will always be attribute name.
 
-                        Attribute attribute = entityType.getAttribute(columnName);
+                            Attribute attribute = entityType.getAttribute(columnName);
 
-                        // TODO : catch column name.
+                            // TODO : catch column name.
 
-                        // Column column = entityMetadata.getColumn(columnName);
-                        //
-                        // if (column != null)
-                        // {
-                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue().toString());
-                        // }
-                        persistenceDelegeator.merge(result);
-                    }
-                    catch (IllegalArgumentException iax)
-                    {
-                        log.error("Invalid column name: " + columnName + " for class : "
-                                + entityMetadata.getEntityClazz());
-                        throw new QueryHandlerException("Error while executing query: " + iax);
+                            // Column column =
+                            // entityMetadata.getColumn(columnName);
+                            //
+                            // if (column != null)
+                            // {
+                            PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue()
+                                    .toString());
+                            // }
+                            persistenceDelegeator.merge(result);
+                        }
+                        catch (IllegalArgumentException iax)
+                        {
+                            log.error("Invalid column name: " + columnName + " for class : "
+                                    + entityMetadata.getEntityClazz());
+                            throw new QueryHandlerException("Error while executing query: " + iax);
+                        }
                     }
                 }
             }
         }
-
     }
 
     /************************* Methods from {@link Query} interface *******************************/
@@ -636,7 +646,8 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Sets hint name and value into hints map and returns instance of {@link Query}
+     * Sets hint name and value into hints map and returns instance of
+     * {@link Query}
      */
     @Override
     public Query setHint(String hintName, Object value)

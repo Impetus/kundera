@@ -40,8 +40,9 @@ public class StudentMongoBooleanTest extends MongoBase
     @After
     public void tearDown() throws Exception
     {
-//        EntityManager em = emf.createEntityManager();       
-//        em.remove(em.find(StudentMongoBoolean.class, getMinValue(Boolean.class)));
+        // EntityManager em = emf.createEntityManager();
+        // em.remove(em.find(StudentMongoBoolean.class,
+        // getMinValue(Boolean.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -256,8 +257,8 @@ public class StudentMongoBooleanTest extends MongoBase
         List<StudentMongoBoolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentMongoBoolean s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentMongoBoolean s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -391,7 +392,8 @@ public class StudentMongoBooleanTest extends MongoBase
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
-        Assert.assertNull(students);
+        Assert.assertNotNull(students);
+        Assert.assertTrue(students.isEmpty());
 
         em.close();
     }
@@ -404,8 +406,8 @@ public class StudentMongoBooleanTest extends MongoBase
         List<StudentMongoBoolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentMongoBoolean s where s.name = Kuldeep and s.age >= "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentMongoBoolean s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

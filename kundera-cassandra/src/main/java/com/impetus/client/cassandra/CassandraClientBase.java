@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javassist.Modifier;
+
 import javax.persistence.PersistenceException;
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.ManagedType;
@@ -69,7 +72,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -671,7 +673,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
         CqlResult result = null;
-        List returnedEntities = null;
+        List returnedEntities = new ArrayList();
         Cassandra.Client conn = null;
         Object pooledConnection = null;
         String persistenceUnit = entityMetadata.getPersistenceUnit();
@@ -980,6 +982,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         nodes.clear();
         nodes = null;
         closed = true;
+        externalProperties = null;
     }
 
     /**
@@ -1055,9 +1058,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         for (Field field : fields)
         {
-            Attribute attribute = compoundKey.getAttribute(field.getName());
-            String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-            translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
+            if (field != null && !Modifier.isStatic(field.getModifiers())
+                    && !Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class))
+            {
+                Attribute attribute = compoundKey.getAttribute(field.getName());
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
+            }
         }
 
         // strip last "AND" clause.
@@ -1256,6 +1263,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             nodes = null;
             nodes = new ArrayList<Node>();
         }
+        externalProperties = null;
     }
 
     /*
