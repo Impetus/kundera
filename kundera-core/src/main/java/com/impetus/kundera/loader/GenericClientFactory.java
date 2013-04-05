@@ -239,4 +239,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
         }
     }
+    
+    protected void unload()
+    {
+        if(client != null)
+        {
+            client.close();
+            client = null;
+        }
+    }
+    
+    
 }
