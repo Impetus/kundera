@@ -659,7 +659,7 @@ public class KunderaQuery
     {
         if (typedParameter != null)
         {
-            FilterClause clause = typedParameter.getParameters().get(name);
+            FilterClause clause = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name) : null;
             if (clause != null)
             {
                 clause.setValue(value);
