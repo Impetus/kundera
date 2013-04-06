@@ -24,8 +24,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
 @Table(name = "test1", schema = "KunderaCassandraXmlTest@CassandraXmlPropertyTest")
+@IndexCollection(columns={@Index(name="url")})
 public class MyTestEntity implements Serializable
 {
 

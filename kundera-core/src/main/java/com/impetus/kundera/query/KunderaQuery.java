@@ -747,7 +747,7 @@ public class KunderaQuery
             super();
             this.property = property;
             this.condition = condition;
-            this.value = value;
+            this.value = KunderaQuery.getValue(value);
         }
 
         /**
@@ -788,7 +788,7 @@ public class KunderaQuery
          */
         protected void setValue(Object value)
         {
-            this.value = value;
+            this.value = KunderaQuery.getValue(value);
         }
 
         /* @see java.lang.Object#toString() */
@@ -821,7 +821,7 @@ public class KunderaQuery
         public UpdateClause(final String property, final Object value)
         {
             this.property = property;
-            this.value = value;
+            this.value = KunderaQuery.getValue(value);
         }
 
         /**
@@ -846,7 +846,7 @@ public class KunderaQuery
          */
         public void setValue(Object value)
         {
-            this.value = value;
+            this.value = KunderaQuery.getValue(value);
         }
 
     }
@@ -1282,5 +1282,24 @@ public class KunderaQuery
             strBuilder.append("[ type = " + this.getParameterType() + "]");
             return strBuilder.toString();
         }
+    }
+
+    
+    /**
+     * Method to skip string literal as per JPA specification.
+     *  if  literal starts is enclose within "''" then skip "'" and include "'" in case of "''" replace it with "'".
+     *  
+     * @param value value.
+     * 
+     * @return replaced string in case of string, else will return original value.
+     */
+    private static Object getValue(Object value)
+    {
+        if(value != null && value.getClass().isAssignableFrom(String.class))
+        {
+            return ((String)value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("''", "'");
+        }
+        
+        return value;
     }
 }
