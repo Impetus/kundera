@@ -99,7 +99,7 @@ public class IndexManager
                     ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                 }
                 ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                        .index(metadata, entity, parentId.toString(), clazz);
+                        .index(metadata, entity, parentId != null ? parentId.toString() : null, clazz);
             }
             else
             {

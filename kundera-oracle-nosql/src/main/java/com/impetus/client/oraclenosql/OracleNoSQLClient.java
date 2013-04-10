@@ -33,18 +33,21 @@ import oracle.kv.Key;
 import oracle.kv.KeyValueVersion;
 import oracle.kv.Value;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -109,6 +112,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         
         Key majorKeyToFind = Key.createKey(majorComponents);
         Object entity = null;
+        Map<String, Object> relationMap = null;
+        if(entityMetadata.getRelationNames() != null && ! entityMetadata.getRelationNames().isEmpty())
+        {
+            relationMap = new HashMap<String, Object>();
+        }
         
         try 
         {            
@@ -156,13 +164,23 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     else if(columnNameToFieldMap.containsKey(minorKeyFirstPart))
                     {
                         Value v = keyValueVersion.getValue();
-                        Field f = columnNameToFieldMap.get(minorKeyFirstPart);
-                        if(f != null)
+                        Field f = columnNameToFieldMap.get(minorKeyFirstPart); 
+                        
+                        if(f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
                             PropertyAccessorHelper.set(entity, f, v.getValue());
-                        }                        
-                    }           
-
+                        } 
+                        else if (entityMetadata.getRelationNames() != null && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
+                        {      
+                            Relation relation = entityMetadata.getRelation(f.getName());
+                            EntityMetadata associationMetadata = KunderaMetadataManager
+                                    .getEntityMetadata(relation.getTargetEntity());
+                            relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
+                                    .getBindableJavaType(), v.getValue()));
+                        }
+                        
+                        
+                    }
                 }
             }     
             
@@ -172,7 +190,15 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             return null;
         }
 
-        return entity;
+        if (relationMap != null && !relationMap.isEmpty())
+        {
+            EnhanceEntity e = new EnhanceEntity(entity, key, relationMap);
+            return e;
+        }
+        else
+        {
+            return entity;
+        }
     }
 
     @Override
@@ -299,6 +325,29 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     kvStore.put(key, value); 
                 }               
             }           
+        }
+        
+        //Iterate over relations
+        if(rlHolders != null && ! rlHolders.isEmpty())
+        {
+            for(RelationHolder rh : rlHolders)
+            {
+                String relationName = rh.getRelationName();  
+                Object valueObj = rh.getRelationValue();
+                
+                if(! StringUtils.isEmpty(relationName) && valueObj != null)
+                {
+                  //Key
+                    Key key = Key.createKey(majorKeyComponent, relationName);
+                    
+                    //Value
+                    byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
+                    Value value = Value.createValue(valueInBytes);
+                    
+                    kvStore.put(key, value);
+                }   
+                
+            }
         }
     }  
     

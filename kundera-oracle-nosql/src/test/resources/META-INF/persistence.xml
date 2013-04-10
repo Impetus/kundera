@@ -8,15 +8,14 @@
 		<properties>			
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="5000"/>
-			<property name="kundera.client" value="pelops" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="kvstore"/>
+			<property name="kundera.keyspace" value="KunderaTests"/>
 			<property name="kundera.dialect" value="kvstore"/>
 			<property name="kundera.client" value="kvstore"/>
 			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
             <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>  
-            <property name="index.home.dir" value="./lucene"/> 
+<!--            <property name="index.home.dir" value="./lucene"/> -->
  		</properties>	
 	</persistence-unit>
 </persistence>
