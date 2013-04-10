@@ -15,13 +15,18 @@
 	<url>http://maven.apache.org</url>
 
 	<repositories>
-    <repository>
-      <id>oracleReleases</id>
-      <name>Oracle Released Java Packages</name>
-      <url>http://download.oracle.com/maven</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
+		<repository>
+			<id>kundera-missing</id>
+			<name>Kundera Public Missing Resources Repository</name>
+			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -78,7 +83,7 @@
 
 
 	</dependencies>
-	
+
 
 	<!-- Assembly build -->
 	<build>
