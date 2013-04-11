@@ -26,7 +26,7 @@ import javax.persistence.Table;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "PERSON_EMBEDDED", schema = "KunderaExamples@twikvstore")
+@Table(name = "PERSON_EMBEDDED", schema = "KunderaTests@twikvstore")
 public class PersonEmbeddedKVStore
 {
     /** The person id. */

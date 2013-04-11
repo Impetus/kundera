@@ -23,11 +23,13 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -112,13 +114,47 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                         .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
             }
 
-            // Add client metadata
-            clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
-            KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
+            if (luceneDirectoryPath != null)
+            {
+                // Add client metadata
+                clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
 
-            // Set Index Manager
-            indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                    luceneDirectoryPath));
+                // Set Index Manager
+                indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                        luceneDirectoryPath));
+            }
+            
+
+            String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+            
+            if(indexerClass != null)
+            {
+                try
+                {
+                    Class<?> indexerClazz = Class.forName(indexerClass);
+                    Indexer indexer = (Indexer) indexerClazz.newInstance(); 
+                    indexManager = new IndexManager(indexer);
+                    clientMetadata.setIndexImplementor(indexerClass);
+                }
+                catch (ClassNotFoundException cnfex)
+                {
+                    logger.error("Error while initialzing indexer:"+indexerClass, cnfex);
+                    throw new KunderaException(cnfex);
+                }
+                catch (InstantiationException iex)
+                {
+                    logger.error("Error while initialzing indexer:"+indexerClass, iex);
+                    throw new KunderaException(iex);
+                }
+                catch (IllegalAccessException iaex)
+                {
+                    logger.error("Error while initialzing indexer:"+indexerClass, iaex);
+                    throw new KunderaException(iaex);
+                }
+            }
+
+            KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);         
 
         }
     }

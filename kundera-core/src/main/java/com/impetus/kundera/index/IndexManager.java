@@ -66,11 +66,19 @@ public class IndexManager
      */
     public final void remove(EntityMetadata metadata, Object entity, String key)
     {
-        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        if (indexer != null)
         {
-            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
-        }
 
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit())
+                    && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+            {
+                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
+            }
+            else
+            {
+                indexer.unIndex(metadata.getEntityClazz(), key);
+            }
+        }
     }
 
     /**
@@ -163,6 +171,8 @@ public class IndexManager
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
+            
+            
             ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity, parentId, clazz);
         }
     }

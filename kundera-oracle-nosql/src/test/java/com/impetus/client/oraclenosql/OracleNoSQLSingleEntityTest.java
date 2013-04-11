@@ -39,14 +39,8 @@ import com.impetus.client.oraclenosql.entities.PersonKVStore;
  * @author amresh.singh
  */
 
-public class OracleNoSQLSingleEntityTest
+public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
 {
-
-    /** The emf. */
-    private static EntityManagerFactory emf;
-
-    /** The em. */
-    private static EntityManager em;
 
     /**
      * Sets the up.
@@ -57,15 +51,13 @@ public class OracleNoSQLSingleEntityTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("twikvstore");
-        em = emf.createEntityManager();
+        super.setUp();
     }
 
     @After
     public void tearDown()
     {
-        em.close();
-        emf.close();
+        super.tearDown();
     }
 
     /**
@@ -81,7 +73,7 @@ public class OracleNoSQLSingleEntityTest
         persistPerson("4", "person4", 40);
 
         //Find Records
-        em.clear();
+        clearEm();
         PersonKVStore p11 = findById("1");
         assertNotNull(p11);
         assertEquals("person1", p11.getPersonName());
@@ -110,7 +102,7 @@ public class OracleNoSQLSingleEntityTest
         p22.setPersonName("person22"); p22.setAge(200); updatePerson(p22);
         p33.setPersonName("person33"); p33.setAge(300); updatePerson(p33);
         p44.setPersonName("person44"); p44.setAge(400); updatePerson(p44);
-        em.clear();        
+        clearEm();       
         p11 = findById("1");
         assertNotNull(p11);
         assertEquals("person11", p11.getPersonName());
@@ -137,7 +129,7 @@ public class OracleNoSQLSingleEntityTest
         deletePerson(p33);
         deletePerson(p44);
 
-        em.clear();
+        clearEm();
         Assert.assertNull(findById("1"));
         Assert.assertNull(findById("2"));
         Assert.assertNull(findById("3"));
@@ -160,7 +152,7 @@ public class OracleNoSQLSingleEntityTest
     protected void persistPerson(String personId, String personName, int age)
     {
         Object p = preparePerson(personId, age, personName);
-        em.persist(p);
+        persist(p);
     }
 
     protected PersonKVStore preparePerson(String rowKey, int age, String name)
@@ -174,12 +166,12 @@ public class OracleNoSQLSingleEntityTest
 
     protected PersonKVStore findById(Object personId)
     {
-        return em.find(PersonKVStore.class, personId);
+        return (PersonKVStore)find(PersonKVStore.class, personId);
     }
 
     protected void updatePerson(PersonKVStore person)
     {
-        em.merge(person);
+        update(person);
     }
 
     protected <E extends Object> void assertFindByNameAndAge(EntityManager em, String clazz, E e, String name,
@@ -221,6 +213,6 @@ public class OracleNoSQLSingleEntityTest
 
     protected void deletePerson(PersonKVStore person)
     {
-        em.remove(person);
+        delete(person);
     }
 }

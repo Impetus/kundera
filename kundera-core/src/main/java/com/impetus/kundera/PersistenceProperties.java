@@ -89,4 +89,6 @@ public interface PersistenceProperties
     public static final String KUNDERA_DATASTORE_FILE_PATH = "kundera.datastore.file.path";
 
     public static final String KUNDERA_TRANSACTION_RESOURCE="kundera.transaction.resource.class";
+    
+    public static final String KUNDERA_INDEXER_CLASS = "kundera.indexer.class";
 }

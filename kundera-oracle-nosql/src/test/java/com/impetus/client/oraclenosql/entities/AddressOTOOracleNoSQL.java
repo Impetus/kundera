@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name="ADDRESS_OTO", schema="KunderaExamples@twikvstore")
+@Table(name="ADDRESS_OTO", schema="KunderaTests@twikvstore")
 public class AddressOTOOracleNoSQL
 {
 

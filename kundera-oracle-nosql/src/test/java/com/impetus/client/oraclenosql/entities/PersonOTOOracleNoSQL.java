@@ -28,7 +28,7 @@ import javax.persistence.Table;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON_OTO", schema = "KunderaExamples@twikvstore")
+@Table(name = "PERSON_OTO", schema = "KunderaTests@twikvstore")
 public class PersonOTOOracleNoSQL
 {  
     

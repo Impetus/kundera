@@ -205,7 +205,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public void close() {
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
-        getIndexManager().flush();
+        //getIndexManager().flush();
 
     }
 
