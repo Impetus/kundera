@@ -15,18 +15,9 @@
  */
 package com.impetus.client.oraclenosql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
-
-import com.impetus.client.oraclenosql.entities.PersonKVStore;
 
 /**
  * Base class for all test cases 

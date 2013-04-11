@@ -24,11 +24,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON_OTO", schema = "KunderaTests@twikvstore")
+@IndexCollection(columns = { @Index(name = "personName"),
+        @Index(name = "age")})
 public class PersonOTOOracleNoSQL
 {  
     

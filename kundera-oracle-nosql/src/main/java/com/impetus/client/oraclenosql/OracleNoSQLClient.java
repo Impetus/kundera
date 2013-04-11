@@ -216,7 +216,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         List<String> majorKeyComponent = new ArrayList<String>();
         majorKeyComponent.add(entityMetadata.getTableName());
-        majorKeyComponent.add(pKey.toString());
+        majorKeyComponent.add(PropertyAccessorHelper.getString(pKey));
 
         
         kvStore.multiDelete(Key.createKey(majorKeyComponent),null,null);

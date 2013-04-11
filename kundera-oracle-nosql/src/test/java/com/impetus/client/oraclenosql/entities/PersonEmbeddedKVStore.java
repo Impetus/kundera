@@ -21,12 +21,17 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Person entity with one embedded attribute 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "PERSON_EMBEDDED", schema = "KunderaTests@twikvstore")
+@IndexCollection(columns = { @Index(name = "personName"),
+        @Index(name = "age")})
 public class PersonEmbeddedKVStore
 {
     /** The person id. */
