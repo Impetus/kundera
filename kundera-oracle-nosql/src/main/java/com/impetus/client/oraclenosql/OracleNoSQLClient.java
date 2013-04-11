@@ -260,7 +260,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         majorKeyComponent.add(PropertyAccessorHelper.getString(id));    //Major keys are always String
 
         //Iterate over all Non-ID attributes of this entity (ID is already part of major key)
-        Set<Attribute> attributes = entityType.getSingularAttributes();        
+        Set<Attribute> attributes = entityType.getSingularAttributes();      
+ 
         
         for(Attribute attribute : attributes)
         {
@@ -301,7 +302,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                 
                                 //Value
                                 byte[] valueByteArray = PropertyAccessorHelper.get(embeddedObject, f);            
-                                Value value = Value.createValue(valueByteArray);                                
+                                Value value = Value.createValue(valueByteArray);                  
+                               
+                                
                                 kvStore.put(key, value);                                 
                             }               
                             
@@ -345,11 +348,62 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     Value value = Value.createValue(valueInBytes);
                     
                     kvStore.put(key, value);
+                    
                 }   
                 
             }
+        }      
+
+    }
+    
+    @Override
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
+        String joinTableName = joinTableData.getJoinTableName();
+        String joinColumnName = joinTableData.getJoinColumnName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();       
+        
+        /**
+         * There will be two kinds of major keys
+         * 1. /Join_Table_Name/Join_Column_Name/Primary_Key_On_Owning_Side
+         * 2. /Join_Table_Name/Inverse_Join_Column_Name/Primary_Key_On_Other_Side
+         * 
+         * Minor keys for both will be list of Primary keys at the opposite side, value will always be null
+         */
+        
+        List<String> majorKeysForJoinColumn = new ArrayList<String>();
+        List<String> majorKeysForInvJoinColumn = new ArrayList<String>();
+        
+        majorKeysForJoinColumn.add(joinTableName);
+        majorKeysForJoinColumn.add(joinColumnName);
+        
+        majorKeysForInvJoinColumn.add(joinTableName);
+        majorKeysForInvJoinColumn.add(invJoinColumnName);
+        
+        for (Object pk : joinTableRecords.keySet())
+        {
+            // Save Join Column ---> inverse Join Column mapping            
+            majorKeysForJoinColumn.add(2, PropertyAccessorHelper.getString(pk));
+            
+            Set<Object> values = joinTableRecords.get(pk);          
+            List<String> minorKeysForJoinColumn = new ArrayList<String>();
+            
+            for (Object childId : values)
+            {
+                minorKeysForJoinColumn.add(PropertyAccessorHelper.getString(childId)); 
+                
+                // Save Invese join Column ---> Join Column mapping
+                majorKeysForInvJoinColumn.add(2, PropertyAccessorHelper.getString(childId));
+                
+                Key key = Key.createKey(majorKeysForInvJoinColumn, PropertyAccessorHelper.getString(pk));
+                kvStore.put(key, null);  //Value will be null
+            }
+            
+            Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);              
+            kvStore.put(key, null);   //Value will be null        
         }
-    }  
+    }
     
     
 
@@ -366,10 +420,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
 
-    @Override
-    public void persistJoinTable(JoinTableData joinTableData)
-    {
-    }
+    
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -388,6 +439,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
+        List<String> majorKeyComponent = new ArrayList<String>();
+        majorKeyComponent.add(tableName);
+        majorKeyComponent.add(columnName);
+        majorKeyComponent.add(PropertyAccessorHelper.getString(columnValue));
+        
+        kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
     }
 
     @Override
