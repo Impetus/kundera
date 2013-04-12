@@ -298,15 +298,17 @@ public abstract class AssociationBase
         {
             em = dao.getEntityManager(persistenceUnits);
         }
-        truncateRdbms();
-
-        truncateMongo();
-
-        truncateRedis();
+        
 
         if (AUTO_MANAGE_SCHEMA)
         {
             truncateColumnFamily();
+            
+            truncateRdbms();
+
+            truncateMongo();
+
+            truncateRedis();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
