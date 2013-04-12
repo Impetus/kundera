@@ -74,7 +74,7 @@ public class DocumentObjectMapper
                     || f.getType().equals(Float.class) || f.getType().equals(Double.class))
             {
                 Object val = PropertyAccessorHelper.getObject(obj, f);
-                dBObj.put(column.getName(), val);
+                dBObj.put(((AbstractAttribute) column).getJPAColumnName(), val);
             }
             else if (f.getType().isAssignableFrom(Point.class))
             {
