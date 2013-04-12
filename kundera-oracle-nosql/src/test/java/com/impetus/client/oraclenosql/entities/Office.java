@@ -18,12 +18,17 @@ package com.impetus.client.oraclenosql.entities;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Office Embeddable object
  * 
  * @author amresh.singh
  */
 @Embeddable
+@IndexCollection(columns = { @Index(name = "officeId"),
+        @Index(name = "companyName"), @Index(name = "location")})
 public class Office
 {
     @Column private int officeId;

@@ -21,12 +21,17 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * <Prove description of functionality provided by this Type> 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "PERSON", schema = "KunderaTests@twikvstore")
+@IndexCollection(columns = { @Index(name = "personName"),
+        @Index(name = "age")})
 public class PersonKVStore
 {
     
