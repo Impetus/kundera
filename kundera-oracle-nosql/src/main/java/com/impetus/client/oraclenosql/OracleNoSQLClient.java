@@ -15,9 +15,11 @@
  */
 package com.impetus.client.oraclenosql;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Implementation of {@link Client} interface for Oracle NoSQL database
  * @author amresh.singh
  */
 public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery> {
@@ -109,7 +111,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         List<String> majorComponents = new ArrayList<String>();
         majorComponents.add(entityMetadata.getTableName());
         majorComponents.add(PropertyAccessorHelper.getString(key));
-        
+
         Key majorKeyToFind = Key.createKey(majorComponents);
         Object entity = null;
         Map<String, Object> relationMap = null;
@@ -372,19 +374,16 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
          * Minor keys for both will be list of Primary keys at the opposite side, value will always be null
          */
         
-        List<String> majorKeysForJoinColumn = new ArrayList<String>();
-        List<String> majorKeysForInvJoinColumn = new ArrayList<String>();
-        
-        majorKeysForJoinColumn.add(joinTableName);
-        majorKeysForJoinColumn.add(joinColumnName);
-        
-        majorKeysForInvJoinColumn.add(joinTableName);
-        majorKeysForInvJoinColumn.add(invJoinColumnName);
         
         for (Object pk : joinTableRecords.keySet())
         {
-            // Save Join Column ---> inverse Join Column mapping            
-            majorKeysForJoinColumn.add(2, PropertyAccessorHelper.getString(pk));
+            // Save Join Column ---> inverse Join Column mapping   
+            List<String> majorKeysForJoinColumn = new ArrayList<String>();
+            
+            majorKeysForJoinColumn.add(joinTableName);
+            //majorKeysForJoinColumn.add(joinColumnName);
+            majorKeysForJoinColumn.add(PropertyAccessorHelper.getString(pk));       
+            
             
             Set<Object> values = joinTableRecords.get(pk);          
             List<String> minorKeysForJoinColumn = new ArrayList<String>();
@@ -394,14 +393,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 minorKeysForJoinColumn.add(PropertyAccessorHelper.getString(childId)); 
                 
                 // Save Invese join Column ---> Join Column mapping
-                majorKeysForInvJoinColumn.add(2, PropertyAccessorHelper.getString(childId));
+                List<String> majorKeysForInvJoinColumn = new ArrayList<String>();
+                majorKeysForInvJoinColumn.add(joinTableName);
+                //majorKeysForInvJoinColumn.add(invJoinColumnName);
+                majorKeysForInvJoinColumn.add(PropertyAccessorHelper.getString(childId));
                 
                 Key key = Key.createKey(majorKeysForInvJoinColumn, PropertyAccessorHelper.getString(pk));
-                kvStore.put(key, null);  //Value will be null
+                kvStore.put(key, Value.createValue(invJoinColumnName.getBytes()));  //Value will be null
             }
             
             Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);              
-            kvStore.put(key, null);   //Value will be null        
+            kvStore.put(key, Value.createValue(joinColumnName.getBytes()));   //Value will be null        
         }
     }
     
@@ -417,22 +419,95 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
-    }
-
-
-    
+    }   
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue)
     {
-        return null;
+        List<E> foreignKeys = new ArrayList<E>();
+
+        //Major Key components
+        List<String> majorComponents = new ArrayList<String>();
+        majorComponents.add(tableName);
+        //majorComponents.add(pKeyColumnName);
+        majorComponents.add(PropertyAccessorHelper.getString(pKeyColumnValue));        
+        Key majorKeyToFind = Key.createKey(majorComponents);
+        
+        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
+
+        try
+        {
+            while (iterator.hasNext())
+            {
+                KeyValueVersion keyValueVersion = iterator.next();
+                
+                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8"); 
+                if(value != null && value.equals(pKeyColumnName))
+                {
+                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
+                    
+                    while(minorKeyIterator.hasNext())
+                    {
+                        String minorKey = minorKeyIterator.next();                  
+                        foreignKeys.add((E) minorKey);                
+                    }
+                }          
+                           
+            }
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }        
+        return foreignKeys;
     }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
+        String valueAsStr = PropertyAccessorHelper.getString(columnValue);
+        Set<String> results = new HashSet<String>();
+        
+        //Major Key components
+        List<String> majorComponents = new ArrayList<String>();
+        majorComponents.add(tableName);
+        //majorComponents.add(columnName);
+        majorComponents.add(PropertyAccessorHelper.getString(valueAsStr));        
+        Key majorKeyToFind = Key.createKey(majorComponents);
+        
+        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
+        try
+        {
+            while (iterator.hasNext())
+            {            
+                KeyValueVersion keyValueVersion = iterator.next();
+                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
+                
+                if(value != null && value.equals(columnName))
+                {
+                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
+                    
+                    while(minorKeyIterator.hasNext())
+                    {
+                        String minorKey = minorKeyIterator.next();                  
+                        results.add(minorKey);            
+                    } 
+                }    
+                           
+            }
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }  
+        
+        
+        if (results != null && ! results.isEmpty())
+        {
+            return results.toArray(new Object[0]);
+        }
         return null;
     }
 
@@ -440,11 +515,61 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         List<String> majorKeyComponent = new ArrayList<String>();
-        majorKeyComponent.add(tableName);
-        majorKeyComponent.add(columnName);
+        majorKeyComponent.add(tableName);        
         majorKeyComponent.add(PropertyAccessorHelper.getString(columnValue));
+        Key majorKey = Key.createKey(majorKeyComponent);
+        boolean deleteApplicableOnMajorKey = false;
         
-        kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
+        //Store minor keys in an array before deleting
+        List<String> minorKeys = new ArrayList<String>();      
+        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKey, null, null);
+        try
+        {
+            while (iterator.hasNext())
+            {
+                KeyValueVersion keyValueVersion = iterator.next();
+                
+                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8"); 
+                if(value != null && value.equals(columnName))
+                {
+                    deleteApplicableOnMajorKey = true;
+                    
+                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
+                    
+                    while(minorKeyIterator.hasNext())
+                    {
+                        String minorKey = minorKeyIterator.next();                  
+                        minorKeys.add(minorKey);                
+                    }
+                }          
+                           
+            }
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+        
+        
+        if(deleteApplicableOnMajorKey)
+        {
+            //Delete This columnValue as major key            
+            kvStore.multiDelete(majorKey, null, null);
+            
+            //Delete all minor keys that contain this columnValue
+            for(String key : minorKeys)
+            {
+                List<String> majorKeys = new ArrayList<String>();
+                majorKeys.add(tableName);        
+                majorKeys.add(PropertyAccessorHelper.getString(key));
+                Key majorAndMinorKeys = Key.createKey(majorKeys, PropertyAccessorHelper.getString(columnValue));
+                kvStore.multiDelete(majorAndMinorKeys, null, null);
+            }
+        }
+        
+        
+        
+        
     }
 
     @Override
