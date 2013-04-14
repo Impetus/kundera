@@ -40,6 +40,13 @@
 			<version>2.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>com.impetus.core</groupId>
+			<artifactId>kundera-core</artifactId>
+			<version>2.5-SNAPSHOT</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>oracle.kv</groupId>
 			<artifactId>kvclient</artifactId>
 			<version>2.0.26</version>
@@ -50,12 +57,8 @@
 			<version>2.0.26</version>
 
 		</dependency>
-		<dependency>
-			<groupId>com.sleepycat</groupId>
-			<artifactId>je</artifactId>
-			<version>3.3.75</version>
-			<scope>test</scope>
-		</dependency>
+		<!--<dependency> <groupId>com.sleepycat</groupId> <artifactId>je</artifactId> 
+			<version>3.3.75</version> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
