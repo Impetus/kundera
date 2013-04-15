@@ -34,7 +34,7 @@ import com.impetus.client.crud.compositeType.association.UserInfo;
  */
 
 @Entity
-@Table(name="CompositeUser", schema = "CompositeCassandra@composite_pu")
+@Table(name="CompositeUserAssociation", schema = "CompositeCassandra@composite_pu")
 //@Index(index = true,columns = { "tweetBody","tweetDate" })
 public class CassandraEmbeddedAssociation
 {

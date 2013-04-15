@@ -164,8 +164,7 @@ public abstract class QueryImpl implements Query
         {
             onDeleteOrUpdate(results);
         }
-        return results /*!= null && !results.isEmpty() ? results : null*/;
-
+        return results != null ? results : new ArrayList();
     }
 
     /**

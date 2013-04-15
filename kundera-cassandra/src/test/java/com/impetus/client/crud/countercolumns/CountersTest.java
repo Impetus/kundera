@@ -16,7 +16,9 @@
 package com.impetus.client.crud.countercolumns;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -36,6 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.KunderaException;
 
@@ -61,7 +64,6 @@ public class CountersTest
 
     private String keyspace = "KunderaCounterColumn";
 
-
     /**
      * @throws java.lang.Exception
      */
@@ -77,7 +79,9 @@ public class CountersTest
         {
             createSchema();
         }
-        emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        emf = Persistence.createEntityManagerFactory("CassandraCounterTest", propertyMap);
     }
 
     private void createSchema() throws InvalidRequestException, TException, SchemaDisagreementException

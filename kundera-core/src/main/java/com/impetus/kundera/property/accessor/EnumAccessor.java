@@ -51,14 +51,14 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
         String s = toString(object);
         try
         {
-            return ((String) s).getBytes(Constants.ENCODING);
+            return s.getBytes(Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
         {
@@ -74,7 +74,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
             return null;
         }
         Enum en = (Enum) object;
-        return en.toString();
+        return en.name();
     }
 
     @Override

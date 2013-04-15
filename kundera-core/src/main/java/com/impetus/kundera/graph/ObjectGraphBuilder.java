@@ -32,6 +32,8 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.IdGenerator;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.DeepEquals;
@@ -45,9 +47,15 @@ public class ObjectGraphBuilder
 {
     private PersistenceCache persistenceCache;
 
-    public ObjectGraphBuilder(PersistenceCache pcCache)
+    private PersistenceDelegator pd;
+
+    private IdGenerator idGenerator;
+
+    public ObjectGraphBuilder(PersistenceCache pcCache, PersistenceDelegator pd)
     {
         this.persistenceCache = pcCache;
+        this.pd = pd;
+        this.idGenerator = new IdGenerator();
     }
 
     public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState)
@@ -84,7 +92,6 @@ public class ObjectGraphBuilder
         {
             return null;
         }
-
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
         String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());

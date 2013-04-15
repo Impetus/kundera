@@ -43,6 +43,7 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 
@@ -102,7 +103,7 @@ public class CassandraCompositeTypeTest
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
-//        user.setNickName(NickName.KK);
+        user.setNickName(NickName.KK);
         em.persist(user);
         em.flush();
 
@@ -120,6 +121,8 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my first tweet", result.getTweetBody());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
+        Assert.assertEquals(NickName.KK, result.getNickName());
+        Assert.assertEquals(NickName.KK.name(), result.getNickName().name());
 
         em.clear();// optional,just to clear persistence cache.
 

@@ -81,7 +81,9 @@ public abstract class ClientBase
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
-        onPersist(metadata, entity, id, relationHolders);
+        /*id = */onPersist(metadata, entity, id, relationHolders);
+//        node.setEntityId(id);
+        node.setData(entity);
         indexNode(node, metadata);
     }
 

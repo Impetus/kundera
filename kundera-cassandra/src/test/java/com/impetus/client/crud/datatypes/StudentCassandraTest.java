@@ -16,12 +16,12 @@
 package com.impetus.client.crud.datatypes;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Query;
 
@@ -89,6 +89,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
             new HtmlReportModule() });
 
+    protected Map propertyMap = null;
+
     /**
      * Sets the up.
      * 
@@ -98,7 +100,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     @Before
     public void setUp() throws Exception
     {
-        setupInternal(persistenceUnit);
+        setupInternal(persistenceUnit, propertyMap);
     }
 
     /**
@@ -684,14 +686,16 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     /**
      * Loads cassandra specific data.
      * 
+     * @param cql_enabled
+     * 
      * @throws TException
      * @throws InvalidRequestException
      * @throws UnavailableException
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-    private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
-            SchemaDisagreementException
+    private void loadData(boolean cql_enabled) throws TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
     {
 
         KsDef ksDef = null;
@@ -711,22 +715,46 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("IS_EXCEPTIONAL".getBytes()), "BooleanType");
         columnDef4.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef4);
+        ColumnDef columnDef5;
+        ColumnDef columnDef8;
+        ColumnDef columnDef11;
+        ColumnDef columnDef16;
+        ColumnDef columnDef7;
+        if (cql_enabled)
+        {
+            columnDef5 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
+            columnDef8 = new ColumnDef(ByteBuffer.wrap("CGPA".getBytes()), "Int32Type");
+            columnDef11 = new ColumnDef(ByteBuffer.wrap("YEARS_SPENT".getBytes()), "Int32Type");
+            columnDef16 = new ColumnDef(ByteBuffer.wrap("BIG_INT".getBytes()), "Int32Type");
+            columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "Int32Type");
+        }
+        else
+        {
+            columnDef5 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            columnDef8 = new ColumnDef(ByteBuffer.wrap("CGPA".getBytes()), "IntegerType");
+            columnDef11 = new ColumnDef(ByteBuffer.wrap("YEARS_SPENT".getBytes()), "IntegerType");
+            columnDef16 = new ColumnDef(ByteBuffer.wrap("BIG_INT".getBytes()), "IntegerType");
+            columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "BytesType");
+        }
 
-        ColumnDef columnDef5 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
         columnDef5.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef5);
+
+        columnDef8.index_type = IndexType.KEYS;
+        cfDef.addToColumn_metadata(columnDef8);
+
+        columnDef11.index_type = IndexType.KEYS;
+        cfDef.addToColumn_metadata(columnDef11);
+
+        columnDef16.index_type = IndexType.KEYS;
+        cfDef.addToColumn_metadata(columnDef16);
 
         ColumnDef columnDef6 = new ColumnDef(ByteBuffer.wrap("SEMESTER".getBytes()), "UTF8Type");
         columnDef6.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef6);
 
-        ColumnDef columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "BytesType");
         columnDef7.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef7);
-
-        ColumnDef columnDef8 = new ColumnDef(ByteBuffer.wrap("CGPA".getBytes()), "IntegerType");
-        columnDef8.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef8);
 
         ColumnDef columnDef9 = new ColumnDef(ByteBuffer.wrap("PERCENTAGE".getBytes()), "FloatType");
         columnDef9.index_type = IndexType.KEYS;
@@ -735,10 +763,6 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         ColumnDef columnDef10 = new ColumnDef(ByteBuffer.wrap("HEIGHT".getBytes()), "DoubleType");
         columnDef10.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef10);
-
-        ColumnDef columnDef11 = new ColumnDef(ByteBuffer.wrap("YEARS_SPENT".getBytes()), "IntegerType");
-        columnDef11.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef11);
 
         ColumnDef columnDef12 = new ColumnDef(ByteBuffer.wrap("ROLL_NUMBER".getBytes()), "LongType");
         columnDef12.index_type = IndexType.KEYS;
@@ -754,10 +778,6 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
 
         ColumnDef columnDef15 = new ColumnDef(ByteBuffer.wrap("SQL_TIME".getBytes()), "DateType");
         columnDef15.index_type = IndexType.KEYS;
-
-        ColumnDef columnDef16 = new ColumnDef(ByteBuffer.wrap("BIG_INT".getBytes()), "IntegerType");
-        columnDef16.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef16);
 
         ColumnDef columnDef17 = new ColumnDef(ByteBuffer.wrap("BIG_DECIMAL".getBytes()), "DecimalType");
         columnDef17.index_type = IndexType.KEYS;
@@ -815,7 +835,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            // Set replication factor, the value MUST be an integer
+            // replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }
@@ -863,11 +883,11 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     }
 
     @Override
-    void createSchema()
+    void createSchema(boolean cql_enabled)
     {
         try
         {
-            loadData();
+            loadData(cql_enabled);
         }
         catch (TException e)
         {
@@ -897,4 +917,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
+    public void setPersistenceUnit(String persistenceUnit)
+    {
+        this.persistenceUnit = persistenceUnit;
+    }
 }

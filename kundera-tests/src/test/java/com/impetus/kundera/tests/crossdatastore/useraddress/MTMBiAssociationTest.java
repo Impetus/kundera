@@ -248,7 +248,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
-
+        cfDef.setKey_validation_class("UTF8Type");
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
@@ -308,7 +308,7 @@ public class MTMBiAssociationTest extends TwinAssociation
 
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-
+        cfDef2.setKey_validation_class("UTF8Type");
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
@@ -359,7 +359,7 @@ public class MTMBiAssociationTest extends TwinAssociation
             CfDef cfDef2 = new CfDef();
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
-
+            cfDef2.setKey_validation_class("UTF8Type");
             List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef : cfDefss)

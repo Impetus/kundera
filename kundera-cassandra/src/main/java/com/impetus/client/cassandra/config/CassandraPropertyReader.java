@@ -20,7 +20,6 @@ import java.util.Properties;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

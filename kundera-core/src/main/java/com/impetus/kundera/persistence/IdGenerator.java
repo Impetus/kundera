@@ -44,11 +44,11 @@ public class IdGenerator
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(PersistenceDelegator.class);
 
-    void setGeneratedIdIfApplicable(Object e, EntityMetadata m, Client<?> client)
+    public void setGeneratedIdIfApplicable(Object e, EntityMetadata m, Client<?> client)
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
-        if (keyValue != null)
+        if (keyValue != null && client != null)
         {
             GenerationType type = keyValue.getStrategy();
             switch (type)

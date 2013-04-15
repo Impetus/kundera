@@ -52,7 +52,6 @@ import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1ToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUniMto1;
-import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.client.schemamanager.entites.CassandraEntitySuper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;

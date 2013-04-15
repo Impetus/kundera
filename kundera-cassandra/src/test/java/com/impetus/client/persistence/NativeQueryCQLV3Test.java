@@ -23,9 +23,7 @@ import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
@@ -47,7 +45,6 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * <Prove description of functionality provided by this Type>
@@ -160,7 +157,6 @@ public class NativeQueryCQLV3Test
         Assert.assertEquals("UT", results.get(0).getState());
         Assert.assertEquals("Brandon Sanderson", results.get(0).getFull_name());
         Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
-
     }
 
     /**

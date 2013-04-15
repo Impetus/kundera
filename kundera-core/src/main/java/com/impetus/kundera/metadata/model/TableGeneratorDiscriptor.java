@@ -35,7 +35,7 @@ public class TableGeneratorDiscriptor
 
     private static final int default_allocation_size = 50;
 
-    private static final int default_initial_value = 0;
+    private static final int default_initial_value = 1;
 
     private String table;
 

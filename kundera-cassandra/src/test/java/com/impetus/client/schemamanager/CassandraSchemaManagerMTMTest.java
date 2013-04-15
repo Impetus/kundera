@@ -23,7 +23,6 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.InvalidRequestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

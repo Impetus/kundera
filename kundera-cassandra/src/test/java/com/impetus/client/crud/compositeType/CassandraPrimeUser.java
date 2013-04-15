@@ -47,9 +47,9 @@ public class CassandraPrimeUser
     @Column
     private String name;
 
-//    @Column
-//    @Enumerated(EnumType.STRING)
-//    private NickName nickName;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private NickName nickName;
 
     public CassandraPrimeUser()
     {
@@ -112,20 +112,18 @@ public class CassandraPrimeUser
         this.name = name;
     }
 
-//    public NickName getNickName()
-//    {
-//        return nickName;
-//    }
-//
-//    public void setNickName(NickName nickName)
-//    {
-//        this.nickName = nickName;
-//    }
-//
-//    enum NickName
-//    {
-//        KK, VM, AS;
-//    }
-    
-    
+    public NickName getNickName()
+    {
+        return nickName;
+    }
+
+    public void setNickName(NickName nickName)
+    {
+        this.nickName = nickName;
+    }
+
+    enum NickName
+    {
+        KK, VM, AS;
+    }
 }

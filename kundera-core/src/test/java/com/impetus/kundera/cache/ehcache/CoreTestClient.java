@@ -58,12 +58,10 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
         return null;
     }
 
-
     @Override
     public void persist(Node node)
     {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -72,7 +70,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
         // TODO Auto-generated method stub
 
     }
-   
+
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
@@ -94,8 +92,11 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -105,8 +106,12 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
      */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
@@ -116,21 +121,24 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         // TODO Auto-generated method stub
-        
+    //    return null;
     }
 
 }

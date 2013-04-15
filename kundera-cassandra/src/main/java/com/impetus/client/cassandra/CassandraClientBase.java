@@ -31,7 +31,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
-import javax.persistence.metamodel.ManagedType;
 
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
@@ -90,6 +89,7 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -128,6 +128,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     protected Map<String, Object> externalProperties;
 
+    protected CQLClient cqlClient;
+
+    protected boolean isCQLEnabled;
+
     /**
      * constructor using fields.
      * 
@@ -138,9 +142,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties)
     {
         this.externalProperties = externalProperties;
+        this.cqlClient = new CQLClient();
         setBatchSize(persistenceUnit, this.externalProperties);
-        cqlVersion = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
-                : CassandraConstants.CQL_VERSION_3_0;
+        cqlVersion = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
+                : null;
+        cqlVersion = cqlVersion == null ? (CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
+                .getCqlVersion() : CassandraConstants.CQL_VERSION_3_0) : cqlVersion;
+        this.isCQLEnabled = cqlVersion.equals(CassandraConstants.CQL_VERSION_3_0);
     }
 
     /**
@@ -588,16 +596,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
-            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            if (isCQL3Enabled(metadata, metaModel))
             {
-                CQLTranslator translator = new CQLTranslator();
-                String select_Query = translator.SELECTALL_QUERY;
-                select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
-                        translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
-                StringBuilder builder = new StringBuilder(select_Query);
-                EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-                onWhereClause(metadata, rowId, translator, builder, compoundKey);
-                result = executeQuery(builder.toString(), metadata.getEntityClazz(), relationNames);
+                result = cqlClient.find(metaModel, metadata, rowId, relationNames);
             }
             else
             {
@@ -611,6 +612,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         return result != null & !result.isEmpty() ? result.get(0) : null;
+    }
+
+    public boolean isCQL3Enabled(EntityMetadata metadata, MetamodelImpl metaModel)
+    {
+        isCQLEnabled = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())
+                || (isCQLEnabled && !metadata.getType().equals(Type.SUPER_COLUMN_FAMILY));
+        return isCQLEnabled;
     }
 
     /**
@@ -670,116 +678,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
     {
-
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        CqlResult result = null;
-        List returnedEntities = new ArrayList();
-        Cassandra.Client conn = null;
-        Object pooledConnection = null;
-        String persistenceUnit = entityMetadata.getPersistenceUnit();
-        try
-        {
-            pooledConnection = getPooledConection(persistenceUnit);
-            conn = getConnection(pooledConnection);
-            conn.set_cql_version(getCqlVersion());
-
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
-
-            if (log.isDebugEnabled())
-            {
-                log.info("executing query " + cqlQuery);
-            }
-            if (getCqlVersion().equals(CassandraConstants.CQL_VERSION_2_0)
-                    && !metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
-            {
-                result = conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-                        org.apache.cassandra.thrift.Compression.NONE);
-            }
-            else
-            {
-                result = conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
-                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
-            }
-            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
-            {
-                returnedEntities = new ArrayList<Object>(result.getRowsSize());
-                Iterator<CqlRow> iter = result.getRowsIterator();
-                while (iter.hasNext())
-                {
-                    CqlRow row = iter.next();
-                    Object rowKey = null;
-
-                    if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
-                    {
-                        // rowKey = PropertyAccessorHelper.getObject(
-                        // entityMetadata.getIdAttribute().getBindableJavaType(),
-                        // row.getKey());
-                    }
-                    // String rowKeys = Bytes.toUTF8(row.getKey());
-                    ThriftRow thriftRow = null;
-                    if (entityMetadata.isCounterColumnType())
-                    {
-                        log.info("Native query is not permitted on counter column returning null ");
-                        return null;
-                    }
-                    else
-                    {
-                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
-                                new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                new ArrayList<CounterSuperColumn>(0));
-                    }
-
-                    Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
-                            relationalField != null && !relationalField.isEmpty());
-
-                    if (entity != null)
-                    {
-                        returnedEntities.add(entity);
-                    }
-                    else
-                    {
-                        returnedEntities.add(row.getColumns().get(0));
-                    }
-                }
-            }
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while executing native CQL query Caused by:", e);
-            throw new PersistenceException(e);
-        }
-        finally
-        {
-            releaseConnection(pooledConnection);
-        }
-        return returnedEntities;
-
+        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
     }
 
     /**
@@ -898,14 +797,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return results;
     }
 
-    protected void onpersistOverCompositeKey(EntityMetadata entityMetadata, Object entity,
-            Cassandra.Client cassandra_client, List<RelationHolder> rlHolders) throws InvalidRequestException,
-            TException, UnavailableException, TimedOutException, SchemaDisagreementException,
-            UnsupportedEncodingException
+    protected String createInsertQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
+            List<RelationHolder> rlHolders)
     {
-        cassandra_client.set_cql_version(getCqlVersion());
         CQLTranslator translator = new CQLTranslator();
         String insert_Query = translator.INSERT_QUERY;
+
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
@@ -931,10 +828,45 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translation.get(TranslationType.VALUE));
         insert_Query = StringUtils
                 .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
-        cassandra_client.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
-                Compression.NONE, consistencyLevel);
+
+        return insert_Query;
     }
 
+    /*protected String createUpdateQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
+            List<RelationHolder> rlHolders)
+    {
+        CQLTranslator translator = new CQLTranslator();
+        String insert_Query = translator.UPDATE_QUERY;
+
+        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+        HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
+                TranslationType.ALL);
+
+        String columnNames = translation.get(TranslationType.COLUMN);
+        String columnValues = translation.get(TranslationType.VALUE);
+        StringBuilder columnNameBuilder = new StringBuilder(columnNames);
+        StringBuilder columnValueBuilder = new StringBuilder(columnValues);
+
+        for (RelationHolder rl : rlHolders)
+        {
+            columnNameBuilder.append(",");
+            columnValueBuilder.append(",");
+            translator.appendColumnName(columnNameBuilder, rl.getRelationName());
+            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
+        }
+
+        translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
+        translation.put(TranslationType.VALUE, columnValueBuilder.toString());
+
+        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
+                translation.get(TranslationType.VALUE));
+        insert_Query = StringUtils
+                .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
+
+        return insert_Query;
+    }*/
+    
     /**
      * Gets the cql version.
      * 
@@ -1012,13 +944,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the metadata
      * @param metaModel
      *            the meta model
-     * @param compoundKeyObject
+     * @param keyObject
      *            the compound key object
      * @param compoundKey
      *            the compound key
      */
-    protected void onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object compoundKeyObject,
-            ManagedType compoundKey)
+    protected String onDeleteQuery(EntityMetadata metadata, MetamodelImpl metaModel, Object keyObject)
     {
         CQLTranslator translator = new CQLTranslator();
         String deleteQuery = CQLTranslator.DELETE_QUERY;
@@ -1028,9 +959,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
 
-        onWhereClause(metadata, compoundKeyObject, translator, deleteQueryBuilder, compoundKey);
+        // EmbeddableType compoundKey =
+        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+        onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
 
-        executeQuery(deleteQueryBuilder.toString(), metadata.getEntityClazz(), null);
+        return deleteQueryBuilder.toString();
+
     }
 
     /**
@@ -1038,7 +972,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * 
      * @param metadata
      *            the metadata
-     * @param compoundKeyObject
+     * @param key
      *            the compound key object
      * @param translator
      *            the translator
@@ -1047,24 +981,31 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param compoundKey
      *            the compound key
      */
-    private void onWhereClause(EntityMetadata metadata, Object compoundKeyObject, CQLTranslator translator,
-            StringBuilder queryBuilder, ManagedType compoundKey)
+    private void onWhereClause(EntityMetadata metadata, Object key, CQLTranslator translator,
+            StringBuilder queryBuilder, MetamodelImpl metaModel)
     {
-        Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
-        // EmbeddableType compoundKey =
-        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-
         queryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
 
-        for (Field field : fields)
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
-            if (field != null && !Modifier.isStatic(field.getModifiers())
-                    && !Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class))
+            Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+            EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+
+            for (Field field : fields)
             {
-                Attribute attribute = compoundKey.getAttribute(field.getName());
-                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                translator.buildWhereClause(queryBuilder, columnName, field, compoundKeyObject);
+                if (field != null && !Modifier.isStatic(field.getModifiers())
+                        && !Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class))
+                {
+                    Attribute attribute = compoundKey.getAttribute(field.getName());
+                    String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                    translator.buildWhereClause(queryBuilder, columnName, field, key);
+                }
             }
+        }
+        else
+        {
+            Attribute attribute = metadata.getIdAttribute();
+            translator.buildWhereClause(queryBuilder, Constants.CQL_KEY, key, "=");
         }
 
         // strip last "AND" clause.
@@ -1283,14 +1224,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Object pooledConnection = null;
 
         /**
-         * Key -> Entity Class
-         * Value -> Map containing Row ID as Key and Mutation List as Value
+         * Key -> Entity Class Value -> Map containing Row ID as Key and
+         * Mutation List as Value
          */
-        Map<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>> batchMutationMap = 
-            new HashMap<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>>();
+        Map<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>> batchMutationMap = new HashMap<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>>();
 
         int recordsExecuted = 0;
-
+        String batchQuery = CQLTranslator.BATCH_QUERY;
+        batchQuery = StringUtils.replace(batchQuery, CQLTranslator.STATEMENT, "");
+        StringBuilder batchQueryBuilder = new StringBuilder(batchQuery);
         try
         {
             for (Node node : nodes)
@@ -1307,32 +1249,46 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                             .getMetamodel(metadata.getPersistenceUnit());
 
                     // delete can not be executed in batch
-                    if (node.isInState(RemovedState.class))
-                    {
-                        delete(entity, id);
-                    }
-                    else if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-                    {
-                        List<RelationHolder> relationHolders = getRelationHolders(node);
-                        onPersist(metadata, entity, id, relationHolders);
-                    }
-                    else
-                    {
-                        List<RelationHolder> relationHolders = getRelationHolders(node);
-                        Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-                        mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
 
-                        recordsExecuted += mutationMap.size();
-                        if (! batchMutationMap.containsKey(metadata.getEntityClazz()))
+                    if (isCQL3Enabled(metadata, metaModel))
+                    {
+                        List<RelationHolder> relationHolders = getRelationHolders(node);
+                        // onPersist(metadata, entity, id, relationHolders);
+                        String query;
+                        if (node.isInState(RemovedState.class))
                         {
-                            batchMutationMap.put(metadata.getEntityClazz(), mutationMap);
+                            query = onDeleteQuery(metadata, metaModel, id);
                         }
                         else
                         {
-                            batchMutationMap.get(metadata.getEntityClazz()).putAll(mutationMap);
+                            query = createInsertQuery(metadata, entity, conn, relationHolders);
                         }
+                        batchQueryBuilder.append(query);
+                    }
+                    else
+                    {
+                        if (node.isInState(RemovedState.class))
+                        {
+                            delete(entity, id);
+                        }
+                        else
+                        {
+                            List<RelationHolder> relationHolders = getRelationHolders(node);
+                            Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+                            mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
 
-                        indexNode(node, metadata);
+                            recordsExecuted += mutationMap.size();
+                            if (!batchMutationMap.containsKey(metadata.getEntityClazz()))
+                            {
+                                batchMutationMap.put(metadata.getEntityClazz(), mutationMap);
+                            }
+                            else
+                            {
+                                batchMutationMap.get(metadata.getEntityClazz()).putAll(mutationMap);
+                            }
+
+                            indexNode(node, metadata);
+                        }
                     }
                 }
             }
@@ -1349,6 +1305,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     conn.batch_mutate(batchMutationMap.get(entityClass), consistencyLevel);
                 }
 
+            }
+
+            if (!nodes.isEmpty() && isCQLEnabled)
+            {
+                batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
+                executeCQLQuery(batchQueryBuilder.toString());
             }
         }
         catch (InvalidRequestException e)
@@ -1367,6 +1329,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
+        {
+            log.error("Error while persisting record. Details: " + e);
+            throw new KunderaException(e);
+        }
+        catch (SchemaDisagreementException e)
         {
             log.error("Error while persisting record. Details: " + e);
             throw new KunderaException(e);
@@ -1492,7 +1459,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         mutationMap.put(b.getBytes(), columnFamilyValues);
 
         return mutationMap;
-    }    
+    }
 
     /**
      * Check on batch limit.
@@ -1619,6 +1586,25 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    private CqlResult executeCQLQuery(String cqlQuery) throws InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException, TException
+    {
+        Cassandra.Client conn = null;
+        Object pooledConnection = null;
+        pooledConnection = getPooledConection(persistenceUnit);
+        conn = getConnection(pooledConnection);
+        conn.set_cql_version(getCqlVersion());
+        try
+        {
+            return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
+                    org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+        }
+        finally
+        {
+            releaseConnection(pooledConnection);
+        }
+    }
+
     /**
      * @param persistenceUnit
      * @param puProperties
@@ -1667,4 +1653,116 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected abstract Object getPooledConection(String persistenceUnit);
 
     protected abstract void releaseConnection(Object conn);
+
+    protected class CQLClient
+    {
+        public void persist(EntityMetadata entityMetadata, Object entity,
+                org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders)
+                throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
+                TimedOutException, SchemaDisagreementException
+        {
+            String insert_Query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+            conn.set_cql_version(getCqlVersion());
+            conn.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
+                    consistencyLevel);
+        }
+
+        public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
+                CassandraDataHandler dataHandler)
+        {
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+            CqlResult result = null;
+            List returnedEntities = new ArrayList();
+            try
+            {
+                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getMetamodel(entityMetadata.getPersistenceUnit());
+
+                if (log.isDebugEnabled())
+                {
+                    log.info("executing query " + cqlQuery);
+                }
+                result = executeCQLQuery(cqlQuery);
+                if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+                {
+                    returnedEntities = new ArrayList<Object>(result.getRowsSize());
+                    Iterator<CqlRow> iter = result.getRowsIterator();
+                    while (iter.hasNext())
+                    {
+                        CqlRow row = iter.next();
+                        Object rowKey = null;
+
+                        ThriftRow thriftRow = null;
+                        if (entityMetadata.isCounterColumnType())
+                        {
+                            log.info("Native query is not permitted on counter column returning null ");
+                            return null;
+                        }
+                        else
+                        {
+                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                    new ArrayList<CounterSuperColumn>(0));
+                        }
+
+                        Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
+                                relationalField != null && !relationalField.isEmpty());
+
+                        if (entity != null)
+                        {
+                            returnedEntities.add(entity);
+                        }
+                        else
+                        {
+                            returnedEntities.add(row.getColumns().get(0));
+                        }
+                    }
+                }
+            }
+            catch (InvalidRequestException e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+            catch (UnavailableException e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+            catch (TimedOutException e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+            catch (TException e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+            catch (Exception e)
+            {
+                log.error("Error while executing native CQL query Caused by:", e);
+                throw new PersistenceException(e);
+            }
+
+            return returnedEntities;
+        }
+
+        public List<Object> find(MetamodelImpl metaModel, EntityMetadata metadata, Object rowId,
+                List<String> relationNames)
+        {
+            CQLTranslator translator = new CQLTranslator();
+            String select_Query = translator.SELECTALL_QUERY;
+            select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
+                    translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
+            StringBuilder builder = new StringBuilder(select_Query);
+            onWhereClause(metadata, rowId, translator, builder, metaModel);
+            return CassandraClientBase.this.executeQuery(builder.toString(), metadata.getEntityClazz(), relationNames);
+        }
+    }
 }

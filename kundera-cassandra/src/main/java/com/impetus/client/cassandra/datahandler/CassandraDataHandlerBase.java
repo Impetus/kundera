@@ -75,6 +75,13 @@ public abstract class CassandraDataHandlerBase
     /** The thrift translator. */
     protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
 
+    protected boolean isCQLEnabled;
+
+    public CassandraDataHandlerBase(boolean isCQLEnabled)
+    {
+        this.isCQLEnabled = isCQLEnabled;
+    }
+
     /**
      * From thrift row.
      * 
@@ -582,15 +589,18 @@ public abstract class CassandraDataHandlerBase
             {
                 if (column != null)
                 {
-                    // entity = initialize(tr, m, entity);                          
-                    
+                    // entity = initialize(tr, m, entity);
+
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if("key".equals(thriftColumnName) && tr.getId() == null)
+                    if (Constants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
                     {
-                        entity = initialize(m, entity, null);     
+                        entity = initialize(m, entity, null);
                         PropertyAccessorHelper.setId(entity, m, column.getValue());
-                    }                    
-                    entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations); 
+                    }
+                    else
+                    {
+                        entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                    }
                 }
             }
 
@@ -1035,72 +1045,30 @@ public abstract class CassandraDataHandlerBase
                 MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getMetamodel(m.getPersistenceUnit());
                 String fieldName = m.getFieldName(thriftColumnName);
-                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;              
-                
-                
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+
                 if (attribute != null)
                 {
-                    entity = initialize(m, entity, null);                    
+                    entity = initialize(m, entity, null);
                     String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                     if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                             && thriftColumnName.equals(idColumnName))
                     {
                         PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
                     }
-                    setFieldValue(entity, thriftColumnValue, attribute);
+                    if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                    {
+                        setFieldValueViaCQL(entity, thriftColumnValue, attribute);
+                    }
+                    else
+                    {
+                        setFieldValue(entity, thriftColumnValue, attribute);
+                    }
                 }
                 else
                 {
-                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-                    {
-                        entity = initialize(m, entity, null);                        
-                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                        try
-                        {
-                            Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m
-                                    .getIdAttribute().getJavaMember());
-                            if (compoundKeyObject == null)
-                            {
-                                compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
-                            }
-
-                            // for()
-                            Set<Attribute> attributes = compoundKey.getAttributes();
-
-                            for (Attribute compoundAttribute : attributes)
-                            {
-                                if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
-                                {
-                                    setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
-                                    PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
-                                            compoundKeyObject);
-                                    break;
-                                }
-                            }
-                            // setFieldValue(entity, ,
-                            // attribute)
-
-                        }
-                        catch (IllegalArgumentException iaex)
-                        {
-                            // ignore as it might not repesented within entity.
-                            // No
-                            // need for any logger message
-                        }
-                        catch (InstantiationException iex)
-                        {
-                            // TODO Auto-generated catch block
-                            log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
-                            throw new PersistenceException(iex);
-                        }
-                        catch (IllegalAccessException iaex)
-                        {
-                            log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
-                            throw new PersistenceException(iaex);
-                        }
-                    }
+                    entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel);
                 }
-
             }
         }
         else
@@ -1115,14 +1083,68 @@ public abstract class CassandraDataHandlerBase
                 Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),
                         (byte[]) thriftColumnValue);
                 relations.put(thriftColumnName, value);
-                
-                if(entity == null)
+
+                if (entity == null)
                 {
                     entity = initialize(m, entity, null);
                 }
                 // prepare EnhanceEntity and return it
             }
 
+        }
+        return entity;
+    }
+
+    private Object populateCompositeId(EntityMetadata m, Object entity, String thriftColumnName,
+            Object thriftColumnValue, MetamodelImpl metaModel) throws InstantiationException, IllegalAccessException
+    {
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            entity = initialize(m, entity, null);
+            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+            try
+            {
+                Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute()
+                        .getJavaMember());
+                if (compoundKeyObject == null)
+                {
+                    compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
+                }
+
+                // for()
+                Set<Attribute> attributes = compoundKey.getAttributes();
+
+                for (Attribute compoundAttribute : attributes)
+                {
+                    if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
+                    {
+                        setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
+                        PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
+                                compoundKeyObject);
+                        break;
+                    }
+                }
+                // setFieldValue(entity, ,
+                // attribute)
+
+            }
+            catch (IllegalArgumentException iaex)
+            {
+                // ignore as it might not repesented within entity.
+                // No
+                // need for any logger message
+            }
+            catch (InstantiationException iex)
+            {
+                // TODO Auto-generated catch block
+                log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+                throw new PersistenceException(iex);
+            }
+            catch (IllegalAccessException iaex)
+            {
+                log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+                throw new PersistenceException(iaex);
+            }
         }
         return entity;
     }

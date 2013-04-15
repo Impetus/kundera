@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.crud.batch;
 
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -51,7 +52,7 @@ import com.impetus.kundera.persistence.api.Batcher;
  * Batch processing test case for cassandra.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class CassandraBatchProcessorTest
 {
@@ -67,6 +68,12 @@ public class CassandraBatchProcessorTest
     /** The em. */
     private static EntityManager em;
 
+    protected boolean AUTO_MANAGE_SCHEMA = true;
+
+    protected boolean USE_CQL = false;
+
+    protected Map propertyMap = null;
+
     /**
      * @throws java.lang.Exception
      */
@@ -76,11 +83,20 @@ public class CassandraBatchProcessorTest
 
         // cassandraSetUp();
         CassandraCli.cassandraSetUp();
-//        CassandraCli.initClient();
+        // CassandraCli.initClient();
         CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            loadData();
+        }
 
-        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        if (propertyMap == null)
+        {
+            propertyMap = new HashMap();
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            propertyMap.put("kundera.batch.size", "5");
+        }
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT, propertyMap);
         em = emf.createEntityManager();
     }
 
@@ -89,46 +105,45 @@ public class CassandraBatchProcessorTest
     {
         int counter = 0;
         List<PersonBatchCassandraEntity> rows = prepareData(10);
-        for(PersonBatchCassandraEntity entity: rows)
+        for (PersonBatchCassandraEntity entity : rows)
         {
             em.persist(entity);
-            
+
             // check for implicit flush.
-            if(++counter == 5)
+            if (++counter == 5)
             {
-                Map<String, Client> clients =  (Map<String, Client>) em.getDelegate();
-                
+                Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+
                 Batcher client = (Batcher) clients.get(PERSISTENCE_UNIT);
                 Assert.assertEquals(5, client.getBatchSize());
                 em.clear();
-                for(int i = 0 ;i <5;i++)
+                for (int i = 0; i < 5; i++)
                 {
-                    
+
                     // assert on each batch size record
                     Assert.assertNotNull(em.find(PersonBatchCassandraEntity.class, rows.get(i).getPersonId()));
-                    
+
                     // as batch size is 5.
                     Assert.assertNull(em.find(PersonBatchCassandraEntity.class, rows.get(6).getPersonId()));
                 }
                 // means implicit flush must happen
             }
         }
-        
-        //flush all on close.
+
+        // flush all on close.
         // explicit flush on close
         em.clear();
         em.close();
-        
+
         em = emf.createEntityManager();
-        
+
         String sql = " Select p from PersonBatchCassandraEntity p";
         Query query = em.createQuery(sql);
         List<PersonBatchCassandraEntity> results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(10, results.size());
     }
-    
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -138,8 +153,6 @@ public class CassandraBatchProcessorTest
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
-
-
 
     /**
      * Load cassandra specific data.
@@ -164,11 +177,11 @@ public class CassandraBatchProcessorTest
         user_Def.name = "PERSON_BATCH";
         user_Def.keyspace = "KunderaExamples";
         user_Def.setComparator_type("UTF8Type");
-//        user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
 
@@ -214,19 +227,18 @@ public class CassandraBatchProcessorTest
 
     }
 
-
     private List<PersonBatchCassandraEntity> prepareData(Integer noOfRecords)
     {
         List<PersonBatchCassandraEntity> persons = new ArrayList<PersonBatchCassandraEntity>();
-        for(int i=1 ; i<=noOfRecords;i++)
+        for (int i = 1; i <= noOfRecords; i++)
         {
             PersonBatchCassandraEntity o = new PersonBatchCassandraEntity();
-            o.setPersonId(i+"");
+            o.setPersonId(i + "");
             o.setPersonName("vivek" + i);
             o.setAge(10);
             persons.add(o);
         }
-        
+
         return persons;
     }
 

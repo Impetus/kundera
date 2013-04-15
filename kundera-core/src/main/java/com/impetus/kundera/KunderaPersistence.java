@@ -70,16 +70,21 @@ public class KunderaPersistence implements PersistenceProvider
     {
         // TODO: This may be a comma separated PU list, synchronizing on this
         // list may not be intended
+        if (persistenceUnit == null)
+        {
+            throw new KunderaException("Persistence unit should not be null");
+        }
         synchronized (persistenceUnit)
         {
             try
             {
-            initializeKundera(persistenceUnit, map);
+                initializeKundera(persistenceUnit, map);
 
-            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
+                EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
-            return emf;
-            }catch(PersistenceUnitConfigurationException pcex)
+                return emf;
+            }
+            catch (PersistenceUnitConfigurationException pcex)
             {
                 // Means it is not for kundera persistence!
                 return null;

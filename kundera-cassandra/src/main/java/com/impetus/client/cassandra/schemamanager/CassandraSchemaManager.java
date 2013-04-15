@@ -28,10 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javassist.Modifier;
-
 import javax.persistence.Embeddable;
-import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -103,6 +100,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private Cassandra.Client cassandra_client;
 
+    private String cql_version = CassandraConstants.CQL_VERSION_3_0;
+
     /**
      * logger used for logging statement.
      */
@@ -142,6 +141,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     public void exportSchema()
     {
+        cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
+                : CassandraConstants.CQL_VERSION_3_0;
         super.exportSchema();
     }
 
@@ -407,6 +408,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
         {
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForCQL3();
+            }
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
@@ -436,6 +441,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
                 // Create Index Table if required
                 createInvertedIndexTable(tableInfo);
+            }
+
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForThrift();
             }
         }
     }
@@ -668,6 +678,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         for (TableInfo tableInfo : tableInfos)
         {
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForCQL3();
+            }
             boolean tablefound = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
@@ -716,6 +730,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         + " does not exist in keyspace " + databaseName + "", "Cassandra", databaseName,
                         tableInfo.getTableName());
             }
+
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForThrift();
+            }
         }
     }
 
@@ -733,8 +752,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo) throws UnsupportedEncodingException
     {
-        // .equalsIgnoreCase(CassandraValidationClassMapper.getValidationClass(columnInfo
-        // .getType())
         return (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()))
                 && (columnDef.isSetIndex_type() == columnInfo.isIndexable() || (columnDef.isSetIndex_type())) ? (columnDef
                 .getValidation_class()
@@ -761,6 +778,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
         {
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForCQL3();
+            }
+
             boolean found = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
@@ -786,6 +808,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (!found)
             {
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+            }
+            if (isCQL3Enabled(tableInfo))
+            {
+                CassandraValidationClassMapper.resetMapperForThrift();
             }
         }
     }
@@ -864,6 +890,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             List<TableInfo> compoundColumnFamilies = new ArrayList<TableInfo>();
             for (TableInfo tableInfo : tableInfos)
             {
+                if (isCQL3Enabled(tableInfo))
+                {
+                    CassandraValidationClassMapper.resetMapperForCQL3();
+                }
                 if ((tableInfo.getTableIdType() != null && !tableInfo.getTableIdType().isAnnotationPresent(
                         Embeddable.class))
                         || tableInfo.getTableIdType() == null)
@@ -878,6 +908,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     compoundColumnFamilies.add(tableInfo);
                 }
+
+                if (isCQL3Enabled(tableInfo))
+                {
+                    CassandraValidationClassMapper.resetMapperForThrift();
+                }
             }
 
             ksDef.setCf_defs(cfDefs);
@@ -885,8 +920,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
             for (TableInfo tableInfo : compoundColumnFamilies)
             {
+                if (isCQL3Enabled(tableInfo))
+                {
+                    CassandraValidationClassMapper.resetMapperForCQL3();
+                }
                 cassandra_client.set_keyspace(databaseName);
                 onCompoundKey(tableInfo);
+                if (isCQL3Enabled(tableInfo))
+                {
+                    CassandraValidationClassMapper.resetMapperForThrift();
+                }
             }
 
             // Recreate Inverted Index Table if applicable
@@ -1525,6 +1568,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // builder.deleteCharAt(builder.length() - 2);
             }
         }
+    }
+
+    private boolean isCQL3Enabled(TableInfo tableInfo)
+    {
+        return tableInfo.getTableIdType() != null
+                && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class)
+                || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && !tableInfo
+                        .getType().equals(Type.SUPER_COLUMN_FAMILY.name()));
     }
 
     /**

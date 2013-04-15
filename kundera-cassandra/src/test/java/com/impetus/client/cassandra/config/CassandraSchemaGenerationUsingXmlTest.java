@@ -71,7 +71,7 @@ public class CassandraSchemaGenerationUsingXmlTest
             Assert.assertTrue(ksDef.isDurable_writes());
             Assert.assertNotNull(ksDef.getCf_defs());
             Assert.assertNotNull(ksDef.getStrategy_options());
-            Assert.assertEquals(4, ksDef.getCf_defsSize());
+            Assert.assertEquals(5, ksDef.getCf_defsSize());
 
             for (CfDef cfDef : ksDef.getCf_defs())
             {
@@ -114,7 +114,7 @@ public class CassandraSchemaGenerationUsingXmlTest
                     Assert.assertEquals(0, cfDef.getColumn_metadataSize());
                     Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
                 }
-                else
+                else if ("CASSANDRASUPERUSER".equals(cfDef.getName()))
                 {
                     Assert.assertEquals("CASSANDRASUPERUSER", cfDef.getName());
                     Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
@@ -125,6 +125,10 @@ public class CassandraSchemaGenerationUsingXmlTest
                     Assert.assertEquals(BytesType.class.getName(), cfDef.getSubcomparator_type());
                     Assert.assertEquals(0, cfDef.getColumn_metadataSize());
                     Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                }
+                else
+                {
+
                 }
             }
 

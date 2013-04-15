@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -117,12 +118,16 @@ public class SchemaConfiguration implements Configuration
                 // if table info exists, get it from map.
                 boolean found = false;
                 Type type = entityMetadata.getType();
-                // Class idClassName =
-                // entityMetadata.getIdColumn().getField().getType();
                 Class idClassName = entityMetadata.getIdAttribute() != null ? entityMetadata.getIdAttribute()
                         .getJavaType() : null;
+
+                String idName = entityMetadata.getIdAttribute() != null ? ((AbstractAttribute) entityMetadata
+                        .getIdAttribute()).getJPAColumnName() : null;
+
+                boolean isCompositeId = idClassName.isAnnotationPresent(Embeddable.class);
+
                 TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
-                        type.name(), idClassName);
+                        type.name(), idClassName, idName, isCompositeId);
 
                 // check for tableInfos not empty and contains the present
                 // tableInfo.
@@ -146,7 +151,8 @@ public class SchemaConfiguration implements Configuration
                     tableInfos.add(tableInfo);
                 }
                 // Add table for GeneratedValue if opted TableStrategy
-                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName);
+                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName,
+                        isCompositeId);
 
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
@@ -168,15 +174,26 @@ public class SchemaConfiguration implements Configuration
         }
     }
 
+    /**
+     * Add tableGenerator to table info.
+     * 
+     * @param appMetadata
+     * @param persistenceUnit
+     * @param tableInfos
+     * @param entityMetadata
+     * @param idClassName
+     * @param idName
+     * @param isCompositeId
+     */
     private void addTableGenerator(ApplicationMetadata appMetadata, String persistenceUnit, List<TableInfo> tableInfos,
-            EntityMetadata entityMetadata, Class idClassName)
+            EntityMetadata entityMetadata, Class idClassName, String idName, boolean isCompositeId)
     {
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(entityMetadata.getEntityClazz().getName());
         if (keyValue != null && keyValue.getTableDiscriptor() != null)
         {
             TableInfo tableGeneratorDiscriptor = new TableInfo(keyValue.getTableDiscriptor().getTable(), false,
-                    "CounterColumnType", idClassName);
+                    "CounterColumnType", String.class, idName, isCompositeId);
             if (!tableInfos.contains(tableGeneratorDiscriptor))
             {
                 tableInfos.add(tableGeneratorDiscriptor);
@@ -215,11 +232,11 @@ public class SchemaConfiguration implements Configuration
                 {
                     String pu = targetEntityMetadata.getPersistenceUnit();
                     Type targetEntityType = targetEntityMetadata.getType();
-                    // Class idClass =
-                    // targetEntityMetadata.getIdColumn().getField().getType();
                     Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
+                    String idName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
+                    boolean isCompositeId = idClass.isAnnotationPresent(Embeddable.class);
                     TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
-                            targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass);
+                            targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass, idName, isCompositeId);
 
                     // In case of different persistence unit. case for poly glot
                     // persistence.
@@ -235,7 +252,6 @@ public class SchemaConfiguration implements Configuration
                     else
                     {
                         addJoinColumnToInfo(relation.getJoinColumnName(), targetTableInfo, tableInfos);
-                        // tableInfos.add(targetTableInfo);
                     }
                 }
             }
@@ -249,11 +265,18 @@ public class SchemaConfiguration implements Configuration
             {
                 JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
                 String joinTableName = joinTableMetadata != null ? joinTableMetadata.getJoinTableName() : null;
+                String joinColumnName = joinTableMetadata != null ? (String) joinTableMetadata.getJoinColumns()
+                        .toArray()[0] : null;
+                String inverseJoinColumnName = joinTableMetadata != null ? (String) joinTableMetadata
+                        .getInverseJoinColumns().toArray()[0] : null;
                 if (joinTableName != null)
                 {
-                    TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(), null);
+                    TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(),
+                            String.class, joinColumnName.concat(inverseJoinColumnName), false);
                     if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
                     {
+                        joinTableInfo.addColumnInfo(getJoinColumn(joinColumnName));
+                        joinTableInfo.addColumnInfo(getJoinColumn(inverseJoinColumnName));
                         tableInfos.add(joinTableInfo);
                     }
                 }
@@ -287,9 +310,6 @@ public class SchemaConfiguration implements Configuration
             }
             targetTableInfos.add(targetTableInfo);
         }
-
-        // targetTableInfo.addColumnInfo(getColumn(entityMetadata.getIdColumn()));
-        // targetTableInfos.add(targetTableInfo);
     }
 
     /**
@@ -305,9 +325,6 @@ public class SchemaConfiguration implements Configuration
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
-        // List<IndexedColumn> columns = getIndexDefs(entityMetadata);
-        // Map<String, com.impetus.kundera.newannotations.Index> columns =
-        // entityMetadata.getColToBeIndexed();
         Map<String, PropertyIndex> columns = entityMetadata.getIndexProperties();
 
         Set attributes = entityType.getAttributes();
@@ -378,6 +395,14 @@ public class SchemaConfiguration implements Configuration
         return entityMetadataMap;
     }
 
+    /**
+     * Get Embedded column info.
+     * 
+     * @param embeddableType
+     * @param embeddableColName
+     * @param embeddedEntityClass
+     * @return
+     */
     private EmbeddedColumnInfo getEmbeddedColumn(EmbeddableType embeddableType, String embeddableColName,
             Class embeddedEntityClass)
     {

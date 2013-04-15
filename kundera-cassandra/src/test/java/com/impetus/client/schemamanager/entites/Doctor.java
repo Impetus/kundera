@@ -37,7 +37,7 @@ public class Doctor
     private String id;
 
     @Column
-    private String key;
+    private String name;
 
     @Column
     private long age;
@@ -64,7 +64,7 @@ public class Doctor
      */
     public String getName()
     {
-        return key;
+        return name;
     }
 
     /**
@@ -73,7 +73,7 @@ public class Doctor
      */
     public void setName(String name)
     {
-        this.key = name;
+        this.name = name;
     }
 
     /**

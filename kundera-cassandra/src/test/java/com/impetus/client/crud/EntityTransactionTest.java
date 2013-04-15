@@ -343,16 +343,20 @@ public class EntityTransactionTest extends BaseTest
 
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
-        user_Def.name = "PERSON";
+        user_Def.name = "PERSONCASSANDRA";
         user_Def.keyspace = "KunderaExamples";
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);

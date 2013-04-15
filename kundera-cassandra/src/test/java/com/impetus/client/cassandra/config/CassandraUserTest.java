@@ -4,17 +4,20 @@
 package com.impetus.client.cassandra.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
@@ -48,6 +51,7 @@ public class CassandraUserTest
         puProperties.put("kundera.nodes", "localhost");
         puProperties.put("kundera.port", "9160");
         puProperties.put("kundera.client.property", "kunderaTest.xml");
+        puProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
         emf = Persistence.createEntityManagerFactory(_PU, puProperties);
         em = emf.createEntityManager();
     }
@@ -79,5 +83,10 @@ public class CassandraUserTest
         Assert.assertNotNull(user);
         Assert.assertEquals(24, user.getAge());
         Assert.assertEquals("gzb", user.getAddress());
+
+        Query q = em.createQuery("Select u from CassandraUser u");
+        List<CassandraUser> users = q.getResultList();
+        Assert.assertNotNull(users);
+        Assert.assertEquals(1, users.size());
     }
 }

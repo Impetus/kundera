@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -43,8 +42,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.persistence.api.Batcher;
 
 /**
  * Test case for more than one entities persisted in the same batch
@@ -82,18 +79,17 @@ public class CassandraBatchProcessorMixedTest
 
     @Test
     public void onBatch()
-    {       
+    {
         List<PersonBatch> persons = preparePersonData(10);
         List<AddressBatch> addresses = prepareAddressData(10);
-        
-        //Insert Persons
+
+        // Insert Persons
         for (PersonBatch person : persons)
         {
-            em.persist(person);           
+            em.persist(person);
         }
-        
-        
-        //Insert Addresses
+
+        // Insert Addresses
         for (AddressBatch address : addresses)
         {
             em.persist(address);
@@ -104,22 +100,22 @@ public class CassandraBatchProcessorMixedTest
         em.clear();
         em.close();
 
-        em = emf.createEntityManager();       
-        
-        //Query on Persons
+        em = emf.createEntityManager();
+
+        // Query on Persons
         String personsQueryStr = " Select p from PersonBatch p";
         Query personsQuery = em.createQuery(personsQueryStr);
         List<PersonBatch> allPersons = personsQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertEquals(10, allPersons.size());
-        
-        //Query on Addresses
+
+        // Query on Addresses
         String addressQueryStr = " Select a from AddressBatch a";
         Query addressQuery = em.createQuery(addressQueryStr);
         List<AddressBatch> allAddresses = addressQuery.getResultList();
         Assert.assertNotNull(allAddresses);
-        Assert.assertEquals(10, allAddresses.size());    
-        
+        Assert.assertEquals(10, allAddresses.size());
+
     }
 
     /**
@@ -156,17 +152,22 @@ public class CassandraBatchProcessorMixedTest
         user_Def.name = CF_PERSON_BATCH;
         user_Def.keyspace = KEYSPACE_KUNDERA_EXAMPLES;
         user_Def.setComparator_type("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("AGEss".getBytes()), "BytesType");
+        columnDef2.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef2);
 
         CfDef address_Def = new CfDef();
         address_Def.name = CF_ADDRESS_BATCH;
         address_Def.keyspace = KEYSPACE_KUNDERA_EXAMPLES;
         address_Def.setComparator_type("UTF8Type");
+        address_Def.setKey_validation_class("UTF8Type");
         ColumnDef columnDefStreet = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDefStreet.index_type = IndexType.KEYS;
         address_Def.addToColumn_metadata(columnDefStreet);

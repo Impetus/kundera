@@ -158,7 +158,7 @@ public class ProcessAnnotationsTest
         Assert.assertNull(keyValue.getSequenceDiscriptor());
         Assert.assertNotNull(keyValue.getTableDiscriptor());
         Assert.assertEquals(50, keyValue.getTableDiscriptor().getAllocationSize());
-        Assert.assertEquals(0, keyValue.getTableDiscriptor().getInitialValue());
+        Assert.assertEquals(1, keyValue.getTableDiscriptor().getInitialValue());
         Assert.assertEquals("KunderaTest", keyValue.getTableDiscriptor().getSchema());
         Assert.assertEquals("kundera_sequences", keyValue.getTableDiscriptor().getTable());
         Assert.assertEquals("sequence_name", keyValue.getTableDiscriptor().getPkColumnName());

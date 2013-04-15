@@ -22,9 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
@@ -43,7 +41,6 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.query.QueryImpl;
 
 /**

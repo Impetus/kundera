@@ -22,7 +22,6 @@ import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 import net.dataforte.cassandra.pool.PoolProperties;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -143,6 +143,7 @@ public class TwissandraTest extends TwitterTestBaseCassandra
         prefrenceCfDef.keyspace = keyspace;
         prefrenceCfDef.setComparator_type("UTF8Type");
         prefrenceCfDef.setDefault_validation_class("UTF8Type");
+        prefrenceCfDef.setKey_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("WEBSITE_THEME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("PRIVACY_LEVEL".getBytes()), "UTF8Type");
@@ -155,6 +156,7 @@ public class TwissandraTest extends TwitterTestBaseCassandra
         externalLinkCfDef.keyspace = keyspace;
         externalLinkCfDef.setComparator_type("UTF8Type");
         externalLinkCfDef.setDefault_validation_class("UTF8Type");
+        externalLinkCfDef.setKey_validation_class("UTF8Type");
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("LINK_TYPE".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("LINK_ADDRESS".getBytes()), "UTF8Type");

@@ -125,7 +125,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
                     ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100,
                             null);
-
                 }
                 else
                 {
@@ -199,36 +198,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
         byte[] minValue = rowKeys.get(MIN_);
         byte[] maxVal = rowKeys.get(MAX_);
-
-        // If one field for range is given.
-//
-//        if (expressions.size() == 1)
-//        {
-//            IndexOperator operator = expressions.get(0).op;
-//            if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
-//            {
-//                maxVal = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-//                minValue = null;
-//            }
-//            else
-//            {
-//                minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-//                maxVal = null;
-//            }
-//            if (operator.equals(IndexOperator.EQ))
-//            {
-//
-//                maxVal = minValue;
-//            }
-//            expressions.remove(0);
-//        }
-//        else
-//        {
-//            minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-//            maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
-//            expressions.remove(0);
-//            expressions.remove(1);
-//        }
 
         try
         {

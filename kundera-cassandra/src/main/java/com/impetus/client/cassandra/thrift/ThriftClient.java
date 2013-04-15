@@ -26,7 +26,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.metamodel.EmbeddableType;
 
 import net.dataforte.cassandra.pool.ConnectionPool;
 
@@ -108,16 +107,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     private ConnectionPool pool;
 
-    /** The timestamp. */
-    private long timestamp;
-
     public ThriftClient(IndexManager indexManager, EntityReader reader, String persistenceUnit, ConnectionPool pool,
             Map<String, Object> externalProperties)
     {
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new ThriftDataHandler(pool);
+        this.dataHandler = new ThriftDataHandler(pool, isCQLEnabled);
         this.invertedIndexHandler = new ThriftInvertedIndexHandler(pool);
         this.reader = reader;
         this.pool = pool;
@@ -138,29 +134,31 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-
         Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
         try
         {
-            Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+            
             // if entity is embeddable...call cql translator to get cql string!
             // use thrift client to execute cql query.
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
-            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            if (isCQL3Enabled(entityMetadata, metaModel))
             {
-                onpersistOverCompositeKey(entityMetadata, entity, conn, rlHolders);
+                cqlClient.persist(entityMetadata, entity, conn, rlHolders);
             }
             else
             {
+                Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
                 prepareMutation(entityMetadata, entity, id, rlHolders, mutationMap);
                 // Write Mutation map to database
                 // conn.set_cql_version("3.0.0");
                 conn.batch_mutate(mutationMap, getConsistencyLevel());
+                
+                mutationMap.clear();
+                mutationMap = null;
             }
-            mutationMap.clear();
-            mutationMap = null;
+            
         }
         catch (InvalidRequestException e)
         {
@@ -196,7 +194,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             PelopsUtils.releaseConnection(pool, conn);
         }
-
     }
 
     /**
@@ -215,7 +212,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-
             for (Object key : joinTableRecords.keySet())
             {
                 PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata
@@ -258,7 +254,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 conn.set_keyspace(entityMetadata.getSchema());
 
                 conn.batch_mutate(mulationMap, getConsistencyLevel());
-
             }
         }
         catch (InvalidRequestException e)
@@ -298,7 +293,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         // Write to inverted index table if applicable
         // setCassandraClient();
         invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler);
-
     }
 
     /**
@@ -342,7 +336,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             throw new KunderaException(e);
         }
-
         return entities;
     }
 
@@ -423,7 +416,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue)
     {
-
         byte[] rowKey = pKeyColumnValue.toString().getBytes();
 
         SlicePredicate predicate = new SlicePredicate();
@@ -540,7 +532,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             return rowKeys.toArray(new Object[0]);
         }
-
         return null;
     }
 
@@ -570,7 +561,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             conn = PelopsUtils.getCassandraConnection(pool);
             keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
-
         }
         catch (InvalidRequestException e)
         {
@@ -583,7 +573,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 log.error("Error while finding relations. Details:" + e.getMessage());
                 throw new KunderaException("Error while finding relations", e);
             }
-
         }
         catch (UnavailableException e)
         {
@@ -610,7 +599,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             entities = new ArrayList<Object>(keySlices.size());
             populateData(m, keySlices, entities, false, null);
         }
-
         return entities;
     }
 
@@ -631,14 +619,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
-            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            if (isCQL3Enabled(metadata, metaModel))
             {
-                EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-                onDeleteQuery(metadata, metaModel, pKey, compoundKey);
+                String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
+                executeQuery(deleteQuery, metadata.getEntityClazz(), null);
             }
             else
             {
-
                 if (metadata.isCounterColumnType())
                 {
                     deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
@@ -769,7 +756,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.dataHandler = null;
         this.invertedIndexHandler = null;
         super.close();
-
     }
 
     private void populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities, boolean isRelational,
@@ -811,7 +797,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             log.error("Error while populating data for relations. Details: " + e.getMessage());
             throw new KunderaException("Error while populating data for relations", e);
         }
-
     }
 
     /** Query related methods */
@@ -931,7 +916,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             PelopsUtils.releaseConnection(pool, conn);
         }
-
         return entities;
     }
 
@@ -990,7 +974,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             results = populateEntitiesFromKeySlices(m, isWrapReq, relations, keys, dataHandler);
         }
-
         return results;
     }
 
