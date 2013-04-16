@@ -33,11 +33,14 @@ import org.hibernate.collection.internal.PersistentSet;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.index.DocumentIndexer;
+import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.LuceneQueryUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -170,7 +173,7 @@ public final class AssociationBuilder
         }
         else
         {
-            associatedObjects = getAssociatedEntitiesFromLucene(entity, entityId, childClass, childClient);
+            associatedObjects = getAssociatedEntitiesFromIndex(entity, entityId, childClass, childClient);
         }
 
         List associatedEntities = new ArrayList();
@@ -425,19 +428,25 @@ public final class AssociationBuilder
     }
 
     /**
-     * Retrieves associated entities via running query into Lucene indexing.
+     * Retrieves associated entities from secondary index. There are two alternatives here:
+     * 
+     *  1. Via running Lucene query into Lucene powered secondary index.
+     *  2. Searching into a secondary index by custom secondary index class provided by user.
+     *  
+     *  @see PersistenceProperties#KUNDERA_INDEX_HOME_DIR
+     *  @see PersistenceProperties#KUNDERA_INDEXER_CLASS
+     *  
+     *  TODO: Which secondary index to use should be transparent. All we should bother about is indexer.index(),
+     *  indexer.search() etc. 
      */
-    private List getAssociatedEntitiesFromLucene(Object entity, Object entityId, Class<?> childClass, Client childClient)
-    {
-        List associatedEntities;
-        // Lucene query, where entity class is child class, parent class is
-        // entity's class
-        // and parent Id is entity ID! that's it!
-        String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass().getCanonicalName()
-                .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
+    private List getAssociatedEntitiesFromIndex(Object entity, Object entityId, Class<?> childClass, Client childClient)
+    {       
+        
+        List associatedEntities;        
+        IndexManager indexManager = childClient.getIndexManager();        
 
-        Map<String, Object> results = childClient.getIndexManager() != null ? childClient.getIndexManager().search(
-                query) : new HashMap<String, Object>();
+        Map<String, Object> results = indexManager != null ? indexManager.search(entity.getClass(), childClass, entityId) 
+                : new HashMap<String, Object>();        
         Set rsSet = results != null ? new HashSet(results.values()) : new HashSet();
 
         if (childClass.equals(entity.getClass()))

@@ -676,5 +676,7 @@ public class LuceneIndexer extends DocumentIndexer
     {
         throw new UnsupportedOperationException();
     }
+    
+    
 
 }

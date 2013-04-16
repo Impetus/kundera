@@ -29,7 +29,8 @@ import java.util.Map;
  */
 public interface Indexer
 {
-
+     
+    
     /**
      * Index a document for given entity class and collection of values.
      * 
@@ -41,13 +42,21 @@ public interface Indexer
 
     /**
      * Executes lucene query and returns inverted indices as output.
-     * 
+     * TODO: Indexer interface shouldn't make any assumption about its implementation, 
+     * this method signature accepts lucene query, and hence should go away
      * @param queryString  lucene query.
      * @param start        start counter
      * @param end          end counter
      * @return             collection containing stored index value.   
      */
+    @Deprecated
     Map<String, Object> search(final String queryString, int start, int count);
+    
+    /**
+     * Searches into a secondary index 
+     * @return
+     */
+    Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId,  int start, int count);
 
     /**
      * Deletes index for given entity class.

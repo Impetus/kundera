@@ -446,7 +446,6 @@ public final class PersistenceDelegator
                             && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit()))
                     {
                         onSynchronization(node, metadata);
-                        System.out.println("dddd");
                     }
                     else
                     {

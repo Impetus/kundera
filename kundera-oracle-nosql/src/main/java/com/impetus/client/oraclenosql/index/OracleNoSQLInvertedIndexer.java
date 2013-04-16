@@ -15,9 +15,23 @@
  */
 package com.impetus.client.oraclenosql.index;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import oracle.kv.Direction;
+import oracle.kv.KVStore;
+import oracle.kv.Key;
+import oracle.kv.KeyValueVersion;
+import oracle.kv.Value;
+
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Inverted Index implementation of {@link Indexer} 
@@ -25,12 +39,31 @@ import com.impetus.kundera.index.Indexer;
  */
 public class OracleNoSQLInvertedIndexer implements Indexer
 {
+    
+    KVStore kvStore;
 
     @Override
     public void index(Class entityClazz, Map<String, Object> values)
-    {    
-        
-
+    {            
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        String idColumnName = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
+        Object id = values.get(idColumnName);        
+   
+        for(String column : values.keySet())
+        {
+            Object value = values.get(column);
+            
+            List<String> majorKeyComponents = new ArrayList<String>();
+            majorKeyComponents.add(m.getIndexName() + "_idx");
+            majorKeyComponents.add(column);
+            majorKeyComponents.add(PropertyAccessorHelper.getString(value));
+            
+            String minorKey = PropertyAccessorHelper.getString(id);
+            
+            Key key = Key.createKey(majorKeyComponents, minorKey);
+            
+            kvStore.put(key, Value.createValue("".getBytes()));            
+        }
     }
 
     @Override
@@ -38,7 +71,43 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     {
 
         return null;
+    }   
+    
+
+    
+    
+    @Override
+    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    {
+        EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(parentClass);
+        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
+        String secIndexName = childMetadata.getIndexName() + "_idx";
+        String parentIdColumnName = ((AbstractAttribute)parentMetadata.getIdAttribute()).getJPAColumnName();
+        String childIdColumnName = ((AbstractAttribute) childMetadata.getIdAttribute()).getJPAColumnName();
+        String id = PropertyAccessorHelper.getString(entityId);
+        
+        List<String> majorComponents = new ArrayList<String>();
+        majorComponents.add(secIndexName);
+        majorComponents.add(parentIdColumnName);
+        majorComponents.add(id);
+
+        Key majorKeyToFind = Key.createKey(majorComponents);
+        
+        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
+        
+        Map<String, Object> results = new HashMap<String, Object>();
+        
+        while (iterator.hasNext())
+        {
+            KeyValueVersion keyValueVersion = iterator.next();
+            String minorKey = keyValueVersion.getKey().getMinorPath().get(0);
+            
+            results.put(childIdColumnName + "|" + minorKey, minorKey);            
+        }
+        
+        return results;
     }
+    
 
     @Override
     public void unIndex(Class entityClazz, Object key)
@@ -49,6 +118,22 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     @Override
     public void close()
     {
-    }  
+    }
+
+    /**
+     * @return the kvStore
+     */
+    public KVStore getKvStore()
+    {
+        return kvStore;
+    }
+
+    /**
+     * @param kvStore the kvStore to set
+     */
+    public void setKvStore(KVStore kvStore)
+    {
+        this.kvStore = kvStore;
+    }     
 
 }

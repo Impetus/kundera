@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -46,7 +47,6 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
@@ -62,13 +62,10 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery> {
 
-    /** The is connected. */
-    // private boolean isConnected;
-
     /** The kvstore db. */
     private KVStore kvStore;
     
-    OracleNoSQLClientFactory factory;
+    private OracleNoSQLClientFactory factory;
     
     /** The reader. */
     private EntityReader reader;
@@ -101,11 +98,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata.getPersistenceUnit());
         
-        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        MetadataUtils.populateColumnAndSuperColumnMaps(entityMetadata, columnNameToFieldMap, superColumnNameToFieldMap);
+        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());        
         
-        log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
+        if(log.isDebugEnabled())
+        {
+            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
+        }        
 
         //Major Key components
         List<String> majorComponents = new ArrayList<String>();
@@ -113,7 +111,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         majorComponents.add(PropertyAccessorHelper.getString(key));
 
         Key majorKeyToFind = Key.createKey(majorComponents);
+        
         Object entity = null;
+        
         Map<String, Object> relationMap = null;
         if(entityMetadata.getRelationNames() != null && ! entityMetadata.getRelationNames().isEmpty())
         {
@@ -124,72 +124,85 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {            
             Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
 
-            if(! iterator.hasNext())
-            {
-                return null;
-            } 
-            else
+            //If a record is found, instantiate entity and set ID value
+            if (iterator.hasNext())
             {
                 entity = entityMetadata.getEntityClazz().newInstance();
                 PropertyAccessorHelper.setId(entity, entityMetadata, key);
+            }
+
+            //Populate non-ID attributes
+            while (iterator.hasNext())
+            {
+                KeyValueVersion keyValueVersion = iterator.next();
+
+                String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
+                String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
                 
-                while (iterator.hasNext()) {
-                    KeyValueVersion keyValueVersion = iterator.next();               
+                if(fieldName != null)
+                {
+                    Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
+
                     
-                    String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
-                    
-                    if(superColumnNameToFieldMap.containsKey(minorKeyFirstPart))
+                    if (metamodel.isEmbeddable(f.getType()))
                     {
-                        Field embeddedField = superColumnNameToFieldMap.get(minorKeyFirstPart);
-                        Class<?> embeddableClass = embeddedField.getType();
+                        //Populate embedded attribute
+                        Class<?> embeddableClass = f.getType();
                         if (metamodel.isEmbeddable(embeddableClass))
                         {
                             String minorKeySecondPart = keyValueVersion.getKey().getMinorPath().get(1);
-                            
-                            Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedField);
-                            if(embeddedObject == null)
+
+                            Object embeddedObject = PropertyAccessorHelper.getObject(entity, f);
+                            if (embeddedObject == null)
                             {
                                 embeddedObject = embeddableClass.newInstance();
-                                PropertyAccessorHelper.set(entity, embeddedField, embeddedObject);
-                            }                          
-                            
-                            Field f = columnNameToFieldMap.get(minorKeySecondPart);           
-                            if(f != null)
+                                PropertyAccessorHelper.set(entity, f, embeddedObject);
+                            }
+
+                            EmbeddableType embeddableType = metamodel.embeddable(embeddableClass);
+                            Attribute columnAttribute = embeddableType.getAttribute(minorKeySecondPart);
+                            Field columnField = (Field) columnAttribute.getJavaMember();
+
+                            if (columnField != null)
                             {
                                 byte[] value = keyValueVersion.getValue().getValue();
-                                PropertyAccessorHelper.set(embeddedObject, f, value);
-                            }                     
-                            
-                        }                   
-                        
+                                PropertyAccessorHelper.set(embeddedObject, columnField, value);
+                            }
+
+                        }
+
                     }
-                    else if(columnNameToFieldMap.containsKey(minorKeyFirstPart))
+                    else if (entityType.getAttribute(fieldName) != null)
                     {
+                        //Populate non-embedded attribute                    
                         Value v = keyValueVersion.getValue();
-                        Field f = columnNameToFieldMap.get(minorKeyFirstPart); 
-                        
-                        if(f != null && entityMetadata.getRelation(f.getName()) == null)
+
+                        if (f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
                             PropertyAccessorHelper.set(entity, f, v.getValue());
-                        } 
-                        else if (entityMetadata.getRelationNames() != null && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
-                        {      
-                            Relation relation = entityMetadata.getRelation(f.getName());
-                            EntityMetadata associationMetadata = KunderaMetadataManager
-                                    .getEntityMetadata(relation.getTargetEntity());
-                            relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
-                                    .getBindableJavaType(), v.getValue()));
                         }
                         
-                        
+                        else if (entityMetadata.getRelationNames() != null
+                                && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
+                        {
+                            Relation relation = entityMetadata.getRelation(f.getName());
+                            EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                                    .getTargetEntity());
+                            relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
+                                    .getIdAttribute().getBindableJavaType(), v.getValue()));
+                        }
+
                     }
                 }
-            }     
+                
+                
+
+            }
             
             
         } catch (Exception e) {
             log.error(e.getMessage());
-            return null;
+            throw new PersistenceException(e.getMessage());
         }
 
         if (relationMap != null && !relationMap.isEmpty())
@@ -252,8 +265,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         
         MetamodelImpl metamodel = (MetamodelImpl)KunderaMetadataManager.getMetamodel(entityMetadata.getPersistenceUnit());
 
-        log.debug("Persisting data into " + schema + "." + table + " for " + id);     
-        
+        if(log.isDebugEnabled())
+        {
+            log.debug("Persisting data into " + schema + "." + table + " for " + id);     
+        }
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
         
         //Major Key component
@@ -262,14 +277,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         majorKeyComponent.add(PropertyAccessorHelper.getString(id));    //Major keys are always String
 
         //Iterate over all Non-ID attributes of this entity (ID is already part of major key)
-        Set<Attribute> attributes = entityType.getSingularAttributes();      
+        Set<Attribute> attributes = entityType.getAttributes();     
  
         
         for(Attribute attribute : attributes)
         {
             if (! attribute.equals(entityMetadata.getIdAttribute()))
             {
-                Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();               
+                Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();  
                 
                 
                 //If attribute is Embeddable, create minor keys for each attribute it contains
@@ -412,7 +427,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
-        return null;
+        List<E> results = new ArrayList<E>();
+        
+        for(Object key : keys)
+        {
+            results.add((E)find(entityClass, key));
+        }
+            
+        return results;
     }
 
     @Override
