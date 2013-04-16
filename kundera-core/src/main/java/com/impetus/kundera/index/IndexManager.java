@@ -18,8 +18,6 @@ package com.impetus.kundera.index;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.metamodel.Metamodel;
-
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
