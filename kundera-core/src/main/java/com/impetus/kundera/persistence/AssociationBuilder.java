@@ -85,11 +85,7 @@ public final class AssociationBuilder
                     && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet || relObject instanceof PersistentCollection))
             {
                 populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
-            }
-            else
-            {
-                log.error("A M2M relationship of Collection type must be joined by JoinTable, relationships won't be set");
-            }
+            }   
 
         }
         else if (relation.getPropertyType().isAssignableFrom(Map.class))

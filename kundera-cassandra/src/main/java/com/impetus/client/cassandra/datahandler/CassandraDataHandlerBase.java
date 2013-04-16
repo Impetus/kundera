@@ -787,6 +787,7 @@ public abstract class CassandraDataHandlerBase
         }
         else
         {
+            columnValue = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), (byte[]) columnValue);
             PropertyAccessorHelper.setId(entity, m, columnValue);
         }
     }

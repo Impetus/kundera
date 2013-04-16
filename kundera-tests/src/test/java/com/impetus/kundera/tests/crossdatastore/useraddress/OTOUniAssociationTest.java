@@ -66,15 +66,6 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
 public class OTOUniAssociationTest extends TwinAssociation
 {
     /**
-     * 
-     */
-    // private static final String KEYSPACE = "KUNDERATESTS";
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "redis", "addCassandra", "addMongo"/*,"oracle_kvstore"
-                                                                                                                  * ,
-                                                                                                                  * "addHbase"
-                                                                                                                  */};
-
-    /**
      * Inits the.
      */
     @BeforeClass

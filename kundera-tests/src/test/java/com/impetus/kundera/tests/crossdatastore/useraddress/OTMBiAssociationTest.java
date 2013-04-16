@@ -45,9 +45,6 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 
 public class OTMBiAssociationTest extends TwinAssociation
 {
-//    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", /*"addHbase",*/"addMongo" };
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","redis", "addCassandra", "addMongo"/*, "addHbase"*/};
-
     /**
      * Inits the.
      */

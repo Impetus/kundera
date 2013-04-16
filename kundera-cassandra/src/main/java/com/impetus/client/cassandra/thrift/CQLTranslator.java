@@ -231,15 +231,14 @@ public final class CQLTranslator
             }
             else
             {
-                Attribute attribute = entityType.getAttribute(field.getName());
                 if (!ReflectUtils.isTransientOrStatic(field)
-                        && m.getIdAttribute().getName().equals(attribute.getName()))
+                        && m.getIdAttribute().getName().equals(entityType.getAttribute(field.getName()).getName()))
                 {
                     onTranslation(type, builder, columnBuilder, Constants.CQL_KEY, record, field);
                 }
                 else if (!ReflectUtils.isTransientOrStatic(field))
                 {
-                    AbstractAttribute attrib = (AbstractAttribute) attribute;
+                    AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
 
                     if (!attrib.isAssociation())
                     {
