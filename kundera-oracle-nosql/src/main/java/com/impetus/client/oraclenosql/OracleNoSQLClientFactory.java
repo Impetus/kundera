@@ -25,15 +25,17 @@ import oracle.kv.KVStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * <Prove description of functionality provided by this Type>
+ * {@link ClientFactory} implementation for Oracle NOSQL database
  * 
  * @author amresh.singh
  */
@@ -59,11 +61,22 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     {
         setExternalProperties(puProperties);
         reader = new OracleNoSQLEntityReader();
+
+      
+        
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
+        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        .getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
+        .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName()))
+        {
+            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setKvStore(kvStore);
+        }
+        
         return new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit());
     }
 

@@ -344,6 +344,15 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             throw new LuceneIndexingException("Error in accessing field:" + field.getName(), e);
         }
     }
+    
+    
+    
+
+    @Override
+    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    {
+        return null;
+    }
 
     /**
      * Gets the kundera id.

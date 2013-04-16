@@ -107,6 +107,10 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             ClientMetadata clientMetadata = new ClientMetadata();
             String luceneDirectoryPath = puProperties != null ? (String) puProperties
                     .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
+                    
+                    String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+                    
             if (luceneDirectoryPath == null)
             {
                 luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
@@ -123,12 +127,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                 indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
                         luceneDirectoryPath));
             }
-            
-
-            String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
-            
-            if(indexerClass != null)
+            else if(indexerClass != null)
             {
                 try
                 {
@@ -152,6 +151,10 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                     logger.error("Error while initialzing indexer:"+indexerClass, iaex);
                     throw new KunderaException(iaex);
                 }
+            }
+            else
+            {
+                indexManager = new IndexManager(null);
             }
 
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);         

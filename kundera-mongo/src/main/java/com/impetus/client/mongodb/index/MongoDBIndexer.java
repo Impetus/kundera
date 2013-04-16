@@ -179,4 +179,12 @@ public class MongoDBIndexer implements Indexer
         
     }
 
+    @Override
+    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    {
+        return null;
+    }
+
+    
+
 }

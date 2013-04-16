@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -52,7 +53,17 @@ public class IndexManager
     public IndexManager(Indexer indexer)
     {
         this.indexer = indexer;
+    }    
+    
+
+    /**
+     * @return the indexer
+     */
+    public Indexer getIndexer()
+    {
+        return indexer;
     }
+
 
     /**
      * Removes an object from Index.
@@ -127,9 +138,13 @@ public class IndexManager
                     
                 }
                 
-                indexCollection.put(DocumentIndexer.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase());
-                indexCollection.put(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), id);
-
+                //indexCollection.put(DocumentIndexer.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase());
+                indexCollection.put(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), id);            
+                
+                EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                if(parentId != null)
+                    indexCollection.put(((AbstractAttribute)parentMetadata.getIdAttribute()).getJPAColumnName(), parentId);
+                
                 indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
@@ -185,10 +200,35 @@ public class IndexManager
      *            the query
      * @return the list
      */
+    @Deprecated
+    //TODO: All lucene specific code (methods that accept lucene query as parameter) from this class should go away
+    //and should be moved to LuceneIndexer instead
     public final Map<String, Object> search(String query)
     {
 
         return search(query, Constants.INVALID, Constants.INVALID, false);
+    }
+
+    public final Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId)
+    {        
+        if(indexer == null) return null;        
+        
+        if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+        {
+            
+            // Search into Lucene index using lucene query, where entity class is child class, parent class is
+            // entity's class and parent Id is entity ID! that's it!
+            String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, parentClass.getCanonicalName()
+                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
+            return ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, Constants.INVALID, Constants.INVALID,
+                    false);
+        }
+        else
+        {
+            //If an alternate indexer implementation class is provided by user, search into that
+            return indexer.search(parentClass, childClass, entityId, Constants.INVALID, Constants.INVALID);
+        }   
+        
     }
 
     /**
