@@ -258,7 +258,7 @@ public class OTMBiAssociationIntTest extends TwinAssociation
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("IntegerType");
+        cfDef.setKey_validation_class("Int32Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
@@ -304,13 +304,14 @@ public class OTMBiAssociationIntTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-        cfDef2.setDefault_validation_class("DoubleType");
+        cfDef2.setKey_validation_class("DoubleType");
+        cfDef2.setComparator_type("UTF8Type");
 
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
 
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef2);
 

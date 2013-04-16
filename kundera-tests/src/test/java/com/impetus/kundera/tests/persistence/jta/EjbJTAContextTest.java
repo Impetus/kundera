@@ -237,11 +237,11 @@ public class EjbJTAContextTest
         user_Def.name = "PERSONNEL";
         user_Def.keyspace = "KunderaTests";
         user_Def.setComparator_type("UTF8Type");
-        user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
 

@@ -233,12 +233,12 @@ public class IMDBPolyglotTest extends TwinAssociation
         // cfDef.column_type = "Super";
 
         cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("UTF8Type");
+        cfDef.setKey_validation_class("Int32Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("ACTOR_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
 
@@ -288,7 +288,17 @@ public class IMDBPolyglotTest extends TwinAssociation
 
         cfDef2.name = MOVIE;
         cfDef2.keyspace = KEYSPACE;
+        cfDef2.setComparator_type("UTF8Type");
+        cfDef2.setKey_validation_class("UTF8Type");
+        
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("TITLE".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
+        cfDef2.addToColumn_metadata(columnDef);
 
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("YEAR".getBytes()), "Int32Type");
+        columnDef1.index_type = IndexType.KEYS;
+        cfDef2.addToColumn_metadata(columnDef1);
+        
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);
 

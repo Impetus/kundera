@@ -298,12 +298,11 @@ public abstract class AssociationBase
         {
             em = dao.getEntityManager(persistenceUnits);
         }
-        
 
         if (AUTO_MANAGE_SCHEMA)
         {
             truncateColumnFamily();
-            
+
             truncateRdbms();
 
             truncateMongo();

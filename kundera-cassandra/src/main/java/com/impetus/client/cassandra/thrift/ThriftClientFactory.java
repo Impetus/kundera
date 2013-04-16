@@ -81,7 +81,10 @@ public class ThriftClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        indexManager.close();
+        if (indexManager != null)
+        {
+            indexManager.close();
+        }
         if (schemaManager != null)
         {
             getSchemaManager(externalProperties).dropSchema();

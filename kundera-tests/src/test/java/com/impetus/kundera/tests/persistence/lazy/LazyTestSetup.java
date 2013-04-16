@@ -102,7 +102,8 @@ public class LazyTestSetup
                 CfDef cfDefPhotographer = new CfDef();
                 cfDefPhotographer.name = COLUMN_FAMILY_PHOTOGRAPHER;
                 cfDefPhotographer.keyspace = KEYSPACE;
-                cfDefPhotographer.setKey_validation_class("IntegerType");
+                cfDefPhotographer.setKey_validation_class("Int32Type");
+                cfDefPhotographer.setComparator_type("UTF8Type");
 
                 ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTOGRAPHER_NAME".getBytes()), "UTF8Type");
                 columnDef2.index_type = IndexType.KEYS;
@@ -116,14 +117,14 @@ public class LazyTestSetup
                 cfDefAlbum.name = COLUMN_FAMILY_ALBUM;
                 cfDefAlbum.keyspace = KEYSPACE;
                 cfDefAlbum.setKey_validation_class("UTF8Type");
-
+                cfDefAlbum.setComparator_type("UTF8Type");
                 ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("ALBUM_NAME".getBytes()), "UTF8Type");
                 columnDef4.index_type = IndexType.KEYS;
-                cfDefPhotographer.addToColumn_metadata(columnDef4);
+                cfDefAlbum.addToColumn_metadata(columnDef4);
 
                 ColumnDef columnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_DESC".getBytes()), "UTF8Type");
                 columnDef5.index_type = IndexType.KEYS;
-                cfDefPhotographer.addToColumn_metadata(columnDef5);
+                cfDefAlbum.addToColumn_metadata(columnDef5);
 
                 List<CfDef> cfDefs = new ArrayList<CfDef>();
                 cfDefs.add(cfDefPhotographer);

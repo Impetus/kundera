@@ -69,7 +69,10 @@ public class OTOUniAssociationTest extends TwinAssociation
      * 
      */
     // private static final String KEYSPACE = "KUNDERATESTS";
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","redis", "addCassandra", "addMongo"/*, "addHbase"*/};
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "redis", "addCassandra", "addMongo"/*,"oracle_kvstore"
+                                                                                                                  * ,
+                                                                                                                  * "addHbase"
+                                                                                                                  */};
 
     /**
      * Inits the.
@@ -320,6 +323,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("UTF8Type");
+        cfDef2.setComparator_type("UTF8Type");
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef2);

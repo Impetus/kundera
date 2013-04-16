@@ -306,6 +306,7 @@ public class OTOBiAssociationTest extends TwinAssociation
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("UTF8Type");
+        cfDef2.setComparator_type("UTF8Type");
         ColumnDef columnDefStreet = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDefStreet.index_type = IndexType.KEYS;
 

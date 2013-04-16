@@ -25,8 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -47,6 +49,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -180,7 +183,7 @@ public final class CQLTranslator
      * 
      * @param record
      *            record
-     * @param entityMetadata
+     * @param m
      *            entity metadata
      * @param type
      *            translation type
@@ -195,7 +198,7 @@ public final class CQLTranslator
      * @param columnBuilder
      *            column name builder
      */
-    private void onTranslation(final Object record, final EntityMetadata entityMetadata, TranslationType type,
+    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
             StringBuilder columnBuilder)
     {
@@ -203,7 +206,7 @@ public final class CQLTranslator
         {
             if (metaModel.isEmbeddable(field.getType()))
             {
-                if (field.getType().equals(entityMetadata.getIdAttribute().getBindableJavaType()))
+                if (field.getType().equals(m.getIdAttribute().getBindableJavaType()))
                 {
                     // builder.
                     // Means it is a compound key! As other
@@ -226,19 +229,22 @@ public final class CQLTranslator
                             "Super columns are not supported via cql for compound/composite keys!");
                 }
             }
-            else if (!ReflectUtils.isTransientOrStatic(field)
-                    && entityMetadata.getIdAttribute().equals(
-                            (AbstractAttribute) entityType.getAttribute(field.getName())))
+            else
             {
-                onTranslation(type, builder, columnBuilder, Constants.CQL_KEY, record, field);
-            }
-            else if (!ReflectUtils.isTransientOrStatic(field))
-            {
-                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
-
-                if (!attrib.isAssociation())
+                Attribute attribute = entityType.getAttribute(field.getName());
+                if (!ReflectUtils.isTransientOrStatic(field)
+                        && m.getIdAttribute().getName().equals(attribute.getName()))
                 {
-                    onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
+                    onTranslation(type, builder, columnBuilder, Constants.CQL_KEY, record, field);
+                }
+                else if (!ReflectUtils.isTransientOrStatic(field))
+                {
+                    AbstractAttribute attrib = (AbstractAttribute) attribute;
+
+                    if (!attrib.isAssociation())
+                    {
+                        onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
+                    }
                 }
             }
         }
