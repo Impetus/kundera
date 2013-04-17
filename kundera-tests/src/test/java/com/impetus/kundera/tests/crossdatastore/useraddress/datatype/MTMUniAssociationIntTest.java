@@ -57,7 +57,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 
     private BigInteger addressID3 = new BigInteger("1234567");
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo,oracle_kvstore" };
 
     /**
      * Inits the.
@@ -105,7 +105,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            // tryOperation(ALL_PUs_UNDER_TEST);
+             tryOperation(ALL_PUs_UNDER_TEST);
         }
         catch (Exception e)
         {
@@ -356,9 +356,9 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef1);
+//        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
+//        columnDef1.index_type = IndexType.KEYS;
+//        cfDef.addToColumn_metadata(columnDef1);
 
         // ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID"
         // .getBytes()), "IntegerType");
@@ -414,9 +414,9 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
 
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
+//        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
+//        columnDef2.index_type = IndexType.KEYS;
+//        cfDef2.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);

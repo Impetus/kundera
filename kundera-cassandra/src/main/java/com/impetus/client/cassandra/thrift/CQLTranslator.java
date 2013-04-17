@@ -370,7 +370,7 @@ public final class CQLTranslator
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                     || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    || value instanceof Enum)
+                    || value instanceof Enum || fieldClazz.isAssignableFrom(Float.class))
             {
                 builder.append("'");
 

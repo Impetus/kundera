@@ -447,11 +447,11 @@ public final class AssociationBuilder
 
         if (childClass.equals(entity.getClass()))
         {
-            associatedEntities = (List<Object>) childClient.findAll(childClass, rsSet.toArray(new String[] {}));
+            associatedEntities = (List<Object>) childClient.findAll(childClass, rsSet.toArray(new Object[] {}));
         }
         else
         {
-            associatedEntities = (List<Object>) childClient.findAll(childClass, rsSet.toArray(new String[] {}));
+            associatedEntities = (List<Object>) childClient.findAll(childClass, rsSet.toArray(new Object[] {}));
         }
         return associatedEntities;
     }

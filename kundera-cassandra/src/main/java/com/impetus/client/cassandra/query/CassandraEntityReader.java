@@ -86,7 +86,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
     {
         return super.findById(primaryKey, m, client);
-
     }
 
     /**
@@ -150,8 +149,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, m.getRelationNames(), 100,
-                            null);
+                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true,
+                            m.getRelationNames(), 100, null);
                 }
                 else
                 {
@@ -194,26 +193,28 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             return null;
         }
 
-        Map<String,byte[]> rowKeys = getRowKeyValue(expressions, ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName());
+        Map<String, byte[]> rowKeys = getRowKeyValue(expressions,
+                ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
 
         byte[] minValue = rowKeys.get(MIN_);
         byte[] maxVal = rowKeys.get(MAX_);
 
         try
         {
-            
+
             result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
                     && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns, expressions);
         }
         catch (Exception e)
         {
-            log.error("Error while executing find by range. Details: " , e);
+            log.error("Error while executing find by range. Details: ", e);
             throw new QueryHandlerException(e);
         }
         return result;
     }
 
-    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Map<Boolean, List<IndexClause>> indexClauseMap)
+    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client,
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
@@ -269,49 +270,50 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         this.conditions = conditions;
     }
 
-
     /**
-     * Returns list of row keys. First element will be min value and second will be major value.
+     * Returns list of row keys. First element will be min value and second will
+     * be major value.
      * 
      * @param expressions
      * @param primaryKeyName
      * @return
      */
-    private Map<String,byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
+    private Map<String, byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
     {
-        Map<String,byte[]> rowKeys = new HashMap<String,byte[]>();
-        
+        Map<String, byte[]> rowKeys = new HashMap<String, byte[]>();
+
         List<IndexExpression> rowExpressions = new ArrayList<IndexExpression>();
-        
-        for(IndexExpression e : expressions)
+
+        for (IndexExpression e : expressions)
         {
-            
+
             if (primaryKeyName.equals(new String(e.getColumn_name())))
             {
                 IndexOperator operator = e.op;
                 if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
                 {
-                    rowKeys.put(MAX_,e.getValue());
+                    rowKeys.put(MAX_, e.getValue());
                     rowExpressions.add(e);
                 }
                 else if (operator.equals(IndexOperator.GTE) || operator.equals(IndexOperator.GT))
                 {
-                    rowKeys.put(MIN_,e.getValue());
+                    rowKeys.put(MIN_, e.getValue());
                     rowExpressions.add(e);
-                } else if (operator.equals(IndexOperator.EQ))
+                }
+                else if (operator.equals(IndexOperator.EQ))
                 {
 
-                    rowKeys.put(MAX_,e.getValue());
-                    rowKeys.put(MIN_,e.getValue());
+                    rowKeys.put(MAX_, e.getValue());
+                    rowKeys.put(MIN_, e.getValue());
                     rowExpressions.add(e);
                 }
 
             }
-            
+
         }
-        
+
         expressions.removeAll(rowExpressions);
         return rowKeys;
-        
+
     }
 }
