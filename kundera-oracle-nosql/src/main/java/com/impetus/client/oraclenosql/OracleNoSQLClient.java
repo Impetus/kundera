@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
+import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -198,9 +199,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                     }
                 }
-
             }
-
         }
         catch (Exception e)
         {
@@ -435,13 +434,51 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         List<E> results = new ArrayList<E>();
-
-        for (Object key : keys)
+        
+        if(keys == null)    //Fetch all records for this entity
         {
-            results.add((E) find(entityClass, key));
+            keys = (Object[]) getAllKeys(entityClass);
         }
-
+        
+        for(Object key : keys)
+        {
+            results.add((E)find(entityClass, key));
+        }
+            
         return results;
+    }
+    
+    /**
+     * @param <E>
+     * @param entityClass
+     * @return
+     */
+    private Object[] getAllKeys(Class<?> entityClass)
+    {
+        Object[] keys;
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        
+        ArrayList<String> majorComponents = new ArrayList<String>();
+        majorComponents.add(m.getTableName());
+        
+        Key key = Key.createKey(majorComponents);
+        
+        Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0,
+                                  key, null, null);
+        
+        Set<String> keySet = new HashSet<String>();
+        
+        while(iterator.hasNext())
+        {
+            KeyValueVersion keyValueVersion = iterator.next();
+            
+            //String majorKeyFirstPart = keyValueVersion.getKey().getMajorPath().get(0);
+            String majorKeySecondPart = keyValueVersion.getKey().getMajorPath().get(1);
+            keySet.add(majorKeySecondPart);
+        }
+        
+        keys = keySet.toArray(new Object[keySet.size()]);
+        return keys;
     }
 
     @Override
@@ -487,7 +524,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
         }
         return foreignKeys;
     }
@@ -529,13 +567,19 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
         }
 
         if (results != null && !results.isEmpty())
         {
             return results.toArray(new Object[0]);
         }
+        return null;
+    }
+    
+    public <E> List<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass) 
+    {
         return null;
     }
 
@@ -575,7 +619,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
         }
 
         if (deleteApplicableOnMajorKey)

@@ -15,9 +15,13 @@
  */
 package com.impetus.client.oraclenosql;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  * Base class for all test cases 
@@ -70,6 +74,33 @@ public class OracleNoSQLTestBase
     protected void delete(Object entity)
     {
         em.remove(entity);
+    }
+    
+    protected List executeSelectQuery(String jpaQuery)
+    {
+        Query query = em.createQuery(jpaQuery);
+        return query.getResultList();
+    }
+    
+    protected List executeSelectQuery(String jpaQuery, Map<String, Object> params)
+    { 
+        Query query = em.createQuery(jpaQuery);
+        if(params != null && ! params.isEmpty())
+        {
+            for(String param : params.keySet())
+            {
+                query.setParameter(param, params.get(param));
+            }
+              
+        }
+        return query.getResultList();   
+    }
+    
+    protected int executeDMLQuery(String jpaQuery)
+    {
+        Query query = em.createQuery(jpaQuery);
+        int updateCount = query.executeUpdate();
+        return updateCount;
     }
 
 }

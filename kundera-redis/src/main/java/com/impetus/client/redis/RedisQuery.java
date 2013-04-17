@@ -253,27 +253,5 @@ public class RedisQuery extends QueryImpl
         interpreter.setFieldName(columnName);
     }
 
-    private String[] getColumns(final String[] columns, final EntityMetadata m)
-    {
-        List<String> columnAsList = new ArrayList<String>();
-        if (columns != null && columns.length > 0)
-        {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    m.getPersistenceUnit());
-            EntityType entity = metaModel.entity(m.getEntityClazz());
-            for (int i = 1; i < columns.length; i++)
-            {
-                if (columns[i] != null)
-                {
-                    Attribute col = entity.getAttribute(columns[i]);
-                    if (col == null)
-                    {
-                        throw new QueryHandlerException("column type is null for: " + columns);
-                    }
-                    columnAsList.add(((AbstractAttribute) col).getJPAColumnName());
-                }
-            }
-        }
-        return columnAsList.toArray(new String[]{});
-    }
+    
 }
