@@ -16,7 +16,7 @@
 package com.impetus.client.oraclenosql;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Utility class for handling read/ write of data from/ to Oracle NoSQL database
  * @author amresh.singh
  */
 import org.apache.commons.logging.Log;
@@ -25,10 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.client.Client;
 
 
-// TODO: Auto-generated Javadoc
 /**
  * Provides utility methods for handling data held in Oracle NoSQL KVstore.
- *
  * @author amresh.singh
  */
 public class OracleNoSQLDataHandler
@@ -40,6 +38,10 @@ public class OracleNoSQLDataHandler
     /** The persistence unit. */
     private String persistenceUnit;
 
+    /** The log. */
+    private static Log log = LogFactory.getLog(OracleNoSQLDataHandler.class);
+    
+    
     /**
      * Instantiates a new mongo db data handler.
      *
@@ -53,8 +55,7 @@ public class OracleNoSQLDataHandler
         this.persistenceUnit = persistenceUnit;
     }
 
-    /** The log. */
-    private static Log log = LogFactory.getLog(OracleNoSQLDataHandler.class);
+    
 
     
 }

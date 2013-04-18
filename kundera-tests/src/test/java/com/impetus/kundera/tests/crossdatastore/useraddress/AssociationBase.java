@@ -98,8 +98,9 @@ public abstract class AssociationBase
 
     private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore";
 
-    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo","rdbms","redis", "addCassandra","oracle_kvstore"/*, "addHbase"*/};
-    
+    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
+            "oracle_kvstore"/* , "addHbase" */};
+
     protected RDBMSCli cli;
 
     // private String persistenceUnits = "rdbms,addHbase";

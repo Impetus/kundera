@@ -18,7 +18,7 @@ public abstract class CassandraBase
 
     protected EntityManagerFactory emf;
 
-    private Map propertyMap;
+    protected Map propertyMap;
 
     protected void setUp() throws Exception
     {
@@ -33,7 +33,7 @@ public abstract class CassandraBase
         if (propertyMap == null)
         {
             propertyMap = new HashMap();
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         }
         emf = Persistence.createEntityManagerFactory("CassandraDataTypeTest", propertyMap);
     }

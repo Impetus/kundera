@@ -35,7 +35,7 @@ public class StudentCassandraIntegerTest extends CassandraBase
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -156,7 +156,7 @@ public class StudentCassandraIntegerTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -593,12 +593,12 @@ public class StudentCassandraIntegerTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraInteger";
             cfDef.keyspace = keyspace;
-            cfDef.setKey_validation_class("IntegerType");
-
+            cfDef.setKey_validation_class("Int32Type");
+            cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(name);
-            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
             age.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(age);
             List<CfDef> cfDefs = new ArrayList<CfDef>();

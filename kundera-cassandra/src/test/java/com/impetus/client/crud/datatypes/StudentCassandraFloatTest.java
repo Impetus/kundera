@@ -596,11 +596,11 @@ public class StudentCassandraFloatTest extends CassandraBase
             cfDef.name = "StudentCassandraFloat";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("FloatType");
-
+            cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(name);
-            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
             age.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(age);
             List<CfDef> cfDefs = new ArrayList<CfDef>();

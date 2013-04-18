@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
@@ -91,6 +93,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
 
     protected Map propertyMap = null;
 
+    protected boolean cqlEnabled = false;
+
     /**
      * Sets the up.
      * 
@@ -100,7 +104,13 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     @Before
     public void setUp() throws Exception
     {
-        setupInternal(persistenceUnit, propertyMap);
+        if (propertyMap == null)
+        {
+//            propertyMap = new HashMap();
+//            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        }
+        setupInternal(persistenceUnit, propertyMap, cqlEnabled);
+        propertyMap = null;
     }
 
     /**
@@ -778,6 +788,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
 
         ColumnDef columnDef15 = new ColumnDef(ByteBuffer.wrap("SQL_TIME".getBytes()), "DateType");
         columnDef15.index_type = IndexType.KEYS;
+        cfDef.addToColumn_metadata(columnDef15);
 
         ColumnDef columnDef17 = new ColumnDef(ByteBuffer.wrap("BIG_DECIMAL".getBytes()), "DecimalType");
         columnDef17.index_type = IndexType.KEYS;

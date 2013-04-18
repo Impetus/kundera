@@ -16,7 +16,6 @@
 
 package com.impetus.client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +46,6 @@ import com.impetus.client.entities.PersonRedis;
 import com.impetus.client.redis.RedisClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.api.Batcher;

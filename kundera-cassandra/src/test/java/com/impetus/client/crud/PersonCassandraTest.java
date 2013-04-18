@@ -106,8 +106,8 @@ public class PersonCassandraTest extends BaseTest
 
         if (propertyMap == null)
         {
-            propertyMap = new HashMap();
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+//            propertyMap = new HashMap();
+//            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
         }
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
 
@@ -531,7 +531,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-        // emf.close();
+//        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 

@@ -33,12 +33,10 @@ public class StudentCassandraCharacterTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -598,12 +596,12 @@ public class StudentCassandraCharacterTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraCharacter";
             cfDef.keyspace = keyspace;
-//            cfDef.setKey_validation_class("UTF8Type");
-
+            cfDef.setKey_validation_class("UTF8Type");
+            cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(name);
-            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
             age.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(age);
             List<CfDef> cfDefs = new ArrayList<CfDef>();

@@ -19,7 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -62,7 +64,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
      * On insert cassandra.
      */
     @Test
-    public void executeTest()
+    public void executeCRUDTest()
     {
         //Insert records
         persistPerson("1", "person1", 10);
@@ -133,18 +135,83 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         Assert.assertNull(findById("3"));
         Assert.assertNull(findById("4"));
 
-        // assertFindByName(em, "PersonKVStore", PersonKVStore.class, "person1",
-        // "PERSON_NAME");
-        // assertFindByNameAndAge(em, "PersonKVStore", PersonKVStore.class,
-        // "person1", "10", "PERSON_NAME");
-        // assertFindByNameAndAgeGTAndLT(em, "PersonKVStore",
-        // PersonKVStore.class, "person1", "5", "25", "PERSON_NAME");
-        // assertFindByNameAndAgeBetween(em, "PersonCassandra",
-        // PersonCassandra.class, "vivek", "10", "15", "PERSON_NAME");
-        // assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "10",
-        // "20", "PERSON_ID");
-        // assertFindWithoutWhereClause(em, "PersonCassandra",
-        // PersonCassandra.class);
+    }
+    
+    @Test
+    public void executeJPAQueriesTest()
+    {
+        //Insert records
+        persistPerson("1", "person1", 10);
+        persistPerson("2", "person2", 20);
+        persistPerson("3", "person3", 30);
+        persistPerson("4", "person4", 40);
+        
+        
+        
+        /*String findAgeByGTELTEClause = "Select p from PersonKVStore p where p.age <=:max AND p.age>=:min";
+        Map<String, Object> params2 = new HashMap<String, Object>();
+        params2.put("min", 30);
+        params2.put("min", 35);
+        List<PersonKVStore> results2 = executeSelectQuery(findAgeByGTELTEClause, params2);*/
+        
+        
+        clearEm();        
+        //Select query, without where clause
+        String findWithOutWhereClause = "Select p from PersonKVStore p";        
+        List<PersonKVStore> results = executeSelectQuery(findWithOutWhereClause);
+        Assert.assertEquals(4, results.size());
+        
+        clearEm();
+        //Select query with where clause on single non-ID column
+        String findByName = "Select p from PersonKVStore p where p.personName=:personName";
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("personName", "person1");        
+        results = executeSelectQuery(findByName, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("1", results.get(0).getPersonId());
+        Assert.assertEquals("person1", results.get(0).getPersonName());
+        Assert.assertEquals(10, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column
+        String findById = "Select p from PersonKVStore p where p.personId=:personId";
+        params = new HashMap<String, Object>();
+        params.put("personId", "2");        
+        results = executeSelectQuery(findById, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("2", results.get(0).getPersonId());
+        Assert.assertEquals("person2", results.get(0).getPersonName());
+        Assert.assertEquals(20, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator
+        String findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId AND p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "3");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("3", results.get(0).getPersonId());
+        Assert.assertEquals("person3", results.get(0).getPersonName());
+        Assert.assertEquals(30, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator (no record)        
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(0, results.size());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());        
+        
     }
 
     protected void persistPerson(String personId, String personName, int age)

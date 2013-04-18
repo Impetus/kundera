@@ -32,15 +32,12 @@ import com.impetus.client.persistence.CassandraCli;
 public class StudentCassandraSqlDateTest extends CassandraBase
 {
 
-
     private static final String keyspace = "KunderaCassandraDataType";
-
-    
 
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -81,7 +78,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         student.setId((Date) getRandomValue(Date.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
-        
+
         // Insert max value of Date
         StudentCassandraSqlDate studentMax = new StudentCassandraSqlDate();
         studentMax.setAge((Short) getMaxValue(short.class));
@@ -95,7 +92,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         studentMin.setId((Date) getMinValue(Date.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
-      
+
         em.close();
     }
 
@@ -162,7 +159,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -541,7 +538,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(((Date)getRandomValue(Date.class)).getTime(), student.getId().getTime());
+                Assert.assertEquals(((Date) getRandomValue(Date.class)).getTime(), student.getId().getTime());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -599,11 +596,11 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             cfDef.name = "StudentCassandraSqlDate";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DateType");
-
+            cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(name);
-            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
             age.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(age);
             List<CfDef> cfDefs = new ArrayList<CfDef>();
@@ -664,6 +661,5 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

@@ -44,8 +44,6 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
 
     public boolean AUTO_MANAGE_SCHEMA = true;
 
-    public boolean CLQ_ENABLED;
-
     /** The emf. */
     protected EntityManagerFactory emf;
 
@@ -105,8 +103,9 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
      * 
      * @param persisntenceUnit
      *            the new up internal
+     * @param CLQ_ENABLED
      */
-    protected void setupInternal(String persisntenceUnit, Map propertyMap)
+    protected void setupInternal(String persisntenceUnit, Map propertyMap, boolean CLQ_ENABLED)
     {
         // dao = new StudentDao(persistenceUnit);
 
@@ -128,13 +127,7 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
         studentId2 = new Long(12345678);
         studentId3 = new Long(12345679);
 
-        if (propertyMap == null)
-        {
-            propertyMap = new HashMap();
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        }
         emf = Persistence.createEntityManagerFactory(persisntenceUnit, propertyMap);
-
         em = emf.createEntityManager();
     }
 
