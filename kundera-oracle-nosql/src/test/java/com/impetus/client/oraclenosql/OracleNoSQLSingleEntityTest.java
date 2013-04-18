@@ -171,6 +171,47 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         Assert.assertEquals("1", results.get(0).getPersonId());
         Assert.assertEquals("person1", results.get(0).getPersonName());
         Assert.assertEquals(10, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column
+        String findById = "Select p from PersonKVStore p where p.personId=:personId";
+        params = new HashMap<String, Object>();
+        params.put("personId", "2");        
+        results = executeSelectQuery(findById, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("2", results.get(0).getPersonId());
+        Assert.assertEquals("person2", results.get(0).getPersonName());
+        Assert.assertEquals(20, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator
+        String findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId AND p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "3");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("3", results.get(0).getPersonId());
+        Assert.assertEquals("person3", results.get(0).getPersonName());
+        Assert.assertEquals(30, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator (no record)        
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(0, results.size());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());        
+        
     }
 
     protected void persistPerson(String personId, String personName, int age)

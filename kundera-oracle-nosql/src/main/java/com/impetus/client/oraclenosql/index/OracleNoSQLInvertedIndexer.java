@@ -15,12 +15,13 @@
  */
 package com.impetus.client.oraclenosql.index;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import oracle.kv.Direction;
 import oracle.kv.KVStore;
@@ -28,6 +29,7 @@ import oracle.kv.Key;
 import oracle.kv.KeyValueVersion;
 import oracle.kv.Value;
 
+import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -44,7 +46,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class OracleNoSQLInvertedIndexer implements Indexer
 {
 
-    KVStore kvStore;
+    KVStore kvStore;    
 
     @Override
     public void index(Class entityClazz, Map<String, Object> values)
@@ -58,7 +60,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
             Object value = values.get(column);
 
             List<String> majorKeyComponents = new ArrayList<String>();
-            majorKeyComponents.add(m.getIndexName() + "_idx");
+            majorKeyComponents.add(getIndexTableName(m));
             majorKeyComponents.add(column);
             majorKeyComponents.add(PropertyAccessorHelper.getString(value));
 
@@ -83,7 +85,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     {
         EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(parentClass);
         EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
-        String secIndexName = childMetadata.getIndexName() + "_idx";
+        String secIndexName = getIndexTableName(childMetadata);
         String parentIdColumnName = ((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName();
         String childIdColumnName = ((AbstractAttribute) childMetadata.getIdAttribute()).getJPAColumnName();
         String id = PropertyAccessorHelper.getString(entityId);
@@ -110,15 +112,64 @@ public class OracleNoSQLInvertedIndexer implements Indexer
             byte[] idByteArr = keyValueVersion.getValue().getValue();
             Object keyObj = accessor.fromBytes(childMetadata.getIdAttribute().getBindableJavaType(), idByteArr);
             
-            
-            /*Object keyObj = accessor.fromString(
-                    ((AbstractAttribute) childMetadata.getIdAttribute()).getBindableJavaType(),
-                    String.valueOf(minorKey));*/
-
             results.put(childIdColumnName + "|" + minorKey, keyObj);
         }
 
         return results;
+    }
+
+    
+    
+    public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        String secIndexName = getIndexTableName(entityMetadata);
+        Map<String, Object> filterConditions = interpreter.getFilterConditions();
+        Set<Object> results = new HashSet<Object>();
+
+        for (String columnName : filterConditions.keySet())
+        {
+            Set<Object> foundKeys = new HashSet<Object>();
+            
+            Object value = filterConditions.get(columnName);
+            if (interpreter.isById() && columnName.equals(idColumnName))
+            {
+                foundKeys.add(value);
+            }
+            else
+            {
+                List<String> majorComponents = new ArrayList<String>();
+                majorComponents.add(secIndexName);
+                majorComponents.add(columnName);
+                majorComponents.add(PropertyAccessorHelper.getString(value));
+
+                Key majorKeyToFind = Key.createKey(majorComponents);
+
+                Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind,
+                        null, null);
+                
+                while (iterator.hasNext())
+                {
+                    KeyValueVersion keyValueVersion = iterator.next();
+                    String minorKey = keyValueVersion.getKey().getMinorPath().get(0);
+
+                    PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(entityMetadata
+                            .getIdAttribute().getBindableJavaType());
+
+                    byte[] idByteArr = keyValueVersion.getValue().getValue();
+                    Object keyObj = accessor
+                            .fromBytes(entityMetadata.getIdAttribute().getBindableJavaType(), idByteArr);
+
+                    foundKeys.add(keyObj);
+                }
+            }
+            
+            addToPrimaryKeySet(results, foundKeys, interpreter.getOperator());            
+        }
+
+        return (Set<E>) results;
+
     }
 
     @Override
@@ -130,6 +181,30 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     @Override
     public void close()
     {
+    }
+    
+    private void addToPrimaryKeySet(Set results, Set keysToAdd, String operation)
+    {
+        if(operation == null)
+        {
+            results.addAll(keysToAdd);
+        }
+        else if(operation.equalsIgnoreCase("OR"))
+        {
+            results.addAll(keysToAdd);
+        }
+        else if(operation.equalsIgnoreCase("AND"))
+        {
+            if(results.isEmpty())
+            {
+                results.addAll(keysToAdd);
+            }
+            else
+            {
+                results.retainAll(keysToAdd);
+            }            
+        }
+        
     }
 
     /**
@@ -147,6 +222,15 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     public void setKvStore(KVStore kvStore)
     {
         this.kvStore = kvStore;
+    }   
+    
+    /**
+     * @param entityMetadata
+     * @return
+     */
+    protected String getIndexTableName(EntityMetadata entityMetadata)
+    {
+        return entityMetadata.getIndexName() + "_idx";
     }
 
 }

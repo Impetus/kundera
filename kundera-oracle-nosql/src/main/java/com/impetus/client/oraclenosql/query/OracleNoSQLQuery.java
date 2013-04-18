@@ -18,6 +18,7 @@ package com.impetus.client.oraclenosql.query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -26,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
+import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -70,28 +72,29 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
        
         ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());
         
-        if (clientMetadata.getIndexImplementor() != null && clientMetadata.getIndexImplementor().getClass().equals(LuceneIndexer.class))
+        if (clientMetadata.getIndexImplementor() != null && client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
         {
-            results = populateUsingLucene(m, client, results);   
-            
-                      
+            results = populateUsingLucene(m, client, results);             
 
         }
         else
         {
             Queue filterClauseQueue = getKunderaQuery().getFilterClauseQueue();
             
-            if(filterClauseQueue.isEmpty())   //Select all query
+            Set<Object> primaryKeys = null;
+            
+            if(! filterClauseQueue.isEmpty())   //Select all query
             {
-                results = (List<Object>) ((OracleNoSQLClient) client).findAll(m.getEntityClazz(), (Object[])null);
-            }
-            else    //Select Query with where clause (requires search within inverted index)
-            {
-                OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
-                return ((OracleNoSQLClient) client).executeQuery(interpreter, m.getEntityClazz());
-            }
-        }
-        
+                //Select Query with where clause (requires search within inverted index)
+                
+                OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);                
+                
+                primaryKeys = ((OracleNoSQLInvertedIndexer) client.getIndexManager().getIndexer()).executeQuery(interpreter, m.getEntityClazz());
+                
+            }    
+                
+            results = (List<Object>) ((OracleNoSQLClient) client).findAll(m.getEntityClazz(), primaryKeys == null ? null : primaryKeys.toArray());          
+        }        
         return results;
     }
 
@@ -146,16 +149,15 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
             else
             {
 
-                String opr = clause.toString();
+                String operator = clause.toString();
                 if (interpreter.getOperator() == null)
                 {
-                    interpreter.setOperator(opr);
+                    interpreter.setOperator(operator);
                 }                
             }
         }
 
         return interpreter;
-    }
-    
+    }   
 
 }
