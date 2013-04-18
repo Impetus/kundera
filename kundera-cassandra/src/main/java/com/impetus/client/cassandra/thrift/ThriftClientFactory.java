@@ -22,7 +22,6 @@ import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 import net.dataforte.cassandra.pool.PoolProperties;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,10 +81,13 @@ public class ThriftClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        indexManager.close();
+        if (indexManager != null)
+        {
+            indexManager.close();
+        }
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         schemaManager = null;
         externalProperties = null;

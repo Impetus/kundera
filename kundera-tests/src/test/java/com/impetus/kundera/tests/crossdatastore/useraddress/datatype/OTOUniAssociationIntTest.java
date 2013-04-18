@@ -66,7 +66,8 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOUniAssociationIntTest extends TwinAssociation
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra", "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","addMongo",
+            "oracle_kvstore", "addCassandra" };
 
     private static final Integer ADDRESS_ID = new Integer(1234567);
 
@@ -272,10 +273,14 @@ public class OTOUniAssociationIntTest extends TwinAssociation
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
         cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("IntegerType");
+        cfDef.setDefault_validation_class("Int32Type");
+        cfDef.setKey_validation_class("Int32Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.setIndex_type(IndexType.KEYS);
         cfDef.addToColumn_metadata(columnDef);
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
+        columnDef2.setIndex_type(IndexType.KEYS);
+        cfDef.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef);
@@ -318,7 +323,9 @@ public class OTOUniAssociationIntTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-        cfDef2.setDefault_validation_class("IntegerType");
+        cfDef2.setDefault_validation_class("Int32Type");
+        cfDef2.setComparator_type("UTF8Type");
+        cfDef2.setKey_validation_class("Int32Type");
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef2);

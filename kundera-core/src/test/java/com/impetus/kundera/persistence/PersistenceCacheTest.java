@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.persistence.context;
+package com.impetus.kundera.persistence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +39,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * Test case for {@link PersistenceCache}
@@ -63,7 +64,7 @@ public class PersistenceCacheTest
     public void setUp() throws Exception
     {
         pc = new PersistenceCache();
-        graphBuilder = new ObjectGraphBuilder(pc);
+        graphBuilder = new ObjectGraphBuilder(pc, new PersistenceDelegator(pc));
 
         getEntityManagerFactory();
         // configurator.configure();

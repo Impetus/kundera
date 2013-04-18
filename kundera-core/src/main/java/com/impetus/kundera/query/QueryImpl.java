@@ -50,6 +50,8 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.DefaultEntityType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -164,8 +166,7 @@ public abstract class QueryImpl implements Query
         {
             onDeleteOrUpdate(results);
         }
-        return results /*!= null && !results.isEmpty() ? results : null*/;
-
+        return results != null ? results : new ArrayList();
     }
 
     /**
@@ -1111,6 +1112,30 @@ public abstract class QueryImpl implements Query
             throw new IllegalStateException("parameter has not been bound" + paramString);
         }
         return value;
+    }
+    
+    protected String[] getColumns(final String[] columns, final EntityMetadata m)
+    {
+        List<String> columnAsList = new ArrayList<String>();
+        if (columns != null && columns.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            for (int i = 1; i < columns.length; i++)
+            {
+                if (columns[i] != null)
+                {
+                    Attribute col = entity.getAttribute(columns[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + columns);
+                    }
+                    columnAsList.add(((AbstractAttribute) col).getJPAColumnName());
+                }
+            }
+        }
+        return columnAsList.toArray(new String[]{});
     }
 
 }

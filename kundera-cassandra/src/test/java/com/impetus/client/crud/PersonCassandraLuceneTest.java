@@ -34,6 +34,7 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -50,11 +51,8 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
-import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
@@ -73,6 +71,8 @@ import com.impetus.kundera.utils.LuceneCleanupUtilities;
 public class PersonCassandraLuceneTest extends BaseTest
 {
     private static final String LUCENE_IDX_CASSANDRA_TEST = "luceneCassandraTest";
+
+    private static final boolean USE_CQL = false;
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -95,7 +95,9 @@ public class PersonCassandraLuceneTest extends BaseTest
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
-        emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST);
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST,propertyMap );
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -125,14 +127,16 @@ public class PersonCassandraLuceneTest extends BaseTest
         Assert.assertEquals("vivek", p.getPersonName());
 
         em.clear();
-        String qry = "Select p.personName from PersonLuceneCassandra p where p.personId >= 1";
+        String qry = "Select p.personId,p.personName from PersonLuceneCassandra p where p.personId >= 1";
         Query q = em.createQuery(qry);
         List<PersonLuceneCassandra> persons = q.getResultList();
 
         assertFindByName(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "personName");
-        assertFindByNameAndAgeGTAndLT(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "20", "personName");
-        assertFindByNameAndAgeBetween(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "15", "personName");
+        assertFindByNameAndAgeGTAndLT(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "20",
+                "personName");
+        assertFindByNameAndAgeBetween(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "15",
+                "personName");
         assertFindByRange(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonLuceneCassandra", PersonLuceneCassandra.class);
 
@@ -216,7 +220,8 @@ public class PersonCassandraLuceneTest extends BaseTest
         em.remove(p);
         em.clear();
 
-        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p", PersonLuceneCassandra.class);
+        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p",
+                PersonLuceneCassandra.class);
 
         List<PersonLuceneCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
@@ -273,23 +278,33 @@ public class PersonCassandraLuceneTest extends BaseTest
         em = emf.createEntityManager();
         Object o1 = em.find(PersonLuceneCassandra.class, "1");
 
-        // Create Insertion List
-        List<Mutation> insertionList = new ArrayList<Mutation>();
-        List<Column> columns = new ArrayList<Column>();
-        Column column = new Column();
-        column.setName(PropertyAccessorFactory.STRING.toBytes("PERSON_NAME"));
-        column.setValue(PropertyAccessorFactory.STRING.toBytes("Amry"));
-        column.setTimestamp(System.currentTimeMillis());
-        columns.add(column);
-        Mutation mut = new Mutation();
-        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
-        insertionList.add(mut);
-        // Create Mutation Map
-        Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
-        columnFamilyValues.put("PERSON", insertionList);
-        Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-        mulationMap.put(ByteBuffer.wrap("1".getBytes()), columnFamilyValues);
-        CassandraCli.client.batch_mutate(mulationMap, ConsistencyLevel.ONE);
+        if (!USE_CQL)
+        {
+            // Create Insertion List
+            List<Mutation> insertionList = new ArrayList<Mutation>();
+            List<Column> columns = new ArrayList<Column>();
+            Column column = new Column();
+            column.setName(PropertyAccessorFactory.STRING.toBytes("PERSON_NAME"));
+            column.setValue(PropertyAccessorFactory.STRING.toBytes("Amry"));
+            column.setTimestamp(System.currentTimeMillis());
+            columns.add(column);
+            Mutation mut = new Mutation();
+            mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
+            insertionList.add(mut);
+            // Create Mutation Map
+            Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
+            columnFamilyValues.put("PERSON", insertionList);
+            Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+            mulationMap.put(ByteBuffer.wrap("1".getBytes()), columnFamilyValues);
+            CassandraCli.client.batch_mutate(mulationMap, ConsistencyLevel.ONE);
+        }
+        else
+        {
+            CQLTranslator translator = new CQLTranslator();
+            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values (1,'Amry',10 )";
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
+                    ConsistencyLevel.ONE);
+        }
 
         em.refresh(o1);
         Object oo1 = em.find(PersonLuceneCassandra.class, "1");
@@ -319,7 +334,8 @@ public class PersonCassandraLuceneTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p", PersonLuceneCassandra.class);
+        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p",
+                PersonLuceneCassandra.class);
 
         List<PersonLuceneCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
@@ -409,7 +425,8 @@ public class PersonCassandraLuceneTest extends BaseTest
         PersonLuceneCassandra person = em.find(PersonLuceneCassandra.class, "1");
         em.remove(person);
         em.clear(); // just to make sure that not to be picked up from cache.
-        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p", PersonLuceneCassandra.class);
+        TypedQuery<PersonLuceneCassandra> query = em.createQuery("Select p from PersonLuceneCassandra p",
+                PersonLuceneCassandra.class);
 
         List<PersonLuceneCassandra> results = query.getResultList();
         Assert.assertNotNull(results);
@@ -419,15 +436,15 @@ public class PersonCassandraLuceneTest extends BaseTest
 
     private void selectIdQuery()
     {/*
-      * String query = "select p.personId from PersonLuceneCassandra p"; Query q =
-      * em.createQuery(query); List<PersonLuceneCassandra> results =
+      * String query = "select p.personId from PersonLuceneCassandra p"; Query q
+      * = em.createQuery(query); List<PersonLuceneCassandra> results =
       * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
       * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
       * Assert.assertNull(results.get(0).getPersonName());
       * 
       * query =
-      * "Select p.personId from PersonLuceneCassandra p where p.personName = vivek";
-      * // // find by name. q = em.createQuery(query); results =
+      * "Select p.personId from PersonLuceneCassandra p where p.personName = vivek"
+      * ; // // find by name. q = em.createQuery(query); results =
       * q.getResultList(); Assert.assertNotNull(results);
       * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
       * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
@@ -460,7 +477,7 @@ public class PersonCassandraLuceneTest extends BaseTest
       * em = null; emf = null;
       */
         // emf.close();
-         CassandraCli.dropKeySpace("KunderaExamples");
+        CassandraCli.dropKeySpace("KunderaExamples");
         LuceneCleanupUtilities.cleanLuceneDirectory(LUCENE_IDX_CASSANDRA_TEST);
     }
 
@@ -491,9 +508,12 @@ public class PersonCassandraLuceneTest extends BaseTest
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
@@ -550,14 +570,12 @@ public class PersonCassandraLuceneTest extends BaseTest
         PersonLuceneCassandra o = new PersonLuceneCassandra();
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
-        o.setAge(age+"");
+        o.setAge(age + "");
         o.setDay(com.impetus.client.crud.PersonLuceneCassandra.Day.MONDAY);
         return o;
     }
 
-    
-    private void assertOnMerge(EntityManager em, String clazz, String oldName,
-            String newName, String fieldName)
+    private void assertOnMerge(EntityManager em, String clazz, String oldName, String newName, String fieldName)
     {
         Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + oldName);
         List<PersonLuceneCassandra> results = q.getResultList();

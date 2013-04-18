@@ -5,6 +5,7 @@ package com.impetus.client.crud;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
@@ -56,7 +58,9 @@ public class CassandraIdQueryTest extends BaseTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest", propertyMap);
         loadData();
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -480,6 +484,7 @@ public class CassandraIdQueryTest extends BaseTest
             Assert.assertNull(person.getA());
         }
     }
+
     /**
      * 
      */
@@ -556,7 +561,7 @@ public class CassandraIdQueryTest extends BaseTest
 
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
-        user_Def.name = "PERSON";
+        user_Def.name = "PERSONCASSANDRA";
         user_Def.keyspace = "KunderaExamples";
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
@@ -564,9 +569,12 @@ public class CassandraIdQueryTest extends BaseTest
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
@@ -581,10 +589,10 @@ public class CassandraIdQueryTest extends BaseTest
             for (CfDef cfDef1 : cfDefn)
             {
 
-                if (cfDef1.getName().equalsIgnoreCase("PERSON"))
+                if (cfDef1.getName().equalsIgnoreCase("PERSONCASSANDRA"))
                 {
 
-                    CassandraCli.client.system_drop_column_family("PERSON");
+                    CassandraCli.client.system_drop_column_family("PERSONCASSANDRA");
 
                 }
             }

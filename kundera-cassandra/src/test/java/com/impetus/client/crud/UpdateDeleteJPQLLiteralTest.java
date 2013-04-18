@@ -16,7 +16,9 @@
 package com.impetus.client.crud;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -35,13 +37,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
  * Junit test case for Update/Delete via query test.
- *  
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class UpdateDeleteJPQLLiteralTest
 {
@@ -63,14 +66,18 @@ public class UpdateDeleteJPQLLiteralTest
      * @throws SchemaDisagreementException
      */
     @Before
-    public void setUp() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    public void setUp() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST/*, propertyMap*/);
         em = emf.createEntityManager();
 
     }
+
     /**
      * Test case to demonstrate update via query use case.
      * 
@@ -79,39 +86,37 @@ public class UpdateDeleteJPQLLiteralTest
     public void test()
     {
         MyTestEntity entity = new MyTestEntity();
-        
+
         UUID key = UUID.randomUUID();
         entity.setKey(key);
         entity.setUrl("url");
         em.persist(entity);
-        
+
         // With JPA where clause and update parameter.
-        String jpql = "update MyTestEntity c set c.url = :url where c.key =:key";   
-        
-        
+        String jpql = "update MyTestEntity c set c.url = :url where c.key =:key";
+
         Query query = em.createQuery(jpql);
         query.setParameter("url", "firstUpdate");
         query.setParameter("key", key);
         query.executeUpdate();
 
         em.clear();
-        
+
         MyTestEntity found = em.find(MyTestEntity.class, key);
-        
+
         Assert.assertNotNull(found);
-        Assert.assertEquals( "firstUpdate", found.getUrl());
-        
+        Assert.assertEquals("firstUpdate", found.getUrl());
+
         // Static where clause with update parameter
         jpql = "update MyTestEntity c set c.url = :url where c.key =" + key.toString();
         query = em.createQuery(jpql);
         query.setParameter("url", "secondUpdate");
         query.executeUpdate();
 
-
         found = em.find(MyTestEntity.class, key);
-        
+
         Assert.assertNotNull(found);
-        Assert.assertEquals( "secondUpdate", found.getUrl());
+        Assert.assertEquals("secondUpdate", found.getUrl());
     }
 
     /**
@@ -121,7 +126,7 @@ public class UpdateDeleteJPQLLiteralTest
     public void jpaStringLiteralTest()
     {
         MyTestEntity entity = new MyTestEntity();
-        
+
         UUID key = UUID.randomUUID();
         entity.setKey(key);
         entity.setUrl("url");
@@ -129,9 +134,9 @@ public class UpdateDeleteJPQLLiteralTest
 
         String staticJpaQueryEnclosing = "Select e from MyTestEntity e where e.url = 'url'";
         Query query = em.createQuery(staticJpaQueryEnclosing);
-        
+
         List<MyTestEntity> result = query.getResultList();
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("url", result.get(0).getUrl());
@@ -140,7 +145,7 @@ public class UpdateDeleteJPQLLiteralTest
         query = em.createQuery(withoutEnclosed);
 
         result = query.getResultList();
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("url", result.get(0).getUrl());
@@ -149,34 +154,34 @@ public class UpdateDeleteJPQLLiteralTest
 
         Assert.assertNotNull(found);
         Assert.assertEquals("url", result.get(0).getUrl());
-        
+
         found.setUrl("url's");
-        
+
         em.merge(found);
-        
+
         String dynamicQuery = "Select e from MyTestEntity e where e.url = 'url''s'";
-        
+
         query = em.createQuery(dynamicQuery);
-        
+
         result = query.getResultList();
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("url's", result.get(0).getUrl());
-        
+
         dynamicQuery = "Select e from MyTestEntity e where e.url = :url";
         query = em.createQuery(dynamicQuery);
         query.setParameter("url", "url's");
-        
+
         result = query.getResultList();
-        
+
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals("url's", result.get(0).getUrl());
 
         // Update by query
         // With JPA where clause and update parameter.
-        String jpql = "update MyTestEntity c set c.url = :url where c.key ="+key.toString();   
+        String jpql = "update MyTestEntity c set c.url = :url where c.key =" + key.toString();
         query = em.createQuery(jpql);
         query.setParameter("url", "updateUrl");
         query.executeUpdate();
@@ -188,7 +193,7 @@ public class UpdateDeleteJPQLLiteralTest
         Assert.assertNotNull(found);
         Assert.assertEquals("updateUrl", found.getUrl());
 
-        jpql = "update MyTestEntity c set c.url = 'enclosedUrl' where c.key = :key";   
+        jpql = "update MyTestEntity c set c.url = 'enclosedUrl' where c.key = :key";
         query = em.createQuery(jpql);
         query.setParameter("key", key);
         query.executeUpdate();
@@ -197,29 +202,27 @@ public class UpdateDeleteJPQLLiteralTest
 
         Assert.assertNotNull(found);
         Assert.assertEquals("enclosedUrl", found.getUrl());
-        
-        
-        jpql = "update MyTestEntity c set c.url = 'enclosedUrl''s' where c.key = :key";   
+
+        jpql = "update MyTestEntity c set c.url = 'enclosedUrl''s' where c.key = :key";
         query = em.createQuery(jpql);
         query.setParameter("key", key);
         query.executeUpdate();
 
         found = em.find(MyTestEntity.class, key);
         Assert.assertEquals("enclosedUrl's", found.getUrl());
-        
+
         // Delete by non column.
-        
-        jpql = "Delete c from MyTestEntity c where c.url = :url";   
+
+        jpql = "Delete c from MyTestEntity c where c.url = :url";
         query = em.createQuery(jpql);
         query.setParameter("url", "enclosedUrl's");
         query.executeUpdate();
 
         found = em.find(MyTestEntity.class, key);
         Assert.assertNull(found);
-        
+
     }
-    
-    
+
     @After
     public void tearDown()
     {

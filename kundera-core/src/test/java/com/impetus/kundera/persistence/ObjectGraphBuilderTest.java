@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.graph;
+package com.impetus.kundera.persistence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,15 +26,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.Store;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -58,7 +61,7 @@ public class ObjectGraphBuilderTest
         new PersistenceUnitConfiguration("kunderatest").configure();
         PersistenceCache persistenceCache = new PersistenceCache();
 
-        graphBuilder = new ObjectGraphBuilder(persistenceCache);
+        graphBuilder = new ObjectGraphBuilder(persistenceCache, new PersistenceDelegator(persistenceCache));
     }
 
     /**

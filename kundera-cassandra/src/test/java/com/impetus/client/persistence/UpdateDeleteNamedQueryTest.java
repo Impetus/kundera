@@ -33,7 +33,6 @@ import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
 import org.junit.After;
@@ -68,7 +67,7 @@ public class UpdateDeleteNamedQueryTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-//        CassandraCli.createKeySpace("KunderaExamples");
+        // CassandraCli.createKeySpace("KunderaExamples");
 
         loadData();
     }
@@ -88,7 +87,7 @@ public class UpdateDeleteNamedQueryTest
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
         user_Def.setKey_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("birth_date".getBytes()), "IntegerType");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("birth_date".getBytes()), "Int32Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("state".getBytes()), "UTF8Type");
@@ -118,17 +117,19 @@ public class UpdateDeleteNamedQueryTest
     {
         EntityManager em = getEntityManagerFactory().createEntityManager();
 
-//        String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
-//        Query q1 = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
-//        q1.executeUpdate();
-//
-//        String idxSql = "CREATE INDEX ON users (birthDate)";
-//        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-//        q1.executeUpdate();
-//
-//        idxSql = "CREATE INDEX ON users (state)";
-//        q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-//        q1.executeUpdate();
+        // String colFamilySql =
+        // "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
+        // Query q1 = em.createNativeQuery(colFamilySql,
+        // CassandraEntitySample.class);
+        // q1.executeUpdate();
+        //
+        // String idxSql = "CREATE INDEX ON users (birthDate)";
+        // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+        // q1.executeUpdate();
+        //
+        // idxSql = "CREATE INDEX ON users (state)";
+        // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+        // q1.executeUpdate();
 
         CassandraEntitySample entity = new CassandraEntitySample();
         entity.setBirth_date(new Integer(100112));

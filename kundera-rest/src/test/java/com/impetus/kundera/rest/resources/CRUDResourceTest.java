@@ -426,7 +426,7 @@ public class CRUDResourceTest extends JerseyTest
         user_Def.name = "BOOK";
         user_Def.keyspace = _KEYSPACE;
         user_Def.setComparator_type("UTF8Type");
-        user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
 
         ColumnDef authorDef = new ColumnDef(ByteBuffer.wrap("AUTHOR".getBytes()), "UTF8Type");
         authorDef.index_type = IndexType.KEYS;
@@ -438,7 +438,8 @@ public class CRUDResourceTest extends JerseyTest
         CfDef person_Def = new CfDef();
         person_Def.name = "PERSONNEL";
         person_Def.keyspace = _KEYSPACE;
-        // cfDef.column_type = "Super";
+        person_Def.setComparator_type("UTF8Type");
+        person_Def.setKey_validation_class("UTF8Type");
         person_Def.setComparator_type("UTF8Type");
         person_Def.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
@@ -447,12 +448,13 @@ public class CRUDResourceTest extends JerseyTest
         CfDef address_Def = new CfDef();
         address_Def.name = "ADDRESS";
         address_Def.keyspace = _KEYSPACE;
-
+        address_Def.setKey_validation_class("UTF8Type");
+        address_Def.setComparator_type("UTF8Type");
         ColumnDef street = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         street.index_type = IndexType.KEYS;
         address_Def.addToColumn_metadata(street);
 
-        ColumnDef personId = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
+        ColumnDef personId = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
         personId.index_type = IndexType.KEYS;
         address_Def.addToColumn_metadata(personId);
 

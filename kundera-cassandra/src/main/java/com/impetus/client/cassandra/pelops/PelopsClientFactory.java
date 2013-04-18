@@ -115,14 +115,18 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        indexManager.close();
+        if (indexManager != null)
+        {
+            indexManager.close();
+        }
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         schemaManager = null;
-//        Pelops.shutdown();
-//        Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties));
+        // Pelops.shutdown();
+        // Pelops.removePool(PelopsUtils.generatePoolName(getPersistenceUnit(),
+        // externalProperties));
         externalProperties = null;
     }
 

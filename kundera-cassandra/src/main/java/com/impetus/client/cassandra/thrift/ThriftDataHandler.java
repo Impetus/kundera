@@ -53,8 +53,9 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
     private ConnectionPool pool;
 
-    public ThriftDataHandler(ConnectionPool pool)
+    public ThriftDataHandler(ConnectionPool pool, boolean isCQLEnabled)
     {
+        super(isCQLEnabled);
         this.pool = pool;
     }
 

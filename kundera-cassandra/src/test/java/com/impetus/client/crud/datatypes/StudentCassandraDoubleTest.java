@@ -7,8 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import junit.framework.Assert;
@@ -35,36 +33,18 @@ public class StudentCassandraDoubleTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    private EntityManagerFactory emf;
-
+    
     @Before
     public void setUp() throws Exception
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            createSchema();
-        }
-        emf = Persistence.createEntityManagerFactory("CassandraDataTypeTest");
+       super.setUp();
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            stopCluster();
-        }
+        super.tearDown();
     }
-
     @Test
     public void testExecuteUseSameEm()
     {
@@ -614,11 +594,11 @@ public class StudentCassandraDoubleTest extends CassandraBase
             cfDef.name = "StudentCassandraDouble";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DoubleType");
-
+            cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(name);
-            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+            ColumnDef age = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
             age.index_type = IndexType.KEYS;
             cfDef.addToColumn_metadata(age);
             List<CfDef> cfDefs = new ArrayList<CfDef>();

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.junit;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -23,6 +24,10 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +56,19 @@ public class TestCassandra
         logger.info("starting server");
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("UUIDCassandra");
-        CassandraCli.columnFamilyExist("uuidsample", "UUIDCassandra");
+        Cassandra.Client client = CassandraCli.getClient();
+        client.set_keyspace("UUIDCassandra");
+        CfDef cf_def = new CfDef();
+        cf_def.keyspace = "UUIDCassandra";
+        cf_def.name = "uuidsample";
+        cf_def.setKey_validation_class("UUIDType");
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("name".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        cf_def.addToColumn_metadata(columnDef2);
+        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("age".getBytes()), "Int32Type");
+        columnDef3.index_type = IndexType.KEYS;
+        cf_def.addToColumn_metadata(columnDef3);
+        client.system_add_column_family(cf_def);
     }
 
     @Test

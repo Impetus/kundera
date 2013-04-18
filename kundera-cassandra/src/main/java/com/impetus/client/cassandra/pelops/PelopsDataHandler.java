@@ -58,8 +58,9 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /**
      * @param externalProperties
      */
-    public PelopsDataHandler(Map<String, Object> externalProperties)
+    public PelopsDataHandler(Map<String, Object> externalProperties, boolean isCQLEnabled)
     {
+        super(isCQLEnabled);
         this.externalProperty = externalProperties;
     }
 

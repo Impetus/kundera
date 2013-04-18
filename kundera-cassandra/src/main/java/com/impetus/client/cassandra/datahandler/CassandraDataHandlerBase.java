@@ -38,6 +38,7 @@ import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -56,6 +57,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
@@ -74,6 +76,13 @@ public abstract class CassandraDataHandlerBase
 
     /** The thrift translator. */
     protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
+
+    protected boolean isCQLEnabled;
+
+    public CassandraDataHandlerBase(boolean isCQLEnabled)
+    {
+        this.isCQLEnabled = isCQLEnabled;
+    }
 
     /**
      * From thrift row.
@@ -582,15 +591,18 @@ public abstract class CassandraDataHandlerBase
             {
                 if (column != null)
                 {
-                    // entity = initialize(tr, m, entity);                          
-                    
+                    // entity = initialize(tr, m, entity);
+
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if("key".equals(thriftColumnName) && tr.getId() == null)
+                    if (Constants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
                     {
-                        entity = initialize(m, entity, null);     
-                        PropertyAccessorHelper.setId(entity, m, column.getValue());
-                    }                    
-                    entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations); 
+                        entity = initialize(m, entity, null);
+                        setId(m, entity, column.getValue());
+                    }
+                    else
+                    {
+                        entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                    }
                 }
             }
 
@@ -764,8 +776,21 @@ public abstract class CassandraDataHandlerBase
             PropertyAccessorHelper.setId(entity, m, tr.getId());
         }
 
-        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
+        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relations)
                 : entity;
+    }
+
+    private void setId(EntityMetadata m, Object entity, Object columnValue)
+    {
+        if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        {
+            setFieldValueViaCQL(entity, columnValue, m.getIdAttribute());
+        }
+        else
+        {
+            columnValue = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), (byte[]) columnValue);
+            PropertyAccessorHelper.setId(entity, m, columnValue);
+        }
     }
 
     /*    *//**
@@ -1035,72 +1060,31 @@ public abstract class CassandraDataHandlerBase
                 MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getMetamodel(m.getPersistenceUnit());
                 String fieldName = m.getFieldName(thriftColumnName);
-                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;              
-                
-                
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+
                 if (attribute != null)
                 {
-                    entity = initialize(m, entity, null);                    
+                    entity = initialize(m, entity, null);
                     String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                     if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                             && thriftColumnName.equals(idColumnName))
                     {
+                        setId(m, entity, thriftColumnValue);
                         PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
                     }
-                    setFieldValue(entity, thriftColumnValue, attribute);
+                    if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                    {
+                        setFieldValueViaCQL(entity, thriftColumnValue, attribute);
+                    }
+                    else
+                    {
+                        setFieldValue(entity, thriftColumnValue, attribute);
+                    }
                 }
                 else
                 {
-                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-                    {
-                        entity = initialize(m, entity, null);                        
-                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                        try
-                        {
-                            Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m
-                                    .getIdAttribute().getJavaMember());
-                            if (compoundKeyObject == null)
-                            {
-                                compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
-                            }
-
-                            // for()
-                            Set<Attribute> attributes = compoundKey.getAttributes();
-
-                            for (Attribute compoundAttribute : attributes)
-                            {
-                                if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
-                                {
-                                    setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
-                                    PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
-                                            compoundKeyObject);
-                                    break;
-                                }
-                            }
-                            // setFieldValue(entity, ,
-                            // attribute)
-
-                        }
-                        catch (IllegalArgumentException iaex)
-                        {
-                            // ignore as it might not repesented within entity.
-                            // No
-                            // need for any logger message
-                        }
-                        catch (InstantiationException iex)
-                        {
-                            // TODO Auto-generated catch block
-                            log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
-                            throw new PersistenceException(iex);
-                        }
-                        catch (IllegalAccessException iaex)
-                        {
-                            log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
-                            throw new PersistenceException(iaex);
-                        }
-                    }
+                    entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel);
                 }
-
             }
         }
         else
@@ -1112,17 +1096,79 @@ public abstract class CassandraDataHandlerBase
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
-                Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),
-                        (byte[]) thriftColumnValue);
+                Object value;
+                if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                {
+                    value = getFieldValueViaCQL(thriftColumnValue, relationMetadata.getIdAttribute());
+                }
+                else
+                {
+                    value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),
+                            (byte[]) thriftColumnValue);
+                }
                 relations.put(thriftColumnName, value);
-                
-                if(entity == null)
+
+                if (entity == null)
                 {
                     entity = initialize(m, entity, null);
                 }
                 // prepare EnhanceEntity and return it
             }
 
+        }
+        return entity;
+    }
+
+    private Object populateCompositeId(EntityMetadata m, Object entity, String thriftColumnName,
+            Object thriftColumnValue, MetamodelImpl metaModel) throws InstantiationException, IllegalAccessException
+    {
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            entity = initialize(m, entity, null);
+            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+            try
+            {
+                Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute()
+                        .getJavaMember());
+                if (compoundKeyObject == null)
+                {
+                    compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
+                }
+
+                // for()
+                Set<Attribute> attributes = compoundKey.getAttributes();
+
+                for (Attribute compoundAttribute : attributes)
+                {
+                    if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
+                    {
+                        setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
+                        PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
+                                compoundKeyObject);
+                        break;
+                    }
+                }
+                // setFieldValue(entity, ,
+                // attribute)
+
+            }
+            catch (IllegalArgumentException iaex)
+            {
+                // ignore as it might not repesented within entity.
+                // No
+                // need for any logger message
+            }
+            catch (InstantiationException iex)
+            {
+                // TODO Auto-generated catch block
+                log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+                throw new PersistenceException(iex);
+            }
+            catch (IllegalAccessException iaex)
+            {
+                log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+                throw new PersistenceException(iaex);
+            }
         }
         return entity;
     }
@@ -1162,14 +1208,16 @@ public abstract class CassandraDataHandlerBase
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), new String(
                             (byte[]) thriftColumnValue));
                 }
-                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class))
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class)
+                        || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                     // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
-                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class))
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
+                        || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
@@ -1186,6 +1234,52 @@ public abstract class CassandraDataHandlerBase
                 log.warn(pae.getMessage());
             }
         }
+    }
+
+    private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)
+    {
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(((AbstractAttribute) attribute)
+                .getBindableJavaType());
+        Object objValue;
+        try
+        {
+            if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(String.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(char.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Character.class))
+            {
+
+                objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(), new String(
+                        (byte[]) thriftColumnValue));
+                return objValue;
+            }
+            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class))
+            {
+                IntegerAccessor intAccessor = new IntegerAccessor();
+                Integer value = intAccessor.fromBytes(short.class, (byte[]) thriftColumnValue);
+                objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
+                        String.valueOf(value));
+                return objValue;
+            }
+            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class))
+            {
+                IntegerAccessor intAccessor = new IntegerAccessor();
+                Integer value = intAccessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
+                        String.valueOf(value));
+                return objValue;
+            }
+            else
+            {
+                objValue = accessor.fromBytes(((AbstractAttribute) attribute).getBindableJavaType(),
+                        (byte[]) thriftColumnValue);
+                return objValue;
+            }
+        }
+        catch (PropertyAccessException pae)
+        {
+            log.warn(pae.getMessage());
+        }
+        return null;
     }
 
     /**

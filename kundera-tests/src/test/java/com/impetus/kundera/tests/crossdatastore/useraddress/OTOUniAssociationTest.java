@@ -66,12 +66,6 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUn
 public class OTOUniAssociationTest extends TwinAssociation
 {
     /**
-     * 
-     */
-    // private static final String KEYSPACE = "KUNDERATESTS";
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms","redis", "addCassandra", "addMongo"/*, "addHbase"*/};
-
-    /**
      * Inits the.
      */
     @BeforeClass
@@ -267,6 +261,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
+        cfDef.setKey_validation_class("UTF8Type");
         ColumnDef columnDefPersonName = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDefPersonName.index_type = IndexType.KEYS;
 
@@ -318,7 +313,8 @@ public class OTOUniAssociationTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-
+        cfDef2.setKey_validation_class("UTF8Type");
+        cfDef2.setComparator_type("UTF8Type");
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef2);

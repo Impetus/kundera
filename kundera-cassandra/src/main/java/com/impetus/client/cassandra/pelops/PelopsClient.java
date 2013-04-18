@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
@@ -129,7 +129,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(externalProperties);
+        this.dataHandler = new PelopsDataHandler(externalProperties, isCQLEnabled);
         this.invertedIndexHandler = new PelopsInvertedIndexHandler(externalProperties);
         this.reader = reader;
     }
@@ -196,10 +196,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+        if (isCQL3Enabled(metadata, metaModel))
         {
-            EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-            onDeleteQuery(metadata, metaModel, pKey, compoundKey);
+            String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
+            executeQuery(deleteQuery, metadata.getEntityClazz(), null);
         }
         else
         {
@@ -427,46 +427,48 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+        if (isCQL3Enabled(metadata, metaModel))
         {
             Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
             try
             {
                 client.set_cql_version(getCqlVersion());
                 client.set_keyspace(metadata.getSchema());
-                onpersistOverCompositeKey(metadata, entity, client, rlHolders);
+                String insert_Query = createInsertQuery(metadata, entity, client, rlHolders);
+                client.set_cql_version(getCqlVersion());
+                client.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
+                        Compression.NONE, getConsistencyLevel());
             }
             catch (InvalidRequestException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
             catch (TException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
             catch (UnsupportedEncodingException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
             catch (UnavailableException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
             catch (TimedOutException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
             catch (SchemaDisagreementException e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by:", e);
                 throw new KunderaException(e);
             }
-
         }
         else
         {

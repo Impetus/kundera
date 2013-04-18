@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,8 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,6 +69,16 @@ public class NullableFieldAccessorTest
         CfDef cf_def = new CfDef();
         cf_def.keyspace = "KunderaExamples";
         cf_def.name = "users";
+        cf_def.setKey_validation_class("UTF8Type");
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("full_name".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        cf_def.addToColumn_metadata(columnDef2);
+        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("birth_date".getBytes()), "Int32Type");
+        columnDef3.index_type = IndexType.KEYS;
+        cf_def.addToColumn_metadata(columnDef3);
+        ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("state".getBytes()), "UTF8Type");
+        columnDef4.index_type = IndexType.KEYS;
+        cf_def.addToColumn_metadata(columnDef4);
         client.system_add_column_family(cf_def);
     }
 

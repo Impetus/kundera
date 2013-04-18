@@ -113,7 +113,11 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     protected Object createPoolOrConnection()
     {
         kvStore = getConnection();
+       
+        
         return kvStore;
+        
+       
     }
 
     /**

@@ -20,7 +20,6 @@ import java.util.Properties;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -185,7 +184,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            return CassandraConstants.CQL_VERSION_3_0;
+            return CassandraConstants.CQL_VERSION_2_0;
         }
 
         public Schema getSchema(String schemaName)

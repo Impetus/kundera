@@ -34,8 +34,14 @@ public class TableInfo
     /** The column metadatas. */
     private List<ColumnInfo> columnMetadatas;
 
-    /** The table id type. */
+    /** The table id class. */
     private Class idClazz;
+
+    /** The table id name. */
+    private String idColumnName;
+
+    /** The table id type /. */
+    private boolean isCompositeId;
 
     /** The type. */
     private String type;
@@ -58,12 +64,15 @@ public class TableInfo
      * @param idClassType
      *            the id class type
      */
-    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, Class idClassType)
+    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, Class idClassType, String idColumnName,
+            boolean isCompositeId)
     {
         this.tableName = tableName;
         this.isIndexable = isIndexable;
         this.type = tableSchemaType;
         this.idClazz = idClassType;
+        this.idColumnName = idColumnName;
+        this.isCompositeId = isCompositeId;
     }
 
     /**
@@ -260,4 +269,15 @@ public class TableInfo
     {
         this.type = type;
     }
+
+    public String getIdColumnName()
+    {
+        return idColumnName;
+    }
+
+    public boolean isCompositeId()
+    {
+        return isCompositeId;
+    }
+
 }

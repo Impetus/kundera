@@ -24,14 +24,20 @@ import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 
 /**
- * <Prove description of functionality provided by this Type>
- * 
+ * Implementation of {@link EntityReader} for Oracle NoSQL database 
  * @author amresh.singh
  */
 public class OracleNoSQLEntityReader extends AbstractEntityReader implements EntityReader
-{
-
-   
+{   
+    public OracleNoSQLEntityReader()
+    {
+      
+    }
+    
+    public OracleNoSQLEntityReader(String luceneQuery)
+    {
+        this.luceneQueryFromJPAQuery = luceneQuery;
+    }
 
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)

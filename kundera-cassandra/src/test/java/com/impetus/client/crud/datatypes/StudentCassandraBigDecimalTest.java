@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import junit.framework.Assert;
@@ -28,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.datatypes.entities.StudentCassandraBigDecimal;
 import com.impetus.client.persistence.CassandraCli;
 
@@ -36,34 +36,18 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    private EntityManagerFactory emf;
-
     @Before
     public void setUp() throws Exception
     {
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            startCluster();
-        }
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            createSchema();
-        }
-        emf = Persistence.createEntityManagerFactory("CassandraDataTypeTest");
+        propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        super.setUp();
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            stopCluster();
-        }
+        super.tearDown();
     }
 
     @Test
@@ -182,7 +166,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()

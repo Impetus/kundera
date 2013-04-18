@@ -318,7 +318,7 @@ public class KunderaQueryParser
                 StringTokenizer token = new StringTokenizer(value, "=");
                 while (token.hasMoreTokens())
                 {
-                    query.addUpdateClause(token.nextToken(), token.nextToken());
+                    query.addUpdateClause(token.nextToken(), token.nextToken().trim());
                 }
             }
         }

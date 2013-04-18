@@ -55,7 +55,6 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.vividsolutions.jtsexample.io.gml2.KMLReaderExample;
 
 /**
  * The Class HibernateClient.
@@ -113,10 +112,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.indexManager.flush();
         if (s != null)
         {
-            s.close();            
+            s.close();
             s = null;
         }
-
         puProperties = null;
     }
 
@@ -216,7 +214,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             if (!isUpdate)
             {
-                s.insert(entity);
+                id = s.insert(entity);
 
                 // Update foreign Keys
                 for (RelationHolder rh : relationHolders)

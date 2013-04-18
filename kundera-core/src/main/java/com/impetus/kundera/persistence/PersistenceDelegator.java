@@ -122,7 +122,7 @@ public final class PersistenceDelegator
     {
         this.validator = new PersistenceValidator();
         this.eventDispatcher = new EntityEventDispatcher();
-        this.graphBuilder = new ObjectGraphBuilder(pc);
+        this.graphBuilder = new ObjectGraphBuilder(pc, this);
         this.persistenceCache = pc;
         this.idGenerator = new IdGenerator();
     }
@@ -450,6 +450,7 @@ public final class PersistenceDelegator
                     else
                     {
                         node.flush();
+                        
                     }
                 }
             }
@@ -517,7 +518,7 @@ public final class PersistenceDelegator
      * Remove the given entity from the persistence context, causing a managed
      * entity to become detached.
      */
-    void detach(Object entity)
+    public void detach(Object entity)
     {
         Node node = getPersistenceCache().getMainCache().getNodeFromCache(entity);
         if (node != null)
@@ -629,7 +630,7 @@ public final class PersistenceDelegator
      * Refresh the state of the instance from the database, overwriting changes
      * made to the entity, if any.
      */
-    void refresh(Object entity)
+    public void refresh(Object entity)
     {
         if (contains(entity))
         {

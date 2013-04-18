@@ -24,12 +24,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javassist.Modifier;
-
 import javax.persistence.PersistenceException;
-import javax.persistence.Transient;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -38,16 +37,19 @@ import org.apache.cassandra.db.marshal.DateType;
 import org.apache.cassandra.db.marshal.DecimalType;
 import org.apache.cassandra.db.marshal.DoubleType;
 import org.apache.cassandra.db.marshal.FloatType;
+import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -93,6 +95,22 @@ public final class CQLTranslator
 
     public static final String LIMIT = " LIMIT ";
 
+    public static final String CREATE_INDEX_QUERY = "CREATE INDEX ON $COLUMNFAMILY ($COLUMNS)";
+
+    public static final String BATCH_QUERY = "BEGIN BATCH $STATEMENT ";
+
+    public static final String STATEMENT = "$STATEMENT";
+
+    public static final String APPLY_BATCH = " APPLY BATCH";
+
+    public static final String USING_CONSISTENCY = "$USING CONSISTENCY";
+
+    public static final String CONSISTENCY_LEVEL = "$CONSISTENCYLEVEL";
+
+    public static final String DROP_TABLE = "drop columnfamily $COLUMN_FAMILY";
+
+    public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY($COLUMNS) VALUES($COLUMNVALUES)";
+
     public CQLTranslator()
     {
 
@@ -127,7 +145,6 @@ public final class CQLTranslator
                 entityMetadata.getPersistenceUnit());
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
-        String columnsAsCSVStr = null;
 
         StringBuilder builder = new StringBuilder();
         StringBuilder columnBuilder = new StringBuilder();
@@ -166,7 +183,7 @@ public final class CQLTranslator
      * 
      * @param record
      *            record
-     * @param entityMetadata
+     * @param m
      *            entity metadata
      * @param type
      *            translation type
@@ -181,7 +198,7 @@ public final class CQLTranslator
      * @param columnBuilder
      *            column name builder
      */
-    private void onTranslation(final Object record, final EntityMetadata entityMetadata, TranslationType type,
+    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
             StringBuilder columnBuilder)
     {
@@ -189,7 +206,7 @@ public final class CQLTranslator
         {
             if (metaModel.isEmbeddable(field.getType()))
             {
-                if (field.getType().equals(entityMetadata.getIdAttribute().getBindableJavaType()))
+                if (field.getType().equals(m.getIdAttribute().getBindableJavaType()))
                 {
                     // builder.
                     // Means it is a compound key! As other
@@ -205,7 +222,6 @@ public final class CQLTranslator
                                             .getJPAColumnName(), compoundKeyObj, compositeColumn);
                         }
                     }
-
                 }
                 else
                 {
@@ -215,15 +231,21 @@ public final class CQLTranslator
             }
             else
             {
-                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
-
-                if (!attrib.isAssociation())
+                if (!ReflectUtils.isTransientOrStatic(field)
+                        && m.getIdAttribute().getName().equals(entityType.getAttribute(field.getName()).getName()))
                 {
-                    onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
+                    onTranslation(type, builder, columnBuilder, Constants.CQL_KEY, record, field);
                 }
+                else if (!ReflectUtils.isTransientOrStatic(field))
+                {
+                    AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
 
+                    if (!attrib.isAssociation())
+                    {
+                        onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
+                    }
+                }
             }
-
         }
     }
 
@@ -274,18 +296,18 @@ public final class CQLTranslator
      *            column name builder object.
      * @param columnName
      *            column name.
-     * @param compoundKeyObj
+     * @param record
      *            value object.
-     * @param compositeColumn
+     * @param column
      *            value column name.
      */
     private void onTranslation(TranslationType type, StringBuilder builder, StringBuilder columnBuilder,
-            String columnName, Object compoundKeyObj, Field compositeColumn)
+            String columnName, Object record, Field column)
     {
         switch (type)
         {
         case ALL:
-            if (appendColumnValue(builder, compoundKeyObj, compositeColumn))
+            if (appendColumnValue(builder, record, column))
             {
                 builder.append(",");
                 appendColumnName(columnBuilder, columnName);
@@ -301,7 +323,7 @@ public final class CQLTranslator
 
         case VALUE:
 
-            if (appendColumnValue(builder, compoundKeyObj, compositeColumn))
+            if (appendColumnValue(builder, record, column))
             {
                 builder.append(","); // because only key columns
             }
@@ -314,16 +336,15 @@ public final class CQLTranslator
      * value is present.
      * 
      * @param builder
-     * @param compoundKeyObj
-     * @param compositeColumn
+     * @param valueObj
+     * @param column
      * @return true if value is not null,else false.
      */
-    private boolean appendColumnValue(StringBuilder builder, Object compoundKeyObj, Field compositeColumn)
+    private boolean appendColumnValue(StringBuilder builder, Object valueObj, Field column)
     {
-        Object value = PropertyAccessorHelper.getObject(compoundKeyObj, compositeColumn);
+        Object value = PropertyAccessorHelper.getObject(valueObj, column);
         boolean isPresent = false;
-        isPresent = appendValue(builder, compositeColumn.getType(), value, isPresent);
-
+        isPresent = appendValue(builder, column.getType(), value, isPresent);
         return isPresent;
     }
 
@@ -349,39 +370,31 @@ public final class CQLTranslator
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                     || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-            /*
-             * || fieldClazz.isAssignableFrom(boolean.class) ||
-             * fieldClazz.isAssignableFrom(Boolean.class)
-             */)
+                    || value instanceof Enum || fieldClazz.isAssignableFrom(Float.class)
+                    || fieldClazz.isAssignableFrom(float.class) || fieldClazz.isAssignableFrom(Double.class)
+                    || fieldClazz.isAssignableFrom(double.class))
             {
                 builder.append("'");
 
                 if (isDate(fieldClazz)) // For CQL, date has to
                                         // be in date.getTime()
                 {
-
                     builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
+                }
+                else if (value instanceof Enum)
+                {
+                    builder.append(((Enum) value).name());
                 }
                 else
                 {
                     builder.append(value);
                 }
                 builder.append("'");
-            } /*
-               * else if(fieldClazz.isAssignableFrom(byte.class)) { // isPresent
-               * = false; ByteAccessor accessor = new ByteAccessor();
-               * builder.append(Hex.encodeHex(accessor.toBytes(value))); //
-               * builder.append(Integer.toHexString(5)); ByteAccessor accessor =
-               * new ByteAccessor();
-               * 
-               * builder.append(accessor.toBytes(value)); }
-               */
+            }
             else
             {
                 builder.append(value);
             }
-
-            // builder.append(","); // because only key columns
         }
         return isPresent;
     }
@@ -397,7 +410,6 @@ public final class CQLTranslator
     public void appendColumnName(StringBuilder builder, String columnName)
     {
         ensureCase(builder, columnName);
-        // builder.append(","); // because only key columns
     }
 
     /**
@@ -452,6 +464,8 @@ public final class CQLTranslator
             validationClassMapper.put(UTF8Type.class.getSimpleName(), "text");
 
             validationClassMapper.put(IntegerType.class.getSimpleName(), "int");
+
+            validationClassMapper.put(Int32Type.class.getSimpleName(), "int");
 
             validationClassMapper.put(DoubleType.class.getSimpleName(), "double");
 

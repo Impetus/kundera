@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType.association;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,6 +26,8 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -123,12 +126,22 @@ public class UserOTOPKTest
         user.setKey_validation_class("UTF8Type");
         user.setDefault_validation_class("UTF8Type");
         user.setComparator_type("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
+        user.addToColumn_metadata(columnDef);
 
         CfDef address = new CfDef(keyspace, "AddressOTOPK");
         address.setKey_validation_class("UTF8Type");
         address.setDefault_validation_class("UTF8Type");
         address.setComparator_type("UTF8Type");
-
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
+        columnDef1.index_type = IndexType.KEYS;
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        
+        address.addToColumn_metadata(columnDef1);
+        address.addToColumn_metadata(columnDef2);
+        
         cfDefs.add(user);
         cfDefs.add(address);
         KsDef ksDef = null;
@@ -181,6 +194,5 @@ public class UserOTOPKTest
         {
             e.printStackTrace();
         }
-
     }
 }

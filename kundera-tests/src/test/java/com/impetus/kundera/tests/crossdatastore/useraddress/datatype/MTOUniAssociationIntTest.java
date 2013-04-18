@@ -52,7 +52,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
 {
     private static final Long ADDRESS_ID = new Long(123456);
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"rdbms",*/ "addCassandra", "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"rdbms",*/ "addCassandra", "addMongo","oracle_kvstore" };
 
     /**
      * Inits the.
@@ -274,12 +274,12 @@ public class MTOUniAssociationIntTest extends TwinAssociation
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("IntegerType");
+        cfDef.setKey_validation_class("Int32Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "LongType");
         columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
 
@@ -324,8 +324,8 @@ public class MTOUniAssociationIntTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-        cfDef2.setDefault_validation_class("LongType");
-
+        cfDef2.setKey_validation_class("LongType");
+        cfDef2.setComparator_type("UTF8Type");
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);

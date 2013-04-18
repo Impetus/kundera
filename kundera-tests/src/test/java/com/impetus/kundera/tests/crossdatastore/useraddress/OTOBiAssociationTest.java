@@ -43,8 +43,6 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBi
 
 public class OTOBiAssociationTest extends TwinAssociation
 {
-//    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addCassandra",/* "addHbase",*/ "addMongo" };
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo","rdbms","redis", "addCassandra",/*, "addHbase"*/};
     /**
      * Inits the.
      */
@@ -253,7 +251,7 @@ public class OTOBiAssociationTest extends TwinAssociation
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-
+        cfDef.setKey_validation_class("UTF8Type");
         ColumnDef columnDefPersonName = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDefPersonName.index_type = IndexType.KEYS;
 
@@ -305,7 +303,8 @@ public class OTOBiAssociationTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-
+        cfDef2.setKey_validation_class("UTF8Type");
+        cfDef2.setComparator_type("UTF8Type");
         ColumnDef columnDefStreet = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDefStreet.index_type = IndexType.KEYS;
 

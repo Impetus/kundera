@@ -93,6 +93,9 @@ public final class Constants
 
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
+    /** Name of Row key column when stored using CQL insert statement*/
+    public static final String CQL_KEY = "key";
+    
     // public final static String INVERTED_INDEXING_ENABLED =
     // "inverted.indexing.enabled";
 

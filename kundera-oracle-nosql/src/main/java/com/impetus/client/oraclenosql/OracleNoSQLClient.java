@@ -31,9 +31,13 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import oracle.kv.Direction;
+import oracle.kv.DurabilityException;
+import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
 import oracle.kv.KeyValueVersion;
+import oracle.kv.Operation;
+import oracle.kv.OperationExecutionException;
 import oracle.kv.Value;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,34 +45,48 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
+import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Implementation of {@link Client} interface for Oracle NoSQL database
+ * 
  * @author amresh.singh
  */
-public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery> {
+public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher
+{
 
     /** The kvstore db. */
     private KVStore kvStore;
-    
+
     private OracleNoSQLClientFactory factory;
-    
+
     /** The reader. */
     private EntityReader reader;
+
+    /** list of nodes for batch processing. */
+    private List<Node> nodes = new ArrayList<Node>();
+
+    /** batch size. */
+    private int batchSize;
 
     /** The log. */
     private static Log log = LogFactory.getLog(OracleNoSQLClient.class);
@@ -83,70 +101,73 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      * @param reader
      *            the reader
      */
-    OracleNoSQLClient(final OracleNoSQLClientFactory factory, EntityReader reader, IndexManager indexManager, final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit)
+    OracleNoSQLClient(final OracleNoSQLClientFactory factory, EntityReader reader, IndexManager indexManager,
+            final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
         this.factory = factory;
-        this.kvStore = kvStore;    
+        this.kvStore = kvStore;
         this.reader = reader;
         this.indexManager = indexManager;
+        setBatchSize(persistenceUnit, puProperties);
     }
-    
+
     @Override
     public Object find(Class entityClass, Object key)
-    {        
+    {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata.getPersistenceUnit());
-        
-        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());        
-        
-        if(log.isDebugEnabled())
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
+                .getPersistenceUnit());
+
+        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+
+        if (log.isDebugEnabled())
         {
             log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
-        }        
+        }
 
-        //Major Key components
+        // Major Key components
         List<String> majorComponents = new ArrayList<String>();
         majorComponents.add(entityMetadata.getTableName());
         majorComponents.add(PropertyAccessorHelper.getString(key));
 
         Key majorKeyToFind = Key.createKey(majorComponents);
-        
+
         Object entity = null;
-        
+
         Map<String, Object> relationMap = null;
-        if(entityMetadata.getRelationNames() != null && ! entityMetadata.getRelationNames().isEmpty())
+        if (entityMetadata.getRelationNames() != null && !entityMetadata.getRelationNames().isEmpty())
         {
             relationMap = new HashMap<String, Object>();
         }
-        
-        try 
-        {            
-            Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
 
-            //If a record is found, instantiate entity and set ID value
+        try
+        {
+            Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null,
+                    null);
+
+            // If a record is found, instantiate entity and set ID value
             if (iterator.hasNext())
             {
                 entity = entityMetadata.getEntityClazz().newInstance();
                 PropertyAccessorHelper.setId(entity, entityMetadata, key);
             }
 
-            //Populate non-ID attributes
+            // Populate non-ID attributes
             while (iterator.hasNext())
             {
                 KeyValueVersion keyValueVersion = iterator.next();
 
                 String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
                 String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
-                
-                if(fieldName != null)
+
+                if (fieldName != null)
                 {
                     Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
 
-                    
                     if (metamodel.isEmbeddable(f.getType()))
                     {
-                        //Populate embedded attribute
+                        // Populate embedded attribute
                         Class<?> embeddableClass = f.getType();
                         if (metamodel.isEmbeddable(embeddableClass))
                         {
@@ -174,14 +195,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     }
                     else if (entityType.getAttribute(fieldName) != null)
                     {
-                        //Populate non-embedded attribute                    
+                        // Populate non-embedded attribute
                         Value v = keyValueVersion.getValue();
 
                         if (f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
                             PropertyAccessorHelper.set(entity, f, v.getValue());
                         }
-                        
+
                         else if (entityMetadata.getRelationNames() != null
                                 && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
                         {
@@ -194,15 +215,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                     }
                 }
-                
-                
-
             }
-            
-            
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new PersistenceException(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            log.error(e);
+            throw new PersistenceException(e);
         }
 
         if (relationMap != null && !relationMap.isEmpty())
@@ -217,10 +235,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
-        //getIndexManager().flush();
+        // getIndexManager().flush();
 
     }
 
@@ -233,13 +252,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         majorKeyComponent.add(entityMetadata.getTableName());
         majorKeyComponent.add(PropertyAccessorHelper.getString(pKey));
 
-        
-        kvStore.multiDelete(Key.createKey(majorKeyComponent),null,null);
-        
+        kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
+
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
-
-    
 
     /**
      * On persist.
@@ -260,42 +276,53 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        String schema = entityMetadata.getSchema();   //Irrelevant for this datastore
+        String schema = entityMetadata.getSchema(); // Irrelevant for this
+                                                    // datastore
         String table = entityMetadata.getTableName();
-        
-        MetamodelImpl metamodel = (MetamodelImpl)KunderaMetadataManager.getMetamodel(entityMetadata.getPersistenceUnit());
 
-        if(log.isDebugEnabled())
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
+                .getPersistenceUnit());
+
+        if (log.isDebugEnabled())
         {
-            log.debug("Persisting data into " + schema + "." + table + " for " + id);     
+            log.debug("Persisting data into " + schema + "." + table + " for " + id);
         }
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
-        
-        //Major Key component
+
+        List<Operation> persistOperations = new ArrayList<Operation>();
+
+        // Major Key component
         List<String> majorKeyComponent = new ArrayList<String>();
         majorKeyComponent.add(table);
-        majorKeyComponent.add(PropertyAccessorHelper.getString(id));    //Major keys are always String
+        majorKeyComponent.add(PropertyAccessorHelper.getString(id)); // Major
+                                                                     // keys
+                                                                     // are
+                                                                     // always
+                                                                     // String
 
-        //Iterate over all Non-ID attributes of this entity (ID is already part of major key)
-        Set<Attribute> attributes = entityType.getAttributes();     
- 
-        
-        for(Attribute attribute : attributes)
+        // Iterate over all Non-ID attributes of this entity (ID is already part
+        // of major key)
+        Set<Attribute> attributes = entityType.getAttributes();
+
+        for (Attribute attribute : attributes)
         {
-            if (! attribute.equals(entityMetadata.getIdAttribute()))
+            Field currentField = (Field) attribute.getJavaMember();
+            Field idField = (Field) entityMetadata.getIdAttribute().getJavaMember();
+            if (!currentField.equals(idField))
             {
-                Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();  
-                
-                
-                //If attribute is Embeddable, create minor keys for each attribute it contains
+                Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();
+
+                // If attribute is Embeddable, create minor keys for each
+                // attribute it contains
                 if (metamodel.isEmbeddable(fieldJavaType))
                 {
                     Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
-                    if(embeddedObject != null)
+                    if (embeddedObject != null)
                     {
                         if (attribute.isCollection())
                         {
-                            //ElementCollection is not supported for OracleNoSQL as of now, ignore for now
+                            // ElementCollection is not supported for
+                            // OracleNoSQL as of now, ignore for now
                             log.warn("Attribute "
                                     + attribute.getName()
                                     + " will not be persistence because ElementCollection is not supported for OracleNoSQL as of now");
@@ -305,129 +332,191 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                             String embeddedColumnName = ((AbstractAttribute) attribute).getJPAColumnName();
                             EmbeddableType embeddableType = metamodel.embeddable(fieldJavaType);
                             Set<Attribute> embeddableAttributes = embeddableType.getAttributes();
-                            
+
                             for (Attribute embeddableAttribute : embeddableAttributes)
                             {
                                 Field f = (Field) embeddableAttribute.getJavaMember();
-                                
+
                                 List<String> minorKeyComponents = new ArrayList<String>();
                                 minorKeyComponents.add(embeddedColumnName);
                                 minorKeyComponents.add(((AbstractAttribute) embeddableAttribute).getJPAColumnName());
-                                
-                                //Key
+
+                                // Key
                                 Key key = Key.createKey(majorKeyComponent, minorKeyComponents);
-                                
-                                //Value
-                                byte[] valueByteArray = PropertyAccessorHelper.get(embeddedObject, f);            
-                                Value value = Value.createValue(valueByteArray);                  
-                               
-                                
-                                kvStore.put(key, value);                                 
-                            }               
-                            
+
+                                // Value
+                                Object valueObj = PropertyAccessorHelper.getObject(embeddedObject, f);
+                                if(valueObj != null) 
+                                {
+                                    byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj);
+                                    //PropertyAccessorHelper.get(embeddedObject, f);                                    
+                                    Value value = Value.createValue(valueByteArray);
+                                    
+                                    Operation op = kvStore.getOperationFactory().createPut(key, value);
+                                    persistOperations.add(op);                                    
+                                    // kvStore.put(key, value);
+                                }
+                            }
                         }
-                    }  
+                    }
                 }
-                
-                //All other non-embeddable agttributes (ignore associations, as they will be store by separate call)
+
+                // All other non-embeddable agttributes (ignore associations, as
+                // they will be store by separate call)
                 else if (!attribute.isAssociation())
                 {
                     Field field = (Field) attribute.getJavaMember();
                     String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                    
-                    //Key
-                    Key key = Key.createKey(majorKeyComponent, columnName);
-                    
-                    //Value
-                    byte[] valueByteArray = PropertyAccessorHelper.get(entity, field);            
-                    Value value = Value.createValue(valueByteArray);
-                    
-                    kvStore.put(key, value); 
-                }               
-            }           
-        }
-        
-        //Iterate over relations
-        if(rlHolders != null && ! rlHolders.isEmpty())
-        {
-            for(RelationHolder rh : rlHolders)
-            {
-                String relationName = rh.getRelationName();  
-                Object valueObj = rh.getRelationValue();
-                
-                if(! StringUtils.isEmpty(relationName) && valueObj != null)
-                {
-                  //Key
-                    Key key = Key.createKey(majorKeyComponent, relationName);
-                    
-                    //Value
-                    byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
-                    Value value = Value.createValue(valueInBytes);
-                    
-                    kvStore.put(key, value);
-                    
-                }   
-                
-            }
-        }      
 
+                    // Key
+                    Key key = Key.createKey(majorKeyComponent, columnName);
+
+                    // Value
+                    Object valueObj = PropertyAccessorHelper.getObject(entity, field);
+                    if(valueObj != null)
+                    {
+                        byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj); 
+                                //PropertyAccessorHelper.get(entity, field);
+                        Value value = Value.createValue(valueByteArray);
+                        
+                        Operation op = kvStore.getOperationFactory().createPut(key, value);
+                        persistOperations.add(op);
+                        // kvStore.put(key, value);                        
+                    }
+                }
+            }
+        }
+
+        // Iterate over relations
+        if (rlHolders != null && !rlHolders.isEmpty())
+        {
+            for (RelationHolder rh : rlHolders)
+            {
+                String relationName = rh.getRelationName();
+                Object valueObj = rh.getRelationValue();
+
+                if (!StringUtils.isEmpty(relationName) && valueObj != null)
+                {
+                    // Key
+                    Key key = Key.createKey(majorKeyComponent, relationName);
+
+                    // Value
+                    if(valueObj != null)
+                    {
+                        byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
+                        Value value = Value.createValue(valueInBytes);
+                        
+                        Operation op = kvStore.getOperationFactory().createPut(key, value);
+                        persistOperations.add(op);
+                        // kvStore.put(key, value);                        
+                    }
+                }
+            }
+        }
+        execute(persistOperations);
     }
-    
+
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
-        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();       
-        
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+
+        List<Operation> persistJoinTableOperation = new ArrayList<Operation>();
+
         /**
-         * There will be two kinds of major keys
-         * 1. /Join_Table_Name/Join_Column_Name/Primary_Key_On_Owning_Side
-         * 2. /Join_Table_Name/Inverse_Join_Column_Name/Primary_Key_On_Other_Side
+         * There will be two kinds of major keys 1.
+         * /Join_Table_Name/Join_Column_Name/Primary_Key_On_Owning_Side 2.
+         * /Join_Table_Name/Inverse_Join_Column_Name/Primary_Key_On_Other_Side
          * 
-         * Minor keys for both will be list of Primary keys at the opposite side, value will always be null
+         * Minor keys for both will be list of Primary keys at the opposite
+         * side, value will always be null
          */
-        
-        
+
         for (Object pk : joinTableRecords.keySet())
         {
-            // Save Join Column ---> inverse Join Column mapping   
+            // Save Join Column ---> inverse Join Column mapping
             List<String> majorKeysForJoinColumn = new ArrayList<String>();
-            
+
             majorKeysForJoinColumn.add(joinTableName);
-            //majorKeysForJoinColumn.add(joinColumnName);
-            majorKeysForJoinColumn.add(PropertyAccessorHelper.getString(pk));       
-            
-            
-            Set<Object> values = joinTableRecords.get(pk);          
+            // majorKeysForJoinColumn.add(joinColumnName);
+            majorKeysForJoinColumn.add(PropertyAccessorHelper.getString(pk));
+
+            Set<Object> values = joinTableRecords.get(pk);
             List<String> minorKeysForJoinColumn = new ArrayList<String>();
-            
+
             for (Object childId : values)
             {
-                minorKeysForJoinColumn.add(PropertyAccessorHelper.getString(childId)); 
-                
+                minorKeysForJoinColumn.add(PropertyAccessorHelper.getString(childId));
+
                 // Save Invese join Column ---> Join Column mapping
                 List<String> majorKeysForInvJoinColumn = new ArrayList<String>();
                 majorKeysForInvJoinColumn.add(joinTableName);
-                //majorKeysForInvJoinColumn.add(invJoinColumnName);
+                // majorKeysForInvJoinColumn.add(invJoinColumnName);
                 majorKeysForInvJoinColumn.add(PropertyAccessorHelper.getString(childId));
-                
+
                 Key key = Key.createKey(majorKeysForInvJoinColumn, PropertyAccessorHelper.getString(pk));
-                kvStore.put(key, Value.createValue(invJoinColumnName.getBytes()));  //Value will be null
+                // kvStore.put(key,
+                // Value.createValue(invJoinColumnName.getBytes())); // Value
+                // will
+                // be
+                // null
+                Operation op = kvStore.getOperationFactory().createPut(key,
+                        Value.createValue(invJoinColumnName.getBytes()));
+                persistJoinTableOperation.add(op);
             }
-            
-            Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);              
-            kvStore.put(key, Value.createValue(joinColumnName.getBytes()));   //Value will be null        
+
+            Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);
+            // kvStore.put(key, Value.createValue(joinColumnName.getBytes()));
+            // // Value
+            // will
+            // be
+            // null
+            Operation op = kvStore.getOperationFactory().createPut(key, Value.createValue(joinColumnName.getBytes()));
+            persistJoinTableOperation.add(op);
+        }
+
+        execute(persistJoinTableOperation);
+    }
+
+    private void execute(List<Operation> batch)
+    {
+        try
+        {
+            kvStore.execute(batch);
+        }
+        catch (DurabilityException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        catch (OperationExecutionException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        catch (FaultException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        finally
+        {
+            batch.clear();
         }
     }
-    
-    
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         List<E> results = new ArrayList<E>();
+        
+        if(keys == null)    //Fetch all records for this entity
+        {
+            keys = (Object[]) getAllKeys(entityClass);
+        }
         
         for(Object key : keys)
         {
@@ -436,12 +525,45 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             
         return results;
     }
+    
+    /**
+     * @param <E>
+     * @param entityClass
+     * @return
+     */
+    private Object[] getAllKeys(Class<?> entityClass)
+    {
+        Object[] keys;
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        
+        ArrayList<String> majorComponents = new ArrayList<String>();
+        majorComponents.add(m.getTableName());
+        
+        Key key = Key.createKey(majorComponents);
+        
+        Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0,
+                                  key, null, null);
+        
+        Set<String> keySet = new HashSet<String>();
+        
+        while(iterator.hasNext())
+        {
+            KeyValueVersion keyValueVersion = iterator.next();
+            
+            //String majorKeyFirstPart = keyValueVersion.getKey().getMajorPath().get(0);
+            String majorKeySecondPart = keyValueVersion.getKey().getMajorPath().get(1);
+            keySet.add(majorKeySecondPart);
+        }
+        
+        keys = keySet.toArray(new Object[keySet.size()]);
+        return keys;
+    }
 
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
-    }   
+    }
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -449,13 +571,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     {
         List<E> foreignKeys = new ArrayList<E>();
 
-        //Major Key components
+        // Major Key components
         List<String> majorComponents = new ArrayList<String>();
         majorComponents.add(tableName);
-        //majorComponents.add(pKeyColumnName);
-        majorComponents.add(PropertyAccessorHelper.getString(pKeyColumnValue));        
+        // majorComponents.add(pKeyColumnName);
+        majorComponents.add(PropertyAccessorHelper.getString(pKeyColumnValue));
         Key majorKeyToFind = Key.createKey(majorComponents);
-        
+
         Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
 
         try
@@ -463,25 +585,26 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             while (iterator.hasNext())
             {
                 KeyValueVersion keyValueVersion = iterator.next();
-                
-                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8"); 
-                if(value != null && value.equals(pKeyColumnName))
+
+                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
+                if (value != null && value.equals(pKeyColumnName))
                 {
                     Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-                    
-                    while(minorKeyIterator.hasNext())
+
+                    while (minorKeyIterator.hasNext())
                     {
-                        String minorKey = minorKeyIterator.next();                  
-                        foreignKeys.add((E) minorKey);                
+                        String minorKey = minorKeyIterator.next();
+                        foreignKeys.add((E) minorKey);
                     }
-                }          
-                           
+                }
+
             }
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
-        }        
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
+        }
         return foreignKeys;
     }
 
@@ -491,45 +614,50 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     {
         String valueAsStr = PropertyAccessorHelper.getString(columnValue);
         Set<String> results = new HashSet<String>();
-        
-        //Major Key components
+
+        // Major Key components
         List<String> majorComponents = new ArrayList<String>();
         majorComponents.add(tableName);
-        //majorComponents.add(columnName);
-        majorComponents.add(PropertyAccessorHelper.getString(valueAsStr));        
+        // majorComponents.add(columnName);
+        majorComponents.add(PropertyAccessorHelper.getString(valueAsStr));
         Key majorKeyToFind = Key.createKey(majorComponents);
-        
+
         Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
         try
         {
             while (iterator.hasNext())
-            {            
+            {
                 KeyValueVersion keyValueVersion = iterator.next();
                 String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
-                
-                if(value != null && value.equals(columnName))
+
+                if (value != null && value.equals(columnName))
                 {
                     Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-                    
-                    while(minorKeyIterator.hasNext())
+
+                    while (minorKeyIterator.hasNext())
                     {
-                        String minorKey = minorKeyIterator.next();                  
-                        results.add(minorKey);            
-                    } 
-                }    
-                           
+                        String minorKey = minorKeyIterator.next();
+                        results.add(minorKey);
+                    }
+                }
+
             }
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
-        }  
-        
-        
-        if (results != null && ! results.isEmpty())
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
+        }
+
+        if (results != null && !results.isEmpty())
         {
             return results.toArray(new Object[0]);
         }
+        return null;
+    }
+    
+    public <E> List<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass) 
+    {
         return null;
     }
 
@@ -537,61 +665,58 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         List<String> majorKeyComponent = new ArrayList<String>();
-        majorKeyComponent.add(tableName);        
+        majorKeyComponent.add(tableName);
         majorKeyComponent.add(PropertyAccessorHelper.getString(columnValue));
         Key majorKey = Key.createKey(majorKeyComponent);
         boolean deleteApplicableOnMajorKey = false;
-        
-        //Store minor keys in an array before deleting
-        List<String> minorKeys = new ArrayList<String>();      
+
+        // Store minor keys in an array before deleting
+        List<String> minorKeys = new ArrayList<String>();
         Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKey, null, null);
         try
         {
             while (iterator.hasNext())
             {
                 KeyValueVersion keyValueVersion = iterator.next();
-                
-                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8"); 
-                if(value != null && value.equals(columnName))
+
+                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
+                if (value != null && value.equals(columnName))
                 {
                     deleteApplicableOnMajorKey = true;
-                    
+
                     Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-                    
-                    while(minorKeyIterator.hasNext())
+
+                    while (minorKeyIterator.hasNext())
                     {
-                        String minorKey = minorKeyIterator.next();                  
-                        minorKeys.add(minorKey);                
+                        String minorKey = minorKeyIterator.next();
+                        minorKeys.add(minorKey);
                     }
-                }          
-                           
+                }
+
             }
         }
         catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new PersistenceException(e);
         }
-        
-        
-        if(deleteApplicableOnMajorKey)
+
+        if (deleteApplicableOnMajorKey)
         {
-            //Delete This columnValue as major key            
+            // Delete This columnValue as major key
             kvStore.multiDelete(majorKey, null, null);
-            
-            //Delete all minor keys that contain this columnValue
-            for(String key : minorKeys)
+
+            // Delete all minor keys that contain this columnValue
+            for (String key : minorKeys)
             {
                 List<String> majorKeys = new ArrayList<String>();
-                majorKeys.add(tableName);        
+                majorKeys.add(tableName);
                 majorKeys.add(PropertyAccessorHelper.getString(key));
                 Key majorAndMinorKeys = Key.createKey(majorKeys, PropertyAccessorHelper.getString(columnValue));
                 kvStore.multiDelete(majorAndMinorKeys, null, null);
             }
         }
-        
-        
-        
-        
+
     }
 
     @Override
@@ -610,9 +735,96 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public Class<OracleNoSQLQuery> getQueryImplementor()
     {
         return OracleNoSQLQuery.class;
-    } 
+    }
+
+    @Override
+    public void addBatch(Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+        onBatchLimit();
+    }
+
+    @Override
+    public int executeBatch()
+    {
+        for (Node node : nodes)
+        {
+            if (node.isDirty())
+            {
+                // delete can not be executed in batch
+                if (node.isInState(RemovedState.class))
+                {
+                    delete(node.getData(), node.getEntityId());
+                }
+                else
+                {
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    List<RelationHolder> relationHolders = getRelationHolders(node);
+                    onPersist(metadata, node.getData(), node.getEntityId(), relationHolders);
+                }
+            }
+        }
+        return nodes.size();
+    }
+
+    @Override
+    public int getBatchSize()
+    {
+        return batchSize;
+    }
+
+    @Override
+    public void clear()
+    {
+        if (nodes != null)
+        {
+            nodes.clear();
+            nodes = null;
+            nodes = new ArrayList<Node>();
+        }
+
+    }
+
+    /**
+     * Check on batch limit.
+     */
+    private void onBatchLimit()
+    {
+        if (batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
+    }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = null;
+        if (puProperties != null)
+        {
+            batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                    : null;
+            if (batch_Size != null)
+            {
+                batchSize = Integer.valueOf(batch_Size);
+                if (batchSize == 0)
+                {
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                }
+            }
+        }
+        else if (batch_Size == null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
+    }
 
 }
-
-
-

@@ -1,3 +1,4 @@
+
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
@@ -28,7 +29,7 @@
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaExamples" />
 			<property name="kundera.dialect" value="cassandra" />
-			<property name="kundera.ddl.auto.prepare" value="create" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 			<property name="kundera.cache.provider.class"
@@ -177,7 +178,7 @@
 		</properties>
 
 	</persistence-unit>
-	
+
 	<persistence-unit name="batchTestSizeTwenty">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -230,7 +231,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.batch.size" value="5000" />
+			<property name="kundera.batch.size" value="500" />
 		</properties>
 	</persistence-unit>
 
@@ -275,7 +276,7 @@
 			<property name="kundera.client.property" value="kunderaTestDataType.xml" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="myapp_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.PersonCassandra</class>
@@ -285,6 +286,23 @@
 			<property name="kundera.keyspace" value="myapp" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="cassandra_cql">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="CqlKeyspace" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
+			<property name="kundera.client" value="thrift" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 			<property name="kundera.cache.provider.class"

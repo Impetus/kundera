@@ -170,6 +170,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         catch (Exception ex)
         {
             // onRollBack.
+            ex.printStackTrace();
             doRollback();
             throw new KunderaException(ex);
         }

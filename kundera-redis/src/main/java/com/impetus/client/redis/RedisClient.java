@@ -412,31 +412,20 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
 
         }
-       /* Response<Map<String, String>> fields = null;
-        if (resource != null && resource.isActive())
-        {
-            fields = ((Transaction) connection).hgetAll(getHashKey(entityMetadata.getTableName(), rowKey));
-            if (connection != null)
-            {
-                ((Pipeline) connection).sync();
-            }
-            for (String field : fields.get().keySet())
-            {
-                ((Transaction) connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey), field);
-            }
-        }
-        else
-        {
-            fields = ((Pipeline) connection).hgetAll(getHashKey(entityMetadata.getTableName(), rowKey));
-            if (connection != null)
-            {
-                ((Pipeline) connection).sync();
-            }
-            for (String field : fields.get().keySet())
-            {
-                ((Pipeline) connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey), field);
-            }
-        }*/
+        /*
+         * Response<Map<String, String>> fields = null; if (resource != null &&
+         * resource.isActive()) { fields = ((Transaction)
+         * connection).hgetAll(getHashKey(entityMetadata.getTableName(),
+         * rowKey)); if (connection != null) { ((Pipeline) connection).sync(); }
+         * for (String field : fields.get().keySet()) { ((Transaction)
+         * connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey),
+         * field); } } else { fields = ((Pipeline)
+         * connection).hgetAll(getHashKey(entityMetadata.getTableName(),
+         * rowKey)); if (connection != null) { ((Pipeline) connection).sync(); }
+         * for (String field : fields.get().keySet()) { ((Pipeline)
+         * connection).hdel(getHashKey(entityMetadata.getTableName(), rowKey),
+         * field); } }
+         */
     }
 
     @Override
@@ -612,7 +601,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             if (resource != null && resource.isActive())
             {
-                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, columnName),
+                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr),
                         getDouble(valueAsStr), getDouble(valueAsStr));
                 ((Transaction) connection).exec();
 
@@ -620,7 +609,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
             else
             {
-                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),
+                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), getDouble(valueAsStr),
                         getDouble(valueAsStr));
 
             }
