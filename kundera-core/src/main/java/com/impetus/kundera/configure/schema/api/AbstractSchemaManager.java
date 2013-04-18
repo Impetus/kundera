@@ -198,27 +198,6 @@ public abstract class AbstractSchemaManager
      */
     protected abstract void create_drop(List<TableInfo> tableInfos);
 
-    // protected DataStore getDataStore(String dataStoreName, ClientProperties
-    // cp)
-    // {
-    // List<DataStore> dataStores = cp != null ? cp.getDatastores() : null;
-    // if (dataStores != null)
-    // {
-    // for (DataStore dataStore : dataStores)
-    // {
-    // if (dataStore != null && dataStore.getName() != null
-    // && dataStore.getName().equalsIgnoreCase(dataStoreName))
-    // {
-    // schemas = dataStore.getSchemas();
-    // conn = dataStore.getConnection();
-    // this.dataStore = dataStore;
-    // return dataStore;
-    // }
-    // }
-    // }
-    // return null;
-    // }
-
     /**
      * handleOperations method handles the all operation on the basis of
      * operationType
