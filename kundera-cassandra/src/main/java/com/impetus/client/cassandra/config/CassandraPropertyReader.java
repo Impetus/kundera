@@ -184,7 +184,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            return CassandraConstants.CQL_VERSION_3_0;
+            return CassandraConstants.CQL_VERSION_2_0;
         }
 
         public Schema getSchema(String schemaName)

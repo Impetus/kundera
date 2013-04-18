@@ -222,7 +222,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         indexManager.close();
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         if (mongoDB != null)
         {

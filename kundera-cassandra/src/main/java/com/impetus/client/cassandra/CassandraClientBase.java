@@ -112,7 +112,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
 
     /** The cql version. */
-    private String cqlVersion = CassandraConstants.CQL_VERSION_3_0;
+    private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
 
     /** The consistency level. */
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
@@ -147,7 +147,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         cqlVersion = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
                 : null;
         cqlVersion = cqlVersion == null ? (CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
-                .getCqlVersion() : CassandraConstants.CQL_VERSION_3_0) : cqlVersion;
+                .getCqlVersion() : CassandraConstants.CQL_VERSION_2_0) : cqlVersion;
         this.isCQLEnabled = cqlVersion.equals(CassandraConstants.CQL_VERSION_3_0);
     }
 

@@ -31,9 +31,13 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import oracle.kv.Direction;
+import oracle.kv.DurabilityException;
+import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
 import oracle.kv.KeyValueVersion;
+import oracle.kv.Operation;
+import oracle.kv.OperationExecutionException;
 import oracle.kv.Value;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,17 +45,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -61,7 +70,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>
+public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher
 {
 
     /** The kvstore db. */
@@ -71,6 +80,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     /** The reader. */
     private EntityReader reader;
+
+    /** list of nodes for batch processing. */
+    private List<Node> nodes = new ArrayList<Node>();
+
+    /** batch size. */
+    private int batchSize;
 
     /** The log. */
     private static Log log = LogFactory.getLog(OracleNoSQLClient.class);
@@ -93,6 +108,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         this.kvStore = kvStore;
         this.reader = reader;
         this.indexManager = indexManager;
+        setBatchSize(persistenceUnit, puProperties);
     }
 
     @Override
@@ -274,6 +290,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
 
+        List<Operation> persistOperations = new ArrayList<Operation>();
+
         // Major Key component
         List<String> majorKeyComponent = new ArrayList<String>();
         majorKeyComponent.add(table);
@@ -289,7 +307,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         for (Attribute attribute : attributes)
         {
-            if (!attribute.equals(entityMetadata.getIdAttribute()))
+            Field currentField = (Field) attribute.getJavaMember();
+            Field idField = (Field) entityMetadata.getIdAttribute().getJavaMember();
+            if (!currentField.equals(idField))
             {
                 Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();
 
@@ -326,10 +346,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                 Key key = Key.createKey(majorKeyComponent, minorKeyComponents);
 
                                 // Value
-                                byte[] valueByteArray = PropertyAccessorHelper.get(embeddedObject, f);
-                                Value value = Value.createValue(valueByteArray);
-
-                                kvStore.put(key, value);
+                                Object valueObj = PropertyAccessorHelper.getObject(embeddedObject, f);
+                                if(valueObj != null) 
+                                {
+                                    byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj);
+                                    //PropertyAccessorHelper.get(embeddedObject, f);                                    
+                                    Value value = Value.createValue(valueByteArray);
+                                    
+                                    Operation op = kvStore.getOperationFactory().createPut(key, value);
+                                    persistOperations.add(op);                                    
+                                    // kvStore.put(key, value);
+                                }
                             }
                         }
                     }
@@ -346,10 +373,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     Key key = Key.createKey(majorKeyComponent, columnName);
 
                     // Value
-                    byte[] valueByteArray = PropertyAccessorHelper.get(entity, field);
-                    Value value = Value.createValue(valueByteArray);
-
-                    kvStore.put(key, value);
+                    Object valueObj = PropertyAccessorHelper.getObject(entity, field);
+                    if(valueObj != null)
+                    {
+                        byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj); 
+                                //PropertyAccessorHelper.get(entity, field);
+                        Value value = Value.createValue(valueByteArray);
+                        
+                        Operation op = kvStore.getOperationFactory().createPut(key, value);
+                        persistOperations.add(op);
+                        // kvStore.put(key, value);                        
+                    }
                 }
             }
         }
@@ -368,13 +402,19 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     Key key = Key.createKey(majorKeyComponent, relationName);
 
                     // Value
-                    byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
-                    Value value = Value.createValue(valueInBytes);
-
-                    kvStore.put(key, value);
+                    if(valueObj != null)
+                    {
+                        byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
+                        Value value = Value.createValue(valueInBytes);
+                        
+                        Operation op = kvStore.getOperationFactory().createPut(key, value);
+                        persistOperations.add(op);
+                        // kvStore.put(key, value);                        
+                    }
                 }
             }
         }
+        execute(persistOperations);
     }
 
     @Override
@@ -384,6 +424,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+
+        List<Operation> persistJoinTableOperation = new ArrayList<Operation>();
 
         /**
          * There will be two kinds of major keys 1.
@@ -417,17 +459,53 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 majorKeysForInvJoinColumn.add(PropertyAccessorHelper.getString(childId));
 
                 Key key = Key.createKey(majorKeysForInvJoinColumn, PropertyAccessorHelper.getString(pk));
-                kvStore.put(key, Value.createValue(invJoinColumnName.getBytes())); // Value
-                                                                                   // will
-                                                                                   // be
-                                                                                   // null
+                // kvStore.put(key,
+                // Value.createValue(invJoinColumnName.getBytes())); // Value
+                // will
+                // be
+                // null
+                Operation op = kvStore.getOperationFactory().createPut(key,
+                        Value.createValue(invJoinColumnName.getBytes()));
+                persistJoinTableOperation.add(op);
             }
 
             Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);
-            kvStore.put(key, Value.createValue(joinColumnName.getBytes())); // Value
-                                                                            // will
-                                                                            // be
-                                                                            // null
+            // kvStore.put(key, Value.createValue(joinColumnName.getBytes()));
+            // // Value
+            // will
+            // be
+            // null
+            Operation op = kvStore.getOperationFactory().createPut(key, Value.createValue(joinColumnName.getBytes()));
+            persistJoinTableOperation.add(op);
+        }
+
+        execute(persistJoinTableOperation);
+    }
+
+    private void execute(List<Operation> batch)
+    {
+        try
+        {
+            kvStore.execute(batch);
+        }
+        catch (DurabilityException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        catch (OperationExecutionException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        catch (FaultException e)
+        {
+            log.error(e);
+            throw new PersistenceException("Error while Persisting data using batch", e);
+        }
+        finally
+        {
+            batch.clear();
         }
     }
 
@@ -612,6 +690,96 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public Class<OracleNoSQLQuery> getQueryImplementor()
     {
         return OracleNoSQLQuery.class;
+    }
+
+    @Override
+    public void addBatch(Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+        onBatchLimit();
+    }
+
+    @Override
+    public int executeBatch()
+    {
+        for (Node node : nodes)
+        {
+            if (node.isDirty())
+            {
+                // delete can not be executed in batch
+                if (node.isInState(RemovedState.class))
+                {
+                    delete(node.getData(), node.getEntityId());
+                }
+                else
+                {
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    List<RelationHolder> relationHolders = getRelationHolders(node);
+                    onPersist(metadata, node.getData(), node.getEntityId(), relationHolders);
+                }
+            }
+        }
+        return nodes.size();
+    }
+
+    @Override
+    public int getBatchSize()
+    {
+        return batchSize;
+    }
+
+    @Override
+    public void clear()
+    {
+        if (nodes != null)
+        {
+            nodes.clear();
+            nodes = null;
+            nodes = new ArrayList<Node>();
+        }
+
+    }
+
+    /**
+     * Check on batch limit.
+     */
+    private void onBatchLimit()
+    {
+        if (batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
+    }
+
+    /**
+     * @param persistenceUnit
+     * @param puProperties
+     */
+    private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        String batch_Size = null;
+        if (puProperties != null)
+        {
+            batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                    : null;
+            if (batch_Size != null)
+            {
+                batchSize = Integer.valueOf(batch_Size);
+                if (batchSize == 0)
+                {
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                }
+            }
+        }
+        else if (batch_Size == null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            batchSize = puMetadata.getBatchSize();
+        }
     }
 
 }

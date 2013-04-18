@@ -100,7 +100,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private Cassandra.Client cassandra_client;
 
-    private String cql_version = CassandraConstants.CQL_VERSION_3_0;
+    private String cql_version = CassandraConstants.CQL_VERSION_2_0;
 
     /**
      * logger used for logging statement.

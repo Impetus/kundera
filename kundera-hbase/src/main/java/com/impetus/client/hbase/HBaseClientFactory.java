@@ -147,7 +147,7 @@ public class HBaseClientFactory extends GenericClientFactory
         // indexManager.close();
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         externalProperties = null;
         schemaManager = null;

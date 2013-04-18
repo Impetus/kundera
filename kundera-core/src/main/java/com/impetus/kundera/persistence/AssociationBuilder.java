@@ -85,7 +85,7 @@ public final class AssociationBuilder
                     && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet || relObject instanceof PersistentCollection))
             {
                 populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
-            }   
+            }
 
         }
         else if (relation.getPropertyType().isAssignableFrom(Map.class))
@@ -218,10 +218,34 @@ public final class AssociationBuilder
                 // reverseRelation.getProperty(), entity);
             }
 
-            traversalRequired = (reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) /*&& !StringUtils
-                    .isBlank(reverseRelation.getMappedBy())*/)
-                    || (reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE) /*&& !StringUtils.isBlank(reverseRelation
-                            .getMappedBy())*/);
+            traversalRequired = (reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) /*
+                                                                                          * &&
+                                                                                          * !
+                                                                                          * StringUtils
+                                                                                          * .
+                                                                                          * isBlank
+                                                                                          * (
+                                                                                          * reverseRelation
+                                                                                          * .
+                                                                                          * getMappedBy
+                                                                                          * (
+                                                                                          * )
+                                                                                          * )
+                                                                                          */)
+                    || (reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE) /*
+                                                                                  * &&
+                                                                                  * !
+                                                                                  * StringUtils
+                                                                                  * .
+                                                                                  * isBlank
+                                                                                  * (
+                                                                                  * reverseRelation
+                                                                                  * .
+                                                                                  * getMappedBy
+                                                                                  * (
+                                                                                  * )
+                                                                                  * )
+                                                                                  */);
 
         }
 
@@ -424,25 +448,27 @@ public final class AssociationBuilder
     }
 
     /**
-     * Retrieves associated entities from secondary index. There are two alternatives here:
+     * Retrieves associated entities from secondary index. There are two
+     * alternatives here:
      * 
-     *  1. Via running Lucene query into Lucene powered secondary index.
-     *  2. Searching into a secondary index by custom secondary index class provided by user.
-     *  
-     *  @see PersistenceProperties#KUNDERA_INDEX_HOME_DIR
-     *  @see PersistenceProperties#KUNDERA_INDEXER_CLASS
-     *  
-     *  TODO: Which secondary index to use should be transparent. All we should bother about is indexer.index(),
-     *  indexer.search() etc. 
+     * 1. Via running Lucene query into Lucene powered secondary index. 2.
+     * Searching into a secondary index by custom secondary index class provided
+     * by user.
+     * 
+     * @see PersistenceProperties#KUNDERA_INDEX_HOME_DIR
+     * @see PersistenceProperties#KUNDERA_INDEXER_CLASS
+     * 
+     *      TODO: Which secondary index to use should be transparent. All we
+     *      should bother about is indexer.index(), indexer.search() etc.
      */
     private List getAssociatedEntitiesFromIndex(Object entity, Object entityId, Class<?> childClass, Client childClient)
-    {       
-        
-        List associatedEntities;        
-        IndexManager indexManager = childClient.getIndexManager();        
+    {
 
-        Map<String, Object> results = indexManager != null ? indexManager.search(entity.getClass(), childClass, entityId) 
-                : new HashMap<String, Object>();        
+        List associatedEntities;
+        IndexManager indexManager = childClient.getIndexManager();
+
+        Map<String, Object> results = indexManager != null ? indexManager.search(entity.getClass(), childClass,
+                entityId) : new HashMap<String, Object>();
         Set rsSet = results != null ? new HashSet(results.values()) : new HashSet();
 
         if (childClass.equals(entity.getClass()))

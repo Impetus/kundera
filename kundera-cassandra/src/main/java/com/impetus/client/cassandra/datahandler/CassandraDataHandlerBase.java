@@ -38,6 +38,7 @@ import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -775,7 +776,7 @@ public abstract class CassandraDataHandlerBase
             PropertyAccessorHelper.setId(entity, m, tr.getId());
         }
 
-        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
+        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relations)
                 : entity;
     }
 
@@ -1207,14 +1208,16 @@ public abstract class CassandraDataHandlerBase
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), new String(
                             (byte[]) thriftColumnValue));
                 }
-                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class))
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class)
+                        || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                     // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
-                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class))
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
+                        || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);

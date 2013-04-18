@@ -15,9 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.crossdatastore.useraddress.dao;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import com.impetus.client.cassandra.common.CassandraConstants;
 
 public class BaseDao
 {
@@ -30,7 +35,9 @@ public class BaseDao
     {
         if (emf == null)
         {
-            emf = Persistence.createEntityManagerFactory(pu);
+            Map propertyMap = new HashMap();
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            emf = Persistence.createEntityManagerFactory(pu, propertyMap);
             em = emf.createEntityManager();
         }
 

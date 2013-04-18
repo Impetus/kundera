@@ -45,7 +45,6 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
             {
                 return null;
             }
-
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)

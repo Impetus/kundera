@@ -87,7 +87,7 @@ public class ThriftClientFactory extends GenericClientFactory
         }
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         schemaManager = null;
         externalProperties = null;

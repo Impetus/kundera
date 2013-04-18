@@ -121,7 +121,7 @@ public class PelopsClientFactory extends GenericClientFactory
         }
         if (schemaManager != null)
         {
-            getSchemaManager(externalProperties).dropSchema();
+            schemaManager.dropSchema();
         }
         schemaManager = null;
         // Pelops.shutdown();
