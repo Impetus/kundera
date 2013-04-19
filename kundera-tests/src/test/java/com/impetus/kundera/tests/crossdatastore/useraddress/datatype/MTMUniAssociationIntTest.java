@@ -40,7 +40,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatUniMToMBigInteger;
@@ -58,7 +57,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 
     private BigInteger addressID3 = new BigInteger("1234567");
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo"/*, "oracle_kvstore" */};
 
     /**
      * Inits the.

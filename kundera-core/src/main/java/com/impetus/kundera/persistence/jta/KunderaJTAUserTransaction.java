@@ -32,7 +32,6 @@ import javax.transaction.UserTransaction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.persistence.ResourceManager;
 
 /**

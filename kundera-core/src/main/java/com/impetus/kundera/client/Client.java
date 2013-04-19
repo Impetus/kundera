@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
-import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.persistence.EntityReader;

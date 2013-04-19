@@ -18,7 +18,6 @@ package com.impetus.kundera.lifecycle.states;
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 

@@ -17,7 +17,6 @@ package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,11 +41,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
-import com.impetus.client.redis.RedisClient;
 import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -98,10 +95,10 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore";
+    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra";
 
-    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-            "oracle_kvstore"/* , "addHbase" */};
+    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra"/*,
+            "oracle_kvstore" , "addHbase" */};
 
     protected RDBMSCli cli;
 

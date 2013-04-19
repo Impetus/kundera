@@ -7,7 +7,6 @@ import org.junit.Before;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.datatypes.StudentCassandraTest;
-import com.impetus.kundera.PersistenceProperties;
 
 public class StudentCassandraCQLTest extends StudentCassandraTest
 {

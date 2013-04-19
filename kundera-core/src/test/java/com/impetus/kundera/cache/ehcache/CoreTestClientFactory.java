@@ -15,16 +15,11 @@
  */
 package com.impetus.kundera.cache.ehcache;
 
-import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
  * <Prove description of functionality provided by this Type>
