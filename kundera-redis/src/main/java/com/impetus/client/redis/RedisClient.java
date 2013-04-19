@@ -519,7 +519,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+            Object pKeyColumnValue, Class columnJavaType)
     {
         Object connection = null;
 

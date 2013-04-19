@@ -150,6 +150,10 @@ public class PersonCassandraTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
+        
+        PersonCassandra personWithKey = new PersonCassandra();
+        personWithKey.setPersonId("111");
+        em.persist(personWithKey );
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);

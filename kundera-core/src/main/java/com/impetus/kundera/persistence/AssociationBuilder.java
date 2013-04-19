@@ -299,13 +299,17 @@ public final class AssociationBuilder
         Client pClient = delegator.getClient(entityMetadata);
 
         String schema = entityMetadata.getSchema();
+
+        EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        Class columnJavaType = owningEntityMetadata.getIdAttribute().getJavaType();
         if (jtMetadata == null)
         {
-            EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+            columnJavaType = entityMetadata.getIdAttribute().getJavaType();
             jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
             schema = owningEntityMetadata.getSchema();
         }
+
         String joinTableName = jtMetadata.getJoinTableName();
 
         Set<String> joinColumns = jtMetadata.getJoinColumns();
@@ -319,7 +323,7 @@ public final class AssociationBuilder
 
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
         List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName, inverseJoinColumnName,
-                entityId);
+                entityId, columnJavaType);
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)

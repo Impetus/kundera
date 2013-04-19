@@ -34,11 +34,13 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.hibernate.persister.entity.PropertyMapping;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatBiMToMShort;
@@ -47,7 +49,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class MTMBiAssociationIntTest extends TwinAssociation
 
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo,oracle_kvstore" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore" };
 
     private short addressID1 = Short.MAX_VALUE;
 
@@ -87,13 +89,15 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
+        // propertyMap.put(CassandraConstants.CQL_VERSION,
+        // CassandraConstants.CQL_VERSION_2_0);
         setUpInternal();
     }
 
     @Test
     public void testCRUD()
     {
-         tryOperation(ALL_PUs_UNDER_TEST);
+        tryOperation(ALL_PUs_UNDER_TEST);
     }
 
     @Override
@@ -260,21 +264,16 @@ public class MTMBiAssociationIntTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
-
         cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("IntegerType");
+        cfDef.setKey_validation_class("Int32Type");
+
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
-
-        // ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID"
-        // .getBytes()), "IntegerType");
-        // cfDef.addToColumn_metadata(columnDef2);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef);
@@ -286,7 +285,6 @@ public class MTMBiAssociationIntTest extends TwinAssociation
 
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
-            // CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef1 : cfDefn)
             {
 
@@ -320,13 +318,14 @@ public class MTMBiAssociationIntTest extends TwinAssociation
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
-        cfDef2.setDefault_validation_class("IntegerType");
+        cfDef2.setKey_validation_class("Int32Type");
+        cfDef2.setComparator_type("UTF8Type");
 
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
 
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef2);
 
@@ -367,7 +366,7 @@ public class MTMBiAssociationIntTest extends TwinAssociation
             CfDef cfDef2 = new CfDef();
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
-
+            cfDef2.setComparator_type("UTF8Type");
             List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef : cfDefss)

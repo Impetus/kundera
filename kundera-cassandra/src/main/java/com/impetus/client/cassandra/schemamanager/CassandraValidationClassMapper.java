@@ -115,7 +115,7 @@ public final class CassandraValidationClassMapper
      *            the data type
      * @return the validation class
      */
-    static String getValidationClass(Class<?> dataType)
+    public static String getValidationClass(Class<?> dataType)
     {
         String validation_class;
         validation_class = validationClassMapper.get(dataType);

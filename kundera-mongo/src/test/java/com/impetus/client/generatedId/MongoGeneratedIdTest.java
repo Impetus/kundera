@@ -79,7 +79,6 @@ public class MongoGeneratedIdTest
         }
         catch (KunderaException e)
         {
-        	e.printStackTrace();
             Assert.fail();
         }
         MongoGeneratedIdStrategyAuto strategyAuto = new MongoGeneratedIdStrategyAuto();

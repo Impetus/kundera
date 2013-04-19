@@ -74,6 +74,8 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
+    protected Map propertyMap = new HashMap();
+
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
 
@@ -131,7 +133,7 @@ public abstract class AssociationBase
         dao.closeEntityManager();
         dao.closeEntityManagerFactory();
 
-        em = dao.getEntityManager(persistenceUnits);
+        em = dao.getEntityManager(persistenceUnits, propertyMap);
         this.colFamilies = colFamilies;
     }
 
@@ -281,7 +283,7 @@ public abstract class AssociationBase
         }
 
         dao.closeEntityManager();
-        em = dao.getEntityManager(persistenceUnits);
+        em = dao.getEntityManager(persistenceUnits, propertyMap);
     }
 
     /**
@@ -299,7 +301,7 @@ public abstract class AssociationBase
     {
         if (!em.isOpen())
         {
-            em = dao.getEntityManager(persistenceUnits);
+            em = dao.getEntityManager(persistenceUnits, propertyMap);
         }
 
         if (AUTO_MANAGE_SCHEMA)

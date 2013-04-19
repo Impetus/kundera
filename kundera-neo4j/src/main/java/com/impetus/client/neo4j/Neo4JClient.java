@@ -220,7 +220,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+            Object pKeyColumnValue, Class columnJavaType)
     {
         throw new UnsupportedOperationException("Operation not supported for Neo4J");
     }

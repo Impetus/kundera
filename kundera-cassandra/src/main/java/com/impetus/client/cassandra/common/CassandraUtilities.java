@@ -18,11 +18,14 @@ package com.impetus.client.cassandra.common;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -108,4 +111,38 @@ public class CassandraUtilities
         }
     }
 
+    /**
+     * Append columns.
+     * 
+     * @param builder
+     *            the builder
+     * @param columns
+     *            the columns
+     * @param selectQuery
+     *            the select query
+     * @param translator
+     *            the translator
+     */
+    public static StringBuilder appendColumns(StringBuilder builder, List<String> columns, String selectQuery,
+            CQLTranslator translator)
+    {
+        if (columns != null)
+        {
+            for (String column : columns)
+            {
+                translator.appendColumnName(builder, column);
+                builder.append(",");
+            }
+        }
+        if (builder.lastIndexOf(",") != -1)
+        {
+            builder.deleteCharAt(builder.length() - 1);
+            // selectQuery = StringUtils.replace(selectQuery,
+            // CQLTranslator.COLUMN_FAMILY, builder.toString());
+            selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS, builder.toString());
+        }
+
+        builder = new StringBuilder(selectQuery);
+        return builder;
+    }
 }

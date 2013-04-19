@@ -20,6 +20,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.client.crud.PersonMongo.Day;
+
 import junit.framework.Assert;
 
 /**
@@ -44,6 +46,7 @@ public abstract class BaseTest
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
         o.setAge(age);
+        o.setDay(Day.FRIDAY);
         return o;
     }
 

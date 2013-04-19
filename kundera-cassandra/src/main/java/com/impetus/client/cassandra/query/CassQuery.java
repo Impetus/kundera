@@ -548,7 +548,7 @@ public class CassQuery extends QueryImpl implements Query
         selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), m.getTableName()).toString());
 
-        builder = appendColumns(builder, columns, selectQuery, translator);
+        builder = CassandraUtilities.appendColumns(builder, columns, selectQuery, translator);
 
         addWhereClause(builder);
 
@@ -694,42 +694,4 @@ public class CassQuery extends QueryImpl implements Query
             builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         }
     }
-
-    /**
-     * Append columns.
-     * 
-     * @param builder
-     *            the builder
-     * @param columns
-     *            the columns
-     * @param selectQuery
-     *            the select query
-     * @param translator
-     *            the translator
-     */
-    private StringBuilder appendColumns(StringBuilder builder, List<String> columns, String selectQuery,
-            CQLTranslator translator)
-    {
-        if (columns != null)
-        {
-            for (String column : columns)
-            {
-
-                translator.appendColumnName(builder, column);
-                builder.append(",");
-            }
-        }
-        if (builder.lastIndexOf(",") != -1)
-        {
-            builder.deleteCharAt(builder.length() - 1);
-            // selectQuery = StringUtils.replace(selectQuery,
-            // CQLTranslator.COLUMN_FAMILY, builder.toString());
-            selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS, builder.toString());
-        }
-
-        builder = new StringBuilder(selectQuery);
-        return builder;
-
-    }
-
 }

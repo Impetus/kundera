@@ -141,7 +141,7 @@ public interface Client<Q extends Query>
      * @return list of values fetched for <columnName>
      */
     <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue);
+            Object pKeyColumnValue, Class columnJavaType);
 
     /**
      * Returns array of primary key for given column name and it's value.

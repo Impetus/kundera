@@ -100,7 +100,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+            Object pKeyColumnValue, Class columnJavaType)
     {
         // TODO Auto-generated method stub
         return null;

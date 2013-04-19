@@ -6,6 +6,7 @@ package com.impetus.client.mongodb.utils;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -88,4 +89,22 @@ public class MongoDBUtils
                  */);
     }
 
+    /**
+     * @param value
+     * @param sourceClass
+     * @param targetClass
+     * @return
+     */
+    public static Object getTranslatedObject(Object value, Class<?> sourceClass, Class<?> targetClass)
+    {
+        if (sourceClass.isAssignableFrom(Date.class))
+        {
+            value = PropertyAccessorHelper.fromDate(targetClass, sourceClass, value);
+        }
+        else
+        {
+            value = PropertyAccessorHelper.fromSourceToTargetClass(targetClass, sourceClass, value);
+        }
+        return value;
+    }
 }

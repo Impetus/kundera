@@ -32,7 +32,6 @@ import javax.persistence.Table;
 @NamedQueries(value = {
         @NamedQuery(name = "mongo.named.query", query = "Select p from PersonMongo p where p.personName = :name"),
         @NamedQuery(name = "mongo.position.query", query = "Select p from PersonMongo p where p.personName = ?1") })
-
 public class PersonMongo
 {
 
@@ -51,7 +50,7 @@ public class PersonMongo
 
     @Column(name = "ENUM")
     @Enumerated(EnumType.STRING)
-    private Day day = Day.FRIDAY;
+    private Day day;
 
     /**
      * Gets the person id.
@@ -110,6 +109,11 @@ public class PersonMongo
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    public void setDay(Day day)
+    {
+        this.day = day;
     }
 
     enum Day

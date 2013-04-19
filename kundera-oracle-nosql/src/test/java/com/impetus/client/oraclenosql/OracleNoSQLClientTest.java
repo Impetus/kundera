@@ -38,6 +38,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION
 
 /**
  * Test case for {@link OracleNoSQLClient}
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLClientTest
@@ -72,8 +73,8 @@ public class OracleNoSQLClientTest
 
     @Test
     public void testPersistJoinTableData()
-    {        
-        
+    {
+
         final String schemaName = "KunderaTests";
         final String tableName = "PERSON_ADDRESS";
         final String joinColumn = "PERSON_ID";
@@ -84,15 +85,15 @@ public class OracleNoSQLClientTest
 
         String joinKey1 = "JK1";
         Integer joinKey2 = new Integer(2);
-        
+
         Integer inverseJoinKey1 = new Integer(1);
         Double inverseJoinKey2 = new Double(2.2);
         String inverseJoinKey3 = "IJK3";
-        
+
         Set inverseJoinKeysFor1 = new HashSet();
         inverseJoinKeysFor1.add(inverseJoinKey1);
         inverseJoinKeysFor1.add(inverseJoinKey2);
-        
+
         Set inverseJoinKeysFor2 = new HashSet();
         inverseJoinKeysFor2.add(inverseJoinKey2);
         inverseJoinKeysFor2.add(inverseJoinKey3);
@@ -105,7 +106,8 @@ public class OracleNoSQLClientTest
         OracleNoSQLClient client = (OracleNoSQLClient) clients.get(PU);
         client.persistJoinTable(joinTableData);
 
-        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey1);
+        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey1,
+                String.class);
 
         Assert.assertNotNull(columns);
         Assert.assertEquals(true, !columns.isEmpty());
@@ -113,16 +115,16 @@ public class OracleNoSQLClientTest
         Assert.assertEquals(true, columns.contains(inverseJoinKey1.toString()));
         Assert.assertEquals(true, columns.contains(inverseJoinKey2.toString()));
 
-        Object[] ids = client.findIdsByColumn(schemaName, tableName, joinColumn, inverseJoinColumn, inverseJoinKey2, null);
+        Object[] ids = client.findIdsByColumn(schemaName, tableName, joinColumn, inverseJoinColumn, inverseJoinKey2,
+                null);
         Assert.assertNotNull(ids);
         Assert.assertTrue(ids.length == 2);
-        
-        
+
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey1);
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey2);
 
-        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey1);
+        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey1, String.class);
 
-        Assert.assertTrue(columns.isEmpty());       
+        Assert.assertTrue(columns.isEmpty());
     }
 }
