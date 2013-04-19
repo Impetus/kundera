@@ -146,15 +146,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         persistPerson("3", "person3", 30);
         persistPerson("4", "person4", 40);
         
-        
-        
-        /*String findAgeByGTELTEClause = "Select p from PersonKVStore p where p.age <=:max AND p.age>=:min";
-        Map<String, Object> params2 = new HashMap<String, Object>();
-        params2.put("min", 30);
-        params2.put("min", 35);
-        List<PersonKVStore> results2 = executeSelectQuery(findAgeByGTELTEClause, params2);*/
-        
-        
+      
         clearEm();        
         //Select query, without where clause
         String findWithOutWhereClause = "Select p from PersonKVStore p";        
@@ -210,8 +202,50 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         params.put("personId", "1");
         params.put("age", 30);
         results = executeSelectQuery(findByIdAndAge, params);
-        Assert.assertEquals(2, results.size());        
+        Assert.assertEquals(2, results.size());  
         
+        clearEm();
+        //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age >:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age>=:min AND p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age<=:start AND p.age>:end";
+        params = new HashMap<String, Object>();
+        params.put("start", 40);
+        params.put("end", 15);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age>:min OR p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 30);
+        params.put("max", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        
+        // Delete Records
+        deletePerson(findById("1"));
+        deletePerson(findById("2"));
+        deletePerson(findById("3"));
+        deletePerson(findById("4"));
     }
 
     protected void persistPerson(String personId, String personName, int age)

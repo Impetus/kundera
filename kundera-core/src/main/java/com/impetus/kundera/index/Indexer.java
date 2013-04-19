@@ -63,9 +63,9 @@ public interface Indexer
      * 
      * @param entityClazz entity class
      * 
-     * @param key  stored index value
+     * @param entity Entity object
      */
-    void unIndex(final Class entityClazz, final Object key);
+    void unIndex(final Class entityClazz, final Object entity);
 
     void close();
 }

@@ -85,7 +85,7 @@ public class IndexManager
             }
             else
             {
-                indexer.unIndex(metadata.getEntityClazz(), key);
+                indexer.unIndex(metadata.getEntityClazz(), entity);
             }
         }
     }

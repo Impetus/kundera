@@ -173,7 +173,7 @@ public class MongoDBIndexer implements Indexer
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object key)
+    public void unIndex(Class entityClazz, Object entity)
     {
         // TODO Auto-generated method stub
         

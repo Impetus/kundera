@@ -15,24 +15,23 @@
  */
 package com.impetus.client.oraclenosql.query;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Queue;
+
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Interprets JPA query and holds conditions to pass on to client
  * @author amresh.singh
  */
 public class OracleNoSQLQueryInterpreter
-{
-    private boolean isById;
+{ 
     
     //Select columns
     private String[] selectColumns;
     
-    //Represents clauses
-    private Map<String, Object> filterConditions;
     
-    String operator;   //Inter-clause operator
+    private Queue clauseQueue;    
+
     
     /**
      * Default constructor
@@ -42,77 +41,25 @@ public class OracleNoSQLQueryInterpreter
         this.selectColumns = selectColumns;
     }
 
+
     /**
-     * @return the isById
+     * @return the clauseQueue
      */
-    public boolean isById()
+    public Queue getClauseQueue()
     {
-        return isById;
+        return clauseQueue;
     }
 
-    /**
-     * @param isById the isById to set
-     */
-    public void setById(boolean isById)
-    {
-        this.isById = isById;
-    }
 
     /**
-     * @return the selectColumns
+     * @param clauseQueue the clauseQueue to set
      */
-    public String[] getSelectColumns()
+    public void setClauseQueue(Queue clauseQueue)
     {
-        return selectColumns;
-    }
-
-    
-
-    /**
-     * @param selectColumns the selectColumns to set
-     */
-    public void setSelectColumns(String[] selectColumns)
-    {
-        this.selectColumns = selectColumns;
-    }
-
-    /**
-     * @return the filterCondition
-     */
-    public Map<String, Object> getFilterConditions()
-    {
-        return filterConditions;
+        this.clauseQueue = clauseQueue;
     }    
     
 
-    /**
-     * @return the operator
-     */
-    public String getOperator()
-    {
-        return operator;
-    }
-
-    /**
-     * @param operator the operator to set
-     */
-    public void setOperator(String operator)
-    {
-        this.operator = operator;
-    }
-
-    /**
-     * Adds filter condition
-     * @param columnName
-     * @param columnValue
-     */
-    public void addFilterCondition(String columnName, Object columnValue)
-    {
-        if(filterConditions == null)
-        {
-            filterConditions = new HashMap<String, Object>();
-        }
-        filterConditions.put(columnName, columnValue);
-    }  
+    
 
 }

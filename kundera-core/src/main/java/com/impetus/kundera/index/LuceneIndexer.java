@@ -664,7 +664,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object key)
+    public void unIndex(Class entityClazz, Object entity)
     {
         throw new UnsupportedOperationException();
     }

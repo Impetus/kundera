@@ -126,36 +126,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
     private OracleNoSQLQueryInterpreter translateQuery(Queue clauseQueue, EntityMetadata entityMetadata)
     {
         OracleNoSQLQueryInterpreter interpreter = new OracleNoSQLQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
-
-        // TODO: If there is no clause present, means we might need to scan complete table.
-        for (Object clause : clauseQueue)
-        {
-            if (clause.getClass().isAssignableFrom(FilterClause.class))
-            {
-                Object value = ((FilterClause) clause).getValue();
-                String condition = ((FilterClause) clause).getCondition();
-                String columnName = ((FilterClause) clause).getProperty();
-
-                if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()))
-                {
-                    interpreter.setById(true);
-                }
-
-                if (condition.equals("="))
-                {
-                    interpreter.addFilterCondition(columnName, value);
-                }             
-            }
-            else
-            {
-
-                String operator = clause.toString();
-                if (interpreter.getOperator() == null)
-                {
-                    interpreter.setOperator(operator);
-                }                
-            }
-        }
+        interpreter.setClauseQueue(clauseQueue);    
 
         return interpreter;
     }   
