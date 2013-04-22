@@ -601,7 +601,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             if (resource != null && resource.isActive())
             {
-                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, columnName),
+                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr),
                         getDouble(valueAsStr), getDouble(valueAsStr));
                 ((Transaction) connection).exec();
 
@@ -609,7 +609,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
             else
             {
-                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),
+                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), getDouble(valueAsStr),
                         getDouble(valueAsStr));
 
             }
@@ -716,9 +716,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
-        Object[] ids = findIdsByColumn(entityMetadata.getSchema(), entityMetadata.getTableName(),
-                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), colName, colValue,
-                entityClazz);
+        Object[] ids = findIdsByColumn(entityMetadata.getTableName(), colName, colValue);
         List<Object> resultSet = new ArrayList<Object>();
         if (ids != null)
         {
@@ -850,6 +848,45 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             nodes = null;
             nodes = new ArrayList<Node>();
         }
+    }
+
+    public Object[] findIdsByColumn(String tableName, String columnName, Object columnValue)
+    {
+        Object connection = null;
+
+        try
+        {
+            connection = getConnection();
+            String valueAsStr = PropertyAccessorHelper.getString(columnValue);
+
+            Set<String> results = null;
+
+            if (resource != null && resource.isActive())
+            {
+                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, columnName),
+                        getDouble(valueAsStr), getDouble(valueAsStr));
+                ((Transaction) connection).exec();
+
+                results = (Set<String>) response.get();
+            }
+            else
+            {
+                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),
+                        getDouble(valueAsStr));
+
+            }
+            if (results != null)
+            {
+                return results.toArray(new Object[0]);
+            }
+
+        }
+        finally
+        {
+            onCleanup(connection);
+        }
+
+        return null;
     }
 
     /**
