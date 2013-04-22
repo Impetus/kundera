@@ -18,6 +18,8 @@ package com.impetus.client.oraclenosql;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,6 +46,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.PersistenceProperties;
@@ -111,9 +114,16 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         this.indexManager = indexManager;
         setBatchSize(persistenceUnit, puProperties);
     }
+    
+    
 
     @Override
     public Object find(Class entityClass, Object key)
+    {
+        return find(entityClass, key, null);
+    }
+    
+    private Object find(Class entityClass, Object key, List<String> columnsToSelect)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
@@ -200,7 +210,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                         if (f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
-                            PropertyAccessorHelper.set(entity, f, v.getValue());
+                            if(columnsToSelect == null || columnsToSelect.isEmpty()
+                                    || columnsToSelect.contains(((AbstractAttribute)entityType.getAttribute(fieldName)).getJPAColumnName()))
+                            {
+                                PropertyAccessorHelper.set(entity, f, v.getValue());
+                            }                    
+                            
                         }
 
                         else if (entityMetadata.getRelationNames() != null
@@ -493,54 +508,64 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    {        
+        return findAll(entityClass, new String[0], keys);
+    }
+    
+    private <E> List<E> findAll(Class<E> entityClass, String[] selectColumns, Object... keys)
     {
         List<E> results = new ArrayList<E>();
-
-        if (keys == null) // Fetch all records for this entity
-        {
-            keys = (Object[]) getAllKeys(entityClass);
-        }
-
+        
         for (Object key : keys)
         {
-            results.add((E) find(entityClass, key));
+            results.add((E) find(entityClass, key, Arrays.asList(selectColumns)));
         }
 
         return results;
     }
 
-    /**
-     * @param <E>
-     * @param entityClass
-     * @return
-     */
-    private Object[] getAllKeys(Class<?> entityClass)
+    
+    public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter)
     {
-        Object[] keys;
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        List<E> results = new ArrayList<E>();
 
-        ArrayList<String> majorComponents = new ArrayList<String>();
-        majorComponents.add(m.getTableName());
-
-        Key key = Key.createKey(majorComponents);
-
-        Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
-
-        Set<String> keySet = new HashSet<String>();
-
-        while (iterator.hasNext())
+        Set<Object> primaryKeys = null;
+        
+        if(! interpreter.getClauseQueue().isEmpty())   //Select all query
         {
-            KeyValueVersion keyValueVersion = iterator.next();
-
-            // String majorKeyFirstPart =
-            // keyValueVersion.getKey().getMajorPath().get(0);
-            String majorKeySecondPart = keyValueVersion.getKey().getMajorPath().get(1);
-            keySet.add(majorKeySecondPart);
+            //Select Query with where clause (requires search within inverted index)           
+            primaryKeys = ((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter, entityClass);    
+            
         }
+        else
+        {            
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
 
-        keys = keySet.toArray(new Object[keySet.size()]);
-        return keys;
-    }
+            ArrayList<String> majorComponents = new ArrayList<String>();
+            majorComponents.add(m.getTableName());
+
+            Key key = Key.createKey(majorComponents);
+
+            Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
+
+            Set<Object> keySet = new HashSet<Object>();
+
+            while (iterator.hasNext())
+            {
+                KeyValueVersion keyValueVersion = iterator.next();
+
+                String majorKeySecondPart = keyValueVersion.getKey().getMajorPath().get(1);
+                keySet.add(majorKeySecondPart);
+            }
+
+            primaryKeys = keySet;
+        }
+        
+        results = findAll(entityClass, interpreter.getSelectColumns(), primaryKeys.toArray());
+
+        return results;
+    }  
+   
 
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
@@ -642,10 +667,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return null;
     }
 
-    public <E> List<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass)
-    {
-        return null;
-    }
+    
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)

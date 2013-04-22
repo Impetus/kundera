@@ -240,12 +240,42 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         results = executeSelectQuery(findByIdAndAge, params);
         Assert.assertEquals(3, results.size());
         
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findAgeByBetween = "Select p from PersonKVStore p where p.age between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 40);
+        results = executeSelectQuery(findAgeByBetween, params);
+        Assert.assertEquals(3, results.size());
         
-        // Delete Records
-        deletePerson(findById("1"));
-        deletePerson(findById("2"));
-        deletePerson(findById("3"));
-        deletePerson(findById("4"));
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findPersonIdBetween = "Select p from PersonKVStore p where p.personId between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", "2");
+        params.put("max", "4");
+        results = executeSelectQuery(findPersonIdBetween, params);
+        Assert.assertEquals(3, results.size());
+        
+        
+        clearEm();
+        String findSelective = "Select p.age from PersonKVStore p";
+        results = executeSelectQuery(findSelective);
+        Assert.assertEquals(4, results.size());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
+        
+        // Delete by query.
+        String deleteQuery = "Delete from PersonKVStore p";        
+        int updateCount = executeDMLQuery(deleteQuery);
+        Assert.assertEquals(4, updateCount);
+
+        clearEm();
+        Assert.assertEquals(null, findById("1"));
+        Assert.assertEquals(null, findById("2"));
+        Assert.assertEquals(null, findById("3"));
+        Assert.assertEquals(null, findById("4"));
     }
 
     protected void persistPerson(String personId, String personName, int age)

@@ -57,9 +57,24 @@ public class OracleNoSQLQueryInterpreter
     public void setClauseQueue(Queue clauseQueue)
     {
         this.clauseQueue = clauseQueue;
+    }
+
+
+    /**
+     * @return the selectColumns
+     */
+    public String[] getSelectColumns()
+    {
+        return selectColumns;
+    }
+
+
+    /**
+     * @param selectColumns the selectColumns to set
+     */
+    public void setSelectColumns(String[] selectColumns)
+    {
+        this.selectColumns = selectColumns;
     }    
     
-
-    
-
 }

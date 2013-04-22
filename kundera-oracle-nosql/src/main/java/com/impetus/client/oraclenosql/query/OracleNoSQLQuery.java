@@ -35,11 +35,9 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -78,22 +76,9 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
 
         }
         else
-        {
-            Queue filterClauseQueue = getKunderaQuery().getFilterClauseQueue();
-            
-            Set<Object> primaryKeys = null;
-            
-            if(! filterClauseQueue.isEmpty())   //Select all query
-            {
-                //Select Query with where clause (requires search within inverted index)
-                
-                OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);                
-                
-                primaryKeys = ((OracleNoSQLInvertedIndexer) client.getIndexManager().getIndexer()).executeQuery(interpreter, m.getEntityClazz());
-                
-            }    
-                
-            results = (List<Object>) ((OracleNoSQLClient) client).findAll(m.getEntityClazz(), primaryKeys == null ? null : primaryKeys.toArray());          
+        {           
+            OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);            
+            results = (List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter);
         }        
         return results;
     }

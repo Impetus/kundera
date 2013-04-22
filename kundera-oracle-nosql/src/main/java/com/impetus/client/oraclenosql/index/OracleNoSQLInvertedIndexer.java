@@ -15,7 +15,6 @@
  */
 package com.impetus.client.oraclenosql.index;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -151,21 +150,10 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                 Object value = ((FilterClause) clause).getValue();                
                 
                 
-                if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()))
+                if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
+                        && condition.equals("="))
                 {
-                    //Search on ID
-                    if(condition.equals("="))
-                    {
-                        foundKeys.add(value);                    
-                    }
-                    else if(condition.equals("<"))
-                    {
-                        
-                    }
-                    else if(condition.equals("<"))
-                    {
-                        
-                    }
+                    foundKeys.add(value);
                 }
                 else
                 {
@@ -211,8 +199,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                         Key majorKeyToFind = Key.createKey(majorComponents);
                         iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind,
                                 range, null);
-                    }  
-                    
+                    }                   
                     
                     while (iterator.hasNext())
                     {
