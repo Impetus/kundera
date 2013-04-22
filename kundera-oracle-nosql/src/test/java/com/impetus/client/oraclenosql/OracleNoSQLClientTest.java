@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.oraclenosql.entities.PersonOTOOracleNoSQL;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
@@ -81,7 +82,7 @@ public class OracleNoSQLClientTest
         final String inverseJoinColumn = "ADDRESS_ID";
 
         JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, schemaName, tableName, joinColumn,
-                inverseJoinColumn, null);
+                inverseJoinColumn, PersonOTOOracleNoSQL.class);
 
         String joinKey1 = "JK1";
         Integer joinKey2 = new Integer(2);
@@ -116,7 +117,7 @@ public class OracleNoSQLClientTest
         Assert.assertEquals(true, columns.contains(inverseJoinKey2.toString()));
 
         Object[] ids = client.findIdsByColumn(schemaName, tableName, joinColumn, inverseJoinColumn, inverseJoinKey2,
-                null);
+                PersonOTOOracleNoSQL.class);
         Assert.assertNotNull(ids);
         Assert.assertTrue(ids.length == 2);
 
