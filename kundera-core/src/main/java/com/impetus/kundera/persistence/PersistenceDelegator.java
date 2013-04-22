@@ -161,7 +161,7 @@ public final class PersistenceDelegator
         }
         catch (Exception es)
         {
-            es.printStackTrace();
+            throw new KunderaException(es);
         }
         // Create an object graph of the entity object.
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());

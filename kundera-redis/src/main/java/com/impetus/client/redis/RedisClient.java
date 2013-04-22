@@ -601,7 +601,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             if (resource != null && resource.isActive())
             {
-                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr),
+                Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, columnName),
                         getDouble(valueAsStr), getDouble(valueAsStr));
                 ((Transaction) connection).exec();
 
@@ -609,7 +609,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
             else
             {
-                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), getDouble(valueAsStr),
+                results = ((Jedis) connection).zrangeByScore(getHashKey(tableName, columnName), getDouble(valueAsStr),
                         getDouble(valueAsStr));
 
             }
