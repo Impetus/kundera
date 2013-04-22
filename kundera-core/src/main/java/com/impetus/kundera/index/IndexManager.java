@@ -15,8 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -134,21 +140,64 @@ public class IndexManager
                     Object obj = PropertyAccessorHelper.getObject(entity, property);
                     indexCollection.put(columnName, obj);
                     
-                }
-                
-                //indexCollection.put(DocumentIndexer.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase());
+                }                
+
                 indexCollection.put(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), id);            
                 
                 EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
                 if(parentId != null)
                     indexCollection.put(((AbstractAttribute)parentMetadata.getIdAttribute()).getJPAColumnName(), parentId);
                 
+                onEmbeddable(entity, clazz, metaModel, indexCollection);               
                 indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
         catch (PropertyAccessException e)
         {
             throw new IndexingException("Can't access ID from entity class " + metadata.getEntityClazz(), e);
+        }
+    }
+
+
+    /**
+     * @param entity
+     * @param clazz
+     * @param metaModel
+     * @param indexCollection
+     */
+    private void onEmbeddable(Object entity, Class<?> clazz, MetamodelImpl metaModel,
+            Map<String, Object> indexCollection)
+    {
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
+        EntityType entityType = metaModel.entity(clazz);
+
+        for (String embeddedFieldName : embeddables.keySet())
+        {
+            EmbeddableType embeddedColumn = embeddables.get(embeddedFieldName);
+
+            // Index embeddable only when specified by user
+            Field embeddedField = (Field) entityType.getAttribute(embeddedFieldName).getJavaMember();
+            if (!MetadataUtils.isEmbeddedAtributeIndexable(embeddedField))
+            {
+                continue;
+            }
+
+            Object embeddedObject = PropertyAccessorHelper.getObject(entity,
+                    (Field) entityType.getAttribute(embeddedFieldName).getJavaMember());                    
+            if (embeddedObject != null && !(embeddedObject instanceof Collection))
+            {
+                for (Object column : embeddedColumn.getAttributes())
+                {
+                    Attribute columnAttribute = (Attribute) column;
+                    String columnName = columnAttribute.getName();
+                    Class<?> columnClass = ((AbstractAttribute) columnAttribute).getBindableJavaType();
+                    if (MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
+                    {
+                       indexCollection.put(embeddedField.getName() + "." + columnName, PropertyAccessorHelper.getObject(embeddedObject, (Field)columnAttribute.getJavaMember()));
+                    }                           
+                }
+            }
+            
         }
     }
 

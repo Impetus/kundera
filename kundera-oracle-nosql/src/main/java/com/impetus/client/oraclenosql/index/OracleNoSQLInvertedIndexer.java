@@ -311,8 +311,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
             {
                 results.retainAll(keysToAdd);
             }            
-        }
-        
+        }       
         
         keysToAdd.clear();        
     }
