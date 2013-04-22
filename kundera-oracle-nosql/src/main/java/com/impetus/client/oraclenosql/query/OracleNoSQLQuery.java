@@ -30,6 +30,7 @@ import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
@@ -76,7 +77,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
 
         }
         else
-        {           
+        {            
             OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);            
             results = (List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter);
         }        
@@ -86,7 +87,10 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        return null;
+        List<Object> ls = new ArrayList<Object>();
+        ls = populateEntities(m, client);
+        
+        return setRelationEntities(ls, client, m);
     }
 
     @Override
