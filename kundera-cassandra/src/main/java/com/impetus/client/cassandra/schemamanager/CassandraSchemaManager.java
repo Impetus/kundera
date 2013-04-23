@@ -414,7 +414,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             for (CfDef cfDef : ksDef.getCf_defs())
             {
-                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
+                if (cfDef.getName().equals(tableInfo.getTableName()))
                 {
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     dropInvertedIndexTable(tableInfo);
@@ -685,7 +685,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean tablefound = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
-                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
+                if (cfDef.getName().equals(tableInfo.getTableName())
                         && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name())))
                 {
                     if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
@@ -786,7 +786,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean found = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
-                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
+                if (cfDef.getName().equals(tableInfo.getTableName())
                         && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
                     if (cfDef.getColumn_type().equalsIgnoreCase("Standard"))
@@ -1086,6 +1086,23 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (isCounterColumnType(tableInfo, defaultValidationClass))
             {
                 cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
+                List<ColumnDef> counterColumnDefs = new ArrayList<ColumnDef>();
+                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+                if (columnInfos != null)
+                {
+                    for (ColumnInfo columnInfo : columnInfos)
+                    {
+                        ColumnDef columnDef = new ColumnDef();
+                        if (columnInfo.isIndexable())
+                        {
+                            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(columnInfo.getIndexType()));
+                        }
+                        columnDef.setName(columnInfo.getColumnName().getBytes());
+                        columnDef.setValidation_class(CounterColumnType.class.getName());
+                        counterColumnDefs.add(columnDef);
+                    }
+                }
+                cfDef.setColumn_metadata(counterColumnDefs);
             }
             else
             {

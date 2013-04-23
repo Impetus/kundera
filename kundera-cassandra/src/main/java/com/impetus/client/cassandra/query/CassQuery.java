@@ -106,7 +106,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        externalProperties = ((CassandraClientBase) client).externalProperties;
+        externalProperties = ((CassandraClientBase) client).getExternalProperties();
 
         // if id attribute is embeddable, it is meant for CQL translation.
         // make it independent of embedded stuff and allow even to add non

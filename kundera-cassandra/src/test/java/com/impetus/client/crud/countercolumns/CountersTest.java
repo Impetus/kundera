@@ -16,6 +16,7 @@
 package com.impetus.client.crud.countercolumns;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
@@ -41,6 +44,7 @@ import org.junit.Test;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * Counter column test case for Counter column family in cassandra.
@@ -77,10 +81,11 @@ public class CountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            createSchema();
+//            createSchema();
         }
         Map propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest", propertyMap);
     }
 
@@ -94,6 +99,10 @@ public class CountersTest
         cfDef.keyspace = keyspace;
         cfDef.name = "counters";
         cfDef.default_validation_class = "CounterColumnType";
+        cfDef.key_validation_class = "UTF8Type";
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("counter".getBytes()), "CounterColumnType");
+        columnDef.index_type = IndexType.KEYS;
+        cfDef.addToColumn_metadata(columnDef);
         cfDef.comparator_type = "UTF8Type";
 
         client.system_add_column_family(cfDef);

@@ -151,8 +151,18 @@ public class CassandraUtilities
         return builder;
     }
 
-    public static String getIdColumnName(EntityMetadata m, Map<String, Object> externalProperties)
+    /**
+     * Return name if Idcolumn for cql, returns {@CassandraConstants.CQL_KEY}
+     * if user opted for {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE} 
+     * otherwise returns JPAColumnName of id attribute.
+     * 
+     * @param m
+     * @param externalProperties
+     * @return
+     */
+    public static String getIdColumnName(final EntityMetadata m, final Map<String, Object> externalProperties)
     {
+        // key for auto schema generation.
         String persistenceUnit = m.getPersistenceUnit();
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);

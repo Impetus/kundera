@@ -121,7 +121,7 @@ public final class CassandraValidationClassMapper
         validation_class = validationClassMapper.get(dataType);
         if (!(validation_class != null))
         {
-            validation_class = UTF8Type.class.getSimpleName();
+            validation_class = BytesType.class.getSimpleName();
         }
         return validation_class;
     }

@@ -107,7 +107,7 @@ public final class CQLTranslator
 
     public static final String DROP_TABLE = "drop columnfamily $COLUMN_FAMILY";
 
-    public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY($COLUMNS) VALUES($COLUMNVALUES)";
+    public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY set ($COLUMN) = ($VALUE) where ($COLUMN) = ($VALUE)";
 
     public CQLTranslator()
     {

@@ -644,7 +644,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             nodes = null;
             nodes = new ArrayList<Node>();
         }
-        puProperties = null;
     }
 
     /*

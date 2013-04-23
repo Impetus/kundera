@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
+import org.bson.types.ObjectId;
+
 @Entity
 @Table(name = "MongoGeneratedIdStrategyAuto", schema = "KunderaExamples@mongoTest")
 @TableGenerator(name = "id_gen")
@@ -15,7 +17,7 @@ public class MongoGeneratedIdStrategyAuto
 {
     @Id
     @GeneratedValue(generator = "id_gen", strategy = GenerationType.AUTO)
-    private String id;
+    private ObjectId id;
 
     @Column
     private String name;
@@ -24,7 +26,7 @@ public class MongoGeneratedIdStrategyAuto
     /**
      * @return the id
      */
-    public String getId()
+    public ObjectId getId()
     {
         return id;
     }
@@ -33,7 +35,7 @@ public class MongoGeneratedIdStrategyAuto
      * @param id
      *            the id to set
      */
-    public void setId(String id)
+    public void setId(ObjectId id)
     {
         this.id = id;
     }
