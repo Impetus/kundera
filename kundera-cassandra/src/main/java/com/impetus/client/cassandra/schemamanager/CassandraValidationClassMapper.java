@@ -75,6 +75,7 @@ public final class CassandraValidationClassMapper
 
         // putting possible combination into map.
         validationClassMapper.put(java.lang.String.class, UTF8Type.class.getSimpleName());
+        validationClassMapper.put(Character.class, UTF8Type.class.getSimpleName());
         validationClassMapper.put(char.class, UTF8Type.class.getSimpleName());
 
         validationClassMapper.put(java.sql.Time.class, DateType.class.getSimpleName());

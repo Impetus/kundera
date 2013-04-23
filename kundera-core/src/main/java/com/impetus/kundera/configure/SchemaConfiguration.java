@@ -223,7 +223,7 @@ public class SchemaConfiguration implements Configuration
             if (targetEntityMetadata == null)
             {
                 log.error("Persistence unit for class : " + entityClass + " is not loaded");
-                throw new SchemaGenerationException("Persistence unit for class : " + entityClass + " is not loaded") ;
+                throw new SchemaGenerationException("Persistence unit for class : " + entityClass + " is not loaded");
             }
             ForeignKey relationType = relation.getType();
 
@@ -449,6 +449,15 @@ public class SchemaConfiguration implements Configuration
     private ColumnInfo getColumn(Attribute column, PropertyIndex indexedColumn)
     {
         ColumnInfo columnInfo = new ColumnInfo();
+
+        if (column.getJavaType().isEnum())
+        {
+            columnInfo.setType(String.class);
+        }
+        else
+        {
+            columnInfo.setType(column.getJavaType());
+        }
         columnInfo.setColumnName(((AbstractAttribute) column).getJPAColumnName());
         if (indexedColumn != null && indexedColumn.getName() != null)
         {
@@ -459,7 +468,6 @@ public class SchemaConfiguration implements Configuration
 
             // Add more if required
         }
-        columnInfo.setType(column.getJavaType());
         return columnInfo;
     }
 
