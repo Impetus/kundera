@@ -77,4 +77,7 @@ public interface CassandraConstants
     public static final String DCLOCAL_READ_REPAIR_CHANCE = "dclocal.read.repair.chance";
 
     public static final String CQL_VERSION = "cql.version";
+
+    /** Name of Row key column when stored using CQL insert statement */
+    public static final String CQL_KEY = "key";
 }

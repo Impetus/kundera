@@ -126,7 +126,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
-    protected Map<String, Object> externalProperties;
+    public Map<String, Object> externalProperties;
 
     protected CQLClient cqlClient;
 
@@ -506,8 +506,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             // definition
             if (isUpdatable)
             {
-                 columnFamilyDefToUpdate.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(m
-                 .getIdAttribute().getJavaType()));
+                columnFamilyDefToUpdate.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(m
+                        .getIdAttribute().getJavaType()));
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }
 
@@ -810,7 +810,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
-                TranslationType.ALL);
+                TranslationType.ALL, externalProperties);
 
         String columnNames = translation.get(TranslationType.COLUMN);
         String columnValues = translation.get(TranslationType.VALUE);
@@ -835,40 +835,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         return insert_Query;
     }
-
-    /*
-     * protected String createUpdateQuery(EntityMetadata entityMetadata, Object
-     * entity, Cassandra.Client cassandra_client, List<RelationHolder>
-     * rlHolders) { CQLTranslator translator = new CQLTranslator(); String
-     * insert_Query = translator.UPDATE_QUERY;
-     * 
-     * insert_Query = StringUtils.replace(insert_Query,
-     * CQLTranslator.COLUMN_FAMILY, translator.ensureCase(new StringBuilder(),
-     * entityMetadata.getTableName()).toString()); HashMap<TranslationType,
-     * String> translation = translator.prepareColumnOrColumnValues(entity,
-     * entityMetadata, TranslationType.ALL);
-     * 
-     * String columnNames = translation.get(TranslationType.COLUMN); String
-     * columnValues = translation.get(TranslationType.VALUE); StringBuilder
-     * columnNameBuilder = new StringBuilder(columnNames); StringBuilder
-     * columnValueBuilder = new StringBuilder(columnValues);
-     * 
-     * for (RelationHolder rl : rlHolders) { columnNameBuilder.append(",");
-     * columnValueBuilder.append(",");
-     * translator.appendColumnName(columnNameBuilder, rl.getRelationName());
-     * translator.appendValue(columnValueBuilder,
-     * rl.getRelationValue().getClass(), rl.getRelationValue(), true); }
-     * 
-     * translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
-     * translation.put(TranslationType.VALUE, columnValueBuilder.toString());
-     * 
-     * insert_Query = StringUtils.replace(insert_Query,
-     * CQLTranslator.COLUMN_VALUES, translation.get(TranslationType.VALUE));
-     * insert_Query = StringUtils .replace(insert_Query, CQLTranslator.COLUMNS,
-     * translation.get(TranslationType.COLUMN));
-     * 
-     * return insert_Query; }
-     */
 
     /**
      * Gets the cql version.
@@ -961,13 +927,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
-
-        // EmbeddableType compoundKey =
-        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
         onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
-
         return deleteQueryBuilder.toString();
-
     }
 
     /**
@@ -1008,7 +969,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else
         {
             Attribute attribute = metadata.getIdAttribute();
-            translator.buildWhereClause(queryBuilder, Constants.CQL_KEY, key, "=");
+            translator.buildWhereClause(queryBuilder, CassandraUtilities.getIdColumnName(metadata, externalProperties),
+                    key, "=");
         }
 
         // strip last "AND" clause.

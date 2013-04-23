@@ -72,6 +72,8 @@ public class CassQuery extends QueryImpl implements Query
     /** The reader. */
     private EntityReader reader;
 
+    private Map<String, Object> externalProperties;
+
     /**
      * Instantiates a new cass query.
      * 
@@ -104,6 +106,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        externalProperties = ((CassandraClientBase) client).externalProperties;
 
         // if id attribute is embeddable, it is meant for CQL translation.
         // make it independent of embedded stuff and allow even to add non
@@ -272,7 +275,7 @@ public class CassQuery extends QueryImpl implements Query
                     }
                     else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
                     {
-                        columns.add(Constants.CQL_KEY);
+                        columns.add(CassandraUtilities.getIdColumnName(m, externalProperties));
                     }
                     else
                     {
@@ -651,7 +654,7 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else if (idColumn.equals(fieldName))
                 {
-                    translator.buildWhereClause(builder, Constants.CQL_KEY, value, condition);
+                    translator.buildWhereClause(builder, CassandraUtilities.getIdColumnName(m, externalProperties), value, condition);
                 }
                 else
                 {

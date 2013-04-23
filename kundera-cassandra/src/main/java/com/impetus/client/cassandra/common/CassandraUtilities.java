@@ -18,7 +18,9 @@ package com.impetus.client.cassandra.common;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -28,10 +30,13 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.accessor.DateAccessor;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Provides utilities methods
@@ -144,5 +149,21 @@ public class CassandraUtilities
 
         builder = new StringBuilder(selectQuery);
         return builder;
+    }
+
+    public static String getIdColumnName(EntityMetadata m, Map<String, Object> externalProperties)
+    {
+        String persistenceUnit = m.getPersistenceUnit();
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String autoDdlOption = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        if (autoDdlOption == null)
+        {
+            autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
+                    .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        }
+        return autoDdlOption == null ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
+                : CassandraConstants.CQL_KEY;
     }
 }
