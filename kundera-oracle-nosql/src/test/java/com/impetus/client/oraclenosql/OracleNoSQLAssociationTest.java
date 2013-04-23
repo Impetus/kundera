@@ -61,9 +61,6 @@ public class OracleNoSQLAssociationTest
         emf.close();
     }
 
-    /**
-     * On insert cassandra.
-     */
     @Test
     public void executeTest()
     {
