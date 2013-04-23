@@ -16,6 +16,8 @@
 package com.impetus.client.oraclenosql.entities;
 
 
+import java.io.File;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,7 +27,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Entity class for Person 
  * @author amresh.singh
  */
 @Entity
@@ -47,7 +49,7 @@ public class PersonKVStore
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
-
+    
     /**
      * Gets the person id.
      *

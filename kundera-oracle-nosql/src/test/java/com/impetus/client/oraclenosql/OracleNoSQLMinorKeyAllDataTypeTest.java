@@ -72,9 +72,7 @@ public class OracleNoSQLMinorKeyAllDataTypeTest
         emf.close();
     }
 
-    /**
-     * On insert cassandra.
-     */
+
     @Test
     public void executeTest()
     {

@@ -55,9 +55,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         super.tearDown();
     }
 
-    /**
-     * On insert cassandra.
-     */
+ 
     @Test
     public void executeCRUDTest()
     {
