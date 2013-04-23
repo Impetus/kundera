@@ -340,11 +340,11 @@
 			<artifactId>kundera-rest</artifactId>
 			<version>2.5-SNAPSHOT</version>
 		</dependency>
-	    <!--     <dependency>
+	    <dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
 			<version>2.5-SNAPSHOT</version>
-		</dependency>  -->
+		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.client</groupId>

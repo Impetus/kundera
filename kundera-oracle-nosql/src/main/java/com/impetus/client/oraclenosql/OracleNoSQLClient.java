@@ -114,15 +114,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         this.indexManager = indexManager;
         setBatchSize(persistenceUnit, puProperties);
     }
-    
-    
 
     @Override
     public Object find(Class entityClass, Object key)
     {
         return find(entityClass, key, null);
     }
-    
+
     private Object find(Class entityClass, Object key, List<String> columnsToSelect)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -210,12 +208,15 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                         if (f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
-                            if(columnsToSelect == null || columnsToSelect.isEmpty()
-                                    || columnsToSelect.contains(((AbstractAttribute)entityType.getAttribute(fieldName)).getJPAColumnName()))
+                            if (columnsToSelect == null
+                                    || columnsToSelect.isEmpty()
+                                    || columnsToSelect
+                                            .contains(((AbstractAttribute) entityType.getAttribute(fieldName))
+                                                    .getJPAColumnName()))
                             {
                                 PropertyAccessorHelper.set(entity, f, v.getValue());
-                            }                    
-                            
+                            }
+
                         }
 
                         else if (entityMetadata.getRelationNames() != null
@@ -508,14 +509,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
-    {        
+    {
         return findAll(entityClass, new String[0], keys);
     }
-    
+
     private <E> List<E> findAll(Class<E> entityClass, String[] selectColumns, Object... keys)
     {
         List<E> results = new ArrayList<E>();
-        
+
         for (Object key : keys)
         {
             results.add((E) find(entityClass, key, Arrays.asList(selectColumns)));
@@ -524,21 +525,22 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return results;
     }
 
-    
     public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter)
     {
         List<E> results = new ArrayList<E>();
 
         Set<Object> primaryKeys = null;
-        
-        if(! interpreter.getClauseQueue().isEmpty())   //Select all query
+
+        if (!interpreter.getClauseQueue().isEmpty()) // Select all query
         {
-            //Select Query with where clause (requires search within inverted index)           
-            primaryKeys = ((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter, entityClass);    
-            
+            // Select Query with where clause (requires search within inverted
+            // index)
+            primaryKeys = ((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter,
+                    entityClass);
+
         }
         else
-        {            
+        {
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
 
             ArrayList<String> majorComponents = new ArrayList<String>();
@@ -560,12 +562,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
             primaryKeys = keySet;
         }
-        
+
         results = findAll(entityClass, interpreter.getSelectColumns(), primaryKeys.toArray());
 
         return results;
-    }  
-   
+    }
 
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
@@ -666,8 +667,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         return null;
     }
-
-    
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)

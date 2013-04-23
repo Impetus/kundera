@@ -153,7 +153,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                 if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
                         && condition.equals("="))
                 {
-                    foundKeys.add(value);
+                    Object idValue = PropertyAccessorHelper.fromSourceToTargetClass(entityMetadata.getIdAttribute().getJavaType(), String.class, value);
+                    foundKeys.add(idValue);
                 }
                 else
                 {

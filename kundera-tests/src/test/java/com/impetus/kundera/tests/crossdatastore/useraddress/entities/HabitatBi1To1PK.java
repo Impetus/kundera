@@ -22,8 +22,12 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
 @Table(name = "ADDRESS", schema = "hibernatepoc@addCassandra")
+@IndexCollection(columns = { @Index(name = "street") })
 public class HabitatBi1To1PK
 {
     @Id

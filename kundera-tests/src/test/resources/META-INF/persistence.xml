@@ -12,7 +12,7 @@
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="cassandra" />
-			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
 			<property name="kundera.cache.provider.class"
@@ -98,29 +98,13 @@
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
-	</persistence-unit>
-	
-	<persistence-unit name="addOracleNoSQL">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>		
-		<properties>			
-			<property name="kundera.nodes" value="localhost"/>
-			<property name="kundera.port" value="5000"/>
-			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests"/>
-			<property name="kundera.dialect" value="kvstore"/>
-			<property name="kundera.client" value="kvstore"/>
-			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
-            <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>  
-			<!--  <property name="index.home.dir" value="./lucene"/> -->
-			<property name="kundera.indexer.class" value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
- 		</properties>	
 	</persistence-unit>
 
 	<persistence-unit name="rdbms">

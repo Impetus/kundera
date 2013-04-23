@@ -42,6 +42,7 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -127,11 +128,12 @@ public final class CQLTranslator
      *            entity meta data
      * @param type
      *            translation type.
+     * @param externalProperties
      * @return Map containing translation type as key and string as translated
      *         CQL string.
      */
     public HashMap<TranslationType, String> prepareColumnOrColumnValues(final Object record,
-            final EntityMetadata entityMetadata, TranslationType type)
+            final EntityMetadata entityMetadata, TranslationType type, Map<String, Object> externalProperties)
     {
         HashMap<TranslationType, String> parsedColumnOrColumnValue = new HashMap<CQLTranslator.TranslationType, String>();
         if (type == null)
@@ -146,7 +148,8 @@ public final class CQLTranslator
         StringBuilder builder = new StringBuilder();
         StringBuilder columnBuilder = new StringBuilder();
 
-        onTranslation(record, entityMetadata, type, metaModel, entityClazz, entityType, builder, columnBuilder);
+        onTranslation(record, entityMetadata, type, metaModel, entityClazz, entityType, builder, columnBuilder,
+                externalProperties);
 
         if (type.equals(TranslationType.ALL) || type.equals(TranslationType.VALUE))
         {
@@ -194,10 +197,11 @@ public final class CQLTranslator
      *            column value builder
      * @param columnBuilder
      *            column name builder
+     * @param externalProperties
      */
     private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
-            StringBuilder columnBuilder)
+            StringBuilder columnBuilder, Map<String, Object> externalProperties)
     {
         for (Field field : entityClazz.getDeclaredFields())
         {
@@ -231,7 +235,8 @@ public final class CQLTranslator
                 if (!ReflectUtils.isTransientOrStatic(field)
                         && m.getIdAttribute().getName().equals(entityType.getAttribute(field.getName()).getName()))
                 {
-                    onTranslation(type, builder, columnBuilder, Constants.CQL_KEY, record, field);
+                    onTranslation(type, builder, columnBuilder,
+                            CassandraUtilities.getIdColumnName(m, externalProperties), record, field);
                 }
                 else if (!ReflectUtils.isTransientOrStatic(field))
                 {
@@ -371,6 +376,11 @@ public final class CQLTranslator
                     || fieldClazz.isAssignableFrom(float.class) || fieldClazz.isAssignableFrom(Double.class)
                     || fieldClazz.isAssignableFrom(double.class))
             {
+                if (fieldClazz.isAssignableFrom(String.class))
+                {
+                    // To allow escape character
+                    value = ((String) value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("'", "''");
+                }
                 builder.append("'");
 
                 if (isDate(fieldClazz)) // For CQL, date has to

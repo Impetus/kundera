@@ -24,8 +24,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
 @Table(name = "PERSONNEL", schema = "hibernatepoc@addCassandra")
+@IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelUni1To1PK
 {
     @Id

@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.datahandler;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,9 +37,12 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -598,7 +602,7 @@ public abstract class CassandraDataHandlerBase
                     // entity = initialize(tr, m, entity);
 
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if (Constants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
+                    if (CassandraConstants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
                     {
                         entity = initialize(m, entity, null);
                         setId(m, entity, column.getValue());

@@ -25,8 +25,12 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
 @Table(name = "PERSONNEL", schema = "KunderaTests")
+@IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelBi1ToM
 {
     @Id

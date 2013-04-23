@@ -69,8 +69,9 @@ public class CQLTranslatorTest
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(CassandraPrimeUser.class);
-        String translatedSql = translator.prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE).get(
-                TranslationType.VALUE);
+        String translatedSql = translator
+                .prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE, null).get(
+                        TranslationType.VALUE);
         String columnAsCsv = "'mevivs',1," + timeLineId + ",'my first tweet','" + currentDate.getTime() + "'";
         Assert.assertEquals(columnAsCsv, translatedSql);
     }
