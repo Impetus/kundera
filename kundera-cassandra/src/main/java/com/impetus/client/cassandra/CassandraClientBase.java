@@ -630,7 +630,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         isCQLEnabled = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())
                 || (isCQLEnabled && !metadata.getType().equals(Type.SUPER_COLUMN_FAMILY));
-        if (isCQLEnabled && !metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        if (isCQLEnabled && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
             log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed by using thrift");
             return isCQLEnabled = false;
