@@ -535,7 +535,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-//        emf.close();
+        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
@@ -586,10 +586,10 @@ public class PersonCassandraTest extends BaseTest
             for (CfDef cfDef1 : cfDefn)
             {
 
-                if (cfDef1.getName().equalsIgnoreCase("PERSON"))
+                if (cfDef1.getName().equalsIgnoreCase("PERSONCASSANDRA"))
                 {
 
-                    CassandraCli.client.system_drop_column_family("PERSON");
+                    CassandraCli.client.system_drop_column_family("PERSONCASSANDRA");
 
                 }
             }

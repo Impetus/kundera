@@ -33,6 +33,9 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -173,6 +176,10 @@ public class PelopsUtils
         String maxIdlePerNode = null;
         String minIdlePerNode = null;
         String maxTotal = null;
+        boolean testOnBorrow = false;
+        boolean testWhileIdle = false;
+        boolean testOnConnect = false;
+        boolean testOnReturn = false;
         if (puProperties != null)
         {
             maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
@@ -197,7 +204,6 @@ public class PelopsUtils
         {
             maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
         }
-
         try
         {
             if (!StringUtils.isEmpty(maxActivePerNode))
@@ -219,6 +225,22 @@ public class PelopsUtils
             {
                 prop.setMaxActive(Integer.parseInt(maxTotal));
             }
+
+            CassandraSchemaMetadata csm = CassandraPropertyReader.csmd;
+            Properties connProps = csm.getConnectionProperties();
+            if (connProps != null)
+            {
+                testOnBorrow = Boolean.parseBoolean(connProps.getProperty(CassandraConstants.TEST_ON_BORROW));
+                testOnConnect = Boolean.parseBoolean(connProps.getProperty(CassandraConstants.TEST_ON_CONNECT));
+                testOnReturn = Boolean.parseBoolean(connProps.getProperty(CassandraConstants.TEST_ON_RETURN));
+                testWhileIdle = Boolean.parseBoolean(connProps.getProperty(CassandraConstants.TEST_WHILE_IDLE));
+            }
+
+            prop.setTestOnBorrow(testOnBorrow);
+            prop.setTestOnConnect(testOnConnect);
+            prop.setTestOnReturn(testOnReturn);
+            prop.setTestWhileIdle(testWhileIdle);
+
         }
         catch (NumberFormatException e)
         {

@@ -18,7 +18,7 @@ public class PersonCassandraCQLTest extends PersonCassandraTest
         propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        AUTO_MANAGE_SCHEMA = false;
+        AUTO_MANAGE_SCHEMA = true;
         USE_CQL = true;
         super.setUp();
     }
