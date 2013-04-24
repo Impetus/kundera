@@ -39,6 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Role;
@@ -55,7 +56,8 @@ public class IMDBPolyglotTest extends TwinAssociation
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(Actor.class);
         clazzz.add(Movie.class);       
-        
+        HBaseCli.startCluster();
+        CassandraCli.cassandraSetUp();
         init(clazzz, ALL_PUs_UNDER_TEST);
     }
 

@@ -96,10 +96,16 @@ public abstract class AssociationBase
 
     public static final String NEO4J_PU = "imdbNeo4J";
 
-    public static String persistenceUnits = "";
+    public static String persistenceUnits = "piccandra,addHbase,picongo,secIdxAddCassandra,";
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, CASSANDRA_PU, MONGO_PU, REDIS_PU,/* HBASE_PU,*/ RDBMS_PU}; 
-    //public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, HBASE_PU};
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { NEO4J_PU, CASSANDRA_PU, MONGO_PU, REDIS_PU,/*
+                                                                                                                 * HBASE_PU
+                                                                                                                 * ,
+                                                                                                                 */
+    RDBMS_PU };
+
+    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // NEO4J_PU, HBASE_PU};
 
     public static void buildPersistenceUnitsList()
     {
@@ -109,7 +115,6 @@ public abstract class AssociationBase
         }
         persistenceUnits = persistenceUnits.substring(0, persistenceUnits.length() - 1);
     }
-    
 
     /**
      * Sets the up internal.
@@ -119,17 +124,17 @@ public abstract class AssociationBase
      */
     protected void setUpInternal(String... colFamilies)
     {
-//        if (persistenceUnits.indexOf(HBASE_PU) > 0 && AUTO_MANAGE_SCHEMA)
-//
-//        {
-//            if (!HBaseCli.isStarted())
-//            {
-//                HBaseCli.startCluster();
-//            }
-//            HBaseCli.createTable("MOVIE");
-//            HBaseCli.addColumnFamily("MOVIE", "TITLE");
-//            HBaseCli.addColumnFamily("MOVIE", "YEAR");
-//        }
+        // if (persistenceUnits.indexOf(HBASE_PU) > 0 && AUTO_MANAGE_SCHEMA)
+        //
+        // {
+        // if (!HBaseCli.isStarted())
+        // {
+        // HBaseCli.startCluster();
+        // }
+        // HBaseCli.createTable("MOVIE");
+        // HBaseCli.addColumnFamily("MOVIE", "TITLE");
+        // HBaseCli.addColumnFamily("MOVIE", "YEAR");
+        // }
 
         dao = new IMDBDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -220,7 +225,7 @@ public abstract class AssociationBase
                 {
                     createRDBMSSchema();
 
-                }                
+                }
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
                 mAdd.setSchema(schema != null ? schema : KEYSPACE);
                 log.warn(clazz.getSimpleName() + " in " + pu);

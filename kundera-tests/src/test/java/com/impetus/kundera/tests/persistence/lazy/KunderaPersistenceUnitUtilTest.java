@@ -27,7 +27,7 @@ public class KunderaPersistenceUnitUtilTest
         setup.startServer();
         setup.createSchema();
 
-        emf = Persistence.createEntityManagerFactory("piccandra");
+        emf = Persistence.createEntityManagerFactory("rdbms,redis,addMongo,addCassandra,piccandra,secIdxAddCassandra,addHbase,picongo");
         em = emf.createEntityManager();
         util = emf.getPersistenceUnitUtil();
     }
@@ -110,11 +110,4 @@ public class KunderaPersistenceUnitUtilTest
         Assert.assertEquals(1, pk);
 
     }
-
-    @Test
-    public void dummyTest()
-    {
-
-    }
-
 }
