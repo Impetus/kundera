@@ -22,6 +22,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import com.impetus.client.crud.PersonMongo.Day;
+
 /**
  * The Class BaseTest.
  * 
@@ -44,6 +46,7 @@ public abstract class BaseTest
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
         o.setAge(age);
+        o.setDay(Day.FRIDAY);
         return o;
     }
 

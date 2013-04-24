@@ -17,7 +17,7 @@ public class StudentCassandraCQLTest extends StudentCassandraTest
     {
         propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-//        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         AUTO_MANAGE_SCHEMA = true;
         cqlEnabled = true;
         super.setUp();

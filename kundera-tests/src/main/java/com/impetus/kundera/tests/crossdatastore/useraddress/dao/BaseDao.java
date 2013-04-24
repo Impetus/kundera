@@ -31,13 +31,31 @@ public class BaseDao
 
     EntityManager em;
 
+    public EntityManager getEntityManager(String pu, Map propertyMap)
+    {
+        if (emf == null)
+        {
+            if (propertyMap.isEmpty())
+            {
+                propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            }
+            emf = Persistence.createEntityManagerFactory(pu, propertyMap);
+            em = emf.createEntityManager();
+        }
+
+        if (em == null)
+        {
+            em = emf.createEntityManager();
+        }
+
+        return em;
+    }
+
     public EntityManager getEntityManager(String pu)
     {
         if (emf == null)
         {
-            Map propertyMap = new HashMap();
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-            emf = Persistence.createEntityManagerFactory(pu, propertyMap);
+            emf = Persistence.createEntityManagerFactory(pu, new HashMap());
             em = emf.createEntityManager();
         }
 

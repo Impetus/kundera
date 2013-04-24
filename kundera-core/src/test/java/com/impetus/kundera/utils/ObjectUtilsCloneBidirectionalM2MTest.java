@@ -39,7 +39,6 @@ import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_M_M;
 import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Store;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;

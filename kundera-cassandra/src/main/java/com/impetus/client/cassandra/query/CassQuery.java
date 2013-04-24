@@ -72,6 +72,8 @@ public class CassQuery extends QueryImpl implements Query
     /** The reader. */
     private EntityReader reader;
 
+    private Map<String, Object> externalProperties;
+
     /**
      * Instantiates a new cass query.
      * 
@@ -104,6 +106,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        externalProperties = ((CassandraClientBase) client).getExternalProperties();
 
         // if id attribute is embeddable, it is meant for CQL translation.
         // make it independent of embedded stuff and allow even to add non
@@ -272,7 +275,7 @@ public class CassQuery extends QueryImpl implements Query
                     }
                     else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
                     {
-                        columns.add(Constants.CQL_KEY);
+                        columns.add(CassandraUtilities.getIdColumnName(m, externalProperties));
                     }
                     else
                     {
@@ -548,7 +551,7 @@ public class CassQuery extends QueryImpl implements Query
         selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), m.getTableName()).toString());
 
-        builder = appendColumns(builder, columns, selectQuery, translator);
+        builder = CassandraUtilities.appendColumns(builder, columns, selectQuery, translator);
 
         addWhereClause(builder);
 
@@ -651,7 +654,7 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else if (idColumn.equals(fieldName))
                 {
-                    translator.buildWhereClause(builder, Constants.CQL_KEY, value, condition);
+                    translator.buildWhereClause(builder, CassandraUtilities.getIdColumnName(m, externalProperties), value, condition);
                 }
                 else
                 {
@@ -694,42 +697,4 @@ public class CassQuery extends QueryImpl implements Query
             builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         }
     }
-
-    /**
-     * Append columns.
-     * 
-     * @param builder
-     *            the builder
-     * @param columns
-     *            the columns
-     * @param selectQuery
-     *            the select query
-     * @param translator
-     *            the translator
-     */
-    private StringBuilder appendColumns(StringBuilder builder, List<String> columns, String selectQuery,
-            CQLTranslator translator)
-    {
-        if (columns != null)
-        {
-            for (String column : columns)
-            {
-
-                translator.appendColumnName(builder, column);
-                builder.append(",");
-            }
-        }
-        if (builder.lastIndexOf(",") != -1)
-        {
-            builder.deleteCharAt(builder.length() - 1);
-            // selectQuery = StringUtils.replace(selectQuery,
-            // CQLTranslator.COLUMN_FAMILY, builder.toString());
-            selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS, builder.toString());
-        }
-
-        builder = new StringBuilder(selectQuery);
-        return builder;
-
-    }
-
 }

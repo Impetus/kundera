@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.AddressOTORedis;
 import com.impetus.client.entities.PersonOTORedis;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 public class RedisAssociationTest

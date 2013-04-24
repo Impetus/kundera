@@ -174,7 +174,7 @@ public class RedisClientTest
         RedisClient client = (RedisClient) clients.get(REDIS_PU);
         client.persistJoinTable(joinTableData);
 
-        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey);
+        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey,String.class);
 
         Assert.assertNotNull(columns);
         Assert.assertEquals(true, !columns.isEmpty());
@@ -185,7 +185,7 @@ public class RedisClientTest
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey1);
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey2);
 
-        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey);
+        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey,String.class);
 
         Assert.assertTrue(columns.isEmpty());
 

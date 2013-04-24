@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -28,7 +27,6 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.BaseTest;
 import com.impetus.client.persistence.CassandraCli;
 

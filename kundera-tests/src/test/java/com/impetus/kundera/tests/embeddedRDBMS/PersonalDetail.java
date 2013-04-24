@@ -20,8 +20,6 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import org.junit.experimental.categories.Category;
-
 /**
  * Entity class for user's personal details
  * 

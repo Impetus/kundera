@@ -85,9 +85,7 @@ public class ClientFactoryConfiguraton implements Configuration
                 return fetchPropertyMap(puProperty);
             }
         }
-
         return externalProperties;
-
     }
 
     /**

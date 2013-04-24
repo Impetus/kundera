@@ -16,12 +16,10 @@
 package com.impetus.kundera.tests.crossdatastore.imdb.entities;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;

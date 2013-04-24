@@ -18,9 +18,9 @@ package com.impetus.client.oraclenosql;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -34,16 +34,10 @@ import com.impetus.client.oraclenosql.entities.PersonEmbeddedKVStore;
  * Test case for CRUD and query operations on an entity that contains one embeddable attribute 
  * @author amresh.singh
  */
-public class OracleNoSQLEmbeddableTest
+public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
 {
     
-    /** The emf. */
-    private static EntityManagerFactory emf;
-
-    /** The em. */
-    private static EntityManager em;
-
-    /**
+   /**
      * Sets the up.
      * 
      * @throws Exception
@@ -52,22 +46,18 @@ public class OracleNoSQLEmbeddableTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("twikvstore");
-        em = emf.createEntityManager();
+        super.setUp();
     }
 
     @After
     public void tearDown()
     {
-        em.close();
-        emf.close();
+        super.tearDown();
     }
 
-    /**
-     * On insert cassandra.
-     */
+ 
     @Test
-    public void executeTest()
+    public void executeCRUDTest()
     {
         
         //Insert records
@@ -77,7 +67,7 @@ public class OracleNoSQLEmbeddableTest
         persistPerson("4", "person4", 40, new Office(4, "Company 4", "Location 4"));
 
         //Find Records
-        em.clear();
+        clearEm();
         PersonEmbeddedKVStore p11 = findById("1");
         assertNotNull(p11);
         assertEquals("person1", p11.getPersonName());
@@ -122,7 +112,7 @@ public class OracleNoSQLEmbeddableTest
         p22.setPersonName("person22"); p22.setAge(200); p22.getOffice().setCompanyName("Company 22"); updatePerson(p22);
         p33.setPersonName("person33"); p33.setAge(300); p33.getOffice().setCompanyName("Company 33"); updatePerson(p33);
         p44.setPersonName("person44"); p44.setAge(400); p44.getOffice().setCompanyName("Company 44"); updatePerson(p44);
-        em.clear();        
+        clearEm();
         p11 = findById("1");
         assertNotNull(p11);
         assertEquals("person11", p11.getPersonName());
@@ -153,7 +143,7 @@ public class OracleNoSQLEmbeddableTest
         deletePerson(p33);
         deletePerson(p44);
 
-        em.clear();
+        clearEm();
         Assert.assertNull(findById("1"));
         Assert.assertNull(findById("2"));
         Assert.assertNull(findById("3"));
@@ -161,10 +151,167 @@ public class OracleNoSQLEmbeddableTest
         
     }
     
+    @Test
+    public void executeJPAQueriesTest()
+    {
+        //Insert records
+        persistPerson("1", "person1", 10, new Office(1, "Company 1", "Location 1"));
+        persistPerson("2", "person2", 20, new Office(2, "Company 2", "Location 2"));
+        persistPerson("3", "person3", 30, new Office(3, "Company 3", "Location 3"));
+        persistPerson("4", "person4", 40, new Office(4, "Company 4", "Location 4"));
+        
+              
+        //Select query, without where clause
+        clearEm();  
+        String findWithOutWhereClause = "Select p from PersonEmbeddedKVStore p";        
+        List<PersonEmbeddedKVStore> results = executeSelectQuery(findWithOutWhereClause);
+        Assert.assertEquals(4, results.size());        
+        
+        //Select query with where clause on single non-ID column
+        clearEm();
+        String findByName = "Select p from PersonEmbeddedKVStore p where p.personName=:personName";
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("personName", "person1");        
+        results = executeSelectQuery(findByName, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("1", results.get(0).getPersonId());
+        Assert.assertEquals("person1", results.get(0).getPersonName());
+        Assert.assertEquals(10, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column
+        String findById = "Select p from PersonEmbeddedKVStore p where p.personId=:personId";
+        params = new HashMap<String, Object>();
+        params.put("personId", "2");        
+        results = executeSelectQuery(findById, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("2", results.get(0).getPersonId());
+        Assert.assertEquals("person2", results.get(0).getPersonName());
+        Assert.assertEquals(20, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator
+        String findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId AND p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "3");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("3", results.get(0).getPersonId());
+        Assert.assertEquals("person3", results.get(0).getPersonName());
+        Assert.assertEquals(30, results.get(0).getAge());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with AND operator (no record)        
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(0, results.size());
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column with OR operator
+        findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age=:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());  
+        
+        clearEm();
+        //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
+        findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age >:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age>=:min AND p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age<=:start AND p.age>:end";
+        params = new HashMap<String, Object>();
+        params.put("start", 40);
+        params.put("end", 15);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age>:min OR p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 30);
+        params.put("max", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findAgeByBetween = "Select p from PersonEmbeddedKVStore p where p.age between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 40);
+        results = executeSelectQuery(findAgeByBetween, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findPersonIdBetween = "Select p from PersonEmbeddedKVStore p where p.personId between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", "2");
+        params.put("max", "4");
+        results = executeSelectQuery(findPersonIdBetween, params);
+        Assert.assertEquals(3, results.size());
+        
+        
+        clearEm();
+        //Search over selective column
+        String findSelective = "Select p.age from PersonEmbeddedKVStore p";
+        results = executeSelectQuery(findSelective);
+        Assert.assertEquals(4, results.size());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge()); 
+        
+        clearEm();
+        //Search over column within embeddable
+        String findByCompanyName = "Select p from PersonEmbeddedKVStore p where p.office.companyName=:companyName";
+        params = new HashMap<String, Object>();
+        params.put("companyName", "Company 3");
+        results = executeSelectQuery(findByCompanyName, params);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("3", results.get(0).getPersonId());
+        Assert.assertEquals("person3", results.get(0).getPersonName());
+        Assert.assertEquals(30, results.get(0).getAge());
+        Assert.assertEquals(3, results.get(0).getOffice().getOfficeId());
+        Assert.assertEquals("Company 3", results.get(0).getOffice().getCompanyName());
+        Assert.assertEquals("Location 3", results.get(0).getOffice().getLocation());       
+        
+        // Delete by query.
+        String deleteQuery = "Delete from PersonEmbeddedKVStore p";        
+        int updateCount = executeDMLQuery(deleteQuery);
+        Assert.assertEquals(4, updateCount);
+
+        clearEm();
+        Assert.assertEquals(null, findById("1"));
+        Assert.assertEquals(null, findById("2"));
+        Assert.assertEquals(null, findById("3"));
+        Assert.assertEquals(null, findById("4"));
+        
+    }
+    
     protected void persistPerson(String personId, String personName, int age, Office office)
     {
         Object p = preparePerson(personId, age, personName, office);
-        em.persist(p);
+        persist(p);      
     }
 
     protected PersonEmbeddedKVStore preparePerson(String rowKey, int age, String name, Office office)
@@ -178,18 +325,18 @@ public class OracleNoSQLEmbeddableTest
     }
 
     protected PersonEmbeddedKVStore findById(Object personId)
-    {
-        return em.find(PersonEmbeddedKVStore.class, personId);
+    {        
+        return (PersonEmbeddedKVStore)find(PersonEmbeddedKVStore.class, personId);
     }
 
     protected void updatePerson(PersonEmbeddedKVStore person)
     {
-        em.merge(person);
+        update(person);        
     }
     
     protected void deletePerson(PersonEmbeddedKVStore person)
     {
-        em.remove(person);
+        delete(person);        
     }
 
 }

@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.datahandler;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,10 +37,12 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -517,11 +520,13 @@ public abstract class CassandraDataHandlerBase
      *            the inverse join column name
      * @param columns
      *            the columns
+     * @param columnJavaType
      * @return the foreign keys from join table
      */
-    public <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns)
+    public <E> List<Object> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns,
+            Class columnJavaType)
     {
-        List<E> foreignKeys = new ArrayList<E>();
+        List<Object> foreignKeys = new ArrayList<Object>();
 
         if (columns == null || columns.isEmpty())
         {
@@ -549,8 +554,11 @@ public abstract class CassandraDataHandlerBase
                     // Object value =
                     // PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),(byte[])
                     // thriftColumnValue);
-                    String val = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
-                    foreignKeys.add((E) val);
+                    // String val =
+                    // PropertyAccessorFactory.STRING.fromBytes(String.class,
+                    // thriftColumnValue);
+                    Object val = PropertyAccessorHelper.getObject(columnJavaType, thriftColumnValue);
+                    foreignKeys.add(val);
                 }
             }
             catch (PropertyAccessException e)
@@ -594,7 +602,7 @@ public abstract class CassandraDataHandlerBase
                     // entity = initialize(tr, m, entity);
 
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if (Constants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
+                    if (CassandraConstants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
                     {
                         entity = initialize(m, entity, null);
                         setId(m, entity, column.getValue());
@@ -776,8 +784,8 @@ public abstract class CassandraDataHandlerBase
             PropertyAccessorHelper.setId(entity, m, tr.getId());
         }
 
-        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relations)
-                : entity;
+        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity,
+                PropertyAccessorHelper.getId(entity, m), relations) : entity;
     }
 
     private void setId(EntityMetadata m, Object entity, Object columnValue)

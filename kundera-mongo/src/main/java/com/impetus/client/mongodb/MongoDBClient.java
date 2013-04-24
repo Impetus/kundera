@@ -131,8 +131,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             for (Object childId : values)
             {
                 DBObject dbObj = new BasicDBObject();
-                dbObj.put(joinColumnName, joinColumnValue);
-                dbObj.put(invJoinColumnName, childId);
+                dbObj.put(joinColumnName, MongoDBUtils.populateValue(joinColumnValue, joinColumnValue.getClass()));
+                dbObj.put(invJoinColumnName, MongoDBUtils.populateValue(childId, childId.getClass()));
                 documents.add(dbObj);
             }
         }
@@ -141,14 +141,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, Object parentId)
+            String inverseJoinColumnName, Object parentId, Class columnJavaType)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);
         BasicDBObject query = new BasicDBObject();
 
-        query.put(joinColumnName, parentId);
+        query.put(joinColumnName, MongoDBUtils.populateValue(parentId, parentId.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -156,7 +156,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-            String foreignKey = (String) fetchedDocument.get(inverseJoinColumnName);
+            Object foreignKey = fetchedDocument.get(inverseJoinColumnName);
+            foreignKey = MongoDBUtils.getTranslatedObject(foreignKey, foreignKey.getClass(), columnJavaType);
             foreignKeys.add((E) foreignKey);
         }
         return foreignKeys;
@@ -172,14 +173,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        String childIdStr = (String) columnValue;
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         List<Object> primaryKeys = new ArrayList<Object>();
 
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
 
-        query.put(columnName, childIdStr);
+        query.put(columnName, MongoDBUtils.populateValue(columnValue, columnValue.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -187,7 +188,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-            String primaryKey = (String) fetchedDocument.get(pKeyName);
+            Object primaryKey = fetchedDocument.get(pKeyName);
+            primaryKey = MongoDBUtils.getTranslatedObject(primaryKey, primaryKey.getClass(), metadata.getIdAttribute()
+                    .getJavaType());
             primaryKeys.add(primaryKey);
         }
 
@@ -245,7 +248,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             return null;
         }
-
         Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
                 fetchedDocument, relationNames);
 
@@ -564,7 +566,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes = null;
             nodes = new ArrayList<Node>();
         }
-        puProperties = null;
     }
 
     /*
@@ -814,6 +815,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public Object generate()
     {
         // return auto generated id used by mongodb.
-        return new ObjectId().toString();
+        return new ObjectId();
     }
 }

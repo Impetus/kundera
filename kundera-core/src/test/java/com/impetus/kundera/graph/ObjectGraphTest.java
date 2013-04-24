@@ -23,10 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.ObjectGraph;
-import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 

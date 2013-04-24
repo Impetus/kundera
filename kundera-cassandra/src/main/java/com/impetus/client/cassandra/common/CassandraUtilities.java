@@ -18,17 +18,25 @@ package com.impetus.client.cassandra.common;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.accessor.DateAccessor;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Provides utilities methods
@@ -108,4 +116,64 @@ public class CassandraUtilities
         }
     }
 
+    /**
+     * Append columns.
+     * 
+     * @param builder
+     *            the builder
+     * @param columns
+     *            the columns
+     * @param selectQuery
+     *            the select query
+     * @param translator
+     *            the translator
+     */
+    public static StringBuilder appendColumns(StringBuilder builder, List<String> columns, String selectQuery,
+            CQLTranslator translator)
+    {
+        if (columns != null)
+        {
+            for (String column : columns)
+            {
+                translator.appendColumnName(builder, column);
+                builder.append(",");
+            }
+        }
+        if (builder.lastIndexOf(",") != -1)
+        {
+            builder.deleteCharAt(builder.length() - 1);
+            // selectQuery = StringUtils.replace(selectQuery,
+            // CQLTranslator.COLUMN_FAMILY, builder.toString());
+            selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS, builder.toString());
+        }
+
+        builder = new StringBuilder(selectQuery);
+        return builder;
+    }
+
+    /**
+     * Return name if Idcolumn for cql, returns {@CassandraConstants.CQL_KEY}
+     * if user opted for {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE} 
+     * otherwise returns JPAColumnName of id attribute.
+     * 
+     * @param m
+     * @param externalProperties
+     * @return
+     */
+    public static String getIdColumnName(final EntityMetadata m, final Map<String, Object> externalProperties)
+    {
+        // key for auto schema generation.
+        String persistenceUnit = m.getPersistenceUnit();
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String autoDdlOption = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        if (autoDdlOption == null)
+        {
+            autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
+                    .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
+        }
+        return autoDdlOption == null ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
+                : CassandraConstants.CQL_KEY;
+    }
 }

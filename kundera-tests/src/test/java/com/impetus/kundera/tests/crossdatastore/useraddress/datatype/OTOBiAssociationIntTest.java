@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatBi1To1FKBigDecimal;
@@ -45,7 +46,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOBiAssociationIntTest extends TwinAssociation
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore" };
 
     private static final BigDecimal ADDRESS_ID = new BigDecimal("123456");
 
@@ -74,6 +75,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
         setUpInternal();
     }
 
@@ -358,7 +360,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Override
     protected void createSchemaForPERSONNEL() throws SQLException
     {
-//        cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID DECIMAL)");
+        // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID DECIMAL)");
     }
 
     /*
@@ -371,7 +373,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Override
     protected void createSchemaForHABITAT() throws SQLException
     {
-//        cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID DECIMAL PRIMARY KEY, STREET VARCHAR(256)");
+        // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID DECIMAL PRIMARY KEY, STREET VARCHAR(256)");
 
     }
 }

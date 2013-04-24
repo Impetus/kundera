@@ -17,7 +17,6 @@ package com.impetus.kundera.tests.crossdatastore.useraddress;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,11 +41,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
-import com.impetus.client.redis.RedisClient;
 import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -74,6 +71,8 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
+    protected Map propertyMap = new HashMap();
+
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
 
@@ -96,10 +95,10 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore";
+    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore,piccandra,secIdxAddCassandra,addHbase,picongo";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-            "oracle_kvstore"/* , "addHbase" */};
+            "oracle_kvstore" /* , "addHbase" */};
 
     protected RDBMSCli cli;
 
@@ -123,6 +122,7 @@ public abstract class AssociationBase
             log.error("Error in RDBMS cli ", e);
         }
 
+        HBaseCli.startCluster();
         // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -131,7 +131,7 @@ public abstract class AssociationBase
         dao.closeEntityManager();
         dao.closeEntityManagerFactory();
 
-        em = dao.getEntityManager(persistenceUnits);
+        em = dao.getEntityManager(persistenceUnits, propertyMap);
         this.colFamilies = colFamilies;
     }
 
@@ -281,7 +281,7 @@ public abstract class AssociationBase
         }
 
         dao.closeEntityManager();
-        em = dao.getEntityManager(persistenceUnits);
+        em = dao.getEntityManager(persistenceUnits, propertyMap);
     }
 
     /**
@@ -299,7 +299,7 @@ public abstract class AssociationBase
     {
         if (!em.isOpen())
         {
-            em = dao.getEntityManager(persistenceUnits);
+            em = dao.getEntityManager(persistenceUnits, propertyMap);
         }
 
         if (AUTO_MANAGE_SCHEMA)
@@ -318,6 +318,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
+        HBaseCli.stopCluster();
         // dao.closeEntityManagerFactory();
 
     }

@@ -30,16 +30,15 @@ import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -78,22 +77,9 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
 
         }
         else
-        {
-            Queue filterClauseQueue = getKunderaQuery().getFilterClauseQueue();
-            
-            Set<Object> primaryKeys = null;
-            
-            if(! filterClauseQueue.isEmpty())   //Select all query
-            {
-                //Select Query with where clause (requires search within inverted index)
-                
-                OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);                
-                
-                primaryKeys = ((OracleNoSQLInvertedIndexer) client.getIndexManager().getIndexer()).executeQuery(interpreter, m.getEntityClazz());
-                
-            }    
-                
-            results = (List<Object>) ((OracleNoSQLClient) client).findAll(m.getEntityClazz(), primaryKeys == null ? null : primaryKeys.toArray());          
+        {            
+            OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);            
+            results = (List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter);
         }        
         return results;
     }
@@ -101,7 +87,10 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        return null;
+        List<Object> ls = new ArrayList<Object>();
+        ls = populateEntities(m, client);
+        
+        return setRelationEntities(ls, client, m);
     }
 
     @Override
@@ -126,36 +115,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
     private OracleNoSQLQueryInterpreter translateQuery(Queue clauseQueue, EntityMetadata entityMetadata)
     {
         OracleNoSQLQueryInterpreter interpreter = new OracleNoSQLQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
-
-        // TODO: If there is no clause present, means we might need to scan complete table.
-        for (Object clause : clauseQueue)
-        {
-            if (clause.getClass().isAssignableFrom(FilterClause.class))
-            {
-                Object value = ((FilterClause) clause).getValue();
-                String condition = ((FilterClause) clause).getCondition();
-                String columnName = ((FilterClause) clause).getProperty();
-
-                if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()))
-                {
-                    interpreter.setById(true);
-                }
-
-                if (condition.equals("="))
-                {
-                    interpreter.addFilterCondition(columnName, value);
-                }             
-            }
-            else
-            {
-
-                String operator = clause.toString();
-                if (interpreter.getOperator() == null)
-                {
-                    interpreter.setOperator(operator);
-                }                
-            }
-        }
+        interpreter.setClauseQueue(clauseQueue);    
 
         return interpreter;
     }   

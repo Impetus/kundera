@@ -15,24 +15,23 @@
  */
 package com.impetus.client.oraclenosql.query;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Queue;
+
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Interprets JPA query and holds conditions to pass on to client
  * @author amresh.singh
  */
 public class OracleNoSQLQueryInterpreter
-{
-    private boolean isById;
+{ 
     
     //Select columns
     private String[] selectColumns;
     
-    //Represents clauses
-    private Map<String, Object> filterConditions;
     
-    String operator;   //Inter-clause operator
+    private Queue clauseQueue;    
+
     
     /**
      * Default constructor
@@ -42,21 +41,24 @@ public class OracleNoSQLQueryInterpreter
         this.selectColumns = selectColumns;
     }
 
-    /**
-     * @return the isById
-     */
-    public boolean isById()
-    {
-        return isById;
-    }
 
     /**
-     * @param isById the isById to set
+     * @return the clauseQueue
      */
-    public void setById(boolean isById)
+    public Queue getClauseQueue()
     {
-        this.isById = isById;
+        return clauseQueue;
     }
+
+
+    /**
+     * @param clauseQueue the clauseQueue to set
+     */
+    public void setClauseQueue(Queue clauseQueue)
+    {
+        this.clauseQueue = clauseQueue;
+    }
+
 
     /**
      * @return the selectColumns
@@ -66,7 +68,6 @@ public class OracleNoSQLQueryInterpreter
         return selectColumns;
     }
 
-    
 
     /**
      * @param selectColumns the selectColumns to set
@@ -74,45 +75,6 @@ public class OracleNoSQLQueryInterpreter
     public void setSelectColumns(String[] selectColumns)
     {
         this.selectColumns = selectColumns;
-    }
-
-    /**
-     * @return the filterCondition
-     */
-    public Map<String, Object> getFilterConditions()
-    {
-        return filterConditions;
     }    
     
-
-    /**
-     * @return the operator
-     */
-    public String getOperator()
-    {
-        return operator;
-    }
-
-    /**
-     * @param operator the operator to set
-     */
-    public void setOperator(String operator)
-    {
-        this.operator = operator;
-    }
-
-    /**
-     * Adds filter condition
-     * @param columnName
-     * @param columnValue
-     */
-    public void addFilterCondition(String columnName, Object columnValue)
-    {
-        if(filterConditions == null)
-        {
-            filterConditions = new HashMap<String, Object>();
-        }
-        filterConditions.put(columnName, columnValue);
-    }  
-
 }

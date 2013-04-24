@@ -44,6 +44,10 @@ public class OracleNosqlBatchProcessorMixedTest
     /** The em. */
     private static EntityManager em;
 
+    private List<PersonBatchOracleNosql> allPersons;
+
+    private List<AddressBatchOracleNosql> allAddresses;
+
     @Before
     public void setUp() throws Exception
     {
@@ -79,14 +83,14 @@ public class OracleNosqlBatchProcessorMixedTest
         // Query on Persons
         String personsQueryStr = " Select p from PersonBatchOracleNosql p";
         Query personsQuery = em.createQuery(personsQueryStr);
-        List<PersonBatchOracleNosql> allPersons = personsQuery.getResultList();
+        allPersons = personsQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertEquals(10, allPersons.size());
 
         // Query on Addresses
         String addressQueryStr = " Select a from AddressBatchOracleNosql a";
         Query addressQuery = em.createQuery(addressQueryStr);
-        List<AddressBatchOracleNosql> allAddresses = addressQuery.getResultList();
+        allAddresses = addressQuery.getResultList();
         Assert.assertNotNull(allAddresses);
         Assert.assertEquals(10, allAddresses.size());
 
@@ -98,6 +102,15 @@ public class OracleNosqlBatchProcessorMixedTest
     @After
     public void tearDown() throws Exception
     {
+        for (PersonBatchOracleNosql entity : allPersons)
+        {
+            em.remove(entity);
+        }
+        for (AddressBatchOracleNosql entity : allAddresses)
+        {
+            em.remove(entity);
+        }
+        em.close();
         emf.close();
     }
 

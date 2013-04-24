@@ -109,12 +109,12 @@ public class PersonCassandraTest extends BaseTest
 //            propertyMap = new HashMap();
 //            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
         }
-        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
 
         if (AUTO_MANAGE_SCHEMA)
         {
             loadData();
         }
+        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -150,6 +150,10 @@ public class PersonCassandraTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
+        
+        PersonCassandra personWithKey = new PersonCassandra();
+        personWithKey.setPersonId("111");
+        em.persist(personWithKey );
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);

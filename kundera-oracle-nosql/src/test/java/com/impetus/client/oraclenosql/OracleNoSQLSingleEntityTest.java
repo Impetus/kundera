@@ -60,9 +60,6 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         super.tearDown();
     }
 
-    /**
-     * On insert cassandra.
-     */
     @Test
     public void executeCRUDTest()
     {
@@ -146,15 +143,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         persistPerson("3", "person3", 30);
         persistPerson("4", "person4", 40);
         
-        
-        
-        /*String findAgeByGTELTEClause = "Select p from PersonKVStore p where p.age <=:max AND p.age>=:min";
-        Map<String, Object> params2 = new HashMap<String, Object>();
-        params2.put("min", 30);
-        params2.put("min", 35);
-        List<PersonKVStore> results2 = executeSelectQuery(findAgeByGTELTEClause, params2);*/
-        
-        
+      
         clearEm();        
         //Select query, without where clause
         String findWithOutWhereClause = "Select p from PersonKVStore p";        
@@ -210,8 +199,80 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         params.put("personId", "1");
         params.put("age", 30);
         results = executeSelectQuery(findByIdAndAge, params);
-        Assert.assertEquals(2, results.size());        
+        Assert.assertEquals(2, results.size());  
         
+        clearEm();
+        //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age >:age";
+        params = new HashMap<String, Object>();
+        params.put("personId", "1");
+        params.put("age", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age>=:min AND p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 30);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(2, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with AND operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age<=:start AND p.age>:end";
+        params = new HashMap<String, Object>();
+        params.put("start", 40);
+        params.put("end", 15);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        findByIdAndAge = "Select p from PersonKVStore p where p.age>:min OR p.age<=:max";
+        params = new HashMap<String, Object>();
+        params.put("min", 30);
+        params.put("max", 20);
+        results = executeSelectQuery(findByIdAndAge, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findAgeByBetween = "Select p from PersonKVStore p where p.age between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", 20);
+        params.put("max", 40);
+        results = executeSelectQuery(findAgeByBetween, params);
+        Assert.assertEquals(3, results.size());
+        
+        clearEm();
+        //Select query with where clause on non-ID column (with comparison) with OR operator
+        String findPersonIdBetween = "Select p from PersonKVStore p where p.personId between :min AND :max";
+        params = new HashMap<String, Object>();
+        params.put("min", "2");
+        params.put("max", "4");
+        results = executeSelectQuery(findPersonIdBetween, params);
+        Assert.assertEquals(3, results.size());
+        
+        
+        clearEm();
+        String findSelective = "Select p.age from PersonKVStore p";
+        results = executeSelectQuery(findSelective);
+        Assert.assertEquals(4, results.size());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
+        
+        // Delete by query.
+        String deleteQuery = "Delete from PersonKVStore p";        
+        int updateCount = executeDMLQuery(deleteQuery);
+        Assert.assertEquals(4, updateCount);
+
+        clearEm();
+        Assert.assertEquals(null, findById("1"));
+        Assert.assertEquals(null, findById("2"));
+        Assert.assertEquals(null, findById("3"));
+        Assert.assertEquals(null, findById("4"));
     }
 
     protected void persistPerson(String personId, String personName, int age)

@@ -32,7 +32,6 @@ import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 
-import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -71,6 +70,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
@@ -126,7 +126,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
-    protected Map<String, Object> externalProperties;
+    private Map<String, Object> externalProperties;
 
     protected CQLClient cqlClient;
 
@@ -431,8 +431,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            Pool Name
      * @param columns
      *            List of columns
+     * @param columnType
      */
-    protected void createIndexesOnColumns(String schemaName, String tableName, String poolName, List<Column> columns)
+    protected void createIndexesOnColumns(EntityMetadata m, String tableName, String poolName, List<Column> columns,
+            Class columnType)
     {
         Object pooledConnection = null;
         try
@@ -440,7 +442,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Cassandra.Client api = null;
             pooledConnection = getPooledConection(persistenceUnit);
             api = getConnection(pooledConnection);
-            KsDef ksDef = api.describe_keyspace(schemaName);
+            KsDef ksDef = api.describe_keyspace(m.getSchema());
             List<CfDef> cfDefs = ksDef.getCf_defs();
 
             // Column family definition on which secondary index creation is
@@ -487,7 +489,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ColumnDef columnDef = new ColumnDef();
 
                 columnDef.setName(column.getName());
-                columnDef.setValidation_class(BytesType.class.getSimpleName());
+                columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnType));
                 columnDef.setIndex_type(IndexType.KEYS);
 
                 // Add secondary index only if it's not already created
@@ -504,6 +506,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             // definition
             if (isUpdatable)
             {
+                columnFamilyDefToUpdate.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(m
+                        .getIdAttribute().getJavaType()));
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }
 
@@ -614,10 +618,23 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return result != null & !result.isEmpty() ? result.get(0) : null;
     }
 
+    /**
+     * Returns true in case of, composite Id and if cql3 opted and not a
+     * embedded entity.
+     * 
+     * @param metadata
+     * @param metaModel
+     * @return
+     */
     public boolean isCQL3Enabled(EntityMetadata metadata, MetamodelImpl metaModel)
     {
         isCQLEnabled = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())
                 || (isCQLEnabled && !metadata.getType().equals(Type.SUPER_COLUMN_FAMILY));
+        if (isCQLEnabled && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        {
+            log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed by using thrift");
+            return isCQLEnabled = false;
+        }
         return isCQLEnabled;
     }
 
@@ -679,6 +696,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             CassandraDataHandler dataHandler)
     {
         return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
+    }
+
+    public Map<String, Object> getExternalProperties()
+    {
+        return externalProperties;
     }
 
     /**
@@ -797,6 +819,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return results;
     }
 
+    /**
+     * Return insert query string for given entity.
+     * 
+     * @param entityMetadata
+     * @param entity
+     * @param cassandra_client
+     * @param rlHolders
+     * @return
+     */
     protected String createInsertQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
             List<RelationHolder> rlHolders)
     {
@@ -806,7 +837,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
-                TranslationType.ALL);
+                TranslationType.ALL, externalProperties);
 
         String columnNames = translation.get(TranslationType.COLUMN);
         String columnValues = translation.get(TranslationType.VALUE);
@@ -832,41 +863,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return insert_Query;
     }
 
-    /*protected String createUpdateQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
-            List<RelationHolder> rlHolders)
-    {
-        CQLTranslator translator = new CQLTranslator();
-        String insert_Query = translator.UPDATE_QUERY;
-
-        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
-        HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
-                TranslationType.ALL);
-
-        String columnNames = translation.get(TranslationType.COLUMN);
-        String columnValues = translation.get(TranslationType.VALUE);
-        StringBuilder columnNameBuilder = new StringBuilder(columnNames);
-        StringBuilder columnValueBuilder = new StringBuilder(columnValues);
-
-        for (RelationHolder rl : rlHolders)
-        {
-            columnNameBuilder.append(",");
-            columnValueBuilder.append(",");
-            translator.appendColumnName(columnNameBuilder, rl.getRelationName());
-            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
-        }
-
-        translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
-        translation.put(TranslationType.VALUE, columnValueBuilder.toString());
-
-        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_VALUES,
-                translation.get(TranslationType.VALUE));
-        insert_Query = StringUtils
-                .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
-
-        return insert_Query;
-    }*/
-    
     /**
      * Gets the cql version.
      * 
@@ -958,13 +954,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
-
-        // EmbeddableType compoundKey =
-        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
         onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
-
         return deleteQueryBuilder.toString();
-
     }
 
     /**
@@ -1005,7 +996,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else
         {
             Attribute attribute = metadata.getIdAttribute();
-            translator.buildWhereClause(queryBuilder, Constants.CQL_KEY, key, "=");
+            translator.buildWhereClause(queryBuilder,
+                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE);
         }
 
         // strip last "AND" clause.
@@ -1204,7 +1196,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             nodes = null;
             nodes = new ArrayList<Node>();
         }
-        externalProperties = null;
     }
 
     /*
@@ -1523,6 +1514,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     }
 
+    /**
+     * Return the generated value of id.
+     * 
+     * @param discriptor
+     * @param pu
+     * @return
+     */
     public Long getGeneratedValue(TableGeneratorDiscriptor discriptor, String pu)
     {
         Cassandra.Client conn = getRawClient(pu, discriptor.getSchema());
@@ -1586,7 +1584,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
-    private CqlResult executeCQLQuery(String cqlQuery) throws InvalidRequestException, UnavailableException,
+    /**
+     * Executes query string using cql3.
+     * 
+     * @param cqlQuery
+     * @return
+     * @throws InvalidRequestException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     */
+    protected CqlResult executeCQLQuery(String cqlQuery) throws InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException, TException
     {
         Cassandra.Client conn = null;
@@ -1603,6 +1612,23 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             releaseConnection(pooledConnection);
         }
+    }
+
+    /**
+     * Find List of objects based on value {@columnValue} of column
+     * {@columnName}
+     * 
+     * @param m
+     * @param columnName
+     * @param columnValue
+     * @param clazz
+     * @param dataHandler
+     * @return
+     */
+    protected List<Object> findByRelationQuery(EntityMetadata m, String columnName, Object columnValue, Class clazz,
+            CassandraDataHandler dataHandler)
+    {
+        return cqlClient.findByRelationQuery(m, columnName, columnValue, clazz, dataHandler);
     }
 
     /**
@@ -1632,6 +1658,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Return cassandra client instance.
+     * 
+     * @param connection
+     * @return
+     */
     private Cassandra.Client getConnection(Object connection)
     {
         if (connection != null)
@@ -1654,6 +1686,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     protected abstract void releaseConnection(Object conn);
 
+    /**
+     * Use CqlClient class for crud when cql enable.
+     * 
+     * 
+     * @author Kuldeep Mishra
+     * 
+     */
     protected class CQLClient
     {
         public void persist(EntityMetadata entityMetadata, Object entity,
@@ -1662,11 +1701,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 TimedOutException, SchemaDisagreementException
         {
             String insert_Query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
-            conn.set_cql_version(getCqlVersion());
+            // conn.set_cql_version(getCqlVersion());
             conn.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
                     consistencyLevel);
         }
 
+        /**
+         * Execute query and Return list of Objects.
+         * 
+         * @param cqlQuery
+         * @param clazz
+         * @param relationalField
+         * @param dataHandler
+         * @return
+         */
         public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
                 CassandraDataHandler dataHandler)
         {
@@ -1753,6 +1801,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             return returnedEntities;
         }
 
+        /**
+         * Finds entity on the basis of rowid and return list of objects.
+         * 
+         * @param metaModel
+         * @param metadata
+         * @param rowId
+         * @param relationNames
+         * @return
+         */
         public List<Object> find(MetamodelImpl metaModel, EntityMetadata metadata, Object rowId,
                 List<String> relationNames)
         {
@@ -1763,6 +1820,34 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             StringBuilder builder = new StringBuilder(select_Query);
             onWhereClause(metadata, rowId, translator, builder, metaModel);
             return CassandraClientBase.this.executeQuery(builder.toString(), metadata.getEntityClazz(), relationNames);
+        }
+
+        /**
+         * Find List of objects based on value {@columnValue} of column
+         * {@columnName}
+         * 
+         * @param m
+         * @param columnName
+         * @param columnValue
+         * @param clazz
+         * @param dataHandler
+         * @return
+         */
+        protected List<Object> findByRelationQuery(EntityMetadata m, String columnName, Object columnValue,
+                Class clazz, CassandraDataHandler dataHandler)
+        {
+            CqlResult result = null;
+            CQLTranslator translator = new CQLTranslator();
+            String selectQuery = translator.SELECTALL_QUERY;
+            selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
+                    translator.ensureCase(new StringBuilder(), m.getTableName()).toString());
+
+            StringBuilder selectQueryBuilder = new StringBuilder(selectQuery);
+            selectQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+            translator.buildWhereClause(selectQueryBuilder, columnName, columnValue, "=");
+            selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
+                    selectQueryBuilder.length());
+            return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler);
         }
     }
 }

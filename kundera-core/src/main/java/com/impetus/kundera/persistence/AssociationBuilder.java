@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.collection.internal.PersistentSet;
@@ -38,10 +37,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
-import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.LuceneQueryUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -299,13 +295,17 @@ public final class AssociationBuilder
         Client pClient = delegator.getClient(entityMetadata);
 
         String schema = entityMetadata.getSchema();
+
+        EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        Class columnJavaType = owningEntityMetadata.getIdAttribute().getJavaType();
         if (jtMetadata == null)
         {
-            EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+            columnJavaType = entityMetadata.getIdAttribute().getJavaType();
             jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
             schema = owningEntityMetadata.getSchema();
         }
+
         String joinTableName = jtMetadata.getJoinTableName();
 
         Set<String> joinColumns = jtMetadata.getJoinColumns();
@@ -319,7 +319,7 @@ public final class AssociationBuilder
 
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
         List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName, inverseJoinColumnName,
-                entityId);
+                entityId, columnJavaType);
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)

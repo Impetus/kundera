@@ -22,7 +22,6 @@ import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 
 import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;

@@ -16,7 +16,6 @@
 package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -116,7 +115,7 @@ final class MongoDBDataHandler
             }
             else
             {
-                rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
+                rowKey = MongoDBUtils.getTranslatedObject(rowKey, rowKeyValueClass, idClass);
                 PropertyAccessorHelper.setId(entity, m, rowKey);
 
             }
@@ -160,7 +159,7 @@ final class MongoDBDataHandler
                                         : null;
                                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
                                         .getJavaType());
-                                colValue = getTranslatedObject(colValue, colValue.getClass(), relationMetadata
+                                colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(), relationMetadata
                                         .getIdAttribute().getJavaType());
                             }
                             relationValue.put(fieldName, colValue);
@@ -197,25 +196,6 @@ final class MongoDBDataHandler
             return entity;
         }
 
-    }
-
-    /**
-     * @param value
-     * @param sourceClass
-     * @param targetClass
-     * @return
-     */
-    private Object getTranslatedObject(Object value, Class<?> sourceClass, Class<?> targetClass)
-    {
-        if (sourceClass.isAssignableFrom(Date.class))
-        {
-            value = PropertyAccessorHelper.fromDate(targetClass, sourceClass, value);
-        }
-        else
-        {
-            value = PropertyAccessorHelper.fromSourceToTargetClass(targetClass, sourceClass, value);
-        }
-        return value;
     }
 
     /**
@@ -275,7 +255,7 @@ final class MongoDBDataHandler
             else
             {
                 value = MongoDBUtils.populateValue(value, value.getClass());
-                value = getTranslatedObject(value, value.getClass(), column.getJavaType());
+                value = MongoDBUtils.getTranslatedObject(value, value.getClass(), column.getJavaType());
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
             }
         }

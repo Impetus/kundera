@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.junit.Test;
-
 import junit.framework.TestCase;
 
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;

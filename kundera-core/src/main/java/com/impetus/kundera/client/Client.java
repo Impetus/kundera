@@ -20,7 +20,6 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
-import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.persistence.EntityReader;
@@ -141,7 +140,7 @@ public interface Client<Q extends Query>
      * @return list of values fetched for <columnName>
      */
     <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue);
+            Object pKeyColumnValue, Class columnJavaType);
 
     /**
      * Returns array of primary key for given column name and it's value.

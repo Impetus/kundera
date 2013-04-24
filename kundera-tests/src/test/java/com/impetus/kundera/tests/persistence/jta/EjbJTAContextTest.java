@@ -73,23 +73,7 @@ public class EjbJTAContextTest
      */
     @Before
     public void setUp() throws Exception
-    {
-
-        // Properties properties = new Properties();
-        // properties.put(Context.INITIAL_CONTEXT_FACTORY,
-        // "org.apache.openejb.client.LocalInitialContextFactory");
-        // // DO NOT DELETE IT !!!
-        // // properties.put("openejb.deployments.classpath.ear", "true");
-        // //
-        // properties.put("openejb.jndiname.format","{deploymentId}/{interfaceType.annotationName}");
-        // // properties.put("openejb.altdd.prefix", "test");
-        // // properties.put("openejb.validation.output.level", "VERBOSE");
-        // // initialContext = new InitialContext(properties);
-        // initialContext = new InitialContext(properties);
-        // initialContext.bind("inject", this);
-        // initialContext.bind("java:comp/UserTransaction", new
-        // KunderaJTAUserTransaction());
-        
+    {      
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
 
@@ -161,13 +145,11 @@ public class EjbJTAContextTest
                     Assert.assertNull(found);
                 }
                 
-//                // As data is not commited, hence it should return null with other session.
+                // As data is not commited, hence it should return null with other session.
                 EntityManager em1 = emf.createEntityManager();
                 Assert.assertNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
             }
-
-        };
-        
+        };        
         return r;
     }
 
@@ -178,7 +160,6 @@ public class EjbJTAContextTest
     public void testPersist() throws NotSupportedException, SystemException, NamingException, SecurityException,
             IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException
     {
-
         userTransaction = (UserTransaction) initialContext.lookup("java:comp/UserTransaction");
         em.setFlushMode(FlushModeType.COMMIT);
 
@@ -283,7 +264,5 @@ public class EjbJTAContextTest
         }
 
         com.impetus.kundera.tests.cli.CassandraCli.client.set_keyspace("KunderaTests");
-
     }
-
 }

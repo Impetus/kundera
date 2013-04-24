@@ -75,6 +75,7 @@ public final class CassandraValidationClassMapper
 
         // putting possible combination into map.
         validationClassMapper.put(java.lang.String.class, UTF8Type.class.getSimpleName());
+        validationClassMapper.put(Character.class, UTF8Type.class.getSimpleName());
         validationClassMapper.put(char.class, UTF8Type.class.getSimpleName());
 
         validationClassMapper.put(java.sql.Time.class, DateType.class.getSimpleName());
@@ -115,13 +116,13 @@ public final class CassandraValidationClassMapper
      *            the data type
      * @return the validation class
      */
-    static String getValidationClass(Class<?> dataType)
+    public static String getValidationClass(Class<?> dataType)
     {
         String validation_class;
         validation_class = validationClassMapper.get(dataType);
         if (!(validation_class != null))
         {
-            validation_class = UTF8Type.class.getSimpleName();
+            validation_class = BytesType.class.getSimpleName();
         }
         return validation_class;
     }

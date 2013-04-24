@@ -72,10 +72,9 @@ public class UpdateDeleteJPQLLiteralTest
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         Map propertyMap = new HashMap();
-        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST/*, propertyMap*/);
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
-
     }
 
     /**

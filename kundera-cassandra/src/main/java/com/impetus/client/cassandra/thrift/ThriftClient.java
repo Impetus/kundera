@@ -137,7 +137,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
         try
         {
-            
+
             // if entity is embeddable...call cql translator to get cql string!
             // use thrift client to execute cql query.
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -154,11 +154,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 // Write Mutation map to database
                 // conn.set_cql_version("3.0.0");
                 conn.batch_mutate(mutationMap, getConsistencyLevel());
-                
+
                 mutationMap.clear();
                 mutationMap = null;
             }
-            
+
         }
         catch (InvalidRequestException e)
         {
@@ -202,13 +202,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), getExternalProperties());
 
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass());
+
         Cassandra.Client conn = null;
         try
         {
@@ -223,15 +224,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                 // Create Insertion List
                 List<Mutation> insertionList = new ArrayList<Mutation>();
-
+                Class columnType = null;
                 for (Object value : values)
                 {
                     Column column = new Column();
                     column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
                             + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
-                    column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
-                    column.setTimestamp(System.currentTimeMillis());
+                    // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
+                    // value));
+                    column.setValue(PropertyAccessorHelper.getBytes(value));
 
+                    column.setTimestamp(System.currentTimeMillis());
+                    columnType = value.getClass();
                     columns.add(column);
 
                     Mutation mut = new Mutation();
@@ -239,7 +243,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     insertionList.add(mut);
                 }
 
-                createIndexesOnColumns(entityMetadata.getSchema(), joinTableName, poolName, columns);
+                createIndexesOnColumns(entityMetadata, joinTableName, poolName, columns, columnType);
 
                 // Create Mutation Map
                 Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
@@ -414,7 +418,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-            Object pKeyColumnValue)
+            Object pKeyColumnValue, Class columnJavaType)
     {
         byte[] rowKey = pKeyColumnValue.toString().getBytes();
 
@@ -429,11 +433,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-
             conn = PelopsUtils.getCassandraConnection(pool);
             results = conn.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
-
         }
         catch (InvalidRequestException e)
         {
@@ -462,8 +463,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN, null);
 
-        List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
-        return foreignKeys;
+        List<Object> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns, columnJavaType);
+        return (List<E>) foreignKeys;
     }
 
     /**
@@ -473,11 +474,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
+        List<Object> rowKeys = new ArrayList<Object>();
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+
         SlicePredicate slicePredicate = new SlicePredicate();
 
         slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
                 columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
@@ -491,13 +494,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         ix.setCount(1000);
         ix.setExpressions(expressions);
 
-        List<Object> rowKeys = new ArrayList<Object>();
         ColumnParent columnParent = new ColumnParent(tableName);
         Cassandra.Client conn = null;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-
             conn = PelopsUtils.getCassandraConnection(pool);
             List<KeySlice> keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
 
@@ -527,7 +527,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             PelopsUtils.releaseConnection(pool, conn);
         }
-
         if (rowKeys != null && !rowKeys.isEmpty())
         {
             return rowKeys.toArray(new Object[0]);
@@ -539,65 +538,72 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
-
-        SlicePredicate slicePredicate = new SlicePredicate();
-        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
         List<Object> entities = null;
 
-        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
-                ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
-        List<IndexExpression> expressions = new ArrayList<IndexExpression>();
-        expressions.add(ie);
-
-        IndexClause ix = new IndexClause();
-        ix.setStart_key(Bytes.EMPTY.toByteArray());
-        ix.setCount(1000);
-        ix.setExpressions(expressions);
-        ColumnParent columnParent = new ColumnParent(m.getTableName());
-
-        List<KeySlice> keySlices;
-        Cassandra.Client conn = null;
-        try
+        if (isCQLEnabled)
         {
-            conn = PelopsUtils.getCassandraConnection(pool);
-            keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
+            entities = findByRelationQuery(m, colName, colValue, entityClazz, dataHandler);
         }
-        catch (InvalidRequestException e)
+        else
         {
-            if (e.why != null && e.why.contains("No indexed columns"))
+            SlicePredicate slicePredicate = new SlicePredicate();
+            slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
+
+            IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
+                    ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
+            List<IndexExpression> expressions = new ArrayList<IndexExpression>();
+            expressions.add(ie);
+
+            IndexClause ix = new IndexClause();
+            ix.setStart_key(Bytes.EMPTY.toByteArray());
+            ix.setCount(1000);
+            ix.setExpressions(expressions);
+            ColumnParent columnParent = new ColumnParent(m.getTableName());
+
+            List<KeySlice> keySlices;
+            Cassandra.Client conn = null;
+            try
             {
-                return entities;
+                conn = PelopsUtils.getCassandraConnection(pool);
+                keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
             }
-            else
+            catch (InvalidRequestException e)
+            {
+                if (e.why != null && e.why.contains("No indexed columns"))
+                {
+                    return entities;
+                }
+                else
+                {
+                    log.error("Error while finding relations. Details:" + e.getMessage());
+                    throw new KunderaException("Error while finding relations", e);
+                }
+            }
+            catch (UnavailableException e)
             {
                 log.error("Error while finding relations. Details:" + e.getMessage());
                 throw new KunderaException("Error while finding relations", e);
             }
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while finding relations. Details:" + e.getMessage());
-            throw new KunderaException("Error while finding relations", e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while finding relations. Details:" + e.getMessage());
-            throw new KunderaException("Error while finding relations", e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while finding relations. Details:" + e.getMessage());
-            throw new KunderaException("Error while finding relations", e);
-        }
-        finally
-        {
-            PelopsUtils.releaseConnection(pool, conn);
-        }
+            catch (TimedOutException e)
+            {
+                log.error("Error while finding relations. Details:" + e.getMessage());
+                throw new KunderaException("Error while finding relations", e);
+            }
+            catch (TException e)
+            {
+                log.error("Error while finding relations. Details:" + e.getMessage());
+                throw new KunderaException("Error while finding relations", e);
+            }
+            finally
+            {
+                PelopsUtils.releaseConnection(pool, conn);
+            }
 
-        if (keySlices != null)
-        {
-            entities = new ArrayList<Object>(keySlices.size());
-            populateData(m, keySlices, entities, false, null);
+            if (keySlices != null)
+            {
+                entities = new ArrayList<Object>(keySlices.size());
+                populateData(m, keySlices, entities, false, null);
+            }
         }
         return entities;
     }

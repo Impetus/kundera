@@ -37,7 +37,7 @@ import com.impetus.client.crud.datatypes.entities.Photoo;
  * Junit for https://github.com/impetus-opensource/Kundera/issues/237
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class CollecteTest
 {
@@ -58,7 +58,8 @@ public class CollecteTest
     }
 
     @Test
-    public void testInsert() {
+    public void testInsert()
+    {
         // une collecte
         Collecte c = new Collecte();
         c.setId("0001");
@@ -86,24 +87,26 @@ public class CollecteTest
 
         c.setPhotos(photos);
         em.persist(c);
+        testSelect();
+
     }
 
-    @Test
-    public void testSelect() {
-         Query q = em.createQuery("select c from Collecte c where c.id =:id");
-         q.setParameter("id", "0001");
-         List<Collecte> collectes = q.getResultList();
-         Collecte c = collectes.get(0);
+    private void testSelect()
+    {
+        Query q = em.createQuery("select c from Collecte c where c.id =:id");
+        q.setParameter("id", "0001");
+        List<Collecte> collectes = q.getResultList();
+        Collecte c = collectes.get(0);
         Assert.assertEquals(c.getEAN(), "3251248033108");
         Assert.assertEquals(c.getPhotos().size(), 3);
-        Assert.assertEquals(c.getPhotos().iterator().next().getMd5() , "1235847EA873");
+        Assert.assertEquals(c.getPhotos().iterator().next().getMd5(), "1235847EA873");
     }
 
     @After
     public void tearDown()
     {
-      em.close();
-      emf.close();
+        em.close();
+        emf.close();
 
     }
 }

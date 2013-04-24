@@ -129,6 +129,7 @@
 	<module>kundera-neo4j</module>
 	<module>kundera-rest</module>
         <module>kundera-redis</module>
+	<module>kundera-oracle-nosql</module>
 	<module>kundera-tests</module>
       </modules>
     </profile>
@@ -153,6 +154,16 @@
       <modules>
         <module>kundera-core</module>
         <module>kundera-redis</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>oracle-nosql</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>kundera-core</module>
+        <module>kundera-oracle-nosql</module>
       </modules>
     </profile>
 
