@@ -638,29 +638,32 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     private void execute(List<Operation> batch)
     {
-        try
-        {
-            kvStore.execute(batch);
-        }
-        catch (DurabilityException e)
-        {
-            log.error(e);
-            throw new PersistenceException("Error while Persisting data using batch", e);
-        }
-        catch (OperationExecutionException e)
-        {
-            log.error(e);
-            throw new PersistenceException("Error while Persisting data using batch", e);
-        }
-        catch (FaultException e)
-        {
-            log.error(e);
-            throw new PersistenceException("Error while Persisting data using batch", e);
-        }
-        finally
-        {
-            batch.clear();
-        }
+        if(batch != null && ! batch.isEmpty())
+        {            
+            try
+            {
+                kvStore.execute(batch);
+            }
+            catch (DurabilityException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            catch (OperationExecutionException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            catch (FaultException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            finally
+            {
+                batch.clear();
+            }
+        }        
     }
 
     @Override
@@ -681,18 +684,20 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return results;
     }
 
-    public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter)
+    public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter, Set<Object> primaryKeys)
     {
         List<E> results = new ArrayList<E>();
-
-        Set<Object> primaryKeys = null;
-
+        if(primaryKeys == null)
+        {
+            primaryKeys = new HashSet<Object>();
+        }
+        
         if (!interpreter.getClauseQueue().isEmpty()) // Select all query
         {
             // Select Query with where clause (requires search within inverted
             // index)
-            primaryKeys = ((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter,
-                    entityClass);
+            primaryKeys.addAll(((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter,
+                    entityClass));
 
         }
         else
@@ -716,7 +721,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 keySet.add(majorKeySecondPart);
             }
 
-            primaryKeys = keySet;
+            primaryKeys.addAll(keySet);
         }
 
         results = findAll(entityClass, interpreter.getSelectColumns(), primaryKeys.toArray());

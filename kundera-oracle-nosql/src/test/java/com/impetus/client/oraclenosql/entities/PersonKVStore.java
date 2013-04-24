@@ -16,11 +16,11 @@
 package com.impetus.client.oraclenosql.entities;
 
 
-import java.io.File;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -34,6 +34,9 @@ import com.impetus.kundera.index.IndexCollection;
 @Table(name = "PERSON", schema = "KunderaTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "personName"),
         @Index(name = "age")})
+@NamedQueries(value = {
+        @NamedQuery(name = "findByAge", query = "Select p from PersonKVStore p where p.age=:age"),
+        @NamedQuery(name = "findByName", query = "Select p from PersonKVStore p where p.personName = ?1") })
 public class PersonKVStore
 {
     

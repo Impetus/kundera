@@ -224,7 +224,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                 interClauseOperator = clause.toString();
             }
             
-            addToPrimaryKeySet(results, foundKeys, interClauseOperator);
+            addToResults(results, foundKeys, interClauseOperator);
         }
         
         return (Set<E>) results; 
@@ -287,34 +287,34 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     {
     }
     
-    private void addToPrimaryKeySet(Set results, Set keysToAdd, String operation)
+    private void addToResults(Set results, Set resultsToAdd, String operation)
     {
-        if(keysToAdd == null || keysToAdd.isEmpty())
+        if(resultsToAdd == null || resultsToAdd.isEmpty())
         {
             return;
         }
         
         if(operation == null)
         {
-            results.addAll(keysToAdd);
+            results.addAll(resultsToAdd);
         }
         else if(operation.equalsIgnoreCase("OR"))
         {
-            results.addAll(keysToAdd);
+            results.addAll(resultsToAdd);
         }
         else if(operation.equalsIgnoreCase("AND"))
         {
             if(results.isEmpty())
             {
-                results.addAll(keysToAdd);
+                results.addAll(resultsToAdd);
             }
             else
             {
-                results.retainAll(keysToAdd);
+                results.retainAll(resultsToAdd);
             }            
-        }       
+        }
         
-        keysToAdd.clear();        
+        resultsToAdd.clear();        
     }
 
     /**

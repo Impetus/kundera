@@ -17,8 +17,6 @@ package com.impetus.client.oraclenosql.query;
 
 import java.util.Queue;
 
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-
 /**
  * Interprets JPA query and holds conditions to pass on to client
  * @author amresh.singh
@@ -29,8 +27,11 @@ public class OracleNoSQLQueryInterpreter
     //Select columns
     private String[] selectColumns;
     
+    private boolean isFindById;   
+    private Object rowKey;
+    private String operatorWithRowKey;
     
-    private Queue clauseQueue;    
+    private Queue clauseQueue;   
 
     
     /**
@@ -75,6 +76,60 @@ public class OracleNoSQLQueryInterpreter
     public void setSelectColumns(String[] selectColumns)
     {
         this.selectColumns = selectColumns;
-    }    
+    }
+
+
+    /**
+     * @return the isFindById
+     */
+    public boolean isFindById()
+    {
+        return isFindById;
+    }
+
+
+    /**
+     * @param isFindById the isFindById to set
+     */
+    public void setFindById(boolean isFindById)
+    {
+        this.isFindById = isFindById;
+    }
+
+
+    /**
+     * @return the rowKey
+     */
+    public Object getRowKey()
+    {
+        return rowKey;
+    }
+
+
+    /**
+     * @param rowKey the rowKey to set
+     */
+    public void setRowKey(Object rowKey)
+    {
+        this.rowKey = rowKey;
+    }
+
+
+    /**
+     * @return the operatorWithRowKey
+     */
+    public String getOperatorWithRowKey()
+    {
+        return operatorWithRowKey;
+    }
+
+
+    /**
+     * @param operatorWithRowKey the operatorWithRowKey to set
+     */
+    public void setOperatorWithRowKey(String operatorWithRowKey)
+    {
+        this.operatorWithRowKey = operatorWithRowKey;
+    }        
     
 }

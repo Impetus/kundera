@@ -82,17 +82,10 @@ public class OracleNoSQLTestBase
         return query.getResultList();
     }
     
-    protected List executeSelectQuery(String jpaQuery, Map<String, Object> params)
+    protected List executeSelectQuery(String jpaQuery, Map<Object, Object> params)
     { 
         Query query = em.createQuery(jpaQuery);
-        if(params != null && ! params.isEmpty())
-        {
-            for(String param : params.keySet())
-            {
-                query.setParameter(param, params.get(param));
-            }
-              
-        }
+        setParams(params, query);
         return query.getResultList();   
     }
     
@@ -101,6 +94,52 @@ public class OracleNoSQLTestBase
         Query query = em.createQuery(jpaQuery);
         int updateCount = query.executeUpdate();
         return updateCount;
+    }
+    
+    protected List executeNamedQuery(String namedQuery, Map<Object, Object> params)
+    {
+        Query query = em.createNamedQuery(namedQuery);
+        setParams(params, query);
+        return query.getResultList();  
+    }
+    
+    protected void begingTx()
+    {
+        em.getTransaction().begin();
+    }
+
+    protected void commitTx()
+    {
+        em.getTransaction().commit();
+    }
+
+    protected void rollbackTx()
+    {
+        em.getTransaction().rollback();
+    }   
+
+
+    /**
+     * @param params
+     * @param query
+     */
+    private void setParams(Map<Object, Object> params, Query query)
+    {
+        if(params != null && ! params.isEmpty())
+        {
+            for(Object param : params.keySet())
+            {
+                if(param instanceof Integer)
+                {
+                    query.setParameter(((Integer) param).intValue(), params.get(param));
+                }
+                else if(param instanceof String)
+                {
+                    query.setParameter((String)param, params.get(param));
+                }                
+            }
+              
+        }
     }
 
 }

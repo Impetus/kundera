@@ -58,8 +58,8 @@ public class OracleNosqlBatchProcessorMixedTest
     @Test
     public void onBatch()
     {
-        List<PersonBatchOracleNosql> persons = preparePersonData(10);
-        List<AddressBatchOracleNosql> addresses = prepareAddressData(10);
+        List<PersonBatchOracleNosql> persons = preparePersonData(11);
+        List<AddressBatchOracleNosql> addresses = prepareAddressData(11);
 
         // Insert Persons
         for (PersonBatchOracleNosql person : persons)
@@ -85,14 +85,14 @@ public class OracleNosqlBatchProcessorMixedTest
         Query personsQuery = em.createQuery(personsQueryStr);
         allPersons = personsQuery.getResultList();
         Assert.assertNotNull(allPersons);
-        Assert.assertEquals(10, allPersons.size());
+        Assert.assertEquals(11, allPersons.size());
 
         // Query on Addresses
         String addressQueryStr = " Select a from AddressBatchOracleNosql a";
         Query addressQuery = em.createQuery(addressQueryStr);
         allAddresses = addressQuery.getResultList();
         Assert.assertNotNull(allAddresses);
-        Assert.assertEquals(10, allAddresses.size());
+        Assert.assertEquals(11, allAddresses.size());
 
     }
 

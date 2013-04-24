@@ -170,7 +170,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         //Select query with where clause on single non-ID column
         clearEm();
         String findByName = "Select p from PersonEmbeddedKVStore p where p.personName=:personName";
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<Object, Object> params = new HashMap<Object, Object>();
         params.put("personName", "person1");        
         results = executeSelectQuery(findByName, params);
         Assert.assertEquals(1, results.size());
@@ -181,7 +181,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on ID column
         String findById = "Select p from PersonEmbeddedKVStore p where p.personId=:personId";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("personId", "2");        
         results = executeSelectQuery(findById, params);
         Assert.assertEquals(1, results.size());
@@ -192,7 +192,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on ID column and non-ID column with AND operator
         String findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId AND p.age=:age";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("personId", "3");
         params.put("age", 30);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -203,7 +203,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         
         clearEm();
         //Select query with where clause on ID column and non-ID column with AND operator (no record)        
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("personId", "1");
         params.put("age", 30);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -212,7 +212,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on ID column and non-ID column with OR operator
         findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age=:age";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("personId", "1");
         params.put("age", 30);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -221,7 +221,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
         findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age >:age";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("personId", "1");
         params.put("age", 20);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -230,7 +230,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with AND operator
         findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age>=:min AND p.age<=:max";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("min", 20);
         params.put("max", 30);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -239,7 +239,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with AND operator
         findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age<=:start AND p.age>:end";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("start", 40);
         params.put("end", 15);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -248,7 +248,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with OR operator
         findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.age>:min OR p.age<=:max";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("min", 30);
         params.put("max", 20);
         results = executeSelectQuery(findByIdAndAge, params);
@@ -257,7 +257,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with OR operator
         String findAgeByBetween = "Select p from PersonEmbeddedKVStore p where p.age between :min AND :max";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("min", 20);
         params.put("max", 40);
         results = executeSelectQuery(findAgeByBetween, params);
@@ -266,7 +266,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with OR operator
         String findPersonIdBetween = "Select p from PersonEmbeddedKVStore p where p.personId between :min AND :max";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("min", "2");
         params.put("max", "4");
         results = executeSelectQuery(findPersonIdBetween, params);
@@ -284,7 +284,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         clearEm();
         //Search over column within embeddable
         String findByCompanyName = "Select p from PersonEmbeddedKVStore p where p.office.companyName=:companyName";
-        params = new HashMap<String, Object>();
+        params = new HashMap<Object, Object>();
         params.put("companyName", "Company 3");
         results = executeSelectQuery(findByCompanyName, params);
         Assert.assertEquals(1, results.size());
