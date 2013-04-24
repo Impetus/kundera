@@ -566,7 +566,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes = null;
             nodes = new ArrayList<Node>();
         }
-        puProperties = null;
     }
 
     /*
@@ -816,6 +815,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public Object generate()
     {
         // return auto generated id used by mongodb.
-        return new ObjectId().toString();
+        return new ObjectId();
     }
 }

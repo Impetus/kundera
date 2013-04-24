@@ -36,6 +36,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
+import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientFactory;
@@ -196,6 +197,8 @@ public class SchemaConfiguration implements Configuration
                     "CounterColumnType", String.class, idName, isCompositeId);
             if (!tableInfos.contains(tableGeneratorDiscriptor))
             {
+                tableGeneratorDiscriptor.addColumnInfo(getJoinColumn(
+                        keyValue.getTableDiscriptor().getValueColumnName(), Long.class));
                 tableInfos.add(tableGeneratorDiscriptor);
             }
         }
@@ -217,6 +220,11 @@ public class SchemaConfiguration implements Configuration
         {
             Class entityClass = relation.getTargetEntity();
             EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+            if (targetEntityMetadata == null)
+            {
+                log.error("Persistence unit for class : " + entityClass + " is not loaded");
+                throw new SchemaGenerationException("Persistence unit for class : " + entityClass + " is not loaded");
+            }
             ForeignKey relationType = relation.getType();
 
             // if relation type is one to many or join by primary key
@@ -226,8 +234,8 @@ public class SchemaConfiguration implements Configuration
                 // if self association
                 if (targetEntityMetadata.equals(entityMetadata))
                 {
-                    tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName()/*, entityMetadata.getIdAttribute()
-                            .getBindableJavaType()*/));
+                    tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName(), entityMetadata.getIdAttribute()
+                            .getJavaType()));
                 }
                 else
                 {
@@ -260,8 +268,8 @@ public class SchemaConfiguration implements Configuration
             // if relation type is one to one or many to one.
             else if (relation.isUnary() && relation.getJoinColumnName() != null)
             {
-                tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName()/*, targetEntityMetadata
-                        .getIdAttribute().getBindableJavaType()*/));
+                tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName(), targetEntityMetadata
+                        .getIdAttribute().getJavaType()));
             }
             // if relation type is many to many and relation via join table.
             else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
@@ -278,10 +286,10 @@ public class SchemaConfiguration implements Configuration
                             String.class, joinColumnName.concat(inverseJoinColumnName), false);
                     if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
                     {
-                        joinTableInfo.addColumnInfo(getJoinColumn(joinColumnName/*, entityMetadata.getIdAttribute()
-                                .getBindableJavaType()*/));
-                        joinTableInfo.addColumnInfo(getJoinColumn(inverseJoinColumnName/*, targetEntityMetadata
-                                .getIdAttribute().getBindableJavaType()*/));
+                        joinTableInfo.addColumnInfo(getJoinColumn(joinColumnName, entityMetadata.getIdAttribute()
+                                .getJavaType()));
+                        joinTableInfo.addColumnInfo(getJoinColumn(inverseJoinColumnName, entityMetadata
+                                .getIdAttribute().getJavaType()));
                         tableInfos.add(joinTableInfo);
                     }
                 }
@@ -304,17 +312,17 @@ public class SchemaConfiguration implements Configuration
             int idx = targetTableInfos.indexOf(targetTableInfo);
             targetTableInfo = targetTableInfos.get(idx);
             if (!targetTableInfo.getColumnMetadatas().contains(
-                    getJoinColumn(joinColumn/*, m.getIdAttribute().getBindableJavaType()*/)))
+                    getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType())))
             {
-                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn/*, m.getIdAttribute().getBindableJavaType()*/));
+                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType()));
             }
         }
         else
         {
             if (!targetTableInfo.getColumnMetadatas().contains(
-                    getJoinColumn(joinColumn/*, m.getIdAttribute().getBindableJavaType()*/)))
+                    getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType())))
             {
-                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn/*, m.getIdAttribute().getBindableJavaType()*/));
+                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType()));
             }
             targetTableInfos.add(targetTableInfo);
         }
@@ -441,6 +449,15 @@ public class SchemaConfiguration implements Configuration
     private ColumnInfo getColumn(Attribute column, PropertyIndex indexedColumn)
     {
         ColumnInfo columnInfo = new ColumnInfo();
+
+        if (column.getJavaType().isEnum())
+        {
+            columnInfo.setType(String.class);
+        }
+        else
+        {
+            columnInfo.setType(column.getJavaType());
+        }
         columnInfo.setColumnName(((AbstractAttribute) column).getJPAColumnName());
         if (indexedColumn != null && indexedColumn.getName() != null)
         {
@@ -451,7 +468,6 @@ public class SchemaConfiguration implements Configuration
 
             // Add more if required
         }
-        columnInfo.setType(column.getJavaType());
         return columnInfo;
     }
 
@@ -464,12 +480,12 @@ public class SchemaConfiguration implements Configuration
      *            joinColumnName.
      * @return ColumnInfo object columnInfo.
      */
-    private ColumnInfo getJoinColumn(String joinColumnName/*, Class columnType*/)
+    private ColumnInfo getJoinColumn(String joinColumnName, Class columnType)
     {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(joinColumnName);
         columnInfo.setIndexable(true);
-//        columnInfo.setType(columnType);
+        columnInfo.setType(columnType);
         return columnInfo;
     }
 

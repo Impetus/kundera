@@ -9,6 +9,7 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -86,10 +87,12 @@ public class MongoGeneratedIdTest
         try
         {
             em.persist(strategyAuto);
+            em.clear();
             List<MongoGeneratedIdStrategyAuto> list = em.createQuery("Select c from MongoGeneratedIdStrategyAuto c")
                     .getResultList();
             Assert.assertNotNull(list);
             Assert.assertEquals(1, list.size());
+            Assert.assertTrue(list.get(0).getId() instanceof ObjectId);
             Assert.assertEquals("kuldeep", list.get(0).getName());
             Object id = list.get(0).getId();
             em.clear();

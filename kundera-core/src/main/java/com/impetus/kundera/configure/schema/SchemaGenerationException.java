@@ -198,4 +198,9 @@ public class SchemaGenerationException extends KunderaException
         this.dataStoreName = dataStoreName;
         this.schemaName = databaseName;
     }
+
+    public SchemaGenerationException(String arg0)
+    {
+        super(arg0);
+    }
 }

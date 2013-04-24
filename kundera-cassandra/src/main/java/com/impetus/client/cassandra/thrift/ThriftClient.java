@@ -202,7 +202,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), getExternalProperties());
 
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();

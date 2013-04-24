@@ -95,7 +95,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore";
+    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore,piccandra,secIdxAddCassandra,addHbase,picongo";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
             "oracle_kvstore" /* , "addHbase" */};
@@ -122,6 +122,7 @@ public abstract class AssociationBase
             log.error("Error in RDBMS cli ", e);
         }
 
+        HBaseCli.startCluster();
         // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -317,6 +318,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
+        HBaseCli.stopCluster();
         // dao.closeEntityManagerFactory();
 
     }

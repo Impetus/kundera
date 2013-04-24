@@ -7,6 +7,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
 
@@ -34,6 +35,7 @@ public abstract class CassandraBase
         {
             propertyMap = new HashMap();
             propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
         emf = Persistence.createEntityManagerFactory("CassandraDataTypeTest", propertyMap);
     }

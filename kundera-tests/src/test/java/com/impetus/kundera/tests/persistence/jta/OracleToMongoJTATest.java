@@ -15,11 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.persistence.jta;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -36,28 +31,17 @@ import javax.transaction.UserTransaction;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.ColumnDef;
-import org.apache.cassandra.thrift.IndexType;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
-import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * @author vivek.mishra
  * 
  */
-public class EjbJTAContextTest
+public class OracleToMongoJTATest
 {
     private InitialContext initialContext;
 
@@ -84,11 +68,8 @@ public class EjbJTAContextTest
 
         initialContext.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
 
-        emf = Persistence.createEntityManagerFactory("secIdxAddCassandraJTA,addMongoJTA");
+        emf = Persistence.createEntityManagerFactory("oracle_kvstore_JTA,addMongoJTA");
         em = emf.createEntityManager();
-        CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaTests");
-        loadData();
     }
 
     @Test
@@ -115,7 +96,7 @@ public class EjbJTAContextTest
         for (i = 0; i < 100; i++)
         {
         EntityManager em1 = emf.createEntityManager();
-        Assert.assertNotNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
+        Assert.assertNotNull(em1.find(OraclePersonnelOTOFKEntityJTA.class, "1_p" + i));
         }
     }
 
@@ -128,7 +109,7 @@ public class EjbJTAContextTest
             @Override
             public void run()
             {
-                PersonnelOToOFKEntityJTA person = new PersonnelOToOFKEntityJTA();
+                OraclePersonnelOTOFKEntityJTA person = new OraclePersonnelOTOFKEntityJTA();
                 person.setPersonId("1_p" + i);
                 person.setPersonName("crossdata-store");
                 HabitatOToOFKEntityJTA address = new HabitatOToOFKEntityJTA();
@@ -147,7 +128,7 @@ public class EjbJTAContextTest
                 
                 // As data is not commited, hence it should return null with other session.
                 EntityManager em1 = emf.createEntityManager();
-                Assert.assertNull(em1.find(PersonnelOToOFKEntityJTA.class, "1_p" + i));
+                Assert.assertNull(em1.find(OraclePersonnelOTOFKEntityJTA.class, "1_p" + i));
             }
         };        
         return r;
@@ -164,7 +145,7 @@ public class EjbJTAContextTest
         em.setFlushMode(FlushModeType.COMMIT);
 
         userTransaction.begin();
-        PersonnelOToOFKEntityJTA person = new PersonnelOToOFKEntityJTA();
+        OraclePersonnelOTOFKEntityJTA person = new OraclePersonnelOTOFKEntityJTA();
         person.setPersonId("1_p");
         person.setPersonName("crossdata-store");
         HabitatOToOFKEntityJTA address = new HabitatOToOFKEntityJTA();
@@ -191,78 +172,5 @@ public class EjbJTAContextTest
     {
         initialContext.unbind("java:comp/UserTransaction");
         initialContext.destroySubcontext("java:comp");
-
-        CassandraCli.dropKeySpace("KunderaTests");
-    }
-
-    /**
-     * Load cassandra specific data.
-     * 
-     * @throws TException
-     *             the t exception
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws UnavailableException
-     *             the unavailable exception
-     * @throws TimedOutException
-     *             the timed out exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     */
-    private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
-            SchemaDisagreementException
-    {
-
-        KsDef ksDef = null;
-        CfDef user_Def = new CfDef();
-        user_Def.name = "PERSONNEL";
-        user_Def.keyspace = "KunderaTests";
-        user_Def.setComparator_type("UTF8Type");
-        user_Def.setKey_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        user_Def.addToColumn_metadata(columnDef1);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(user_Def);
-
-        try
-        {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
-            }
-            CassandraCli.client.system_add_column_family(user_Def);
-
-        }
-        catch (NotFoundException e)
-        {
-
-            ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            // Set replication factor
-            if (ksDef.strategy_options == null)
-            {
-                ksDef.strategy_options = new LinkedHashMap<String, String>();
-            }
-            // Set replication factor, the value MUST be an integer
-            ksDef.strategy_options.put("replication_factor", "1");
-            CassandraCli.client.system_add_keyspace(ksDef);
-        }
-
-        com.impetus.kundera.tests.cli.CassandraCli.client.set_keyspace("KunderaTests");
     }
 }
