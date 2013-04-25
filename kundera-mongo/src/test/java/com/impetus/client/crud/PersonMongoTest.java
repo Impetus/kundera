@@ -31,7 +31,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.PersonMongo.Day;
+import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.utils.MongoUtils;
+import com.impetus.kundera.client.Client;
+import com.mongodb.CommandResult;
 
 public class PersonMongoTest extends BaseTest
 {
@@ -120,6 +123,8 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(2, results.size());
         
         selectIdQuery();
+        
+        onExecuteScript();
 
     }
 
@@ -268,4 +273,19 @@ public class PersonMongoTest extends BaseTest
         MongoUtils.dropDatabase(emf, _PU);
         emf.close();
     }
+
+
+    private void onExecuteScript()
+    {
+        Map<String, Client<Query>> clients = (Map<String, Client<Query>>) em.getDelegate();
+        Client client = clients.get(_PU);
+
+        String jScript = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
+        Object result = ((MongoDBClient)client).executeScript(jScript);
+        Assert.assertNull(result);
+        String findOneJScript = "db.PERSON.findOne()";
+        result = ((MongoDBClient)client).executeScript(findOneJScript);
+        Assert.assertNotNull(result);
+    }
+
 }
