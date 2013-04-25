@@ -157,12 +157,6 @@ public class UpdateDeleteNamedQueryTest
 
     }
 
-    @Test
-    public void testDelete()
-    {
-
-    }
-
     /**
      * @throws java.lang.Exception
      */

@@ -165,7 +165,6 @@ public abstract class AssociationBase
     {
         if (entityPuCol != null)
         {
-
             Iterator<Class> iter = entityPuCol.keySet().iterator();
             log.warn("\n\nInvocation for:\n--------------------------------");
             while (iter.hasNext())
@@ -271,7 +270,7 @@ public abstract class AssociationBase
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
-            CleanupUtilities.cleanLuceneDirectory(pu);
+            CleanupUtilities.cleanLuceneDirectory(pu); 
         }
     }
 

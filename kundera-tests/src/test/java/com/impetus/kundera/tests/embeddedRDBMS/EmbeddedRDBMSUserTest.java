@@ -75,7 +75,10 @@ public class EmbeddedRDBMSUserTest
         {
             CassandraCli.cassandraSetUp();
             CassandraCli.initClient();
-            HBaseCli.startCluster();
+            if (!HBaseCli.isStarted())
+            {
+                HBaseCli.startCluster();
+            }
             loadData();
             cli = new RDBMSCli(KEYSPACE);
             cli.createSchema(KEYSPACE);

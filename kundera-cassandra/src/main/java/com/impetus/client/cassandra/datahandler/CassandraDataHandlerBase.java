@@ -607,6 +607,13 @@ public abstract class CassandraDataHandlerBase
                         entity = initialize(m, entity, null);
                         setId(m, entity, column.getValue());
                     }
+                    else if (m.isCounterColumnType())
+                    {
+                        LongAccessor accessor = new LongAccessor();
+                        Long value = accessor.fromBytes(Long.class, column.getValue());
+                        CounterColumn counterColumn = new CounterColumn(ByteBuffer.wrap(column.getName()), value);
+                        onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
+                    }
                     else
                     {
                         entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
@@ -1080,7 +1087,7 @@ public abstract class CassandraDataHandlerBase
                         setId(m, entity, thriftColumnValue);
                         PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
                     }
-                    if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                    if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
                     {
                         setFieldValueViaCQL(entity, thriftColumnValue, attribute);
                     }

@@ -13,11 +13,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.tests.cli.HBaseCli;
 
 /**
  * @author Kuldeep Mishra
@@ -49,10 +50,9 @@ public class BankTest
     public void setUp() throws Exception
     {
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        cli = new HBaseCli();
-        if (!cli.isStarted())
+        if (!HBaseCli.isStarted())
         {
-            cli.startCluster();
+            HBaseCli.startCluster();
         }
 
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
@@ -79,7 +79,7 @@ public class BankTest
         mongoProperties = null;
         hbaseProperties = null;
         puPropertiesMap = null;
-//        cli.startCluster();
+        // cli.startCluster();
     }
 
     @Test
@@ -104,6 +104,13 @@ public class BankTest
         b.setAccountHolders(accountHolders);
 
         em.persist(b);
-    }
 
+        em.clear();
+
+        Bank found = em.find(Bank.class, "SBI_1");
+        Assert.assertNotNull(found);
+        Assert.assertEquals("SBI", found.getBankName());
+        Assert.assertNotNull(found.getAccountHolders());
+        Assert.assertEquals(2, found.getAccountHolders().size());
+    }
 }

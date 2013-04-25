@@ -221,5 +221,15 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             }
             return null;
         }
+
+        public Properties getConnectionProperties()
+        {
+            DataStore ds = getDataStore();
+            if (ds != null && ds.getConnection() != null)
+            {
+                return ds.getConnection().getProperties();
+            }
+            return null;
+        }
     }
 }

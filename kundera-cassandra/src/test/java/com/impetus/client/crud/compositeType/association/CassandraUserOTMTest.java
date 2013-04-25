@@ -158,13 +158,13 @@ public class CassandraUserOTMTest
 
             for (CfDef cfDef1 : cfDefn)
             {
-                if (cfDef1.getName().equalsIgnoreCase("UserOTOPK"))
+                if (cfDef1.getName().equals("CassandraUserUniOTM"))
                 {
-                    CassandraCli.client.system_drop_column_family("UserOTOPK");
+                    CassandraCli.client.system_drop_column_family("CassandraUserUniOTM");
                 }
-                if (cfDef1.getName().equalsIgnoreCase("AddressOTOPK"))
+                if (cfDef1.getName().equals("CassandraAddressUniOTM"))
                 {
-                    CassandraCli.client.system_drop_column_family("AddressOTOPK");
+                    CassandraCli.client.system_drop_column_family("CassandraAddressUniOTM");
                 }
             }
             CassandraCli.client.system_add_column_family(user);

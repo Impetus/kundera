@@ -46,8 +46,8 @@ import com.impetus.kundera.tests.crossdatastore.imdb.entities.Role;
 
 public class IMDBPolyglotTest extends TwinAssociation
 
-{  
-    Set<Actor> actors = new HashSet<Actor>(); 
+{
+    Set<Actor> actors = new HashSet<Actor>();
 
     @BeforeClass
     public static void init() throws Exception
@@ -55,8 +55,11 @@ public class IMDBPolyglotTest extends TwinAssociation
         buildPersistenceUnitsList();
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(Actor.class);
-        clazzz.add(Movie.class);       
-        HBaseCli.startCluster();
+        clazzz.add(Movie.class);
+        if (!HBaseCli.isStarted())
+        {
+            HBaseCli.startCluster();
+        }
         CassandraCli.cassandraSetUp();
         init(clazzz, ALL_PUs_UNDER_TEST);
     }
@@ -78,21 +81,21 @@ public class IMDBPolyglotTest extends TwinAssociation
     {
         tryOperation(ALL_PUs_UNDER_TEST);
     }
-    
+
     @Override
     protected void insert()
     {
-        populateActors();                
+        populateActors();
         dao.insertActors(actors);
     }
 
     @Override
     protected void find()
     {
-        
+
         Actor actor1 = (Actor) dao.find(Actor.class, 1);
         Actor actor2 = (Actor) dao.find(Actor.class, 2);
-        
+
         assertActors(actor1, actor2);
     }
 
@@ -107,30 +110,29 @@ public class IMDBPolyglotTest extends TwinAssociation
         dao.merge(actor2);
         Actor actor1Modified = (Actor) dao.find(Actor.class, 1);
         Actor actor2Modified = (Actor) dao.find(Actor.class, 2);
-        assertUpdatedActors(actor1Modified, actor2Modified);        
+        assertUpdatedActors(actor1Modified, actor2Modified);
     }
 
     @Override
     protected void remove()
-    {        
+    {
         Actor actor1 = (Actor) dao.find(Actor.class, 1);
         Actor actor2 = (Actor) dao.find(Actor.class, 2);
-        
+
         dao.remove(actor1);
         dao.remove(actor2);
-        
+
         Actor actor1Deleted = (Actor) dao.find(Actor.class, 1);
         Actor actor2Deleted = (Actor) dao.find(Actor.class, 2);
-        
+
         Assert.assertNull(actor1Deleted);
         Assert.assertNull(actor2Deleted);
     }
-    
-    
+
     @Override
     public void findAllActors()
     {
-        
+
         List<Actor> actors = dao.findAllActors();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -139,7 +141,7 @@ public class IMDBPolyglotTest extends TwinAssociation
 
     @Override
     public void findActorByID()
-    {        
+    {
         List<Actor> actors = dao.findActorByID();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -149,7 +151,7 @@ public class IMDBPolyglotTest extends TwinAssociation
 
     @Override
     public void findActorByName()
-    {        
+    {
         List<Actor> actors = dao.findActorByName();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -159,24 +161,24 @@ public class IMDBPolyglotTest extends TwinAssociation
 
     @Override
     public void findActorByIDAndNamePositive()
-    {        
+    {
         List<Actor> actors = dao.findActorByIDAndNamePositive();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(1, actors.size());
         assertActor1(actors.get(0));
     }
-    
+
     @Override
     public void findActorByIDAndNameNegative()
-    {        
-        List<Actor> actors = dao.findActorByIDAndNameNegative();        
+    {
+        List<Actor> actors = dao.findActorByIDAndNameNegative();
         Assert.assertTrue(actors == null || actors.isEmpty());
     }
 
     @Override
     public void findActorWithMatchingName()
-    {        
+    {
         List<Actor> actors = dao.findActorWithMatchingName();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -186,7 +188,7 @@ public class IMDBPolyglotTest extends TwinAssociation
 
     @Override
     public void findActorWithinGivenIdRange()
-    {        
+    {
         List<Actor> actors = dao.findActorWithinGivenIdRange();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -194,10 +196,9 @@ public class IMDBPolyglotTest extends TwinAssociation
         // assertActor2(actors.get(0));
     }
 
-
     @Override
     public void findSelectedFields()
-    {        
+    {
         List<Actor> actors = dao.findSelectedFields();
         Assert.assertNotNull(actors);
         Assert.assertFalse(actors.isEmpty());
@@ -219,9 +220,9 @@ public class IMDBPolyglotTest extends TwinAssociation
      */
     @After
     public void tearDown() throws Exception
-    {        
+    {
     }
-   
+
     @Override
     protected void loadDataForActor() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
@@ -292,7 +293,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         cfDef2.keyspace = KEYSPACE;
         cfDef2.setComparator_type("UTF8Type");
         cfDef2.setKey_validation_class("UTF8Type");
-        
+
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("TITLE".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef);
@@ -300,7 +301,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("YEAR".getBytes()), "Int32Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
-        
+
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);
 
@@ -326,36 +327,47 @@ public class IMDBPolyglotTest extends TwinAssociation
         CassandraCli.client.set_keyspace(KEYSPACE);
 
     }
-    
+
     private void populateActors()
     {
-        //Actors
+        // Actors
         Actor actor1 = new Actor(1, "Tom Cruise");
-        Actor actor2 = new Actor(2, "Emmanuelle Béart");     
-        
-        //Movies
+        Actor actor2 = new Actor(2, "Emmanuelle Béart");
+
+        // Movies
         Movie movie1 = new Movie("m1", "War of the Worlds", 2005);
-        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);       
+        Movie movie2 = new Movie("m2", "Mission Impossible", 1996);
         Movie movie3 = new Movie("m3", "Hell", 2005);
-        
-        //Roles
-        Role role1 = new Role("Ray Ferrier", "Lead Actor"); role1.setActor(actor1); role1.setMovie(movie1);
-        Role role2 = new Role("Ethan Hunt", "Lead Actor"); role2.setActor(actor1); role2.setMovie(movie2);
-        Role role3 = new Role("Claire Phelps", "Lead Actress"); role3.setActor(actor2); role1.setMovie(movie2);
-        Role role4 = new Role("Sophie", "Supporting Actress"); role4.setActor(actor2); role1.setMovie(movie3);
-        
-        //Relationships
-        actor1.addMovie(role1, movie1); actor1.addMovie(role2, movie2);
-        actor2.addMovie(role3, movie2); actor2.addMovie(role4, movie3);
-        
+
+        // Roles
+        Role role1 = new Role("Ray Ferrier", "Lead Actor");
+        role1.setActor(actor1);
+        role1.setMovie(movie1);
+        Role role2 = new Role("Ethan Hunt", "Lead Actor");
+        role2.setActor(actor1);
+        role2.setMovie(movie2);
+        Role role3 = new Role("Claire Phelps", "Lead Actress");
+        role3.setActor(actor2);
+        role1.setMovie(movie2);
+        Role role4 = new Role("Sophie", "Supporting Actress");
+        role4.setActor(actor2);
+        role1.setMovie(movie3);
+
+        // Relationships
+        actor1.addMovie(role1, movie1);
+        actor1.addMovie(role2, movie2);
+        actor2.addMovie(role3, movie2);
+        actor2.addMovie(role4, movie3);
+
         movie1.addActor(role1, actor1);
-        movie2.addActor(role2, actor1); movie2.addActor(role3, actor2);
+        movie2.addActor(role2, actor1);
+        movie2.addActor(role3, actor2);
         movie3.addActor(role4, actor2);
-        
+
         actors.add(actor1);
         actors.add(actor2);
     }
-    
+
     private void assertActors(Actor actor1, Actor actor2)
     {
         Assert.assertNotNull(actor1);
@@ -364,8 +376,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Map<Role, Movie> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
         Assert.assertEquals(2, movies1.size());
-        
-        
+
         Assert.assertNotNull(actor2);
         Assert.assertEquals(2, actor2.getId());
         Assert.assertEquals("Emmanuelle Béart", actor2.getName());
@@ -373,7 +384,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
     }
-    
+
     /**
      * @param actor1
      * @param actor2
@@ -386,15 +397,15 @@ public class IMDBPolyglotTest extends TwinAssociation
         Map<Role, Movie> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
         Assert.assertEquals(2, movies1.size());
-        
+
         Assert.assertNotNull(actor2);
         Assert.assertEquals(2, actor2.getId());
         Assert.assertEquals("Amir", actor2.getName());
         Map<Role, Movie> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
-    }  
-    
+    }
+
     /**
      * @param actor2
      */
@@ -406,7 +417,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Map<Role, Movie> movies2 = actor2.getMovies();
         Assert.assertFalse(movies2 == null || movies2.isEmpty());
         Assert.assertEquals(2, movies2.size());
-       
+
     }
 
     /**
@@ -420,6 +431,6 @@ public class IMDBPolyglotTest extends TwinAssociation
         Map<Role, Movie> movies1 = actor1.getMovies();
         Assert.assertFalse(movies1 == null || movies1.isEmpty());
         Assert.assertEquals(2, movies1.size());
-        
+
     }
- }
+}

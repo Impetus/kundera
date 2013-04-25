@@ -107,7 +107,13 @@ public final class CQLTranslator
 
     public static final String DROP_TABLE = "drop columnfamily $COLUMN_FAMILY";
 
-    public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY set ($COLUMN) = ($VALUE) where ($COLUMN) = ($VALUE)";
+    public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY ";
+
+    public static final String ADD_SET_CLAUSE = "SET ";
+
+    public static final String COMMA_STR = ", ";
+    
+    public static final String INCR_COUNTER = "+";
 
     public CQLTranslator()
     {
@@ -265,6 +271,16 @@ public final class CQLTranslator
         builder.append(clause);
         appendValue(builder, value.getClass(), value, false);
         builder.append(AND_CLAUSE);
+    }
+
+    public void buildSetClauseForCounters(StringBuilder builder, String field, Object value)
+    {
+        builder = ensureCase(builder, field);
+        builder.append(EQ_CLAUSE);
+        builder = ensureCase(builder, field);
+        builder.append(INCR_COUNTER);
+        appendValue(builder, value.getClass(), value, false);
+        builder.append(COMMA_STR);
     }
 
     /**

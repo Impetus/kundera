@@ -122,7 +122,10 @@ public abstract class AssociationBase
             log.error("Error in RDBMS cli ", e);
         }
 
-        HBaseCli.startCluster();
+        if (!HBaseCli.isStarted())
+        {
+            HBaseCli.startCluster();
+        }
         // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -318,9 +321,8 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-        HBaseCli.stopCluster();
+        // HBaseCli.stopCluster();
         // dao.closeEntityManagerFactory();
-
     }
 
     /**

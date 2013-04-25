@@ -80,4 +80,12 @@ public interface CassandraConstants
 
     /** Name of Row key column when stored using CQL insert statement */
     public static final String CQL_KEY = "key";
+
+    public static final String TEST_ON_BORROW = "test.onborrow";
+
+    public static final String TEST_ON_CONNECT = "test.onconnect";
+
+    public static final String TEST_WHILE_IDLE = "test.whileidle";
+
+    public static final String TEST_ON_RETURN = "test.onretrun";
 }

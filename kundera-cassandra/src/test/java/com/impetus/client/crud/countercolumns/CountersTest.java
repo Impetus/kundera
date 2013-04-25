@@ -68,6 +68,8 @@ public class CountersTest
 
     private String keyspace = "KunderaCounterColumn";
 
+    protected Map propertyMap = new HashMap();
+
     /**
      * @throws java.lang.Exception
      */
@@ -81,11 +83,13 @@ public class CountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-//            createSchema();
+            // createSchema();
         }
-        Map propertyMap = new HashMap();
-        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        if (propertyMap.isEmpty())
+        {
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest", propertyMap);
     }
 
@@ -120,11 +124,11 @@ public class CountersTest
     @After
     public void tearDown() throws Exception
     {
+        emf.close();
         if (/* AUTO_MANAGE_SCHEMA && CassandraCli.keyspaceExist(keyspace) */CassandraCli.client != null)
         {
             CassandraCli.dropKeySpace(keyspace);
         }
-        emf.close();
     }
 
     @Test

@@ -31,6 +31,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -98,6 +99,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -615,7 +617,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             throw new PersistenceException(e);
         }
 
-        return result != null & !result.isEmpty() ? result.get(0) : null;
+        return result != null && !result.isEmpty() ? result.get(0) : null;
     }
 
     /**
@@ -861,6 +863,64 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
 
         return insert_Query;
+    }
+
+    /**
+     * Return update query string for given entity.
+     * 
+     * @param entityMetadata
+     * @param entity
+     * @param cassandra_client
+     * @param rlHolders
+     * @return
+     */
+    protected String createUpdateQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
+            List<RelationHolder> rlHolders)
+    {
+        CQLTranslator translator = new CQLTranslator();
+        String update_Query = translator.UPDATE_QUERY;
+
+        update_Query = StringUtils.replace(update_Query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+        StringBuilder builder = new StringBuilder(update_Query);
+        builder.append(CQLTranslator.ADD_SET_CLAUSE);
+
+        Object rowId = PropertyAccessorHelper.getId(entity, entityMetadata);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+
+        Field[] declaredFields = entityMetadata.getEntityClazz().getDeclaredFields();
+        String[] columns = new String[declaredFields.length];
+        Object[] values = new Object[declaredFields.length];
+
+        int counter = 0;
+        for (Field field : declaredFields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(field)
+                    && !(entityMetadata.getIdAttribute().getName()
+                            .equals(entityType.getAttribute(field.getName()).getName()) && field.getType().equals(
+                            entityMetadata.getIdAttribute().getBindableJavaType())))
+            {
+                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
+                if (!attrib.isAssociation())
+                {
+                    columns[counter] = attrib.getJPAColumnName();
+                    values[counter] = PropertyAccessorHelper.getObject(entity, field);
+                    counter++;
+                }
+            }
+        }
+        for (int i = 0; i < counter; i++)
+        {
+            translator.buildSetClauseForCounters(builder, columns[i], values[i]);
+        }
+
+        // strip last "," clause.
+        builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
+        onWhereClause(entityMetadata, rowId, translator, builder, metaModel);
+        return builder.toString();
     }
 
     /**
@@ -1700,9 +1760,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
                 TimedOutException, SchemaDisagreementException
         {
-            String insert_Query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+            String query;
+            if (entityMetadata.isCounterColumnType())
+            {
+                query = createUpdateQuery(entityMetadata, entity, conn, rlHolders);
+            }
+            else
+            {
+                query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+            }
             // conn.set_cql_version(getCqlVersion());
-            conn.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
+            conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
                     consistencyLevel);
         }
 
@@ -1741,17 +1809,18 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         Object rowKey = null;
 
                         ThriftRow thriftRow = null;
-                        if (entityMetadata.isCounterColumnType())
+                      /*  if (entityMetadata.isCounterColumnType())
                         {
-                            log.info("Native query is not permitted on counter column returning null ");
-                            return null;
-                        }
-                        else
-                        {
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(),  new ArrayList<Column>(0),
                                     new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                     new ArrayList<CounterSuperColumn>(0));
                         }
+                        else
+                        {*/
+                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                    new ArrayList<CounterSuperColumn>(0));
+//                        }
 
                         Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
                                 relationalField != null && !relationalField.isEmpty());
