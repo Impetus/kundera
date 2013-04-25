@@ -192,23 +192,36 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         results = executeSelectQuery(findByIdAndAge, params);
         Assert.assertEquals(0, results.size());
         
-        clearEm();
-        //Select query with where clause on ID column and non-ID column with OR operator
-        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
-        params = new HashMap<Object, Object>();
-        params.put("personId", "1");
-        params.put("age", 30);
-        results = executeSelectQuery(findByIdAndAge, params);
-        Assert.assertEquals(2, results.size());  
-        
-        clearEm();
-        //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
-        findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age >:age";
-        params = new HashMap<Object, Object>();
-        params.put("personId", "1");
-        params.put("age", 20);
-        results = executeSelectQuery(findByIdAndAge, params);
-        Assert.assertEquals(3, results.size());
+        //OR queries are not supported for Lucene, and hence are not to be tested in that case 
+        if(! isLuceneIndexingEnabled())
+        {
+            clearEm();
+            //Select query with where clause on ID column and non-ID column with OR operator
+            findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
+            params = new HashMap<Object, Object>();
+            params.put("personId", "1");
+            params.put("age", 30);
+            results = executeSelectQuery(findByIdAndAge, params);
+            Assert.assertEquals(2, results.size());  
+            
+            clearEm();
+            //Select query with where clause on ID column and non-ID column (greater than operator) with OR operator
+            findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age >:age";
+            params = new HashMap<Object, Object>();
+            params.put("personId", "1");
+            params.put("age", 20);
+            results = executeSelectQuery(findByIdAndAge, params);
+            Assert.assertEquals(3, results.size());
+            
+            clearEm();
+            //Select query with where clause on non-ID column (with comparison) with OR operator
+            String findByAgeOR = "Select p from PersonKVStore p where p.age>:min OR p.age<=:max";
+            params = new HashMap<Object, Object>();
+            params.put("min", 30);
+            params.put("max", 20);
+            results = executeSelectQuery(findByAgeOR, params);
+            Assert.assertEquals(3, results.size());
+        }       
         
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with AND operator
@@ -226,16 +239,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         params.put("start", 40);
         params.put("end", 15);
         results = executeSelectQuery(findByAgeLTGT, params);
-        Assert.assertEquals(3, results.size());
-        
-        clearEm();
-        //Select query with where clause on non-ID column (with comparison) with OR operator
-        findByAge = "Select p from PersonKVStore p where p.age>:min OR p.age<=:max";
-        params = new HashMap<Object, Object>();
-        params.put("min", 30);
-        params.put("max", 20);
-        results = executeSelectQuery(findByAge, params);
-        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(3, results.size());       
         
         clearEm();
         //Select query with where clause on non-ID column (with comparison) with OR operator
