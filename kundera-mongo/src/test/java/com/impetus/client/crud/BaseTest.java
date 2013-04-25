@@ -20,9 +20,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import junit.framework.Assert;
+import com.impetus.client.crud.PersonMongo.Month;
 
-import com.impetus.client.crud.PersonMongo.Day;
+import junit.framework.Assert;
 
 /**
  * The Class BaseTest.
@@ -47,6 +47,7 @@ public abstract class BaseTest
         o.setPersonName("vivek");
         o.setAge(age);
         o.setDay(Day.FRIDAY);
+        o.setMonth(Month.JAN);
         return o;
     }
 

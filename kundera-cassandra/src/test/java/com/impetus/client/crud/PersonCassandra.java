@@ -64,6 +64,10 @@ public class PersonCassandra
     @Enumerated(EnumType.STRING)
     private Day day;
 
+    @Column(name = "MONTH_ENUM")
+    @Enumerated(EnumType.STRING)
+    private Month month;
+
     /**
      * @return the a
      */
@@ -155,6 +159,16 @@ public class PersonCassandra
     public void setDay(Day day)
     {
         this.day = day;
+    }
+
+    public Month getMonth()
+    {
+        return month;
+    }
+
+    public void setMonth(Month month)
+    {
+        this.month = month;
     }
 
     enum Day

@@ -30,6 +30,9 @@ public class Counters
     @Column
     private int counter;
 
+    @Column
+    private transient int count;
+
     /**
      * @return the id
      */
@@ -63,4 +66,15 @@ public class Counters
     {
         this.counter = counter;
     }
+
+    public int getCount()
+    {
+        return count;
+    }
+
+    public void setCount(int count)
+    {
+        this.count = count;
+    }
+
 }

@@ -30,7 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.PersonMongo.Day;
+import com.impetus.client.crud.PersonMongo.Month;
 import com.impetus.client.utils.MongoUtils;
 
 public class PersonMongoTest extends BaseTest
@@ -69,7 +69,7 @@ public class PersonMongoTest extends BaseTest
         Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
         Object p3 = prepareMongoInstance("3", 15);
-        
+
         Query findQuery = em.createQuery("Select p from PersonMongo p");
         List<PersonMongo> allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
@@ -79,12 +79,12 @@ public class PersonMongoTest extends BaseTest
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
-        
+
         findQuery = em.createQuery("Select p.age from PersonMongo p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
-        
+
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
@@ -95,6 +95,7 @@ public class PersonMongoTest extends BaseTest
         PersonMongo p = findById(PersonMongo.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals(Day.FRIDAY, p.getDay());
+        Assert.assertEquals(Month.JAN, p.getMonth());
         Assert.assertEquals("vivek", p.getPersonName());
         assertFindByName(em, "PersonMongo", PersonMongo.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonMongo", PersonMongo.class, "vivek", "10", "personName");
@@ -107,18 +108,21 @@ public class PersonMongoTest extends BaseTest
         query.setParameter("name", "vivek");
         List<PersonMongo> results = query.getResultList();
         Assert.assertEquals(3, results.size());
+        Assert.assertEquals(Month.JAN, results.get(0).getMonth());
 
         query = em.createNamedQuery("mongo.position.query");
         query.setParameter(1, "vivek");
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
+        Assert.assertEquals(Month.JAN, results.get(0).getMonth());
 
         query = em.createQuery("select p from PersonMongo p");
         query.setMaxResults(2);
         results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        
+        Assert.assertEquals(Month.JAN, results.get(0).getMonth());
+
         selectIdQuery();
 
     }
@@ -133,7 +137,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
-        
+
         query = "Select p.personId from PersonMongo p where p.personName = vivek";
         // // find by name.
         q = em.createQuery(query);
@@ -144,9 +148,8 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
-        
-        q = em.createQuery("Select p.personId from PersonMongo p where p.personName = vivek and p.age > "
-                + 10);
+
+        q = em.createQuery("Select p.personId from PersonMongo p where p.personName = vivek and p.age > " + 10);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
@@ -155,7 +158,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
     }
-    
+
     /**
      * On typed named query.
      */
@@ -173,6 +176,7 @@ public class PersonMongoTest extends BaseTest
         query.setParameter("name", "vivek");
         List<PersonMongo> results = query.getResultList();
         Assert.assertEquals(3, results.size());
+        Assert.assertEquals(Month.JAN, results.get(0).getMonth());
     }
 
     /**

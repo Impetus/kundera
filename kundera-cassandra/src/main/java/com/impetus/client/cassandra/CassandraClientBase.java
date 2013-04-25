@@ -866,7 +866,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Return update query string for given entity.
+     * Return update query string for given entity intended for counter column
+     * family.
      * 
      * @param entityMetadata
      * @param entity
@@ -874,8 +875,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param rlHolders
      * @return
      */
-    protected String createUpdateQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
-            List<RelationHolder> rlHolders)
+    protected String createUpdateQueryForCounter(EntityMetadata entityMetadata, Object entity,
+            Cassandra.Client cassandra_client, List<RelationHolder> rlHolders)
     {
         CQLTranslator translator = new CQLTranslator();
         String update_Query = translator.UPDATE_QUERY;
@@ -891,30 +892,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
-        Field[] declaredFields = entityMetadata.getEntityClazz().getDeclaredFields();
-        String[] columns = new String[declaredFields.length];
-        Object[] values = new Object[declaredFields.length];
+        Set<Attribute> attributes = entityType.getAttributes();
 
-        int counter = 0;
-        for (Field field : declaredFields)
+        for (Attribute attrib : attributes)
         {
-            if (!ReflectUtils.isTransientOrStatic(field)
-                    && !(entityMetadata.getIdAttribute().getName()
-                            .equals(entityType.getAttribute(field.getName()).getName()) && field.getType().equals(
-                            entityMetadata.getIdAttribute().getBindableJavaType())))
+            if (!entityMetadata.getIdAttribute().getName().equals(attrib.getName())
+                    && !metaModel.isEmbeddable(attrib.getJavaType()) && !attrib.isAssociation())
             {
-                AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
-                if (!attrib.isAssociation())
-                {
-                    columns[counter] = attrib.getJPAColumnName();
-                    values[counter] = PropertyAccessorHelper.getObject(entity, field);
-                    counter++;
-                }
+                translator.buildSetClauseForCounters(builder, ((AbstractAttribute) attrib).getJPAColumnName(),
+                        PropertyAccessorHelper.getObject(entity, attrib.getName()));
             }
         }
-        for (int i = 0; i < counter; i++)
+        for (RelationHolder rl : rlHolders)
         {
-            translator.buildSetClauseForCounters(builder, columns[i], values[i]);
+            translator.buildSetClauseForCounters(builder, rl.getRelationName(), rl.getRelationValue());
         }
 
         // strip last "," clause.
@@ -1763,7 +1754,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             String query;
             if (entityMetadata.isCounterColumnType())
             {
-                query = createUpdateQuery(entityMetadata, entity, conn, rlHolders);
+                query = createUpdateQueryForCounter(entityMetadata, entity, conn, rlHolders);
             }
             else
             {
@@ -1809,18 +1800,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         Object rowKey = null;
 
                         ThriftRow thriftRow = null;
-                      /*  if (entityMetadata.isCounterColumnType())
-                        {
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(),  new ArrayList<Column>(0),
-                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                    new ArrayList<CounterSuperColumn>(0));
-                        }
-                        else
-                        {*/
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
-                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                    new ArrayList<CounterSuperColumn>(0));
-//                        }
+                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                new ArrayList<CounterSuperColumn>(0));
 
                         Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
                                 relationalField != null && !relationalField.isEmpty());

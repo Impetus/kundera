@@ -63,6 +63,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 
@@ -599,20 +600,11 @@ public abstract class CassandraDataHandlerBase
             {
                 if (column != null)
                 {
-                    // entity = initialize(tr, m, entity);
-
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                     if (CassandraConstants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
                     {
                         entity = initialize(m, entity, null);
                         setId(m, entity, column.getValue());
-                    }
-                    else if (m.isCounterColumnType())
-                    {
-                        LongAccessor accessor = new LongAccessor();
-                        Long value = accessor.fromBytes(Long.class, column.getValue());
-                        CounterColumn counterColumn = new CounterColumn(ByteBuffer.wrap(column.getName()), value);
-                        onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
                     }
                     else
                     {
@@ -1012,6 +1004,13 @@ public abstract class CassandraDataHandlerBase
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
+        if (m.isCounterColumnType())
+        {
+            LongAccessor accessor = new LongAccessor();
+            Long value = accessor.fromBytes(Long.class, column.getValue());
+            return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
+                    value.toString());
+        }
         return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
     }
 
@@ -1253,8 +1252,7 @@ public abstract class CassandraDataHandlerBase
 
     private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)
     {
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(((AbstractAttribute) attribute)
-                .getBindableJavaType());
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) attribute.getJavaMember());
         Object objValue;
         try
         {

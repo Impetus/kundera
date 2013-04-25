@@ -58,7 +58,6 @@ public class MongoDBUtils
                     populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()),
                             ((AbstractAttribute) compositeColumn).getBindableJavaType()));
         }
-
         return compoundKeyObj;
     }
 
@@ -82,11 +81,7 @@ public class MongoDBUtils
     private static boolean isUTF8Value(Class<?> clazz)
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
-                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                /*
-                 * || (clazz.isAssignableFrom(Calendar.class)) ||
-                 * (clazz.isAssignableFrom(GregorianCalendar.class))
-                 */);
+                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class)));
     }
 
     /**

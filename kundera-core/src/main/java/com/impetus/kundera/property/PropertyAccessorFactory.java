@@ -105,8 +105,8 @@ public class PropertyAccessorFactory
         map.put(Enum.class, new EnumAccessor());
 
         map.put(UUID.class, new UUIDAccessor());
-        
-        //Accessor for Geolocation classes
+
+        // Accessor for Geolocation classes
         map.put(Point.class, new PointAccessor());
     }
 
@@ -131,7 +131,15 @@ public class PropertyAccessorFactory
     @SuppressWarnings("unchecked")
     public static PropertyAccessor getPropertyAccessor(Class<?> clazz)
     {
-        PropertyAccessor<?> accessor = map.get(clazz);
+        PropertyAccessor<?> accessor;
+        if (clazz.isEnum())
+        {
+            accessor = new EnumAccessor();
+        }
+        else
+        {
+            accessor = map.get(clazz);
+        }
 
         // allow fall-back to Object streamer.
         if (null == accessor)
