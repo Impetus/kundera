@@ -47,6 +47,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -229,27 +230,25 @@ public abstract class QueryImpl implements Query
      *            the client
      * @param result
      *            the result
+     * @param columnsToSelect List of column names to be selected (rest should be ignored)
      * @return the list
      */
-    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
+    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result, String[] columnsToSelect)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
         Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
+        String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+        Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
+        
         if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
-        {
-            String[] primaryKeys = searchFilter.values().toArray(new String[] {});
-            Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
+        {            
 
-            // result = (List<Object>)
-            // persistenceDelegeator.find(m.getEntityClazz(),
-            // uniquePKs.toArray());
-            result = (List<Object>) client.findAll(m.getEntityClazz(), uniquePKs.toArray());
-
+            result = (List<Object>) client.findAll(m.getEntityClazz(), columnsToSelect, uniquePKs.toArray());
         }
         else
         {
-            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
+            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
         }
         return result;
     }
@@ -299,7 +298,15 @@ public abstract class QueryImpl implements Query
                 // property
                 sb.append(metadata.getIndexName());
                 sb.append(".");
-                sb.append(filter.getProperty());
+                
+                if(MetadataUtils.getEnclosingEmbeddedFieldName(metadata, filter.getProperty(), true) != null)
+                {
+                    sb.append(filter.getProperty().substring(filter.getProperty().indexOf(".") + 1, filter.getProperty().length()));
+                }
+                else
+                {
+                    sb.append(filter.getProperty());
+                }                
 
                 // joiner
                 String appender = "";
@@ -450,7 +457,7 @@ public abstract class QueryImpl implements Query
     {
         Set<String> rSet = fetchDataFromLucene(client);
 
-        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
+        List resultList = client.findAll(m.getEntityClazz(), null, rSet.toArray(new String[] {}));
         transform(m, ls, resultList);
 
     }
@@ -489,6 +496,9 @@ public abstract class QueryImpl implements Query
         {
             sb.append(isGreaterThan ? "null" : value);
         }
+        
+        //sb.append(isGreaterThan ? "null" : value);
+        
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }

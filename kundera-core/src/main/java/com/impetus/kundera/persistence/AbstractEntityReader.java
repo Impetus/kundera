@@ -213,7 +213,7 @@ public class AbstractEntityReader
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
         Set<String> rSet = fetchDataFromLucene(client);
-        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
+        List resultList = client.findAll(m.getEntityClazz(), null, rSet.toArray(new String[] {}));
         return m.getRelationNames() != null && !m.getRelationNames().isEmpty() ? resultList : transform(m, ls,
                 resultList);
     }

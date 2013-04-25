@@ -92,14 +92,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         
         if (client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
         {
-            results.addAll(populateUsingLucene(m, client, null));
-            
-            /*if(interpreter.isFindById())
-            {                
-                //results.addAll(resultsFromIdSearch);                
-                addToResults(results, resultsFromIdSearch, interpreter.getOperatorWithRowKey());
-            } */       
-
+            results.addAll(populateUsingLucene(m, client, null, interpreter.getSelectColumns()));
         }
         else
         {   

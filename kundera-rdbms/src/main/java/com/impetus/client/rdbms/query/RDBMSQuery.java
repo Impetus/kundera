@@ -117,7 +117,7 @@ public class RDBMSQuery extends QueryImpl implements Query
             }
             else
             {
-                result = populateUsingLucene(m, client, result);
+                result = populateUsingLucene(m, client, result, null);
             }
         }
         catch (Exception e)

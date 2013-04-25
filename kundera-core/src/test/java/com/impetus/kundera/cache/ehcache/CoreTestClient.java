@@ -23,7 +23,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
     }
 
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         // TODO Auto-generated method stub
         return null;

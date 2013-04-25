@@ -177,7 +177,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * java.lang.String[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> arg0, Object... arg1)
+    public <E> List<E> findAll(Class<E> arg0, String[] columnsToSelect, Object... arg1)
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.

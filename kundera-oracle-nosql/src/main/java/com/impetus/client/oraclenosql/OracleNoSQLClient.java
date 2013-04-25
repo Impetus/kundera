@@ -667,18 +667,18 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
-    {
-        return findAll(entityClass, new String[0], keys);
-    }
-
-    private <E> List<E> findAll(Class<E> entityClass, String[] selectColumns, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         List<E> results = new ArrayList<E>();
+        
+        if(columnsToSelect == null)
+        {
+            columnsToSelect = new String[0];
+        }
 
         for (Object key : keys)
         {
-            results.add((E) find(entityClass, key, Arrays.asList(selectColumns)));
+            results.add((E) find(entityClass, key, Arrays.asList(columnsToSelect)));
         }
 
         return results;
