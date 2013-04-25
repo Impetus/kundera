@@ -302,7 +302,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         Object connection = getConnection();
         List results = new ArrayList();

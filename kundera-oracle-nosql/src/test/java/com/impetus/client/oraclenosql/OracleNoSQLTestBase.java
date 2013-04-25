@@ -23,6 +23,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.metadata.model.ClientMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+
 /**
  * Base class for all test cases 
  * @author amresh.singh
@@ -30,6 +36,8 @@ import javax.persistence.Query;
 public class OracleNoSQLTestBase
 {
     
+    private static final String PERSISTENCE_UNIT = "twikvstore";
+
     /** The emf. */
     private static EntityManagerFactory emf;
 
@@ -38,7 +46,7 @@ public class OracleNoSQLTestBase
 
     protected void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("twikvstore");
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         em = emf.createEntityManager();
     }
 
@@ -140,6 +148,20 @@ public class OracleNoSQLTestBase
             }
               
         }
+    }
+    
+    protected boolean isLuceneIndexingEnabled()
+    {
+        if(emf != null)
+        {
+            ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(PERSISTENCE_UNIT);
+            String luceneDirectory = clientMetadata.getLuceneIndexDir();
+            if(! StringUtils.isEmpty(luceneDirectory))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

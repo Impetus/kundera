@@ -47,6 +47,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -261,7 +262,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
 
@@ -816,5 +817,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         // return auto generated id used by mongodb.
         return new ObjectId();
+    }
+
+    /**
+     * Method to execute mongo jscripts.
+     * 
+     * @param script jscript in string format
+     * 
+     * @return result object.
+     */
+    public Object executeScript(String script)
+    {
+        return mongoDb.eval(script);
     }
 }

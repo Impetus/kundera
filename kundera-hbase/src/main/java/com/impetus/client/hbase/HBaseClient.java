@@ -163,7 +163,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> entities = new ArrayList<E>();

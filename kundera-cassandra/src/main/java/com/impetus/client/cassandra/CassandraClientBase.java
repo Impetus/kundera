@@ -568,11 +568,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the element type
      * @param entityClass
      *            the entity class
+     * @param columnsToSelect TODO
      * @param rowIds
      *            the row ids
      * @return the list
      */
-    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> results = new ArrayList<E>();
@@ -737,7 +738,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     rowIds[i] = PropertyAccessorHelper.getObject(b, (Field) m.getIdAttribute().getJavaMember());
                     i++;
                 }
-                entities.addAll(findAll(m.getEntityClazz(), rowIds));
+                entities.addAll(findAll(m.getEntityClazz(), null, rowIds));
             }
 
         }
