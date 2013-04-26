@@ -42,7 +42,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.entities.Month;
 import com.impetus.client.entities.PersonRedis;
+import com.impetus.client.entities.PersonRedis.Day;
 import com.impetus.client.redis.RedisClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -174,7 +176,8 @@ public class RedisClientTest
         RedisClient client = (RedisClient) clients.get(REDIS_PU);
         client.persistJoinTable(joinTableData);
 
-        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey,String.class);
+        List<String> columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey,
+                String.class);
 
         Assert.assertNotNull(columns);
         Assert.assertEquals(true, !columns.isEmpty());
@@ -185,7 +188,7 @@ public class RedisClientTest
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey1);
         client.deleteByColumn(schemaName, tableName, inverseJoinColumn, inverseJoinKey2);
 
-        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey,String.class);
+        columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey, String.class);
 
         Assert.assertTrue(columns.isEmpty());
 
@@ -240,6 +243,8 @@ public class RedisClientTest
         object.setAge(32);
         object.setPersonId(ROW_KEY);
         object.setPersonName(originalName);
+        object.setDay(Day.TUESDAY);
+        object.setMonth(Month.JAN);
 
         Node node = new Node(nodeId, PersonRedis.class, new TransientState(), null, ROW_KEY);
         node.setData(object);
@@ -251,7 +256,8 @@ public class RedisClientTest
         Assert.assertEquals(result.getPersonId(), object.getPersonId());
         Assert.assertEquals(result.getAge(), object.getAge());
         Assert.assertEquals(result.getPersonName(), object.getPersonName());
-
+        Assert.assertEquals(result.getDay(), object.getDay());
+        Assert.assertEquals(result.getMonth(), object.getMonth());
     }
 
     /**

@@ -90,7 +90,6 @@ public class DocumentObjectMapper
                 log.warn("Field " + f.getName()
                         + " is not a premitive, String or Wrapper object, and hence, won't be part of persistence");
             }
-
         }
         return dBObj;
     }
@@ -145,13 +144,13 @@ public class DocumentObjectMapper
                 if (column.getJavaType().isAssignableFrom(Point.class))
                 {
                     Point point = null;
-                    if(val != null)
+                    if (val != null)
                     {
                         BasicDBList list = (BasicDBList) val;
                         double x = Double.parseDouble(list.get(0).toString());
                         double y = Double.parseDouble(list.get(1).toString());
                         point = new Point(x, y);
-                    }                    
+                    }
                     PropertyAccessorHelper.set(obj, (Field) column.getJavaMember(), point);
                 }
                 else

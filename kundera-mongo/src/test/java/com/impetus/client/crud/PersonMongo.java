@@ -48,9 +48,13 @@ public class PersonMongo
     @Column(name = "AGE")
     private Integer age;
 
-    @Column(name = "ENUM")
+    @Column(name = "DAY_ENUM")
     @Enumerated(EnumType.STRING)
     private Day day;
+
+    @Column(name = "MONTH_ENUM")
+    @Enumerated(EnumType.STRING)
+    private Month month;
 
     /**
      * Gets the person id.
@@ -116,14 +120,23 @@ public class PersonMongo
         this.day = day;
     }
 
-    enum Day
-    {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
-    }
-
     public Day getDay()
     {
         return day;
     }
 
+    public Month getMonth()
+    {
+        return month;
+    }
+
+    public void setMonth(Month month)
+    {
+        this.month = month;
+    }
+
+    enum Month
+    {
+        JAN, FEB, MARCH, APRIL, MAY, JUNE;
+    }
 }

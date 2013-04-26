@@ -46,6 +46,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -83,9 +84,6 @@ final class MongoDBDataHandler
         Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
-        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
-        // Set<String>>();
-
         try
         {
             entity = entityClass.newInstance();
@@ -159,8 +157,8 @@ final class MongoDBDataHandler
                                         : null;
                                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
                                         .getJavaType());
-                                colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(), relationMetadata
-                                        .getIdAttribute().getJavaType());
+                                colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
+                                        relationMetadata.getIdAttribute().getJavaType());
                             }
                             relationValue.put(fieldName, colValue);
                         }
@@ -214,11 +212,16 @@ final class MongoDBDataHandler
         Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
         if (value != null)
         {
-            if (column.getJavaType().isAssignableFrom(Map.class))
+            if (column.getJavaType().isEnum())
+            {
+                EnumAccessor accessor = new EnumAccessor();
+                value = accessor.fromString(column.getJavaType(), value.toString());
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
+            }
+            else if (column.getJavaType().isAssignableFrom(Map.class))
             {
                 PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
             }
-
             else if (column.getJavaType().isAssignableFrom(Point.class))
             {
                 BasicDBList list = (BasicDBList) value;
@@ -284,7 +287,6 @@ final class MongoDBDataHandler
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         // Populate Row Key
-
         Object id = PropertyAccessorHelper.getId(entity, m);
 
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
@@ -553,7 +555,7 @@ final class MongoDBDataHandler
     {
 
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-        if(embeddedObject != null)
+        if (embeddedObject != null)
         {
             if (column.isCollection())
             {
@@ -570,8 +572,8 @@ final class MongoDBDataHandler
                 dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
                         DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
             }
-        }        
-        
+        }
+
         return dbObj;
     }
 

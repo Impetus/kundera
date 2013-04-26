@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.HBaseClient;
+import com.impetus.client.hbase.crud.PersonHBase.Day;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
@@ -78,7 +79,7 @@ public class PersonHBaseTest extends BaseTest
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
-        
+
         findQuery = em.createQuery("Select p.age from PersonHBase p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
@@ -88,6 +89,8 @@ public class PersonHBaseTest extends BaseTest
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
+        Assert.assertEquals(Day.MONDAY, personHBase.getDay());
+        Assert.assertEquals(Month.MARCH, personHBase.getMonth());
 
         assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");

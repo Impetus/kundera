@@ -43,7 +43,6 @@ import org.apache.cassandra.db.marshal.UUIDType;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -112,7 +111,7 @@ public final class CQLTranslator
     public static final String ADD_SET_CLAUSE = "SET ";
 
     public static final String COMMA_STR = ", ";
-    
+
     public static final String INCR_COUNTER = "+";
 
     public CQLTranslator()
@@ -257,6 +256,14 @@ public final class CQLTranslator
         }
     }
 
+    /**
+     * Build where clause with {@ EQ_CLAUSE} clause.
+     * 
+     * @param builder
+     * @param field
+     * @param member
+     * @param entity
+     */
     public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
     {
         builder = ensureCase(builder, field);
@@ -265,6 +272,14 @@ public final class CQLTranslator
         builder.append(AND_CLAUSE);
     }
 
+    /**
+     * Build where clause with given clause.
+     * 
+     * @param builder
+     * @param field
+     * @param value
+     * @param clause
+     */
     public void buildWhereClause(StringBuilder builder, String field, Object value, String clause)
     {
         builder = ensureCase(builder, field);
@@ -273,6 +288,13 @@ public final class CQLTranslator
         builder.append(AND_CLAUSE);
     }
 
+    /**
+     * Builds set clause for a given counter field.
+     * 
+     * @param builder
+     * @param field
+     * @param value
+     */
     public void buildSetClauseForCounters(StringBuilder builder, String field, Object value)
     {
         builder = ensureCase(builder, field);

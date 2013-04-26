@@ -25,6 +25,7 @@ import java.util.Set;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -50,7 +51,6 @@ public class PropertyAccessorHelper
      */
     public static void set(Object target, Field field, byte[] bytes)
     {
-
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object value = accessor.fromBytes(field.getType(), bytes);
         set(target, field, value);
@@ -71,7 +71,6 @@ public class PropertyAccessorHelper
      */
     public static void set(Object target, Field field, String fieldVal)
     {
-
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object value = accessor.fromString(target.getClass(), fieldVal);
         set(target, field, value);
@@ -145,10 +144,10 @@ public class PropertyAccessorHelper
             throw new PropertyAccessException(iacc);
         }
     }
-    
-    
+
     /**
      * Retutrns copy of object
+     * 
      * @param from
      * @param field
      * @return
@@ -191,30 +190,29 @@ public class PropertyAccessorHelper
      */
     public static String getString(Object from, Field field)
     {
-
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object object = getObject(from, field);
         return object != null ? accessor.toString(object) : null;
 
     }
 
-
-
-    
-/*
+    /*
     *//**
-     * Invokes corresponding accessor and returns string value for that object.
+     * Invokes corresponding accessor and returns string value for that
+     * object.
      * 
-     * @param obj object.
+     * @param obj
+     *            object.
      * 
      * @return string value for input object.
-     *//*
-    public static String getString(Object obj)
-    {
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(obj.getClass());
-        return accessor.toString(obj);
-        
-    }*/
+     */
+    /*
+     * public static String getString(Object obj) { PropertyAccessor<?> accessor
+     * = PropertyAccessorFactory.getPropertyAccessor(obj.getClass()); return
+     * accessor.toString(obj);
+     * 
+     * }
+     */
     /**
      * Gets field value as byte-array.
      * 
@@ -400,7 +398,8 @@ public class PropertyAccessorHelper
     }
 
     /**
-     * Retrieves Generic class from a collection field that has only one argument.
+     * Retrieves Generic class from a collection field that has only one
+     * argument.
      * 
      * @param collectionField
      *            the collection field
@@ -431,9 +430,10 @@ public class PropertyAccessorHelper
         }
         return genericClass != null ? genericClass : collectionField.getType();
     }
-    
+
     /**
-     * Retrieves Generic class from a collection field that has only one argument.
+     * Retrieves Generic class from a collection field that has only one
+     * argument.
      * 
      * @param collectionField
      *            the collection field
