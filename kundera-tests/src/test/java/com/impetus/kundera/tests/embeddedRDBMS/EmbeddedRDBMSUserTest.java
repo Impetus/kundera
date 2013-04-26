@@ -75,10 +75,6 @@ public class EmbeddedRDBMSUserTest
         {
             CassandraCli.cassandraSetUp();
             CassandraCli.initClient();
-            if (!HBaseCli.isStarted())
-            {
-                HBaseCli.startCluster();
-            }
             loadData();
             cli = new RDBMSCli(KEYSPACE);
             cli.createSchema(KEYSPACE);
@@ -98,14 +94,15 @@ public class EmbeddedRDBMSUserTest
     {
         truncateRdbms();
         truncateColumnFamily();
-//        HBaseCli.stopCluster();
+        // HBaseCli.stopCluster();
     }
 
     @Test
     public void test()
     {
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("rdbms,secIdxAddCassandra,piccandra,addMongo,picongo,addHbase");
+        EntityManagerFactory emf = Persistence
+                .createEntityManagerFactory("rdbms,secIdxAddCassandra,piccandra,addMongo,picongo");
         EntityManager em = emf.createEntityManager();
         // em.getTransaction().begin();
         // em.setFlushMode(FlushModeType.COMMIT);
@@ -283,7 +280,6 @@ public class EmbeddedRDBMSUserTest
 
     private void createTable() throws SQLException
     {
-        // cli.update("USE testdb");
         try
         {
             cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150),age INT)");

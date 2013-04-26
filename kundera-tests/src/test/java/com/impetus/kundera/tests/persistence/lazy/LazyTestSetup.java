@@ -59,10 +59,6 @@ public class LazyTestSetup
             try
             {
                 CassandraCli.cassandraSetUp();
-                if (!HBaseCli.isStarted())
-                {
-                    HBaseCli.startCluster();
-                }
             }
             catch (IOException e)
             {
@@ -94,7 +90,6 @@ public class LazyTestSetup
 
     void stopServer()
     {
-//        HBaseCli.stopCluster();
     }
 
     void createSchema()

@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "ACCOUNTHOLDER", schema = "KunderaTests@addHbase")
+@Table(name = "ACCOUNTHOLDER", schema = "KunderaTests@secIdxAddCassandra")
 public class AccountHolder
 {
 

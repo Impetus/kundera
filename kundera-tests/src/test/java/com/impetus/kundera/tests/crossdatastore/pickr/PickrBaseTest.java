@@ -57,7 +57,7 @@ public abstract class PickrBaseTest
 
     protected static final String SCHEMA = "Pickr";
 
-    protected String pu = "piccandra,picmysql,picongo";
+    protected String pu = "piccandra,picmysql,picongo,secIdxAddCassandra,addMongo";
 
     protected RDBMSCli cli;
 
@@ -70,8 +70,8 @@ public abstract class PickrBaseTest
             CassandraCli.cassandraSetUp();
             try
             {
-                
-                cli = new RDBMSCli(SCHEMA);           
+
+                cli = new RDBMSCli(SCHEMA);
 
                 cli.createSchema(SCHEMA);
             }
@@ -127,8 +127,8 @@ public abstract class PickrBaseTest
     }
 
     protected void tearDown() throws Exception
-    {      
-        //pickr.close();        
+    {
+        // pickr.close();
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace("Pickr");
@@ -145,8 +145,7 @@ public abstract class PickrBaseTest
                 cli.closeConnection();
             }
         }
-        
-        
+
     }
 
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
@@ -208,7 +207,7 @@ public abstract class PickrBaseTest
         }
         catch (SQLException e)
         {
-            if(cli != null && RUN_IN_EMBEDDED_MODE)
+            if (cli != null && RUN_IN_EMBEDDED_MODE)
             {
                 try
                 {

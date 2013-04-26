@@ -34,11 +34,14 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import oracle.kv.Direction;
+import oracle.kv.DurabilityException;
+import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
 import oracle.kv.KeyRange;
 import oracle.kv.KeyValueVersion;
 import oracle.kv.Operation;
+import oracle.kv.OperationExecutionException;
 import oracle.kv.Value;
 
 import org.apache.commons.lang.StringUtils;
@@ -79,7 +82,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     private KVStore kvStore;
 
     private OracleNoSQLClientFactory factory;
-    
+
     OracleNoSQLDataHandler handler;
 
     /** The reader. */
@@ -207,15 +210,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                     byte[] value = keyValueVersion.getValue().getValue();
                                     PropertyAccessorHelper.set(embeddedObject, columnField, value);
                                 }
-
                             }
-
                         }
-
                     }
                     else if (entityType.getAttribute(fieldName) != null)
                     {
-
                         Value v = keyValueVersion.getValue();
                         if (f != null && entityMetadata.getRelation(f.getName()) == null)
                         {
@@ -236,9 +235,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                     // Populate non-embedded attribute
                                     PropertyAccessorHelper.set(entity, f, v.getValue());
                                 }
-
                             }
-
                         }
 
                         else if (entityMetadata.getRelationNames() != null
@@ -250,7 +247,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                             relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
                                     .getIdAttribute().getBindableJavaType(), v.getValue()));
                         }
-
                     }
                 }
             }
@@ -270,7 +266,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             return entity;
         }
-    }    
+    }
 
     @Override
     public void close()
@@ -285,9 +281,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         String idString = PropertyAccessorHelper.getString(pKey);
 
         Key key = Key.createKey(entityMetadata.getTableName());
-        //String idString2 = getNextString(idString);
+        // String idString2 = getNextString(idString);
         KeyRange keyRange = new KeyRange(idString, true, idString, true);
-        
+
         Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, keyRange, null);
 
         List<Operation> deleteOperations = new ArrayList<Operation>();
@@ -299,25 +295,36 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             String foundIdString = foundKey.getMajorPath().get(1);
             List<String> minorKeysComponents = keyValueVersion.getKey().getMinorPath();
             if (minorKeysComponents.size() > 0
-                    && minorKeysComponents.get(minorKeysComponents.size() - 1).endsWith(OracleNOSQLConstants.LOB_SUFFIX))
+                    && minorKeysComponents.get(minorKeysComponents.size() - 1)
+                            .endsWith(OracleNOSQLConstants.LOB_SUFFIX))
             {
-                kvStore.deleteLOB(keyValueVersion.getKey(), OracleNOSQLConstants.DEFAULT_DURABILITY, OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                kvStore.deleteLOB(keyValueVersion.getKey(), OracleNOSQLConstants.DEFAULT_DURABILITY,
+                        OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
             else
             {
-                if(idString.equals(foundIdString))
+                if (idString.equals(foundIdString))
                 {
                     Operation op = kvStore.getOperationFactory().createDelete(foundKey);
-                    deleteOperations.add(op);                    
+                    deleteOperations.add(op);
                 }
             }
-
         }
         handler.execute(deleteOperations);
         // kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
 
+    /**
+     * @param idString
+     * @return
+     */
+    private String getNextString(String idString)
+    {
+        char lastChar = (char) idString.charAt(idString.length() - 1);
+        String idString2 = idString.substring(0, idString.length() - 1) + (char) ((int) lastChar + 1);
+        return idString2;
+    }
 
     /**
      * On persist.
@@ -441,14 +448,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 // they will be store by separate call)
                 else if (!attribute.isAssociation())
                 {
-                    Field field = (Field) attribute.getJavaMember();           
+                    Field field = (Field) attribute.getJavaMember();
 
                     // Value
                     Object valueObj = PropertyAccessorHelper.getObject(entity, field);
                     if (valueObj != null)
                     {
                         String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                        
+
                         if (valueObj instanceof File)
                         {
                             // Key
@@ -500,8 +507,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         handler.execute(persistOperations);
     }
 
-    
-
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -549,14 +554,42 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
-    
+    private void execute(List<Operation> batch)
+    {
+        if (batch != null && !batch.isEmpty())
+        {
+            try
+            {
+                kvStore.execute(batch);
+            }
+            catch (DurabilityException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            catch (OperationExecutionException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            catch (FaultException e)
+            {
+                log.error(e);
+                throw new PersistenceException("Error while Persisting data using batch", e);
+            }
+            finally
+            {
+                batch.clear();
+            }
+        }
+    }
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         List<E> results = new ArrayList<E>();
-        
-        if(columnsToSelect == null)
+
+        if (columnsToSelect == null)
         {
             columnsToSelect = new String[0];
         }
@@ -569,14 +602,15 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return results;
     }
 
-    public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter, Set<Object> primaryKeys)
+    public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter,
+            Set<Object> primaryKeys)
     {
         List<E> results = new ArrayList<E>();
-        if(primaryKeys == null)
+        if (primaryKeys == null)
         {
             primaryKeys = new HashSet<Object>();
         }
-        
+
         if (!interpreter.getClauseQueue().isEmpty()) // Select all query
         {
             // Select Query with where clause (requires search within inverted
@@ -798,8 +832,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             nodes.add(node);
         }
         onBatchLimit();
-    } 
-    
+    }
+
     /**
      * @return the handler
      */

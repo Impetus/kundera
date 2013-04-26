@@ -39,7 +39,9 @@ public class BaseDao
             {
                 propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
             }
-            emf = Persistence.createEntityManagerFactory(pu, propertyMap);
+            Map mapOfExternalProperties = new HashMap<String, Map>();
+            mapOfExternalProperties.put("addCassandra", propertyMap);
+            emf = Persistence.createEntityManagerFactory(pu, mapOfExternalProperties);
             em = emf.createEntityManager();
         }
 
