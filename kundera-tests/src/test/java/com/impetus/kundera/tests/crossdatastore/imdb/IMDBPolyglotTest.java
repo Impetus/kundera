@@ -56,10 +56,6 @@ public class IMDBPolyglotTest extends TwinAssociation
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(Actor.class);
         clazzz.add(Movie.class);
-        if (!HBaseCli.isStarted())
-        {
-            HBaseCli.startCluster();
-        }
         CassandraCli.cassandraSetUp();
         init(clazzz, ALL_PUs_UNDER_TEST);
     }

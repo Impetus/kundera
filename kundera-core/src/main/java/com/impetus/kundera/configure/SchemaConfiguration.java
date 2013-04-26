@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.utils.InvalidConfigurationException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Schema configuration implementation to support ddl_schema_creation
@@ -154,13 +155,13 @@ public class SchemaConfiguration implements Configuration
                 // Add table for GeneratedValue if opted TableStrategy
                 addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName,
                         isCompositeId);
-
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
         }
         for (String persistenceUnit : persistenceUnits)
         {
-            Map<String, Object> externalProperties = getExternalProperties(persistenceUnit);
+            Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                    externalPropertyMap, persistenceUnits);
             if (getSchemaProperty(persistenceUnit, externalProperties) != null
                     && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
             {
@@ -511,42 +512,5 @@ public class SchemaConfiguration implements Configuration
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
         return autoDdlOption;
-    }
-
-    /**
-     * @param puProperty
-     */
-    private Map<String, Object> getExternalProperties(String pu)
-    {
-        Map<String, Object> puProperty;
-        if (persistenceUnits.length > 1 && externalPropertyMap != null)
-        {
-            puProperty = (Map<String, Object>) externalPropertyMap.get(pu);
-
-            // if property found then return it, if it is null by pass it, else
-            // throw invalidConfiguration.
-            if (puProperty != null)
-            {
-                return fetchPropertyMap(puProperty);
-            }
-        }
-        return externalPropertyMap;
-    }
-
-    /**
-     * @param puProperty
-     * @return
-     */
-    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
-    {
-        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
-        {
-            return puProperty;
-        }
-        else
-        {
-            throw new InvalidConfigurationException(
-                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
-        }
     }
 }

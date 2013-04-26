@@ -27,7 +27,8 @@ public class KunderaPersistenceUnitUtilTest
         setup.startServer();
         setup.createSchema();
 
-        emf = Persistence.createEntityManagerFactory("rdbms,redis,addMongo,addCassandra,piccandra,secIdxAddCassandra,addHbase,picongo");
+        emf = Persistence
+                .createEntityManagerFactory("rdbms,redis,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo");
         em = emf.createEntityManager();
         util = emf.getPersistenceUnitUtil();
     }
