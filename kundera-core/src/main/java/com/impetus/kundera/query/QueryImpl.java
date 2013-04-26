@@ -236,6 +236,7 @@ public abstract class QueryImpl implements Query
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result, String[] columnsToSelect)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
+        System.out.println("ddd");
         Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
@@ -294,7 +295,7 @@ public abstract class QueryImpl implements Query
             {
                 boolean appended = false;
                 FilterClause filter = (FilterClause) object;
-                sb.append("+");
+//                sb.append("+");
                 // property
                 sb.append(metadata.getIndexName());
                 sb.append(".");
@@ -370,7 +371,7 @@ public abstract class QueryImpl implements Query
         {
             sb.append(" AND ");
         }
-        sb.append("+");
+//        sb.append("+");
         sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
         sb.append(":");
         // sb.append(getEntityClass().getName());
