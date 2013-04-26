@@ -34,6 +34,8 @@ import oracle.kv.KeyRange;
 import oracle.kv.KeyValueVersion;
 import oracle.kv.Value;
 
+import com.impetus.client.oraclenosql.OracleNOSQLConstants;
+import com.impetus.client.oraclenosql.OracleNoSQLDataHandler;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -53,7 +55,11 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 public class OracleNoSQLInvertedIndexer implements Indexer
 {
 
+    
+
     KVStore kvStore;    
+    
+    OracleNoSQLDataHandler handler;
 
     @Override
     public void index(Class entityClazz, Map<String, Object> values)
@@ -64,18 +70,19 @@ public class OracleNoSQLInvertedIndexer implements Indexer
 
         for (String column : values.keySet())
         {
-            Object value = values.get(column);
+            Object valueObject = values.get(column);
 
             List<String> majorKeyComponents = new ArrayList<String>();
             majorKeyComponents.add(getIndexTableName(m));
             majorKeyComponents.add(column);
-            majorKeyComponents.add(PropertyAccessorHelper.getString(value));
+            majorKeyComponents.add(PropertyAccessorHelper.getString(valueObject));
 
             String minorKey = PropertyAccessorHelper.getString(id);
 
-            Key key = Key.createKey(majorKeyComponents, minorKey);
+            Key key = Key.createKey(majorKeyComponents, minorKey);            
+            byte[] valueByteArray = PropertyAccessorHelper.getBytes(id);
             
-            byte[] valueByteArray = PropertyAccessorHelper.getBytes(id);           
+            
             kvStore.put(key, Value.createValue(valueByteArray));
         }
     }
@@ -334,13 +341,23 @@ public class OracleNoSQLInvertedIndexer implements Indexer
         this.kvStore = kvStore;
     }   
     
+    
+    
+    /**
+     * @param handler the handler to set
+     */
+    public void setHandler(OracleNoSQLDataHandler handler)
+    {
+        this.handler = handler;
+    }
+
     /**
      * @param entityMetadata
      * @return
      */
     protected String getIndexTableName(EntityMetadata entityMetadata)
     {
-        return entityMetadata.getIndexName() + "_idx";
+        return entityMetadata.getIndexName() + OracleNOSQLConstants.SECONDARY_INDEX_SUFFIX;
     }
 
 }
