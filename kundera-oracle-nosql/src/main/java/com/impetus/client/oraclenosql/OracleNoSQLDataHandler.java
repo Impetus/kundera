@@ -53,7 +53,7 @@ import com.impetus.kundera.client.Client;
 public class OracleNoSQLDataHandler
 {
     /** The client. */
-    private Client client;
+    private OracleNoSQLClient client;
     
     private KVStore kvStore;
 
@@ -73,7 +73,7 @@ public class OracleNoSQLDataHandler
     public OracleNoSQLDataHandler(Client client, KVStore kvStore, String persistenceUnit)
     {
         super();
-        this.client = client;
+        this.client = (OracleNoSQLClient)client;
         this.kvStore = kvStore;
         this.persistenceUnit = persistenceUnit;
     }
@@ -117,8 +117,8 @@ public class OracleNoSQLDataHandler
      */
     public File getLOBFile(KeyValueVersion keyValueVersion, String fileName) throws FileNotFoundException, IOException
     {
-        InputStreamVersion istreamVersion = kvStore.getLOB(keyValueVersion.getKey(), OracleNOSQLConstants.DEFAULT_CONSISTENCY, 5,
-                OracleNOSQLConstants.DEFAULT_TIME_UNIT);
+        InputStreamVersion istreamVersion = kvStore.getLOB(keyValueVersion.getKey(), client.getConsistency(), client.getTimeout(),
+                client.getTimeUnit());
         InputStream is = istreamVersion.getInputStream();
 
         File lobFile = new File(fileName);
@@ -156,7 +156,7 @@ public class OracleNoSQLDataHandler
         try
         {
             FileInputStream fis = new FileInputStream(lobFile);
-            Version version = kvStore.putLOB(key, fis, OracleNOSQLConstants.DEFAULT_DURABILITY, OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS, OracleNOSQLConstants.DEFAULT_TIME_UNIT);
+            Version version = kvStore.putLOB(key, fis, client.getDurability(), client.getTimeout(), client.getTimeUnit());
         }
         catch (FileNotFoundException e)
         {
@@ -166,17 +166,7 @@ public class OracleNoSQLDataHandler
         {
             log.warn("IOException while writing file " + lobFile + ". This is being omitted. Details:" + e.getMessage());
         }
-    }
-    
-    /**
-     * @param idString
-     * @return
-     */
-    private String getNextString(String idString)
-    {
-        char lastChar = (char)idString.charAt(idString.length() - 1);
-        String idString2 = idString.substring(0, idString.length() - 1) + (char)((int)lastChar + 1);
-        return idString2;
-    }
+   }
+
     
 }

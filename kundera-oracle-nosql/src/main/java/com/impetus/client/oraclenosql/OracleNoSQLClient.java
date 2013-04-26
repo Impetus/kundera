@@ -16,6 +16,8 @@
 package com.impetus.client.oraclenosql;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -33,7 +35,9 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import oracle.kv.Consistency;
 import oracle.kv.Direction;
+import oracle.kv.Durability;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
 import oracle.kv.KeyRange;
@@ -90,6 +94,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     /** batch size. */
     private int batchSize;
+    
+    //Configuration Parameter
+    private int timeout = OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS;
+    private Durability durability = OracleNOSQLConstants.DEFAULT_DURABILITY;
+    private TimeUnit timeUnit = OracleNOSQLConstants.DEFAULT_TIME_UNIT;
+    private Consistency consistency = OracleNOSQLConstants.DEFAULT_CONSISTENCY;
 
     /** The log. */
     private static Log log = LogFactory.getLog(OracleNoSQLClient.class);
@@ -155,16 +165,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null,
                     null);
 
-            // If a record is found, instantiate entity and set ID value
-            if (iterator.hasNext())
-            {
-                entity = entityMetadata.getEntityClazz().newInstance();
-                PropertyAccessorHelper.setId(entity, entityMetadata, key);
-            }
-
             // Populate non-ID attributes
             while (iterator.hasNext())
             {
+                entity = initializeEntity(entity, key, entityMetadata);
+                
                 KeyValueVersion keyValueVersion = iterator.next();
 
                 String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
@@ -197,16 +202,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                             if (columnField != null)
                             {
-                                if (f.getType().isAssignableFrom(File.class))
-                                {
-                                    File lobFile = handler.getLOBFile(keyValueVersion, minorKeySecondPart);
-                                    PropertyAccessorHelper.set(embeddedObject, columnField, lobFile);
-                                }
-                                else
-                                {
-                                    byte[] value = keyValueVersion.getValue().getValue();
-                                    PropertyAccessorHelper.set(embeddedObject, columnField, value);
-                                }
+                                populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);                     
 
                             }
 
@@ -225,18 +221,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                             .contains(((AbstractAttribute) entityType.getAttribute(fieldName))
                                                     .getJPAColumnName()))
                             {
-                                if (f.getType().isAssignableFrom(File.class))
-                                {
-                                    File lobFile = handler.getLOBFile(keyValueVersion, minorKeyFirstPart);
-                                    PropertyAccessorHelper.set(entity, f, lobFile);
-
-                                }
-                                else
-                                {
-                                    // Populate non-embedded attribute
-                                    PropertyAccessorHelper.set(entity, f, v.getValue());
-                                }
-
+                                populateField(entity, f, keyValueVersion, minorKeyFirstPart);
                             }
 
                         }
@@ -270,12 +255,51 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             return entity;
         }
+    }
+
+    /**
+     * Populates a field in enclosing class instance from data retrieved from Oracle NoSQL
+     * @param object
+     * @param field
+     * @param keyValueVersion
+     * @param minorKey
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private void populateField(Object object, Field field, KeyValueVersion keyValueVersion, String minorKey) throws FileNotFoundException, IOException
+    {
+        if (field.getType().isAssignableFrom(File.class))
+        {
+            File lobFile = handler.getLOBFile(keyValueVersion, minorKey);
+            PropertyAccessorHelper.set(object, field, lobFile);
+        }
+        else
+        {
+            PropertyAccessorHelper.set(object, field, keyValueVersion.getValue().getValue());
+        }
+    }
+
+    /**
+     * @param key
+     * @param entityMetadata
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    private Object initializeEntity(Object entity, Object key, EntityMetadata entityMetadata) throws InstantiationException,
+            IllegalAccessException
+    {
+        if(entity == null)
+        {
+            entity = entityMetadata.getEntityClazz().newInstance();
+            PropertyAccessorHelper.setId(entity, entityMetadata, key);            
+        }
+        return entity;
     }    
 
     @Override
     public void close()
     {
-
     }
 
     @Override
@@ -301,7 +325,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             if (minorKeysComponents.size() > 0
                     && minorKeysComponents.get(minorKeysComponents.size() - 1).endsWith(OracleNOSQLConstants.LOB_SUFFIX))
             {
-                kvStore.deleteLOB(keyValueVersion.getKey(), OracleNOSQLConstants.DEFAULT_DURABILITY, OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                kvStore.deleteLOB(keyValueVersion.getKey(), durability, timeout, timeUnit);
             }
             else
             {
@@ -886,5 +910,69 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             batchSize = puMetadata.getBatchSize();
         }
     }
+
+    /**
+     * @param timeout the timeout to set
+     */
+    public void setTimeout(int timeout)
+    {
+        this.timeout = timeout;
+    }
+
+    /**
+     * @param durability the durability to set
+     */
+    public void setDurability(Durability durability)
+    {
+        this.durability = durability;
+    }
+
+    /**
+     * @param timeUnit the timeUnit to set
+     */
+    public void setTimeUnit(TimeUnit timeUnit)
+    {
+        this.timeUnit = timeUnit;
+    }
+
+    /**
+     * @param consistency the consistency to set
+     */
+    public void setConsistency(Consistency consistency)
+    {
+        this.consistency = consistency;
+    }
+
+    /**
+     * @return the timeout
+     */
+    public int getTimeout()
+    {
+        return timeout;
+    }
+
+    /**
+     * @return the durability
+     */
+    public Durability getDurability()
+    {
+        return durability;
+    }
+
+    /**
+     * @return the timeUnit
+     */
+    public TimeUnit getTimeUnit()
+    {
+        return timeUnit;
+    }
+
+    /**
+     * @return the consistency
+     */
+    public Consistency getConsistency()
+    {
+        return consistency;
+    }     
 
 }
