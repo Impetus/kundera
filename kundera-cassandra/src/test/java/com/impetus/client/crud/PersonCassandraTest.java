@@ -54,6 +54,7 @@ import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -106,13 +107,13 @@ public class PersonCassandraTest extends BaseTest
 
         if (propertyMap == null)
         {
-//            propertyMap = new HashMap();
-//            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            propertyMap = new HashMap();
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            loadData();
+//            loadData();
         }
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
@@ -150,10 +151,10 @@ public class PersonCassandraTest extends BaseTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
+
         PersonCassandra personWithKey = new PersonCassandra();
         personWithKey.setPersonId("111");
-        em.persist(personWithKey );
+        em.persist(personWithKey);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
@@ -254,6 +255,7 @@ public class PersonCassandraTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
+        Assert.assertEquals(Month.APRIL, p.getMonth());
         // modify record.
         p.setPersonName("newvivek");
         em.merge(p);
@@ -289,6 +291,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
+        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
 
         p1 = prepareData("1", 10);
         em.persist(p1);
@@ -299,6 +302,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
+        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
 
     }
 
@@ -401,6 +405,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
+        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
     }
 
     /**
@@ -535,7 +540,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-//        emf.close();
+        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
@@ -572,6 +577,9 @@ public class PersonCassandraTest extends BaseTest
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef2);
+        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("MONTH_ENUM".getBytes()), "UTF8Type");
+        columnDef3.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef3);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
@@ -586,10 +594,10 @@ public class PersonCassandraTest extends BaseTest
             for (CfDef cfDef1 : cfDefn)
             {
 
-                if (cfDef1.getName().equalsIgnoreCase("PERSON"))
+                if (cfDef1.getName().equalsIgnoreCase("PERSONCASSANDRA"))
                 {
 
-                    CassandraCli.client.system_drop_column_family("PERSON");
+                    CassandraCli.client.system_drop_column_family("PERSONCASSANDRA");
 
                 }
             }

@@ -177,10 +177,10 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         {
                             return cqlVersion;
                         }
-                    }
-                    else
-                    {
-                        log.warn("This is not valid cql version type, please provide valid one");
+                        else
+                        {
+                            log.warn("This is not valid cql version type, please provide valid one");
+                        }
                     }
                 }
             }
@@ -218,6 +218,16 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         return t;
                     }
                 }
+            }
+            return null;
+        }
+
+        public Properties getConnectionProperties()
+        {
+            DataStore ds = getDataStore();
+            if (ds != null && ds.getConnection() != null)
+            {
+                return ds.getConnection().getProperties();
             }
             return null;
         }

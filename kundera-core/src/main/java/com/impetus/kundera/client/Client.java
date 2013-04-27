@@ -22,14 +22,23 @@ import javax.persistence.Query;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
- * Client API. Defines methods which are required for to be implemented by
- * various clients(pelops, Mongo). Any new addition of new client must implement
- * this API to integrate new client with existing Kundera API. It's an extension
- * API to support extension of new client.
+ * In Kundera, <b>Clients</b> act as a translator of JPA calls to
+ * datastore-specific respective operations call. Clients are constructed via
+ * {@link ClientFactory} that are configurable in persistence.xml. This makes it
+ * possible for user to choose a {@link Client} implementation for a particular
+ * persistence unit.
+ * 
+ * Client API defines methods that are required to be implemented by various
+ * clients implementations (Thrift, Mongo etc).
+ * 
+ * Any new addition of datastore support must implement this API. This is
+ * because kundera-core - after initialization, caching etc, calls clients
+ * methods to read from/ write into datastores.
  * 
  * @author vivek.mishra
  */
@@ -37,64 +46,59 @@ public interface Client<Q extends Query>
 {
 
     /**
-     * Retrieve columns from a column-family row.
+     * Retrieves an entity from datastore
      * 
-     * @param the
-     *            element type
      * @param entityClass
      *            the entity class
      * @param key
      *            The key of the row
-     * @return A list of matching columns
-     * @throws Exception
-     *             the exception
+     * @return Entity object
      */
     Object find(Class entityClass, Object key);
 
     /**
-     * Retrieve columns from multiple rows of a column-family.
+     * Retrieve <code>columnsToSelect</code> from multiple rows of a
+     * column-family.
      * 
      * @param <E>
      *            the element type
      * @param entityClass
      *            the entity class
+     * @param columnsToSelect
+     *            Array of column names that need to be populated into entity
      * @param keys
      *            Array of row keys
-     * @return A Map of row and corresponding list of columns.
-     * @throws Exception
-     *             the exception
+     * @return List of entity objects
      */
-    <E> List<E> findAll(Class<E> entityClass, Object... keys);
+    <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys);
 
     /**
-     * Load data.
+     * Finds entities that match a given set of embedded column values provided
+     * in the Map
      * 
      * @param <E>
      *            the element type
      * @param entityClass
      *            the entity class
      * @param embeddedColumnMap
-     *            the col
-     * @return the list
-     * @throws Exception
-     *             the exception
+     *            Map of embedded column name and their values that are used as
+     *            a criteria for finding entities
+     * @return the list of entities
      */
     <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap);
 
     /**
-     * Shutdown.
+     * Cleans up client
      */
     void close();
 
     /**
-     * Delete.
+     * Deletes an entity from datastore for a given primary key
      * 
      * @param entity
      *            the entity
      * @param pKey
-     *            the key
-     * @throws Exception
-     *             the exception
+     *            Primary key of entity to be deleted
      */
     void delete(Object entity, Object pKey);
 

@@ -17,6 +17,8 @@ package com.impetus.client.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -40,6 +42,14 @@ public class PersonRedis
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+
+    @Column(name = "ENUM")
+    @Enumerated(EnumType.STRING)
+    private Day day;
+
+    @Column(name = "MONTH_ENUM")
+    @Enumerated(EnumType.STRING)
+    private Month month;
 
     /**
      * Gets the person id.
@@ -98,6 +108,31 @@ public class PersonRedis
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    public Day getDay()
+    {
+        return day;
+    }
+
+    public void setDay(Day day)
+    {
+        this.day = day;
+    }
+
+    public Month getMonth()
+    {
+        return month;
+    }
+
+    public void setMonth(Month month)
+    {
+        this.month = month;
+    }
+
+    public enum Day
+    {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
 }

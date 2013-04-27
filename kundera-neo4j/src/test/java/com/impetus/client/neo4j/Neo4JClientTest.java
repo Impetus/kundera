@@ -118,7 +118,7 @@ public class Neo4JClientTest
 
     /**
      * Test method for
-     * {@link com.impetus.client.neo4j.Neo4JClient#findAll(java.lang.Class, java.lang.Object[])}
+     * {@link com.impetus.client.neo4j.Neo4JClient#findAll(java.lang.Class, String[], java.lang.Object[])}
      * .
      */
     @Test

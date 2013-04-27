@@ -16,9 +16,9 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<!-- <property name="index.home.dir" value="./lucene"/> -->
-			<property name="kundera.indexer.class"
-				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
+<!--			<property name="index.home.dir" value="./lucene"/>-->
+			 <property name="kundera.indexer.class"
+			value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
 	</persistence-unit>
 

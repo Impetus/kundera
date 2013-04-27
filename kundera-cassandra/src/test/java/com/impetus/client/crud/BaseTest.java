@@ -48,6 +48,7 @@ public abstract class BaseTest
         o.setPersonName("vivek");
         o.setAge(age);
         o.setDay(Day.THURSDAY);
+        o.setMonth(Month.APRIL);
         return o;
     }
 

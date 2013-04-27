@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -295,9 +296,9 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             // index index name
             luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
                     Field.Index.ANALYZED_NO_NORMS);
-            document.add(luceneField);
+            document.add(luceneField);           
             
-            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(), metadata.getIdAttribute().getName()),id.toString(),Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
+            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(), ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName()),id.toString(),Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
         }
         catch (PropertyAccessException e)
@@ -330,7 +331,9 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             if (obj != null)
             {
                 Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), obj.toString(),
-                        Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+                        Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);       
+                
+                
                 document.add(luceneField);
             }
             else

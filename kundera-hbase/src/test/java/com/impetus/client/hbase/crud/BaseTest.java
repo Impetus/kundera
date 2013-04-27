@@ -20,6 +20,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.client.hbase.crud.PersonHBase.Day;
+
 import junit.framework.Assert;
 
 /**
@@ -44,6 +46,8 @@ public abstract class BaseTest
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
         o.setAge(age);
+        o.setDay(Day.MONDAY);
+        o.setMonth(Month.MARCH);
         return o;
     }
 
@@ -92,7 +96,6 @@ public abstract class BaseTest
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
-
     }
 
     /**

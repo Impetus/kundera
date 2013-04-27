@@ -17,6 +17,8 @@ package com.impetus.client.hbase.crud;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -41,6 +43,14 @@ public class PersonHBase
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+
+    @Column(name = "ENUM")
+    @Enumerated(EnumType.STRING)
+    private Day day;
+
+    @Column(name = "MONTH_ENUM")
+    @Enumerated(EnumType.STRING)
+    private Month month;
 
     /**
      * Gets the person id.
@@ -99,6 +109,38 @@ public class PersonHBase
     public void setAge(int age)
     {
         this.age = age;
+    }
+
+    /**
+     * @return the day
+     */
+    public Day getDay()
+    {
+        return day;
+    }
+
+    /**
+     * @param day
+     *            the day to set
+     */
+    public void setDay(Day day)
+    {
+        this.day = day;
+    }
+
+    public Month getMonth()
+    {
+        return month;
+    }
+
+    public void setMonth(Month month)
+    {
+        this.month = month;
+    }
+
+    enum Day
+    {
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
 }

@@ -49,6 +49,7 @@ import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.cli.HBaseCli;
 
 /**
  * @author Kuldeep Mishra
@@ -93,13 +94,15 @@ public class EmbeddedRDBMSUserTest
     {
         truncateRdbms();
         truncateColumnFamily();
+        // HBaseCli.stopCluster();
     }
 
     @Test
     public void test()
     {
 
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("rdbms,secIdxAddCassandra");
+        EntityManagerFactory emf = Persistence
+                .createEntityManagerFactory("rdbms,secIdxAddCassandra,piccandra,addMongo,picongo");
         EntityManager em = emf.createEntityManager();
         // em.getTransaction().begin();
         // em.setFlushMode(FlushModeType.COMMIT);
@@ -277,7 +280,6 @@ public class EmbeddedRDBMSUserTest
 
     private void createTable() throws SQLException
     {
-        // cli.update("USE testdb");
         try
         {
             cli.update("CREATE TABLE KUNDERATESTS.user (emailId VARCHAR(150), first_name VARCHAR(150), last_name VARCHAR(150), name VARCHAR(150), password VARCHAR(150), personal_detail_id VARCHAR(150), rel_status VARCHAR(150), user_id VARCHAR(150),age INT)");

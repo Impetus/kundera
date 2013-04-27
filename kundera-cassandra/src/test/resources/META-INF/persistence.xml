@@ -231,7 +231,8 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.batch.size" value="500" />
+			<property name="kundera.batch.size" value="5000" />
+			<property name="kundera.client.property" value="kunderaConnectionTest.xml" />
 		</properties>
 	</persistence-unit>
 

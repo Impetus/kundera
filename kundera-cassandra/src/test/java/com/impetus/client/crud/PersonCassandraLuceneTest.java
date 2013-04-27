@@ -140,6 +140,14 @@ public class PersonCassandraLuceneTest extends BaseTest
         assertFindByRange(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonLuceneCassandra", PersonLuceneCassandra.class);
 
+        // OR clause test case.
+        String orClauseQuery = "Select p from PersonLuceneCassandra p where p.personName = 'vivek1' OR p.age = 10";
+        
+        q = em.createQuery(orClauseQuery);
+        
+        List<PersonLuceneCassandra> results = q.getResultList();
+        
+        Assert.assertEquals(1, results.size());
         // perform merge after query.
         for (PersonLuceneCassandra person : persons)
         {

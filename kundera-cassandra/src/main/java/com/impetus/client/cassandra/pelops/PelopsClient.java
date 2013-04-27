@@ -141,9 +141,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
+    public final <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
-        return super.findAll(entityClass, rowIds);
+        return super.findAll(entityClass, columnsToSelect, rowIds);
     }
 
     /**

@@ -54,6 +54,7 @@ import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.InvalidConfigurationException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Metamodel configurer: a) Configure application meta data b) loads entity
@@ -145,7 +146,8 @@ public class MetamodelConfiguration implements Configuration
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
             classesToScan = puMetadata.getManagedClassNames();
             managedURLs = puMetadata.getManagedURLs();
-            Map<String, Object> externalProperties = getExternalProperties(persistenceUnit);
+            Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                    externalProperyMap, persistenceUnits);
 
             client = externalProperties != null ? (String) externalProperties
                     .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
@@ -263,7 +265,8 @@ public class MetamodelConfiguration implements Configuration
         for (Class clazz : classes)
         {
             String pu = getPersistenceUnitOfEntity(clazz);
-            EntityValidator validator = new EntityValidatorImpl(getExternalProperties(persistenceUnit));
+            EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                    externalProperyMap, persistenceUnits));
             if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
                     && persistenceUnit.equalsIgnoreCase(pu))
             {
@@ -355,7 +358,8 @@ public class MetamodelConfiguration implements Configuration
                             if (null == metadata)
                             {
                                 MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client,
-                                        getExternalProperties(persistenceUnit));
+                                        KunderaCoreUtils.getExternalProperties(persistenceUnit, externalProperyMap,
+                                                persistenceUnits));
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
 
                                 // in case entity's pu does not belong to parse
@@ -437,45 +441,6 @@ public class MetamodelConfiguration implements Configuration
         }
 
         return clazzToPuMap;
-    }
-
-    /**
-     * @param puProperty
-     */
-    private Map<String, Object> getExternalProperties(String pu)
-    {
-        Map<String, Object> puProperty;
-        if (persistenceUnits.length > 1 && externalProperyMap != null)
-        {
-            puProperty = (Map<String, Object>) externalProperyMap.get(pu);
-
-            // if property found then return it, if it is null by pass it, else
-            // throw invalidConfiguration.
-            if (puProperty != null)
-            {
-                return fetchPropertyMap(puProperty);
-            }
-        }
-
-        return externalProperyMap;
-
-    }
-
-    /**
-     * @param puProperty
-     * @return
-     */
-    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
-    {
-        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
-        {
-            return puProperty;
-        }
-        else
-        {
-            throw new InvalidConfigurationException(
-                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
-        }
     }
 
     private void processGeneratedValueAnnotation(Class<?> clazz, String persistenceUnit, EntityMetadata m,

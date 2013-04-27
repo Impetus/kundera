@@ -31,6 +31,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -98,6 +99,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -566,11 +568,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the element type
      * @param entityClass
      *            the entity class
+     * @param columnsToSelect TODO
      * @param rowIds
      *            the row ids
      * @return the list
      */
-    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> results = new ArrayList<E>();
@@ -615,7 +618,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             throw new PersistenceException(e);
         }
 
-        return result != null & !result.isEmpty() ? result.get(0) : null;
+        return result != null && !result.isEmpty() ? result.get(0) : null;
     }
 
     /**
@@ -735,7 +738,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     rowIds[i] = PropertyAccessorHelper.getObject(b, (Field) m.getIdAttribute().getJavaMember());
                     i++;
                 }
-                entities.addAll(findAll(m.getEntityClazz(), rowIds));
+                entities.addAll(findAll(m.getEntityClazz(), null, rowIds));
             }
 
         }
@@ -864,6 +867,55 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
+     * Return update query string for given entity intended for counter column
+     * family.
+     * 
+     * @param entityMetadata
+     * @param entity
+     * @param cassandra_client
+     * @param rlHolders
+     * @return
+     */
+    protected String createUpdateQueryForCounter(EntityMetadata entityMetadata, Object entity,
+            Cassandra.Client cassandra_client, List<RelationHolder> rlHolders)
+    {
+        CQLTranslator translator = new CQLTranslator();
+        String update_Query = translator.UPDATE_QUERY;
+
+        update_Query = StringUtils.replace(update_Query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+        StringBuilder builder = new StringBuilder(update_Query);
+        builder.append(CQLTranslator.ADD_SET_CLAUSE);
+
+        Object rowId = PropertyAccessorHelper.getId(entity, entityMetadata);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+
+        Set<Attribute> attributes = entityType.getAttributes();
+
+        for (Attribute attrib : attributes)
+        {
+            if (!entityMetadata.getIdAttribute().getName().equals(attrib.getName())
+                    && !metaModel.isEmbeddable(attrib.getJavaType()) && !attrib.isAssociation())
+            {
+                translator.buildSetClauseForCounters(builder, ((AbstractAttribute) attrib).getJPAColumnName(),
+                        PropertyAccessorHelper.getObject(entity, attrib.getName()));
+            }
+        }
+        for (RelationHolder rl : rlHolders)
+        {
+            translator.buildSetClauseForCounters(builder, rl.getRelationName(), rl.getRelationValue());
+        }
+
+        // strip last "," clause.
+        builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
+        onWhereClause(entityMetadata, rowId, translator, builder, metaModel);
+        return builder.toString();
+    }
+
+    /**
      * Gets the cql version.
      * 
      * @return the cqlVersion
@@ -907,10 +959,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public void close()
     {
-        nodes.clear();
-        nodes = null;
+        clear();
+//        nodes.clear();
+//        nodes = null;
         closed = true;
-        externalProperties = null;
+//        externalProperties = null;
     }
 
     /**
@@ -1700,9 +1753,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
                 TimedOutException, SchemaDisagreementException
         {
-            String insert_Query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+            String query;
+            if (entityMetadata.isCounterColumnType())
+            {
+                query = createUpdateQueryForCounter(entityMetadata, entity, conn, rlHolders);
+            }
+            else
+            {
+                query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+            }
             // conn.set_cql_version(getCqlVersion());
-            conn.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
+            conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
                     consistencyLevel);
         }
 
@@ -1741,17 +1802,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         Object rowKey = null;
 
                         ThriftRow thriftRow = null;
-                        if (entityMetadata.isCounterColumnType())
-                        {
-                            log.info("Native query is not permitted on counter column returning null ");
-                            return null;
-                        }
-                        else
-                        {
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
-                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                    new ArrayList<CounterSuperColumn>(0));
-                        }
+                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                new ArrayList<CounterSuperColumn>(0));
 
                         Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
                                 relationalField != null && !relationalField.isEmpty());

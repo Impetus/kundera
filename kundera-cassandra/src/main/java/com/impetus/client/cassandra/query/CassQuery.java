@@ -156,7 +156,7 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else
                 {
-                    result = populateUsingLucene(m, client, result);
+                    result = populateUsingLucene(m, client, result, null);
                 }
             }
         }

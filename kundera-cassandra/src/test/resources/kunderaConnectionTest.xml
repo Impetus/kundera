@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<connection>
+				<properties>
+					<property name="testonborrow" value="true"></property>
+					<property name="testwhileidle" value="true"></property>
+					<property name="testonconnect" value="true"></property>
+					<property name="testonreturn" value="true"></property>
+					<property name="socket.timeout" value="120000"></property>
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>

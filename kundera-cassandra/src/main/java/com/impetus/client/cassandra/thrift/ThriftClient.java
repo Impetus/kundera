@@ -312,9 +312,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
      * Finds a {@link List} of entities from database
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
-        return super.findAll(entityClass, keys);
+        return super.findAll(entityClass, columnsToSelect, keys);
     }
 
     /**
@@ -774,7 +774,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 List<Object> rowKeys = ThriftDataResultHelper.getRowKeys(keySlices, m);
 
                 Object[] rowIds = rowKeys.toArray();
-                entities.addAll(findAll(m.getEntityClazz(), rowIds));
+                entities.addAll(findAll(m.getEntityClazz(), null, rowIds));
             }
             else
             {

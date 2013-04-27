@@ -13,11 +13,13 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.cli.HBaseCli;
 
 /**
  * @author Kuldeep Mishra
@@ -28,7 +30,7 @@ public class BankTest
     /**
      * 
      */
-    private static final String _PU = "addHbase,addMongo";
+    private static final String _PU = "secIdxAddCassandra,addMongo";
 
     private EntityManagerFactory emf;
 
@@ -36,7 +38,7 @@ public class BankTest
 
     private Map<String, Object> mongoProperties = new HashMap<String, Object>();
 
-    private Map<String, Object> hbaseProperties = new HashMap<String, Object>();
+    private Map<String, Object> cassandraProperties = new HashMap<String, Object>();
 
     private Map<String, Map<String, Object>> puPropertiesMap = new HashMap<String, Map<String, Object>>();
 
@@ -48,21 +50,15 @@ public class BankTest
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        cli = new HBaseCli();
-        if (!cli.isStarted())
-        {
-            cli.startCluster();
-        }
 
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
-        mongoProperties.put("kundera.keyspace", "KunderaKeyspace");
 
-        hbaseProperties.put("kundera.ddl.auto.prepare", "create-drop");
-        hbaseProperties.put("kundera.keyspace", "KunderaKeyspace");
+        cassandraProperties.put("kundera.ddl.auto.prepare", "create-drop");
 
         puPropertiesMap.put("addMongo", mongoProperties);
-        puPropertiesMap.put("addHbase", hbaseProperties);
+        puPropertiesMap.put("secIdxAddCassandra", cassandraProperties);
 
         emf = Persistence.createEntityManagerFactory(_PU, puPropertiesMap);
         em = emf.createEntityManager();
@@ -77,9 +73,8 @@ public class BankTest
         em.close();
         emf.close();
         mongoProperties = null;
-        hbaseProperties = null;
+        cassandraProperties = null;
         puPropertiesMap = null;
-//        cli.startCluster();
     }
 
     @Test
@@ -104,6 +99,13 @@ public class BankTest
         b.setAccountHolders(accountHolders);
 
         em.persist(b);
-    }
 
+        em.clear();
+
+        Bank found = em.find(Bank.class, "SBI_1");
+        Assert.assertNotNull(found);
+        Assert.assertEquals("SBI", found.getBankName());
+        Assert.assertNotNull(found.getAccountHolders());
+        Assert.assertEquals(2, found.getAccountHolders().size());
+    }
 }

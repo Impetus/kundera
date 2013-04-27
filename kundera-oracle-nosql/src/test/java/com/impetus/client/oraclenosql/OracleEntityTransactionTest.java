@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.servlet.UnavailableException;
 
 import junit.framework.Assert;
@@ -291,13 +292,12 @@ public class OracleEntityTransactionTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
+    {
+        // Delete by query.
+        String deleteQuery = "Delete from PersonKVStore p";        
+        Query query = em.createQuery(deleteQuery);
+        int updateCount = query.executeUpdate();
+        
     }
 
     /**

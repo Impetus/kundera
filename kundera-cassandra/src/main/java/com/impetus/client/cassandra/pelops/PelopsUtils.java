@@ -33,6 +33,9 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -42,6 +45,8 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class PelopsUtils
 {
+
+    private static final int _DEFAULT_SHOCKET_TIMEOUT = 120000;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
@@ -173,12 +178,22 @@ public class PelopsUtils
         String maxIdlePerNode = null;
         String minIdlePerNode = null;
         String maxTotal = null;
+        String testOnBorrow = null;
+        String testWhileIdle = null;
+        String testOnConnect = null;
+        String testOnReturn = null;
+        String socketTimeOut = null;
         if (puProperties != null)
         {
             maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
             maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
             minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
             maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            testOnBorrow = (String) puProperties.get(CassandraConstants.TEST_ON_BORROW);
+            testOnConnect = (String) puProperties.get(CassandraConstants.TEST_ON_CONNECT);
+            testOnReturn = (String) puProperties.get(CassandraConstants.TEST_ON_RETURN);
+            testWhileIdle = (String) puProperties.get(CassandraConstants.TEST_WHILE_IDLE);
+            socketTimeOut = (String) puProperties.get(CassandraConstants.SOCKET_TIMEOUT);
         }
 
         if (maxActivePerNode == null)
@@ -197,7 +212,6 @@ public class PelopsUtils
         {
             maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
         }
-
         try
         {
             if (!StringUtils.isEmpty(maxActivePerNode))
@@ -219,6 +233,47 @@ public class PelopsUtils
             {
                 prop.setMaxActive(Integer.parseInt(maxTotal));
             }
+
+            CassandraSchemaMetadata csm = CassandraPropertyReader.csmd;
+            Properties connProps = csm.getConnectionProperties();
+            if (connProps != null)
+            {
+                if (testOnBorrow == null)
+                {
+                    testOnBorrow = connProps.getProperty(CassandraConstants.TEST_ON_BORROW);
+                }
+                if (testOnConnect == null)
+                {
+                    testOnConnect = connProps.getProperty(CassandraConstants.TEST_ON_CONNECT);
+                }
+                if (testOnReturn == null)
+                {
+                    testOnReturn = connProps.getProperty(CassandraConstants.TEST_ON_RETURN);
+                }
+                if (testWhileIdle == null)
+                {
+                    testWhileIdle = connProps.getProperty(CassandraConstants.TEST_WHILE_IDLE);
+                }
+                if (socketTimeOut == null)
+                {
+                    socketTimeOut = connProps.getProperty(CassandraConstants.SOCKET_TIMEOUT);
+                }
+            }
+
+            prop.setTestOnBorrow(Boolean.parseBoolean(testOnBorrow));
+            prop.setTestOnConnect(Boolean.parseBoolean(testOnConnect));
+            prop.setTestOnReturn(Boolean.parseBoolean(testOnReturn));
+            prop.setTestWhileIdle(Boolean.parseBoolean(testWhileIdle));
+
+            if (!StringUtils.isEmpty(socketTimeOut))
+            {
+                prop.setSocketTimeout(Integer.parseInt(socketTimeOut));
+            }
+            else
+            {
+                prop.setSocketTimeout(_DEFAULT_SHOCKET_TIMEOUT);
+            }
+
         }
         catch (NumberFormatException e)
         {

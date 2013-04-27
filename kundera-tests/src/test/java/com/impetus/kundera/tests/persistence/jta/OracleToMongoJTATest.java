@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -51,13 +52,14 @@ public class OracleToMongoJTATest
 
     private EntityManager em;
 
-    private Integer i=0;
+    private Integer i = 0;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
-    {      
+    {
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
 
@@ -82,21 +84,21 @@ public class OracleToMongoJTATest
 
         userTransaction.begin();
 
-        
         for (i = 0; i < 100; i++)
         {
-           Runnable r =  onExecute();
-           r.run();
+            Runnable r = onExecute();
+            r.run();
         }
-        
+
         userTransaction.commit();
 
         userTransaction.begin();
-        // As data is commited, hence it should return values with other session.
+        // As data is commited, hence it should return values with other
+        // session.
         for (i = 0; i < 100; i++)
         {
-        EntityManager em1 = emf.createEntityManager();
-        Assert.assertNotNull(em1.find(OraclePersonnelOTOFKEntityJTA.class, "1_p" + i));
+            EntityManager em1 = emf.createEntityManager();
+            Assert.assertNotNull(em1.find(OraclePersonnelOTOFKEntityJTA.class, "1_p" + i));
         }
     }
 
@@ -104,8 +106,6 @@ public class OracleToMongoJTATest
     {
         Runnable r = new Runnable()
         {
-
-
             @Override
             public void run()
             {
@@ -125,18 +125,16 @@ public class OracleToMongoJTATest
                     HabitatOToOFKEntityJTA found = em.find(HabitatOToOFKEntityJTA.class, "1_a" + i);
                     Assert.assertNull(found);
                 }
-                
-                // As data is not commited, hence it should return null with other session.
+
+                // As data is not commited, hence it should return null with
+                // other session.
                 EntityManager em1 = emf.createEntityManager();
                 Assert.assertNull(em1.find(OraclePersonnelOTOFKEntityJTA.class, "1_p" + i));
             }
-        };        
+        };
         return r;
     }
 
-    
-    
-    
     @Test
     public void testPersist() throws NotSupportedException, SystemException, NamingException, SecurityException,
             IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException
@@ -170,6 +168,19 @@ public class OracleToMongoJTATest
     @After
     public void tearDown() throws Exception
     {
+        userTransaction.begin();
+        
+        // Delete by query.
+        String deleteQuery = "Delete from OraclePersonnelOTOFKEntityJTA p";
+        Query query = em.createQuery(deleteQuery);
+        query.executeUpdate();
+        
+        deleteQuery = "Delete from HabitatOToOFKEntityJTA p";
+        query = em.createQuery(deleteQuery);
+        query.executeUpdate();
+        
+        userTransaction.commit();
+        
         initialContext.unbind("java:comp/UserTransaction");
         initialContext.destroySubcontext("java:comp");
     }

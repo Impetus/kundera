@@ -47,6 +47,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.mongodb.BasicDBObject;
+import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -237,21 +238,27 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             query.put("_id", MongoDBUtils.populateValue(key, key.getClass()));
         }
 
-        DBCursor cursor = dbCollection.find(query);
-        DBObject fetchedDocument = null;
+//        DBCursor cursor = dbCollection.findOne(query);
+        DBObject fetchedDocument = dbCollection.findOne(query);;
 
-        if (cursor.hasNext())
+        /*if (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
         }
         else
         {
             return null;
-        }
-        Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+        }*/
+        
+        if(fetchedDocument != null)
+        {
+            Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
                 fetchedDocument, relationNames);
 
         return enhancedEntity;
+        }
+        
+        return null;
     }
 
     /*
@@ -261,7 +268,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
 
@@ -816,5 +823,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         // return auto generated id used by mongodb.
         return new ObjectId();
+    }
+
+    /**
+     * Method to execute mongo jscripts.
+     * 
+     * @param script jscript in string format
+     * 
+     * @return result object.
+     */
+    public Object executeScript(String script)
+    {
+        return mongoDb.eval(script);
     }
 }

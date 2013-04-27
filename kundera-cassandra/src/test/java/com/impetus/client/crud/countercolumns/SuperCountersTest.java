@@ -16,7 +16,9 @@
 package com.impetus.client.crud.countercolumns;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -35,8 +37,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * @author impadmin
@@ -58,6 +62,7 @@ public class SuperCountersTest
 
     private String keyspace = "KunderaCounterColumn";
 
+    protected Map propertyMap = new HashMap();
     /**
      * @throws java.lang.Exception
      */
@@ -72,6 +77,11 @@ public class SuperCountersTest
         if (AUTO_MANAGE_SCHEMA)
         {
             createSchema();
+        }
+        if (propertyMap.isEmpty())
+        {
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }
@@ -103,11 +113,11 @@ public class SuperCountersTest
     @After
     public void tearDown() throws Exception
     {
+        emf.close();
         if (/* AUTO_MANAGE_SCHEMA && CassandraCli.keyspaceExist(keyspace) */CassandraCli.client != null)
         {
             CassandraCli.dropKeySpace(keyspace);
         }
-        emf.close();
     }
 
     @Test

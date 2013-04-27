@@ -144,7 +144,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
         List entities = new ArrayList<E>();
         for (Object key : keys)

@@ -223,7 +223,7 @@ public class HBaseQuery extends QueryImpl implements Query
         else
         {
             List results = null;
-            return populateUsingLucene(m, client, results);
+            return populateUsingLucene(m, client, results, null);
         }
         // return null;
     }

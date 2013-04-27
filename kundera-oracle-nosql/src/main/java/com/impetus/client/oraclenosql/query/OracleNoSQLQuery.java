@@ -16,29 +16,32 @@
 package com.impetus.client.oraclenosql.query;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
-import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -64,25 +67,47 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
             log.debug("Populating entities for JPA query on OracleNOSQL");
         }
         
-        List<Object> results = new ArrayList<Object>();
+        Set<Object> results = new HashSet<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
         .getPersistenceUnitMetadata(m.getPersistenceUnit()).getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
        
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());
+        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());        
+        OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
         
-        if (clientMetadata.getIndexImplementor() != null && client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
+        Set<Object> resultsFromIdSearch = new HashSet<Object>();
+        
+        //Find By ID queries
+        if(interpreter.isFindById())
         {
-            results = populateUsingLucene(m, client, results);             
-
+            Object entity = client.find(m.getEntityClazz(), interpreter.getRowKey());
+            resultsFromIdSearch.add(entity);
+            
+            if(interpreter.getOperatorWithRowKey() == null)
+            {
+                List<Object> output = new ArrayList<Object>();        
+                output.addAll(resultsFromIdSearch);                
+                return output;   
+            }
+        }  
+        
+        
+        if (client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
+        {
+            results.addAll(populateUsingLucene(m, client, null, interpreter.getSelectColumns()));
         }
         else
-        {            
-            OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);            
-            results = (List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter);
-        }        
-        return results;
-    }
+        {   
+                        
+            results.addAll((List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter, null));
+        }    
+        
+        List<Object> output = new ArrayList<Object>();        
+        output.addAll(results);
+        
+        return output;       
+    }  
+  
 
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
@@ -115,9 +140,63 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
     private OracleNoSQLQueryInterpreter translateQuery(Queue clauseQueue, EntityMetadata entityMetadata)
     {
         OracleNoSQLQueryInterpreter interpreter = new OracleNoSQLQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
-        interpreter.setClauseQueue(clauseQueue);    
+        interpreter.setClauseQueue(clauseQueue); 
+        
+        String operatorWithIdClause = null;
+        boolean idClauseFound = false;
+        for(Object clause : clauseQueue)
+        {            
+            if (clause.getClass().isAssignableFrom(FilterClause.class) && !idClauseFound)            
+            {
+                String columnName = ((FilterClause) clause).getProperty();
+                SingularAttribute idAttribute = entityMetadata.getIdAttribute();
+                if (columnName.equals(((AbstractAttribute) idAttribute).getJPAColumnName()))
+                {
+                    interpreter.setFindById(true);
+                    // To convert rowkey string to object.
+                    Object keyObj =   PropertyAccessorHelper.fromSourceToTargetClass(((AbstractAttribute)idAttribute).getBindableJavaType(), String.class, ((FilterClause) clause).getValue());
+                    interpreter.setRowKey(keyObj/*((FilterClause) clause).getValue()*/);
+                    idClauseFound = true;
+                }
+            }
+            else if(clause instanceof String)            
+            {                
+               operatorWithIdClause = clause.toString();               
+            }
+            
+            if(idClauseFound && operatorWithIdClause != null)
+            {
+                break;
+            }
+        }
+        
+        interpreter.setOperatorWithRowKey(operatorWithIdClause);
 
         return interpreter;
-    }   
+    } 
+    
+    private void addToResults(Set results, Set resultsToAdd, String operation)
+    {
+        if(resultsToAdd == null || resultsToAdd.isEmpty())
+        {
+            return;
+        }
+        
+        if(operation == null)
+        {
+            results.addAll(resultsToAdd);
+        }
+        else if(operation.equalsIgnoreCase("OR"))
+        {
+            results.addAll(resultsToAdd);
+        }
+        else if(operation.equalsIgnoreCase("AND"))
+        {           
+            results.retainAll(resultsToAdd);                        
+        }
+        
+        resultsToAdd.clear();        
+    }
+   
 
 }

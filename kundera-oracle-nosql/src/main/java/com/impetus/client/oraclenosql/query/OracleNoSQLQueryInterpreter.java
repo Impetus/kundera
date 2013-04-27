@@ -17,22 +17,25 @@ package com.impetus.client.oraclenosql.query;
 
 import java.util.Queue;
 
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-
 /**
  * Interprets JPA query and holds conditions to pass on to client
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLQueryInterpreter
-{ 
-    
-    //Select columns
-    private String[] selectColumns;
-    
-    
-    private Queue clauseQueue;    
+{
 
-    
+    // Select columns
+    private String[] selectColumns;
+
+    private boolean isFindById;
+
+    private Object rowKey;
+
+    private String operatorWithRowKey;
+
+    private Queue clauseQueue;
+
     /**
      * Default constructor
      */
@@ -40,7 +43,6 @@ public class OracleNoSQLQueryInterpreter
     {
         this.selectColumns = selectColumns;
     }
-
 
     /**
      * @return the clauseQueue
@@ -50,15 +52,14 @@ public class OracleNoSQLQueryInterpreter
         return clauseQueue;
     }
 
-
     /**
-     * @param clauseQueue the clauseQueue to set
+     * @param clauseQueue
+     *            the clauseQueue to set
      */
     public void setClauseQueue(Queue clauseQueue)
     {
         this.clauseQueue = clauseQueue;
     }
-
 
     /**
      * @return the selectColumns
@@ -68,13 +69,64 @@ public class OracleNoSQLQueryInterpreter
         return selectColumns;
     }
 
-
     /**
-     * @param selectColumns the selectColumns to set
+     * @param selectColumns
+     *            the selectColumns to set
      */
     public void setSelectColumns(String[] selectColumns)
     {
         this.selectColumns = selectColumns;
-    }    
-    
+    }
+
+    /**
+     * @return the isFindById
+     */
+    public boolean isFindById()
+    {
+        return isFindById;
+    }
+
+    /**
+     * @param isFindById
+     *            the isFindById to set
+     */
+    public void setFindById(boolean isFindById)
+    {
+        this.isFindById = isFindById;
+    }
+
+    /**
+     * @return the rowKey
+     */
+    public Object getRowKey()
+    {
+        return rowKey;
+    }
+
+    /**
+     * @param rowKey
+     *            the rowKey to set
+     */
+    public void setRowKey(Object rowKey)
+    {
+        this.rowKey = rowKey;
+    }
+
+    /**
+     * @return the operatorWithRowKey
+     */
+    public String getOperatorWithRowKey()
+    {
+        return operatorWithRowKey;
+    }
+
+    /**
+     * @param operatorWithRowKey
+     *            the operatorWithRowKey to set
+     */
+    public void setOperatorWithRowKey(String operatorWithRowKey)
+    {
+        this.operatorWithRowKey = operatorWithRowKey;
+    }
+
 }

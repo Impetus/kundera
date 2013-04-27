@@ -74,9 +74,6 @@ public abstract class AssociationBase
     protected Map propertyMap = new HashMap();
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
-    // /*,"rdbms"*/ "addCassandra","addHbase", "addMongo" };
-
-    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
 
     // public static final String[] ALL_PUs_UNDER_TEST = new
@@ -95,14 +92,12 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "rdbms,redis,addMongo,addCassandra,oracle_kvstore,piccandra,secIdxAddCassandra,addHbase,picongo";
+    private String persistenceUnits = "rdbms,redis,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
             "oracle_kvstore" /* , "addHbase" */};
 
     protected RDBMSCli cli;
-
-    // private String persistenceUnits = "rdbms,addHbase";
 
     /**
      * Sets the up internal.
@@ -116,14 +111,13 @@ public abstract class AssociationBase
         {
             cli = new RDBMSCli(KEYSPACE);
             cli.createSchema(KEYSPACE);
+            CassandraCli.cassandraSetUp();
         }
         catch (Exception e)
         {
             log.error("Error in RDBMS cli ", e);
         }
 
-        HBaseCli.startCluster();
-        // String persistenceUnits = "rdbms,twissandra";
         dao = new UserAddressDaoImpl(persistenceUnits);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         KunderaMetadata.INSTANCE.setCoreMetadata(null);
@@ -218,9 +212,6 @@ public abstract class AssociationBase
                     {
                         CassandraCli.cassandraSetUp();
                         CassandraCli.initClient();
-
-                        // HBaseCli cli = new HBaseCli();
-                        // cli.startCluster();
                     }
 
                     if (AUTO_MANAGE_SCHEMA)
@@ -318,9 +309,8 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-        HBaseCli.stopCluster();
+        // HBaseCli.stopCluster();
         // dao.closeEntityManagerFactory();
-
     }
 
     /**

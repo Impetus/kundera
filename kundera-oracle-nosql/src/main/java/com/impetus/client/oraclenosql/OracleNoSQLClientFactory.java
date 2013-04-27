@@ -29,6 +29,7 @@ import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -72,13 +73,14 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
         .getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
         .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
-        if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName()))
-        {
-            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setKvStore(kvStore);
-        }
         
-        return new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit());
+        Client client = new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit());       
+        populateIndexer(indexerClass, client);
+        
+        return client;
     }
+
+    
 
     @Override
     public boolean isThreadSafe()
@@ -118,6 +120,20 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         return kvStore;
         
        
+    }
+    
+    /**
+     * Populates {@link Indexer} into {@link IndexManager}
+     * @param indexerClass
+     * @param client
+     */
+    private void populateIndexer(String indexerClass, Client client)
+    {
+        if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName()))
+        {
+            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setKvStore(kvStore);
+            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setHandler(((OracleNoSQLClient)client).getHandler());
+        }
     }
 
     /**
