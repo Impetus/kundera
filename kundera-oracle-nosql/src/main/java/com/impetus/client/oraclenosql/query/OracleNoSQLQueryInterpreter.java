@@ -19,21 +19,23 @@ import java.util.Queue;
 
 /**
  * Interprets JPA query and holds conditions to pass on to client
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLQueryInterpreter
-{ 
-    
-    //Select columns
-    private String[] selectColumns;
-    
-    private boolean isFindById;   
-    private Object rowKey;
-    private String operatorWithRowKey;
-    
-    private Queue clauseQueue;   
+{
 
-    
+    // Select columns
+    private String[] selectColumns;
+
+    private boolean isFindById;
+
+    private Object rowKey;
+
+    private String operatorWithRowKey;
+
+    private Queue clauseQueue;
+
     /**
      * Default constructor
      */
@@ -41,7 +43,6 @@ public class OracleNoSQLQueryInterpreter
     {
         this.selectColumns = selectColumns;
     }
-
 
     /**
      * @return the clauseQueue
@@ -51,15 +52,14 @@ public class OracleNoSQLQueryInterpreter
         return clauseQueue;
     }
 
-
     /**
-     * @param clauseQueue the clauseQueue to set
+     * @param clauseQueue
+     *            the clauseQueue to set
      */
     public void setClauseQueue(Queue clauseQueue)
     {
         this.clauseQueue = clauseQueue;
     }
-
 
     /**
      * @return the selectColumns
@@ -69,15 +69,14 @@ public class OracleNoSQLQueryInterpreter
         return selectColumns;
     }
 
-
     /**
-     * @param selectColumns the selectColumns to set
+     * @param selectColumns
+     *            the selectColumns to set
      */
     public void setSelectColumns(String[] selectColumns)
     {
         this.selectColumns = selectColumns;
     }
-
 
     /**
      * @return the isFindById
@@ -87,15 +86,14 @@ public class OracleNoSQLQueryInterpreter
         return isFindById;
     }
 
-
     /**
-     * @param isFindById the isFindById to set
+     * @param isFindById
+     *            the isFindById to set
      */
     public void setFindById(boolean isFindById)
     {
         this.isFindById = isFindById;
     }
-
 
     /**
      * @return the rowKey
@@ -105,15 +103,14 @@ public class OracleNoSQLQueryInterpreter
         return rowKey;
     }
 
-
     /**
-     * @param rowKey the rowKey to set
+     * @param rowKey
+     *            the rowKey to set
      */
     public void setRowKey(Object rowKey)
     {
         this.rowKey = rowKey;
     }
-
 
     /**
      * @return the operatorWithRowKey
@@ -123,13 +120,13 @@ public class OracleNoSQLQueryInterpreter
         return operatorWithRowKey;
     }
 
-
     /**
-     * @param operatorWithRowKey the operatorWithRowKey to set
+     * @param operatorWithRowKey
+     *            the operatorWithRowKey to set
      */
     public void setOperatorWithRowKey(String operatorWithRowKey)
     {
         this.operatorWithRowKey = operatorWithRowKey;
-    }        
-    
+    }
+
 }

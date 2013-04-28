@@ -22,6 +22,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +39,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
@@ -147,10 +149,13 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
             if (clause.getClass().isAssignableFrom(FilterClause.class) && !idClauseFound)            
             {
                 String columnName = ((FilterClause) clause).getProperty();
-                if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()))
+                SingularAttribute idAttribute = entityMetadata.getIdAttribute();
+                if (columnName.equals(((AbstractAttribute) idAttribute).getJPAColumnName()))
                 {
                     interpreter.setFindById(true);
-                    interpreter.setRowKey(((FilterClause) clause).getValue());
+                    // To convert rowkey string to object.
+                    Object keyObj =   PropertyAccessorHelper.fromSourceToTargetClass(((AbstractAttribute)idAttribute).getBindableJavaType(), String.class, ((FilterClause) clause).getValue());
+                    interpreter.setRowKey(keyObj/*((FilterClause) clause).getValue()*/);
                     idClauseFound = true;
                 }
             }

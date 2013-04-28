@@ -238,21 +238,27 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             query.put("_id", MongoDBUtils.populateValue(key, key.getClass()));
         }
 
-        DBCursor cursor = dbCollection.find(query);
-        DBObject fetchedDocument = null;
+//        DBCursor cursor = dbCollection.findOne(query);
+        DBObject fetchedDocument = dbCollection.findOne(query);;
 
-        if (cursor.hasNext())
+        /*if (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
         }
         else
         {
             return null;
-        }
-        Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+        }*/
+        
+        if(fetchedDocument != null)
+        {
+            Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
                 fetchedDocument, relationNames);
 
         return enhancedEntity;
+        }
+        
+        return null;
     }
 
     /*

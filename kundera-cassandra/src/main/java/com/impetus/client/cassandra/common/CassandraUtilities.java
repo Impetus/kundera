@@ -152,9 +152,17 @@ public class CassandraUtilities
     }
 
     /**
-     * Return name if Idcolumn for cql, returns {@CassandraConstants.CQL_KEY}
-     * if user opted for {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE} 
-     * otherwise returns JPAColumnName of id attribute.
+     * Return name if Idcolumn for cql, returns {@CassandraConstants.CQL_KEY
+     * 
+     * 
+     * 
+     * } if user opted for
+     * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
+     * 
+     * 
+     * } otherwise returns
+     * JPAColumnName of id attribute.
      * 
      * @param m
      * @param externalProperties
