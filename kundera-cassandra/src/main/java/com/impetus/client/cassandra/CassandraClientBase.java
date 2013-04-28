@@ -959,10 +959,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public void close()
     {
-        nodes.clear();
-        nodes = null;
+        clear();
+//        nodes.clear();
+//        nodes = null;
         closed = true;
-        externalProperties = null;
+//        externalProperties = null;
     }
 
     /**
