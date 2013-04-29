@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentOracleNoSQLChar
 {
 
-
     @Id
     private char id;
 
@@ -70,6 +69,5 @@ public class StudentOracleNoSQLChar
     {
         this.name = name;
     }
-
 
 }

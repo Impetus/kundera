@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentOracleNoSQLShort
 {
 
-
     @Id
     private Short id;
 
@@ -70,7 +69,5 @@ public class StudentOracleNoSQLShort
     {
         this.name = name;
     }
-
-
 
 }

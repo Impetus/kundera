@@ -25,6 +25,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Entity class for Person in Batch operation
+ * 
  * @author amresh.singh
  */
 @Entity

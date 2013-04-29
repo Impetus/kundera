@@ -15,7 +15,6 @@
  */
 package com.impetus.client.oraclenosql.entities;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -27,19 +26,18 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Entity class for Person 
+ * Entity class for Person
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "PERSON", schema = "KunderaTests@twikvstore")
-@IndexCollection(columns = { @Index(name = "personName"),
-        @Index(name = "age")})
-@NamedQueries(value = {
-        @NamedQuery(name = "findByAge", query = "Select p from PersonKVStore p where p.age=:age"),
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
+@NamedQueries(value = { @NamedQuery(name = "findByAge", query = "Select p from PersonKVStore p where p.age=:age"),
         @NamedQuery(name = "findByName", query = "Select p from PersonKVStore p where p.personName = ?1") })
 public class PersonKVStore
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -52,10 +50,10 @@ public class PersonKVStore
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
-    
+
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -65,7 +63,7 @@ public class PersonKVStore
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -75,8 +73,9 @@ public class PersonKVStore
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -85,8 +84,9 @@ public class PersonKVStore
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -102,12 +102,12 @@ public class PersonKVStore
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
         this.age = age;
     }
-    
-    
+
 }

@@ -25,10 +25,12 @@ import oracle.kv.KVStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.oraclenosql.config.OracleNoSQLPropertyReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -46,11 +48,9 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLClientFactory.class);
 
-
     /** The kvstore db. */
     private KVStore kvStore;
 
-   
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
@@ -60,34 +60,31 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> puProperties)
     {
+        initializePropertyReader();
         setExternalProperties(puProperties);
         reader = new OracleNoSQLEntityReader();
-
-      
-        
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
         String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-        .getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
-        .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
-        
-        Client client = new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit());       
+                .getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+
+        Client client = new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties,
+                getPersistenceUnit());
         populateIndexer(indexerClass, client);
-        
+
         return client;
     }
-
-    
 
     @Override
     public boolean isThreadSafe()
     {
         return false;
     }
-    
+
     @Override
     public void destroy()
     {
@@ -98,7 +95,7 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         }
         schemaManager = null;
         externalProperties = null;
-        
+
         if (kvStore != null)
         {
             logger.info("Closing connection to kvStore.");
@@ -109,21 +106,19 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         {
             logger.warn("Can't close connection to kvStore, it was already disconnected");
         }
-    }   
+    }
 
     @Override
     protected Object createPoolOrConnection()
     {
         kvStore = getConnection();
-       
-        
+
         return kvStore;
-        
-       
     }
-    
+
     /**
      * Populates {@link Indexer} into {@link IndexManager}
+     * 
      * @param indexerClass
      * @param client
      */
@@ -132,7 +127,17 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName()))
         {
             ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setKvStore(kvStore);
-            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setHandler(((OracleNoSQLClient)client).getHandler());
+            ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setHandler(((OracleNoSQLClient) client)
+                    .getHandler());
+        }
+    }
+
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new OracleNoSQLPropertyReader();
+            propertyReader.read(getPersistenceUnit());
         }
     }
 

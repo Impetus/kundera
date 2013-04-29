@@ -69,6 +69,4 @@ public class StudentOracleNoSQLCharacter
         this.name = name;
     }
 
-
-
 }

@@ -35,11 +35,11 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name = "PERSON_ALL_DATA_TYPE", schema = "KunderaTests@twikvstore")
 public class PersonOracleNoSQLAllDataType
-{    
+{
     @Id
     @Column(name = "PERSON_ID")
     private long personId;
-   
+
     @Column(name = "PERSON_NAME")
     private String personName;
 
@@ -103,9 +103,8 @@ public class PersonOracleNoSQLAllDataType
     private BigDecimal accumulatedWealth;
 
     @Column(name = "GRADUATION_DAY")
-    private Calendar graduationDay;  
+    private Calendar graduationDay;
 
-   
     public PersonOracleNoSQLAllDataType()
     {
     }
@@ -148,7 +147,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param personId the personId to set
+     * @param personId
+     *            the personId to set
      */
     public void setPersonId(long personId)
     {
@@ -164,7 +164,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param personName the personName to set
+     * @param personName
+     *            the personName to set
      */
     public void setPersonName(String personName)
     {
@@ -180,7 +181,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param isExceptional the isExceptional to set
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
@@ -196,7 +198,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -212,7 +215,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param grade the grade to set
+     * @param grade
+     *            the grade to set
      */
     public void setGrade(char grade)
     {
@@ -228,7 +232,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param digitalSignature the digitalSignature to set
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
@@ -244,7 +249,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param rating the rating to set
+     * @param rating
+     *            the rating to set
      */
     public void setRating(short rating)
     {
@@ -260,7 +266,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param compliance the compliance to set
+     * @param compliance
+     *            the compliance to set
      */
     public void setCompliance(float compliance)
     {
@@ -276,7 +283,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param height the height to set
+     * @param height
+     *            the height to set
      */
     public void setHeight(double height)
     {
@@ -292,7 +300,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param enrolmentDate the enrolmentDate to set
+     * @param enrolmentDate
+     *            the enrolmentDate to set
      */
     public void setEnrolmentDate(java.util.Date enrolmentDate)
     {
@@ -308,7 +317,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param enrolmentTime the enrolmentTime to set
+     * @param enrolmentTime
+     *            the enrolmentTime to set
      */
     public void setEnrolmentTime(java.util.Date enrolmentTime)
     {
@@ -324,7 +334,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param joiningDateAndTime the joiningDateAndTime to set
+     * @param joiningDateAndTime
+     *            the joiningDateAndTime to set
      */
     public void setJoiningDateAndTime(java.util.Date joiningDateAndTime)
     {
@@ -340,7 +351,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param yearsSpent the yearsSpent to set
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
@@ -356,7 +368,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param uniqueId the uniqueId to set
+     * @param uniqueId
+     *            the uniqueId to set
      */
     public void setUniqueId(Long uniqueId)
     {
@@ -372,7 +385,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param monthlySalary the monthlySalary to set
+     * @param monthlySalary
+     *            the monthlySalary to set
      */
     public void setMonthlySalary(Double monthlySalary)
     {
@@ -388,7 +402,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param birthday the birthday to set
+     * @param birthday
+     *            the birthday to set
      */
     public void setBirthday(java.sql.Date birthday)
     {
@@ -404,7 +419,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param birthtime the birthtime to set
+     * @param birthtime
+     *            the birthtime to set
      */
     public void setBirthtime(java.sql.Time birthtime)
     {
@@ -420,7 +436,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param anniversary the anniversary to set
+     * @param anniversary
+     *            the anniversary to set
      */
     public void setAnniversary(java.sql.Timestamp anniversary)
     {
@@ -436,7 +453,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param jobAttempts the jobAttempts to set
+     * @param jobAttempts
+     *            the jobAttempts to set
      */
     public void setJobAttempts(BigInteger jobAttempts)
     {
@@ -452,7 +470,8 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param accumulatedWealth the accumulatedWealth to set
+     * @param accumulatedWealth
+     *            the accumulatedWealth to set
      */
     public void setAccumulatedWealth(BigDecimal accumulatedWealth)
     {
@@ -468,13 +487,12 @@ public class PersonOracleNoSQLAllDataType
     }
 
     /**
-     * @param graduationDay the graduationDay to set
+     * @param graduationDay
+     *            the graduationDay to set
      */
     public void setGraduationDay(Calendar graduationDay)
     {
         this.graduationDay = graduationDay;
     }
-    
-    
-    
+
 }

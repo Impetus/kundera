@@ -45,16 +45,16 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.Client;
 
-
 /**
  * Provides utility methods for handling data held in Oracle NoSQL KVstore.
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLDataHandler
 {
     /** The client. */
     private OracleNoSQLClient client;
-    
+
     private KVStore kvStore;
 
     /** The persistence unit. */
@@ -62,26 +62,27 @@ public class OracleNoSQLDataHandler
 
     /** The log. */
     private static Log log = LogFactory.getLog(OracleNoSQLDataHandler.class);
-    
-    
+
     /**
      * Instantiates a new mongo db data handler.
-     *
-     * @param client the client
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param client
+     *            the client
+     * @param persistenceUnit
+     *            the persistence unit
      */
     public OracleNoSQLDataHandler(Client client, KVStore kvStore, String persistenceUnit)
     {
         super();
-        this.client = (OracleNoSQLClient)client;
+        this.client = (OracleNoSQLClient) client;
         this.kvStore = kvStore;
         this.persistenceUnit = persistenceUnit;
     }
-    
+
     public void execute(List<Operation> operations)
     {
-        if(operations != null && ! operations.isEmpty())
-        {            
+        if (operations != null && !operations.isEmpty())
+        {
             try
             {
                 kvStore.execute(operations);
@@ -89,25 +90,25 @@ public class OracleNoSQLDataHandler
             catch (DurabilityException e)
             {
                 log.error(e);
-                throw new PersistenceException("Error while Persisting data using batch", e);
+                throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             catch (OperationExecutionException e)
             {
                 log.error(e);
-                throw new PersistenceException("Error while Persisting data using batch", e);
+                throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             catch (FaultException e)
             {
                 log.error(e);
-                throw new PersistenceException("Error while Persisting data using batch", e);
+                throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             finally
             {
                 operations.clear();
             }
-        }        
+        }
     }
-    
+
     /**
      * @param keyValueVersion
      * @param fileName
@@ -117,8 +118,8 @@ public class OracleNoSQLDataHandler
      */
     public File getLOBFile(KeyValueVersion keyValueVersion, String fileName) throws FileNotFoundException, IOException
     {
-        InputStreamVersion istreamVersion = kvStore.getLOB(keyValueVersion.getKey(), client.getConsistency(), client.getTimeout(),
-                client.getTimeUnit());
+        InputStreamVersion istreamVersion = kvStore.getLOB(keyValueVersion.getKey(), client.getConsistency(),
+                client.getTimeout(), client.getTimeUnit());
         InputStream is = istreamVersion.getInputStream();
 
         File lobFile = new File(fileName);
@@ -133,18 +134,21 @@ public class OracleNoSQLDataHandler
     }
 
     /**
-     * @param minorKeyFirstPart
+     * @param minorKey
      * @return
      */
-    public String removeLOBSuffix(String minorKeyFirstPart)
+    public String removeLOBSuffix(String minorKey)
     {
-        if (minorKeyFirstPart.endsWith(OracleNOSQLConstants.LOB_SUFFIX))
+        if (minorKey == null)
+            return minorKey;
+
+        if (minorKey.endsWith(OracleNOSQLConstants.LOB_SUFFIX))
         {
-            minorKeyFirstPart = minorKeyFirstPart.substring(0, minorKeyFirstPart.length() - OracleNOSQLConstants.LOB_SUFFIX.length());
+            minorKey = minorKey.substring(0, minorKey.length() - OracleNOSQLConstants.LOB_SUFFIX.length());
         }
-        return minorKeyFirstPart;
+        return minorKey;
     }
-    
+
     /**
      * Saves LOB file to Oracle KV Store
      * 
@@ -156,17 +160,17 @@ public class OracleNoSQLDataHandler
         try
         {
             FileInputStream fis = new FileInputStream(lobFile);
-            Version version = kvStore.putLOB(key, fis, client.getDurability(), client.getTimeout(), client.getTimeUnit());
+            Version version = kvStore.putLOB(key, fis, client.getDurability(), client.getTimeout(),
+                    client.getTimeUnit());
         }
         catch (FileNotFoundException e)
         {
-            log.warn("Unable to find file " + lobFile + ". This is being omitted. Details:" + e.getMessage());
+            log.warn("Unable to find file " + lobFile + ". This is being omitted, Caused by:" + e + ".");
         }
         catch (IOException e)
         {
-            log.warn("IOException while writing file " + lobFile + ". This is being omitted. Details:" + e.getMessage());
+            log.warn("IOException while writing file " + lobFile + ". This is being omitted. Caused by:" + e + ".");
         }
-   }
+    }
 
-    
 }

@@ -24,7 +24,7 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-       
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -32,7 +32,7 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-     
+
     }
 
     @Test
@@ -41,8 +41,8 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -52,8 +52,8 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -147,7 +147,7 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -379,8 +379,8 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
         List<StudentOracleNoSQLInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLInteger s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLInteger s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -537,5 +537,4 @@ public class StudentOracleNoSQLIntegerTest extends OracleNoSQLBase
         em.close();
     }
 
-    
 }

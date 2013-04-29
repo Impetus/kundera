@@ -201,7 +201,8 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         results = executeSelectQuery(findByIdAndAge, params);
         Assert.assertEquals(0, results.size());
 
-        // OR queries and numeric searches are not supported for Lucene as of now, and hence are not to be
+        // OR queries and numeric searches are not supported for Lucene as of
+        // now, and hence are not to be
         // tested in that case
         if (!isLuceneIndexingEnabled())
         {
@@ -275,8 +276,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
             results = executeSelectQuery(findPersonIdBetween, params);
             Assert.assertEquals(3, results.size());
 
-        }    
-
+        }
 
         clearEm();
         String findSelective = "Select p.age from PersonKVStore p";

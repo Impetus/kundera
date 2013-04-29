@@ -69,7 +69,4 @@ public class StudentOracleNoSQLfloat
         this.name = name;
     }
 
-
-
-
 }

@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentOracleNoSQLbyte
 {
 
-
     @Id
     private byte id;
 
@@ -70,9 +69,5 @@ public class StudentOracleNoSQLbyte
     {
         this.name = name;
     }
-
-
-
-
 
 }

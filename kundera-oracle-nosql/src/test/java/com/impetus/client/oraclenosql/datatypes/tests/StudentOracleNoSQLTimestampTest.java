@@ -25,14 +25,14 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
 
     @Before
     public void setUp() throws Exception
-    {      
+    {
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     
+        emf.close();
     }
 
     @Test
@@ -41,8 +41,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -52,8 +52,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -89,7 +89,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLTimestamp studentMax = em.find(StudentOracleNoSQLTimestamp.class, getMaxValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp studentMax = em.find(StudentOracleNoSQLTimestamp.class,
+                getMaxValue(Timestamp.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -99,7 +100,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLTimestamp studentMin = em.find(StudentOracleNoSQLTimestamp.class, getMinValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp studentMin = em.find(StudentOracleNoSQLTimestamp.class,
+                getMinValue(Timestamp.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -109,7 +111,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLTimestamp student = em.find(StudentOracleNoSQLTimestamp.class, getRandomValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp student = em.find(StudentOracleNoSQLTimestamp.class,
+                getRandomValue(Timestamp.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -131,7 +134,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLTimestamp newStudent = em.find(StudentOracleNoSQLTimestamp.class, getMaxValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp newStudent = em.find(StudentOracleNoSQLTimestamp.class,
+                getMaxValue(Timestamp.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -288,7 +292,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLTimestamp studentMax = em.find(StudentOracleNoSQLTimestamp.class, getMaxValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp studentMax = em.find(StudentOracleNoSQLTimestamp.class,
+                getMaxValue(Timestamp.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -318,8 +323,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLTimestamp newStudent = em
-                .find(StudentOracleNoSQLTimestamp.class, getRandomValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp newStudent = em.find(StudentOracleNoSQLTimestamp.class,
+                getRandomValue(Timestamp.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -339,8 +344,8 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLTimestamp newStudent = em
-                .find(StudentOracleNoSQLTimestamp.class, getRandomValue(Timestamp.class));
+        StudentOracleNoSQLTimestamp newStudent = em.find(StudentOracleNoSQLTimestamp.class,
+                getRandomValue(Timestamp.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -539,6 +544,5 @@ public class StudentOracleNoSQLTimestampTest extends OracleNoSQLBase
         Assert.assertEquals(3, count);
         em.close();
     }
-
 
 }

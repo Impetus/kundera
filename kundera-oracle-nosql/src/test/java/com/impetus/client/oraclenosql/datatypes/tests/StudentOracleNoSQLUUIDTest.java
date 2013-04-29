@@ -26,7 +26,7 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-      
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -34,7 +34,7 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-      
+
     }
 
     @Test
@@ -43,20 +43,20 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNativeQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNativeQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
-    
+
     @Test
     public void testExecute()
     {
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -72,8 +72,6 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
         Assert.assertNotNull(results);
 
     }
-
-    
 
     public void testPersist(boolean useSameEm)
     {
@@ -423,8 +421,8 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
         List<StudentOracleNoSQLUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLUUID s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLUUID s where s.name = Kuldeep and s.age >= "
+                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -553,5 +551,4 @@ public class StudentOracleNoSQLUUIDTest extends OracleNoSQLBase
         em.close();
     }
 
-  
 }

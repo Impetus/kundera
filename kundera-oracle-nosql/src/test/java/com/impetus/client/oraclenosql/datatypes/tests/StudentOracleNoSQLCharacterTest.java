@@ -25,7 +25,7 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-       
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -33,7 +33,7 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-      
+
     }
 
     @Test
@@ -42,8 +42,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -53,8 +53,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -89,7 +89,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLCharacter studentMax = em.find(StudentOracleNoSQLCharacter.class, getMaxValue(Character.class));
+        StudentOracleNoSQLCharacter studentMax = em.find(StudentOracleNoSQLCharacter.class,
+                getMaxValue(Character.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -99,7 +100,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLCharacter studentMin = em.find(StudentOracleNoSQLCharacter.class, getMinValue(Character.class));
+        StudentOracleNoSQLCharacter studentMin = em.find(StudentOracleNoSQLCharacter.class,
+                getMinValue(Character.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -109,7 +111,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLCharacter student = em.find(StudentOracleNoSQLCharacter.class, getRandomValue(Character.class));
+        StudentOracleNoSQLCharacter student = em.find(StudentOracleNoSQLCharacter.class,
+                getRandomValue(Character.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -131,7 +134,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLCharacter newStudent = em.find(StudentOracleNoSQLCharacter.class, getMaxValue(Character.class));
+        StudentOracleNoSQLCharacter newStudent = em.find(StudentOracleNoSQLCharacter.class,
+                getMaxValue(Character.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -289,7 +293,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLCharacter studentMax = em.find(StudentOracleNoSQLCharacter.class, getMaxValue(Character.class));
+        StudentOracleNoSQLCharacter studentMax = em.find(StudentOracleNoSQLCharacter.class,
+                getMaxValue(Character.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -319,8 +324,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLCharacter newStudent = em
-                .find(StudentOracleNoSQLCharacter.class, getRandomValue(Character.class));
+        StudentOracleNoSQLCharacter newStudent = em.find(StudentOracleNoSQLCharacter.class,
+                getRandomValue(Character.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -339,8 +344,8 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLCharacter newStudent = em
-                .find(StudentOracleNoSQLCharacter.class, getRandomValue(Character.class));
+        StudentOracleNoSQLCharacter newStudent = em.find(StudentOracleNoSQLCharacter.class,
+                getRandomValue(Character.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -539,6 +544,5 @@ public class StudentOracleNoSQLCharacterTest extends OracleNoSQLBase
         Assert.assertEquals(3, count);
         em.close();
     }
-
 
 }

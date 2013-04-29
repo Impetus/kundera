@@ -12,8 +12,6 @@ import javax.persistence.Table;
 public class StudentOracleNoSQLTimestamp
 {
 
-
-
     @Id
     private Timestamp id;
 
@@ -73,7 +71,5 @@ public class StudentOracleNoSQLTimestamp
     {
         this.name = name;
     }
-
-
 
 }

@@ -26,7 +26,7 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-     
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -34,7 +34,7 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-       
+
     }
 
     @Test
@@ -43,8 +43,8 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -54,8 +54,8 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -91,7 +91,7 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLDate studentMax = em.find(StudentOracleNoSQLDate.class, getMaxValue(Date.class));       
+        StudentOracleNoSQLDate studentMax = em.find(StudentOracleNoSQLDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -408,8 +408,8 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
         List<StudentOracleNoSQLDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLDate s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLDate s where s.name = Kuldeep and s.age >= "
+                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -538,5 +538,4 @@ public class StudentOracleNoSQLDateTest extends OracleNoSQLBase
         em.close();
     }
 
-    
 }

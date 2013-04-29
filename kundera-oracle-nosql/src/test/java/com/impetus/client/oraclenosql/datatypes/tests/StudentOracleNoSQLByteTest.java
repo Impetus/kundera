@@ -25,7 +25,7 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-        
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -33,7 +33,7 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-       
+
     }
 
     @Test
@@ -42,8 +42,8 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -53,8 +53,8 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -410,8 +410,8 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
         List<StudentOracleNoSQLByte> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLByte s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLByte s where s.name = Kuldeep and s.age >= "
+                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -539,7 +539,5 @@ public class StudentOracleNoSQLByteTest extends OracleNoSQLBase
         Assert.assertEquals(3, count);
         em.close();
     }
-
-   
 
 }

@@ -294,10 +294,10 @@ public class OracleEntityTransactionTest
     public void tearDown() throws Exception
     {
         // Delete by query.
-        String deleteQuery = "Delete from PersonKVStore p";        
+        String deleteQuery = "Delete from PersonKVStore p";
         Query query = em.createQuery(deleteQuery);
         int updateCount = query.executeUpdate();
-        
+
     }
 
     /**

@@ -26,30 +26,30 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * UserProfile entity class 
+ * UserProfile entity class
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "USER_PROFILE", schema = "KunderaTests@twikvstore")
-@IndexCollection(columns = { @Index(name = "userName")})
+@IndexCollection(columns = { @Index(name = "userName") })
 public class UserProfile
 {
     @Id
-    @Column(name="USER_ID")
+    @Column(name = "USER_ID")
     private int userId;
-    
-    @Column(name="USER_NAME")
-    private String userName;
-    
-    @Column(name="PROFILE_PICTURE")
-    private File profilePicture;  
 
-    
+    @Column(name = "USER_NAME")
+    private String userName;
+
+    @Column(name = "PROFILE_PICTURE")
+    private File profilePicture;
+
     public UserProfile()
     {
-        
+
     }
-    
+
     public UserProfile(int userId, String userName, File profilePicture)
     {
         super();
@@ -67,7 +67,8 @@ public class UserProfile
     }
 
     /**
-     * @param userId the userId to set
+     * @param userId
+     *            the userId to set
      */
     public void setUserId(int userId)
     {
@@ -83,7 +84,8 @@ public class UserProfile
     }
 
     /**
-     * @param userName the userName to set
+     * @param userName
+     *            the userName to set
      */
     public void setUserName(String userName)
     {
@@ -99,11 +101,12 @@ public class UserProfile
     }
 
     /**
-     * @param profilePicture the profilePicture to set
+     * @param profilePicture
+     *            the profilePicture to set
      */
     public void setProfilePicture(File profilePicture)
     {
         this.profilePicture = profilePicture;
-    }   
+    }
 
 }

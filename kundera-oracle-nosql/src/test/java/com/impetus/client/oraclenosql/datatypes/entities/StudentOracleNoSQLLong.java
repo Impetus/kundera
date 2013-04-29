@@ -70,5 +70,4 @@ public class StudentOracleNoSQLLong
         this.name = name;
     }
 
-
 }

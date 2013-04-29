@@ -58,6 +58,7 @@ import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
@@ -80,7 +81,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher
+public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher, ClientPropertiesSetter
 {
     /** The kvstore db. */
     private KVStore kvStore;
@@ -97,11 +98,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     /** batch size. */
     private int batchSize;
-    
-    //Configuration Parameter
+
+    // Configuration Parameter
     private int timeout = OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS;
+
     private Durability durability = OracleNOSQLConstants.DEFAULT_DURABILITY;
+
     private TimeUnit timeUnit = OracleNOSQLConstants.DEFAULT_TIME_UNIT;
+
     private Consistency consistency = OracleNOSQLConstants.DEFAULT_CONSISTENCY;
 
     /** The log. */
@@ -172,7 +176,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             while (iterator.hasNext())
             {
                 entity = initializeEntity(entity, key, entityMetadata);
-                
+
                 KeyValueVersion keyValueVersion = iterator.next();
 
                 String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
@@ -205,8 +209,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                             if (columnField != null)
                             {
-                                populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);                     
-
+                                if (columnsToSelect == null
+                                        || columnsToSelect.isEmpty()
+                                        || columnsToSelect.contains(((AbstractAttribute) columnAttribute)
+                                                .getJPAColumnName()))
+                                {
+                                    populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);
+                                }
                             }
                         }
                     }
@@ -241,7 +250,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error("Error while finding data for Key " + key + ", Caused By :" + e + ".");
             throw new PersistenceException(e);
         }
 
@@ -257,7 +266,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * Populates a field in enclosing class instance from data retrieved from Oracle NoSQL
+     * Populates a field in enclosing class instance from data retrieved from
+     * Oracle NoSQL
+     * 
      * @param object
      * @param field
      * @param keyValueVersion
@@ -265,7 +276,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private void populateField(Object object, Field field, KeyValueVersion keyValueVersion, String minorKey) throws FileNotFoundException, IOException
+    private void populateField(Object object, Field field, KeyValueVersion keyValueVersion, String minorKey)
+            throws FileNotFoundException, IOException
     {
         if (field.getType().isAssignableFrom(File.class))
         {
@@ -285,20 +297,24 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    private Object initializeEntity(Object entity, Object key, EntityMetadata entityMetadata) throws InstantiationException,
-            IllegalAccessException
+    private Object initializeEntity(Object entity, Object key, EntityMetadata entityMetadata)
+            throws InstantiationException, IllegalAccessException
     {
-        if(entity == null)
+        if (entity == null)
         {
             entity = entityMetadata.getEntityClazz().newInstance();
-            PropertyAccessorHelper.setId(entity, entityMetadata, key);            
+            PropertyAccessorHelper.setId(entity, entityMetadata, key);
         }
         return entity;
-    }    
+    }
 
     @Override
     public void close()
     {
+        this.handler = null;
+        this.reader = null;
+
+        nodes.clear();
     }
 
     @Override
@@ -339,17 +355,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         handler.execute(deleteOperations);
         // kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
-    }
-
-    /**
-     * @param idString
-     * @return
-     */
-    private String getNextString(String idString)
-    {
-        char lastChar = (char) idString.charAt(idString.length() - 1);
-        String idString2 = idString.substring(0, idString.length() - 1) + (char) ((int) lastChar + 1);
-        return idString2;
     }
 
     /**
@@ -418,7 +423,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                             // OracleNoSQL as of now, ignore for now
                             log.warn("Attribute "
                                     + attribute.getName()
-                                    + " will not be persistence because ElementCollection is not supported for OracleNoSQL as of now");
+                                    + " will not be persistence because ElementCollection is not supported for OracleNoSQL as of now.");
                         }
                         else
                         {
@@ -590,17 +595,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             }
             catch (DurabilityException e)
             {
-                log.error(e);
+                log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
                 throw new PersistenceException("Error while Persisting data using batch", e);
             }
             catch (OperationExecutionException e)
             {
-                log.error(e);
+                log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
                 throw new PersistenceException("Error while Persisting data using batch", e);
             }
             catch (FaultException e)
             {
-                log.error(e);
+                log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
                 throw new PersistenceException("Error while Persisting data using batch", e);
             }
             finally
@@ -677,7 +682,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
-        return null;
+        throw new UnsupportedOperationException("This operation is not supported for OracleNoSQL.");
     }
 
     @Override
@@ -718,7 +723,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while finding columns for ID " + pKeyColumnValue + ", Caused by:" + e + ".");
             throw new PersistenceException(e);
         }
         return foreignKeys;
@@ -763,7 +768,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
             throw new PersistenceException(e);
         }
 
@@ -810,7 +815,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while deleting records for column " + columnName + ", Caused By :" + e + ".");
             throw new PersistenceException(e);
         }
 
@@ -835,7 +840,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        return null;
+        throw new UnsupportedOperationException("This operation is not supported for OracleNoSQL.");
     }
 
     @Override
@@ -947,8 +952,16 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        // new CassandraClientProperties().populateClientProperties(client,
+        // properties);
+    }
+
     /**
-     * @param timeout the timeout to set
+     * @param timeout
+     *            the timeout to set
      */
     public void setTimeout(int timeout)
     {
@@ -956,7 +969,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * @param durability the durability to set
+     * @param durability
+     *            the durability to set
      */
     public void setDurability(Durability durability)
     {
@@ -964,7 +978,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * @param timeUnit the timeUnit to set
+     * @param timeUnit
+     *            the timeUnit to set
      */
     public void setTimeUnit(TimeUnit timeUnit)
     {
@@ -972,7 +987,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * @param consistency the consistency to set
+     * @param consistency
+     *            the consistency to set
      */
     public void setConsistency(Consistency consistency)
     {
@@ -1009,6 +1025,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public Consistency getConsistency()
     {
         return consistency;
-    }     
+    }
 
 }

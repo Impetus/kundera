@@ -33,6 +33,7 @@ import com.impetus.kundera.loader.ClientFactory;
 
 /**
  * Test case for {@link OracleNoSQLClientFactory}
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLClientFactoryTest
@@ -64,9 +65,10 @@ public class OracleNoSQLClientFactoryTest
         emf.close();
     }
 
-
     /**
-     * Test method for {@link com.impetus.client.oraclenosql.OracleNoSQLClientFactory#createPoolOrConnection()}.
+     * Test method for
+     * {@link com.impetus.client.oraclenosql.OracleNoSQLClientFactory#createPoolOrConnection()}
+     * .
      */
     @Test
     public void testConnection()
@@ -114,7 +116,5 @@ public class OracleNoSQLClientFactoryTest
             Assert.fail(e.getMessage());
         }
     }
-
-  
 
 }
