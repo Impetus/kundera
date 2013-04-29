@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * The Class StudentDaoTest. script to create Cassandra column family for this
@@ -104,7 +106,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     {
         if (propertyMap == null)
         {
-            // propertyMap = new HashMap();
+             propertyMap = new HashMap();
+             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
             // propertyMap.put(CassandraConstants.CQL_VERSION,
             // CassandraConstants.CQL_VERSION_2_0);
         }
