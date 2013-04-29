@@ -40,7 +40,7 @@ public class StudentMongobyteTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongobyte.class, getMaxValue(byte.class)));
+        // em.remove(em.find(StudentMongobyte.class, getMaxValue(byte.class)));
         em.remove(em.find(StudentMongobyte.class, getMinValue(byte.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)

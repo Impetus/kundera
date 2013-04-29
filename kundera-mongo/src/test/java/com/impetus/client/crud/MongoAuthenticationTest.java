@@ -124,6 +124,6 @@ public class MongoAuthenticationTest extends BaseTest
     @After
     public void tearDown() throws Exception
     {
-//        MongoUtils.dropDatabase(emf, pu);
+        // MongoUtils.dropDatabase(emf, pu);
     }
 }

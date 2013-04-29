@@ -25,13 +25,13 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Person entity with one embedded attribute 
+ * Person entity with one embedded attribute
+ * 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "PERSON_EMBEDDED", schema = "KunderaTests@twikvstore")
-@IndexCollection(columns = { @Index(name = "personName"),
-        @Index(name = "age")})
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonEmbeddedKVStore
 {
     /** The person id. */
@@ -46,13 +46,13 @@ public class PersonEmbeddedKVStore
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
-    
+
     @Embedded
     private Office office;
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -62,7 +62,7 @@ public class PersonEmbeddedKVStore
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -72,8 +72,9 @@ public class PersonEmbeddedKVStore
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -82,8 +83,9 @@ public class PersonEmbeddedKVStore
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -99,7 +101,8 @@ public class PersonEmbeddedKVStore
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -115,7 +118,8 @@ public class PersonEmbeddedKVStore
     }
 
     /**
-     * @param office the office to set
+     * @param office
+     *            the office to set
      */
     public void setOffice(Office office)
     {
@@ -123,12 +127,12 @@ public class PersonEmbeddedKVStore
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(Integer age)
     {
         this.age = age;
-    }  
-    
+    }
 
 }

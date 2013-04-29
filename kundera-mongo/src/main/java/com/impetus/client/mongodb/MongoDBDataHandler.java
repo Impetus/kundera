@@ -180,17 +180,17 @@ final class MongoDBDataHandler
         }
         catch (InstantiationException e)
         {
-            log.error("Error while instantiating " + entityClass + ". Details:" + e.getMessage());
+            log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
             return entity;
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while Getting entity from Document. Details:" + e.getMessage());
+            log.error("Error while Getting entity from Document, Caused by: ", e);
             return entity;
         }
         catch (PropertyAccessException e)
         {
-            log.error("Error while Getting entity from Document. Details:" + e.getMessage());
+            log.error("Error while Getting entity from Document, Caused by: ", e);
             return entity;
         }
 

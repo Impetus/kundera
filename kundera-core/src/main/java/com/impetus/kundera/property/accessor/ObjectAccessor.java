@@ -147,22 +147,23 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         {
             throw new PropertyAccessException(e);
         }
-    }    
+    }
 
     @Override
     public Object getCopy(Object object)
     {
-        if(object == null) return null;
-        
-        if(object instanceof byte[])
+        if (object == null)
+            return null;
+
+        if (object instanceof byte[])
         {
             byte[] byteArr = (byte[]) object;
             return byteArr.clone();
         }
-        else if(object instanceof Cloneable)
+        else if (object instanceof Cloneable)
         {
-            Class<?> clazz = object.getClass();            
-            
+            Class<?> clazz = object.getClass();
+
             Object o = null;
             try
             {
@@ -171,34 +172,39 @@ public class ObjectAccessor implements PropertyAccessor<Object>
             }
             catch (SecurityException e)
             {
-                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:"
+                        + e.getMessage());
                 return object;
             }
             catch (IllegalArgumentException e)
             {
-                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:"
+                        + e.getMessage());
                 return object;
             }
             catch (NoSuchMethodException e)
             {
-                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:"
+                        + e.getMessage());
                 return object;
             }
             catch (IllegalAccessException e)
             {
-                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:"
+                        + e.getMessage());
                 return object;
             }
             catch (InvocationTargetException e)
             {
-                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:" + e.getMessage());
+                log.warn("Object of class " + object.getClass() + " can't be cloned, due to exception:"
+                        + e.getMessage());
                 return object;
             }
             return o;
         }
         else
-        {          
-          return object;
+        {
+            return object;
         }
     }
 

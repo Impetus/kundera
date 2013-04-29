@@ -88,8 +88,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public void begin() throws NotSupportedException, SystemException
     {
-        if(log.isDebugEnabled())
-        log.info("beginning JTA transaction");
+        if (log.isDebugEnabled())
+            log.info("beginning JTA transaction");
 
         Transaction tx = threadLocal.get();
         if (tx != null)
@@ -119,8 +119,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         {
             if (tx != null)
             {
-                if(log.isDebugEnabled())
-                log.info("Commiting transaction:" + tx);
+                if (log.isDebugEnabled())
+                    log.info("Commiting transaction:" + tx);
                 tx.commit();
             }
             else
@@ -131,8 +131,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         }
         finally
         {
-            if(log.isDebugEnabled())
-            log.info("Resetting after commit.");
+            if (log.isDebugEnabled())
+                log.info("Resetting after commit.");
             threadLocal.set(null);
             timerThead.set(null);
         }
@@ -163,27 +163,27 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     public void rollback() throws IllegalStateException, SecurityException, SystemException
     {
 
-            try
+        try
+        {
+            Transaction tx = threadLocal.get();
+            if (tx == null)
             {
-                Transaction tx = threadLocal.get();
-                if (tx == null)
-                {
-                    throw new IllegalStateException("Cannot locate a Transaction for rollback.");
-                }
-                
-                if(log.isDebugEnabled())
+                throw new IllegalStateException("Cannot locate a Transaction for rollback.");
+            }
+
+            if (log.isDebugEnabled())
                 log.info("Rollback transaction:" + tx);
 
-                tx.rollback();
+            tx.rollback();
 
-            }
-            finally
-            {
-                if(log.isDebugEnabled())
+        }
+        finally
+        {
+            if (log.isDebugEnabled())
                 log.info("Resetting after rollback.");
-                threadLocal.set(null);
-                timerThead.set(null);
-            }
+            threadLocal.set(null);
+            timerThead.set(null);
+        }
     }
 
     /*
@@ -218,8 +218,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         }
         else
         {
-            if(log.isDebugEnabled())
-            log.debug("Cannot reset running transaction:" + tx);
+            if (log.isDebugEnabled())
+                log.debug("Cannot reset running transaction:" + tx);
         }
 
     }

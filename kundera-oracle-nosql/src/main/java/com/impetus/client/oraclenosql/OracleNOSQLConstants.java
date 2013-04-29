@@ -22,19 +22,24 @@ import oracle.kv.Durability;
 
 /**
  * Constants used in OracleNoSQL implementation of Kundera
+ * 
  * @author amresh.singh
  */
 public interface OracleNOSQLConstants
 {
     /** LOB Constants */
     public static final int DEFAULT_WRITE_TIMEOUT_SECONDS = 5;
+
     public static final Durability DEFAULT_DURABILITY = Durability.COMMIT_WRITE_NO_SYNC;
+
     public static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.SECONDS;
+
     public static final Consistency DEFAULT_CONSISTENCY = Consistency.NONE_REQUIRED;
+
     public static final String LOB_SUFFIX = ".lob";
-    
+
     public static final int OUTPUT_BUFFER_SIZE = 1024;
-    
+
     public static final String SECONDARY_INDEX_SUFFIX = "_idx";
 
 }

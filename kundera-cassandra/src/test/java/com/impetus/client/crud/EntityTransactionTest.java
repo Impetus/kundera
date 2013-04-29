@@ -52,10 +52,10 @@ public class EntityTransactionTest extends BaseTest
 {
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /**
      * Sets the up.
@@ -232,7 +232,7 @@ public class EntityTransactionTest extends BaseTest
         em.clear();
         // persist with 1 em
         EntityManager em1 = emf.createEntityManager();
-//        em1.setFlushMode(FlushModeType.COMMIT);
+        // em1.setFlushMode(FlushModeType.COMMIT);
         em1.getTransaction().begin();
         Object p3 = prepareData("4", 15);
         em1.persist(p3);
@@ -265,7 +265,7 @@ public class EntityTransactionTest extends BaseTest
     public void rollBackWithMultiTransactions()
     {
         EntityManager em1 = emf.createEntityManager();
-//        em1.setFlushMode(FlushModeType.COMMIT);
+        // em1.setFlushMode(FlushModeType.COMMIT);
 
         // Begin transaction.
         em1.getTransaction().begin();
@@ -277,7 +277,7 @@ public class EntityTransactionTest extends BaseTest
 
         // another em instance
         EntityManager em2 = emf.createEntityManager();
-//        em2.setFlushMode(FlushModeType.COMMIT);
+        // em2.setFlushMode(FlushModeType.COMMIT);
 
         // begin transaction.
         em2.getTransaction().begin();
@@ -320,6 +320,8 @@ public class EntityTransactionTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
+    	em.close();
+    	emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 

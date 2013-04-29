@@ -250,7 +250,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         catch (HibernateException e)
         {
             log.error(e);
-            e.printStackTrace();
             throw new PersistenceException(e);
         }
         finally

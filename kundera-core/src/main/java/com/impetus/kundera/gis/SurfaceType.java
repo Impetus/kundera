@@ -17,7 +17,7 @@ package com.impetus.kundera.gis;
 
 /**
  * @author amresh
- *
+ * 
  */
 public enum SurfaceType
 {

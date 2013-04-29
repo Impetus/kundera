@@ -523,7 +523,7 @@ public final class EntityMetadata
         builder.append("\tTable: " + tableName + ", \n");
         builder.append("\tKeyspace: " + schema + ",\n");
         builder.append("\tPersistence Unit: " + persistenceUnit + ",\n");
-        builder.append("\tId: " + idAttribute.getName() + ",\n");        
+        builder.append("\tId: " + idAttribute.getName() + ",\n");
         builder.append("\tCacheable: " + cacheable + ",\n");
 
         if (!indexPrperties.isEmpty())
@@ -558,10 +558,11 @@ public final class EntityMetadata
 
         if (!relationsMap.isEmpty())
         {
-            builder.append("\tRelation (\n");            
+            builder.append("\tRelation (\n");
             for (Relation rel : relationsMap.values())
             {
-                if(rel.getMapKeyJoinClass() != null) builder.append(" --- via ").append(rel.getMapKeyJoinClass().getSimpleName()).append(" ---\n");
+                if (rel.getMapKeyJoinClass() != null)
+                    builder.append(" --- via ").append(rel.getMapKeyJoinClass().getSimpleName()).append(" ---\n");
                 builder.append("\t\t" + rel.getTargetEntity().getName() + "#" + rel.getProperty().getName());
                 builder.append(" (" + rel.getCascades());
                 builder.append(", " + rel.getType());

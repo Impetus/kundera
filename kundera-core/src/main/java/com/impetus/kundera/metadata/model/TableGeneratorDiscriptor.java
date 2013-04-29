@@ -19,8 +19,7 @@ import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 
 /**
- * TableGeneratorDiscriptor class holds the information about table
- * generator.
+ * TableGeneratorDiscriptor class holds the information about table generator.
  * 
  * @author Kuldeep.Mishra
  * 

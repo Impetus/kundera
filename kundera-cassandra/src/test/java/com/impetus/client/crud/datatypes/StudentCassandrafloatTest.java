@@ -33,12 +33,10 @@ public class StudentCassandrafloatTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -598,7 +596,7 @@ public class StudentCassandrafloatTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandrafloat";
             cfDef.keyspace = keyspace;
-             cfDef.setKey_validation_class("FloatType");
+            cfDef.setKey_validation_class("FloatType");
             cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;
@@ -664,6 +662,5 @@ public class StudentCassandrafloatTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

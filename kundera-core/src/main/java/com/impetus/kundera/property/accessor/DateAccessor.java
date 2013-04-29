@@ -162,7 +162,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         {
             return null;
         }
-        
+
         return String.valueOf(date.getTime());
     }
 
@@ -202,13 +202,13 @@ public class DateAccessor implements PropertyAccessor<Date>
      */
     public static Date getDateByPattern(String date)
     {
-        if(StringUtils.isNumeric(date))
+        if (StringUtils.isNumeric(date))
         {
             return new Date(Long.parseLong(date));
         }
-        
+
         for (String p : patterns)
-        {           
+        {
             try
             {
                 DateFormat formatter = new SimpleDateFormat(p);
@@ -230,8 +230,6 @@ public class DateAccessor implements PropertyAccessor<Date>
 
         throw new PropertyAccessException("Required Date format is not supported!" + date);
     }
-    
-    
 
     @Override
     public Date getCopy(Object object)
@@ -254,8 +252,6 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         return date != null ? getDateByPattern(date).toString() : null;
     }
-    
-    
 
     public Date getInstance(Class<?> clazz)
     {

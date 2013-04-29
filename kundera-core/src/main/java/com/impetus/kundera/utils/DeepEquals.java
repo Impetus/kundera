@@ -308,12 +308,12 @@ public class DeepEquals
     {
         Collection col1 = (Collection) dualKey._key1;
         Collection col2 = (Collection) dualKey._key2;
-       
-        if(col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+
+        if (col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
         {
             return false;
         }
-        
+
         if (col1.size() != col2.size())
         {
             return false;
@@ -349,11 +349,11 @@ public class DeepEquals
      */
     private static boolean compareUnordered(Collection col1, Collection col2, Set visited)
     {
-        if(col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+        if (col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
         {
             return false;
         }
-        
+
         if (col1.size() != col2.size())
         {
             return false;

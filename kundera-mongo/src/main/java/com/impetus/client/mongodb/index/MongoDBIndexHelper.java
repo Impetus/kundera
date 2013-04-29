@@ -16,7 +16,8 @@
 package com.impetus.client.mongodb.index;
 
 /**
- * Helper class for Mongo DB Indexing 
+ * Helper class for Mongo DB Indexing
+ * 
  * @author amresh.singh
  */
 public class MongoDBIndexHelper

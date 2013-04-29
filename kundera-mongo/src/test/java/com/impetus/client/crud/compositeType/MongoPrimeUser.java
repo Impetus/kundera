@@ -24,32 +24,32 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 @Entity
-@Table(name="User", schema="KunderaExamples@mongoTest")
+@Table(name = "User", schema = "KunderaExamples@mongoTest")
 public class MongoPrimeUser
 {
-    
+
     @EmbeddedId
     private MongoCompoundKey key;
-    
+
     @Column
     private String tweetBody;
-    
-    @Column 
+
+    @Column
     private Date tweetDate;
 
     public MongoPrimeUser()
     {
     }
-    
+
     public MongoPrimeUser(MongoCompoundKey key)
     {
         this.key = key;
     }
-    
+
     /**
      * @return the key
      */
@@ -75,7 +75,8 @@ public class MongoPrimeUser
     }
 
     /**
-     * @param tweetBody the tweetBody to set
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -83,7 +84,8 @@ public class MongoPrimeUser
     }
 
     /**
-     * @param tweetDate the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {

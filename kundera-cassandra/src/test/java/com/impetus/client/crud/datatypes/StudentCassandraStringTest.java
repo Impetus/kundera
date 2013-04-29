@@ -32,12 +32,10 @@ public class StudentCassandraStringTest extends CassandraBase
 {
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After

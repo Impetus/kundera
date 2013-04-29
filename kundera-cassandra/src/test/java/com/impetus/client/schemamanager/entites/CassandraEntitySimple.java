@@ -28,7 +28,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name = "CassandraEntitySimple", schema = "KunderaCoreExmples@CassandraSchemaOperationTest")
-@IndexCollection(columns = { @Index(name = "personName",type = "KEYS"), @Index(name = "age",type = "KEYS") })
+@IndexCollection(columns = { @Index(name = "personName", type = "KEYS"), @Index(name = "age", type = "KEYS") })
 public class CassandraEntitySimple
 {
 

@@ -91,7 +91,7 @@ public class SchemaConfigurationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null,persistenceUnit);
+        configuration = new SchemaConfiguration(null, persistenceUnit);
         puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
     }
 

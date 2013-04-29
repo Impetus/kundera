@@ -69,6 +69,4 @@ public class StudentMongoCharacter
         this.name = name;
     }
 
-
-
 }

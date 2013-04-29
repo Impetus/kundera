@@ -34,78 +34,87 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "PERSON_LOCATION", schema = "KunderaExamples@mongoTest")
 @IndexCollection(columns = { @Index(name = "currentLocation", type = "GEO2D") })
-public class Person {
-	@Id
-	@Column(name = "PERSON_ID")
-	private int personId;
+public class Person
+{
+    @Id
+    @Column(name = "PERSON_ID")
+    private int personId;
 
-	@Column(name = "PERSON_NAME")
-	private String name;
+    @Column(name = "PERSON_NAME")
+    private String name;
 
-	@Column(name = "CURRENT_LOCATION")
-	private Point currentLocation;
+    @Column(name = "CURRENT_LOCATION")
+    private Point currentLocation;
 
-	@Embedded
-	private Vehicle vehicle;
+    @Embedded
+    private Vehicle vehicle;
 
-	/**
-	 * @return the personId
-	 */
-	public int getPersonId() {
-		return personId;
-	}
+    /**
+     * @return the personId
+     */
+    public int getPersonId()
+    {
+        return personId;
+    }
 
-	/**
-	 * @param personId
-	 *            the personId to set
-	 */
-	public void setPersonId(int personId) {
-		this.personId = personId;
-	}
+    /**
+     * @param personId
+     *            the personId to set
+     */
+    public void setPersonId(int personId)
+    {
+        this.personId = personId;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName()
+    {
+        return name;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	/**
-	 * @return the currentLocation
-	 */
-	public Point getCurrentLocation() {
-		return currentLocation;
-	}
+    /**
+     * @return the currentLocation
+     */
+    public Point getCurrentLocation()
+    {
+        return currentLocation;
+    }
 
-	/**
-	 * @param currentLocation
-	 *            the currentLocation to set
-	 */
-	public void setCurrentLocation(Point currentLocation) {
-		this.currentLocation = currentLocation;
-	}
+    /**
+     * @param currentLocation
+     *            the currentLocation to set
+     */
+    public void setCurrentLocation(Point currentLocation)
+    {
+        this.currentLocation = currentLocation;
+    }
 
-	/**
-	 * @return the vehicle
-	 */
-	public Vehicle getVehicle() {
-		return vehicle;
-	}
+    /**
+     * @return the vehicle
+     */
+    public Vehicle getVehicle()
+    {
+        return vehicle;
+    }
 
-	/**
-	 * @param vehicle
-	 *            the vehicle to set
-	 */
-	public void setVehicle(Vehicle vehicle) {
-		this.vehicle = vehicle;
-	}
+    /**
+     * @param vehicle
+     *            the vehicle to set
+     */
+    public void setVehicle(Vehicle vehicle)
+    {
+        this.vehicle = vehicle;
+    }
 
 }

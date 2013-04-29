@@ -22,6 +22,7 @@ import javax.persistence.Table;
 
 /**
  * Entity class
+ * 
  * @author amresh.singh
  */
 @Entity
@@ -37,10 +38,10 @@ public class CassandraBatchEntity
 
     @Column(name = "name")
     private String name;
-    
+
     public CassandraBatchEntity()
     {
-        
+
     }
 
     /**
@@ -52,7 +53,8 @@ public class CassandraBatchEntity
     }
 
     /**
-     * @param user_name the user_name to set
+     * @param user_name
+     *            the user_name to set
      */
     public void setUser_name(String user_name)
     {
@@ -68,7 +70,8 @@ public class CassandraBatchEntity
     }
 
     /**
-     * @param password the password to set
+     * @param password
+     *            the password to set
      */
     public void setPassword(String password)
     {
@@ -84,12 +87,12 @@ public class CassandraBatchEntity
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
         this.name = name;
     }
-    
-    
+
 }

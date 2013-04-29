@@ -70,7 +70,4 @@ public class StudentOracleNoSQLByte
         this.name = name;
     }
 
-
-
-
 }

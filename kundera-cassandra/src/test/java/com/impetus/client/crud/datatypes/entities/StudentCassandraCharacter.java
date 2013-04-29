@@ -73,6 +73,4 @@ public class StudentCassandraCharacter
         this.name = name;
     }
 
-
-
 }

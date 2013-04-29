@@ -98,9 +98,9 @@ public class PersistenceCache
         if (transactionalCache != null)
         {
             transactionalCache.clear();
-            transactionalCache =null;
+            transactionalCache = null;
         }
-        
+
         initialize();
 
     }

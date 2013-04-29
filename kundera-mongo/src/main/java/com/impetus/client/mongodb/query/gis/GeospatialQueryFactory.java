@@ -56,15 +56,14 @@ public class GeospatialQueryFactory
             }
         }
         else if (operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<="))
-        {            
-            return new NearQueryImpl();            
+        {
+            return new NearQueryImpl();
         }
         else
         {
             throw new QueryHandlerException("Shape " + shape.getClass() + " is not supported"
                     + " in JPA queries for operator " + operator + " in Kundera currently");
         }
-    }  
-    
+    }
 
 }

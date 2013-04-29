@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentHBasebyte
 {
 
-
     @Id
     private byte id;
 
@@ -70,9 +69,5 @@ public class StudentHBasebyte
     {
         this.name = name;
     }
-
-
-
-
 
 }

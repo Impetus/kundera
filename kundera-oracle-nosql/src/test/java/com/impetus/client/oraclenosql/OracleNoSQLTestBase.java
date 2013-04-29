@@ -25,17 +25,17 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
- * Base class for all test cases 
+ * Base class for all test cases
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLTestBase
 {
-    
+
     private static final String PERSISTENCE_UNIT = "twikvstore";
 
     /** The emf. */
@@ -50,24 +50,26 @@ public class OracleNoSQLTestBase
         em = emf.createEntityManager();
     }
 
-
     protected void tearDown()
     {
         em.close();
         emf.close();
     }
-    
+
     protected void clearEm()
     {
         em.clear();
     }
-    
-    
+
+    protected void setEmProperty(String key, Object value)
+    {
+        em.setProperty(key, value);
+    }
+
     protected void persist(Object entity)
-    {        
+    {
         em.persist(entity);
     }
-  
 
     protected Object find(Class<?> entityClass, Object id)
     {
@@ -77,40 +79,40 @@ public class OracleNoSQLTestBase
     protected void update(Object entity)
     {
         em.merge(entity);
-    }   
+    }
 
     protected void delete(Object entity)
     {
         em.remove(entity);
     }
-    
+
     protected List executeSelectQuery(String jpaQuery)
     {
         Query query = em.createQuery(jpaQuery);
         return query.getResultList();
     }
-    
+
     protected List executeSelectQuery(String jpaQuery, Map<Object, Object> params)
-    { 
+    {
         Query query = em.createQuery(jpaQuery);
         setParams(params, query);
-        return query.getResultList();   
+        return query.getResultList();
     }
-    
+
     protected int executeDMLQuery(String jpaQuery)
     {
         Query query = em.createQuery(jpaQuery);
         int updateCount = query.executeUpdate();
         return updateCount;
     }
-    
+
     protected List executeNamedQuery(String namedQuery, Map<Object, Object> params)
     {
         Query query = em.createNamedQuery(namedQuery);
         setParams(params, query);
-        return query.getResultList();  
+        return query.getResultList();
     }
-    
+
     protected void begingTx()
     {
         em.getTransaction().begin();
@@ -124,8 +126,7 @@ public class OracleNoSQLTestBase
     protected void rollbackTx()
     {
         em.getTransaction().rollback();
-    }   
-
+    }
 
     /**
      * @param params
@@ -133,30 +134,30 @@ public class OracleNoSQLTestBase
      */
     private void setParams(Map<Object, Object> params, Query query)
     {
-        if(params != null && ! params.isEmpty())
+        if (params != null && !params.isEmpty())
         {
-            for(Object param : params.keySet())
+            for (Object param : params.keySet())
             {
-                if(param instanceof Integer)
+                if (param instanceof Integer)
                 {
                     query.setParameter(((Integer) param).intValue(), params.get(param));
                 }
-                else if(param instanceof String)
+                else if (param instanceof String)
                 {
-                    query.setParameter((String)param, params.get(param));
-                }                
+                    query.setParameter((String) param, params.get(param));
+                }
             }
-              
+
         }
     }
-    
+
     protected boolean isLuceneIndexingEnabled()
     {
-        if(emf != null)
+        if (emf != null)
         {
             ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(PERSISTENCE_UNIT);
             String luceneDirectory = clientMetadata.getLuceneIndexDir();
-            if(! StringUtils.isEmpty(luceneDirectory))
+            if (!StringUtils.isEmpty(luceneDirectory))
             {
                 return true;
             }

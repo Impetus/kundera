@@ -55,7 +55,9 @@ public class JPQLParseException extends QueryHandlerException
      */
     public JPQLParseException(String errMsg)
     {
-        super(errMsg + ". For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf");
+        super(
+                errMsg
+                        + ". For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf");
     }
 
 }

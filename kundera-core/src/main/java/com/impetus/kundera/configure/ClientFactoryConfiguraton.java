@@ -15,14 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**

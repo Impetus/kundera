@@ -83,8 +83,6 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     {
         return s != null ? new BigInteger(s) : null;
     }
-    
-    
 
     @Override
     public BigInteger getCopy(Object object)

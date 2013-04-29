@@ -37,9 +37,10 @@ public class ColumnInfo
 
     /** Maximum allowed value for this column */
     private Integer maxValue;
-    
+
     /** Minimum allowed value for this column */
     private Integer minValue;
+
     /**
      * The index type;
      */
@@ -185,7 +186,8 @@ public class ColumnInfo
     }
 
     /**
-     * @param maxValue the maxValue to set
+     * @param maxValue
+     *            the maxValue to set
      */
     public void setMaxValue(Integer maxValue)
     {
@@ -201,11 +203,12 @@ public class ColumnInfo
     }
 
     /**
-     * @param minValue the minValue to set
+     * @param minValue
+     *            the minValue to set
      */
     public void setMinValue(Integer minValue)
     {
         this.minValue = minValue;
-    }  
-    
+    }
+
 }

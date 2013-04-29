@@ -19,12 +19,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON_BATCH", schema = "KunderaMongoDataType@HbaseBatchTest")
-//@Index(index = true, columns = { "PERSON_NAME", "AGE" })
+// @Index(index = true, columns = { "PERSON_NAME", "AGE" })
 public class PersonBatchHBaseEntity
 {
 

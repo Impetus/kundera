@@ -39,8 +39,8 @@ public class StudentMongoIntTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoInt.class, getMaxValue(int.class)));
-//        em.remove(em.find(StudentMongoInt.class, getMinValue(int.class)));
+        // em.remove(em.find(StudentMongoInt.class, getMaxValue(int.class)));
+        // em.remove(em.find(StudentMongoInt.class, getMinValue(int.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)
         {

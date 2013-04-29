@@ -19,14 +19,13 @@ import com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLSqlDa
 public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
 {
 
-
     private static final String keyspace = "KunderaTests";
 
     private EntityManagerFactory emf;
 
     @Before
     public void setUp() throws Exception
-    {     
+    {
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -34,7 +33,7 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-     
+
     }
 
     @Test
@@ -43,8 +42,8 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -54,8 +53,8 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -69,7 +68,7 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         student.setId((Date) getRandomValue(Date.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
-        
+
         // Insert max value of Date
         StudentOracleNoSQLSqlDate studentMax = new StudentOracleNoSQLSqlDate();
         studentMax.setAge((Short) getMaxValue(short.class));
@@ -83,7 +82,7 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         studentMin.setId((Date) getMinValue(Date.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
-      
+
         em.close();
     }
 
@@ -150,7 +149,7 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -381,8 +380,8 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         List<StudentOracleNoSQLSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLSqlDate s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLSqlDate s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -529,7 +528,7 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
             }
             else
             {
-                Assert.assertEquals(((Date)getRandomValue(Date.class)).getTime(), student.getId().getTime());
+                Assert.assertEquals(((Date) getRandomValue(Date.class)).getTime(), student.getId().getTime());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -539,5 +538,4 @@ public class StudentOracleNoSQLSqlDateTest extends OracleNoSQLBase
         em.close();
     }
 
-   
 }

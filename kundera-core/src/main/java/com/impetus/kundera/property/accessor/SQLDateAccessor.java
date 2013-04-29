@@ -101,7 +101,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         {
             return null;
         }
-        
+
         return String.valueOf(date.getTime());
     }
 
@@ -119,16 +119,14 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         if (s == null)
         {
             return null;
-        }        
-        if(StringUtils.isNumeric(s))
+        }
+        if (StringUtils.isNumeric(s))
         {
             return new Date(Long.parseLong(s));
         }
         Date d = Date.valueOf(s);
         return d;
     }
-    
-    
 
     @Override
     public Date getCopy(Object object)

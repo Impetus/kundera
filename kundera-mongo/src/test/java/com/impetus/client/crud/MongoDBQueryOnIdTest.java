@@ -408,6 +408,7 @@ public class MongoDBQueryOnIdTest extends BaseTest
         }
 
     }
+
     /**
      * 
      */
@@ -449,6 +450,7 @@ public class MongoDBQueryOnIdTest extends BaseTest
         }
         Assert.assertEquals(1, count);
     }
+
     private void init()
     {
         Object p1 = prepareMongoInstance("1", 10);

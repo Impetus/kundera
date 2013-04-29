@@ -138,10 +138,10 @@ public class UserOTOPKTest
         columnDef1.index_type = IndexType.KEYS;
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
-        
+
         address.addToColumn_metadata(columnDef1);
         address.addToColumn_metadata(columnDef2);
-        
+
         cfDefs.add(user);
         cfDefs.add(address);
         KsDef ksDef = null;

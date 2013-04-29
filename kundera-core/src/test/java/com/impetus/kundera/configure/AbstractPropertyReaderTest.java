@@ -52,7 +52,7 @@ public class AbstractPropertyReaderTest
     @After
     public void tearDown() throws Exception
     {
-    	reader = null;
+        reader = null;
     }
 
     /**

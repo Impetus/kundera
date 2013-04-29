@@ -175,17 +175,22 @@ public class SimpleAuthenticator implements IAuthenticator
         return String.format("Given password in password mode %s could not be validated for user %s", mode, username);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.cassandra.auth.IAuthenticator#alter(java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthenticator#alter(java.lang.String,
+     * java.util.Map)
      */
     @Override
     public void alter(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
     {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#alterableOptions()
      */
     @Override
@@ -195,27 +200,34 @@ public class SimpleAuthenticator implements IAuthenticator
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.cassandra.auth.IAuthenticator#create(java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthenticator#create(java.lang.String,
+     * java.util.Map)
      */
     @Override
     public void create(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
     {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#drop(java.lang.String)
      */
     @Override
     public void drop(String arg0) throws InvalidRequestException
     {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#protectedResources()
      */
     @Override
@@ -225,7 +237,9 @@ public class SimpleAuthenticator implements IAuthenticator
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#requireAuthentication()
      */
     @Override
@@ -235,17 +249,21 @@ public class SimpleAuthenticator implements IAuthenticator
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#setup()
      */
     @Override
     public void setup()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.cassandra.auth.IAuthenticator#supportedOptions()
      */
     @Override

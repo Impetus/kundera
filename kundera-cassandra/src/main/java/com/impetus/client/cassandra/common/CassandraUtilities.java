@@ -18,7 +18,6 @@ package com.impetus.client.cassandra.common;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,7 +35,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.accessor.DateAccessor;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Provides utilities methods
@@ -156,8 +154,10 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
      * 
      * 
      * 

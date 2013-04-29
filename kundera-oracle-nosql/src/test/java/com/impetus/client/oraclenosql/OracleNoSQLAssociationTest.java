@@ -30,7 +30,8 @@ import com.impetus.client.oraclenosql.entities.AddressOTOOracleNoSQL;
 import com.impetus.client.oraclenosql.entities.PersonOTOOracleNoSQL;
 
 /**
- * Test case for association between two entities in OracleNoSQL 
+ * Test case for association between two entities in OracleNoSQL
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLAssociationTest
@@ -64,13 +65,13 @@ public class OracleNoSQLAssociationTest
     @Test
     public void executeTest()
     {
-        //Insert records
+        // Insert records
         persistPerson("1", "person1", 10, new AddressOTOOracleNoSQL(1.1, "Address 1"));
         persistPerson("2", "person2", 20, new AddressOTOOracleNoSQL(2.2, "Address 2"));
         persistPerson("3", "person3", 30, new AddressOTOOracleNoSQL(3.3, "Address 3"));
         persistPerson("4", "person4", 40, new AddressOTOOracleNoSQL(4.4, "Address 4"));
 
-        //Find Records
+        // Find Records
         em.clear();
         PersonOTOOracleNoSQL p11 = findById("1");
         Assert.assertNotNull(p11);
@@ -78,7 +79,7 @@ public class OracleNoSQLAssociationTest
         Assert.assertEquals(new Integer(10), p11.getAge());
         Assert.assertNotNull(p11.getAddress());
         Assert.assertEquals(new Double(1.1), p11.getAddress().getAddressId());
-        Assert.assertEquals("Address 1", p11.getAddress().getStreet());        
+        Assert.assertEquals("Address 1", p11.getAddress().getStreet());
 
         PersonOTOOracleNoSQL p22 = findById("2");
         Assert.assertNotNull(p22);
@@ -86,15 +87,15 @@ public class OracleNoSQLAssociationTest
         Assert.assertEquals(new Integer(20), p22.getAge());
         Assert.assertNotNull(p22.getAddress());
         Assert.assertEquals(new Double(2.2), p22.getAddress().getAddressId());
-        Assert.assertEquals("Address 2", p22.getAddress().getStreet()); 
-        
+        Assert.assertEquals("Address 2", p22.getAddress().getStreet());
+
         PersonOTOOracleNoSQL p33 = findById("3");
         Assert.assertNotNull(p33);
         Assert.assertEquals("person3", p33.getPersonName());
         Assert.assertEquals(new Integer(30), p33.getAge());
         Assert.assertNotNull(p33.getAddress());
         Assert.assertEquals(new Double(3.3), p33.getAddress().getAddressId());
-        Assert.assertEquals("Address 3", p33.getAddress().getStreet()); 
+        Assert.assertEquals("Address 3", p33.getAddress().getStreet());
 
         PersonOTOOracleNoSQL p44 = findById("4");
         assertNotNull(p44);
@@ -102,17 +103,29 @@ public class OracleNoSQLAssociationTest
         Assert.assertEquals(new Integer(40), p44.getAge());
         Assert.assertNotNull(p44.getAddress());
         Assert.assertEquals(new Double(4.4), p44.getAddress().getAddressId());
-        Assert.assertEquals("Address 4", p44.getAddress().getStreet()); 
+        Assert.assertEquals("Address 4", p44.getAddress().getStreet());
 
-        PersonOTOOracleNoSQL p55 = findById("5");  //Invalid records
+        PersonOTOOracleNoSQL p55 = findById("5"); // Invalid records
         Assert.assertNull(p55);
 
-        //Update records
-        p11.setPersonName("person11"); p11.setAge(100); p11.getAddress().setStreet("Address 11"); updatePerson(p11);
-        p22.setPersonName("person22"); p22.setAge(200); p22.getAddress().setStreet("Address 22"); updatePerson(p22);
-        p33.setPersonName("person33"); p33.setAge(300); p33.getAddress().setStreet("Address 33"); updatePerson(p33);
-        p44.setPersonName("person44"); p44.setAge(400); p44.getAddress().setStreet("Address 44"); updatePerson(p44);
-        em.clear();        
+        // Update records
+        p11.setPersonName("person11");
+        p11.setAge(100);
+        p11.getAddress().setStreet("Address 11");
+        updatePerson(p11);
+        p22.setPersonName("person22");
+        p22.setAge(200);
+        p22.getAddress().setStreet("Address 22");
+        updatePerson(p22);
+        p33.setPersonName("person33");
+        p33.setAge(300);
+        p33.getAddress().setStreet("Address 33");
+        updatePerson(p33);
+        p44.setPersonName("person44");
+        p44.setAge(400);
+        p44.getAddress().setStreet("Address 44");
+        updatePerson(p44);
+        em.clear();
         p11 = findById("1");
         Assert.assertNotNull(p11);
         Assert.assertEquals("person11", p11.getPersonName());
@@ -136,7 +149,7 @@ public class OracleNoSQLAssociationTest
         Assert.assertEquals("person44", p44.getPersonName());
         Assert.assertEquals(new Integer(400), p44.getAge());
         Assert.assertEquals("Address 44", p44.getAddress().getStreet());
-        
+
         // Delete Records
         deletePerson(p11);
         deletePerson(p22);
@@ -148,16 +161,14 @@ public class OracleNoSQLAssociationTest
         Assert.assertNull(findById("2"));
         Assert.assertNull(findById("3"));
         Assert.assertNull(findById("4"));
-        
+
     }
-    
-    
-    
+
     protected void persistPerson(String personId, String personName, int age, AddressOTOOracleNoSQL address)
     {
         Object p = preparePerson(personId, age, personName, address);
         em.persist(p);
-    }    
+    }
 
     protected PersonOTOOracleNoSQL findById(Object personId)
     {
@@ -168,12 +179,12 @@ public class OracleNoSQLAssociationTest
     {
         em.merge(person);
     }
-    
+
     protected void deletePerson(PersonOTOOracleNoSQL person)
     {
         em.remove(person);
     }
-    
+
     protected PersonOTOOracleNoSQL preparePerson(String rowKey, int age, String name, AddressOTOOracleNoSQL address)
     {
         PersonOTOOracleNoSQL person = new PersonOTOOracleNoSQL();

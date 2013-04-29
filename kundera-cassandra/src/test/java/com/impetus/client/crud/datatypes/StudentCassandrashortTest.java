@@ -33,12 +33,10 @@ public class StudentCassandrashortTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -159,7 +157,7 @@ public class StudentCassandrashortTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -606,7 +604,7 @@ public class StudentCassandrashortTest extends CassandraBase
             cfDefs.add(cfDef);
             try
             {
-//                CassandraCli.initClient();
+                // CassandraCli.initClient();
                 ksDef = CassandraCli.client.describe_keyspace(keyspace);
                 CassandraCli.client.set_keyspace(keyspace);
 
@@ -637,7 +635,7 @@ public class StudentCassandrashortTest extends CassandraBase
                 // Set replication factor, the value MUST be an Short
                 ksDef.strategy_options.put("replication_factor", "1");
                 CassandraCli.client.system_add_keyspace(ksDef);
-            }            
+            }
         }
         catch (TException e)
         {

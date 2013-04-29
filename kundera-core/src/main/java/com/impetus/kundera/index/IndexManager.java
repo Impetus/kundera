@@ -57,8 +57,7 @@ public class IndexManager
     public IndexManager(Indexer indexer)
     {
         this.indexer = indexer;
-    }    
-    
+    }
 
     /**
      * @return the indexer
@@ -67,7 +66,6 @@ public class IndexManager
     {
         return indexer;
     }
-
 
     /**
      * Removes an object from Index.
@@ -121,8 +119,8 @@ public class IndexManager
                     ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
                     ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                 }
-                ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                        .index(metadata, entity, parentId != null ? parentId.toString() : null, clazz);
+                ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
+                        parentId != null ? parentId.toString() : null, clazz);
             }
             else
             {
@@ -139,16 +137,17 @@ public class IndexManager
                     // String propertyName = index.getName();
                     Object obj = PropertyAccessorHelper.getObject(entity, property);
                     indexCollection.put(columnName, obj);
-                    
-                }                
 
-                indexCollection.put(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), id);            
-                
+                }
+
+                indexCollection.put(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), id);
+
                 EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-                if(parentId != null)
-                    indexCollection.put(((AbstractAttribute)parentMetadata.getIdAttribute()).getJPAColumnName(), parentId);
-                
-                onEmbeddable(entity, clazz, metaModel, indexCollection);               
+                if (parentId != null)
+                    indexCollection.put(((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName(),
+                            parentId);
+
+                onEmbeddable(entity, clazz, metaModel, indexCollection);
                 indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
@@ -157,7 +156,6 @@ public class IndexManager
             throw new IndexingException("Can't access ID from entity class " + metadata.getEntityClazz(), e);
         }
     }
-
 
     /**
      * @param entity
@@ -183,7 +181,7 @@ public class IndexManager
             }
 
             Object embeddedObject = PropertyAccessorHelper.getObject(entity,
-                    (Field) entityType.getAttribute(embeddedFieldName).getJavaMember());                    
+                    (Field) entityType.getAttribute(embeddedFieldName).getJavaMember());
             if (embeddedObject != null && !(embeddedObject instanceof Collection))
             {
                 for (Object column : embeddedColumn.getAttributes())
@@ -193,11 +191,14 @@ public class IndexManager
                     Class<?> columnClass = ((AbstractAttribute) columnAttribute).getBindableJavaType();
                     if (MetadataUtils.isColumnInEmbeddableIndexable(embeddedField, columnName))
                     {
-                       indexCollection.put(embeddedField.getName() + "." + columnName, PropertyAccessorHelper.getObject(embeddedObject, (Field)columnAttribute.getJavaMember()));
-                    }                           
+                        indexCollection.put(
+                                embeddedField.getName() + "." + columnName,
+                                PropertyAccessorHelper.getObject(embeddedObject,
+                                        (Field) columnAttribute.getJavaMember()));
+                    }
                 }
             }
-            
+
         }
     }
 
@@ -233,8 +234,7 @@ public class IndexManager
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
-            
-            
+
             ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity, parentId, clazz);
         }
     }
@@ -248,8 +248,9 @@ public class IndexManager
      * @return the list
      */
     @Deprecated
-    //TODO: All lucene specific code (methods that accept lucene query as parameter) from this class should go away
-    //and should be moved to LuceneIndexer instead
+    // TODO: All lucene specific code (methods that accept lucene query as
+    // parameter) from this class should go away
+    // and should be moved to LuceneIndexer instead
     public final Map<String, Object> search(String query)
     {
 
@@ -257,25 +258,29 @@ public class IndexManager
     }
 
     public final Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId)
-    {        
-        if(indexer == null) return null;        
-        
+    {
+        if (indexer == null)
+            return null;
+
         if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
         {
-            
-            // Search into Lucene index using lucene query, where entity class is child class, parent class is
+
+            // Search into Lucene index using lucene query, where entity class
+            // is child class, parent class is
             // entity's class and parent Id is entity ID! that's it!
             String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, parentClass.getCanonicalName()
-                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName().toLowerCase());
-            return ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, Constants.INVALID, Constants.INVALID,
-                    false);
+                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName()
+                    .toLowerCase());
+            return ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, Constants.INVALID,
+                    Constants.INVALID, false);
         }
         else
         {
-            //If an alternate indexer implementation class is provided by user, search into that
+            // If an alternate indexer implementation class is provided by user,
+            // search into that
             return indexer.search(parentClass, childClass, entityId, Constants.INVALID, Constants.INVALID);
-        }   
-        
+        }
+
     }
 
     /**

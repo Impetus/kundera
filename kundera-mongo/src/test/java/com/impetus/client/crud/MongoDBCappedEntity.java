@@ -15,7 +15,7 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "MongoDBCappedEntity", schema = "KunderaMongoSchemaGeneration@mongoSchemaGenerationTest")
 @IndexCollection(columns = { @Index(name = "personName", type = "ASC"),
-        @Index(name = "age", type = "DSC", min = 100, max = 500)})
+        @Index(name = "age", type = "DSC", min = 100, max = 500) })
 public class MongoDBCappedEntity
 {
 
@@ -31,7 +31,6 @@ public class MongoDBCappedEntity
     /** The age. */
     @Column(name = "AGE")
     private short age;
-
 
     /**
      * Gets the person id.
@@ -94,5 +93,5 @@ public class MongoDBCappedEntity
     public void setAge(short age)
     {
         this.age = age;
-    }   
+    }
 }

@@ -37,7 +37,7 @@ public class StudentCassandraTimestampTest extends CassandraBase
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -664,6 +664,5 @@ public class StudentCassandraTimestampTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

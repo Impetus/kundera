@@ -24,7 +24,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-        
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -32,7 +32,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-        
+
     }
 
     @Test
@@ -41,8 +41,8 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -52,8 +52,8 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -147,7 +147,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -194,13 +194,13 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         int count = 0;
         for (StudentOracleNoSQLlong student : students)
         {
-            if (student.getId() == ((Long)getMaxValue(long.class)).longValue())
+            if (student.getId() == ((Long) getMaxValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId() == ((Long)getMinValue(long.class)).longValue())
+            else if (student.getId() == ((Long) getMinValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -226,8 +226,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         List<StudentOracleNoSQLlong> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLlong s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class);
+        query = "Select s From StudentOracleNoSQLlong s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -253,8 +252,8 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         List<StudentOracleNoSQLlong> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLlong s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLlong s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -415,7 +414,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         count = 0;
         for (StudentOracleNoSQLlong student : students)
         {
-            if (student.getId() == ((Long)getMaxValue(long.class)).longValue())
+            if (student.getId() == ((Long) getMaxValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -479,7 +478,7 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         count = 0;
         for (StudentOracleNoSQLlong student : students)
         {
-            if (student.getId() == ((Long)getMaxValue(long.class)).longValue())
+            if (student.getId() == ((Long) getMaxValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -512,13 +511,13 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         int count = 0;
         for (StudentOracleNoSQLlong student : students)
         {
-            if (student.getId() == ((Long)getMaxValue(long.class)).longValue())
+            if (student.getId() == ((Long) getMaxValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId() == ((Long)getMinValue(long.class)).longValue())
+            else if (student.getId() == ((Long) getMinValue(long.class)).longValue())
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -536,5 +535,4 @@ public class StudentOracleNoSQLlongTest extends OracleNoSQLBase
         em.close();
     }
 
-   
 }

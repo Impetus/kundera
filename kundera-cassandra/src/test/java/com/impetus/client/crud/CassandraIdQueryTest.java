@@ -41,10 +41,10 @@ import com.impetus.client.persistence.CassandraCli;
 public class CassandraIdQueryTest extends BaseTest
 {
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     private Map<Object, Object> col;
 

@@ -69,7 +69,4 @@ public class StudentHBasefloat
         this.name = name;
     }
 
-
-
-
 }

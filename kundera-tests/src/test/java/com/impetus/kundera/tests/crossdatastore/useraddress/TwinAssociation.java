@@ -58,7 +58,7 @@ public abstract class TwinAssociation extends AssociationBase
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         combinations = null;
         combinations = new ArrayList<Map<Class, String>>();
-        
+
         /*
          * if (RUN_IN_EMBEDDED_MODE) { CassandraCli.cassandraSetUp();
          * 

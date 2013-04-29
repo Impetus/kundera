@@ -74,7 +74,4 @@ public class StudentCassandraByte
         this.name = name;
     }
 
-
-
-
 }

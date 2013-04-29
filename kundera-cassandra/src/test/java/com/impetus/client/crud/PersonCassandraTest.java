@@ -78,10 +78,10 @@ public class PersonCassandraTest extends BaseTest
     private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /** The col. */
     private Map<Object, Object> col;
@@ -113,7 +113,7 @@ public class PersonCassandraTest extends BaseTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-//            loadData();
+            // loadData();
         }
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
@@ -540,6 +540,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
+    	em.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }

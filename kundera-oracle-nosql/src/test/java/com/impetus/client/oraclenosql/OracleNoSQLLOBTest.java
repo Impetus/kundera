@@ -16,6 +16,10 @@
 package com.impetus.client.oraclenosql;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
+
+import oracle.kv.Consistency;
+import oracle.kv.Durability;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,7 +29,8 @@ import org.junit.Test;
 import com.impetus.client.oraclenosql.entities.UserProfile;
 
 /**
- * Test case for read and write on Large Objects (LOBs) 
+ * Test case for read and write on Large Objects (LOBs)
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
@@ -34,6 +39,11 @@ public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
     public void setUp() throws Exception
     {
         super.setUp();
+
+        setEmProperty("write.timeout", 10);
+        setEmProperty("durability", Durability.COMMIT_WRITE_NO_SYNC);
+        setEmProperty("time.unit", TimeUnit.SECONDS);
+        setEmProperty("consistency", Consistency.NONE_REQUIRED);
     }
 
     @After
@@ -42,28 +52,27 @@ public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
         super.tearDown();
     }
 
-    
     @Test
     public void executeLOBTest()
     {
-        //Save Record
+        // Save Record
         File file = new File("src/test/resources/nature.jpg");
         long fileSize = file.getTotalSpace();
         UserProfile userProfile = new UserProfile(1, "Amresh", file);
-        persist(userProfile);  
-        
-        //Find Record
+        persist(userProfile);
+
+        // Find Record
         clearEm();
-        UserProfile up = (UserProfile)find(UserProfile.class, 1);
+        UserProfile up = (UserProfile) find(UserProfile.class, 1);
         Assert.assertNotNull(up);
         Assert.assertEquals(1, up.getUserId());
         Assert.assertEquals("Amresh", up.getUserName());
         Assert.assertEquals(fileSize, up.getProfilePicture().getTotalSpace());
-        
-        //Delete Record
+
+        // Delete Record
         clearEm();
         delete(up);
         Assert.assertNull(find(UserProfile.class, 1));
-        
-    }    
+
+    }
 }

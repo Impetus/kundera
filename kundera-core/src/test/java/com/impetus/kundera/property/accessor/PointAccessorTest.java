@@ -26,7 +26,8 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.vividsolutions.jts.io.WKTWriter;
 
 /**
- * Test case for {@link PropertyAccessor} 
+ * Test case for {@link PropertyAccessor}
+ * 
  * @author amresh.singh
  */
 public class PointAccessorTest
@@ -52,48 +53,56 @@ public class PointAccessorTest
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#fromBytes(java.lang.Class, byte[])}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#fromBytes(java.lang.Class, byte[])}
+     * .
      */
     @Test
     public void testFromBytes()
     {
         Point point = new Point(4.5, 6.3);
         byte[] input = pa.toBytes(point);
-        
+
         Point point2 = pa.fromBytes(Point.class, input);
         Assert.assertTrue(point.equals(point2));
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#toBytes(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#toBytes(java.lang.Object)}
+     * .
      */
     @Test
     public void testToBytes()
     {
         Point point = new Point(4.5, 6.3);
         byte[] input = pa.toBytes(point);
-        
+
         Point point2 = pa.fromBytes(Point.class, input);
         Assert.assertTrue(point.equals(point2));
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#toString(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#toString(java.lang.Object)}
+     * .
      */
     @Test
     public void testToStringObject()
     {
         Point point = new Point(4.5, 6.3);
         String pointStr = pa.toString(point);
-        
+
         WKTWriter writer = new WKTWriter();
         String wktStr = writer.write(point);
-        
-        Assert.assertEquals(wktStr, pointStr);        
+
+        Assert.assertEquals(wktStr, pointStr);
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#fromString(java.lang.Class, java.lang.String)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#fromString(java.lang.Class, java.lang.String)}
+     * .
      */
     @Test
     public void testFromString()
@@ -101,16 +110,18 @@ public class PointAccessorTest
         Point point = new Point(4.5, 6.3);
         WKTWriter writer = new WKTWriter();
         String wktStr = writer.write(point);
-        
+
         Point point2 = pa.fromString(com.vividsolutions.jts.geom.Point.class, wktStr);
-        
+
         Assert.assertNotNull(point2);
         Assert.assertEquals(point.getX(), point2.getX());
         Assert.assertEquals(point.getY(), point2.getY());
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#getCopy(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#getCopy(java.lang.Object)}
+     * .
      */
     @Test
     public void testGetCopy()
@@ -122,12 +133,14 @@ public class PointAccessorTest
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.property.accessor.PointAccessor#getInstance(java.lang.Class)}.
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.PointAccessor#getInstance(java.lang.Class)}
+     * .
      */
     @Test
     public void testGetInstance()
     {
-        Point point = (Point)pa.getInstance(Point.class);
+        Point point = (Point) pa.getInstance(Point.class);
         Assert.assertNotNull(point);
         Assert.assertEquals(0.0, point.getX());
         Assert.assertEquals(0.0, point.getY());

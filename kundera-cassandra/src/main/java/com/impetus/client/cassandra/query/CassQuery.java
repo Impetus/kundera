@@ -102,7 +102,7 @@ public class CassQuery extends QueryImpl implements Query
     {
         if (log.isDebugEnabled())
         {
-            log.debug("on populateEntities cassandra query");
+            log.debug("Populating entities for Cassandra query.");
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -336,8 +336,8 @@ public class CassQuery extends QueryImpl implements Query
                 String opr = o.toString();
                 if (opr.equalsIgnoreCase("or"))
                 {
-                    log.error("Support for OR clause is not enabled with in cassandra");
-                    throw new QueryHandlerException("unsupported clause " + opr + " for cassandra");
+                    log.error("Support for OR clause is not enabled within cassandra.");
+                    throw new QueryHandlerException("Unsupported clause " + opr + " for cassandra.");
                 }
 
             }
@@ -470,13 +470,13 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 catch (SecurityException e)
                 {
-                    log.error("Error while extrating " + jpaFieldName + ";Details:" + e.getMessage());
-                    throw new QueryHandlerException("Error while extrating " + jpaFieldName);
+                    log.error("Error while extrating " + jpaFieldName + ", Caused by: ", e);
+                    throw new QueryHandlerException("Error while extrating " + jpaFieldName + ".");
                 }
                 catch (NoSuchFieldException e)
                 {
-                    log.error("Error while extrating " + jpaFieldName + ";Details:" + e.getMessage());
-                    throw new QueryHandlerException("Error while extrating " + jpaFieldName);
+                    log.error("Error while extrating " + jpaFieldName + ", Caused by: ", e);
+                    throw new QueryHandlerException("Error while extrating " + jpaFieldName + ".");
                 }
 
             }
@@ -503,8 +503,8 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            log.error("Error while handling data type for:" + jpaFieldName);
-            throw new QueryHandlerException("field type is null for:" + jpaFieldName);
+            log.error("Error while handling data type for " + jpaFieldName + ".");
+            throw new QueryHandlerException("Field type is null for " + jpaFieldName + ".");
         }
     }
 
@@ -654,7 +654,8 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else if (idColumn.equals(fieldName))
                 {
-                    translator.buildWhereClause(builder, CassandraUtilities.getIdColumnName(m, externalProperties), value, condition);
+                    translator.buildWhereClause(builder, CassandraUtilities.getIdColumnName(m, externalProperties),
+                            value, condition);
                 }
                 else
                 {

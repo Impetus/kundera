@@ -121,7 +121,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         {
             return null;
         }
-        
+
         return String.valueOf(time.getTime());
     }
 
@@ -139,16 +139,14 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         {
             return null;
         }
-        
-        if(StringUtils.isNumeric(s))
+
+        if (StringUtils.isNumeric(s))
         {
             return new Time(Long.parseLong(s));
         }
         Time t = Time.valueOf(s);
         return t;
     }
-    
-    
 
     @Override
     public Time getCopy(Object object)

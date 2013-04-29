@@ -43,7 +43,6 @@ public class UserInfo
     @Column(name = "age")
     private int age;
 
-    
     /**
      * 
      */
@@ -51,7 +50,6 @@ public class UserInfo
     {
     }
 
-    
     /**
      * @param userInfoId
      * @param firstName
@@ -59,16 +57,19 @@ public class UserInfo
      * @param age
      * @param timeLine
      */
-    public UserInfo(String userInfoId, String firstName, String lastName, int age/*, CassandraPrimeUser timeLine*/)
+    public UserInfo(String userInfoId, String firstName, String lastName, int age/*
+                                                                                  * ,
+                                                                                  * CassandraPrimeUser
+                                                                                  * timeLine
+                                                                                  */)
     {
         super();
         this.userInfoId = userInfoId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
-//        this.timeLine = timeLine;
+        // this.timeLine = timeLine;
     }
-
 
     /**
      * @return the userInfoId
@@ -102,26 +103,26 @@ public class UserInfo
         return age;
     }
 
-//    /**
-//     * @return the timeLine
-//     */
-//    public CassandraPrimeUser getTimeLine()
-//    {
-//        return timeLine;
-//    }
-
+    // /**
+    // * @return the timeLine
+    // */
+    // public CassandraPrimeUser getTimeLine()
+    // {
+    // return timeLine;
+    // }
 
     /**
-     * @param firstName the firstName to set
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
         this.firstName = firstName;
     }
 
-
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {

@@ -16,7 +16,6 @@
 package com.impetus.client.mongodb.config;
 
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

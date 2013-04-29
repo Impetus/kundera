@@ -71,8 +71,8 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
-            throws IOException;
+    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+            Object columnFamilyObj) throws IOException;
 
     /**
      * Writes Columns <code>columns</code> into a given table. Each columns is
@@ -156,8 +156,10 @@ public interface Writer
     /**
      * method to perform batch insert/update.
      * 
-     * @param rows  data rows
-     * @throws IOException  throws io exception.
+     * @param rows
+     *            data rows
+     * @throws IOException
+     *             throws io exception.
      */
-    void persistRows(Map<HTableInterface,List<HBaseDataWrapper>> rows) throws IOException;
+    void persistRows(Map<HTableInterface, List<HBaseDataWrapper>> rows) throws IOException;
 }

@@ -15,7 +15,6 @@
  */
 package com.impetus.client.crud;
 
-
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 /**
- * Test case for Capped Collections 
+ * Test case for Capped Collections
+ * 
  * @author amresh.singh
  */
 public class CappedCollectionTest
@@ -51,7 +51,6 @@ public class CappedCollectionTest
 
     private EntityManager em;
 
-
     /**
      * @throws java.lang.Exception
      */
@@ -59,10 +58,10 @@ public class CappedCollectionTest
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
-        em = emf.createEntityManager();    
+        em = emf.createEntityManager();
         em.getDelegate();
         getDB();
-     }
+    }
 
     /**
      * @throws java.lang.Exception
@@ -73,62 +72,64 @@ public class CappedCollectionTest
         truncateMongo();
         emf.close();
     }
-    
+
     @Test
     public void testCappedCollection()
     {
-        //Validate schema
+        // Validate schema
         DBCollection collection = db.getCollection("MongoDBCappedEntity");
         Assert.assertTrue(collection.isCapped());
-        CommandResult stats = collection.getStats();       
-        
+        CommandResult stats = collection.getStats();
+
         Object maxObj = stats.get(MongoDBConstants.MAX);
-        Assert.assertNotNull(maxObj);        
+        Assert.assertNotNull(maxObj);
         int max = Integer.parseInt(maxObj.toString());
         Assert.assertEquals(10, max);
-        
-      /*  Object size = stats.get(MongoDBConstants.SIZE);
-        Assert.assertNotNull(size);
-        Assert.assertEquals(10240, Integer.parseInt(size.toString()));*/
-        
-        //Index should not have been created
+
+        /*
+         * Object size = stats.get(MongoDBConstants.SIZE);
+         * Assert.assertNotNull(size); Assert.assertEquals(10240,
+         * Integer.parseInt(size.toString()));
+         */
+
+        // Index should not have been created
         List<DBObject> indexInfo = collection.getIndexInfo();
         Assert.assertTrue(indexInfo.isEmpty());
-        
-        //Insert "Max" records successfully
-        for(int i = 1; i <= max; i++)
+
+        // Insert "Max" records successfully
+        for (int i = 1; i <= max; i++)
         {
             MongoDBCappedEntity entity = new MongoDBCappedEntity();
             entity.setPersonId(i + "");
             entity.setPersonName("Person_Name_" + i);
-            entity.setAge((short)i);
-            
-            em.persist(entity);            
+            entity.setAge((short) i);
+
+            em.persist(entity);
         }
-        
-        //Insert one more record and check whether it replaces first one
+
+        // Insert one more record and check whether it replaces first one
         MongoDBCappedEntity entity = new MongoDBCappedEntity();
         entity.setPersonId((max + 1) + "");
         entity.setPersonName("Person_Name_" + (max + 1));
-        entity.setAge((short) (max + 1));        
+        entity.setAge((short) (max + 1));
         em.persist(entity);
-        
+
         em.clear();
         MongoDBCappedEntity firstRecord = em.find(MongoDBCappedEntity.class, "1");
         Assert.assertNull(firstRecord);
-        
+
         MongoDBCappedEntity lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
-        Assert.assertNotNull(lastRecord);        
-       
-        //Deleting documents within a capped collection should simply ignore, as is done by native API
+        Assert.assertNotNull(lastRecord);
+
+        // Deleting documents within a capped collection should simply ignore,
+        // as is done by native API
         em.remove(lastRecord);
         em.clear();
         lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
-        Assert.assertNotNull(lastRecord);     
-                
+        Assert.assertNotNull(lastRecord);
+
     }
-    
-    
+
     private void truncateMongo()
     {
 
@@ -136,8 +137,8 @@ public class CappedCollectionTest
         {
             db.dropDatabase();
         }
-    }  
-    
+    }
+
     /**
      * 
      */

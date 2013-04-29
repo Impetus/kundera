@@ -19,28 +19,33 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class PromoCode {
+public class PromoCode
+{
 
-	@Column(name = "promoCode_id")
-	private String promoCodeId;
+    @Column(name = "promoCode_id")
+    private String promoCodeId;
 
-	@Column(name = "promoCode_name")
-	private String promoCodeName;
+    @Column(name = "promoCode_name")
+    private String promoCodeName;
 
-	public String getPromoCodeId() {
-		return promoCodeId;
-	}
+    public String getPromoCodeId()
+    {
+        return promoCodeId;
+    }
 
-	public void setPromoCodeId(String promoCodeId) {
-		this.promoCodeId = promoCodeId;
-	}
+    public void setPromoCodeId(String promoCodeId)
+    {
+        this.promoCodeId = promoCodeId;
+    }
 
-	public String getPromoCodeName() {
-		return promoCodeName;
-	}
+    public String getPromoCodeName()
+    {
+        return promoCodeName;
+    }
 
-	public void setPromoCodeName(String promoCodeName) {
-		this.promoCodeName = promoCodeName;
-	}
+    public void setPromoCodeName(String promoCodeName)
+    {
+        this.promoCodeName = promoCodeName;
+    }
 
 }

@@ -45,18 +45,19 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
- * Implementation of {@link Query} for Oracle NoSQL database 
+ * Implementation of {@link Query} for Oracle NoSQL database
+ * 
  * @author amresh.singh
  */
 public class OracleNoSQLQuery extends QueryImpl implements Query
 {
     private static Log log = LogFactory.getLog(OracleNoSQLQuery.class);
-    
+
     public OracleNoSQLQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
         super(query, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
-        
+
     }
 
     @Override
@@ -66,55 +67,55 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         {
             log.debug("Populating entities for JPA query on OracleNOSQL");
         }
-        
+
         Set<Object> results = new HashSet<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-        .getPersistenceUnitMetadata(m.getPersistenceUnit()).getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
-       
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());        
+                .getPersistenceUnitMetadata(m.getPersistenceUnit()).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+
+        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());
         OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
-        
+
         Set<Object> resultsFromIdSearch = new HashSet<Object>();
-        
-        //Find By ID queries
-        if(interpreter.isFindById())
+
+        // Find By ID queries
+        if (interpreter.isFindById())
         {
             Object entity = client.find(m.getEntityClazz(), interpreter.getRowKey());
             resultsFromIdSearch.add(entity);
-            
-            if(interpreter.getOperatorWithRowKey() == null)
+
+            if (interpreter.getOperatorWithRowKey() == null)
             {
-                List<Object> output = new ArrayList<Object>();        
-                output.addAll(resultsFromIdSearch);                
-                return output;   
+                List<Object> output = new ArrayList<Object>();
+                output.addAll(resultsFromIdSearch);
+                return output;
             }
-        }  
-        
-        
+        }
+
         if (client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
         {
             results.addAll(populateUsingLucene(m, client, null, interpreter.getSelectColumns()));
         }
         else
-        {   
-                        
-            results.addAll((List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter, null));
-        }    
-        
-        List<Object> output = new ArrayList<Object>();        
+        {
+
+            results.addAll((List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter,
+                    null));
+        }
+
+        List<Object> output = new ArrayList<Object>();
         output.addAll(results);
-        
-        return output;       
-    }  
-  
+
+        return output;
+    }
 
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         List<Object> ls = new ArrayList<Object>();
         ls = populateEntities(m, client);
-        
+
         return setRelationEntities(ls, client, m);
     }
 
@@ -134,19 +135,19 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         }
 
         return 0;
-    }  
-    
-    
+    }
+
     private OracleNoSQLQueryInterpreter translateQuery(Queue clauseQueue, EntityMetadata entityMetadata)
     {
-        OracleNoSQLQueryInterpreter interpreter = new OracleNoSQLQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
-        interpreter.setClauseQueue(clauseQueue); 
-        
+        OracleNoSQLQueryInterpreter interpreter = new OracleNoSQLQueryInterpreter(getColumns(getKunderaQuery()
+                .getResult(), entityMetadata));
+        interpreter.setClauseQueue(clauseQueue);
+
         String operatorWithIdClause = null;
         boolean idClauseFound = false;
-        for(Object clause : clauseQueue)
-        {            
-            if (clause.getClass().isAssignableFrom(FilterClause.class) && !idClauseFound)            
+        for (Object clause : clauseQueue)
+        {
+            if (clause.getClass().isAssignableFrom(FilterClause.class) && !idClauseFound)
             {
                 String columnName = ((FilterClause) clause).getProperty();
                 SingularAttribute idAttribute = entityMetadata.getIdAttribute();
@@ -154,49 +155,53 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
                 {
                     interpreter.setFindById(true);
                     // To convert rowkey string to object.
-                    Object keyObj =   PropertyAccessorHelper.fromSourceToTargetClass(((AbstractAttribute)idAttribute).getBindableJavaType(), String.class, ((FilterClause) clause).getValue());
-                    interpreter.setRowKey(keyObj/*((FilterClause) clause).getValue()*/);
+                    Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
+                            ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
+                            ((FilterClause) clause).getValue());
+                    interpreter.setRowKey(keyObj/*
+                                                 * ((FilterClause)
+                                                 * clause).getValue()
+                                                 */);
                     idClauseFound = true;
                 }
             }
-            else if(clause instanceof String)            
-            {                
-               operatorWithIdClause = clause.toString();               
+            else if (clause instanceof String)
+            {
+                operatorWithIdClause = clause.toString();
             }
-            
-            if(idClauseFound && operatorWithIdClause != null)
+
+            if (idClauseFound && operatorWithIdClause != null)
             {
                 break;
             }
         }
-        
+
         interpreter.setOperatorWithRowKey(operatorWithIdClause);
 
         return interpreter;
-    } 
-    
+    }
+
     private void addToResults(Set results, Set resultsToAdd, String operation)
     {
-        if(resultsToAdd == null || resultsToAdd.isEmpty())
+        if (resultsToAdd == null || resultsToAdd.isEmpty())
         {
             return;
         }
-        
-        if(operation == null)
+
+        if (operation == null)
         {
             results.addAll(resultsToAdd);
         }
-        else if(operation.equalsIgnoreCase("OR"))
+        else if (operation.equalsIgnoreCase("OR"))
         {
             results.addAll(resultsToAdd);
         }
-        else if(operation.equalsIgnoreCase("AND"))
-        {           
-            results.retainAll(resultsToAdd);                        
+        else if (operation.equalsIgnoreCase("AND"))
+        {
+            results.retainAll(resultsToAdd);
         }
-        
-        resultsToAdd.clear();        
+
+        resultsToAdd.clear();
     }
-   
 
 }

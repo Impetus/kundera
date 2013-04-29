@@ -55,11 +55,9 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 public class OracleNoSQLInvertedIndexer implements Indexer
 {
 
-    
+    private KVStore kvStore;
 
-    KVStore kvStore;    
-    
-    OracleNoSQLDataHandler handler;
+    private OracleNoSQLDataHandler handler;
 
     @Override
     public void index(Class entityClazz, Map<String, Object> values)
@@ -79,10 +77,9 @@ public class OracleNoSQLInvertedIndexer implements Indexer
 
             String minorKey = PropertyAccessorHelper.getString(id);
 
-            Key key = Key.createKey(majorKeyComponents, minorKey);            
+            Key key = Key.createKey(majorKeyComponents, minorKey);
             byte[] valueByteArray = PropertyAccessorHelper.getBytes(id);
-            
-            
+
             kvStore.put(key, Value.createValue(valueByteArray));
         }
     }
@@ -90,8 +87,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     @Override
     public Map<String, Object> search(String queryString, int start, int count)
     {
-
-        return null;
+        throw new UnsupportedOperationException("This method is not supported for OracleNoSQL.");
     }
 
     @Override
@@ -125,116 +121,108 @@ public class OracleNoSQLInvertedIndexer implements Indexer
 
             byte[] idByteArr = keyValueVersion.getValue().getValue();
             Object keyObj = accessor.fromBytes(childMetadata.getIdAttribute().getBindableJavaType(), idByteArr);
-            
+
             results.put(childIdColumnName + "|" + minorKey, keyObj);
         }
 
         return results;
     }
 
-    
-    
     public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
-        String secIndexName = getIndexTableName(entityMetadata);        
-        
+        String secIndexName = getIndexTableName(entityMetadata);
+
         Set<Object> results = new HashSet<Object>();
         Set<Object> foundKeys = new HashSet<Object>();
         String interClauseOperator = null;
-        
-        Queue filterClauseQueue = interpreter.getClauseQueue();       
-        
-        for(Object clause : filterClauseQueue)
-        {         
-            if(clause instanceof FilterClause)
+
+        Queue filterClauseQueue = interpreter.getClauseQueue();
+
+        for (Object clause : filterClauseQueue)
+        {
+            if (clause instanceof FilterClause)
             {
                 foundKeys = new HashSet<Object>();
-                
+
                 String columnName = ((FilterClause) clause).getProperty();
                 String condition = ((FilterClause) clause).getCondition();
-                Object value = ((FilterClause) clause).getValue();                
-                
-                
+                Object value = ((FilterClause) clause).getValue();
+
                 if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
                         && condition.equals("="))
                 {
-                    Object idValue = PropertyAccessorHelper.fromSourceToTargetClass(entityMetadata.getIdAttribute().getJavaType(), String.class, value);
+                    Object idValue = PropertyAccessorHelper.fromSourceToTargetClass(entityMetadata.getIdAttribute()
+                            .getJavaType(), String.class, value);
                     foundKeys.add(idValue);
                 }
                 else
                 {
                     List<String> majorComponents = new ArrayList<String>();
                     majorComponents.add(secIndexName);
-                    majorComponents.add(columnName);         
-                    
+                    majorComponents.add(columnName);
+
                     KeyRange range = null;
                     Iterator<KeyValueVersion> iterator = null;
-                    
-                    
-                    if(condition.equals("="))
+
+                    if (condition.equals("="))
                     {
                         majorComponents.add(PropertyAccessorHelper.getString(value));
                         Key majorKeyToFind = Key.createKey(majorComponents);
-                        iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind,
-                                range, null);
-                    }                    
-                    else if(condition.equals(">"))
+                        iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, range, null);
+                    }
+                    else if (condition.equals(">"))
                     {
                         range = new KeyRange(value.toString(), false, null, true);
                         Key majorKeyToFind = Key.createKey(majorComponents);
-                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind,
-                                range, null);
+                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind, range, null);
                     }
-                    else if(condition.equals("<"))
+                    else if (condition.equals("<"))
                     {
                         range = new KeyRange(null, true, value.toString(), false);
                         Key majorKeyToFind = Key.createKey(majorComponents);
-                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind,
-                                range, null);
-                    }  
-                    else if(condition.equals(">="))
+                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind, range, null);
+                    }
+                    else if (condition.equals(">="))
                     {
                         range = new KeyRange(value.toString(), true, null, true);
                         Key majorKeyToFind = Key.createKey(majorComponents);
-                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind,
-                                range, null);
+                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind, range, null);
                     }
-                    else if(condition.equals("<="))
+                    else if (condition.equals("<="))
                     {
                         range = new KeyRange(null, true, value.toString(), true);
                         Key majorKeyToFind = Key.createKey(majorComponents);
-                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind,
-                                range, null);
-                    }                   
-                    
+                        iterator = kvStore.storeIterator(Direction.UNORDERED, 0, majorKeyToFind, range, null);
+                    }
+
                     while (iterator.hasNext())
                     {
                         KeyValueVersion keyValueVersion = iterator.next();
                         String minorKey = keyValueVersion.getKey().getMinorPath().get(0);
-                        
+
                         PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(entityMetadata
                                 .getIdAttribute().getBindableJavaType());
-                        
+
                         byte[] idByteArr = keyValueVersion.getValue().getValue();
-                        Object keyObj = accessor
-                        .fromBytes(entityMetadata.getIdAttribute().getBindableJavaType(), idByteArr);
-                        
+                        Object keyObj = accessor.fromBytes(entityMetadata.getIdAttribute().getBindableJavaType(),
+                                idByteArr);
+
                         foundKeys.add(keyObj);
                     }
-                    
+
                 }
             }
-            else if(clause instanceof String)
+            else if (clause instanceof String)
             {
                 interClauseOperator = clause.toString();
             }
-            
+
             addToResults(results, foundKeys, interClauseOperator);
         }
-        
-        return (Set<E>) results; 
+
+        return (Set<E>) results;
 
     }
 
@@ -242,86 +230,85 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     public void unIndex(Class entityClazz, Object entity)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
-        
+
         String indexTableName = getIndexTableName(entityMetadata);
-        
-        //byte[] id = PropertyAccessorHelper.get(entity, (Field)entityMetadata.getIdAttribute().getJavaMember());
-        Object id = PropertyAccessorHelper.getId(entity, entityMetadata); 
-            
+
+        // byte[] id = PropertyAccessorHelper.get(entity,
+        // (Field)entityMetadata.getIdAttribute().getJavaMember());
+        Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
+
         MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
                 .getPersistenceUnit());
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
-        Set<Attribute> attributes = entityType.getSingularAttributes();       
-        
-        
+        Set<Attribute> attributes = entityType.getSingularAttributes();
+
         for (Attribute attribute : attributes)
         {
             Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();
-            
-            if(! attribute.isAssociation() && ! metamodel.isEmbeddable(fieldJavaType))                
+
+            if (!attribute.isAssociation() && !metamodel.isEmbeddable(fieldJavaType))
             {
-                String columnName = ((AbstractAttribute)attribute).getJPAColumnName();
-                
+                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+
                 List<String> majorComponents = new ArrayList<String>();
                 majorComponents.add(indexTableName);
                 majorComponents.add(columnName);
-                
-                
+
                 Key key = Key.createKey(majorComponents);
-                Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);                
-                
+                Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
+
                 while (iterator.hasNext())
                 {
                     KeyValueVersion keyValueVersion = iterator.next();
-                    Key keytoDelete = keyValueVersion.getKey(); 
+                    Key keytoDelete = keyValueVersion.getKey();
                     byte[] value = keyValueVersion.getValue().getValue();
-                    Object valueObject = PropertyAccessorHelper.getObject(((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType(), value);
-                    
-                    
-                    if(valueObject.equals(id))
+                    Object valueObject = PropertyAccessorHelper.getObject(
+                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType(), value);
+
+                    if (valueObject.equals(id))
                     {
-                        //Delete this key
+                        // Delete this key
                         kvStore.multiDelete(keytoDelete, null, null);
                     }
-                }                
-            }           
-        }        
-        
+                }
+            }
+        }
+
     }
 
     @Override
     public void close()
     {
     }
-    
+
     private void addToResults(Set results, Set resultsToAdd, String operation)
     {
-        if(resultsToAdd == null || resultsToAdd.isEmpty())
+        if (resultsToAdd == null || resultsToAdd.isEmpty())
         {
             return;
         }
-        
-        if(operation == null)
+
+        if (operation == null)
         {
             results.addAll(resultsToAdd);
         }
-        else if(operation.equalsIgnoreCase("OR"))
+        else if (operation.equalsIgnoreCase("OR"))
         {
             results.addAll(resultsToAdd);
         }
-        else if(operation.equalsIgnoreCase("AND"))
+        else if (operation.equalsIgnoreCase("AND"))
         {
-            if(results.isEmpty())
+            if (results.isEmpty())
             {
                 results.addAll(resultsToAdd);
             }
             else
             {
                 results.retainAll(resultsToAdd);
-            }            
+            }
         }
-        
-        resultsToAdd.clear();        
+
+        resultsToAdd.clear();
     }
 
     /**
@@ -339,12 +326,11 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     public void setKvStore(KVStore kvStore)
     {
         this.kvStore = kvStore;
-    }   
-    
-    
-    
+    }
+
     /**
-     * @param handler the handler to set
+     * @param handler
+     *            the handler to set
      */
     public void setHandler(OracleNoSQLDataHandler handler)
     {

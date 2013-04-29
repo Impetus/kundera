@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation interface for column
+ * 
  * @author Kuldeep Mishra
  * 
  */

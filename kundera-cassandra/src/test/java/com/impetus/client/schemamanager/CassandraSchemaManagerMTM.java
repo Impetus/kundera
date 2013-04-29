@@ -64,14 +64,14 @@ public class CassandraSchemaManagerMTM
         CassandraCli.cassandraSetUp();
     }
 
-        /**
-         * @throws java.lang.Exception
-         */
-        @After
-        public void tearDown() throws Exception
-        {
-            CassandraCli.dropKeySpace(keyspace);
-        }
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        CassandraCli.dropKeySpace(keyspace);
+    }
 
     @Test
     public void test()
@@ -153,8 +153,8 @@ public class CassandraSchemaManagerMTM
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
 
-        new ClientFactoryConfiguraton(null,pu).configure();
-        new SchemaConfiguration(null,pu).configure();
+        new ClientFactoryConfiguraton(null, pu).configure();
+        new SchemaConfiguration(null, pu).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

@@ -93,13 +93,11 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
             throw new PropertyAccessException(e);
         }
     }
-    
-    
 
     @Override
     public Boolean getCopy(Object object)
     {
-        return object != null ? new Boolean((Boolean)object) : null;
+        return object != null ? new Boolean((Boolean) object) : null;
     }
 
     public Boolean getInstance(Class<?> clazz)

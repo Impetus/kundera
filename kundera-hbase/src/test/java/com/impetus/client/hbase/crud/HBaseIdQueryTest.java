@@ -113,23 +113,17 @@ public class HBaseIdQueryTest extends BaseTest
      */
     private void findByIdAndAgeGTAndLT()
     {/*
-        String qry = "Select p.personName from PersonHBase p where p.personId = 1 and p.personName = vivek and p.age >=10 and p.age <= 20";
-        Query q = em.createQuery(qry);
-        List<PersonHBase> persons = q.getResultList();
-        Assert.assertNotNull(persons);
-        Assert.assertEquals(1, persons.size());
-        int count = 0;
-        for (PersonHBase person : persons)
-        {
-            if (person.getPersonId().equals("1"))
-            {
-                Assert.assertNull(person.getAge());
-                Assert.assertEquals("vivek", person.getPersonName());
-                count++;
-            }
-        }
-        Assert.assertEquals(1, count);
-    */}
+      * String qry =
+      * "Select p.personName from PersonHBase p where p.personId = 1 and p.personName = vivek and p.age >=10 and p.age <= 20"
+      * ; Query q = em.createQuery(qry); List<PersonHBase> persons =
+      * q.getResultList(); Assert.assertNotNull(persons); Assert.assertEquals(1,
+      * persons.size()); int count = 0; for (PersonHBase person : persons) { if
+      * (person.getPersonId().equals("1")) { Assert.assertNull(person.getAge());
+      * Assert.assertEquals("vivek", person.getPersonName()); count++; } }
+      * Assert.assertEquals(1, count);
+      */
+    }
+
     /**
      * 
      */
@@ -468,8 +462,8 @@ public class HBaseIdQueryTest extends BaseTest
     private void init()
     {
 
-//        cli.createTable("PERSON");
-//        cli.addColumnFamily("PERSON", "PERSON");
+        // cli.createTable("PERSON");
+        // cli.addColumnFamily("PERSON", "PERSON");
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);

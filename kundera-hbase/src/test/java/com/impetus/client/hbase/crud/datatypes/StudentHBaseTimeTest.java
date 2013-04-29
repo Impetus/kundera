@@ -22,6 +22,7 @@ public class StudentHBaseTimeTest extends Base
     private static final String table = "StudentHBaseTime";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -570,8 +571,8 @@ public class StudentHBaseTimeTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
-        }
+
+    }
 
     public void dropSchema()
     {

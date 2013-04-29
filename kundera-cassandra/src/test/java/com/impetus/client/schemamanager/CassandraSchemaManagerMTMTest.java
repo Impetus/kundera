@@ -65,7 +65,7 @@ public class CassandraSchemaManagerMTMTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null,_persistenceUnit);
+        configuration = new SchemaConfiguration(null, _persistenceUnit);
         CassandraCli.cassandraSetUp();
     }
 
@@ -77,7 +77,6 @@ public class CassandraSchemaManagerMTMTest
     {
         CassandraCli.dropKeySpace(_keyspace);
     }
-
 
     @Test
     public void test()
@@ -157,7 +156,7 @@ public class CassandraSchemaManagerMTMTest
 
         appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
 
-        new ClientFactoryConfiguraton(null,_persistenceUnit).configure();
+        new ClientFactoryConfiguraton(null, _persistenceUnit).configure();
         configuration.configure();
         return null;
     }

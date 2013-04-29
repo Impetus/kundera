@@ -36,7 +36,9 @@ public class CollectionConverter
     private static Log log = LogFactory.getLog(CollectionConverter.class);
 
     /**
-     * Converts a collection of <code>genericClass</code> objects to String representation
+     * Converts a collection of <code>genericClass</code> objects to String
+     * representation
+     * 
      * @param input
      * @param genericClass
      * @param mediaType
@@ -70,11 +72,10 @@ public class CollectionConverter
         }
     }
 
-    
-    
-    
     /**
-     * Converts a String representation to collection of <code>genericClass</code> objects
+     * Converts a String representation to collection of
+     * <code>genericClass</code> objects
+     * 
      * @param input
      * @param collectionClass
      * @param genericClass

@@ -21,54 +21,59 @@ import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class NearQueryImpl implements GeospatialQuery
 {
-    
+
     @Override
     public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         BasicDBObject q = (BasicDBObject) query;
-        
-        if(q == null) q = new BasicDBObject();        
-        
-        //Set point in query which is involved in near search
-        if(shape != null && shape.getClass().isAssignableFrom(Point.class))
+
+        if (q == null)
+            q = new BasicDBObject();
+
+        // Set point in query which is involved in near search
+        if (shape != null && shape.getClass().isAssignableFrom(Point.class))
         {
             Point point = (Point) shape;
-            BasicDBObject filter = (BasicDBObject)q.get(geolocationColumnName); 
-                
-            if(filter == null) filter = new BasicDBObject(); 
-            
-            if(point.getSurfaceType().equals(SurfaceType.SPHERICAL)) 
+            BasicDBObject filter = (BasicDBObject) q.get(geolocationColumnName);
+
+            if (filter == null)
+                filter = new BasicDBObject();
+
+            if (point.getSurfaceType().equals(SurfaceType.SPHERICAL))
             {
-                filter.put("$nearSphere", new double[] {point.getX(), point.getY()});
+                filter.put("$nearSphere", new double[] { point.getX(), point.getY() });
             }
             else
             {
-                filter.put("$near", new double[] {point.getX(), point.getY()});
-            }           
-            
+                filter.put("$near", new double[] { point.getX(), point.getY() });
+            }
+
             q.put(geolocationColumnName, filter);
         }
-        
-        //Set maximum distance from the given point
-        if(shape != null && (shape.getClass().isAssignableFrom(Double.class) ||shape.getClass().isAssignableFrom(double.class)))
+
+        // Set maximum distance from the given point
+        if (shape != null
+                && (shape.getClass().isAssignableFrom(Double.class) || shape.getClass().isAssignableFrom(double.class)))
         {
             Double maxDistance = (Double) shape;
-            
-            BasicDBObject filter = (BasicDBObject)q.get(geolocationColumnName); 
-            
-            if(filter == null) filter = new BasicDBObject();   
-            
+
+            BasicDBObject filter = (BasicDBObject) q.get(geolocationColumnName);
+
+            if (filter == null)
+                filter = new BasicDBObject();
+
             filter.put("$maxDistance", maxDistance);
-           
+
             q.put(geolocationColumnName, filter);
         }
-        
+
         return q;
-    }      
+    }
 
 }

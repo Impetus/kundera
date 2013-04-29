@@ -32,7 +32,7 @@ public class HbaseAssociationTest
     @Before
     public void setUp()
     {
-        HBaseCli  cli = new HBaseCli();
+        HBaseCli cli = new HBaseCli();
         cli.startCluster();
         emf = Persistence.createEntityManagerFactory(HBASE_PU);
     }

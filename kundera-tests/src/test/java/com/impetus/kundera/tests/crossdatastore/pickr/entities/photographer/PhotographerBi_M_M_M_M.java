@@ -48,7 +48,7 @@ public class PhotographerBi_M_M_M_M
     private String photographerName;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(/*schema = "Pickr",*/ name = "PHOTOGRAPHER_ALBUM", joinColumns = { @JoinColumn(name = "PHOTOGRAPHER_ID") }, inverseJoinColumns = { @JoinColumn(name = "ALBUM_ID") })
+    @JoinTable(/* schema = "Pickr", */name = "PHOTOGRAPHER_ALBUM", joinColumns = { @JoinColumn(name = "PHOTOGRAPHER_ID") }, inverseJoinColumns = { @JoinColumn(name = "ALBUM_ID") })
     private List<AlbumBi_M_M_M_M> albums;
 
     /**

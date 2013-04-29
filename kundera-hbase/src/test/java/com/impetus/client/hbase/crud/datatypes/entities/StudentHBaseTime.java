@@ -12,7 +12,6 @@ import javax.persistence.Table;
 public class StudentHBaseTime
 {
 
-
     @Id
     private Time id;
 
@@ -72,6 +71,5 @@ public class StudentHBaseTime
     {
         this.name = name;
     }
-
 
 }

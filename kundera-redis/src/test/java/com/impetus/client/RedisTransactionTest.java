@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.PersonRedis;
 
-
 public class RedisTransactionTest
 {
 
@@ -28,10 +27,9 @@ public class RedisTransactionTest
 
     /** The emf. */
     private EntityManagerFactory emf;
-    
+
     /** The em. */
     private EntityManager em;
-
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisTransactionTest.class);
@@ -46,7 +44,6 @@ public class RedisTransactionTest
         em = emf.createEntityManager();
     }
 
-    
     /**
      * On rollback.
      * 
@@ -106,7 +103,7 @@ public class RedisTransactionTest
     @Test
     public void onCommit() throws Exception
     {
-//        em.setFlushMode(FlushModeType.COMMIT);
+        // em.setFlushMode(FlushModeType.COMMIT);
 
         em.getTransaction().begin();
 
@@ -130,10 +127,9 @@ public class RedisTransactionTest
 
         // roll back, should roll back person name for p2!
         em.getTransaction().rollback();
-     
+
         p = em.find(PersonRedis.class, "1");
         Assert.assertNotNull(p);
-
 
         p = em.find(PersonRedis.class, "2");
         Assert.assertNotNull(p);
@@ -200,7 +196,7 @@ public class RedisTransactionTest
         em.clear();
         // persist with 1 em
         EntityManager em1 = emf.createEntityManager();
-//        em1.setFlushMode(FlushModeType.COMMIT);
+        // em1.setFlushMode(FlushModeType.COMMIT);
         em1.getTransaction().begin();
         Object p3 = prepareData("4", 15);
         em1.persist(p3);
@@ -216,7 +212,7 @@ public class RedisTransactionTest
         }
         catch (Exception ex)
         {
-             em1.clear();
+            em1.clear();
             p = em.find(PersonRedis.class, "4");
             Assert.assertNotNull(p);
             Assert.assertEquals("vivek", p.getPersonName());
@@ -231,7 +227,7 @@ public class RedisTransactionTest
     public void rollBackWithMultiTransactions()
     {
         EntityManager em1 = emf.createEntityManager();
-//        em1.setFlushMode(FlushModeType.COMMIT);
+        // em1.setFlushMode(FlushModeType.COMMIT);
 
         // Begin transaction.
         em1.getTransaction().begin();
@@ -243,7 +239,7 @@ public class RedisTransactionTest
 
         // another em instance
         EntityManager em2 = emf.createEntityManager();
-//        em2.setFlushMode(FlushModeType.COMMIT);
+        // em2.setFlushMode(FlushModeType.COMMIT);
 
         // begin transaction.
         PersonRedis found = em2.find(PersonRedis.class, "11");
@@ -252,7 +248,7 @@ public class RedisTransactionTest
         found.setPersonName("merged");
         em2.merge(found);
 
-//        // commit p1 after modification.
+        // // commit p1 after modification.
         em2.getTransaction().commit();
 
         // open another entity manager.
@@ -271,7 +267,6 @@ public class RedisTransactionTest
             Assert.assertEquals("merged", finalFound.getPersonName());
         }
     }
-
 
     /**
      * Prepare data.
@@ -300,13 +295,13 @@ public class RedisTransactionTest
         EntityManager em = emf.createEntityManager();
 
         // Delete by query.
-        String deleteQuery="Delete from PersonRedis p";
+        String deleteQuery = "Delete from PersonRedis p";
         Query query = em.createQuery(deleteQuery);
         int updateCount = query.executeUpdate();
-        
+
         em.close();
         emf.close();
-        emf=null;
+        emf = null;
     }
 
 }

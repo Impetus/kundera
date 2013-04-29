@@ -40,14 +40,15 @@ public class StudentMongoSqlDateTest extends MongoBase
     @After
     public void tearDown() throws Exception
     {
-//        EntityManager em = emf.createEntityManager();
-//        // em.remove(em.find(StudentMongoSqlDate.class,
-//        // getMaxValue(Date.class)));
-//        em.remove(em.find(StudentMongoSqlDate.class, getMinValue(Date.class)));
-//        if (AUTO_MANAGE_SCHEMA)
-//        {
-            dropSchema();
-//        }
+        // EntityManager em = emf.createEntityManager();
+        // // em.remove(em.find(StudentMongoSqlDate.class,
+        // // getMaxValue(Date.class)));
+        // em.remove(em.find(StudentMongoSqlDate.class,
+        // getMinValue(Date.class)));
+        // if (AUTO_MANAGE_SCHEMA)
+        // {
+        dropSchema();
+        // }
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
@@ -574,7 +575,7 @@ public class StudentMongoSqlDateTest extends MongoBase
     public void dropSchema()
     {
         EntityManager em = emf.createEntityManager();
-        truncateMongo(em, PERSISTENCE_UNIT,"StudentMongoSqlDate");
+        truncateMongo(em, PERSISTENCE_UNIT, "StudentMongoSqlDate");
     }
 
 }

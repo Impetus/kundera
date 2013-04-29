@@ -182,14 +182,12 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
 
         return buffer;
     }
-    
-    
 
     @Override
     public UUID getCopy(Object object)
     {
         UUID uuid = (UUID) object;
-        
+
         return uuid != null ? UUID.fromString(uuid.toString()) : null;
     }
 

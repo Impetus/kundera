@@ -19,7 +19,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 
 /**
- * Geometric Polygon implementation 
+ * Geometric Polygon implementation
+ * 
  * @author amresh.singh
  */
 public class Polygon extends com.vividsolutions.jts.geom.Polygon
@@ -33,21 +34,21 @@ public class Polygon extends com.vividsolutions.jts.geom.Polygon
     public Polygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory)
     {
         super(shell, holes, factory);
-    }  
-    
+    }
+
     @Override
     public Coordinate[] getCoordinates()
     {
         com.vividsolutions.jts.geom.Coordinate[] coordinates = super.getCoordinates();
-        
-        Coordinate[] cs = new Coordinate[coordinates.length];     
-        
+
+        Coordinate[] cs = new Coordinate[coordinates.length];
+
         int count = 0;
-        for(com.vividsolutions.jts.geom.Coordinate c : coordinates)
+        for (com.vividsolutions.jts.geom.Coordinate c : coordinates)
         {
             cs[count++] = new Coordinate(c);
         }
-        
+
         return cs;
     }
 }

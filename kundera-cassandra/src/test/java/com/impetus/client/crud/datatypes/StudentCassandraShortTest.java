@@ -33,12 +33,10 @@ public class StudentCassandraShortTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -159,7 +157,7 @@ public class StudentCassandraShortTest extends CassandraBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -660,6 +658,5 @@ public class StudentCassandraShortTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

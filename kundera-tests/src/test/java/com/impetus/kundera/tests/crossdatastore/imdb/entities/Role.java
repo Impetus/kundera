@@ -26,28 +26,31 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Role Relationship entity class
+ * 
  * @author amresh.singh
  */
 @Entity
-@Table(name="ROLE")
-@IndexCollection(columns={@Index(name = "roleType", type = "KEYS")})
+@Table(name = "ROLE")
+@IndexCollection(columns = { @Index(name = "roleType", type = "KEYS") })
 public class Role
 {
     @Id
-    @Column(name="ROLE_NAME")
+    @Column(name = "ROLE_NAME")
     private String roleName;
-    
-    @Column(name="ROLE_TYPE")
-    private String roleType;   
-    
+
+    @Column(name = "ROLE_TYPE")
+    private String roleType;
+
     @OneToOne
     private Actor actor;
-    
+
     @OneToOne
     private Movie movie;
-    
-    public Role() {}
-    
+
+    public Role()
+    {
+    }
+
     public Role(String roleName, String roleType)
     {
         this.roleName = roleName;
@@ -63,7 +66,8 @@ public class Role
     }
 
     /**
-     * @param roleName the roleName to set
+     * @param roleName
+     *            the roleName to set
      */
     public void setRoleName(String roleName)
     {
@@ -79,7 +83,8 @@ public class Role
     }
 
     /**
-     * @param roleType the roleType to set
+     * @param roleType
+     *            the roleType to set
      */
     public void setRoleType(String roleType)
     {
@@ -95,7 +100,8 @@ public class Role
     }
 
     /**
-     * @param actor the actor to set
+     * @param actor
+     *            the actor to set
      */
     public void setActor(Actor actor)
     {
@@ -111,14 +117,14 @@ public class Role
     }
 
     /**
-     * @param movie the movie to set
+     * @param movie
+     *            the movie to set
      */
     public void setMovie(Movie movie)
     {
         this.movie = movie;
-    } 
-    
-    
+    }
+
     public boolean equals(Object o)
     {
         if (!(o instanceof Role))
@@ -127,10 +133,10 @@ public class Role
         }
 
         Role that = (Role) o;
-        
+
         return (this.roleName == that.roleName || this.roleName.equals(that.roleName))
-                &&(this.roleType == that.roleType || this.roleType.equals(that.roleType));   
-        
+                && (this.roleType == that.roleType || this.roleType.equals(that.roleType));
+
     }
 
     public int hashCode()
@@ -139,7 +145,5 @@ public class Role
         int h2 = (roleType == null) ? 0 : roleType.hashCode();
         return h1 + 31 * h2;
     }
-    
-    
 
 }

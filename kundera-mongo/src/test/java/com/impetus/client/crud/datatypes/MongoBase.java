@@ -16,7 +16,7 @@ public abstract class MongoBase
     public static final boolean RUN_IN_EMBEDDED_MODE = false;
 
     public static final boolean AUTO_MANAGE_SCHEMA = false;
-    
+
     protected static final String PERSISTENCE_UNIT = "MongoDataTypeTest";
 
     DataGenerator<?> dataGenerator;
@@ -54,16 +54,16 @@ public abstract class MongoBase
     {
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         MongoDBClient client = (MongoDBClient) clients.get(persistenceUnit);
-        if(client != null)
+        if (client != null)
         {
             try
             {
                 Field db = client.getClass().getDeclaredField("mongoDb");
-                if(!db.isAccessible())
+                if (!db.isAccessible())
                 {
                     db.setAccessible(true);
                 }
-                DB mongoDB =  (DB) db.get(client);
+                DB mongoDB = (DB) db.get(client);
                 mongoDB.getCollection(tableName).drop();
             }
             catch (SecurityException e)
@@ -87,9 +87,8 @@ public abstract class MongoBase
                 e.printStackTrace();
             }
         }
-        
-    }
 
+    }
 
     protected abstract void startCluster();
 

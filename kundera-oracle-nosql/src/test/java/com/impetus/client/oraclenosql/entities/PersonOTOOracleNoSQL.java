@@ -32,11 +32,9 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name = "PERSON_OTO", schema = "KunderaTests@twikvstore")
-@IndexCollection(columns = { @Index(name = "personName"),
-        @Index(name = "age")})
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonOTOOracleNoSQL
-{  
-    
+{
 
     /** The person id. */
     @Id
@@ -51,16 +49,14 @@ public class PersonOTOOracleNoSQL
     @Column(name = "AGE")
     private Integer age;
 
-    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-    @JoinColumn(name="ADDRESS_ID")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ADDRESS_ID")
     private AddressOTOOracleNoSQL address;
 
-    
     public PersonOTOOracleNoSQL()
     {
-        
+
     }
-    
 
     public PersonOTOOracleNoSQL(String personId, String personName, Integer age, AddressOTOOracleNoSQL address)
     {
@@ -144,5 +140,4 @@ public class PersonOTOOracleNoSQL
         this.age = age;
     }
 
-    
 }

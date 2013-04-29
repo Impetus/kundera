@@ -179,7 +179,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         }
                         else
                         {
-                            log.warn("This is not valid cql version type, please provide valid one");
+                            log.warn("This is not valid cql version type, please provide valid one.");
                         }
                     }
                 }

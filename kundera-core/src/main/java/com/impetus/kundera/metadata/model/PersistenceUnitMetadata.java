@@ -76,7 +76,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     private URL rootUrl;
 
     private String schemaVersion;
-    
+
     private URL mappedUrl;
 
     public PersistenceUnitMetadata()
@@ -586,6 +586,5 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     {
         return mappedUrl;
     }
-    
-    
+
 }

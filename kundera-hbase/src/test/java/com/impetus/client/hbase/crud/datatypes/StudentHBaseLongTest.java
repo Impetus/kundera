@@ -25,6 +25,7 @@ public class StudentHBaseLongTest extends Base
     private static final String table = "StudentHBaseLong";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -570,7 +571,7 @@ public class StudentHBaseLongTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

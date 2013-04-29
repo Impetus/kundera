@@ -65,7 +65,7 @@ public class QueryResolver
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
         boolean isNative = appMetadata.isNative(jpaQuery);
-//        String pu = null;
+        // String pu = null;
         EntityMetadata m = null;
         // In case of named native query
         if (!isNative)
@@ -76,18 +76,19 @@ public class QueryResolver
             parser.parse();
 
             kunderaQuery.postParsingInit();
-//            pu = kunderaQuery.getPersistenceUnit();
+            // pu = kunderaQuery.getPersistenceUnit();
             m = kunderaQuery.getEntityMetadata();
         }
         else
         {
             Class mappedClass = appMetadata.getMappedClass(jpaQuery);
 
-//            pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
+            // pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
         }
 
-//        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        // PersistenceUnitMetadata puMetadata =
+        // KunderaMetadataManager.getPersistenceUnitMetadata(pu);
 
         Query query = null;
 

@@ -28,6 +28,7 @@ public interface SequenceGenerator extends Generator
 {
     /**
      * generate id on the basis of {@SequenceGeneratorDiscriptor
+     * 
      * } property.
      * 
      * @param discriptor

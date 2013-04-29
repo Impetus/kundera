@@ -263,7 +263,7 @@ public final class CassandraCli
     {
         return client;
     }
-    
+
     public static void truncateColumnFamily(String keyspace, String... columns)
     {
         try

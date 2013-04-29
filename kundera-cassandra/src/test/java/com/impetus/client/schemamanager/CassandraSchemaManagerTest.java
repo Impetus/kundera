@@ -100,7 +100,6 @@ public class CassandraSchemaManagerTest
         CassandraCli.dropKeySpace(_KEYSPACE);
     }
 
-
     /**
      * Test schema operation.
      * 
@@ -141,7 +140,7 @@ public class CassandraSchemaManagerTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEmbeddedPersonUniMto1", _KEYSPACE));
-        
+
     }
 
     /**
@@ -192,7 +191,7 @@ public class CassandraSchemaManagerTest
         clazzToPu.put(CassandraEntityAddressBi1ToM.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressBiMTo1.class.getName(), pus);
         clazzToPu.put(CassandraEmbeddedPersonUniMto1.class.getName(), pus);
-        
+
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m1 = new EntityMetadata(CassandraEntitySuper.class);
@@ -236,7 +235,7 @@ public class CassandraSchemaManagerTest
 
         IndexProcessor indexProcessor = new IndexProcessor();
         indexProcessor.process(CassandraEntityPersonUniMto1.class, m5);
-        
+
         m1.setPersistenceUnit(_PU);
         m2.setPersistenceUnit(_PU);
         m3.setPersistenceUnit(_PU);

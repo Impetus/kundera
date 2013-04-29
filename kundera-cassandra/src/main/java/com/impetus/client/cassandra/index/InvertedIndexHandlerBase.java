@@ -91,8 +91,8 @@ public abstract class InvertedIndexHandlerBase
         Object pk = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), superColumnName);
         IndexOperator condition = expression.getOp();
 
-        if(log.isDebugEnabled())
-        log.debug("rowKey: " + rowKey + "; Super column Name: " + superColumnNameStr + "; condition: " + condition);
+        if (log.isDebugEnabled())
+            log.debug("rowKey: " + rowKey + "; Super column Name: " + superColumnNameStr + "; condition: " + condition);
 
         // TODO: Second check unnecessary but unavoidable as filter clause
         // property is incorrectly passed as column name

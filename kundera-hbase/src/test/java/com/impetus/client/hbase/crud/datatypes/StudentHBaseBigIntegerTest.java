@@ -564,7 +564,7 @@ public class StudentHBaseBigIntegerTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

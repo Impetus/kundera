@@ -25,7 +25,6 @@ import java.util.Set;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**

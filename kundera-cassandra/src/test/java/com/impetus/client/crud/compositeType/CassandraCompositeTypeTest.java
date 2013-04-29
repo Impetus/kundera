@@ -406,7 +406,6 @@ public class CassandraCompositeTypeTest
 
         // em = emf.createEntityManager();
         em.clear();
-        
 
         final String noClause = "Select u from CassandraPrimeUser u";
         Query q = em.createQuery(noClause);
@@ -422,6 +421,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(2, results.size());
 
     }
+
     @Test
     public void onBatchInsert()
     {
@@ -429,7 +429,7 @@ public class CassandraCompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
         long t1 = System.currentTimeMillis();
-        for (int i = 0; i < 5000; i++)
+        for (int i = 0; i < 500; i++)
         {
             CassandraCompoundKey key = new CassandraCompoundKey("mevivs", i, timeLineId);
             Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
@@ -445,7 +445,7 @@ public class CassandraCompositeTypeTest
 
         em.clear();
 
-        CassandraPrimeUser u = em.find(CassandraPrimeUser.class, new CassandraCompoundKey("mevivs", 4999, timeLineId));
+        CassandraPrimeUser u = em.find(CassandraPrimeUser.class, new CassandraCompoundKey("mevivs", 499, timeLineId));
         Assert.assertNotNull(u);
     }
 

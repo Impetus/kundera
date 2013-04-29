@@ -32,7 +32,7 @@ public final class Relation
 
     /** The target entity. */
     private Class<?> targetEntity;
-    
+
     /** If relation is through a Map, Map Key Join Class */
     private Class<?> mapKeyJoinClass;
 
@@ -142,8 +142,7 @@ public final class Relation
     public Class<?> getTargetEntity()
     {
         return targetEntity;
-    }   
-    
+    }
 
     /**
      * @return the mapKeyJoinClass
@@ -154,7 +153,8 @@ public final class Relation
     }
 
     /**
-     * @param mapKeyJoinClass the mapKeyJoinClass to set
+     * @param mapKeyJoinClass
+     *            the mapKeyJoinClass to set
      */
     public void setMapKeyJoinClass(Class<?> mapKeyJoinClass)
     {

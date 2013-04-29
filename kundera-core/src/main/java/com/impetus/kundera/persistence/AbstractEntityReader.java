@@ -277,7 +277,7 @@ public class AbstractEntityReader
         }
         catch (PropertyAccessException e)
         {
-            log.error("Error while Getting ID. Details:" + e.getMessage());
+            log.error("Error while Getting ID, Caused by: ", e);
             throw new EntityReaderException("Error while Getting ID for entity " + entity, e);
         }
 

@@ -116,15 +116,13 @@ public class FloatAccessor implements PropertyAccessor<Float>
         {
             throw new PropertyAccessException(e);
         }
-    }   
-    
+    }
 
     @Override
     public Float getCopy(Object object)
     {
-        return object != null ? (Float)object : null;
-    }    
-
+        return object != null ? (Float) object : null;
+    }
 
     public Float getInstance(Class<?> clazz)
     {

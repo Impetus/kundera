@@ -196,7 +196,8 @@ public class ReflectUtils
 
     public static boolean isTransientOrStatic(Field field)
     {
-        return field != null && (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())
-                || field.isAnnotationPresent(Transient.class));
+        return field != null
+                && (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) || field
+                        .isAnnotationPresent(Transient.class));
     }
 }

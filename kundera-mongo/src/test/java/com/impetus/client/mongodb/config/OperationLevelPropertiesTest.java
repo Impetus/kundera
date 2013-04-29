@@ -37,16 +37,18 @@ import com.mongodb.LazyDBEncoder;
 import com.mongodb.WriteConcern;
 
 /**
- * Test case for properties set on operation level in MongoDBClient 
+ * Test case for properties set on operation level in MongoDBClient
+ * 
  * @author amresh.singh
  */
 public class OperationLevelPropertiesTest
 {
     String persistenceUnit = "mongoTest";
+
     EntityManagerFactory emf;
+
     EntityManager em;
-    
-    
+
     @Before
     public void setUp() throws Exception
     {
@@ -54,32 +56,32 @@ public class OperationLevelPropertiesTest
         em = emf.createEntityManager();
         em.getDelegate();
     }
-    
+
     @Test
     public void executeTest()
     {
-        //Get properties from client
-        Map<String, Client> clients = (Map<String, Client>)em.getDelegate();       
-        MongoDBClient client = (MongoDBClient)clients.get(persistenceUnit);
-        
-        //Check default values
+        // Get properties from client
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        MongoDBClient client = (MongoDBClient) clients.get(persistenceUnit);
+
+        // Check default values
         WriteConcern wc = client.getWriteConcern();
-        DBEncoder encoder = client.getEncoder();        
+        DBEncoder encoder = client.getEncoder();
         Assert.assertNotNull(wc);
         Assert.assertFalse(wc.getFsync());
         Assert.assertEquals(0, wc.getW());
         Assert.assertEquals(0, wc.getWtimeout());
         Assert.assertNotNull(encoder);
         Assert.assertTrue(encoder instanceof DefaultDBEncoder);
-        
-        //Set parameters into EM 
-        //(See http://api.mongodb.org/java/2.6/com/mongodb/WriteConcern.html)
+
+        // Set parameters into EM
+        // (See http://api.mongodb.org/java/2.6/com/mongodb/WriteConcern.html)
         WriteConcern wcNew = new WriteConcern(1, 300, true);
         DBEncoder encoderNew = new LazyDBEncoder();
         em.setProperty(MongoDBClientProperties.WRITE_CONCERN, wcNew);
-        //em.setProperty(MongoDBClientProperties.DB_ENCODER, encoderNew);
-        
-        //Check Modified values
+        // em.setProperty(MongoDBClientProperties.DB_ENCODER, encoderNew);
+
+        // Check Modified values
         WriteConcern wcModified = client.getWriteConcern();
         DBEncoder encoderModified = client.getEncoder();
         Assert.assertNotNull(wcModified);
@@ -87,23 +89,22 @@ public class OperationLevelPropertiesTest
         Assert.assertEquals(1, wcModified.getW());
         Assert.assertEquals(300, wcModified.getWtimeout());
         Assert.assertNotNull(encoderModified);
-        //Assert.assertTrue(encoderModified instanceof LazyDBEncoder);
-        
-        
-        //Write Entity to database
+        // Assert.assertTrue(encoderModified instanceof LazyDBEncoder);
+
+        // Write Entity to database
         PersonMongo person = new PersonMongo();
         person.setPersonId("1");
         person.setPersonName("Amresh");
-        person.setAge(31);        
+        person.setAge(31);
         em.persist(person);
-        
-        //Find entity from database
+
+        // Find entity from database
         PersonMongo p = em.find(PersonMongo.class, "1");
         Assert.assertNotNull(p);
-        
-        //Delete entity from database
-        em.remove(p); 
-        
+
+        // Delete entity from database
+        em.remove(p);
+
     }
 
     /**

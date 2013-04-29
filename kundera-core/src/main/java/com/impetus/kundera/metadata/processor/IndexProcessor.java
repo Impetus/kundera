@@ -106,51 +106,49 @@ public class IndexProcessor implements MetadataProcessor
         log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
 
         // scan for fields
-        
-        EntityType entityType  = (EntityType) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
-        
+
+        EntityType entityType = (EntityType) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
+
         Set<Attribute> attributes = entityType.getAttributes();
-        for(Attribute attrib : attributes)
+        for (Attribute attrib : attributes)
         {
-            if(!attrib.isAssociation())
+            if (!attrib.isAssociation())
             {
                 String colName = attrib.getName();
-                if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty()
-                        && indexedColumnsMap.containsKey(colName))
+                if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty() && indexedColumnsMap.containsKey(colName))
                 {
                     com.impetus.kundera.index.Index indexedColumn = indexedColumnsMap.get(colName);
-                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute)attrib).getJPAColumnName(), indexedColumn.type(),
-                            indexedColumn.max(), indexedColumn.min(), (Field)attrib.getJavaMember()));
-                    
-                } else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
-                        && columnsNameToBeIndexed.contains(colName))
-                {
-                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute)attrib).getJPAColumnName(), null, null, null, (Field)attrib.getJavaMember()));
-                }
-            }
-            
-        }
-        /*
-        for (Field f : clazz.getDeclaredFields())
-        {
-            if (f.isAnnotationPresent(Column.class))
-            {
-                String fieldName = f.getName();
-                String colName = getIndexName(f, fieldName);
-                if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty()
-                        && indexedColumnsMap.containsKey(fieldName))
-                {
-                    com.impetus.kundera.index.Index indexedColumn = indexedColumnsMap.get(fieldName);
-                    metadata.addIndexProperty(populatePropertyIndex(indexedColumn.name(), indexedColumn.type(),
-                            indexedColumn.max(), indexedColumn.min(), f));
+                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute) attrib).getJPAColumnName(),
+                            indexedColumn.type(), indexedColumn.max(), indexedColumn.min(),
+                            (Field) attrib.getJavaMember()));
+
                 }
                 else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
                         && columnsNameToBeIndexed.contains(colName))
                 {
-                    metadata.addIndexProperty(populatePropertyIndex(fieldName, null, null, null, f));
+                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute) attrib).getJPAColumnName(),
+                            null, null, null, (Field) attrib.getJavaMember()));
                 }
             }
-        }*/
+
+        }
+        /*
+         * for (Field f : clazz.getDeclaredFields()) { if
+         * (f.isAnnotationPresent(Column.class)) { String fieldName =
+         * f.getName(); String colName = getIndexName(f, fieldName); if
+         * (indexedColumnsMap != null && !indexedColumnsMap.isEmpty() &&
+         * indexedColumnsMap.containsKey(fieldName)) {
+         * com.impetus.kundera.index.Index indexedColumn =
+         * indexedColumnsMap.get(fieldName);
+         * metadata.addIndexProperty(populatePropertyIndex(indexedColumn.name(),
+         * indexedColumn.type(), indexedColumn.max(), indexedColumn.min(), f));
+         * } else if (columnsNameToBeIndexed != null &&
+         * !columnsNameToBeIndexed.isEmpty() &&
+         * columnsNameToBeIndexed.contains(colName)) {
+         * metadata.addIndexProperty(populatePropertyIndex(fieldName, null,
+         * null, null, f)); } } }
+         */
     }
 
     /**

@@ -35,12 +35,13 @@ import com.impetus.kundera.query.QueryImpl;
 
 /**
  * Utility methods for handling entities passed in REST request
+ * 
  * @author amresh
  * 
  */
 public class EntityUtils
 {
-    
+
     public static Map<String, String> httpMethods = new HashMap<String, String>();
 
     static
@@ -141,21 +142,21 @@ public class EntityUtils
             }
         }
     }
-    
+
     public static boolean isValidQuery(String queryString, String httpMethod)
     {
-        if(queryString == null || httpMethod == null)
+        if (queryString == null || httpMethod == null)
         {
             return false;
         }
         queryString = queryString.trim();
-        if(queryString.length() < 6) return false;
-        String firstKeyword = queryString.substring(0, 6);        
+        if (queryString.length() < 6)
+            return false;
+        String firstKeyword = queryString.substring(0, 6);
         String allowedKeyword = httpMethods.get(httpMethod);
-        
-        
-        
-        if(allowedKeyword != null && firstKeyword.equalsIgnoreCase(allowedKeyword)) {
+
+        if (allowedKeyword != null && firstKeyword.equalsIgnoreCase(allowedKeyword))
+        {
             return true;
         }
         else

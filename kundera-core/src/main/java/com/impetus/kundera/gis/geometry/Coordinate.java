@@ -16,10 +16,11 @@
 package com.impetus.kundera.gis.geometry;
 
 /**
- * Geometric Coordinate implementation 
+ * Geometric Coordinate implementation
+ * 
  * @author amresh.singh
  */
-public class Coordinate extends com.vividsolutions.jts.geom.Coordinate 
+public class Coordinate extends com.vividsolutions.jts.geom.Coordinate
 {
     /**
      * 
@@ -27,7 +28,7 @@ public class Coordinate extends com.vividsolutions.jts.geom.Coordinate
     public Coordinate()
     {
         super();
-        
+
     }
 
     /**
@@ -36,7 +37,7 @@ public class Coordinate extends com.vividsolutions.jts.geom.Coordinate
     public Coordinate(com.vividsolutions.jts.geom.Coordinate c)
     {
         super(c);
-        
+
     }
 
     /**
@@ -47,7 +48,7 @@ public class Coordinate extends com.vividsolutions.jts.geom.Coordinate
     public Coordinate(double x, double y, double z)
     {
         super(x, y, z);
-        
+
     }
 
     /**
@@ -57,7 +58,7 @@ public class Coordinate extends com.vividsolutions.jts.geom.Coordinate
     public Coordinate(double x, double y)
     {
         super(x, y);
-        
-    }    
+
+    }
 
 }

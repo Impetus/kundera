@@ -8,7 +8,7 @@ import javax.persistence.Embeddable;
 
 /**
  * @author Kuldeep Mishra
- *
+ * 
  */
 @Embeddable
 public class EmbeddableTransientEntity

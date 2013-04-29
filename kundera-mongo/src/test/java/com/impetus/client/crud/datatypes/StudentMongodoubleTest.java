@@ -40,7 +40,8 @@ public class StudentMongodoubleTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongodouble.class, getMaxValue(double.class)));
+        // em.remove(em.find(StudentMongodouble.class,
+        // getMaxValue(double.class)));
         em.remove(em.find(StudentMongodouble.class, getMinValue(double.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)

@@ -255,7 +255,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
             entityMetadata.setIdAttribute((SingularAttribute) attrib);
-            
+
             // populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }

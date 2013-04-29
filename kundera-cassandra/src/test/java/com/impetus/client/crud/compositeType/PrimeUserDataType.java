@@ -24,36 +24,36 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 @Entity
-@Table(name="CompositeUserDataType", schema = "CompositeCassandra@compositedatatype")
-//@Index(index = true,columns = { "tweetBody","tweetDate" })
+@Table(name = "CompositeUserDataType", schema = "CompositeCassandra@compositedatatype")
+// @Index(index = true,columns = { "tweetBody","tweetDate" })
 public class PrimeUserDataType
 {
-    
+
     @EmbeddedId
     private CompoundKeyDataType key;
-    
+
     @Column
     private String tweetBody;
-    
-    @Column 
+
+    @Column
     private Date tweetDate;
 
     @Column
     private Boolean isActive;
-    
+
     public PrimeUserDataType()
     {
     }
-    
+
     public PrimeUserDataType(CompoundKeyDataType key)
     {
         this.key = key;
     }
-    
+
     /**
      * @return the key
      */
@@ -79,7 +79,8 @@ public class PrimeUserDataType
     }
 
     /**
-     * @param tweetBody the tweetBody to set
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -87,7 +88,8 @@ public class PrimeUserDataType
     }
 
     /**
-     * @param tweetDate the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
@@ -104,5 +106,4 @@ public class PrimeUserDataType
         this.isActive = isActive;
     }
 
-    
 }

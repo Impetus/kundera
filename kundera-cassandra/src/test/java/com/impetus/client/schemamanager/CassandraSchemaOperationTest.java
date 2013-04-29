@@ -90,10 +90,9 @@ public class CassandraSchemaOperationTest
     @After
     public void tearDown() throws Exception
     {
-            CassandraCli.dropKeySpace("KunderaCoreExmples");
+        CassandraCli.dropKeySpace("KunderaCoreExmples");
     }
 
-    
     @Test
     public void testCreate() throws NotFoundException, InvalidRequestException, TException,
             UnsupportedEncodingException

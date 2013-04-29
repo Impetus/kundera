@@ -70,5 +70,4 @@ public class StudentOracleNoSQLDouble
         this.name = name;
     }
 
-
 }

@@ -47,7 +47,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.mongodb.BasicDBObject;
-import com.mongodb.CommandResult;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -238,26 +237,23 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             query.put("_id", MongoDBUtils.populateValue(key, key.getClass()));
         }
 
-//        DBCursor cursor = dbCollection.findOne(query);
-        DBObject fetchedDocument = dbCollection.findOne(query);;
+        // DBCursor cursor = dbCollection.findOne(query);
+        DBObject fetchedDocument = dbCollection.findOne(query);
+        ;
 
-        /*if (cursor.hasNext())
-        {
-            fetchedDocument = cursor.next();
-        }
-        else
-        {
-            return null;
-        }*/
-        
-        if(fetchedDocument != null)
+        /*
+         * if (cursor.hasNext()) { fetchedDocument = cursor.next(); } else {
+         * return null; }
+         */
+
+        if (fetchedDocument != null)
         {
             Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
-                fetchedDocument, relationNames);
+                    fetchedDocument, relationNames);
 
-        return enhancedEntity;
+            return enhancedEntity;
         }
-        
+
         return null;
     }
 
@@ -828,7 +824,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /**
      * Method to execute mongo jscripts.
      * 
-     * @param script jscript in string format
+     * @param script
+     *            jscript in string format
      * 
      * @return result object.
      */

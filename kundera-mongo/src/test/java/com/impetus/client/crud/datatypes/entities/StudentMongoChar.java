@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentMongoChar
 {
 
-
     @Id
     private char id;
 
@@ -70,6 +69,5 @@ public class StudentMongoChar
     {
         this.name = name;
     }
-
 
 }

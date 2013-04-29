@@ -33,12 +33,10 @@ public class StudentCassandraFloatTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -46,7 +44,7 @@ public class StudentCassandraFloatTest extends CassandraBase
     {
         super.tearDown();
     }
-    
+
     @Test
     public void testExecuteUseSameEm()
     {
@@ -661,6 +659,5 @@ public class StudentCassandraFloatTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

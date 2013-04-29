@@ -591,19 +591,18 @@ public class DeepEqualsTest extends TestCase
 
     }
 
-
-//    @Test
+    // @Test
     public void perf()
     {
         Pet p1 = null;
         long t1 = System.currentTimeMillis();
-        
-        for(int i = 0 ; i < 1000000 ;i++)
+
+        for (int i = 0; i < 1000000; i++)
         {
-            p1 = new Pet("Eddie"+i, "Terrier");
+            p1 = new Pet("Eddie" + i, "Terrier");
             ObjectUtils.deepCopy(p1);
         }
-        long t2 = System.currentTimeMillis(); 
-        System.out.println(t2 -t1);
+        long t2 = System.currentTimeMillis();
+        System.out.println(t2 - t1);
     }
 }

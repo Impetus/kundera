@@ -187,12 +187,12 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (NotFoundException e)
         {
-            log.error("Error while fetching super column for Row " + rowKey + ";Details:" + e.getMessage());
+            log.error("Error while fetching super column for Row " + rowKey + ", Caused by: ", e);
             return null;
         }
         catch (PelopsException e)
         {
-            log.error("Error while fetching super column for Row " + rowKey + ";Details:" + e.getMessage());
+            log.error("Error while fetching super column for Row " + rowKey + ", Caused by: ", e);
             return null;
         }
         return thriftSuperColumn;

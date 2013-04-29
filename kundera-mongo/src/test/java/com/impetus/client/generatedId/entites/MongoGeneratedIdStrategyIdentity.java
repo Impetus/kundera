@@ -19,7 +19,6 @@ public class MongoGeneratedIdStrategyIdentity
     @Column
     private String name;
 
-
     /**
      * @return the id
      */
@@ -53,6 +52,5 @@ public class MongoGeneratedIdStrategyIdentity
     {
         this.name = name;
     }
-
 
 }

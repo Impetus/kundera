@@ -69,6 +69,4 @@ public class StudentHBaseCharacter
         this.name = name;
     }
 
-
-
 }

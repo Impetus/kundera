@@ -1,6 +1,5 @@
 package com.impetus.client.hbase.crud.datatypes.entities;
 
-
 import java.sql.Date;
 
 import javax.persistence.Column;

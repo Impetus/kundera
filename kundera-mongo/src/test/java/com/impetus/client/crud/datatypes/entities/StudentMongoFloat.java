@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentMongoFloat
 {
 
-
     @Id
     private Float id;
 
@@ -70,7 +69,5 @@ public class StudentMongoFloat
     {
         this.name = name;
     }
-
-
 
 }

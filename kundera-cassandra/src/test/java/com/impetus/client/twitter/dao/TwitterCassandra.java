@@ -129,27 +129,29 @@ public interface TwitterCassandra
      * @return list of all followers.
      */
     List<UserCassandra> getFollowers(String userId);
-    
-    
+
     /************** Queries ***********************/
 
     List<UserCassandra> findPersonalDetailByName(String name);
-    
+
     /**
-     * Find tweets tweeted by individual with certain marital status and using a certain device. 
+     * Find tweets tweeted by individual with certain marital status and using a
+     * certain device.
+     * 
      * @param relationship
      * @param device
      * @return
      */
     List<UserCassandra> findByRelationshipAndDevice(String relationship, String device);
-    
+
     /**
      * Get me all tweets that I tweeted from a particular device
+     * 
      * @param userId
      * @param device
      * @return
      */
-    UserCassandra findByUserIdAndTweetDevice(String userId, String device);   
+    UserCassandra findByUserIdAndTweetDevice(String userId, String device);
 
     /**
      * Find tweet by tweet body.
@@ -177,29 +179,47 @@ public interface TwitterCassandra
     void createEntityManager();
 
     void closeEntityManager();
-    
-    
-    
+
     /************** Queries on Professional Data ****************/
     List<UserCassandra> findUserByProfessionId(long professionId);
+
     List<UserCassandra> findUserByDepartment(String departmentName);
+
     List<UserCassandra> findExceptionalUsers();
+
     List<UserCassandra> findUserByAge(int age);
+
     List<UserCassandra> findUserByGrade(char grade);
+
     List<UserCassandra> findUserByDigitalSignature(byte digitalSignature);
+
     List<UserCassandra> findUserByRating(short rating);
+
     List<UserCassandra> findUserByCompliance(float compliance);
+
     List<UserCassandra> findUserByHeight(double age);
+
     List<UserCassandra> findUserByEnrolmentDate(Date enrolmentDate);
+
     List<UserCassandra> findUserByEnrolmentTime(Date enrolmentTime);
+
     List<UserCassandra> findUserByJoiningDateAndTime(Date joiningDateAndTime);
+
     List<UserCassandra> findUserByYearsSpent(Integer yearsSpent);
+
     List<UserCassandra> findUserByUniqueId(Long uniqueId);
+
     List<UserCassandra> findUserByMonthlySalary(Double monthlySalary);
+
     List<UserCassandra> findUserByBirthday(java.sql.Date birthday);
+
     List<UserCassandra> findUserByBirthtime(java.sql.Time birthtime);
+
     List<UserCassandra> findUserByAnniversary(java.sql.Timestamp anniversary);
+
     List<UserCassandra> findUserByJobAttempts(BigInteger jobAttempts);
+
     List<UserCassandra> findUserByAccumulatedWealth(BigDecimal accumulatedWealth);
+
     List<UserCassandra> findUserByGraduationDay(Calendar graduationDay);
 }

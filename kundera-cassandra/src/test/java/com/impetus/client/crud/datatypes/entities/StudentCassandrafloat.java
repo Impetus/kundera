@@ -73,7 +73,4 @@ public class StudentCassandrafloat
         this.name = name;
     }
 
-
-
-
 }

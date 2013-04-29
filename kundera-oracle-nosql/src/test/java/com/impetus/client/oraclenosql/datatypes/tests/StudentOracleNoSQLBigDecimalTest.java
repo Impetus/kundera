@@ -25,14 +25,14 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
 
     @Before
     public void setUp() throws Exception
-    {        
+    {
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();        
+        emf.close();
     }
 
     @Test
@@ -41,8 +41,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -52,8 +52,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -88,8 +88,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLBigDecimal studentMax = em
-                .find(StudentOracleNoSQLBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal studentMax = em.find(StudentOracleNoSQLBigDecimal.class,
+                getMaxValue(BigDecimal.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -99,8 +99,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLBigDecimal studentMin = em
-                .find(StudentOracleNoSQLBigDecimal.class, getMinValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal studentMin = em.find(StudentOracleNoSQLBigDecimal.class,
+                getMinValue(BigDecimal.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -110,8 +110,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLBigDecimal student = em
-                .find(StudentOracleNoSQLBigDecimal.class, getRandomValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal student = em.find(StudentOracleNoSQLBigDecimal.class,
+                getRandomValue(BigDecimal.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -121,7 +121,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentOracleNoSQLBigDecimal student = em.find(StudentOracleNoSQLBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal student = em.find(StudentOracleNoSQLBigDecimal.class,
+                getMaxValue(BigDecimal.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -133,8 +134,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentOracleNoSQLBigDecimal newStudent = em
-                .find(StudentOracleNoSQLBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal newStudent = em.find(StudentOracleNoSQLBigDecimal.class,
+                getMaxValue(BigDecimal.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -151,7 +152,7 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -285,8 +286,8 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentOracleNoSQLBigDecimal studentMax = em
-                .find(StudentOracleNoSQLBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentOracleNoSQLBigDecimal studentMax = em.find(StudentOracleNoSQLBigDecimal.class,
+                getMaxValue(BigDecimal.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -535,7 +536,6 @@ public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
         }
         Assert.assertEquals(3, count);
         em.close();
-    } 
-   
+    }
 
 }

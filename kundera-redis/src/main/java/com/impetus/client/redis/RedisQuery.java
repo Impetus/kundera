@@ -71,7 +71,7 @@ public class RedisQuery extends QueryImpl
          * 
          */
         RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), entityMetadata);
-        return ((RedisClient)client).onExecuteQuery(interpreter, entityMetadata.getEntityClazz());
+        return ((RedisClient) client).onExecuteQuery(interpreter, entityMetadata.getEntityClazz());
     }
 
     /*
@@ -87,7 +87,7 @@ public class RedisQuery extends QueryImpl
     {
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
         RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), m);
-        ls = ((RedisClient)client).onExecuteQuery(interpreter, m.getEntityClazz());
+        ls = ((RedisClient) client).onExecuteQuery(interpreter, m.getEntityClazz());
         return setRelationEntities(ls, client, m);
     }
 
@@ -126,10 +126,10 @@ public class RedisQuery extends QueryImpl
         return 0;
     }
 
-
     private RedisQueryInterpreter onTranslation(Queue clauseQueue, EntityMetadata entityMetadata)
     {
-        RedisQueryInterpreter interpreter = new RedisQueryInterpreter(getColumns(getKunderaQuery().getResult(), entityMetadata));
+        RedisQueryInterpreter interpreter = new RedisQueryInterpreter(getColumns(getKunderaQuery().getResult(),
+                entityMetadata));
 
         // If there is no clause present, means we might need to scan complete
         // table.
@@ -172,7 +172,7 @@ public class RedisQuery extends QueryImpl
                 {
                     validateClause(interpreter, condition, columnName);
                     interpreter.setMin(columnName, value);
-                    if(interpreter.getMax() == null)
+                    if (interpreter.getMax() == null)
                     {
                         interpreter.setMax(columnName, -1D);
                     }
@@ -182,7 +182,7 @@ public class RedisQuery extends QueryImpl
                 {
                     validateClause(interpreter, condition, columnName);
                     interpreter.setMax(columnName, value);
-                    if(interpreter.getMin() == null)
+                    if (interpreter.getMin() == null)
                     {
                         interpreter.setMin(columnName, 0D);
                     }
@@ -234,7 +234,6 @@ public class RedisQuery extends QueryImpl
         return interpreter;
     }
 
-
     private void validateClause(RedisQueryInterpreter interpreter, String condition, String columnName)
     {
         if (interpreter.getClause() != null)
@@ -245,9 +244,8 @@ public class RedisQuery extends QueryImpl
                         "Nested AND/OR clause is not supported for different set of fields for condition:" + condition);
             }
         }
-        
+
         interpreter.setFieldName(columnName);
     }
 
-    
 }

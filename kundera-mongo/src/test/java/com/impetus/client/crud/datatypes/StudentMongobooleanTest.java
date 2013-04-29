@@ -256,8 +256,8 @@ public class StudentMongobooleanTest extends MongoBase
         List<StudentMongoboolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentMongoboolean s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentMongoboolean s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -404,8 +404,8 @@ public class StudentMongobooleanTest extends MongoBase
         List<StudentMongoboolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentMongoboolean s where s.name = Kuldeep and s.age >= "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentMongoboolean s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -544,7 +544,7 @@ public class StudentMongobooleanTest extends MongoBase
     public void dropSchema()
     {
         EntityManager em = emf.createEntityManager();
-        truncateMongo(em,_PERSISTENCEUNIT,"StudentMongoboolean");
+        truncateMongo(em, _PERSISTENCEUNIT, "StudentMongoboolean");
     }
 
 }

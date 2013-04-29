@@ -29,7 +29,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "test1", schema = "KunderaCassandraXmlTest@CassandraXmlPropertyTest")
-@IndexCollection(columns={@Index(name="url")})
+@IndexCollection(columns = { @Index(name = "url") })
 public class MyTestEntity implements Serializable
 {
 

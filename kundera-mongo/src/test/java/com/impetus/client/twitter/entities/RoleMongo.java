@@ -12,27 +12,28 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
-@Table( name="Rol", schema = "KunderaExamples@mongoTest")
+@Table(name = "Rol", schema = "KunderaExamples@mongoTest")
 public class RoleMongo
 {
 
     @Id
     @Column
     private Integer rolId;
+
     @Column
     private String name;
-    @OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY, mappedBy="userRol")
-    private List<User> segUsuarioList;
 
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, mappedBy = "userRol")
+    private List<User> segUsuarioList;
 
     public RoleMongo()
     {
-        
+
     }
-    
+
     /**
      * @return the rolId
      */
@@ -40,13 +41,16 @@ public class RoleMongo
     {
         return rolId;
     }
+
     /**
-     * @param rolId the rolId to set
+     * @param rolId
+     *            the rolId to set
      */
     public void setRolId(Integer rolId)
     {
         this.rolId = rolId;
     }
+
     /**
      * @return the name
      */
@@ -54,13 +58,16 @@ public class RoleMongo
     {
         return name;
     }
+
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
         this.name = name;
     }
+
     /**
      * @return the segUsuarioList
      */
@@ -68,13 +75,14 @@ public class RoleMongo
     {
         return segUsuarioList;
     }
+
     /**
-     * @param segUsuarioList the segUsuarioList to set
+     * @param segUsuarioList
+     *            the segUsuarioList to set
      */
     public void setSegUsuarioList(List<User> segUsuarioList)
     {
         this.segUsuarioList = segUsuarioList;
     }
-    
-    
+
 }

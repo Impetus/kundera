@@ -70,7 +70,4 @@ public class StudentMongoByte
         this.name = name;
     }
 
-
-
-
 }

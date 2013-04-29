@@ -23,9 +23,11 @@ public class StudentHBaseSqlDateTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
+
     private static final String table = "StudentHBaseSqlDate";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -167,7 +169,7 @@ public class StudentHBaseSqlDateTest extends Base
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -570,7 +572,7 @@ public class StudentHBaseSqlDateTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

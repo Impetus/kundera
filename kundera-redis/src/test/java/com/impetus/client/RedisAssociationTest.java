@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.entities.AddressOTORedis;
 import com.impetus.client.entities.PersonOTORedis;
 
-
 public class RedisAssociationTest
 {
 
@@ -30,20 +29,19 @@ public class RedisAssociationTest
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisAssociationTest.class);
 
-    
     @Before
     public void setUp()
     {
-//        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        // KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
     }
-    
+
     @Test
     public void testCrud()
     {
         logger.info("On crud over association ");
         EntityManager em = emf.createEntityManager();
-        
+
         PersonOTORedis person = new PersonOTORedis(ROW_KEY);
         person.setAge(32);
         person.setPersonName("vivek");
@@ -51,10 +49,10 @@ public class RedisAssociationTest
         address.setAddress("india");
         person.setAddress(address);
         em.persist(person);
-        
+
         em.clear();
         PersonOTORedis p = em.find(PersonOTORedis.class, ROW_KEY);
-        
+
         // Assertions.
         Assert.assertNotNull(p);
         Assert.assertEquals(person.getPersonId(), p.getPersonId());
@@ -63,12 +61,11 @@ public class RedisAssociationTest
 
         // Remove
         em.remove(p);
-        
+
         em.clear(); // clear cache
         Assert.assertNull(em.find(AddressOTORedis.class, 12.23));
     }
-    
-    
+
     @After
     public void tearDown()
     {

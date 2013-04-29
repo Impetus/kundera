@@ -29,11 +29,11 @@ import com.impetus.kundera.persistence.TransactionResource.Response;
 class Coordinator
 {
 
-//    private List<TransactionResource> txResources = new ArrayList<TransactionResource>();
+    // private List<TransactionResource> txResources = new
+    // ArrayList<TransactionResource>();
 
-    private Map<String,TransactionResource> txResources = new HashMap<String,TransactionResource>();
-    
-    
+    private Map<String, TransactionResource> txResources = new HashMap<String, TransactionResource>();
+
     public Coordinator()
     {
 
@@ -44,11 +44,11 @@ class Coordinator
         txResources.put(pu, resource);
     }
 
-    TransactionResource getResource (final String pu)
+    TransactionResource getResource(final String pu)
     {
         return txResources.get(pu);
     }
-    
+
     Response coordinate(TxAction action)
     {
         Response response = Response.YES;
@@ -91,7 +91,7 @@ class Coordinator
         default:
             throw new IllegalArgumentException("Invalid transaction action : " + action);
         }
-        
+
         return response;
     }
 
@@ -99,12 +99,12 @@ class Coordinator
     {
         for (TransactionResource res : txResources.values())
         {
-            if(res.isActive())
+            if (res.isActive())
             {
                 return true;
             }
-            
+
         }
-     return false;   
+        return false;
     }
 }

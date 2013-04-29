@@ -15,25 +15,25 @@ public class Human
 {
     @Id
     public String hId;
-    
+
     @Column(name = "humanAlive")
     public Boolean humanAlive;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "humanId")
-//    @Column(name = "HumansPrivatePhoto")
+    // @Column(name = "HumansPrivatePhoto")
     public HumansPrivatePhoto humansPrivatePhoto;
-    
+
     public Human()
     {
-        
+
     }
 
     public Human(String humanId)
     {
         this.hId = humanId;
     }
-    
+
     public Boolean getHumanAlive()
     {
         return humanAlive;
@@ -58,6 +58,5 @@ public class Human
     {
         return hId;
     }
-    
-    
+
 }

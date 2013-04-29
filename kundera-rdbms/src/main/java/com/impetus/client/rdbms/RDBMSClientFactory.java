@@ -55,9 +55,9 @@ public class RDBMSClientFactory extends GenericClientFactory
     public void destroy()
     {
         unload();
-     
+
         if (sf != null && !sf.isClosed())
-        {            
+        {
             sf.close();
             sf = null;
         }
@@ -84,7 +84,6 @@ public class RDBMSClientFactory extends GenericClientFactory
         // meant for rdbms, so initally i have set depth to zero!
         conf.setProperty("hibernate.max_fetch_depth", "0");
 
-
         if (externalProperties != null && !externalProperties.isEmpty())
         {
             for (String key : externalProperties.keySet())
@@ -96,7 +95,7 @@ public class RDBMSClientFactory extends GenericClientFactory
                 }
             }
         }
-        
+
         serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
 
         for (Class<?> c : classes)

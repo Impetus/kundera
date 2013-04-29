@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.persistence;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,15 +36,13 @@ public class DefaultTransactionResource implements TransactionResource
 {
 
     private boolean isActive;
-    
+
     private Client client;
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(DefaultTransactionResource.class);
 
-    
     private List<Node> nodes = new ArrayList<Node>();
-
 
     public DefaultTransactionResource(Client client)
     {
@@ -74,22 +71,23 @@ public class DefaultTransactionResource implements TransactionResource
     {
         onFlush();
         nodes.clear();
-        nodes=null;
+        nodes = null;
         nodes = new ArrayList<Node>();
         isActive = false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#onFlush()
      */
     public void onFlush()
     {
-        for(Node node : nodes)
+        for (Node node : nodes)
         {
             node.flush();
         }
-        
-        
+
     }
 
     /*
@@ -100,12 +98,12 @@ public class DefaultTransactionResource implements TransactionResource
     @Override
     public void onRollback()
     {
-            onBatchRollBack();
-            
-            nodes.clear();
-            nodes=null;
-            nodes = new ArrayList<Node>();
-            isActive = false;
+        onBatchRollBack();
+
+        nodes.clear();
+        nodes = null;
+        nodes = new ArrayList<Node>();
+        isActive = false;
     }
 
     /*
@@ -140,17 +138,16 @@ public class DefaultTransactionResource implements TransactionResource
         return isActive;
     }
 
-
     /**
-     *  In case of rollback, clear added batch, if any. 
+     * In case of rollback, clear added batch, if any.
      */
     private void onBatchRollBack()
     {
-        if(client instanceof Batcher)
+        if (client instanceof Batcher)
         {
             ((Batcher) client).clear();
         }
-        
+
     }
 
 }

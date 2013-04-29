@@ -26,7 +26,7 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-       
+
         emf = Persistence.createEntityManagerFactory("twikvstore");
     }
 
@@ -34,7 +34,7 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-      
+
     }
 
     @Test
@@ -43,8 +43,8 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
         testPersist(true);
         testFindById(true);
         testMerge(true);
-        //testFindByQuery(true);
-        //testNamedQueryUseSameEm(true);
+        // testFindByQuery(true);
+        // testNamedQueryUseSameEm(true);
         testDelete(true);
     }
 
@@ -54,8 +54,8 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
         testPersist(false);
         testFindById(false);
         testMerge(false);
-        //testFindByQuery(false);
-        //testNamedQuery(false);
+        // testFindByQuery(false);
+        // testNamedQuery(false);
         testDelete(false);
     }
 
@@ -207,7 +207,8 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
         List<StudentOracleNoSQLboolean> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLboolean s where s.name = Kuldeep or s.age > " + getMinValue(short.class);
+        query = "Select s From StudentOracleNoSQLboolean s where s.name = Kuldeep or s.age > "
+                + getMinValue(short.class);
         try
         {
             q = em.createQuery(query);
@@ -370,8 +371,8 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
         Query q;
         List<StudentOracleNoSQLboolean> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLboolean s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLboolean s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -510,6 +511,5 @@ public class StudentOracleNoSQLbooleanTest extends OracleNoSQLBase
         Assert.assertEquals(2, count);
         em.close();
     }
-
 
 }

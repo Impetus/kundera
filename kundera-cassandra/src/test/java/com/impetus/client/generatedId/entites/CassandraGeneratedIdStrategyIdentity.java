@@ -53,5 +53,4 @@ public class CassandraGeneratedIdStrategyIdentity
         this.name = name;
     }
 
-
 }

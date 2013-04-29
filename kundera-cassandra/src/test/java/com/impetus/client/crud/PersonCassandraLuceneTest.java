@@ -75,10 +75,10 @@ public class PersonCassandraLuceneTest extends BaseTest
     private static final boolean USE_CQL = false;
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /** The col. */
     private Map<Object, Object> col;
@@ -97,7 +97,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         loadData();
         Map propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST,propertyMap );
+        emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -142,11 +142,11 @@ public class PersonCassandraLuceneTest extends BaseTest
 
         // OR clause test case.
         String orClauseQuery = "Select p from PersonLuceneCassandra p where p.personName = 'vivek1' OR p.age = 10";
-        
+
         q = em.createQuery(orClauseQuery);
-        
+
         List<PersonLuceneCassandra> results = q.getResultList();
-        
+
         Assert.assertEquals(1, results.size());
         // perform merge after query.
         for (PersonLuceneCassandra person : persons)
@@ -484,7 +484,7 @@ public class PersonCassandraLuceneTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-        // emf.close();
+         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
         LuceneCleanupUtilities.cleanLuceneDirectory(LUCENE_IDX_CASSANDRA_TEST);
     }

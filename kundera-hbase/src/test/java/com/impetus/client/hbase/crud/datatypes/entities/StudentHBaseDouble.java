@@ -70,5 +70,4 @@ public class StudentHBaseDouble
         this.name = name;
     }
 
-
 }

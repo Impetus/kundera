@@ -39,10 +39,10 @@ public class TransientUserTest
     private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /**
      * @throws java.lang.Exception

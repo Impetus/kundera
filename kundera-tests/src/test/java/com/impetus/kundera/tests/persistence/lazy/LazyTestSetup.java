@@ -33,7 +33,6 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 
 /**
  * Utilities for Test setup

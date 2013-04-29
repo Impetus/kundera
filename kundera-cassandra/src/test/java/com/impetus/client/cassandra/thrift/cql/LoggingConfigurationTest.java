@@ -61,7 +61,7 @@ public class LoggingConfigurationTest
         lc.setId("lc1");
         lc.setLable("one");
         lc.setLongName("first lc");
-        
+
         LoggingConfiguration lc1 = new LoggingConfiguration();
         lc1.setId("lc2");
         lc1.setLable("two");

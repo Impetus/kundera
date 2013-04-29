@@ -572,7 +572,6 @@ public class StudentHBasebyteTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
 
     }
 

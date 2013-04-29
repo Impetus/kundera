@@ -52,7 +52,7 @@ public class UserInfo
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private MongoPrimeUser timeLine;
-    
+
     /**
      * 
      */
@@ -60,7 +60,6 @@ public class UserInfo
     {
     }
 
-    
     /**
      * @param userInfoId
      * @param firstName
@@ -77,7 +76,6 @@ public class UserInfo
         this.age = age;
         this.timeLine = timeLine;
     }
-
 
     /**
      * @return the userInfoId
@@ -119,18 +117,18 @@ public class UserInfo
         return timeLine;
     }
 
-
     /**
-     * @param firstName the firstName to set
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
         this.firstName = firstName;
     }
 
-
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {

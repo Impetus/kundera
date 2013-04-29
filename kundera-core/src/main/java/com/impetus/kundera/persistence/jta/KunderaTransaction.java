@@ -83,8 +83,8 @@ public class KunderaTransaction implements Transaction
         }
         else
         {
-            if(log.isDebugEnabled())
-            log.debug("Transaction is set for rollback only, processing rollback.");
+            if (log.isDebugEnabled())
+                log.debug("Transaction is set for rollback only, processing rollback.");
 
             for (ResourceManager implementor : implementors)
             {

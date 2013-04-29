@@ -22,6 +22,7 @@ public class StudentHBaseTimestampTest extends Base
     private static final String table = "StudentHBaseTimestamp";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -167,7 +168,7 @@ public class StudentHBaseTimestampTest extends Base
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-         findByRange();
+        findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -214,13 +215,12 @@ public class StudentHBaseTimestampTest extends Base
         int count = 0;
         for (StudentHBaseTimestamp student : students)
         {
-           /* if (student.getId().equals(getMaxValue(Timestamp.class)))
-            {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
-                count++;
-            }
-            else */if (student.getId().equals(getMinValue(Timestamp.class)))
+            /*
+             * if (student.getId().equals(getMaxValue(Timestamp.class))) {
+             * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+             * Assert.assertEquals("Kuldeep", student.getName()); count++; }
+             * else
+             */if (student.getId().equals(getMinValue(Timestamp.class)))
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -246,7 +246,8 @@ public class StudentHBaseTimestampTest extends Base
         List<StudentHBaseTimestamp> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age > " + getPartialValue(short.class);
+        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age > "
+                + getPartialValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -272,8 +273,8 @@ public class StudentHBaseTimestampTest extends Base
         List<StudentHBaseTimestamp> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age > " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age > "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -398,8 +399,8 @@ public class StudentHBaseTimestampTest extends Base
         List<StudentHBaseTimestamp> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseTimestamp s where s.name = Amresh and s.age > " + getPartialValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseTimestamp s where s.name = Amresh and s.age > "
+                + getPartialValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -426,8 +427,8 @@ public class StudentHBaseTimestampTest extends Base
         List<StudentHBaseTimestamp> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age >= " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseTimestamp s where s.name = Kuldeep and s.age >= "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -570,7 +571,7 @@ public class StudentHBaseTimestampTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

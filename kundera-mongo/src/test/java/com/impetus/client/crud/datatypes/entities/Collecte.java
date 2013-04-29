@@ -115,5 +115,4 @@ public class Collecte
         this.photos = photos;
     }
 
-    
 }

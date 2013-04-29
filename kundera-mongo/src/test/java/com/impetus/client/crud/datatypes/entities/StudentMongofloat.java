@@ -69,7 +69,4 @@ public class StudentMongofloat
         this.name = name;
     }
 
-
-
-
 }

@@ -32,44 +32,56 @@ import com.mongodb.DB;
  * @author Kuldeep Mishra
  * 
  */
-public class MongoUtils {
+public class MongoUtils
+{
 
-	private static final Log logger = LogFactory.getLog(MongoUtils.class);
+    private static final Log logger = LogFactory.getLog(MongoUtils.class);
 
-	/**
+    /**
      * 
      */
-	public static void dropDatabase(EntityManagerFactory emf, String pu) {
-		EntityManager em = null;
-		Map<String, Client> clients = null;
-		MongoDBClient client = null;
-		if (emf != null)
-			em = emf.createEntityManager();
+    public static void dropDatabase(EntityManagerFactory emf, String pu)
+    {
+        EntityManager em = null;
+        Map<String, Client> clients = null;
+        MongoDBClient client = null;
+        if (emf != null)
+            em = emf.createEntityManager();
 
-		if (em != null)
-			clients = (Map<String, Client>) em.getDelegate();
-		if (clients != null)
-			client = (MongoDBClient) clients.get(pu);
-		if (client != null) {
-			try {
-				Field db = client.getClass().getDeclaredField("mongoDb");
-				if (!db.isAccessible()) {
-					db.setAccessible(true);
-				}
-				DB mongoDB = (DB) db.get(client);
-				mongoDB.dropDatabase();
-			} catch (SecurityException e) {
-				logger.error(e);
-			}
+        if (em != null)
+            clients = (Map<String, Client>) em.getDelegate();
+        if (clients != null)
+            client = (MongoDBClient) clients.get(pu);
+        if (client != null)
+        {
+            try
+            {
+                Field db = client.getClass().getDeclaredField("mongoDb");
+                if (!db.isAccessible())
+                {
+                    db.setAccessible(true);
+                }
+                DB mongoDB = (DB) db.get(client);
+                mongoDB.dropDatabase();
+            }
+            catch (SecurityException e)
+            {
+                logger.error(e);
+            }
 
-			catch (NoSuchFieldException e) {
-				logger.error(e);
-			} catch (IllegalArgumentException e) {
-				logger.error(e);
-			} catch (IllegalAccessException e) {
-				logger.error(e);
-			}
-		}
+            catch (NoSuchFieldException e)
+            {
+                logger.error(e);
+            }
+            catch (IllegalArgumentException e)
+            {
+                logger.error(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                logger.error(e);
+            }
+        }
 
-	}
+    }
 }

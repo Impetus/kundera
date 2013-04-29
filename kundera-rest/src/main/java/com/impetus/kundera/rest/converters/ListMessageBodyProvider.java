@@ -39,7 +39,7 @@ public class ListMessageBodyProvider implements MessageBodyWriter<ArrayList<Obje
     @Override
     public boolean isWriteable(Class<?> paramClass, Type paramType, Annotation[] paramArrayOfAnnotation,
             MediaType paramMediaType)
-    { 
+    {
         return true;
     }
 

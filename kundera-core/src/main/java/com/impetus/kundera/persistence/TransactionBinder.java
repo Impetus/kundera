@@ -17,21 +17,24 @@
 package com.impetus.kundera.persistence;
 
 /**
- * TransactionBinder interface. If underlying database provides in-built transaction support, client has to implement this interface and 
- * bind transaction resource with client.
+ * TransactionBinder interface. If underlying database provides in-built
+ * transaction support, client has to implement this interface and bind
+ * transaction resource with client.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public interface TransactionBinder
 {
 
     /**
-     * Binds a transaction resource with client instance. Any subsequent CRUD calls will use this transaction resource to mark bind within 
-     * already running transaction boundary. TransactionResource is responsible to bind and provide connection instance with for subsequent
-     * commit/rollback. 
+     * Binds a transaction resource with client instance. Any subsequent CRUD
+     * calls will use this transaction resource to mark bind within already
+     * running transaction boundary. TransactionResource is responsible to bind
+     * and provide connection instance with for subsequent commit/rollback.
      * 
-     * @param resource transactional resource
+     * @param resource
+     *            transactional resource
      */
     void bind(TransactionResource resource);
 }

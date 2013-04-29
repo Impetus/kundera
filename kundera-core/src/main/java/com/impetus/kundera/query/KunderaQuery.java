@@ -655,7 +655,8 @@ public class KunderaQuery
     {
         if (typedParameter != null)
         {
-            FilterClause clause = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name) : null;
+            FilterClause clause = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name)
+                    : null;
             if (clause != null)
             {
                 clause.setValue(value);
@@ -1284,22 +1285,24 @@ public class KunderaQuery
         }
     }
 
-    
     /**
-     * Method to skip string literal as per JPA specification.
-     *  if  literal starts is enclose within "''" then skip "'" and include "'" in case of "''" replace it with "'".
-     *  
-     * @param value value.
+     * Method to skip string literal as per JPA specification. if literal starts
+     * is enclose within "''" then skip "'" and include "'" in case of "''"
+     * replace it with "'".
      * 
-     * @return replaced string in case of string, else will return original value.
+     * @param value
+     *            value.
+     * 
+     * @return replaced string in case of string, else will return original
+     *         value.
      */
     private static Object getValue(Object value)
     {
-        if(value != null && value.getClass().isAssignableFrom(String.class))
+        if (value != null && value.getClass().isAssignableFrom(String.class))
         {
-            return ((String)value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("''", "'");
+            return ((String) value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("''", "'");
         }
-        
+
         return value;
     }
 }

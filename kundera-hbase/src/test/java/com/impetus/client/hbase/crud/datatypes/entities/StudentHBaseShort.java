@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentHBaseShort
 {
 
-
     @Id
     private Short id;
 
@@ -70,7 +69,5 @@ public class StudentHBaseShort
     {
         this.name = name;
     }
-
-
 
 }

@@ -78,10 +78,10 @@ public class ThriftDataResultHelper
 
         case SUPER_COLUMN:
             output = cosc.super_column;
-            if(row != null)
+            if (row != null)
             {
                 row.addSuperColumn(cosc.super_column);
-            }            
+            }
             break;
 
         case COUNTER_COLUMN:

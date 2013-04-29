@@ -419,24 +419,16 @@ public class CompositeDataTypeTest
      */
     private void loadData()
     {/*
-        CassandraCli.createKeySpace("CompositeCassandra");
-        String cql_Query = "create columnfamily \"CompositeUserDataType\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
-                + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
-        try
-        {
-            CassandraCli.getClient().set_keyspace("CompositeCassandra");
-        }
-        catch (InvalidRequestException e)
-        {
-            logger.error(e.getMessage());
-        }
-        catch (TException e)
-        {
-            logger.error(e.getMessage());
-        }
-        CassandraCli.executeCqlQuery(cql_Query);
-
-    */}
+      * CassandraCli.createKeySpace("CompositeCassandra"); String cql_Query =
+      * "create columnfamily \"CompositeUserDataType\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, \"tweetBody\" text,"
+      * +
+      * " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))"
+      * ; try { CassandraCli.getClient().set_keyspace("CompositeCassandra"); }
+      * catch (InvalidRequestException e) { logger.error(e.getMessage()); }
+      * catch (TException e) { logger.error(e.getMessage()); }
+      * CassandraCli.executeCqlQuery(cql_Query);
+      */
+    }
 
     /**
      * Prepare data.

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,7 @@ import com.impetus.kundera.persistence.api.Batcher;
  * Batch processing test case for cassandra.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class HBaseBatchProcessorTest
 {
@@ -56,7 +55,7 @@ public class HBaseBatchProcessorTest
     private static EntityManager em;
 
     /** Rows. */
-    private List<PersonBatchHBaseEntity> rows ;
+    private List<PersonBatchHBaseEntity> rows;
 
     private HBaseCli cli;
 
@@ -73,39 +72,39 @@ public class HBaseBatchProcessorTest
     }
 
     /**
-     *  Test case for batch operation.
+     * Test case for batch operation.
      */
     @Test
     public void onBatch()
     {
         int counter = 0;
         rows = prepareData(10);
-        for(PersonBatchHBaseEntity entity: rows)
+        for (PersonBatchHBaseEntity entity : rows)
         {
             em.persist(entity);
-            
+
             // check for implicit flush.
-            if(++counter == 5)
+            if (++counter == 5)
             {
-                Map<String, Client> clients =  (Map<String, Client>) em.getDelegate();
-                
+                Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+
                 Batcher client = (Batcher) clients.get(PERSISTENCE_UNIT);
                 Assert.assertEquals(5, client.getBatchSize());
                 em.clear();
-                for(int i = 0 ;i <5;i++)
+                for (int i = 0; i < 5; i++)
                 {
-                    
+
                     // assert on each batch size record
                     Assert.assertNotNull(em.find(PersonBatchHBaseEntity.class, rows.get(i).getPersonId()));
-                    
+
                     // as batch size is 5.
                     Assert.assertNull(em.find(PersonBatchHBaseEntity.class, rows.get(6).getPersonId()));
                 }
                 // means implicit flush must happen
             }
         }
-        
-        //flush all on close.
+
+        // flush all on close.
         // explicit flush on close
         em.clear();
         em.flush();
@@ -116,30 +115,27 @@ public class HBaseBatchProcessorTest
         Assert.assertNotNull(results);
         Assert.assertEquals(10, results.size());
     }
-    
-    
+
     /**
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-        for(PersonBatchHBaseEntity o : rows)
+        for (PersonBatchHBaseEntity o : rows)
         {
             em.remove(o);
         }
-        
+
         em.close();
         emf.close();
-        
+
         if (cli != null && cli.isStarted())
         {
             cli.stopCluster("PERSON");
         }
 
     }
-
-
 
     /**
      * @param noOfRecords
@@ -148,15 +144,15 @@ public class HBaseBatchProcessorTest
     private List<PersonBatchHBaseEntity> prepareData(Integer noOfRecords)
     {
         List<PersonBatchHBaseEntity> persons = new ArrayList<PersonBatchHBaseEntity>();
-        for(int i=1 ; i<=noOfRecords;i++)
+        for (int i = 1; i <= noOfRecords; i++)
         {
             PersonBatchHBaseEntity o = new PersonBatchHBaseEntity();
-            o.setPersonId(i+"");
+            o.setPersonId(i + "");
             o.setPersonName("vivek" + i);
             o.setAge(10);
             persons.add(o);
         }
-        
+
         return persons;
     }
 

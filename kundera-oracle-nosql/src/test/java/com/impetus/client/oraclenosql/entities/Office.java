@@ -27,19 +27,21 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Embeddable
-@IndexCollection(columns = { @Index(name = "officeId"),
-        @Index(name = "companyName"), @Index(name = "location")})
+@IndexCollection(columns = { @Index(name = "officeId"), @Index(name = "companyName"), @Index(name = "location") })
 public class Office
 {
-    @Column private int officeId;
+    @Column
+    private int officeId;
 
-    @Column private String companyName;
+    @Column
+    private String companyName;
 
-    @Column private String location;
-    
+    @Column
+    private String location;
+
     public Office()
-    {    
-        
+    {
+
     }
 
     public Office(int officeId, String companyName, String location)

@@ -118,9 +118,12 @@ public class MongoDBPropertyReaderTest
 
                 parseConnectionString(properties.getProperty(MongoDBConstants.CONNECTIONS));
 
-//                Assert.assertEquals(timeOut, dbSchemaMetadata.getSocketTimeOut());
-//                Assert.assertEquals(this.readPreference, dbSchemaMetadata.getReadPreference());
-//                Assert.assertEquals(connections.size(), dbSchemaMetadata.getConnections().size());
+                // Assert.assertEquals(timeOut,
+                // dbSchemaMetadata.getSocketTimeOut());
+                // Assert.assertEquals(this.readPreference,
+                // dbSchemaMetadata.getReadPreference());
+                // Assert.assertEquals(connections.size(),
+                // dbSchemaMetadata.getConnections().size());
             }
             catch (NumberFormatException nfe)
             {

@@ -137,7 +137,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         // TODO Auto-generated method stub
-    //    return null;
+        // return null;
     }
 
 }

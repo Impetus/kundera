@@ -22,7 +22,6 @@ public class MongoGeneratedIdStrategyAuto
     @Column
     private String name;
 
-
     /**
      * @return the id
      */

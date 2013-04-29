@@ -365,7 +365,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
         catch (Exception e)
         {
-            log.error("Error while persisting entity " + entity + ". Details:" + e.getMessage());
+            log.error("Error while persisting entity " + entity + ", Caused by: ", e);
             throw new PersistenceException(e);
         }
     }

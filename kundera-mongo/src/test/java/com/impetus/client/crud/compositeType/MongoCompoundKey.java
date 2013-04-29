@@ -26,12 +26,15 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class MongoCompoundKey
 {
-    @Column private String userId;
-    @Column private int tweetId;
-    @Column private UUID timeLineId;
+    @Column
+    private String userId;
 
-    
-    
+    @Column
+    private int tweetId;
+
+    @Column
+    private UUID timeLineId;
+
     /**
      * 
      */
@@ -50,7 +53,7 @@ public class MongoCompoundKey
         this.tweetId = tweetId;
         this.timeLineId = timeLineId;
     }
-    
+
     /**
      * @return the userId
      */
@@ -58,7 +61,7 @@ public class MongoCompoundKey
     {
         return userId;
     }
-    
+
     /**
      * @return the tweetId
      */
@@ -66,7 +69,7 @@ public class MongoCompoundKey
     {
         return tweetId;
     }
-    
+
     /**
      * @return the timeLineId
      */

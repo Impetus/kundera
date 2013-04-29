@@ -315,12 +315,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         catch (MasterNotRunningException mnre)
         {
-            logger.error("Master not running exception, Caused by:" , mnre);
+            logger.error("Master not running exception, Caused by:", mnre);
             throw new SchemaGenerationException(mnre, "Hbase");
         }
         catch (ZooKeeperConnectionException zkce)
         {
-            logger.error("Unable to connect to zookeeper, Caused by:" , zkce);
+            logger.error("Unable to connect to zookeeper, Caused by:", zkce);
             throw new SchemaGenerationException(zkce, "Hbase");
         }
         return true;

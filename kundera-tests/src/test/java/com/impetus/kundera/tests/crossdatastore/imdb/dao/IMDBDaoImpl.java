@@ -25,11 +25,13 @@ import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
 
 /**
- * Implementation of {@link IMDBDao} 
+ * Implementation of {@link IMDBDao}
+ * 
  * @author amresh.singh
  */
-public class IMDBDaoImpl extends BaseDao {
-    
+public class IMDBDaoImpl extends BaseDao
+{
+
     private String persistenceUnit;
 
     /**
@@ -39,7 +41,7 @@ public class IMDBDaoImpl extends BaseDao {
     {
         this.persistenceUnit = persistenceUnit;
     }
-    
+
     public void insert(Object actor)
     {
         em = getEntityManager(persistenceUnit);
@@ -47,7 +49,7 @@ public class IMDBDaoImpl extends BaseDao {
         em.persist(actor);
         em.getTransaction().commit();
         closeEntityManager();
-    }    
+    }
 
     public Object find(Class entityClass, Object key)
     {
@@ -71,7 +73,7 @@ public class IMDBDaoImpl extends BaseDao {
 
     public void remove(Object entity)
     {
-        em = getEntityManager(persistenceUnit);       
+        em = getEntityManager(persistenceUnit);
         em.getTransaction().begin();
         em.remove(entity);
         em.getTransaction().commit();
@@ -85,14 +87,13 @@ public class IMDBDaoImpl extends BaseDao {
         em.merge(modifiedObj);
         em.getTransaction().commit();
         closeEntityManager();
-    } 
-    
+    }
 
     public List<Actor> findAllActors()
     {
         em = getEntityManager(persistenceUnit);
         Query query = em.createQuery("select a from Actor a");
-        List<Actor> actors = query.getResultList();        
+        List<Actor> actors = query.getResultList();
         closeEntityManager();
         return actors;
     }
@@ -126,12 +127,12 @@ public class IMDBDaoImpl extends BaseDao {
         query.setParameter("name", "Tom Cruise");
         List<Actor> actors = query.getResultList();
         closeEntityManager();
-        return actors;        
+        return actors;
     }
-    
+
     public List<Actor> findActorByIDAndNameNegative()
     {
-        em = getEntityManager(persistenceUnit);        // Negative scenario
+        em = getEntityManager(persistenceUnit); // Negative scenario
         Query query = em.createQuery("select a from Actor a where a.id=:id AND a.name=:name");
         query.setParameter("id", 2);
         query.setParameter("name", "Tom Cruise");
@@ -153,7 +154,7 @@ public class IMDBDaoImpl extends BaseDao {
     public List<Actor> findActorWithinGivenIdRange()
     {
         em = getEntityManager(persistenceUnit);
-        
+
         Query query = em.createQuery("select a from Actor a where a.id between :min AND :max");
         query.setParameter("min", 1);
         query.setParameter("max", 2);
@@ -174,7 +175,7 @@ public class IMDBDaoImpl extends BaseDao {
         return movies;
 
     }
-    
+
     public List<Movie> findMoviesGreaterThanLessThanYear()
     {
         em = getEntityManager(persistenceUnit);
@@ -219,6 +220,5 @@ public class IMDBDaoImpl extends BaseDao {
         closeEntityManager();
         return movies;
     }
-    
 
 }

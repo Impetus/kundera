@@ -24,7 +24,8 @@ import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
- * Provides methods for geospatial queries specific to polygon shape  
+ * Provides methods for geospatial queries specific to polygon shape
+ * 
  * @author amresh.singh
  */
 public class PolygonQueryImpl implements GeospatialQuery
@@ -33,21 +34,22 @@ public class PolygonQueryImpl implements GeospatialQuery
     public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List polygonList = new ArrayList();
-        
+
         Polygon polygon = (Polygon) shape;
-        
-        for(Coordinate c : polygon.getCoordinates())
+
+        for (Coordinate c : polygon.getCoordinates())
         {
-            polygonList.add(new double[] {c.x, c.y});
-        }       
-        
+            polygonList.add(new double[] { c.x, c.y });
+        }
+
         BasicDBObject q = (BasicDBObject) query;
-        
-        if(q == null) q = new BasicDBObject();       
-        
-        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", polygonList)));  
-        
+
+        if (q == null)
+            q = new BasicDBObject();
+
+        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", polygonList)));
+
         return q;
     }
-    
+
 }

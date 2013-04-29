@@ -18,8 +18,8 @@ package com.impetus.kundera.generator;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 
 /**
- * {@link TableGenerator} interface , all client should implement this
- * interface in order to support table generation strategy.
+ * {@link TableGenerator} interface , all client should implement this interface
+ * in order to support table generation strategy.
  * 
  * @author Kuldeep.Mishra
  * 
@@ -28,6 +28,7 @@ public interface TableGenerator extends Generator
 {
     /**
      * generate id on the basis of {@TableGeneratorDiscriptor
+     * 
      * 
      * } property.
      * 

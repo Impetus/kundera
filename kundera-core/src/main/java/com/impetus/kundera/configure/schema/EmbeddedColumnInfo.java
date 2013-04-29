@@ -37,7 +37,6 @@ public class EmbeddedColumnInfo
     private List<ColumnInfo> columns;
 
     private EmbeddableType embeddable;
-    
 
     /**
      * @param metaModel
@@ -46,8 +45,7 @@ public class EmbeddedColumnInfo
     {
         this.embeddable = metaModel;
     }
-    
-    
+
     /**
      * @return the embeddable
      */
@@ -55,7 +53,6 @@ public class EmbeddedColumnInfo
     {
         return embeddable;
     }
-
 
     /**
      * @return the embeddedColumnName
