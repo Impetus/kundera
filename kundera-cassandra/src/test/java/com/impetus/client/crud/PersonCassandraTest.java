@@ -113,7 +113,7 @@ public class PersonCassandraTest extends BaseTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-//            loadData();
+            // loadData();
         }
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();

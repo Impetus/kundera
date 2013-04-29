@@ -99,7 +99,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -568,7 +567,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the element type
      * @param entityClass
      *            the entity class
-     * @param columnsToSelect TODO
+     * @param columnsToSelect
+     *            TODO
      * @param rowIds
      *            the row ids
      * @return the list
@@ -960,10 +960,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public void close()
     {
         clear();
-//        nodes.clear();
-//        nodes = null;
+        // nodes.clear();
+        // nodes = null;
         closed = true;
-//        externalProperties = null;
+        // externalProperties = null;
     }
 
     /**

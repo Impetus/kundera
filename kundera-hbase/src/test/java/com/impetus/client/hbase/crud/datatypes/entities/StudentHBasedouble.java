@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class StudentHBasedouble
 {
 
-
     @Id
     private double id;
 
@@ -70,7 +69,5 @@ public class StudentHBasedouble
     {
         this.name = name;
     }
-
-
 
 }

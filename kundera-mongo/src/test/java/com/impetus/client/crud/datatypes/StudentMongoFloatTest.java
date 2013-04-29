@@ -40,7 +40,8 @@ public class StudentMongoFloatTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoFloat.class, getMaxValue(Float.class)));
+        // em.remove(em.find(StudentMongoFloat.class,
+        // getMaxValue(Float.class)));
         em.remove(em.find(StudentMongoFloat.class, getMinValue(Float.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)

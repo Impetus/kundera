@@ -17,9 +17,10 @@ public class TokenClient
     @Id
     @Column(name = "client_id")
     private String id;
+
     @Column(name = "client_name")
     private String clientName;
-    
+
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private Set<Token> tokens;
 
@@ -27,25 +28,30 @@ public class TokenClient
     {
         return id;
     }
+
     public void setId(String id)
     {
         this.id = id;
     }
+
     public String getClientName()
     {
         return clientName;
     }
+
     public void setClientName(String clientName)
     {
         this.clientName = clientName;
     }
+
     public Set<Token> getTokens()
     {
         return tokens;
     }
+
     public void setTokens(Set<Token> tokens)
     {
         this.tokens = tokens;
     }
-    
+
 }

@@ -39,12 +39,11 @@ import com.impetus.kundera.index.IndexCollection;
 @Embeddable
 @IndexCollection(columns = { @Index(name = "professionId"), @Index(name = "departmentName"),
         @Index(name = "isExceptional"), @Index(name = "age"), @Index(name = "grade"),
-        @Index(name = "digitalSignature"), @Index(name = "rating"),
-        @Index(name = "compliance"), @Index(name = "height"), @Index(name = "enrolmentDate"),
-        @Index(name = "enrolmentTime"), @Index(name = "joiningDateAndTime"),
-        @Index(name = "yearsSpent"), @Index(name = "uniqueId"), @Index(name = "monthlySalary"),
-        @Index(name = "birthday"), @Index(name = "birthtime"), @Index(name = "anniversary"),
-        @Index(name = "jobAttempts"), @Index(name = "accumulatedWealth"),
+        @Index(name = "digitalSignature"), @Index(name = "rating"), @Index(name = "compliance"),
+        @Index(name = "height"), @Index(name = "enrolmentDate"), @Index(name = "enrolmentTime"),
+        @Index(name = "joiningDateAndTime"), @Index(name = "yearsSpent"), @Index(name = "uniqueId"),
+        @Index(name = "monthlySalary"), @Index(name = "birthday"), @Index(name = "birthtime"),
+        @Index(name = "anniversary"), @Index(name = "jobAttempts"), @Index(name = "accumulatedWealth"),
         @Index(name = "graduationDay") })
 public class ProfessionalDetailCassandra
 {
@@ -117,8 +116,8 @@ public class ProfessionalDetailCassandra
     @Column(name = "GRADUATION_DAY")
     private Calendar graduationDay;
 
-    public ProfessionalDetailCassandra(long professionId, String departmentName, boolean isExceptional, int age, char grade,
-            byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
+    public ProfessionalDetailCassandra(long professionId, String departmentName, boolean isExceptional, int age,
+            char grade, byte digitalSignature, short rating, float compliance, double height, Date enrolmentDate,
             Date enrolmentTime, Date joiningDateAndTime, Integer yearsSpent, Long uniqueId, Double monthlySalary,
             java.sql.Date birthday, Time birthtime, Timestamp anniversary, BigInteger jobAttempts,
             BigDecimal accumulatedWealth, Calendar graduationDay)

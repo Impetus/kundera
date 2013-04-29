@@ -39,22 +39,22 @@ public class OTMCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        String query="Delete t from Token t";
+        String query = "Delete t from Token t";
         Query q = em.createQuery(query);
         q.executeUpdate();
-        
-       if(emf != null)
-       {
-           emf.close();
-           emf=null;
-       }
-       if(em != null)
-       {
-           em.close();
-           em=null;
-       }
-       
-       CassandraCli.dropKeySpace("myapp");
+
+        if (emf != null)
+        {
+            emf.close();
+            emf = null;
+        }
+        if (em != null)
+        {
+            em.close();
+            em = null;
+        }
+
+        CassandraCli.dropKeySpace("myapp");
     }
 
     @Test
@@ -72,30 +72,30 @@ public class OTMCRUDTest
         token2.setClient(client);
         em.persist(token1);
         em.persist(token2);
-        
+
         em.clear();
         Token result = em.find(Token.class, "tokenId1");
-        
+
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getClient());
-        
+
         em.clear();
-        String query="Select t from Token t";
+        String query = "Select t from Token t";
         Query q = em.createQuery(query);
         List<Token> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
         Assert.assertNotNull(results.get(0).getClient());
         Assert.assertNotNull(results.get(1).getClient());
-        
+
         em.clear();
-        query="Select t from TokenClient t";
+        query = "Select t from TokenClient t";
         q = em.createQuery(query);
         List<TokenClient> resultClient = q.getResultList();
         Assert.assertNotNull(resultClient);
         Assert.assertEquals(1, resultClient.size());
-        Assert.assertEquals(2,resultClient.get(0).getTokens().size());
-        
+        Assert.assertEquals(2, resultClient.get(0).getTokens().size());
+
     }
 
 }

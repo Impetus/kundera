@@ -23,7 +23,8 @@ import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
- * Provides methods for geospatial queries specific to triangle shape 
+ * Provides methods for geospatial queries specific to triangle shape
+ * 
  * @author amresh.singh
  */
 public class TriangleQueryImpl implements GeospatialQuery
@@ -33,21 +34,21 @@ public class TriangleQueryImpl implements GeospatialQuery
     public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List triangleList = new ArrayList();
-        
+
         Triangle triangle = (Triangle) shape;
-        
-        triangleList.add(new double[] {triangle.p0.x, triangle.p0.y}); //A
-        triangleList.add(new double[]{triangle.p1.x, triangle.p1.y}); // B
-        triangleList.add(new double[]{triangle.p2.x, triangle.p2.y}); // C
-        
+
+        triangleList.add(new double[] { triangle.p0.x, triangle.p0.y }); // A
+        triangleList.add(new double[] { triangle.p1.x, triangle.p1.y }); // B
+        triangleList.add(new double[] { triangle.p2.x, triangle.p2.y }); // C
+
         BasicDBObject q = (BasicDBObject) query;
-        
-        if(q == null) q = new BasicDBObject();       
-        
-        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));  
-        
+
+        if (q == null)
+            q = new BasicDBObject();
+
+        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));
+
         return q;
     }
-    
 
 }

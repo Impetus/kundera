@@ -62,8 +62,8 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,String... columns)
-            throws IOException;
+    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,
+            String... columns) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
@@ -82,8 +82,8 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readAll(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,String... columns)
-            throws IOException;
+    List readAll(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,
+            String... columns) throws IOException;
 
     /**
      * @param tableName
@@ -92,11 +92,11 @@ public interface DataHandler
      * @param relationNames
      * @param startRow
      * @param endRow
-     * @param columns 
+     * @param columns
      * @return
      */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow, String[] columns)
-            throws IOException;
+    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
+            String[] columns) throws IOException;
 
     /**
      * Write data.
@@ -177,6 +177,6 @@ public interface DataHandler
      */
     void deleteRow(Object rowKey, String tableName) throws IOException;
 
-    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,Class rowKeyClazz)
-            throws IOException;
+    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
+            Class rowKeyClazz) throws IOException;
 }

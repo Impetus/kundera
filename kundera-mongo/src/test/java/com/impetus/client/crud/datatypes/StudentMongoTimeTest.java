@@ -41,7 +41,7 @@ public class StudentMongoTimeTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoTime.class, getMaxValue(Time.class)));
+        // em.remove(em.find(StudentMongoTime.class, getMaxValue(Time.class)));
         em.remove(em.find(StudentMongoTime.class, getMinValue(Time.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)

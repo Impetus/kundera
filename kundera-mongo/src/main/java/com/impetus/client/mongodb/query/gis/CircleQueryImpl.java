@@ -24,7 +24,8 @@ import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
- * Provides methods for geospatial queries specific to circle shape 
+ * Provides methods for geospatial queries specific to circle shape
+ * 
  * @author amresh.singh
  */
 public class CircleQueryImpl implements GeospatialQuery
@@ -34,26 +35,27 @@ public class CircleQueryImpl implements GeospatialQuery
     {
         Circle circle = (Circle) shape;
         List circleList = new ArrayList();
-        
-        circleList.add(new double[] { circle.getCentre().x, circle.getCentre().y }); //Centre of circle 
+
+        circleList.add(new double[] { circle.getCentre().x, circle.getCentre().y }); // Centre
+                                                                                     // of
+                                                                                     // circle
         circleList.add(circle.getRadius()); // Radius
-        
+
         BasicDBObject q = (BasicDBObject) query;
-        
-        if(q == null)  q = new BasicDBObject();
-       
-        
-        if(circle.getSurfaceType().equals(SurfaceType.SPHERICAL)) {
-            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$centerSphere",
-                    circleList)));            
+
+        if (q == null)
+            q = new BasicDBObject();
+
+        if (circle.getSurfaceType().equals(SurfaceType.SPHERICAL))
+        {
+            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$centerSphere", circleList)));
         }
         else
         {
-            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$center",
-                    circleList)));
+            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$center", circleList)));
         }
-            
-        return q;        
-    } 
+
+        return q;
+    }
 
 }

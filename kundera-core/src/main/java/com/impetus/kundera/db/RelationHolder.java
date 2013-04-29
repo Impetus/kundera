@@ -24,12 +24,11 @@ public class RelationHolder
 {
 
     /** The relation name. */
-    private String relationName;   
+    private String relationName;
 
     /** The relation value. */
     private Object relationValue;
-    
-    
+
     /** Holds object through which this relation is maintained */
     private Object relationVia;
 
@@ -46,7 +45,7 @@ public class RelationHolder
         this.relationName = relationName;
         this.relationValue = relationValue;
     }
-    
+
     public RelationHolder(String relationName, Object relationValue, Object relationVia)
     {
         this.relationName = relationName;
@@ -80,7 +79,6 @@ public class RelationHolder
     public Object getRelationVia()
     {
         return relationVia;
-    }  
-    
+    }
 
 }

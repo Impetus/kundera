@@ -85,8 +85,8 @@ public class LuceneQuery extends QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
-        if(log.isDebugEnabled())
-        log.debug("JPA Query: " + query);
+        if (log.isDebugEnabled())
+            log.debug("JPA Query: " + query);
 
         // get luence query
         String q = luceneQuery;
@@ -94,9 +94,9 @@ public class LuceneQuery extends QueryImpl implements Query
         {
             q = getLuceneQueryFromJPAQuery();
         }
-        
-        if(log.isDebugEnabled())
-        log.debug("Lucene Query: " + q);
+
+        if (log.isDebugEnabled())
+            log.debug("Lucene Query: " + q);
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);

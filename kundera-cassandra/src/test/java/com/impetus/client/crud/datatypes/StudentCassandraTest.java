@@ -104,8 +104,9 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     {
         if (propertyMap == null)
         {
-//            propertyMap = new HashMap();
-//            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            // propertyMap = new HashMap();
+            // propertyMap.put(CassandraConstants.CQL_VERSION,
+            // CassandraConstants.CQL_VERSION_2_0);
         }
         setupInternal(persistenceUnit, propertyMap, cqlEnabled);
         propertyMap = null;

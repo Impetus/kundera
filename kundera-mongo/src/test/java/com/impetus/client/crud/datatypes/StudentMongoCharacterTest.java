@@ -40,7 +40,8 @@ public class StudentMongoCharacterTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoCharacter.class, getMaxValue(Character.class)));
+        // em.remove(em.find(StudentMongoCharacter.class,
+        // getMaxValue(Character.class)));
         em.remove(em.find(StudentMongoCharacter.class, getMinValue(Character.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)
@@ -165,7 +166,7 @@ public class StudentMongoCharacterTest extends MongoBase
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()

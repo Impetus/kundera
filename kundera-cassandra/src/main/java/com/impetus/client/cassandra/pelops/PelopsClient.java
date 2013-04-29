@@ -391,7 +391,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (PelopsException e)
             {
-                log.info(e.getMessage());
+                log.error("Error while finding relations, Caused by: ", e);
                 return entities;
             }
             entities = new ArrayList<Object>(qResults.size());
@@ -450,32 +450,32 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (InvalidRequestException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             catch (TException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             catch (UnsupportedEncodingException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             catch (UnavailableException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             catch (TimedOutException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             catch (SchemaDisagreementException e)
             {
-                log.error("Error during persist, Caused by:", e);
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
         }
@@ -490,7 +490,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (Exception e)
             {
-                log.error("Error during persist, Caused by:" + e.getMessage());
+                log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);
             }
             addRelationsToThriftRow(metadata, tf, rlHolders);
@@ -662,22 +662,22 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 }
                 catch (InvalidRequestException irex)
                 {
-                    log.error("Error during executing find, Caused by :" + irex.getMessage());
+                    log.error("Error during executing find, Caused by :", irex);
                     throw new PersistenceException(irex);
                 }
                 catch (UnavailableException uex)
                 {
-                    log.error("Error during executing find, Caused by :" + uex.getMessage());
+                    log.error("Error during executing find, Caused by :", uex);
                     throw new PersistenceException(uex);
                 }
                 catch (TimedOutException tex)
                 {
-                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    log.error("Error during executing find, Caused by :", tex);
                     throw new PersistenceException(tex);
                 }
                 catch (TException tex)
                 {
-                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    log.error("Error during executing find, Caused by :", tex);
                     throw new PersistenceException(tex);
                 }
             }

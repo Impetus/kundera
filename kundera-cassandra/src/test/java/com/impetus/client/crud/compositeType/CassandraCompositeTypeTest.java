@@ -406,7 +406,6 @@ public class CassandraCompositeTypeTest
 
         // em = emf.createEntityManager();
         em.clear();
-        
 
         final String noClause = "Select u from CassandraPrimeUser u";
         Query q = em.createQuery(noClause);
@@ -422,6 +421,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(2, results.size());
 
     }
+
     @Test
     public void onBatchInsert()
     {

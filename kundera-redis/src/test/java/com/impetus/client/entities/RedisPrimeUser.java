@@ -24,32 +24,32 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 @Entity
-@Table(name="User", schema="RedisK@redis_pu")
+@Table(name = "User", schema = "RedisK@redis_pu")
 public class RedisPrimeUser
 {
-    
+
     @EmbeddedId
     private RedisCompoundKey key;
-    
+
     @Column
     private String tweetBody;
-    
-    @Column 
+
+    @Column
     private Date tweetDate;
 
     public RedisPrimeUser()
     {
     }
-    
+
     public RedisPrimeUser(RedisCompoundKey key)
     {
         this.key = key;
     }
-    
+
     /**
      * @return the key
      */
@@ -75,7 +75,8 @@ public class RedisPrimeUser
     }
 
     /**
-     * @param tweetBody the tweetBody to set
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -83,7 +84,8 @@ public class RedisPrimeUser
     }
 
     /**
-     * @param tweetDate the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {

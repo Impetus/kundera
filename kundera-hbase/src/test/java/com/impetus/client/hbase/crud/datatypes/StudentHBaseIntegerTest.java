@@ -25,6 +25,7 @@ public class StudentHBaseIntegerTest extends Base
     private static final String table = "StudentHBaseInteger";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -219,12 +220,14 @@ public class StudentHBaseIntegerTest extends Base
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-//            else if (student.getId().equals(getMinValue(Integer.class)))
-//            {
-//                Assert.assertEquals(getPartialValue(short.class), student.getAge());
-//                Assert.assertEquals(getMinValue(String.class), student.getName());
-//                count++;
-//            }
+            // else if (student.getId().equals(getMinValue(Integer.class)))
+            // {
+            // Assert.assertEquals(getPartialValue(short.class),
+            // student.getAge());
+            // Assert.assertEquals(getMinValue(String.class),
+            // student.getName());
+            // count++;
+            // }
             else
             {
                 Assert.assertEquals(getRandomValue(Integer.class), student.getId());
@@ -245,7 +248,8 @@ public class StudentHBaseIntegerTest extends Base
         List<StudentHBaseInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age > " + getPartialValue(short.class);
+        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age > "
+                + getPartialValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -271,8 +275,8 @@ public class StudentHBaseIntegerTest extends Base
         List<StudentHBaseInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age > " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age > "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -424,8 +428,8 @@ public class StudentHBaseIntegerTest extends Base
         List<StudentHBaseInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age >= " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseInteger s where s.name = Kuldeep and s.age >= "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -568,7 +572,7 @@ public class StudentHBaseIntegerTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

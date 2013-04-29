@@ -135,27 +135,27 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             }
             catch (IllegalStateException e)
             {
-                log.error("Unable to insert records into inverted index. Details:" + e.getMessage());
+                log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (InvalidRequestException e)
             {
-                log.error("Unable to insert records into inverted index. Details:" + e.getMessage());
+                log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (TException e)
             {
-                log.error("Unable to insert records into inverted index. Details:" + e.getMessage());
+                log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (UnavailableException e)
             {
-                log.error("Unable to insert records into inverted index. Details:" + e.getMessage());
+                log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (TimedOutException e)
             {
-                log.error("Unable to insert records into inverted index. Details:" + e.getMessage());
+                log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
             finally
@@ -196,22 +196,22 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (InvalidRequestException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         finally
@@ -252,27 +252,27 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (InvalidRequestException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (NotFoundException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TException e)
         {
-            log.error("Unable to search from inverted index. Details:" + e.getMessage());
+            log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
         finally
@@ -329,22 +329,22 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (InvalidRequestException e)
         {
-            log.error("Unable to delete data from inverted index. Details:" + e.getMessage());
+            log.error("Unable to delete data from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Unable to delete data from inverted index. Details:" + e.getMessage());
+            log.error("Unable to delete data from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Unable to delete data from inverted index. Details:" + e.getMessage());
+            log.error("Unable to delete data from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
         catch (TException e)
         {
-            log.error("Unable to delete data from inverted index. Details:" + e.getMessage());
+            log.error("Unable to delete data from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
 

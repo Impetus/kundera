@@ -20,9 +20,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.impetus.client.crud.PersonMongo.Month;
-
 import junit.framework.Assert;
+
+import com.impetus.client.crud.PersonMongo.Month;
 
 /**
  * The Class BaseTest.

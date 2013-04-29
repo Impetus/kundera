@@ -16,7 +16,8 @@
 package com.impetus.client.mongodb.index;
 
 /**
- * MongoDB Index Type 
+ * MongoDB Index Type
+ * 
  * @author amresh.singh
  */
 public enum IndexType

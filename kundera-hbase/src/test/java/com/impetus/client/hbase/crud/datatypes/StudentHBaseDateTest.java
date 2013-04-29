@@ -22,6 +22,7 @@ public class StudentHBaseDateTest extends Base
     private static final String table = "StudentHBaseDate";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -214,20 +215,17 @@ public class StudentHBaseDateTest extends Base
         int count = 0;
         for (StudentHBaseDate student : students)
         {
-            /*if (student.getId().equals(getMaxValue(Date.class)))
+            /*
+             * if (student.getId().equals(getMaxValue(Date.class))) {
+             * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+             * Assert.assertEquals("Kuldeep", student.getName()); count++; }
+             * else
+             */if (student.getId().equals(getMinValue(Date.class)))
             {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
+                Assert.assertEquals(getPartialValue(short.class), student.getAge());
+                Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
             }
-             else */if (student.getId().equals(getMinValue(Date.class)))
-             {
-             Assert.assertEquals(getPartialValue(short.class),
-             student.getAge());
-             Assert.assertEquals(getMinValue(String.class),
-             student.getName());
-             count++;
-             }
             else
             {
                 Assert.assertEquals(getRandomValue(Date.class), student.getId());
@@ -571,7 +569,7 @@ public class StudentHBaseDateTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

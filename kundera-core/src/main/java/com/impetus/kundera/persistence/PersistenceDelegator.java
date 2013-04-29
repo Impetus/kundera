@@ -450,7 +450,7 @@ public final class PersistenceDelegator
                     else
                     {
                         node.flush();
-                        
+
                     }
                 }
             }

@@ -29,7 +29,8 @@ public class TransientEntity
     private transient int age;
 
     @Embedded
-    private EmbeddableTransientEntity embeddableTransientField;  
+    private EmbeddableTransientEntity embeddableTransientField;
+
     /**
      * @return the rowKey
      */
@@ -90,11 +91,12 @@ public class TransientEntity
     }
 
     /**
-     * @param embeddableTransientEntity the embeddableTransientEntity to set
+     * @param embeddableTransientEntity
+     *            the embeddableTransientEntity to set
      */
     public void setEmbeddableTransientEntity(EmbeddableTransientEntity embeddableTransientEntity)
     {
         this.embeddableTransientField = embeddableTransientEntity;
-    }   
-       
+    }
+
 }

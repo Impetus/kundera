@@ -25,12 +25,13 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * Entity class for batch operation
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table(name = "ADDRESS_BATCH", schema = "KunderaExamples@batchTestSizeTwenty")
-@IndexCollection(columns = { @Index(name = "STREET")})
+@IndexCollection(columns = { @Index(name = "STREET") })
 public class AddressBatch
 {
     @Id
@@ -50,7 +51,8 @@ public class AddressBatch
     }
 
     /**
-     * @param addressId the addressId to set
+     * @param addressId
+     *            the addressId to set
      */
     public void setAddressId(String addressId)
     {
@@ -66,7 +68,8 @@ public class AddressBatch
     }
 
     /**
-     * @param street the street to set
+     * @param street
+     *            the street to set
      */
     public void setStreet(String street)
     {

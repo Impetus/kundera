@@ -45,20 +45,20 @@ public class PersonOTORedis
     @Column(name = "AGE")
     private Integer age;
 
-    @OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-    @JoinColumn(name="ADDRESS_ID")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ADDRESS_ID")
     private AddressOTORedis address;
 
     public PersonOTORedis(String personId)
     {
         this.personId = personId;
     }
-    
+
     public PersonOTORedis()
     {
-        
+
     }
-    
+
     /**
      * Gets the person id.
      * 
@@ -133,5 +133,4 @@ public class PersonOTORedis
         this.age = age;
     }
 
-    
 }

@@ -59,7 +59,8 @@ public class KunderaEntityTransaction implements EntityTransaction
         else
         {
             this.coordinator = ((EntityManagerImpl) entityManager).getPersistenceDelegator().getCoordinator();
-            ((EntityManagerImpl) entityManager).getPersistenceDelegator().begin(); // transaction de-marcation.
+            ((EntityManagerImpl) entityManager).getPersistenceDelegator().begin(); // transaction
+                                                                                   // de-marcation.
             this.coordinator.coordinate(TxAction.BEGIN);
         }
     }
@@ -140,6 +141,6 @@ public class KunderaEntityTransaction implements EntityTransaction
     @Override
     public void setRollbackOnly()
     {
-        this.rollbackOnly =true;
+        this.rollbackOnly = true;
     }
 }

@@ -75,7 +75,7 @@ public class ClientMetadata
     {
         this.indexImplementor = indexImplementor;
     }
-    
+
     /**
      * Checks if is use secondry index.
      * 
@@ -83,8 +83,9 @@ public class ClientMetadata
      */
     public boolean isUseSecondryIndex()
     {
-        // if lucene directory and indexer class both not present then return true.
-        
+        // if lucene directory and indexer class both not present then return
+        // true.
+
         return StringUtils.isEmpty(LuceneIndexDir) && StringUtils.isBlank(LuceneIndexDir)
                 && StringUtils.isEmpty(indexImplementor) && StringUtils.isBlank(indexImplementor);
     }

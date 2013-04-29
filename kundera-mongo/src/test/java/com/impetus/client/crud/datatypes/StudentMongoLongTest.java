@@ -39,7 +39,7 @@ public class StudentMongoLongTest extends MongoBase
     public void tearDown() throws Exception
     {
         EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoLong.class, getMaxValue(Long.class)));
+        // em.remove(em.find(StudentMongoLong.class, getMaxValue(Long.class)));
         em.remove(em.find(StudentMongoLong.class, getMinValue(Long.class)));
         emf.close();
         if (AUTO_MANAGE_SCHEMA)

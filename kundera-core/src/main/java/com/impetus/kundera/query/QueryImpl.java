@@ -230,10 +230,12 @@ public abstract class QueryImpl implements Query
      *            the client
      * @param result
      *            the result
-     * @param columnsToSelect List of column names to be selected (rest should be ignored)
+     * @param columnsToSelect
+     *            List of column names to be selected (rest should be ignored)
      * @return the list
      */
-    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result, String[] columnsToSelect)
+    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result,
+            String[] columnsToSelect)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
         System.out.println("ddd");
@@ -241,9 +243,9 @@ public abstract class QueryImpl implements Query
                 Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
-        
+
         if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
-        {            
+        {
 
             result = (List<Object>) client.findAll(m.getEntityClazz(), columnsToSelect, uniquePKs.toArray());
         }
@@ -295,19 +297,20 @@ public abstract class QueryImpl implements Query
             {
                 boolean appended = false;
                 FilterClause filter = (FilterClause) object;
-//                sb.append("+");
+                // sb.append("+");
                 // property
                 sb.append(metadata.getIndexName());
                 sb.append(".");
-                
-                if(MetadataUtils.getEnclosingEmbeddedFieldName(metadata, filter.getProperty(), true) != null)
+
+                if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, filter.getProperty(), true) != null)
                 {
-                    sb.append(filter.getProperty().substring(filter.getProperty().indexOf(".") + 1, filter.getProperty().length()));
+                    sb.append(filter.getProperty().substring(filter.getProperty().indexOf(".") + 1,
+                            filter.getProperty().length()));
                 }
                 else
                 {
                     sb.append(filter.getProperty());
-                }                
+                }
 
                 // joiner
                 String appender = "";
@@ -371,7 +374,7 @@ public abstract class QueryImpl implements Query
         {
             sb.append(" AND ");
         }
-//        sb.append("+");
+        // sb.append("+");
         sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
         sb.append(":");
         // sb.append(getEntityClass().getName());
@@ -497,9 +500,9 @@ public abstract class QueryImpl implements Query
         {
             sb.append(isGreaterThan ? "null" : value);
         }
-        
-        //sb.append(isGreaterThan ? "null" : value);
-        
+
+        // sb.append(isGreaterThan ? "null" : value);
+
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }
@@ -1124,7 +1127,7 @@ public abstract class QueryImpl implements Query
         }
         return value;
     }
-    
+
     protected String[] getColumns(final String[] columns, final EntityMetadata m)
     {
         List<String> columnAsList = new ArrayList<String>();
@@ -1146,7 +1149,7 @@ public abstract class QueryImpl implements Query
                 }
             }
         }
-        return columnAsList.toArray(new String[]{});
+        return columnAsList.toArray(new String[] {});
     }
 
 }

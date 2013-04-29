@@ -82,8 +82,8 @@ public class HBaseWriter implements Writer
      * javax.persistence.metamodel.Attribute, java.lang.Object)
      */
     @Override
-    public void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
-            throws IOException
+    public void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column,
+            Object columnObj) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
@@ -100,7 +100,8 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity)
+            throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
@@ -145,8 +146,7 @@ public class HBaseWriter implements Writer
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.add(htable.getTableName(), Bytes.toBytes(columnName),
-                    HBaseUtils.getBytes(columns.get(columnName)));
+            p.add(htable.getTableName(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
             isPresent = true;
             // /* .getBytes() */);
         }

@@ -358,5 +358,5 @@ public class PickrTestUni_1_M_1_M extends PickrBaseTest
         // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
         // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
         // HBaseCli.addColumnFamily("ALBUM", "PHOTOGRAPHER_ID");
-    }   
+    }
 }

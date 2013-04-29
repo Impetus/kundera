@@ -228,7 +228,6 @@ public class HBaseDataHandler implements DataHandler
         return output;
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -251,7 +250,7 @@ public class HBaseDataHandler implements DataHandler
         hTable = gethTable(tableName);
 
         // Load raw data from HBase
-        List<HBaseData> results = ((HBaseReader)hbaseReader).loadAll(hTable, rowKey,tableName, columns);
+        List<HBaseData> results = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, tableName, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -768,8 +767,8 @@ public class HBaseDataHandler implements DataHandler
      * @return
      * @throws IOException
      */
-    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTableInterface hTable, Object entity,
-            List<String> relationNames, List<HBaseData> results) throws IOException
+    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTableInterface hTable,
+            Object entity, List<String> relationNames, List<HBaseData> results) throws IOException
     {
         try
         {

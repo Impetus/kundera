@@ -73,7 +73,7 @@ public class ActorTest
     @After
     public void tearDown() throws Exception
     {
-            CassandraCli.dropKeySpace("KunderaCoreExmples");
+        CassandraCli.dropKeySpace("KunderaCoreExmples");
 
     }
 

@@ -73,11 +73,13 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
         private static final String HOST = "host";
 
         private ClientProperties clientProperties;
-        
-        private HashMap<String, String> properties=new HashMap<String, String>();
-        
+
+        private HashMap<String, String> properties = new HashMap<String, String>();
+
         private String host;
+
         private String port;
+
         public RedisSchemaMetadata()
         {
 
@@ -91,8 +93,8 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
         {
             this.clientProperties = clientProperties;
             properties = initializeProperties();
-            this.host=properties.get(HOST);
-            this.port=properties.get(PORT);
+            this.host = properties.get(HOST);
+            this.port = properties.get(PORT);
         }
 
         public Map<String, String> getProperties()
@@ -101,22 +103,22 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
             properties.remove(PORT);
             return (Map<String, String>) Collections.unmodifiableMap(properties);
         }
-        
+
         public String getHost()
         {
             return host;
         }
-        
+
         public String getPort()
         {
             return port;
         }
-        
+
         public String getPassword()
         {
             return properties.get("requirepass");
         }
-        
+
         private HashMap<String, String> initializeProperties()
         {
             if (clientProperties != null && clientProperties.getDatastores() != null)
@@ -132,7 +134,6 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
 
             return null;
         }
-        
-        
+
     }
 }

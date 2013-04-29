@@ -162,32 +162,32 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error("Error while persisting record. Details: ", e);
+            log.error("Error while persisting record, Caused by: ", e);
             throw new KunderaException(e);
         }
         finally
@@ -262,23 +262,23 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while inserting record into join table. Details: " + e.getMessage());
-            throw new PersistenceException("Error while inserting record into join table", e);
+            log.error("Error while inserting record into join table, Caused by: ", e);
+            throw new PersistenceException("Error while inserting record into join table.", e);
         }
         catch (TException e)
         {
-            log.error("Error while inserting record into join table. Details: " + e.getMessage());
-            throw new PersistenceException("Error while inserting record into join table", e);
+            log.error("Error while inserting record into join table, Caused by: ", e);
+            throw new PersistenceException("Error while inserting record into join table.", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while inserting record into join table. Details: " + e.getMessage());
-            throw new PersistenceException("Error while inserting record into join table", e);
+            log.error("Error while inserting record into join table, Caused by: ", e);
+            throw new PersistenceException("Error while inserting record into join table.", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while inserting record into join table. Details: " + e.getMessage());
-            throw new PersistenceException("Error while inserting record into join table", e);
+            log.error("Error while inserting record into join table, Caused by: ", e);
+            throw new PersistenceException("Error while inserting record into join table.", e);
         }
         finally
         {
@@ -385,22 +385,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while getting super columns for row Key " + rowId + ". Details:" + e.getMessage());
+            log.error("Error while getting super columns for row Key " + rowId + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            log.error("Error while getting super columns for row Key " + rowId + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            log.error("Error while getting super columns for row Key " + rowId + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
         }
         catch (TException e)
         {
-            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            log.error("Error while getting super columns for row Key " + rowId + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
         }
         finally
@@ -438,22 +438,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
         }
         catch (TException e)
         {
-            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ", Caused by: ", e);
             throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
         }
         finally
@@ -505,22 +505,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            log.error("Error while fetching key slices for index clause, Caused by: ", e);
             throw new KunderaException("Error while fetching key slices for index clause", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            log.error("Error while fetching key slices for index clause, Caused by: ", e);
             throw new KunderaException("Error while fetching key slices for index clause", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            log.error("Error while fetching key slices for index clause, Caused by: ", e);
             throw new KunderaException("Error while fetching key slices for index clause", e);
         }
         catch (TException e)
         {
-            log.error("Error while fetching key slices for index clause. Details:" + e.getMessage());
+            log.error("Error while fetching key slices for index clause, Caused by: ", e);
             throw new KunderaException("Error while fetching key slices for index clause", e);
         }
         finally
@@ -575,24 +575,24 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 }
                 else
                 {
-                    log.error("Error while finding relations. Details:" + e.getMessage());
-                    throw new KunderaException("Error while finding relations", e);
+                    log.error("Error while finding relations, Caused by: ", e);
+                    throw new KunderaException("Error while finding relations.", e);
                 }
             }
             catch (UnavailableException e)
             {
-                log.error("Error while finding relations. Details:" + e.getMessage());
-                throw new KunderaException("Error while finding relations", e);
+                log.error("Error while finding relations, Caused by: ", e);
+                throw new KunderaException("Error while finding relations.", e);
             }
             catch (TimedOutException e)
             {
-                log.error("Error while finding relations. Details:" + e.getMessage());
-                throw new KunderaException("Error while finding relations", e);
+                log.error("Error while finding relations, Caused by: ", e);
+                throw new KunderaException("Error while finding relations.", e);
             }
             catch (TException e)
             {
-                log.error("Error while finding relations. Details:" + e.getMessage());
-                throw new KunderaException("Error while finding relations", e);
+                log.error("Error while finding relations, Caused by: ", e);
+                throw new KunderaException("Error while finding relations.", e);
             }
             finally
             {
@@ -648,22 +648,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            log.error("Error while deleting row from table, Caused by: ", e);
             throw new KunderaException("Error while deleting row from table", e);
         }
         catch (TException e)
         {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            log.error("Error while deleting row from table, Caused by: ", e);
             throw new KunderaException("Error while deleting row from table", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            log.error("Error while deleting row from table, Caused by: ", e);
             throw new KunderaException("Error while deleting row from table", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            log.error("Error while deleting row from table, Caused by: ", e);
             throw new KunderaException("Error while deleting row from table", e);
         }
         finally
@@ -706,22 +706,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
+            log.error("Error while deleting column value, Caused by: ", e);
             throw new PersistenceException("Error while deleting column value", e);
         }
         catch (TException e)
         {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
+            log.error("Error while deleting column value, Caused by: ", e);
             throw new PersistenceException("Error while deleting column value", e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
+            log.error("Error while deleting column value, Caused by: ", e);
             throw new PersistenceException("Error while deleting column value", e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
+            log.error("Error while deleting column value, Caused by: ", e);
             throw new PersistenceException("Error while deleting column value", e);
         }
         finally
@@ -800,7 +800,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (Exception e)
         {
-            log.error("Error while populating data for relations. Details: " + e.getMessage());
+            log.error("Error while populating data for relations, Caused by: " + e.getMessage());
             throw new KunderaException("Error while populating data for relations", e);
         }
     }
@@ -900,22 +900,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error during executing find, Caused by :" + irex.getMessage());
+            log.error("Error during executing find, Caused by: ", irex);
             throw new PersistenceException(irex);
         }
         catch (UnavailableException uex)
         {
-            log.error("Error during executing find, Caused by :" + uex.getMessage());
+            log.error("Error during executing find, Caused by: ", uex);
             throw new PersistenceException(uex);
         }
         catch (TimedOutException tex)
         {
-            log.error("Error during executing find, Caused by :" + tex.getMessage());
+            log.error("Error during executing find, Caused by: ", tex);
             throw new PersistenceException(tex);
         }
         catch (TException tex)
         {
-            log.error("Error during executing find, Caused by :" + tex.getMessage());
+            log.error("Error during executing find, Caused by: ", tex);
             throw new PersistenceException(tex);
         }
         finally

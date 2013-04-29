@@ -29,7 +29,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "person", schema = "kunderatest@kunderatest")
-@EntityListeners({PersonHandler.class})
+@EntityListeners({ PersonHandler.class })
 public class PersonnelListenerDTO
 {
 

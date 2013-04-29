@@ -336,99 +336,97 @@ public class PickrTestUni_M_1_1_M extends PickrBaseTest
      * ()
      */
     @Override
-    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException, UnavailableException,
-            TimedOutException, SchemaDisagreementException
+    protected void createCassandraSchema() throws IOException, TException, InvalidRequestException,
+            UnavailableException, TimedOutException, SchemaDisagreementException
     {
-            /**
-             * schema generation for cassandra.
-             * */
+        /**
+         * schema generation for cassandra.
+         * */
 
-            KsDef ksDef = null;
+        KsDef ksDef = null;
 
-            CfDef pCfDef = new CfDef();
-            pCfDef.name = "PHOTOGRAPHER";
-            pCfDef.keyspace = "Pickr";
-            pCfDef.setComparator_type("UTF8Type");
-            pCfDef.setDefault_validation_class("UTF8Type");
-            ColumnDef pColumnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTOGRAPHER_NAME".getBytes()), "UTF8Type");
-            pColumnDef2.index_type = IndexType.KEYS;
-            ColumnDef pColumnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_ID".getBytes()), "UTF8Type");
-            pColumnDef5.index_type = IndexType.KEYS;
-            pCfDef.addToColumn_metadata(pColumnDef2);
-            pCfDef.addToColumn_metadata(pColumnDef5);
+        CfDef pCfDef = new CfDef();
+        pCfDef.name = "PHOTOGRAPHER";
+        pCfDef.keyspace = "Pickr";
+        pCfDef.setComparator_type("UTF8Type");
+        pCfDef.setDefault_validation_class("UTF8Type");
+        ColumnDef pColumnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTOGRAPHER_NAME".getBytes()), "UTF8Type");
+        pColumnDef2.index_type = IndexType.KEYS;
+        ColumnDef pColumnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_ID".getBytes()), "UTF8Type");
+        pColumnDef5.index_type = IndexType.KEYS;
+        pCfDef.addToColumn_metadata(pColumnDef2);
+        pCfDef.addToColumn_metadata(pColumnDef5);
 
-            CfDef aCfDef = new CfDef();
-            aCfDef.name = "ALBUM";
-            aCfDef.keyspace = "Pickr";
-            aCfDef.setComparator_type("UTF8Type");
-            aCfDef.setDefault_validation_class("UTF8Type");
-            ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("ALBUM_NAME".getBytes()), "UTF8Type");
-            columnDef.index_type = IndexType.KEYS;
-            ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("ALBUM_DESC".getBytes()), "UTF8Type");
-            columnDef3.index_type = IndexType.KEYS;
+        CfDef aCfDef = new CfDef();
+        aCfDef.name = "ALBUM";
+        aCfDef.keyspace = "Pickr";
+        aCfDef.setComparator_type("UTF8Type");
+        aCfDef.setDefault_validation_class("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("ALBUM_NAME".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
+        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("ALBUM_DESC".getBytes()), "UTF8Type");
+        columnDef3.index_type = IndexType.KEYS;
 
-            aCfDef.addToColumn_metadata(columnDef);
-            aCfDef.addToColumn_metadata(columnDef3);
+        aCfDef.addToColumn_metadata(columnDef);
+        aCfDef.addToColumn_metadata(columnDef3);
 
-            CfDef photoLinkCfDef = new CfDef();
-            photoLinkCfDef.name = "PHOTO";
-            photoLinkCfDef.keyspace = "Pickr";
-            photoLinkCfDef.setComparator_type("UTF8Type");
-            photoLinkCfDef.setDefault_validation_class("UTF8Type");
-            ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("PHOTO_CAPTION".getBytes()), "UTF8Type");
-            columnDef1.index_type = IndexType.KEYS;
-            ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTO_DESC".getBytes()), "UTF8Type");
-            columnDef2.index_type = IndexType.KEYS;
-            ColumnDef columnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_ID".getBytes()), "UTF8Type");
-            columnDef5.index_type = IndexType.KEYS;
-            photoLinkCfDef.addToColumn_metadata(columnDef1);
-            photoLinkCfDef.addToColumn_metadata(columnDef2);
-            photoLinkCfDef.addToColumn_metadata(columnDef5);
+        CfDef photoLinkCfDef = new CfDef();
+        photoLinkCfDef.name = "PHOTO";
+        photoLinkCfDef.keyspace = "Pickr";
+        photoLinkCfDef.setComparator_type("UTF8Type");
+        photoLinkCfDef.setDefault_validation_class("UTF8Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("PHOTO_CAPTION".getBytes()), "UTF8Type");
+        columnDef1.index_type = IndexType.KEYS;
+        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PHOTO_DESC".getBytes()), "UTF8Type");
+        columnDef2.index_type = IndexType.KEYS;
+        ColumnDef columnDef5 = new ColumnDef(ByteBuffer.wrap("ALBUM_ID".getBytes()), "UTF8Type");
+        columnDef5.index_type = IndexType.KEYS;
+        photoLinkCfDef.addToColumn_metadata(columnDef1);
+        photoLinkCfDef.addToColumn_metadata(columnDef2);
+        photoLinkCfDef.addToColumn_metadata(columnDef5);
 
-            List<CfDef> cfDefs = new ArrayList<CfDef>();
-            cfDefs.add(pCfDef);
-            cfDefs.add(aCfDef);
-            cfDefs.add(photoLinkCfDef);
-            try
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        cfDefs.add(pCfDef);
+        cfDefs.add(aCfDef);
+        cfDefs.add(photoLinkCfDef);
+        try
+        {
+            ksDef = CassandraCli.client.describe_keyspace("Pickr");
+            CassandraCli.client.set_keyspace("Pickr");
+            List<CfDef> cfDefn = ksDef.getCf_defs();
+
+            for (CfDef cfDef1 : cfDefn)
             {
-                ksDef = CassandraCli.client.describe_keyspace("Pickr");
-                CassandraCli.client.set_keyspace("Pickr");
-                List<CfDef> cfDefn = ksDef.getCf_defs();
 
-                for (CfDef cfDef1 : cfDefn)
+                if (cfDef1.getName().equalsIgnoreCase("PHOTOGRAPHER"))
                 {
-
-                    if (cfDef1.getName().equalsIgnoreCase("PHOTOGRAPHER"))
-                    {
-                        CassandraCli.client.system_drop_column_family("PHOTOGRAPHER");
-                    }
-                    if (cfDef1.getName().equalsIgnoreCase("ALBUM"))
-                    {
-                        CassandraCli.client.system_drop_column_family("ALBUM");
-                    }
-                    if (cfDef1.getName().equalsIgnoreCase("PHOTO"))
-                    {
-                        CassandraCli.client.system_drop_column_family("PHOTO");
-                    }
+                    CassandraCli.client.system_drop_column_family("PHOTOGRAPHER");
                 }
-                CassandraCli.client.system_add_column_family(pCfDef);
-                CassandraCli.client.system_add_column_family(aCfDef);
-                CassandraCli.client.system_add_column_family(photoLinkCfDef);
+                if (cfDef1.getName().equalsIgnoreCase("ALBUM"))
+                {
+                    CassandraCli.client.system_drop_column_family("ALBUM");
+                }
+                if (cfDef1.getName().equalsIgnoreCase("PHOTO"))
+                {
+                    CassandraCli.client.system_drop_column_family("PHOTO");
+                }
             }
-            catch (NotFoundException e)
-            {
-                addKeyspace(ksDef, cfDefs);
-            }
-            catch (InvalidRequestException e)
-            {
-                log.error(e.getMessage());
-            }
-            catch (TException e)
-            {
-                log.error(e.getMessage());
-            }
+            CassandraCli.client.system_add_column_family(pCfDef);
+            CassandraCli.client.system_add_column_family(aCfDef);
+            CassandraCli.client.system_add_column_family(photoLinkCfDef);
         }
-   
-
+        catch (NotFoundException e)
+        {
+            addKeyspace(ksDef, cfDefs);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+        }
+    }
 
 }

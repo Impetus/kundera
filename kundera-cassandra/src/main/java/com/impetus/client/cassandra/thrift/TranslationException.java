@@ -21,7 +21,7 @@ import com.impetus.kundera.KunderaException;
  * Runtime exception class for CQL translation.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class TranslationException extends KunderaException
 {

@@ -549,7 +549,7 @@ public class Node implements NodeStateContext
                     childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
             }
         }
-}
+    }
 
     // Overridden methods from
 

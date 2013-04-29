@@ -257,7 +257,7 @@ public final class CQLTranslator
     }
 
     /**
-     * Build where clause with {@ EQ_CLAUSE} clause.
+     * Build where clause with @ EQ_CLAUSE} clause.
      * 
      * @param builder
      * @param field

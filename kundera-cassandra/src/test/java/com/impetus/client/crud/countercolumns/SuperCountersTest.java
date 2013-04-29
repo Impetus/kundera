@@ -63,6 +63,7 @@ public class SuperCountersTest
     private String keyspace = "KunderaCounterColumn";
 
     protected Map propertyMap = new HashMap();
+
     /**
      * @throws java.lang.Exception
      */
@@ -143,7 +144,7 @@ public class SuperCountersTest
 
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
-        
+
         em.clear();
         SuperCounters counter2 = new SuperCounters();
         counter2 = em.find(SuperCounters.class, id1);

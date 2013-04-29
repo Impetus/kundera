@@ -74,5 +74,4 @@ public class StudentCassandraLong
         this.name = name;
     }
 
-
 }

@@ -53,5 +53,4 @@ public class RedisGeneratedIdStrategyIdentity
         this.name = name;
     }
 
-
 }

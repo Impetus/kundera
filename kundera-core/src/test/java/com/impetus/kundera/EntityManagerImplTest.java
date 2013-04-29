@@ -73,12 +73,12 @@ public class EntityManagerImplTest
                 {
                     em.clear();
                 }
-                
+
                 em.persist(entity);
 
             }
             long t2 = System.currentTimeMillis();
-            System.out.println("Time taken for 1 million dummy insert: "+ (t2 - t1));
+            System.out.println("Time taken for 1 million dummy insert: " + (t2 - t1));
         }
         catch (Exception e)
         {

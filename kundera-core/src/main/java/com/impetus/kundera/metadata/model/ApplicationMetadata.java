@@ -397,11 +397,11 @@ public class ApplicationMetadata
             builder = null;
         }
 
-//        for (String className : clazzToPuMap.keySet())
-//        {
-//            List<String> pus = clazzToPuMap.get(className);
-//        }
-//        this.clazzToPuMap = null;
+        // for (String className : clazzToPuMap.keySet())
+        // {
+        // List<String> pus = clazzToPuMap.get(className);
+        // }
+        // this.clazzToPuMap = null;
 
         PersistenceUnitMetadata puMetadata = getPersistenceUnitMetadata(pu);
         if (puMetadata != null)

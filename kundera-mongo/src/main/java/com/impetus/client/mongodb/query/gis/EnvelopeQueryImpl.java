@@ -23,7 +23,8 @@ import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.mongodb.BasicDBObject;
 
 /**
- * Provides methods for geospatial queries specific to box shape  
+ * Provides methods for geospatial queries specific to box shape
+ * 
  * @author amresh.singh
  */
 public class EnvelopeQueryImpl implements GeospatialQuery
@@ -33,21 +34,22 @@ public class EnvelopeQueryImpl implements GeospatialQuery
     public Object createGeospatialQuery(String geolocationColumnName, Object shape, Object query)
     {
         List boxList = new ArrayList();
-        
+
         Envelope box = (Envelope) shape;
-        
-        boxList.add(new double[] {box.getMinX(), box.getMinY()}); //Starting coordinate
-        boxList.add(new double[]{box.getMaxX(),box.getMaxY()}); // Ending coordinate
-        
+
+        boxList.add(new double[] { box.getMinX(), box.getMinY() }); // Starting
+                                                                    // coordinate
+        boxList.add(new double[] { box.getMaxX(), box.getMaxY() }); // Ending
+                                                                    // coordinate
+
         BasicDBObject q = (BasicDBObject) query;
-        
-        if(q == null) q = new BasicDBObject();       
-        
-        
+
+        if (q == null)
+            q = new BasicDBObject();
+
         q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$box", boxList)));
-        
+
         return q;
     }
-    
 
 }

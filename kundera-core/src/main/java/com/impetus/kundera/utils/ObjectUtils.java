@@ -226,9 +226,8 @@ public class ObjectUtils
                     Object targetRelationObject = null;
 
                     Class<?> relationObjectClass = relation.getProperty().getType();
-                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();                
-                    
-                    
+                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
+
                     if (Collection.class.isAssignableFrom(relationObjectClass))
                     {
                         targetRelationObject = actualRelationObjectClass.newInstance();
@@ -239,25 +238,26 @@ public class ObjectUtils
                             Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
 
                             m.invoke(targetRelationObject, copyTargetRelObj);
-                        }                  
+                        }
 
                     }
-                    else if(Map.class.isAssignableFrom(relationObjectClass))
+                    else if (Map.class.isAssignableFrom(relationObjectClass))
                     {
                         targetRelationObject = actualRelationObjectClass.newInstance();
-                        Method m = actualRelationObjectClass.getMethod("put", new Class<?>[]{Object.class, Object.class});
+                        Method m = actualRelationObjectClass.getMethod("put", new Class<?>[] { Object.class,
+                                Object.class });
 
                         for (Object keyObj : ((Map) sourceRelationObject).keySet())
                         {
-                            Object valObj = ((Map) sourceRelationObject).get(keyObj);                      
-                            
+                            Object valObj = ((Map) sourceRelationObject).get(keyObj);
+
                             Object copyTargetKeyObj = deepCopyUsingMetadata(keyObj, copiedObjectMap);
                             Object copyTargetValueObj = deepCopyUsingMetadata(valObj, copiedObjectMap);
 
-                            m.invoke(targetRelationObject, new Object[]{copyTargetKeyObj, copyTargetValueObj});
-                        }                  
+                            m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
+                        }
 
-                    }                    
+                    }
                     else
                     {
                         targetRelationObject = deepCopyUsingMetadata(sourceRelationObject, copiedObjectMap);
@@ -270,7 +270,8 @@ public class ObjectUtils
         }
         catch (InstantiationException e)
         {
-            log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:" + e.getMessage());            
+            log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:"
+                    + e.getMessage());
             return null;
         }
         catch (IllegalAccessException e)

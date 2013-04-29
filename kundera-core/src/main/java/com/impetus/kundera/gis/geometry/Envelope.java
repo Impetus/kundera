@@ -18,7 +18,8 @@ package com.impetus.kundera.gis.geometry;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * Geometric Envelope (Box) implementation 
+ * Geometric Envelope (Box) implementation
+ * 
  * @author amresh.singh
  */
 public class Envelope extends com.vividsolutions.jts.geom.Envelope

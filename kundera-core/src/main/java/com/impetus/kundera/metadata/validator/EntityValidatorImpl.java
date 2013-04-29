@@ -171,7 +171,7 @@ public class EntityValidatorImpl implements EntityValidator
                 if (!(field.isAnnotationPresent(TableGenerator.class)
                         || field.isAnnotationPresent(SequenceGenerator.class)
                         || clazz.isAnnotationPresent(TableGenerator.class) || clazz
-                            .isAnnotationPresent(SequenceGenerator.class)))
+                        .isAnnotationPresent(SequenceGenerator.class)))
                 {
                     throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
                 }

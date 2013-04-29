@@ -87,10 +87,10 @@ public class MongoDBSchemaManagerTest
         {
 
             if (dbObject.get("name").equals("_id_"))
-                {                    
-                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("_id", 1)));
-                    count++;
-                }
+            {
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("_id", 1)));
+                count++;
+            }
             else if (dbObject.get("name").equals("PERSON_NAME_1"))
             {
                 Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));

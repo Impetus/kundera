@@ -96,10 +96,9 @@ public class MetaModelBuilderForTransientEntityTest
             SingularAttribute embeddableAttrib = managedType.getSingularAttribute("embeddableTransientField");
             assertOnEmbeddable(embeddableAttrib, EmbeddableTransientEntity.class);
             EmbeddableType<X> embeddableType = (EmbeddableType<X>) embeddableAttrib.getType();
-            Attribute<X, String> attribute = (Attribute<X, String>) embeddableType
-                    .getAttribute("embeddedField");
-            assertOnEmbeddableType(EmbeddableTransientEntity.class, attribute, embeddableType,
-                    "embeddedField", Float.class);
+            Attribute<X, String> attribute = (Attribute<X, String>) embeddableType.getAttribute("embeddedField");
+            assertOnEmbeddableType(EmbeddableTransientEntity.class, attribute, embeddableType, "embeddedField",
+                    Float.class);
         }
         catch (SecurityException e)
         {

@@ -48,6 +48,6 @@ public final class HibernateUtils
     {
         PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        return persistenceUnitMetadatata != null ? persistenceUnitMetadatata.getMappedUrl(): null;
+        return persistenceUnitMetadatata != null ? persistenceUnitMetadatata.getMappedUrl() : null;
     }
 }

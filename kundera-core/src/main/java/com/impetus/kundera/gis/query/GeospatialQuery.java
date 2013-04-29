@@ -15,9 +15,9 @@
  */
 package com.impetus.kundera.gis.query;
 
-
 /**
- * Provides methods related to Geospatial Queries  
+ * Provides methods related to Geospatial Queries
+ * 
  * @author amresh.singh
  */
 public interface GeospatialQuery

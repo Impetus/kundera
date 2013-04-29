@@ -22,6 +22,7 @@ import javax.persistence.Table;
 
 /**
  * Entity class
+ * 
  * @author amresh.singh
  */
 @Entity
@@ -107,6 +108,6 @@ public class CassandraEntity
     public void setState(String state)
     {
         this.state = state;
-    }    
+    }
 
 }

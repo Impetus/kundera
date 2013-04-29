@@ -94,7 +94,8 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-//        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        // propertyMap.put(CassandraConstants.CQL_VERSION,
+        // CassandraConstants.CQL_VERSION_2_0);
         setUpInternal("ADDRESS", "PERSONNEL");
     }
 

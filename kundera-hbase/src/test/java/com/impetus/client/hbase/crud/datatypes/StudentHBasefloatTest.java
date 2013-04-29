@@ -21,6 +21,7 @@ public class StudentHBasefloatTest extends Base
     private static final String table = "StudentHBasefloat";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -212,13 +213,13 @@ public class StudentHBasefloatTest extends Base
         int count = 0;
         for (StudentHBasefloat student : students)
         {
-           /* if (student.getId() == ((Float) getMaxValue(float.class)).floatValue())
-            {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
-                count++;
-            }
-            else */if (student.getId() == ((Float) getMinValue(float.class)).floatValue())
+            /*
+             * if (student.getId() == ((Float)
+             * getMaxValue(float.class)).floatValue()) {
+             * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+             * Assert.assertEquals("Kuldeep", student.getName()); count++; }
+             * else
+             */if (student.getId() == ((Float) getMinValue(float.class)).floatValue())
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -567,7 +568,7 @@ public class StudentHBasefloatTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

@@ -96,7 +96,7 @@ public final class GraphEntityMapper
         Node node = null;
         if (!isUpdate)
         {
-            node = getOrCreateNodeWithUniqueFactory(entity, key, m, graphDb);            
+            node = getOrCreateNodeWithUniqueFactory(entity, key, m, graphDb);
         }
         else
         {
@@ -172,12 +172,12 @@ public final class GraphEntityMapper
         }
         catch (InstantiationException e)
         {
-            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity", e);
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity", e);
         }
         catch (NotFoundException e)
@@ -237,12 +237,12 @@ public final class GraphEntityMapper
         }
         catch (InstantiationException e)
         {
-            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity");
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while converting Neo4j object to entity. Details:" + e.getMessage());
+            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity");
         }
 

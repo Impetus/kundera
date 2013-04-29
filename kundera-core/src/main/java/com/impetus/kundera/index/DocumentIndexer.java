@@ -271,7 +271,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             Object id;
             id = PropertyAccessorHelper.getId(object, metadata);
             luceneField = new Field(ENTITY_ID_FIELD, id.toString(), Field.Store.YES, Field.Index.ANALYZED);
-            
+
             // luceneField.set
             // adding class
             // namespace
@@ -296,9 +296,11 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             // index index name
             luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
                     Field.Index.ANALYZED_NO_NORMS);
-            document.add(luceneField);           
-            
-            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(), ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName()),id.toString(),Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
+
+            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(),
+                    ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()), id.toString(),
+                    Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
         }
         catch (PropertyAccessException e)
@@ -331,9 +333,8 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             if (obj != null)
             {
                 Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), obj.toString(),
-                        Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);       
-                
-                
+                        Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+
                 document.add(luceneField);
             }
             else
@@ -347,9 +348,6 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             throw new LuceneIndexingException("Error in accessing field:" + field.getName(), e);
         }
     }
-    
-    
-    
 
     @Override
     public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)

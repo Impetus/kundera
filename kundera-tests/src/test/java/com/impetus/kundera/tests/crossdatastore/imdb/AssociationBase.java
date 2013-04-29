@@ -270,7 +270,7 @@ public abstract class AssociationBase
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
-            CleanupUtilities.cleanLuceneDirectory(pu); 
+            CleanupUtilities.cleanLuceneDirectory(pu);
         }
     }
 

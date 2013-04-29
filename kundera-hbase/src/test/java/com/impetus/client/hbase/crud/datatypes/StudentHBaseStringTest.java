@@ -21,9 +21,11 @@ public class StudentHBaseStringTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
+
     private static final String table = "StudentHBaseString";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -415,8 +417,8 @@ public class StudentHBaseStringTest extends Base
         List<StudentHBaseString> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseString s where s.name = Kuldeep and s.age >= " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseString s where s.name = Kuldeep and s.age >= "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -559,7 +561,7 @@ public class StudentHBaseStringTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

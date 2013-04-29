@@ -53,7 +53,7 @@ public class MongoGeneratedIdTest
     @After
     public void tearDown() throws Exception
     {
-    	MongoUtils.dropDatabase(emf, "mongoTest");
+        MongoUtils.dropDatabase(emf, "mongoTest");
         emf.close();
     }
 

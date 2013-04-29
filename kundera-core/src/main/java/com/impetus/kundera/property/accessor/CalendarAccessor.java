@@ -83,8 +83,8 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     public String toString(Object object)
     {
         Calendar calendar = (Calendar) object;
-        
-        if(calendar == null)
+
+        if (calendar == null)
         {
             return null;
         }
@@ -112,13 +112,12 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         cal.setTime(d);
         return cal;
     }
-    
-    
 
     @Override
     public Calendar getCopy(Object object)
     {
-        if(object == null) return null;
+        if (object == null)
+            return null;
         Calendar c = (Calendar) object;
         Calendar copy = Calendar.getInstance();
         copy.setTimeInMillis(c.getTimeInMillis());

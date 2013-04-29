@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
-
 /**
  * Contains all constants properties supported in persistence.xml
  * 
@@ -83,12 +82,12 @@ public interface PersistenceProperties
 
     public static final String KUNDERA_BATCH_SIZE = "kundera.batch.size";
 
-    public static final String KUNDERA_TRANSACTION_TIMEOUT="kundera.transaction.timeout";
-    
+    public static final String KUNDERA_TRANSACTION_TIMEOUT = "kundera.transaction.timeout";
+
     /** Location where datastore file is stored */
     public static final String KUNDERA_DATASTORE_FILE_PATH = "kundera.datastore.file.path";
 
-    public static final String KUNDERA_TRANSACTION_RESOURCE="kundera.transaction.resource.class";
-    
+    public static final String KUNDERA_TRANSACTION_RESOURCE = "kundera.transaction.resource.class";
+
     public static final String KUNDERA_INDEXER_CLASS = "kundera.indexer.class";
 }

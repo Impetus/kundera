@@ -26,52 +26,62 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "users", schema = "KunderaExamples@secIdxCassandraTest")
-public class Users {
+public class Users
+{
 
-	@Id
-	protected String userId;
+    @Id
+    protected String userId;
 
-	@Column
-	protected String firstName = "";
+    @Column
+    protected String firstName = "";
 
-	@Column
-	protected String lastName = "";
+    @Column
+    protected String lastName = "";
 
-	@ElementCollection
-	private List<PromoCode> promoCodes = new ArrayList<PromoCode>();
+    @ElementCollection
+    private List<PromoCode> promoCodes = new ArrayList<PromoCode>();
 
-	public Users() {
-	}
+    public Users()
+    {
+    }
 
-	public String getUserId() {
-		return userId;
-	}
+    public String getUserId()
+    {
+        return userId;
+    }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public String getFirstName()
+    {
+        return firstName;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
 
-	public String getLastName() {
-		return lastName;
-	}
+    public String getLastName()
+    {
+        return lastName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public void setLastName(String lastName)
+    {
+        this.lastName = lastName;
+    }
 
-	public List<PromoCode> getPromoCodes() {
-		return promoCodes;
-	}
+    public List<PromoCode> getPromoCodes()
+    {
+        return promoCodes;
+    }
 
-	public void setPromoCodes(List<PromoCode> promoCodes) {
-		this.promoCodes = promoCodes;
-	}
+    public void setPromoCodes(List<PromoCode> promoCodes)
+    {
+        this.promoCodes = promoCodes;
+    }
 }

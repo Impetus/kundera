@@ -53,7 +53,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**

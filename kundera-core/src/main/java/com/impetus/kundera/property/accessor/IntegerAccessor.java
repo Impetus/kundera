@@ -95,13 +95,12 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
         {
             throw new PropertyAccessException(e);
         }
-    }  
-    
+    }
 
     @Override
     public Integer getCopy(Object object)
     {
-        return object != null ? (Integer)object : null;
+        return object != null ? (Integer) object : null;
     }
 
     public Integer getInstance(Class<?> clazz)

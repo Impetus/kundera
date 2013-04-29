@@ -232,15 +232,16 @@ public class ObjectUtilsCloneBidirectionalTest
     private void assertObjectReferenceInequality(PhotographerBi_1_M_1_M p1, PhotographerBi_1_M_1_M p2)
     {
 
-        Assert.assertFalse(p1 == p2);        
+        Assert.assertFalse(p1 == p2);
         Assert.assertFalse(p1.getPhotographerName() == p2.getPhotographerName());
         Assert.assertFalse(p1.getPersonalDetail() == p2.getPersonalDetail());
         Assert.assertFalse(p1.getPersonalDetail().getPersonalDetailId() == p2.getPersonalDetail().getPersonalDetailId());
         Assert.assertFalse(p1.getPersonalDetail().getName() == p2.getPersonalDetail().getName());
         Assert.assertFalse(p1.getPersonalDetail().getPassword() == p2.getPersonalDetail().getPassword());
-        Assert.assertFalse(p1.getPersonalDetail().getRelationshipStatus() == p2.getPersonalDetail().getRelationshipStatus());
+        Assert.assertFalse(p1.getPersonalDetail().getRelationshipStatus() == p2.getPersonalDetail()
+                .getRelationshipStatus());
         Assert.assertFalse(p1.getTweets() == p2.getTweets());
-        
+
         for (int i = 0; i < p1.getTweets().size(); i++)
         {
             Tweet p1Tweet = p1.getTweets().get(i);
@@ -259,8 +260,8 @@ public class ObjectUtilsCloneBidirectionalTest
             Assert.assertFalse(p1Album == p2Album);
             Assert.assertFalse(p1Album.getAlbumId() == p2Album.getAlbumId());
             Assert.assertFalse(p1Album.getAlbumName() == p2Album.getAlbumName());
-            Assert.assertFalse(p1Album.getAlbumDescription() == p2Album.getAlbumDescription());           
-            
+            Assert.assertFalse(p1Album.getAlbumDescription() == p2Album.getAlbumDescription());
+
             Assert.assertFalse(p1.getAlbums().get(i).getPhotos() == p2.getAlbums().get(i).getPhotos());
             Assert.assertFalse(p1.getAlbums().get(i).getPhotographer() == p2.getAlbums().get(i).getPhotographer());
 

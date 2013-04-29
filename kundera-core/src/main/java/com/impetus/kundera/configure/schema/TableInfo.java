@@ -64,8 +64,8 @@ public class TableInfo
      * @param idClassType
      *            the id class type
      */
-    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, Class idClassType, String idColumnName,
-            boolean isCompositeId)
+    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, Class idClassType,
+            String idColumnName, boolean isCompositeId)
     {
         this.tableName = tableName;
         this.isIndexable = isIndexable;

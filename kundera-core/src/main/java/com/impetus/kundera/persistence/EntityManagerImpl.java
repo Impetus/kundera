@@ -847,7 +847,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
     private void onLookUp(PersistenceUnitTransactionType transactionType)
     {
-        //TODO transaction should not be null;
+        // TODO transaction should not be null;
         if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
         {
             if (this.entityTransaction == null)
@@ -866,7 +866,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                     throw new KunderaException(
                             "Lookup for UserTransaction returning null for :{java:comp/UserTransaction}");
                 }
-                //TODO what is need to check?
+                // TODO what is need to check?
                 if (!(this.utx instanceof KunderaJTAUserTransaction))
                 {
                     throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
@@ -879,7 +879,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
                     this.setFlushMode(FlushModeType.COMMIT);
                     ((KunderaJTAUserTransaction) this.utx).setImplementor(this);
                 }
-
 
             }
             catch (NamingException e)

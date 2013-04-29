@@ -16,7 +16,6 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**

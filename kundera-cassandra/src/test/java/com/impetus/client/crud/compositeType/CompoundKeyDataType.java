@@ -31,7 +31,7 @@ public class CompoundKeyDataType
 {
 
     // Primitive Types
-//    @Id
+    // @Id
     @Column(name = "STUDENT_ID")
     private long studentId;
 
@@ -98,8 +98,8 @@ public class CompoundKeyDataType
     @Column(name = "BIG_INT")
     private BigInteger bigInteger;
 
-//    @Column(name = "BIG_DECIMAL")
-//    private BigDecimal bigDecimal;
+    // @Column(name = "BIG_DECIMAL")
+    // private BigDecimal bigDecimal;
 
     @Column(name = "CALENDAR")
     private Calendar calendar;
@@ -444,22 +444,22 @@ public class CompoundKeyDataType
         this.bigInteger = bigInteger;
     }
 
-//    /**
-//     * @return the bigDecimal
-//     */
-//    public BigDecimal getBigDecimal()
-//    {
-//        return bigDecimal;
-//    }
-//
-//    /**
-//     * @param bigDecimal
-//     *            the bigDecimal to set
-//     */
-//    public void setBigDecimal(BigDecimal bigDecimal)
-//    {
-//        this.bigDecimal = bigDecimal;
-//    }
+    // /**
+    // * @return the bigDecimal
+    // */
+    // public BigDecimal getBigDecimal()
+    // {
+    // return bigDecimal;
+    // }
+    //
+    // /**
+    // * @param bigDecimal
+    // * the bigDecimal to set
+    // */
+    // public void setBigDecimal(BigDecimal bigDecimal)
+    // {
+    // this.bigDecimal = bigDecimal;
+    // }
 
     /**
      * @return the calendar

@@ -22,32 +22,32 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
- * Geometric Point implementation 
+ * Geometric Point implementation
+ * 
  * @author amresh.singh
  */
-public class Point extends com.vividsolutions.jts.geom.Point 
-{   
-    /** Surface type on which this point is based*/
-    private SurfaceType surfaceType  = SurfaceType.FLAT;   
-    
+public class Point extends com.vividsolutions.jts.geom.Point
+{
+    /** Surface type on which this point is based */
+    private SurfaceType surfaceType = SurfaceType.FLAT;
+
     public Point(com.vividsolutions.jts.geom.Point point)
     {
         super(point.getCoordinate(), point.getPrecisionModel(), point.getSRID());
-    }    
-    
+    }
+
     public Point(double x, double y)
-    {       
+    {
         super(new Coordinate(x, y), new PrecisionModel(), 0);
     }
-    
-    
+
     /**
      * @param coordinates
      * @param factory
      */
     public Point(CoordinateSequence coordinates, GeometryFactory factory)
     {
-        super(coordinates, factory);        
+        super(coordinates, factory);
     }
 
     /**
@@ -59,7 +59,7 @@ public class Point extends com.vividsolutions.jts.geom.Point
     public Point(Coordinate coordinate, PrecisionModel precisionModel, int SRID)
     {
         super(coordinate, precisionModel, SRID);
-        
+
     }
 
     /**
@@ -71,11 +71,12 @@ public class Point extends com.vividsolutions.jts.geom.Point
     }
 
     /**
-     * @param surfaceType the surfaceType to set
+     * @param surfaceType
+     *            the surfaceType to set
      */
     public void setSurfaceType(SurfaceType surfaceType)
     {
         this.surfaceType = surfaceType;
-    }  
-   
+    }
+
 }

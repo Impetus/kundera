@@ -25,8 +25,8 @@ package com.impetus.kundera.generator;
 public interface AutoGenerator extends Generator
 {
     /**
-     * generate id, Its totally client responsibility to generate Id, using client
-     * specific strategy.
+     * generate id, Its totally client responsibility to generate Id, using
+     * client specific strategy.
      * 
      * @param discriptor
      * @return

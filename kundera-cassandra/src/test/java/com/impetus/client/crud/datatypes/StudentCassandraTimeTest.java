@@ -37,7 +37,7 @@ public class StudentCassandraTimeTest extends CassandraBase
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After

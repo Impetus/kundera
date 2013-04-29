@@ -16,7 +16,6 @@ import com.impetus.kundera.index.IndexCollection;
 public class StudentCassandraDate
 {
 
-
     @Id
     private Date id;
 
@@ -76,6 +75,5 @@ public class StudentCassandraDate
     {
         this.name = name;
     }
-
 
 }

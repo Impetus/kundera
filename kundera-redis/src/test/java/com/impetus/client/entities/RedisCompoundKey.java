@@ -26,12 +26,15 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class RedisCompoundKey
 {
-    @Column private String user_Id;
-    @Column private int tweetId;
-    @Column private UUID timeLineId;
+    @Column
+    private String user_Id;
 
-    
-    
+    @Column
+    private int tweetId;
+
+    @Column
+    private UUID timeLineId;
+
     /**
      * 
      */
@@ -50,7 +53,7 @@ public class RedisCompoundKey
         this.tweetId = tweetId;
         this.timeLineId = timeLineId;
     }
-    
+
     /**
      * @return the userId
      */
@@ -58,7 +61,7 @@ public class RedisCompoundKey
     {
         return user_Id;
     }
-    
+
     /**
      * @return the tweetId
      */
@@ -66,7 +69,7 @@ public class RedisCompoundKey
     {
         return tweetId;
     }
-    
+
     /**
      * @return the timeLineId
      */

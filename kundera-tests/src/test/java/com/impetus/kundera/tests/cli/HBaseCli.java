@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -164,52 +163,52 @@ public final class HBaseCli
     /**
      * Destroyes cluster.
      */
-//    public static void stopCluster()
-//    {
-//        try
-//        {
-//            if (utility != null)
-//            {
-//                utility.cleanupTestDir();
-//                utility.shutdownMiniCluster();
-//                utility = null;
-//                FileUtil.fullyDelete(zkDir);
-//                FileUtil.fullyDelete(masterDir);
-//                isStarted = false;
-//            }
-//        }
-//        catch (IOException e)
-//        {
-//            logger.error(e.getMessage());
-//        }
-//        /*
-//         * DO NOT DELETE IT! HTable table =
-//         * utility.createTable("test".getBytes(), "testcol".getBytes());
-//         * utility.getHBaseAdmin().disableTable("test");
-//         * utility.getHBaseAdmin().addColumn("test", new
-//         * HColumnDescriptor("testColFamily"));
-//         * utility.getHBaseAdmin().enableTable("test");
-//         * logger.info("Server is running : "
-//         * +utility.getHBaseAdmin().isMasterRunning());
-//         * 
-//         * Put p = new Put(Bytes.toBytes("1"));
-//         * p.add(Bytes.toBytes("testColFamily"),
-//         * Bytes.toBytes("col1"),"col1".getBytes()); table.put(p);
-//         * logger.info("Table exist:" +
-//         * utility.getHBaseAdmin().tableExists("test")); Get g = new
-//         * Get(Bytes.toBytes("1")); Result r = table.get(g);
-//         * logger.info("Row count:" + r.list().size());
-//         * utility.getHBaseAdmin().disableTable("test");
-//         * logger.info("Deleting table...");
-//         * utility.getHBaseAdmin().deleteTable("test");
-//         * logger.info("Shutting down now..."); utility.shutdownMiniCluster();
-//         */
-//        catch (Exception e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//    }
+    // public static void stopCluster()
+    // {
+    // try
+    // {
+    // if (utility != null)
+    // {
+    // utility.cleanupTestDir();
+    // utility.shutdownMiniCluster();
+    // utility = null;
+    // FileUtil.fullyDelete(zkDir);
+    // FileUtil.fullyDelete(masterDir);
+    // isStarted = false;
+    // }
+    // }
+    // catch (IOException e)
+    // {
+    // logger.error(e.getMessage());
+    // }
+    // /*
+    // * DO NOT DELETE IT! HTable table =
+    // * utility.createTable("test".getBytes(), "testcol".getBytes());
+    // * utility.getHBaseAdmin().disableTable("test");
+    // * utility.getHBaseAdmin().addColumn("test", new
+    // * HColumnDescriptor("testColFamily"));
+    // * utility.getHBaseAdmin().enableTable("test");
+    // * logger.info("Server is running : "
+    // * +utility.getHBaseAdmin().isMasterRunning());
+    // *
+    // * Put p = new Put(Bytes.toBytes("1"));
+    // * p.add(Bytes.toBytes("testColFamily"),
+    // * Bytes.toBytes("col1"),"col1".getBytes()); table.put(p);
+    // * logger.info("Table exist:" +
+    // * utility.getHBaseAdmin().tableExists("test")); Get g = new
+    // * Get(Bytes.toBytes("1")); Result r = table.get(g);
+    // * logger.info("Row count:" + r.list().size());
+    // * utility.getHBaseAdmin().disableTable("test");
+    // * logger.info("Deleting table...");
+    // * utility.getHBaseAdmin().deleteTable("test");
+    // * logger.info("Shutting down now..."); utility.shutdownMiniCluster();
+    // */
+    // catch (Exception e)
+    // {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // }
+    // }
 
     public static boolean isStarted()
     {

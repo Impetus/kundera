@@ -169,18 +169,18 @@ public class OracleToMongoJTATest
     public void tearDown() throws Exception
     {
         userTransaction.begin();
-        
+
         // Delete by query.
         String deleteQuery = "Delete from OraclePersonnelOTOFKEntityJTA p";
         Query query = em.createQuery(deleteQuery);
         query.executeUpdate();
-        
+
         deleteQuery = "Delete from HabitatOToOFKEntityJTA p";
         query = em.createQuery(deleteQuery);
         query.executeUpdate();
-        
+
         userTransaction.commit();
-        
+
         initialContext.unbind("java:comp/UserTransaction");
         initialContext.destroySubcontext("java:comp");
     }

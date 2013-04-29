@@ -12,8 +12,6 @@ import javax.persistence.Table;
 public class StudentMongoTimestamp
 {
 
-
-
     @Id
     private Timestamp id;
 
@@ -73,7 +71,5 @@ public class StudentMongoTimestamp
     {
         this.name = name;
     }
-
-
 
 }

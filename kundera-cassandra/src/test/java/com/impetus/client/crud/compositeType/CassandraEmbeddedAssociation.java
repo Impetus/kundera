@@ -30,37 +30,37 @@ import com.impetus.client.crud.compositeType.association.UserInfo;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 
 @Entity
-@Table(name="CompositeUserAssociation", schema = "CompositeCassandra@composite_pu")
-//@Index(index = true,columns = { "tweetBody","tweetDate" })
+@Table(name = "CompositeUserAssociation", schema = "CompositeCassandra@composite_pu")
+// @Index(index = true,columns = { "tweetBody","tweetDate" })
 public class CassandraEmbeddedAssociation
 {
-    
+
     @EmbeddedId
     private CassandraCompoundKey key;
-    
+
     @Column
     private String tweetBody;
-    
-    @Column 
+
+    @Column
     private Date tweetDate;
 
-    @OneToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
-    @JoinColumn(name="userInfo_id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "userInfo_id")
     private UserInfo userInfo;
-    
+
     public CassandraEmbeddedAssociation()
     {
     }
-    
+
     public CassandraEmbeddedAssociation(CassandraCompoundKey key)
     {
         this.key = key;
     }
-    
+
     /**
      * @return the key
      */
@@ -86,7 +86,8 @@ public class CassandraEmbeddedAssociation
     }
 
     /**
-     * @param tweetBody the tweetBody to set
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -94,7 +95,8 @@ public class CassandraEmbeddedAssociation
     }
 
     /**
-     * @param tweetDate the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
@@ -111,5 +113,4 @@ public class CassandraEmbeddedAssociation
         this.userInfo = userInfo;
     }
 
-    
 }

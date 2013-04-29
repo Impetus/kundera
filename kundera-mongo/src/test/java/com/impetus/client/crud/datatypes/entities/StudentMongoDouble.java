@@ -70,5 +70,4 @@ public class StudentMongoDouble
         this.name = name;
     }
 
-
 }

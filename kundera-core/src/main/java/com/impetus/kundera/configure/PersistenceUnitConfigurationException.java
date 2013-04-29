@@ -7,7 +7,7 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author Kuldeep Mishra
- *
+ * 
  */
 public class PersistenceUnitConfigurationException extends KunderaException
 {

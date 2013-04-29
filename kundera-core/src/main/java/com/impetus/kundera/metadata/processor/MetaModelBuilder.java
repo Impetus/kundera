@@ -274,7 +274,7 @@ public final class MetaModelBuilder<X, T>
                     Field[] embeddedFields = attribType.getDeclaredFields();
                     for (Field f : embeddedFields)
                     {
-                        if(isNonTransient(f))
+                        if (isNonTransient(f))
                         {
                             new TypeBuilder<T>(f).build(embeddableType, f.getType());
                         }
@@ -416,7 +416,6 @@ public final class MetaModelBuilder<X, T>
                 }
             }
 
-            
             /**
              * Validates that super type must be embeddable.
              * 
@@ -740,7 +739,7 @@ public final class MetaModelBuilder<X, T>
         Field[] embeddedFields = clazz.getDeclaredFields();
         for (Field f : embeddedFields)
         {
-            if(isNonTransient(f))
+            if (isNonTransient(f))
             {
                 new TypeBuilder<T>(f).build(managedType, f.getType());
             }
@@ -771,8 +770,8 @@ public final class MetaModelBuilder<X, T>
      */
     private boolean isNonTransient(Field attribute)
     {
-        return attribute != null && !Modifier.isStatic(attribute.getModifiers()) && !Modifier.isTransient(attribute.getModifiers())
-                && !attribute.isAnnotationPresent(Transient.class);
+        return attribute != null && !Modifier.isStatic(attribute.getModifiers())
+                && !Modifier.isTransient(attribute.getModifiers()) && !attribute.isAnnotationPresent(Transient.class);
     }
 
 }

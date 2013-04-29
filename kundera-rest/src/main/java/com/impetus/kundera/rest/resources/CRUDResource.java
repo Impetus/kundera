@@ -75,7 +75,7 @@ public class CRUDResource
             @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers, InputStream in)
     {
 
-        if(log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
             log.debug("POST: SessionToken: " + sessionToken);
             log.debug("POST: entityClass: " + entityClassName);
@@ -86,13 +86,13 @@ public class CRUDResource
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
             Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            
-            if(log.isDebugEnabled())
-            log.debug("POST: entityClass" + entityClass);
+
+            if (log.isDebugEnabled())
+                log.debug("POST: entityClass" + entityClass);
 
             String mediaType = headers.getRequestHeader("content-type").get(0);
-            if(log.isDebugEnabled())
-            log.debug("POST: Media Type:" + mediaType);
+            if (log.isDebugEnabled())
+                log.debug("POST: Media Type:" + mediaType);
 
             Object entity = JAXBUtils.toObject(in, entityClass, mediaType);
             em.persist(entity);

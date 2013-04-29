@@ -25,7 +25,7 @@ import javax.persistence.Table;
 
 /**
  * The Class RedisEmbeddedUser.
- *
+ * 
  * @author vivek.mishra
  */
 
@@ -33,7 +33,7 @@ import javax.persistence.Table;
 @Table(name = "User", schema = "RedisK@redis_pu")
 public class RedisEmbeddedUser
 {
-    
+
     /** The user id. */
     @Id
     private String userId;
@@ -59,8 +59,9 @@ public class RedisEmbeddedUser
 
     /**
      * Instantiates a new redis embedded user.
-     *
-     * @param userId the user id
+     * 
+     * @param userId
+     *            the user id
      */
     public RedisEmbeddedUser(String userId)
     {
@@ -69,7 +70,7 @@ public class RedisEmbeddedUser
 
     /**
      * Gets the tweet body.
-     *
+     * 
      * @return the tweetBody
      */
     public String getTweetBody()
@@ -79,7 +80,7 @@ public class RedisEmbeddedUser
 
     /**
      * Gets the tweet date.
-     *
+     * 
      * @return the tweetDate
      */
     public Date getTweetDate()
@@ -89,8 +90,9 @@ public class RedisEmbeddedUser
 
     /**
      * Sets the tweet body.
-     *
-     * @param tweetBody the tweetBody to set
+     * 
+     * @param tweetBody
+     *            the tweetBody to set
      */
     public void setTweetBody(String tweetBody)
     {
@@ -99,8 +101,9 @@ public class RedisEmbeddedUser
 
     /**
      * Sets the tweet date.
-     *
-     * @param tweetDate the tweetDate to set
+     * 
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
@@ -109,7 +112,7 @@ public class RedisEmbeddedUser
 
     /**
      * Gets the user id.
-     *
+     * 
      * @return the user id
      */
     public String getUserId()
@@ -119,7 +122,7 @@ public class RedisEmbeddedUser
 
     /**
      * Gets the embeddable.
-     *
+     * 
      * @return the embeddable
      */
     public RedisCompoundKey getEmbeddable()
@@ -129,8 +132,9 @@ public class RedisEmbeddedUser
 
     /**
      * Sets the embeddable.
-     *
-     * @param embeddable the new embeddable
+     * 
+     * @param embeddable
+     *            the new embeddable
      */
     public void setEmbeddable(RedisCompoundKey embeddable)
     {

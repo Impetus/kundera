@@ -126,7 +126,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(Month.JAN, results.get(0).getMonth());
 
         selectIdQuery();
-        
+
         onExecuteScript();
 
     }
@@ -277,17 +277,16 @@ public class PersonMongoTest extends BaseTest
         emf.close();
     }
 
-
     private void onExecuteScript()
     {
         Map<String, Client<Query>> clients = (Map<String, Client<Query>>) em.getDelegate();
         Client client = clients.get(_PU);
 
         String jScript = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
-        Object result = ((MongoDBClient)client).executeScript(jScript);
+        Object result = ((MongoDBClient) client).executeScript(jScript);
         Assert.assertNull(result);
         String findOneJScript = "db.PERSON.findOne()";
-        result = ((MongoDBClient)client).executeScript(findOneJScript);
+        result = ((MongoDBClient) client).executeScript(findOneJScript);
         Assert.assertNotNull(result);
     }
 

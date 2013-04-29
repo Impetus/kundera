@@ -52,9 +52,11 @@ public class CassandraUserOTMTest
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(_KEYSPACE);
         loadData();
-//        HashMap propertyMap = new HashMap();
-//        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-//        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        // HashMap propertyMap = new HashMap();
+        // propertyMap.put(CassandraConstants.CQL_VERSION,
+        // CassandraConstants.CQL_VERSION_3_0);
+        // propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE,
+        // "create");
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
     }
 
@@ -107,7 +109,7 @@ public class CassandraUserOTMTest
         Assert.assertEquals("1", users.get(0).getPersonId());
         Assert.assertNotNull(users.get(0).getAddresses());
         Assert.assertEquals(2, users.get(0).getAddresses().size());
-        
+
         em.remove(foundObject);
 
         foundObject = em.find(CassandraUserUniOTM.class, "1");

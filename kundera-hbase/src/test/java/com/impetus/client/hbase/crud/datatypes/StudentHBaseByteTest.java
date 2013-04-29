@@ -26,6 +26,7 @@ public class StudentHBaseByteTest extends Base
     private static final String table = "StudentHBaseByte";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -219,12 +220,14 @@ public class StudentHBaseByteTest extends Base
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-//            else if (student.getId().equals(getMinValue(Byte.class)))
-//            {
-//                Assert.assertEquals(getPartialValue(short.class), student.getAge());
-//                Assert.assertEquals(getMinValue(String.class), student.getName());
-//                count++;
-//            }
+            // else if (student.getId().equals(getMinValue(Byte.class)))
+            // {
+            // Assert.assertEquals(getPartialValue(short.class),
+            // student.getAge());
+            // Assert.assertEquals(getMinValue(String.class),
+            // student.getName());
+            // count++;
+            // }
             else
             {
                 Assert.assertEquals(getRandomValue(Byte.class), student.getId());
@@ -568,7 +571,7 @@ public class StudentHBaseByteTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

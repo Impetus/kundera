@@ -121,7 +121,7 @@ public class LuceneIndexer extends DocumentIndexer
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
             w.setMergePolicy(new LogDocMergePolicy());
-//            w.setMergeFactor(1);
+            // w.setMergeFactor(1);
             w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
@@ -228,8 +228,8 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public final void unindex(EntityMetadata metadata, Object id) throws LuceneIndexingException
     {
-        if(log.isDebugEnabled())
-        log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
+        if (log.isDebugEnabled())
+            log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
             String luceneQuery = "+"
@@ -241,14 +241,15 @@ public class LuceneIndexer extends DocumentIndexer
                             ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()) + ":" + id.toString();
 
             /* String indexName, Query query, boolean autoCommit */
-//            w.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
-            
+            // w.deleteDocuments(new Term(KUNDERA_ID_FIELD,
+            // getKunderaId(metadata, id)));
+
             QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
                     Version.LUCENE_34));
-                qp.setLowercaseExpandedTerms(false);
-                qp.setAllowLeadingWildcard(true);
-                // qp.set
-                Query q = qp.parse(luceneQuery);
+            qp.setLowercaseExpandedTerms(false);
+            qp.setAllowLeadingWildcard(true);
+            // qp.set
+            Query q = qp.parse(luceneQuery);
 
             w.deleteDocuments(q);
             w.commit();
@@ -256,10 +257,10 @@ public class LuceneIndexer extends DocumentIndexer
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
             w.setMergePolicy(new LogDocMergePolicy());
-//            w.setMergeFactor(1);
+            // w.setMergeFactor(1);
             w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
-//            flushInternal();
+            // flushInternal();
         }
         catch (CorruptIndexException e)
         {
@@ -275,8 +276,6 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
-
-    
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation)
@@ -288,8 +287,8 @@ public class LuceneIndexer extends DocumentIndexer
             count = 100;
         }
 
-        if(log.isDebugEnabled())
-        log.debug("Searching index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
+        if (log.isDebugEnabled())
+            log.debug("Searching index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
         // Set<String> entityIds = new HashSet<String>();
         Map<String, Object> indexCol = new HashMap<String, Object>();
@@ -351,8 +350,8 @@ public class LuceneIndexer extends DocumentIndexer
      */
     public void indexDocument(EntityMetadata metadata, Document document)
     {
-        if(log.isDebugEnabled())
-        log.debug("Indexing document: " + document + " for in file system using Lucene");
+        if (log.isDebugEnabled())
+            log.debug("Indexing document: " + document + " for in file system using Lucene");
 
         IndexWriter w = getIndexWriter();
         try
@@ -365,12 +364,12 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (CorruptIndexException e)
         {
-            log.error("Error while indexing document " + document + " into Lucene. Details:" + e.getMessage());
+            log.error("Error while indexing document " + document + " into Lucene, Caused by: ", e);
             throw new LuceneIndexingException("Error while indexing document " + document + " into Lucene.", e);
         }
         catch (IOException e)
         {
-            log.error("Error while indexing document " + document + " into Lucene. Details:" + e.getMessage());
+            log.error("Error while indexing document " + document + " into Lucene, Caused by: ", e);
             throw new LuceneIndexingException("Error while indexing document " + document + " into Lucene.", e);
         }
     }
@@ -388,14 +387,14 @@ public class LuceneIndexer extends DocumentIndexer
                 w.commit();
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
                 readyForCommit = false;
-                reader=null;
-                isInitialized=false;
+                reader = null;
+                isInitialized = false;
             }
         }
 
         catch (CorruptIndexException e)
         {
-            log.error("Error while Flushing Lucene Indexes. Details:" + e.getMessage());
+            log.error("Error while Flushing Lucene Indexes, Caused by: ", e);
             throw new LuceneIndexingException("Error while Flushing Lucene Indexes", e);
         }
         catch (IOException e)
@@ -421,45 +420,25 @@ public class LuceneIndexer extends DocumentIndexer
 
         catch (CorruptIndexException e)
         {
-            log.error("Error while closing lucene indexes. Details:" + e.getMessage());
+            log.error("Error while closing lucene indexes, Caused by: ", e);
             throw new LuceneIndexingException("Error while closing lucene indexes.", e);
         }
         catch (IOException e)
         {
-            log.error("Error while closing lucene indexes. Details:" + e.getMessage());
+            log.error("Error while closing lucene indexes, Caused by: ", e);
             throw new LuceneIndexingException("Error while closing lucene indexes.", e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.index.Indexer#flush()
-     */
     @Override
     public void flush()
     {
-/*        
-        if (w != null)
-        {
-
-            try
-            {
-                w.commit();
-//                w.close();
-//                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
-            }
-            catch (CorruptIndexException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+        /*
+         * if (w != null) {
+         * 
+         * try { w.commit(); // w.close(); // index.copy(index,
+         * FSDirectory.open(getIndexDirectory()), false); } catch
+         * (CorruptIndexException e) { } catch (IOException e) { } }
          */
     }
 
@@ -514,8 +493,8 @@ public class LuceneIndexer extends DocumentIndexer
             return null;
         }
 
-        if(log.isDebugEnabled())
-        log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
+        if (log.isDebugEnabled())
+            log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
 
         Document currentDoc = null;
         Object embeddedObject = null;
@@ -619,7 +598,7 @@ public class LuceneIndexer extends DocumentIndexer
             currentDoc = new Document();
 
             // Add entity class, PK info into document
-            
+
             addEntityClassToDocument(metadata, object, currentDoc);
 
             // Add all entity fields(columns) into document
@@ -674,7 +653,5 @@ public class LuceneIndexer extends DocumentIndexer
     {
         throw new UnsupportedOperationException();
     }
-    
-    
 
 }

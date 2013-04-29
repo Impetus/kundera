@@ -70,5 +70,4 @@ public class StudentHBaseLong
         this.name = name;
     }
 
-
 }

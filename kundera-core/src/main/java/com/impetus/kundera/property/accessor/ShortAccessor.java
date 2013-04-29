@@ -103,13 +103,11 @@ public class ShortAccessor implements PropertyAccessor<Short>
             throw new PropertyAccessException(e);
         }
     }
-    
-    
 
     @Override
     public Short getCopy(Object object)
     {
-        return object != null ? (Short)object : null;
+        return object != null ? (Short) object : null;
     }
 
     public Short getInstance(Class<?> clazz)

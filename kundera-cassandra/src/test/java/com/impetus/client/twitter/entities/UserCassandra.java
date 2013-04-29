@@ -49,7 +49,7 @@ public class UserCassandra
     // Embedded object, will persist co-located
     @Embedded
     private PersonalDetailCassandra personalDetail;
-    
+
     // Embedded object, will persist co-located
     @Embedded
     private ProfessionalDetailCassandra professionalDetail;
@@ -123,7 +123,7 @@ public class UserCassandra
     public void setPersonalDetail(PersonalDetailCassandra personalDetail)
     {
         this.personalDetail = personalDetail;
-    }   
+    }
 
     /**
      * @return the professionalDetail
@@ -134,7 +134,8 @@ public class UserCassandra
     }
 
     /**
-     * @param professionalDetail the professionalDetail to set
+     * @param professionalDetail
+     *            the professionalDetail to set
      */
     public void setProfessionalDetail(ProfessionalDetailCassandra professionalDetail)
     {

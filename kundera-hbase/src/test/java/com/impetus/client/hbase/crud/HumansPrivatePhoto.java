@@ -14,22 +14,22 @@ public class HumansPrivatePhoto
     @Id
     public String humanId;
 
-
     @OneToOne(mappedBy = "humansPrivatePhoto", cascade = CascadeType.REFRESH)
-    //@PrimaryKeyJoinColumn
+    // @PrimaryKeyJoinColumn
     public Human human;
-    
+
     public String photoName;
-    
+
     public HumansPrivatePhoto()
     {
-        
+
     }
-    
+
     public HumansPrivatePhoto(String humanId)
     {
         this.humanId = humanId;
     }
+
     public Human getHuman()
     {
         return human;
@@ -54,6 +54,5 @@ public class HumansPrivatePhoto
     {
         return humanId;
     }
-    
-    
+
 }

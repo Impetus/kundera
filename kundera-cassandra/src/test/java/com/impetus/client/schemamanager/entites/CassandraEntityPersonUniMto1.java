@@ -32,7 +32,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name = "CassandraEntityPersonUniMto1", schema = "CassandraSchemaManagerTest@CassandraSchemaManager")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age")})
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class CassandraEntityPersonUniMto1
 {
 

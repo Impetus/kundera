@@ -162,7 +162,7 @@ public class MongoDBIndexer implements Indexer
     public void index(Class entityClazz, Map<String, Object> values)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -176,7 +176,7 @@ public class MongoDBIndexer implements Indexer
     public void unIndex(Class entityClazz, Object entity)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -184,7 +184,5 @@ public class MongoDBIndexer implements Indexer
     {
         return null;
     }
-
-    
 
 }

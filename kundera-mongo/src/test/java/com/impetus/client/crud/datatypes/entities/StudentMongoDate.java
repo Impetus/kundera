@@ -12,7 +12,6 @@ import javax.persistence.Table;
 public class StudentMongoDate
 {
 
-
     @Id
     private Date id;
 
@@ -72,6 +71,5 @@ public class StudentMongoDate
     {
         this.name = name;
     }
-
 
 }

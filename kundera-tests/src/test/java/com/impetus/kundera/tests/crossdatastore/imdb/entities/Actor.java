@@ -31,37 +31,42 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
- * Actor Node Entity class 
+ * Actor Node Entity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="ACTOR")   //Ignored for Neo4J
-@IndexCollection(columns={@Index(name = "name", type = "KEYS")})
+@Table(name = "ACTOR")
+// Ignored for Neo4J
+@IndexCollection(columns = { @Index(name = "name", type = "KEYS") })
 public class Actor
 {
     @Id
-    @Column(name="ACTOR_ID")   
+    @Column(name = "ACTOR_ID")
     private int id;
-    
-    @Column(name="ACTOR_NAME")
+
+    @Column(name = "ACTOR_NAME")
     private String name;
-    
-    public Actor() {}
-    
+
+    public Actor()
+    {
+    }
+
     public Actor(int actorId, String actorName)
     {
         this.id = actorId;
         this.name = actorName;
     }
-    
-    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)     
-    @MapKeyJoinColumn(name="ACTS_IN")
+
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @MapKeyJoinColumn(name = "ACTS_IN")
     private Map<Role, Movie> movies;
-    
+
     public void addMovie(Role role, Movie movie)
     {
-        if(movies == null) movies = new HashMap<Role, Movie>();
+        if (movies == null)
+            movies = new HashMap<Role, Movie>();
         movies.put(role, movie);
     }
 
@@ -74,7 +79,8 @@ public class Actor
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(int id)
     {
@@ -90,7 +96,8 @@ public class Actor
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -106,11 +113,12 @@ public class Actor
     }
 
     /**
-     * @param movies the movies to set
+     * @param movies
+     *            the movies to set
      */
     public void setMovies(Map<Role, Movie> movies)
     {
         this.movies = movies;
-    }   
+    }
 
 }

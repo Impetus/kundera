@@ -137,7 +137,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     }
                     catch (Exception e)
                     {
-                        log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
+                        log.error("Error while executing handleAssociation for cassandra, Caused by: ", e);
                         throw new QueryHandlerException(e);
                     }
                 }
@@ -207,7 +207,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         catch (Exception e)
         {
-            log.error("Error while executing find by range. Details: ", e);
+            log.error("Error while executing find by range, Caused by: ", e);
             throw new QueryHandlerException(e);
         }
         return result;

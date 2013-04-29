@@ -107,8 +107,8 @@ public class MetadataBuilder
         EntityMetadata metadata = new EntityMetadata(clazz);
         validate(clazz);
 
-        if(log.isDebugEnabled())
-        log.debug("Processing @Entity >> " + clazz);
+        if (log.isDebugEnabled())
+            log.debug("Processing @Entity >> " + clazz);
 
         for (MetadataProcessor processor : metadataProcessors)
         {
@@ -134,7 +134,7 @@ public class MetadataBuilder
             metadata.setPersistenceUnit(persistenceUnit);
         }
     }
-    
+
     private void checkForNeo4J(EntityMetadata metadata)
     {
         if (Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(client))
@@ -156,8 +156,10 @@ public class MetadataBuilder
     {
         // if pu is null and client is not rdbms OR metadata pu does not match
         // with configured one. don't process for anything.
-        if ((metadata.getPersistenceUnit() == null && ! (Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client) || Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(client)))
-                || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
+        if ((metadata.getPersistenceUnit() == null && !(Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client) || Constants.NEO4J_CLIENT_FACTORY
+                .equalsIgnoreCase(client)))
+                || metadata.getPersistenceUnit() != null
+                && !metadata.getPersistenceUnit().equals(persistenceUnit))
         {
             metadata = null;
         }

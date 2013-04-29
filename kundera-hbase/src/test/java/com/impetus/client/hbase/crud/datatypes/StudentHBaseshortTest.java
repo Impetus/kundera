@@ -22,9 +22,11 @@ public class StudentHBaseshortTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
+
     private static final String table = "StudentHBaseshort";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -212,13 +214,13 @@ public class StudentHBaseshortTest extends Base
         int count = 0;
         for (StudentHBaseshort student : students)
         {
-           /* if (student.getId() == ((Short) getMaxValue(Short.class)).shortValue())
-            {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
-                count++;
-            }
-            else*/ if (student.getId() == ((Short) getPartialValue(short.class)).shortValue())
+            /*
+             * if (student.getId() == ((Short)
+             * getMaxValue(Short.class)).shortValue()) {
+             * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+             * Assert.assertEquals("Kuldeep", student.getName()); count++; }
+             * else
+             */if (student.getId() == ((Short) getPartialValue(short.class)).shortValue())
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -567,7 +569,7 @@ public class StudentHBaseshortTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

@@ -167,13 +167,13 @@ public abstract class StudentMongoBase<E extends StudentEntityDef> extends BaseT
 
         em.persist(prepareData((Long) studentId2, 78575785898L, "Amresh", true, 20, 'C', (byte) 50, (short) 8,
                 (float) 69.6, 163.76765655, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("1234567810"), calendar,
-                ((E) instance.getClass().newInstance())));
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger(
+                        "1234567810"), calendar, ((E) instance.getClass().newInstance())));
 
         em.persist(prepareData((Long) studentId3, 78575785899L, "Amresh", true, 15, 'C', (byte) 50, (short) 8,
                 (float) 69.6, 163.76765656, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("1234567811"), calendar,
-                ((E) instance.getClass().newInstance())));
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger(
+                        "1234567811"), calendar, ((E) instance.getClass().newInstance())));
 
     }
 

@@ -112,15 +112,13 @@ public class ByteAccessor implements PropertyAccessor<Byte>
         {
             throw new PropertyAccessException(e);
         }
-    }  
-    
+    }
 
     @Override
     public Byte getCopy(Object object)
     {
-        return object != null ? new Byte((Byte)object) : null;
-    }    
-
+        return object != null ? new Byte((Byte) object) : null;
+    }
 
     public Byte getInstance(Class<?> clazz)
     {

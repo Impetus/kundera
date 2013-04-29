@@ -70,7 +70,4 @@ public class StudentHBaseByte
         this.name = name;
     }
 
-
-
-
 }

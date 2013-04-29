@@ -37,7 +37,7 @@ import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
 
 /**
  * The Class ClasspathReader.
- *
+ * 
  * @author animesh.kumar
  */
 public class ClasspathReader extends Reader
@@ -62,7 +62,7 @@ public class ClasspathReader extends Reader
 
     /**
      * Instantiates a new classpath reader.
-     *
+     * 
      * @param classesToScan
      *            the classes to scan
      */
@@ -100,7 +100,7 @@ public class ClasspathReader extends Reader
     /**
      * Uses the java.class.path system property to obtain a list of URLs that
      * represent the CLASSPATH
-     *
+     * 
      * @return the URl[]
      */
     @SuppressWarnings("deprecation")
@@ -130,33 +130,45 @@ public class ClasspathReader extends Reader
         return list.toArray(new URL[list.size()]);
     }
 
-
     /**
-     * Scan class resource in the provided urls with the additional Class-Path of each jar checking
-     *
-     * @param classRelativePath relative path to a class resource
-     * @param urls              urls to be checked
+     * Scan class resource in the provided urls with the additional Class-Path
+     * of each jar checking
+     * 
+     * @param classRelativePath
+     *            relative path to a class resource
+     * @param urls
+     *            urls to be checked
      * @return list of class path included in the base package
      */
     private URL[] findResourcesInUrls(String classRelativePath, URL[] urls)
     {
         List<URL> list = new ArrayList<URL>();
-        for (URL url : urls) {
-            if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar")) {
-                try {
+        for (URL url : urls)
+        {
+            if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
+            {
+                try
+                {
                     JarFile jarFile = new JarFile(url.getFile());
 
                     // Checking the dependencies of this jar file
                     Manifest manifest = jarFile.getManifest();
-                    if (manifest != null) {
+                    if (manifest != null)
+                    {
                         String classPath = manifest.getMainAttributes().getValue("Class-Path");
-                        // Scan all entries in the classpath if they are specified in the jar
-                        if (!StringUtils.isEmpty(classPath)) {
+                        // Scan all entries in the classpath if they are
+                        // specified in the jar
+                        if (!StringUtils.isEmpty(classPath))
+                        {
                             List<URL> subList = new ArrayList<URL>();
-                            for (String cpEntry : classPath.split(" ")) {
-                                try {
+                            for (String cpEntry : classPath.split(" "))
+                            {
+                                try
+                                {
                                     subList.add(new URL(cpEntry));
-                                } catch (MalformedURLException e) {
+                                }
+                                catch (MalformedURLException e)
+                                {
                                     logger.warn("Incorrect URL in the classpath of a jar file [" + url.toString()
                                             + "]: " + cpEntry);
                                 }
@@ -166,19 +178,28 @@ public class ClasspathReader extends Reader
                         }
                     }
                     JarEntry present = jarFile.getJarEntry(classRelativePath + ".class");
-                    if (present != null) {
+                    if (present != null)
+                    {
                         list.add(url);
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     logger.warn("Error during loading from context , Caused by:" + e.getMessage());
                 }
 
-            } else if (url.getPath().endsWith("/")) {
+            }
+            else if (url.getPath().endsWith("/"))
+            {
                 File file = new File(url.getPath() + classRelativePath + ".class");
-                if (file.exists()) {
-                    try {
+                if (file.exists())
+                {
+                    try
+                    {
                         list.add(file.toURL());
-                    } catch (MalformedURLException e) {
+                    }
+                    catch (MalformedURLException e)
+                    {
                         throw new ResourceReadingException(e);
                     }
                 }
@@ -190,7 +211,7 @@ public class ClasspathReader extends Reader
 
     /**
      * Scan class resources into a basePackagetoScan path.
-     *
+     * 
      * @return list of class path included in the base package
      */
 
@@ -201,7 +222,8 @@ public class ClasspathReader extends Reader
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
 
-        for (String fullyQualifiedClassName : classesToScan) {
+        for (String fullyQualifiedClassName : classesToScan)
+        {
             String classRelativePath = fullyQualifiedClassName.replace(".", "/");
             URL[] urls = ((URLClassLoader) classLoader).getURLs();
             list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath, urls)));
@@ -212,7 +234,7 @@ public class ClasspathReader extends Reader
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override
@@ -233,7 +255,7 @@ public class ClasspathReader extends Reader
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.classreading.Reader#getFilter()
      */
 
@@ -244,7 +266,7 @@ public class ClasspathReader extends Reader
 
     /**
      * Sets the filter.
-     *
+     * 
      * @param filter
      *            the new filter
      */

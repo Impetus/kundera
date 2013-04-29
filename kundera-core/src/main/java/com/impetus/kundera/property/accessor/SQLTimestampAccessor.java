@@ -118,7 +118,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         {
             return null;
         }
-        
+
         return String.valueOf(timeStamp.getTime());
     }
 
@@ -136,15 +136,13 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         {
             return null;
         }
-        if(StringUtils.isNumeric(s))
+        if (StringUtils.isNumeric(s))
         {
             return new Timestamp(Long.parseLong(s));
-        }        
+        }
         Timestamp t = Timestamp.valueOf(s);
         return t;
     }
-    
-    
 
     @Override
     public Timestamp getCopy(Object object)

@@ -40,13 +40,15 @@ public class StudentMongoTimestampTest extends MongoBase
     @After
     public void tearDown() throws Exception
     {
-//        EntityManager em = emf.createEntityManager();
-//        em.remove(em.find(StudentMongoTimestamp.class, getMaxValue(Timestamp.class)));
-//        em.remove(em.find(StudentMongoTimestamp.class, getMinValue(Timestamp.class)));
-//        if (AUTO_MANAGE_SCHEMA)
-//        {
-            dropSchema();
-//        }
+        // EntityManager em = emf.createEntityManager();
+        // em.remove(em.find(StudentMongoTimestamp.class,
+        // getMaxValue(Timestamp.class)));
+        // em.remove(em.find(StudentMongoTimestamp.class,
+        // getMinValue(Timestamp.class)));
+        // if (AUTO_MANAGE_SCHEMA)
+        // {
+        dropSchema();
+        // }
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();

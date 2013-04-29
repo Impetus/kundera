@@ -21,9 +21,11 @@ public class StudentHBaselongTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
+
     private static final String table = "StudentHBaselong";
 
     private HBaseCli cli;
+
     @Before
     public void setUp() throws Exception
     {
@@ -218,12 +220,15 @@ public class StudentHBaselongTest extends Base
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-//            else if (student.getId() == ((Long) getMinValue(long.class)).longValue())
-//            {
-//                Assert.assertEquals(getPartialValue(short.class), student.getAge());
-//                Assert.assertEquals(getMinValue(String.class), student.getName());
-//                count++;
-//            }
+            // else if (student.getId() == ((Long)
+            // getMinValue(long.class)).longValue())
+            // {
+            // Assert.assertEquals(getPartialValue(short.class),
+            // student.getAge());
+            // Assert.assertEquals(getMinValue(String.class),
+            // student.getName());
+            // count++;
+            // }
             else
             {
                 Assert.assertEquals(getRandomValue(long.class), student.getId());
@@ -368,8 +373,8 @@ public class StudentHBaselongTest extends Base
         List<StudentHBaselong> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaselong s where s.name = Amresh and s.age between " + getPartialValue(short.class)
-                + " and " + getMaxValue(short.class);
+        query = "Select s From StudentHBaselong s where s.name = Amresh and s.age between "
+                + getPartialValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -567,7 +572,7 @@ public class StudentHBaselongTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

@@ -39,7 +39,6 @@ import com.impetus.client.entity.PromoCode;
 import com.impetus.client.entity.Users;
 import com.impetus.client.persistence.CassandraCli;
 
-
 public class UserPromoCodeTest
 {
     private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
@@ -85,43 +84,40 @@ public class UserPromoCodeTest
         promoCode1.setPromoCodeName("promoname1");
 
         u.getPromoCodes().add(promoCode1);
-        
+
         em.persist(u);
-        
+
         em.clear(); // to avoid fetch from cache and get from DB.
-        
+
         Users found = em.find(Users.class, "1_u");
-        
+
         Assert.assertNotNull(found);
         Assert.assertEquals("firstname", found.getFirstName());
         Assert.assertEquals(1, found.getPromoCodes().size());
-        
-        // add 1 more promo code.
-        
-       PromoCode promoCode = new PromoCode();
-       promoCode.setPromoCodeId("2_p");
-       promoCode.setPromoCodeName("promoname2");
-       
-       found.getPromoCodes().add(promoCode);
-       em.merge(found);
-       
-       
-       em.clear(); // to avoid fetch from cache get from DB.
-       
-       found = em.find(Users.class, "1_u");
-       
-       Assert.assertNotNull(found);
-       Assert.assertEquals("firstname", found.getFirstName());
-       Assert.assertEquals(2, found.getPromoCodes().size());
-       
-       
-       // Delete
-       em.remove(found);
 
-       
-       found = em.find(Users.class, "1_u");
-       
-       Assert.assertNull(found);
+        // add 1 more promo code.
+
+        PromoCode promoCode = new PromoCode();
+        promoCode.setPromoCodeId("2_p");
+        promoCode.setPromoCodeName("promoname2");
+
+        found.getPromoCodes().add(promoCode);
+        em.merge(found);
+
+        em.clear(); // to avoid fetch from cache get from DB.
+
+        found = em.find(Users.class, "1_u");
+
+        Assert.assertNotNull(found);
+        Assert.assertEquals("firstname", found.getFirstName());
+        Assert.assertEquals(2, found.getPromoCodes().size());
+
+        // Delete
+        em.remove(found);
+
+        found = em.find(Users.class, "1_u");
+
+        Assert.assertNull(found);
 
     }
 

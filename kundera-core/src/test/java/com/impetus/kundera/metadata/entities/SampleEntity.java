@@ -43,8 +43,9 @@ public class SampleEntity
 
     public SampleEntity()
     {
-        
+
     }
+
     /**
      * @return the key
      */

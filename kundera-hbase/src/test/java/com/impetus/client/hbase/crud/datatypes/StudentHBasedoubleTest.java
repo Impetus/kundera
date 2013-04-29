@@ -21,6 +21,7 @@ public class StudentHBasedoubleTest extends Base
     private static final String table = "StudentHBasedouble";
 
     private HBaseCli cli;
+
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
@@ -213,13 +214,13 @@ public class StudentHBasedoubleTest extends Base
         int count = 0;
         for (StudentHBasedouble student : students)
         {
-           /* if (student.getId() == ((Double) getMaxValue(Double.class)).doubleValue())
-            {
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
-                Assert.assertEquals("Kuldeep", student.getName());
-                count++;
-            }
-            else */if (student.getId() == ((Double) getMinValue(Double.class)).doubleValue())
+            /*
+             * if (student.getId() == ((Double)
+             * getMaxValue(Double.class)).doubleValue()) {
+             * Assert.assertEquals(getMaxValue(short.class), student.getAge());
+             * Assert.assertEquals("Kuldeep", student.getName()); count++; }
+             * else
+             */if (student.getId() == ((Double) getMinValue(Double.class)).doubleValue())
             {
                 Assert.assertEquals(getPartialValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -424,8 +425,8 @@ public class StudentHBasedoubleTest extends Base
         List<StudentHBasedouble> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBasedouble s where s.name = Kuldeep and s.age >= " + getPartialValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentHBasedouble s where s.name = Kuldeep and s.age >= "
+                + getPartialValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -568,7 +569,7 @@ public class StudentHBasedoubleTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

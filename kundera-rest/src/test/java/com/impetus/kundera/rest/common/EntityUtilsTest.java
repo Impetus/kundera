@@ -24,7 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class EntityUtilsTest
@@ -47,43 +48,44 @@ public class EntityUtilsTest
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.rest.common.EntityUtils#isValidQuery(java.lang.String, java.lang.String)}.
+     * Test method for
+     * {@link com.impetus.kundera.rest.common.EntityUtils#isValidQuery(java.lang.String, java.lang.String)}
+     * .
      */
     @Test
     public void testIsValidQuery()
     {
-        /** Positive scenario*/
+        /** Positive scenario */
         String insertQuery = "Insert into Book values (1, Amresh)";
         Assert.assertTrue(EntityUtils.isValidQuery(insertQuery, HttpMethod.POST));
-        
+
         String selectQuery = "Select b from Book b";
         Assert.assertTrue(EntityUtils.isValidQuery(selectQuery, HttpMethod.GET));
-        
+
         String updateQuery = "update Book set author=Amresh";
         Assert.assertTrue(EntityUtils.isValidQuery(updateQuery, HttpMethod.PUT));
-        
+
         String deleteQuery = "delete from Book";
         Assert.assertTrue(EntityUtils.isValidQuery(deleteQuery, HttpMethod.DELETE));
-        
-        
+
         /** Negative scenario - Unmatched Http Method */
         String insertQuery2 = "Insert into Book values (1, Amresh)";
         Assert.assertFalse(EntityUtils.isValidQuery(insertQuery2, HttpMethod.GET));
-        
+
         String selectQuery2 = "Select b from Book b";
         Assert.assertFalse(EntityUtils.isValidQuery(selectQuery2, HttpMethod.POST));
-        
+
         String updateQuery2 = "update Book set author=Amresh";
         Assert.assertFalse(EntityUtils.isValidQuery(updateQuery2, HttpMethod.DELETE));
-        
+
         String deleteQuery2 = "delete from Book";
         Assert.assertFalse(EntityUtils.isValidQuery(deleteQuery2, HttpMethod.PUT));
-        
+
         /** Negative scenario - Junk Values */
         String junkQuery = "Blah Blah Blah";
-        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.GET));      
-        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.POST));       
-        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.DELETE));        
+        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.GET));
+        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.POST));
+        Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.DELETE));
         Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.PUT));
     }
 

@@ -75,21 +75,21 @@ public class TwibaseTest extends TwitterTestBaseHbase
     {
         if (AUTO_MANAGE_SCHEMA)
         {/*
-            cli.createTable("USER");
-            cli.addColumnFamily("USER", "PREFERENCE_ID");
-            cli.addColumnFamily("USER", "FRIEND_ID");
-            cli.addColumnFamily("USER", "FOLLOWER_ID");
-            cli.addColumnFamily("USER", "personalDetail");
-
-            cli.createTable("PREFERENCE");
-            cli.addColumnFamily("PREFERENCE", "WEBSITE_THEME");
-            cli.addColumnFamily("PREFERENCE", "PRIVACY_LEVEL");
-
-            cli.createTable("EXTERNAL_LINK");
-            cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
-            cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
-            cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
-        */}
+          * cli.createTable("USER"); cli.addColumnFamily("USER",
+          * "PREFERENCE_ID"); cli.addColumnFamily("USER", "FRIEND_ID");
+          * cli.addColumnFamily("USER", "FOLLOWER_ID");
+          * cli.addColumnFamily("USER", "personalDetail");
+          * 
+          * cli.createTable("PREFERENCE"); cli.addColumnFamily("PREFERENCE",
+          * "WEBSITE_THEME"); cli.addColumnFamily("PREFERENCE",
+          * "PRIVACY_LEVEL");
+          * 
+          * cli.createTable("EXTERNAL_LINK");
+          * cli.addColumnFamily("EXTERNAL_LINK", "LINK_TYPE");
+          * cli.addColumnFamily("EXTERNAL_LINK", "USER_ID");
+          * cli.addColumnFamily("EXTERNAL_LINK", "LINK_ADDRESS");
+          */
+        }
     }
 
     @Override

@@ -26,66 +26,76 @@ import redis.clients.jedis.Transaction;
 import com.impetus.kundera.persistence.TransactionResource;
 
 /**
- * Defines transaction boundaries for redis client, if user opted for transaction support(kundera.transaction.resource)
+ * Defines transaction boundaries for redis client, if user opted for
+ * transaction support(kundera.transaction.resource)
+ * 
  * @author vivek
- *
+ * 
  */
 public class RedisTransaction implements TransactionResource
 {
 
-      private List<Transaction>  resources = new ArrayList<Transaction>();
-      
-      private boolean isTransactionInProgress;
-    
-      /**
-       * Default constructor
-       */
-      public RedisTransaction()
-      {
-          
-      }
-      
-    /* (non-Javadoc)
+    private List<Transaction> resources = new ArrayList<Transaction>();
+
+    private boolean isTransactionInProgress;
+
+    /**
+     * Default constructor
+     */
+    public RedisTransaction()
+    {
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#onBegin()
      */
     @Override
     public void onBegin()
     {
         isTransactionInProgress = true;
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#onCommit()
      */
     @Override
     public void onCommit()
     {
-        for(BinaryTransaction resource : resources)
+        for (BinaryTransaction resource : resources)
         {
             resource.exec();
         }
         isTransactionInProgress = false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#onRollback()
      */
     @Override
     public void onRollback()
     {
-        for(BinaryTransaction resource : resources)
+        for (BinaryTransaction resource : resources)
         {
             resource.discard();
         }
-        
+
         resources.clear();
         resources = new ArrayList<Transaction>();
         isTransactionInProgress = false;
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#onFlush()
      */
     @Override
@@ -94,7 +104,9 @@ public class RedisTransaction implements TransactionResource
         onCommit();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#prepare()
      */
     @Override
@@ -103,7 +115,9 @@ public class RedisTransaction implements TransactionResource
         return Response.YES;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.persistence.TransactionResource#isActive()
      */
     @Override
@@ -115,11 +129,12 @@ public class RedisTransaction implements TransactionResource
     Transaction bindResource(Jedis resource)
     {
         Transaction tx = null;
-        if(resources.isEmpty())
+        if (resources.isEmpty())
         {
             tx = resource.multi();
             resources.add(tx);
-        } else
+        }
+        else
         {
             tx = resources.get(0);
         }

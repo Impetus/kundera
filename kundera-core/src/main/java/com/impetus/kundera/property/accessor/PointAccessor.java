@@ -28,7 +28,8 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 /**
- * Property Accessor for {@link Point} 
+ * Property Accessor for {@link Point}
+ * 
  * @author amresh.singh
  */
 public class PointAccessor implements PropertyAccessor<Point>
@@ -42,7 +43,7 @@ public class PointAccessor implements PropertyAccessor<Point>
         try
         {
             ois = new ObjectInputStream(new ByteArrayInputStream(b));
-            o = (Point)ois.readObject();
+            o = (Point) ois.readObject();
             ois.close();
         }
         catch (IOException e)
@@ -83,12 +84,13 @@ public class PointAccessor implements PropertyAccessor<Point>
     @Override
     public Point fromString(Class targetClass, String s)
     {
-        if(s == null) return null;
-        
+        if (s == null)
+            return null;
+
         WKTReader reader = new WKTReader();
         try
         {
-            return new Point((com.vividsolutions.jts.geom.Point)reader.read(s));
+            return new Point((com.vividsolutions.jts.geom.Point) reader.read(s));
         }
         catch (ParseException e)
         {
@@ -99,8 +101,9 @@ public class PointAccessor implements PropertyAccessor<Point>
     @Override
     public Point getCopy(Object object)
     {
-        if(object == null) return null;
-        
+        if (object == null)
+            return null;
+
         Point p = (Point) object;
         return new Point(p.getX(), p.getY());
     }

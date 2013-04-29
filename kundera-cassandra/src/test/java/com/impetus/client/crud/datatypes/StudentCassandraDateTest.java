@@ -34,12 +34,10 @@ public class StudentCassandraDateTest extends CassandraBase
 
     private static final String keyspace = "KunderaCassandraDataType";
 
-    
-
     @Before
     public void setUp() throws Exception
     {
-       super.setUp();
+        super.setUp();
     }
 
     @After
@@ -102,7 +100,7 @@ public class StudentCassandraDateTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraDate studentMax = em.find(StudentCassandraDate.class, getMaxValue(Date.class));       
+        StudentCassandraDate studentMax = em.find(StudentCassandraDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -662,6 +660,5 @@ public class StudentCassandraDateTest extends CassandraBase
     {
         CassandraCli.dropKeySpace(keyspace);
     }
-
 
 }

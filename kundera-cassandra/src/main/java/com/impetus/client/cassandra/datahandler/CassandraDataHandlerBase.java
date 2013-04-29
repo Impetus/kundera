@@ -16,7 +16,6 @@
 package com.impetus.client.cassandra.datahandler;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,10 +36,8 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -63,7 +60,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 
@@ -769,12 +765,12 @@ public abstract class CassandraDataHandlerBase
         }
         catch (InstantiationException iex)
         {
-            log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+            log.error("Eror while retrieving data, Caused by: ", iex);
             throw new PersistenceException(iex);
         }
         catch (IllegalAccessException iaex)
         {
-            log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+            log.error("Eror while retrieving data, Caused by: ", iaex);
             throw new PersistenceException(iaex);
         }
 
@@ -1175,12 +1171,12 @@ public abstract class CassandraDataHandlerBase
             catch (InstantiationException iex)
             {
                 // TODO Auto-generated catch block
-                log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+                log.error("Error while retrieving data, Caused by: ", iex);
                 throw new PersistenceException(iex);
             }
             catch (IllegalAccessException iaex)
             {
-                log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+                log.error("Error while retrieving data, Caused by: ", iaex);
                 throw new PersistenceException(iaex);
             }
         }
@@ -1204,7 +1200,7 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn(pae.getMessage());
+                log.warn("Error while setting field value, Caused by: " + pae);
             }
         }
     }
@@ -1245,7 +1241,7 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn(pae.getMessage());
+                log.warn("Error while setting field value via CQL, Caused by: ", pae);
             }
         }
     }
@@ -1290,7 +1286,7 @@ public abstract class CassandraDataHandlerBase
         }
         catch (PropertyAccessException pae)
         {
-            log.warn(pae.getMessage());
+            log.warn("Error reading property while getting field value via CQL, Caused by: ", pae);
         }
         return null;
     }
@@ -1658,8 +1654,12 @@ public abstract class CassandraDataHandlerBase
                 // This is an entity column to be persisted in a super column
                 // family. It will be stored as a super column that would
                 // have just one column with the same name
-                log.info(exp.getMessage()
-                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                if (log.isInfoEnabled())
+                {
+                    log.info(exp.getMessage()
+                            + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                }
+
                 value = counterSuperColumnObject.toString();
             }
             if (null != value)
@@ -1673,9 +1673,8 @@ public abstract class CassandraDataHandlerBase
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("For counter column arguments should be numeric type, error caused by :"
-                            + nfe.getMessage());
-                    throw new KunderaException("For counter column,arguments should be numeric type", nfe);
+                    log.error("For counter column arguments should be numeric type, Caused by :", nfe);
+                    throw new KunderaException("For counter column,arguments should be numeric type.", nfe);
                 }
             }
         }
@@ -1730,8 +1729,11 @@ public abstract class CassandraDataHandlerBase
                 // This is an entity column to be persisted in a super column
                 // family. It will be stored as a super column that would
                 // have just one column with the same name
-                log.info(exp.getMessage()
-                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                if (log.isInfoEnabled())
+                {
+                    log.info(exp.getMessage()
+                            + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                }
                 value = superColumnObject.toString().getBytes();
             }
             if (null != value)

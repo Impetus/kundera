@@ -135,7 +135,7 @@ public class StudentHBaseCalendarTest extends Base
         findByNameAndAgeWithOrClause();
         findByAgeAndNameGTAndLT();
         findByNameAndAGEBetween();
-//        findByRange();
+        // findByRange();
     }
 
     private void findByAgeAndNameGTAndLT()
@@ -289,10 +289,10 @@ public class StudentHBaseCalendarTest extends Base
         em.persist(studentMax);
 
         em.close();
-        
-         em = emf.createEntityManager();
 
-         studentMax = em.find(StudentHBaseCalendar.class, getMaxValue(Calendar.class));
+        em = emf.createEntityManager();
+
+        studentMax = em.find(StudentHBaseCalendar.class, getMaxValue(Calendar.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -353,14 +353,14 @@ public class StudentHBaseCalendarTest extends Base
         EntityManager em;
         String query;
         Query q;
-        List<StudentHBaseCalendar> students;        
+        List<StudentHBaseCalendar> students;
         em = emf.createEntityManager();
         query = "Select s From StudentHBaseCalendar s where s.name = Amresh and s.age between "
                 + getPartialValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
-        Assert.assertTrue(students.isEmpty());      
+        Assert.assertTrue(students.isEmpty());
         em.close();
     }
 
@@ -505,7 +505,7 @@ public class StudentHBaseCalendarTest extends Base
     public void createSchema()
     {
         cli.createTable(table);
-        
+
     }
 
     public void dropSchema()

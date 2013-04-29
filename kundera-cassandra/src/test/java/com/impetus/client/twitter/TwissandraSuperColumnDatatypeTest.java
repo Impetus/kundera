@@ -810,48 +810,46 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         externalLinkCfDef.addToColumn_metadata(columnDef1);
         externalLinkCfDef.addToColumn_metadata(columnDef2);
         externalLinkCfDef.addToColumn_metadata(columnDef4);
-        
-       /* 
-        CfDef userCfDef = new CfDef();
-        userCfDef.name = "USER";
-        userCfDef.keyspace = keyspace;
-        userCfDef.column_type = "Super";
-        userCfDef.setComparator_type("UTF8Type");
-        userCfDef.setSubcomparator_type("AsciiType");
-        userCfDef.setKey_validation_class("UTF8Type");
 
-        CfDef userIndexCfDef = new CfDef();
-        userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
-        userIndexCfDef.column_type = "Super";
-        userIndexCfDef.keyspace = keyspace;
-        userIndexCfDef.setKey_validation_class("UTF8Type");
-
-        CfDef prefrenceCfDef = new CfDef();
-        prefrenceCfDef.name = "PREFERENCE";
-        prefrenceCfDef.keyspace = keyspace;
-        prefrenceCfDef.setComparator_type("UTF8Type");
-        prefrenceCfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("WEBSITE_THEME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("PRIVACY_LEVEL".getBytes()), "UTF8Type");
-        columnDef3.index_type = IndexType.KEYS;
-        prefrenceCfDef.addToColumn_metadata(columnDef);
-        prefrenceCfDef.addToColumn_metadata(columnDef3);
-
-        CfDef externalLinkCfDef = new CfDef();
-        externalLinkCfDef.name = "EXTERNAL_LINK";
-        externalLinkCfDef.keyspace = keyspace;
-        externalLinkCfDef.setComparator_type("UTF8Type");
-        externalLinkCfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("LINK_TYPE".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("LINK_ADDRESS".getBytes()), "UTF8Type");
-        columnDef2.index_type = IndexType.KEYS;
-        ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("USER_ID".getBytes()), "UTF8Type");
-        columnDef4.index_type = IndexType.KEYS;
-        externalLinkCfDef.addToColumn_metadata(columnDef1);
-        externalLinkCfDef.addToColumn_metadata(columnDef2);
-        externalLinkCfDef.addToColumn_metadata(columnDef4);*/
+        /*
+         * CfDef userCfDef = new CfDef(); userCfDef.name = "USER";
+         * userCfDef.keyspace = keyspace; userCfDef.column_type = "Super";
+         * userCfDef.setComparator_type("UTF8Type");
+         * userCfDef.setSubcomparator_type("AsciiType");
+         * userCfDef.setKey_validation_class("UTF8Type");
+         * 
+         * CfDef userIndexCfDef = new CfDef(); userIndexCfDef.name = "USER" +
+         * Constants.INDEX_TABLE_SUFFIX; userIndexCfDef.column_type = "Super";
+         * userIndexCfDef.keyspace = keyspace;
+         * userIndexCfDef.setKey_validation_class("UTF8Type");
+         * 
+         * CfDef prefrenceCfDef = new CfDef(); prefrenceCfDef.name =
+         * "PREFERENCE"; prefrenceCfDef.keyspace = keyspace;
+         * prefrenceCfDef.setComparator_type("UTF8Type");
+         * prefrenceCfDef.setDefault_validation_class("UTF8Type"); ColumnDef
+         * columnDef = new
+         * ColumnDef(ByteBuffer.wrap("WEBSITE_THEME".getBytes()), "UTF8Type");
+         * columnDef.index_type = IndexType.KEYS; ColumnDef columnDef3 = new
+         * ColumnDef(ByteBuffer.wrap("PRIVACY_LEVEL".getBytes()), "UTF8Type");
+         * columnDef3.index_type = IndexType.KEYS;
+         * prefrenceCfDef.addToColumn_metadata(columnDef);
+         * prefrenceCfDef.addToColumn_metadata(columnDef3);
+         * 
+         * CfDef externalLinkCfDef = new CfDef(); externalLinkCfDef.name =
+         * "EXTERNAL_LINK"; externalLinkCfDef.keyspace = keyspace;
+         * externalLinkCfDef.setComparator_type("UTF8Type");
+         * externalLinkCfDef.setDefault_validation_class("UTF8Type"); ColumnDef
+         * columnDef1 = new ColumnDef(ByteBuffer.wrap("LINK_TYPE".getBytes()),
+         * "UTF8Type"); columnDef1.index_type = IndexType.KEYS; ColumnDef
+         * columnDef2 = new
+         * ColumnDef(ByteBuffer.wrap("LINK_ADDRESS".getBytes()), "UTF8Type");
+         * columnDef2.index_type = IndexType.KEYS; ColumnDef columnDef4 = new
+         * ColumnDef(ByteBuffer.wrap("USER_ID".getBytes()), "UTF8Type");
+         * columnDef4.index_type = IndexType.KEYS;
+         * externalLinkCfDef.addToColumn_metadata(columnDef1);
+         * externalLinkCfDef.addToColumn_metadata(columnDef2);
+         * externalLinkCfDef.addToColumn_metadata(columnDef4);
+         */
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(userCfDef);

@@ -74,5 +74,4 @@ public class StudentCassandraDouble
         this.name = name;
     }
 
-
 }

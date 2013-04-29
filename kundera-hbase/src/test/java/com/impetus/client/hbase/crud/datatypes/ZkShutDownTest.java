@@ -33,7 +33,7 @@ public class ZkShutDownTest
     @Test
     public void test()
     {
-//        HBaseCli.cleanUp();
+        // HBaseCli.cleanUp();
     }
 
 }

@@ -98,13 +98,12 @@ public class StringAccessor implements PropertyAccessor<String>
     public String fromString(Class targetClass, String s)
     {
         return s;
-    } 
-    
+    }
 
     @Override
     public String getCopy(Object object)
     {
-        return object != null ? new String((String)object) : null;
+        return object != null ? new String((String) object) : null;
     }
 
     public String getInstance(Class<?> clazz)

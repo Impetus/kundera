@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-
 /**
  * Class Dummy Property Reader for test
  * 
@@ -49,7 +48,7 @@ public class DummyPropertyReader extends AbstractPropertyReader implements Prope
         }
 
     }
-   
+
     /**
      * Dummy schema metadata for test.
      * 
