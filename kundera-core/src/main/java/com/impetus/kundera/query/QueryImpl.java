@@ -238,7 +238,6 @@ public abstract class QueryImpl implements Query
             String[] columnsToSelect)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
-        System.out.println("ddd");
         Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
                 Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
