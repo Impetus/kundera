@@ -60,10 +60,10 @@ public class CassandraBatchProcessorMixedTest
     private static final String PERSISTENCE_UNIT = "batchTestSizeTwenty";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     @Before
     public void setUp() throws Exception
@@ -124,6 +124,7 @@ public class CassandraBatchProcessorMixedTest
     @After
     public void tearDown() throws Exception
     {
+    	em.close();
         emf.close();
         CassandraCli.dropKeySpace(KEYSPACE_KUNDERA_EXAMPLES);
     }

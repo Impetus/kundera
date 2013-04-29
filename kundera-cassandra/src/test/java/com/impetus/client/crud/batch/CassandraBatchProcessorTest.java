@@ -63,10 +63,10 @@ public class CassandraBatchProcessorTest
     private static final String PERSISTENCE_UNIT = "secIdxBatchTest";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     protected boolean AUTO_MANAGE_SCHEMA = true;
 
@@ -150,6 +150,7 @@ public class CassandraBatchProcessorTest
     @After
     public void tearDown() throws Exception
     {
+    	em.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }

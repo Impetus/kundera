@@ -21,10 +21,10 @@ public class OTMCRUDTest
     private static final String SEC_IDX_CASSANDRA_TEST = "myapp_pu";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     @Before
     public void setUp() throws Exception

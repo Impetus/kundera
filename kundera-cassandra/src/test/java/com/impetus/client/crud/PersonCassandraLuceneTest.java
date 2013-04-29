@@ -75,10 +75,10 @@ public class PersonCassandraLuceneTest extends BaseTest
     private static final boolean USE_CQL = false;
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /** The col. */
     private Map<Object, Object> col;
@@ -484,7 +484,7 @@ public class PersonCassandraLuceneTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-        // emf.close();
+         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
         LuceneCleanupUtilities.cleanLuceneDirectory(LUCENE_IDX_CASSANDRA_TEST);
     }

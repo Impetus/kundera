@@ -31,6 +31,7 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,10 +45,10 @@ public class UserPromoCodeTest
     private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
     /**
      * Sets the up.
@@ -60,7 +61,7 @@ public class UserPromoCodeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+//        loadData();
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
         em = emf.createEntityManager();
     }
@@ -187,4 +188,12 @@ public class UserPromoCodeTest
 
     }
 
+    @After
+    
+    public void tearDown()
+    {
+    	em.close();
+    	emf.close();
+        CassandraCli.dropKeySpace("KunderaExamples");
+    }
 }
