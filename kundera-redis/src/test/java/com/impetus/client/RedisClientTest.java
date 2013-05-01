@@ -106,7 +106,7 @@ public class RedisClientTest
     {
         Map<String, String> batchProperty = new HashMap<String, String>(1);
         batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
-        emf = Persistence.createEntityManagerFactory(REDIS_PU, batchProperty);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(REDIS_PU, batchProperty);
         EntityManager em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         RedisClient client = (RedisClient) clients.get(REDIS_PU);
@@ -141,12 +141,12 @@ public class RedisClientTest
         em.close();
         em = null;
 
-        // emf.close();
+//         emf1.close();
         //
         // emf = null;
-        // batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
-        // emf = Persistence.createEntityManagerFactory(REDIS_PU,
-        // batchProperty);
+         batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
+         emf = Persistence.createEntityManagerFactory(REDIS_PU,
+         batchProperty);
 
     }
 
@@ -276,6 +276,7 @@ public class RedisClientTest
         em.close();
 
         emf.close();
-    }
+        emf=null;
+     }
 
 }

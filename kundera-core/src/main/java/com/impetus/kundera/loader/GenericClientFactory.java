@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -69,7 +70,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     protected PropertyReader propertyReader;
 
     /** Holds persistence unit related property */
-    protected Map<String, Object> externalProperties;
+    protected Map<String, Object> externalProperties = new HashMap<String, Object>();
 
     /**
      * Load.

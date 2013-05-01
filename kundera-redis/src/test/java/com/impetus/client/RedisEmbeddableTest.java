@@ -77,6 +77,7 @@ public class RedisEmbeddableTest
 
         found = em.find(RedisEmbeddedUser.class, userId);
         Assert.assertNull(found);
+        em.close();
     }
 
     /**

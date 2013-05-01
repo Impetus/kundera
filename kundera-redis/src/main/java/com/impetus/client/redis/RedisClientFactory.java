@@ -80,17 +80,61 @@ public class RedisClientFactory extends GenericClientFactory
         Properties props = puMetadata.getProperties();
         String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
                 : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        if(contactNode == null)
+        {
+        	contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+        }
         String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
                 : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        
+        if(defaultPort == null)
+        {
+        	defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        
         String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
                 : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
+        if(password == null)
+        {
+        	password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+        }
+        
         String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        
+        if(maxActivePerNode == null)
+        {
+        	maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+        
         String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+        
+        if(maxIdlePerNode == null)
+        {
+        	maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+        }
+        
         String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+        
+        if(minIdlePerNode == null)
+        {
+        	minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+        }
+        
         String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        
+        if(maxTotal == null)
+        {
+        	maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+        }
+        
         String txTimeOut = props.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
 
+        if(txTimeOut == null)
+        {
+        	txTimeOut = (String) externalProperties.get(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
+        }
+        
         JedisPoolConfig poolConfig = onPoolConfig(WHEN_EXHAUSTED_FAIL, maxActivePerNode, maxIdlePerNode,
                 minIdlePerNode, maxTotal);
 
@@ -114,14 +158,17 @@ public class RedisClientFactory extends GenericClientFactory
         }
         else
         {
-            Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+            // Jedis connection = new Jedis(contactNode,
+            // Integer.valueOf(defaultPort));
 
-            if (password != null)
-            {
-                connection.auth(password);
-            }
-            connection.connect();
-            return connection;
+//            if (password != null)
+//            {
+//                // connection.auth(password);
+//            }
+            // connection.connect();
+        	// Connection to made available at the time of getConnection(). YCSB performance fixes and ideally it is needed at that time only. 
+        	// No need to cache it at factory level as needed to managed within entity manager boundary! 
+            return null;
         }
     }
 
@@ -144,7 +191,7 @@ public class RedisClientFactory extends GenericClientFactory
      */
     protected void setExternalProperties(Map<String, Object> puProperties)
     {
-        if (this.externalProperties == null)
+        if (puProperties != null)
         {
             this.externalProperties = puProperties;
         }
@@ -174,8 +221,8 @@ public class RedisClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        if (logger.isDebugEnabled())
-            logger.info("on close destroying connection pool");
+        // if(logger.isDebugEnabled())
+        logger.info("on close destroying connection pool");
 
         if (getConnectionPoolOrConnection() != null && getConnectionPoolOrConnection() instanceof JedisPool)
         {
@@ -185,7 +232,7 @@ public class RedisClientFactory extends GenericClientFactory
         {
             ((Jedis) getConnectionPoolOrConnection()).disconnect();
         }
-        this.externalProperties = null;
+
     }
 
     /**
@@ -198,7 +245,7 @@ public class RedisClientFactory extends GenericClientFactory
         if (logger.isDebugEnabled())
             logger.info("borrowing connection from pool");
         Object poolOrConnection = getConnectionPoolOrConnection();
-        if (poolOrConnection instanceof JedisPool)
+        if (poolOrConnection != null && poolOrConnection instanceof JedisPool)
         {
 
             Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
@@ -218,7 +265,33 @@ public class RedisClientFactory extends GenericClientFactory
         }
         else
         {
-            return (Jedis) poolOrConnection;
+            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit());
+
+            Properties props = puMetadata.getProperties();
+
+            String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                    : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+            String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+            String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+
+            if (defaultPort == null || !StringUtils.isNumeric(defaultPort))
+            {
+                throw new RuntimeException("Invalid port provided: " + defaultPort);
+            }
+            Jedis connection = new Jedis(contactNode, Integer.parseInt(defaultPort));
+
+
+            if (password != null)
+            {
+                connection.auth(password);
+            }
+            connection.connect();
+
+            // System.out.println("Returning connection");
+            return connection;
         }
     }
 
