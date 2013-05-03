@@ -202,7 +202,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         else
         {
             logger.debug("Returning fresh client instance for persistence unit : " + persistenceUnit);
-            client = instantiateClient(persistenceUnit);
+            // no need to hold a client reference.
+            return instantiateClient(persistenceUnit);
         }
 
         return client;
