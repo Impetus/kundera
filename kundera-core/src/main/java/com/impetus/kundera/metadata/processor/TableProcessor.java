@@ -33,6 +33,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -112,7 +113,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
 
-        if (schemaStr == null)
+        if (StringUtils.isBlank(schemaStr))
         {
             LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
                     + ". This entity won't be persisted");
