@@ -3,7 +3,7 @@ Overview
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
 *  To make working with NoSQL as simple as working with SQL
-*   To serve as JPA Compliant mapping solution for NoSQL Datastores.
+*  To serve as JPA Compliant mapping solution for NoSQL Datastores.
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
@@ -28,13 +28,26 @@ Currently Supported Datasources
 *	MongoDB
 *	HBase
 *  Redis
+*  OracleNoSQL
 *  Neo4j
 *  Relational databases
 
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.4 is released tag.
+####Please Note: trunk is current development branch. 2.5 is released tag.
+
+#### 30-Apr-2013 - Kundera 2.5 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.4:
+
+* Support for OracleNoSQL
+   [Please use the Oracle NoSQL jars from the Oracle NoSQL distribution at:
+   http://download.oracle.com/otn-pub/otn_software/nosql-database/kv-ce-2.0.26.zip.
+   For the convenience of those who want to build Kundera from source we have additionally
+   placed the jars at http://kundera.googlecode.com/svn/maven2/maven-missing-resources/]
+ 
+* CQL 3.0 interoperability with thrift
+
 
 #### 08-Mar-2013 - Kundera 2.4 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.3:

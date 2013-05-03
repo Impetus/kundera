@@ -68,6 +68,8 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.property.accessor.StringAccessor;
 
 /**
  * Redis client implementation for REDIS.
@@ -98,6 +100,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
 
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
+    
+    private Jedis connection;
 
     RedisClient(final RedisClientFactory factory, final String persistenceUnit)
     {
@@ -206,7 +210,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private Object fetch(Class clazz, Object key, Object connection, byte[][] fields) throws InstantiationException,
             IllegalAccessException
     {
-        Object result;
+        Object result = null;
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
 
@@ -220,7 +224,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         else
         {
-            rowKey = PropertyAccessorHelper.getString(key);
+            ObjectAccessor accessor = new ObjectAccessor();
+            
+            rowKey = accessor.toString(key);/*PropertyAccessorHelper.getString(key);*/
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
@@ -344,6 +350,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             settings.clear();
             settings = null;
         }
+
+        if (connection != null)
+        {
+//            System.out.println("Closing" + this.connection);
+            connection.disconnect();
+            connection = null;
+        }
+
         reader = null;
     }
 
@@ -1326,6 +1340,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 // It might be a case of embeddable attribute.
 
             }
+            
         }
 
         if (entity != null)
@@ -1596,7 +1611,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private Object getConnection()
     {
-        Jedis connection = factory.getConnection();
+/*        Jedis connection = factory.getConnection();
 
         // If resource is not null means a transaction in progress.
 
@@ -1616,6 +1631,33 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             return connection;
         }
+*/
+        if(resource == null && this.connection !=null )
+        {
+            return this.connection;
+        }
+        
+        Jedis conn = factory.getConnection();
+
+        // If resource is not null means a transaction in progress.
+
+        if (settings != null)
+        {
+            for (String key : settings.keySet())
+            {
+                conn.configSet(key, settings.get(key).toString());
+            }
+        }
+
+        if (resource != null && resource.isActive())
+        {
+            return ((RedisTransaction) resource).bindResource(conn);
+        }
+        else
+        {
+            this.connection = conn;
+            return conn;
+        }    
     }
 
     /**
@@ -1685,7 +1727,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         else
         {
-            rowKey = PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+            ObjectAccessor accessor = new ObjectAccessor();
+            rowKey = accessor.toString(id);
+//            rowKey = /*PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember())*/ ;
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);

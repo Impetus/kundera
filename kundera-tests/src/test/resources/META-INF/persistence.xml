@@ -299,7 +299,7 @@
 	<persistence-unit name="oracle_kvstore">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
 		<properties>			
-			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="5000"/>
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
@@ -315,7 +315,7 @@
 	<persistence-unit name="oracle_kvstore_JTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
 		<properties>			
-			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="5000"/>
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
