@@ -37,7 +37,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -113,13 +116,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
 
-        if (StringUtils.isBlank(schemaStr))
-        {
-            LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
-                    + ". This entity won't be persisted");
-            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
-                    + table.name() + ". This entity won't be persisted");
-        }
+//        if (StringUtils.isBlank(schemaStr))
+//        {
+//            LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
+//                    + ". This entity won't be persisted");
+//            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
+//                    + table.name() + ". This entity won't be persisted");
+//        }
         MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
 
         // scan for fields
