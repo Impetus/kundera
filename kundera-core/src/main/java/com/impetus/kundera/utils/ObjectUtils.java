@@ -33,7 +33,8 @@ import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.hibernate.collection.internal.AbstractPersistentCollection;
+//import org.hibernate.collection.internal.AbstractPersistentCollection;
+import com.impetus.kundera.PersistenceUtilHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,7 +216,7 @@ public class ObjectUtils
                 Field relationField = relation.getProperty();
                 Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
 
-                if (sourceRelationObject != null && !(sourceRelationObject instanceof AbstractPersistentCollection))
+                if (sourceRelationObject != null && !( PersistenceUtilHelper.instanceOfHibernateAbstractPersistentCollection(sourceRelationObject)))
                 {
                     if (sourceRelationObject instanceof KunderaProxy)
                     {

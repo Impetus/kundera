@@ -14,6 +14,8 @@
  ******************************************************************************/
 package com.impetus.kundera.utils;
 
+import com.impetus.kundera.PersistenceUtilHelper;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -29,7 +31,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.hibernate.collection.spi.PersistentCollection;
+//import org.hibernate.collection.spi.PersistentCollection;
 
 /**
  * Deeply compare two (2) objects. This method will call any overridden equals()
@@ -309,7 +311,8 @@ public class DeepEquals
         Collection col1 = (Collection) dualKey._key1;
         Collection col2 = (Collection) dualKey._key2;
 
-        if (col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+        if ( PersistenceUtilHelper.instanceOfHibernatePersistentCollection(
+            col1) || PersistenceUtilHelper.instanceOfHibernatePersistentCollection( col2 ))
         {
             return false;
         }
@@ -349,7 +352,7 @@ public class DeepEquals
      */
     private static boolean compareUnordered(Collection col1, Collection col2, Set visited)
     {
-        if (col1 instanceof PersistentCollection || col2 instanceof PersistentCollection)
+        if (PersistenceUtilHelper.instanceOfHibernatePersistentCollection(col1)|| PersistenceUtilHelper.instanceOfHibernatePersistentCollection(col2))
         {
             return false;
         }
@@ -445,7 +448,7 @@ public class DeepEquals
                 continue;
             }
 
-            if (obj instanceof Collection && !(obj instanceof PersistentCollection))
+            if (obj instanceof Collection && !(PersistenceUtilHelper.instanceOfHibernatePersistentCollection(obj)))
             {
                 stack.addAll(0, (Collection) obj);
                 continue;

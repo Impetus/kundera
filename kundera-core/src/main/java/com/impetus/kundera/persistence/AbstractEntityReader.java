@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.collection.internal.PersistentSet;
-import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.proxy.HibernateProxy;
+//import org.hibernate.collection.internal.PersistentSet;
+//import org.hibernate.collection.spi.PersistentCollection;
+//import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -123,8 +124,8 @@ public class AbstractEntityReader
                 }
 
                 // Populate other type of relationships
-                else if (object == null || object instanceof HibernateProxy || object instanceof PersistentSet
-                        || object instanceof PersistentCollection)
+                else if (object == null || PersistenceUtilHelper.instanceOfHibernateProxy( object ) || PersistenceUtilHelper.instanceOfHibernatePersistentSet( object )
+                        || PersistenceUtilHelper.instanceOfHibernatePersistentCollection( object ))
                 {
                     Field biDirectionalField = associationBuilder.getBiDirectionalField(relation.getTargetEntity(),
                             entity.getClass());
