@@ -121,7 +121,7 @@ public class UpdateDeleteNamedQueryTest
         // "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
         // Query q1 = em.createNativeQuery(colFamilySql,
         // CassandraEntitySample.class);
-        // q1.executeUpdate();
+        // q1.executeUpdate(); 
         //
         // String idxSql = "CREATE INDEX ON users (birthDate)";
         // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
@@ -138,7 +138,7 @@ public class UpdateDeleteNamedQueryTest
         entity.setState("UP");
         em.persist(entity);
 
-        String updateQuery = "Update CassandraEntitySample c SET c.state=DELHI where c.state=UP";
+        String updateQuery = "Update CassandraEntitySample c SET c.state = DELHI where c.state = UP";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
 

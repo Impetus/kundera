@@ -160,16 +160,4 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         return KVStoreFactory.getStore(new KVStoreConfig(storeName, hostName + ":" + defaultPort));
     }
-
-    /**
-     * @param puProperties
-     */
-    protected void setExternalProperties(Map<String, Object> puProperties)
-    {
-        if (this.externalProperties == null)
-        {
-            this.externalProperties = puProperties;
-        }
-    }
-
 }

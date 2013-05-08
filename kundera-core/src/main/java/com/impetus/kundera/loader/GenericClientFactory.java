@@ -267,7 +267,10 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      */
     protected void setExternalProperties(Map<String, Object> puProperties)
     {
-        this.externalProperties = puProperties;
+        if (puProperties != null)
+        {
+            this.externalProperties = puProperties;
+        }
     }
 
     protected void onValidation(final String host, final String port)
@@ -288,5 +291,4 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         }
         externalProperties = null;
     }
-
 }

@@ -186,17 +186,6 @@ public class RedisClientFactory extends GenericClientFactory
         return new RedisClient(this, persistenceUnit);
     }
 
-    /**
-     * On setting external properties.
-     */
-    protected void setExternalProperties(Map<String, Object> puProperties)
-    {
-        if (puProperties != null)
-        {
-            this.externalProperties = puProperties;
-        }
-    }
-
     Map<String, Object> getOverridenProperties()
     {
         return this.externalProperties;

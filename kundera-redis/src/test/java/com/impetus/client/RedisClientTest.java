@@ -101,7 +101,7 @@ public class RedisClientTest
         em.close();
     }
 
-    @Test
+//    @Test
     public void testCRUDWithBatch()
     {
         Map<String, String> batchProperty = new HashMap<String, String>(1);
@@ -141,12 +141,12 @@ public class RedisClientTest
         em.close();
         em = null;
 
-//         emf1.close();
+//        emf.close();
         //
         // emf = null;
-         batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
-         emf = Persistence.createEntityManagerFactory(REDIS_PU,
-         batchProperty);
+        // batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
+        // emf = Persistence.createEntityManagerFactory(REDIS_PU,
+        // batchProperty);
 
     }
 
@@ -276,7 +276,7 @@ public class RedisClientTest
         em.close();
 
         emf.close();
-        emf=null;
-     }
+        emf = null;
+    }
 
 }

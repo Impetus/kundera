@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
 
 /**
@@ -149,7 +151,7 @@ public class ClasspathReader extends Reader
             {
                 try
                 {
-                    JarFile jarFile = new JarFile(url.getFile());
+                    JarFile jarFile = new JarFile(URLDecoder.decode(url.getFile(), Constants.CHARSET_UTF8));
 
                     // Checking the dependencies of this jar file
                     Manifest manifest = jarFile.getManifest();
@@ -221,11 +223,11 @@ public class ClasspathReader extends Reader
         List<URL> list = new ArrayList<URL>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
+        URL[] urls = ((URLClassLoader) classLoader).getURLs();
 
         for (String fullyQualifiedClassName : classesToScan)
         {
             String classRelativePath = fullyQualifiedClassName.replace(".", "/");
-            URL[] urls = ((URLClassLoader) classLoader).getURLs();
             list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath, urls)));
         }
 

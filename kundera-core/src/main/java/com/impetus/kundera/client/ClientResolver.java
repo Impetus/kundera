@@ -39,7 +39,7 @@ public final class ClientResolver
 {
 
     /** The client factories. */
-    static Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
+   static Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
 
     /** logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(ClientResolver.class);
