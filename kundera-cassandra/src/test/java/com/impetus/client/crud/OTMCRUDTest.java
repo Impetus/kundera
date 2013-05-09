@@ -1,6 +1,8 @@
 package com.impetus.client.crud;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -13,7 +15,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.PersistenceProperties;
 
 public class OTMCRUDTest
 {
@@ -26,13 +30,20 @@ public class OTMCRUDTest
     /** The em. */
     private EntityManager em;
 
+    protected Map propertyMap = null;
+
     @Before
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         CassandraCli.createKeySpace("myapp");
-        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
+        if (propertyMap == null)
+        {
+            propertyMap = new HashMap();
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        }
+        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
     }
 

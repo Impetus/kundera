@@ -362,35 +362,35 @@
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 
@@ -398,7 +398,7 @@
 			<groupId>com.impetus.kundera.rest</groupId>
 			<artifactId>kundera-rest</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 
@@ -406,7 +406,7 @@
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-redis</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 
@@ -414,14 +414,14 @@
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
 			<version>2.6-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<!-- <dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
 			<version>2.5-SNAPSHOT</version>
-			<classifier>tests</classifier>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency> -->
 

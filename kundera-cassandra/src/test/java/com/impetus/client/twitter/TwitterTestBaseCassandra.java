@@ -54,7 +54,7 @@ import com.impetus.client.twitter.entities.UserCassandra;
  */
 public abstract class TwitterTestBaseCassandra
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
