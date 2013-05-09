@@ -22,9 +22,10 @@ import java.util.Set;
 
 import javax.persistence.MapKeyJoinColumn;
 
+import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.proxy.HibernateProxy;
+//import org.hibernate.collection.spi.PersistentCollection;
+//import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
@@ -149,7 +150,7 @@ public class ObjectGraphBuilder
             // Child Object set in this entity
             Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            if (childObject != null && !(childObject instanceof HibernateProxy))
+            if (childObject != null && !( PersistenceUtilHelper.instanceOfHibernateProxy( childObject )))
             {
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
                 if (metadata != null && relation.isJoinedByPrimaryKey())
@@ -167,7 +168,7 @@ public class ObjectGraphBuilder
                     // and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
-                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    if (childrenObjects != null && !( PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects )))
 
                         for (Object childObj : childrenObjects)
                         {
@@ -180,7 +181,7 @@ public class ObjectGraphBuilder
                 else if (Map.class.isAssignableFrom(childObject.getClass()))
                 {
                     Map childrenObjects = (Map) childObject;
-                    if (childrenObjects != null && !(childrenObjects instanceof PersistentCollection))
+                    if (childrenObjects != null && !( PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {

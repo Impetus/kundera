@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.collection.internal.PersistentSet;
-import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.proxy.HibernateProxy;
+//import org.hibernate.collection.internal.PersistentSet;
+//import org.hibernate.collection.spi.PersistentCollection;
+//import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -78,7 +79,8 @@ public final class AssociationBuilder
                 || relation.getPropertyType().isAssignableFrom(Set.class))
         {
             if (relation.isRelatedViaJoinTable()
-                    && (relObject == null || relObject instanceof HibernateProxy || relObject instanceof PersistentSet || relObject instanceof PersistentCollection))
+                    && (relObject == null || PersistenceUtilHelper.instanceOfHibernateProxy(relObject) || PersistenceUtilHelper.instanceOfHibernatePersistentSet(relObject)
+                || PersistenceUtilHelper.instanceOfHibernatePersistentCollection(relObject)))
             {
                 populateCollectionFromJoinTable(entity, entityMetadata, delegator, relation);
             }
