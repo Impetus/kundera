@@ -145,8 +145,6 @@ public class ClasspathReader extends Reader
     private URL[] findResourcesInUrls(String classRelativePath, URL[] urls)
     {
         List<URL> list = new ArrayList<URL>();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
         for (URL url : urls)
         {
             if (AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
@@ -167,11 +165,14 @@ public class ClasspathReader extends Reader
                             List<URL> subList = new ArrayList<URL>();
                             for (String cpEntry : classPath.split(" "))
                             {
-                                URLClassLoader loader = (URLClassLoader) this.getClass().getClassLoader();
-                                URL enclosedJar = loader.findResource(cpEntry);
-                                if (enclosedJar != null)
+                                try
                                 {
-                                    subList.add(enclosedJar);
+                                    subList.add(new URL(cpEntry));
+                                }
+                                catch (MalformedURLException e)
+                                {
+                                    logger.warn("Incorrect URL in the classpath of a jar file [" + url.toString()
+                                            + "]: " + cpEntry);
                                 }
                             }
                             list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath,
