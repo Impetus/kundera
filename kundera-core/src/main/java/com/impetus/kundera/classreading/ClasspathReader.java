@@ -171,8 +171,14 @@ public class ClasspathReader extends Reader
                                 }
                                 catch (MalformedURLException e)
                                 {
-                                    logger.warn("Incorrect URL in the classpath of a jar file [" + url.toString()
-                                            + "]: " + cpEntry);
+                                    URL subResources = ClasspathReader.class.getClassLoader().getResource(cpEntry);
+                                    if (subResources != null)
+                                    {
+                                        subList.add(subResources);
+                                    }
+                                    // logger.warn("Incorrect URL in the classpath of a jar file ["
+                                    // + url.toString()
+                                    // + "]: " + cpEntry);
                                 }
                             }
                             list.addAll(Arrays.asList(findResourcesInUrls(classRelativePath,

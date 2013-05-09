@@ -1075,20 +1075,23 @@ public abstract class CassandraDataHandlerBase
                 if (attribute != null)
                 {
                     entity = initialize(m, entity, null);
-                    String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-                    if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
-                            && thriftColumnName.equals(idColumnName))
+                    if (!attribute.isAssociation())
                     {
-                        setId(m, entity, thriftColumnValue);
-                        PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
-                    }
-                    if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
-                    {
-                        setFieldValueViaCQL(entity, thriftColumnValue, attribute);
-                    }
-                    else
-                    {
-                        setFieldValue(entity, thriftColumnValue, attribute);
+                        String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+                        if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                                && thriftColumnName.equals(idColumnName))
+                        {
+                            setId(m, entity, thriftColumnValue);
+                            PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
+                        }
+                        if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
+                        {
+                            setFieldValueViaCQL(entity, thriftColumnValue, attribute);
+                        }
+                        else
+                        {
+                            setFieldValue(entity, thriftColumnValue, attribute);
+                        }
                     }
                 }
                 else
