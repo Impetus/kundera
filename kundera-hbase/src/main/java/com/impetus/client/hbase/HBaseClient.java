@@ -663,6 +663,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 if (node.isDirty())
                 {
+                    node.handlePreEvent();
                     HTableInterface hTable = null;
                     Object rowKey = node.getEntityId();
                     Object entity = node.getData();
@@ -704,6 +705,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                             data.put(hTable, dataSet);
                         }
                     }
+                    node.handlePostEvent();
                 }
             }
 

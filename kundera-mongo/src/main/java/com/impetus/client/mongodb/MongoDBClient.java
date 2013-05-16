@@ -584,6 +584,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             if (node.isDirty())
             {
+                node.handlePreEvent();
                 // delete can not be executed in batch
                 if (node.isInState(RemovedState.class))
                 {
@@ -598,6 +599,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                             node.isUpdate());
                     indexNode(node, metadata);
                 }
+                node.handlePostEvent();
             }
         }
 

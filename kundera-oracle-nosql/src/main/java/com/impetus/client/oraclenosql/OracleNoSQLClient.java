@@ -880,6 +880,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             if (node.isDirty())
             {
+                node.handlePreEvent();
                 // delete can not be executed in batch
                 if (node.isInState(RemovedState.class))
                 {
@@ -891,6 +892,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     onPersist(metadata, node.getData(), node.getEntityId(), relationHolders);
                 }
+                node.handlePostEvent();
             }
         }
         return nodes.size();

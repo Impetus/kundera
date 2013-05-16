@@ -13,8 +13,9 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.entity;
+package com.impetus.client.cassandra.thrift;
 
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 
 public class PersonHandler
@@ -23,7 +24,12 @@ public class PersonHandler
     @PrePersist
     public void handledPrePersist(PersonnelListenerDTO user)
     {
-        user.setLastName("Mishra");
+        user.setFirstName("kuldeep");
     }
 
+    @PostPersist
+    public void handledPostPersist(PersonnelListenerDTO user)
+    {
+        user.setFirstName("vivek");
+    }
 }

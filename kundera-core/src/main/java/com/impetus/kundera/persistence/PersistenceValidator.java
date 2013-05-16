@@ -38,7 +38,7 @@ public class PersistenceValidator
      *            Instance of entity object
      * @return True if entity object is valid, false otherwise
      */
-    boolean isValidEntityObject(Object entity)
+    public boolean isValidEntityObject(Object entity)
     {
         if (entity == null)
         {
@@ -54,8 +54,6 @@ public class PersistenceValidator
             log.error("Entity to be persisted can't have Primary key set to null.");
             return false;
         }
-
         return true;
     }
-
 }

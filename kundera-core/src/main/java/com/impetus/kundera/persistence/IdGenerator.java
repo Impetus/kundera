@@ -42,29 +42,33 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class IdGenerator
 {
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(PersistenceDelegator.class);
+    private static final Log log = LogFactory.getLog(IdGenerator.class);
 
-    public void setGeneratedIdIfApplicable(Object e, EntityMetadata m, Client<?> client)
+    public void generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd)
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
-        if (keyValue != null && client != null)
+        if (keyValue != null)
         {
-            GenerationType type = keyValue.getStrategy();
-            switch (type)
+            Client<?> client = pd.getClient(m);
+            if (client != null)
             {
-            case TABLE:
-                onTableGenerator(m, client, keyValue, e);
-                break;
-            case SEQUENCE:
-                onSequenceGenerator(m, client, keyValue, e);
-                break;
-            case AUTO:
-                onAutoGenerator(m, client, e);
-                break;
-            case IDENTITY:
-                throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
-                        + " Strategy not supported by this client :" + client.getClass().getName());
+                GenerationType type = keyValue.getStrategy();
+                switch (type)
+                {
+                case TABLE:
+                    onTableGenerator(m, client, keyValue, e);
+                    break;
+                case SEQUENCE:
+                    onSequenceGenerator(m, client, keyValue, e);
+                    break;
+                case AUTO:
+                    onAutoGenerator(m, client, e);
+                    break;
+                case IDENTITY:
+                    throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
+                            + " Strategy not supported by this client :" + client.getClass().getName());
+                }
             }
         }
     }
