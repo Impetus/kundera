@@ -66,39 +66,42 @@ public class ThriftDataResultHelper
     public static <T> T transformThriftResult(ColumnOrSuperColumn cosc, ColumnFamilyType columnFamilyType, ThriftRow row)
     {
         Object output = null;
-        switch (columnFamilyType)
+        if (cosc != null)
         {
-        case COLUMN:
-            output = cosc.column;
-            if (row != null)
+            switch (columnFamilyType)
             {
-                row.addColumn(cosc.column);
-            }
-            break;
+            case COLUMN:
+                output = cosc.column;
+                if (row != null)
+                {
+                    row.addColumn(cosc.column);
+                }
+                break;
 
-        case SUPER_COLUMN:
-            output = cosc.super_column;
-            if (row != null)
-            {
-                row.addSuperColumn(cosc.super_column);
-            }
-            break;
+            case SUPER_COLUMN:
+                output = cosc.super_column;
+                if (row != null)
+                {
+                    row.addSuperColumn(cosc.super_column);
+                }
+                break;
 
-        case COUNTER_COLUMN:
-            output = cosc.counter_column;
-            if (row != null)
-            {
-                row.addCounterColumn(cosc.counter_column);
-            }
-            break;
+            case COUNTER_COLUMN:
+                output = cosc.counter_column;
+                if (row != null)
+                {
+                    row.addCounterColumn(cosc.counter_column);
+                }
+                break;
 
-        case COUNTER_SUPER_COLUMN:
-            output = cosc.counter_super_column;
-            if (row != null)
-            {
-                row.addCounterSuperColumn(cosc.counter_super_column);
+            case COUNTER_SUPER_COLUMN:
+                output = cosc.counter_super_column;
+                if (row != null)
+                {
+                    row.addCounterSuperColumn(cosc.counter_super_column);
+                }
+                break;
             }
-            break;
         }
         return (T) output;
     }
