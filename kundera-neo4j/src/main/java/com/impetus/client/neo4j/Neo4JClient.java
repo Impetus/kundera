@@ -413,6 +413,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             {
                 if (graphNode.isDirty())
                 {
+                    graphNode.handlePreEvent();
                     // Delete can not be executed in batch, deleting normally
                     if (graphNode.isInState(RemovedState.class))
                     {
@@ -485,6 +486,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             }
                         }
                     }
+                    graphNode.handlePostEvent();
                 }
             }
 

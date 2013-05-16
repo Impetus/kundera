@@ -586,4 +586,13 @@ public class MetadataUtils
             return false;
         }
     }
+
+    public static boolean isSchemaAttributeRequired(final String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        String clientFactoryName = puMetadata != null ? puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+        return !(Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName) || Constants.RDBMS_CLIENT_FACTORY
+                .equalsIgnoreCase(clientFactoryName));
+    }
 }

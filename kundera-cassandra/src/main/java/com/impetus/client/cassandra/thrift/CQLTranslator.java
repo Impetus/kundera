@@ -280,11 +280,11 @@ public final class CQLTranslator
      * @param value
      * @param clause
      */
-    public void buildWhereClause(StringBuilder builder, String field, Object value, String clause)
+    public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause)
     {
         builder = ensureCase(builder, field);
         builder.append(clause);
-        appendValue(builder, value.getClass(), value, false);
+        appendValue(builder, fieldClazz, value, false);
         builder.append(AND_CLAUSE);
     }
 
@@ -410,14 +410,12 @@ public final class CQLTranslator
 
             if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                     || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    || value instanceof Enum || fieldClazz.isAssignableFrom(Float.class)
-                    || fieldClazz.isAssignableFrom(float.class) || fieldClazz.isAssignableFrom(Double.class)
-                    || fieldClazz.isAssignableFrom(double.class))
+                    || value instanceof Enum)
             {
                 if (fieldClazz.isAssignableFrom(String.class))
                 {
                     // To allow escape character
-                    value = ((String) value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("'", "''");
+                    value = ((String) value).replaceAll("'", "''");
                 }
                 builder.append("'");
 

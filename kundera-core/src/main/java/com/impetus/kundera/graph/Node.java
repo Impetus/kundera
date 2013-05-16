@@ -18,16 +18,28 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**
@@ -87,6 +99,8 @@ public class Node implements NodeStateContext
     private Node originalNode;
 
     private boolean isProcessed;
+
+    private EntityEventDispatcher eventDispatcher = new EntityEventDispatcher();
 
     private Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
     {
@@ -358,23 +372,6 @@ public class Node implements NodeStateContext
         this.dirty = dirty;
     }
 
-    // /**
-    // * @return the depth
-    // */
-    // private int getDepth()
-    // {
-    // return depth;
-    // }
-
-    // /**
-    // * @param depth
-    // * the depth to set
-    // */
-    // public void setDepth(int depth)
-    // {
-    // this.depth = depth;
-    // }
-
     /**
      * @return the client
      */
@@ -522,8 +519,9 @@ public class Node implements NodeStateContext
     {
         if (isDirty())
         {
+            handlePreEvent();
             getCurrentNodeState().handleFlush(this);
-
+            handlePostEvent();
             this.isProcessed = true;
         }
 
@@ -638,16 +636,125 @@ public class Node implements NodeStateContext
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);
         cloneCopy.setDataClass(this.dataClass);
-        // cloneCopy.setDepth(this.depth);
         cloneCopy.setTraversed(this.traversed);
 
         return cloneCopy;
-
     }
 
     @Override
     public Object getEntityId()
     {
         return this.entityId;
+    }
+
+    public void handlePreEvent()
+    {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+
+        if (isUpdate)
+        {
+            onPreEvent(metadata, EntityEvent.UPDATE);
+        }
+        else if (this.isInState(RemovedState.class))
+        {
+            onPreEvent(metadata, EntityEvent.REMOVE);
+        }
+        else
+        {
+            onPreEvent(metadata, EntityEvent.PERSIST);
+        }
+    }
+
+    public void handlePostEvent()
+    {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+
+        if (isUpdate)
+        {
+            onPostEvent(metadata, EntityEvent.UPDATE);
+        }
+        else if (this.isInState(RemovedState.class))
+        {
+            onPostEvent(metadata, EntityEvent.REMOVE);
+        }
+        else
+        {
+            onPostEvent(metadata, EntityEvent.PERSIST);
+        }
+    }
+
+    private void onPreEvent(EntityMetadata metadata, EntityEvent event)
+    {
+        try
+        {
+            this.eventDispatcher.fireEventListeners(metadata, this.data, EntityEvent.getPreEvent(event));
+        }
+        catch (Exception es)
+        {
+            throw new KunderaException(es);
+        }
+    }
+
+    private void onPostEvent(EntityMetadata metadata, EntityEvent event)
+    {
+        try
+        {
+            this.eventDispatcher.fireEventListeners(metadata, this.data, EntityEvent.getPostEvent(event));
+        }
+        catch (Exception es)
+        {
+            throw new KunderaException(es);
+        }
+    }
+
+    private enum EntityEvent
+    {
+        UPDATE, PERSIST, REMOVE;
+
+        private final static Class getPreEvent(EntityEvent event)
+        {
+            Class clazz = null;
+            switch (event)
+            {
+            case PERSIST:
+                clazz = PrePersist.class;
+                break;
+
+            case UPDATE:
+                clazz = PreUpdate.class;
+                break;
+
+            case REMOVE:
+                clazz = PreRemove.class;
+                break;
+
+            default:
+                // TODO: Throw an error.
+            }
+            return clazz;
+        }
+
+        private final static Class getPostEvent(EntityEvent event)
+        {
+            Class clazz = null;
+            switch (event)
+            {
+            case PERSIST:
+                clazz = PostPersist.class;
+                break;
+
+            case UPDATE:
+                clazz = PostUpdate.class;
+                break;
+
+            case REMOVE:
+                clazz = PostRemove.class;
+                break;
+
+            default:
+                // TODO: Throw an error.
+            }
+            return clazz;
+        }
     }
 }

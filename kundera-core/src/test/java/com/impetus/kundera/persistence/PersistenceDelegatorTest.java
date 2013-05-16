@@ -88,7 +88,8 @@ public class PersistenceDelegatorTest
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals("com.impetus.kundera.KunderaException: Entitymatadata should not be null",
+            Assert.assertEquals(
+                    "java.lang.IllegalArgumentException: Entity object is invalid, operation failed. Please check previous log message for details",
                     e.getMessage());
         }
 
@@ -203,7 +204,16 @@ public class PersistenceDelegatorTest
                     e.getMessage());
         }
 
-        em.merge(new PersonnelDTO());
+        try
+        {
+            em.merge(new PersonnelDTO());
+        }
+        catch (KunderaException e)
+        {
+            Assert.assertEquals(
+                    "java.lang.IllegalArgumentException: Entity object is invalid, operation failed. Please check previous log message for details",
+                    e.getMessage());
+        }
     }
 
     @Test

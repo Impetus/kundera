@@ -100,7 +100,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
 
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
-    
+
     private Jedis connection;
 
     RedisClient(final RedisClientFactory factory, final String persistenceUnit)
@@ -225,8 +225,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         else
         {
             ObjectAccessor accessor = new ObjectAccessor();
-            
-            rowKey = accessor.toString(key);/*PropertyAccessorHelper.getString(key);*/
+
+            rowKey = accessor.toString(key);/*
+                                             * PropertyAccessorHelper.getString(key
+                                             * );
+                                             */
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
@@ -353,7 +356,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (connection != null)
         {
-//            System.out.println("Closing" + this.connection);
+            // System.out.println("Closing" + this.connection);
             connection.disconnect();
             connection = null;
         }
@@ -805,6 +808,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 if (node.isDirty())
                 {
+                    node.handlePreEvent();
                     // delete can not be executed in batch
                     if (node.isInState(RemovedState.class))
                     {
@@ -819,6 +823,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         onPersist(metadata, node.getData(), node.getEntityId(), relationHolders,
                                 pipeLine != null ? pipeLine : connection);
                     }
+                    node.handlePostEvent();
                 }
             }
         }
@@ -1340,7 +1345,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 // It might be a case of embeddable attribute.
 
             }
-            
+
         }
 
         if (entity != null)
@@ -1611,32 +1616,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private Object getConnection()
     {
-/*        Jedis connection = factory.getConnection();
-
-        // If resource is not null means a transaction in progress.
-
-        if (settings != null)
-        {
-            for (String key : settings.keySet())
-            {
-                connection.configSet(key, settings.get(key).toString());
-            }
-        }
-
-        if (resource != null && resource.isActive())
-        {
-            return ((RedisTransaction) resource).bindResource(connection);
-        }
-        else
-        {
-            return connection;
-        }
-*/
-        if(resource == null && this.connection !=null )
+        /*
+         * Jedis connection = factory.getConnection();
+         * 
+         * // If resource is not null means a transaction in progress.
+         * 
+         * if (settings != null) { for (String key : settings.keySet()) {
+         * connection.configSet(key, settings.get(key).toString()); } }
+         * 
+         * if (resource != null && resource.isActive()) { return
+         * ((RedisTransaction) resource).bindResource(connection); } else {
+         * return connection; }
+         */
+        if (resource == null && this.connection != null)
         {
             return this.connection;
         }
-        
+
         Jedis conn = factory.getConnection();
 
         // If resource is not null means a transaction in progress.
@@ -1657,7 +1653,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             this.connection = conn;
             return conn;
-        }    
+        }
     }
 
     /**
@@ -1729,7 +1725,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             ObjectAccessor accessor = new ObjectAccessor();
             rowKey = accessor.toString(id);
-//            rowKey = /*PropertyAccessorHelper.getString(entity, (Field) entityMetadata.getIdAttribute().getJavaMember())*/ ;
+            // rowKey = /*PropertyAccessorHelper.getString(entity, (Field)
+            // entityMetadata.getIdAttribute().getJavaMember())*/ ;
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);

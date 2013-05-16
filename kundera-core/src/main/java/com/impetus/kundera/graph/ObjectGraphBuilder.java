@@ -35,6 +35,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.IdGenerator;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.PersistenceValidator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.DeepEquals;
@@ -52,11 +53,14 @@ public class ObjectGraphBuilder
 
     private IdGenerator idGenerator;
 
+    private PersistenceValidator validator;
+
     public ObjectGraphBuilder(PersistenceCache pcCache, PersistenceDelegator pd)
     {
         this.persistenceCache = pcCache;
         this.pd = pd;
         this.idGenerator = new IdGenerator();
+        this.validator = new PersistenceValidator();
     }
 
     public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState)
@@ -91,8 +95,19 @@ public class ObjectGraphBuilder
         // entity metadata could be null.
         if (entityMetadata == null)
         {
-            return null;
+            throw new IllegalArgumentException(
+                    "Entity object is invalid, operation failed. Please check previous log message for details");
         }
+
+        // Generate and set Id if @GeneratedValue present.
+        idGenerator.generateAndSetId(entity, entityMetadata, pd);
+
+        if (!validator.isValidEntityObject(entity))
+        {
+            throw new IllegalArgumentException(
+                    "Entity object is invalid, operation failed. Please check previous log message for details");
+        }
+
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
         String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
@@ -150,7 +165,7 @@ public class ObjectGraphBuilder
             // Child Object set in this entity
             Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            if (childObject != null && !( PersistenceUtilHelper.instanceOfHibernateProxy( childObject )))
+            if (childObject != null && !(PersistenceUtilHelper.instanceOfHibernateProxy(childObject)))
             {
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
                 if (metadata != null && relation.isJoinedByPrimaryKey())
@@ -168,7 +183,8 @@ public class ObjectGraphBuilder
                     // and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
-                    if (childrenObjects != null && !( PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects )))
+                    if (childrenObjects != null
+                            && !(PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
 
                         for (Object childObj : childrenObjects)
                         {
@@ -181,7 +197,8 @@ public class ObjectGraphBuilder
                 else if (Map.class.isAssignableFrom(childObject.getClass()))
                 {
                     Map childrenObjects = (Map) childObject;
-                    if (childrenObjects != null && !( PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
+                    if (childrenObjects != null
+                            && !(PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {

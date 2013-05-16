@@ -21,8 +21,10 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 
 /**
  * State context of a given entity
@@ -75,8 +77,6 @@ public interface NodeStateContext
 
     boolean isHeadNode();
 
-    // void setHeadNode(boolean isHeadNode);
-
     Client getClient();
 
     void setClient(Client client);
@@ -123,5 +123,4 @@ public interface NodeStateContext
     public void setPersistenceCache(PersistenceCache persistenceCache);
 
     public Object getEntityId();
-
 }

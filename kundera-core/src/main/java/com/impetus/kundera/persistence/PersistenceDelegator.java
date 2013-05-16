@@ -27,12 +27,6 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.persistence.FlushModeType;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
@@ -93,8 +87,6 @@ public final class PersistenceDelegator
 
     private ObjectGraphBuilder graphBuilder;
 
-    private PersistenceValidator validator;
-
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     // Whether a transaction is in progress
@@ -108,8 +100,6 @@ public final class PersistenceDelegator
 
     private Coordinator coordinator;
 
-    private IdGenerator idGenerator;
-
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -120,11 +110,9 @@ public final class PersistenceDelegator
      */
     PersistenceDelegator(final PersistenceCache pc)
     {
-        this.validator = new PersistenceValidator();
         this.eventDispatcher = new EntityEventDispatcher();
         this.graphBuilder = new ObjectGraphBuilder(pc, this);
         this.persistenceCache = pc;
-        this.idGenerator = new IdGenerator();
     }
 
     /***********************************************************************/
@@ -142,27 +130,7 @@ public final class PersistenceDelegator
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
-        EntityMetadata metadata = getMetadata(e.getClass());
 
-        idGenerator.setGeneratedIdIfApplicable(e, metadata, getClient(metadata));
-
-        if (!validator.isValidEntityObject(e))
-        {
-            throw new IllegalArgumentException(
-                    "Entity object is invalid, operation failed. Please check previous log message for details");
-        }
-
-        // Get entity metadata.
-
-        // Invoke Pre-Persist Events.
-        try
-        {
-            getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-        }
-        catch (Exception es)
-        {
-            throw new KunderaException(es);
-        }
         // Create an object graph of the entity object.
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
 
@@ -187,10 +155,6 @@ public final class PersistenceDelegator
         lock.writeLock().unlock();
         graph.clear();
         graph = null;
-
-        // Invoke Post Persist Events
-        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-
         if (log.isDebugEnabled())
         {
             log.debug("Data persisted successfully for entity : " + e.getClass());
@@ -369,7 +333,6 @@ public final class PersistenceDelegator
         }
 
         EntityMetadata metadata = getMetadata(e.getClass());
-        getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
 
         // Create an object graph of the entity object
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
@@ -399,8 +362,6 @@ public final class PersistenceDelegator
         // clear out graph
         graph.clear();
         graph = null;
-
-        getEventDispatcher().fireEventListeners(metadata, e, PostRemove.class);
 
         if (log.isDebugEnabled())
             log.debug("Data removed successfully for entity : " + e.getClass());
@@ -450,7 +411,6 @@ public final class PersistenceDelegator
                     else
                     {
                         node.flush();
-
                     }
                 }
             }
@@ -478,9 +438,6 @@ public final class PersistenceDelegator
 
         EntityMetadata m = getMetadata(e.getClass());
 
-        // Fire PreUpdate events
-        getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
-
         // Create an object graph of the entity object to be merged
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
 
@@ -507,9 +464,6 @@ public final class PersistenceDelegator
 
         graph.clear();
         graph = null;
-
-        // fire PreUpdate events
-        getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
 
         return (E) node.getData();
     }
@@ -556,7 +510,7 @@ public final class PersistenceDelegator
      * 
      * @return the event dispatcher
      */
-    private EntityEventDispatcher getEventDispatcher()
+    public EntityEventDispatcher getEventDispatcher()
     {
         return eventDispatcher;
     }
@@ -656,7 +610,12 @@ public final class PersistenceDelegator
      */
     private EntityMetadata getMetadata(Class<?> clazz)
     {
-        return KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        if (metadata == null)
+        {
+            throw new KunderaException("Entitymatadata should not be null");
+        }
+        return metadata;
     }
 
     /**

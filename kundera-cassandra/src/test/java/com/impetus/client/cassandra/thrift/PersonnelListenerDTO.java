@@ -13,12 +13,16 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.entity;
+package com.impetus.client.cassandra.thrift;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -28,7 +32,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "person", schema = "kunderatest@kunderatest")
+@Table(name = "person", schema = "KunderaExamples@secIdxCassandraTest")
 @EntityListeners({ PersonHandler.class })
 public class PersonnelListenerDTO
 {
@@ -44,6 +48,10 @@ public class PersonnelListenerDTO
     /** The last name. */
     @Column(name = "last_name")
     private String lastName;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "personId")
+    private AddressListenerDTO address;
 
     /**
      * Instantiates a new personnel dto.
@@ -131,6 +139,16 @@ public class PersonnelListenerDTO
     public void setLastName(String lastName)
     {
         this.lastName = lastName;
+    }
+
+    public AddressListenerDTO getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(AddressListenerDTO address)
+    {
+        this.address = address;
     }
 
 }

@@ -261,7 +261,7 @@ public class NativeQueryCQLV3Test
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
         createColumnFamily = "create table test2 (key text primary key, count int)";
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
-        batchOps = "BEGIN BATCH INSERT INTO test1(id, url) VALUES ('64907b40-29a1-11e2-93fa-90b11c71b811','w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
+        batchOps = "BEGIN BATCH INSERT INTO test1(id, url) VALUES (64907b40-29a1-11e2-93fa-90b11c71b811,'w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
         em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
 
     }

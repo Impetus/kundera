@@ -11,13 +11,14 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.EndpointDetails;
+import org.apache.cassandra.thrift.TokenRange;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.PersistenceProperties;
 
 public class OTMCRUDTest
 {
@@ -107,6 +108,6 @@ public class OTMCRUDTest
         Assert.assertEquals(1, resultClient.size());
         Assert.assertEquals(2, resultClient.get(0).getTokens().size());
 
+        em.clear();
     }
-
 }

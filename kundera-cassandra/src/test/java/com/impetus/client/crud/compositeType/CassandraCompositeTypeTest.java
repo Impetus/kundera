@@ -458,7 +458,7 @@ public class CassandraCompositeTypeTest
     public void tearDown() throws Exception
     {
         // emf.close();
-        CassandraCli.dropKeySpace("CompositeCassandra");
+//        CassandraCli.dropKeySpace("CompositeCassandra");
     }
 
     // DO NOT DELETE IT!! though it is automated with schema creation option.
