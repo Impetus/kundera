@@ -391,7 +391,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (PelopsException e)
             {
-                log.error("Error while finding relations, Caused by: ", e);
+                log.warn(e.getMessage());
                 return entities;
             }
             entities = new ArrayList<Object>(qResults.size());

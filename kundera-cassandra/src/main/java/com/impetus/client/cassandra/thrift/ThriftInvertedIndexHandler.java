@@ -240,13 +240,11 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     {
         ColumnPath cp = new ColumnPath(columnFamilyName);
         cp.setSuper_column(superColumnName);
-        ColumnOrSuperColumn cosc;
+        ColumnOrSuperColumn cosc = null;
 
         Cassandra.Client conn = null;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-
             conn = PelopsUtils.getCassandraConnection(pool);
             cosc = conn.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
         }
@@ -257,8 +255,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (NotFoundException e)
         {
-            log.error("Unable to search from inverted index, Caused by: ", e);
-            throw new IndexingException("Unable to search from inverted index", e);
+            log.warn("Not found any record in inverted index table");
         }
         catch (UnavailableException e)
         {
