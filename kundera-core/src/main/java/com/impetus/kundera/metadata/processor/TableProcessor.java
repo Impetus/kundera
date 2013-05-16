@@ -37,10 +37,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.MetamodelLoaderException;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -89,7 +86,6 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if (LOG.isDebugEnabled())
             LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
         populateMetadata(metadata, clazz, puProperties);
-
     }
 
     /**
@@ -108,21 +104,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             Map puProperties)
     {
         Table table = clazz.getAnnotation(Table.class);
-        boolean isEmbeddable = false;
         // Set Name of persistence object
         metadata.setTableName(table.name());
         // Add named/native query related application metadata.
         addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
-
-//        if (StringUtils.isBlank(schemaStr))
-//        {
-//            LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
-//                    + ". This entity won't be persisted");
-//            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
-//                    + table.name() + ". This entity won't be persisted");
-//        }
+        
         MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
 
         // scan for fields

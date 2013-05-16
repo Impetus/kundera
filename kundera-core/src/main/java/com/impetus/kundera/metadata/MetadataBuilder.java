@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +33,7 @@ import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 /**
  * Concrete implementation of IMetadataManager.
@@ -120,6 +122,19 @@ public class MetadataBuilder
             if (metadata == null)
             {
                 break;
+            }
+            
+            // Check for schema attribute of Table annotation.
+            if (MetadataUtils.isSchemaAttributeRequired(metadata.getPersistenceUnit())
+                    && StringUtils.isBlank(metadata.getSchema()))
+            {
+                if (log.isErrorEnabled())
+                {
+                    log.error("It is mandatory to specify Schema alongwith Table name:" + metadata.getTableName()
+                            + ". This entity won't be persisted");
+                }
+                throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
+                        + metadata.getTableName()+ ". This entity won't be persisted");
             }
         }
 
