@@ -149,8 +149,11 @@ public class PersistenceUnitConfiguration implements Configuration
                 // check for unique names
                 if (persistenceUnitNames.contains(metadata.getPersistenceUnitName()))
                 {
-                    throw new InvalidConfigurationException("Duplicate persistence-units for name: "
-                            + metadata.getPersistenceUnitName() + ". verify your persistence.xml file");
+                    if (log.isWarnEnabled())
+                    {
+                        log.warn("Duplicate persistence-units for name: " + metadata.getPersistenceUnitName()
+                                + ". verify your persistence.xml file");
+                    }
                 }
 
                 // check for provider
