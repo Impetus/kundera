@@ -26,6 +26,7 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -43,6 +44,7 @@ import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -641,7 +643,7 @@ public class CassQuery extends QueryImpl implements Query
                     ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName();
                     // compositeColumns.add(new
                     // BasicDBObject(compositeColumn,value));
-                    translator.buildWhereClause(builder,
+                    translator.buildWhereClause(builder,((AbstractAttribute) keyObj.getAttribute(fieldName)).getBindableJavaType(),
                             ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName(), value, condition);
                     if (partitionKey == null)
                     {
@@ -654,12 +656,15 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else if (idColumn.equals(fieldName))
                 {
-                    translator.buildWhereClause(builder, CassandraUtilities.getIdColumnName(m, externalProperties),
+                    translator.buildWhereClause(builder,((AbstractAttribute)m.getIdAttribute()).getBindableJavaType(), CassandraUtilities.getIdColumnName(m, externalProperties),
                             value, condition);
                 }
                 else
                 {
-                    translator.buildWhereClause(builder, fieldName, value, condition);
+                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
+                    Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
+                            m.getFieldName(fieldName));
+                    translator.buildWhereClause(builder, ((AbstractAttribute) attribute).getBindableJavaType(),fieldName, value, condition);
                     allowFiltering = true;
                 }
             }

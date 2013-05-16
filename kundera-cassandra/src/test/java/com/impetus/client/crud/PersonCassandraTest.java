@@ -133,7 +133,7 @@ public class PersonCassandraTest extends BaseTest
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
 
-        Query findQuery = em.createQuery("Select p from PersonCassandra p");
+        Query findQuery = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
         List<PersonCassandra> allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
@@ -181,7 +181,7 @@ public class PersonCassandraTest extends BaseTest
         // perform merge after query.
         for (PersonCassandra person : persons)
         {
-            person.setPersonName("after merge");
+            person.setPersonName("'after merge'");
             em.merge(person);
         }
 
@@ -194,15 +194,15 @@ public class PersonCassandraTest extends BaseTest
 
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
-        Assert.assertEquals("after merge", p.getPersonName());
+        Assert.assertEquals("'after merge'", p.getPersonName());
 
-        String updateQuery = "update PersonCassandra p set p.personName='KK MISHRA' where p.personId=1";
+        String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
         q = em.createQuery(updateQuery);
         q.executeUpdate();
 
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
-        Assert.assertEquals("KK MISHRA", p.getPersonName());
+        Assert.assertEquals("'KK MISHRA'", p.getPersonName());
 
         // Delete without WHERE clause.
 
@@ -367,7 +367,7 @@ public class PersonCassandraTest extends BaseTest
         else
         {
             CQLTranslator translator = new CQLTranslator();
-            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values (1,'Amry',10 )";
+            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
             CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
@@ -540,7 +540,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-    	em.close();
+        em.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }

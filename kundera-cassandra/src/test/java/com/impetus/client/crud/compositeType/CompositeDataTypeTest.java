@@ -258,7 +258,7 @@ public class CompositeDataTypeTest
         q.setParameter("sqlTimestamp", sqlTimestamp);
         q.setParameter("sqlTime", sqlTime);
         q.setParameter("bigInteger", bigInteger);
-        q.setParameter("calendar", calendar.getTime());
+        q.setParameter("calendar", calendar);
 
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -293,7 +293,7 @@ public class CompositeDataTypeTest
         q.setParameter("sqlTimestamp", sqlTimestamp);
         q.setParameter("sqlTime", sqlTime);
         q.setParameter("bigInteger", bigInteger);
-        q.setParameter("calendar", calendar.getTime());
+        q.setParameter("calendar", calendar);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());

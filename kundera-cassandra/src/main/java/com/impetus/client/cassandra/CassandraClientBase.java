@@ -32,6 +32,7 @@ import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -94,6 +95,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -1050,6 +1052,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             Attribute attribute = metadata.getIdAttribute();
             translator.buildWhereClause(queryBuilder,
+                    ((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType(),
                     CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE);
         }
 
@@ -1283,6 +1286,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 if (node.isDirty())
                 {
+                    node.handlePreEvent();
                     Object entity = node.getData();
                     Object id = node.getEntityId();
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
@@ -1334,6 +1338,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                             indexNode(node, metadata);
                         }
                     }
+                    node.handlePostEvent();
                 }
             }
 
@@ -1631,10 +1636,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             log.error("Error while adding counter value to table " + discriptor.getTable() + ". Details:", e);
             throw new KunderaException("Error while adding counter value to table ", e);
         }
-        finally
-        {
-            releaseConnection(conn);
-        }
     }
 
     /**
@@ -1655,7 +1656,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Object pooledConnection = null;
         pooledConnection = getPooledConection(persistenceUnit);
         conn = getConnection(pooledConnection);
-        conn.set_cql_version(getCqlVersion());
+        // conn.set_cql_version(getCqlVersion());
         try
         {
             return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
@@ -1889,7 +1890,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         protected List<Object> findByRelationQuery(EntityMetadata m, String columnName, Object columnValue,
                 Class clazz, CassandraDataHandler dataHandler)
         {
-            CqlResult result = null;
             CQLTranslator translator = new CQLTranslator();
             String selectQuery = translator.SELECTALL_QUERY;
             selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
@@ -1897,7 +1897,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             StringBuilder selectQueryBuilder = new StringBuilder(selectQuery);
             selectQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
-            translator.buildWhereClause(selectQueryBuilder, columnName, columnValue, "=");
+
+            translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, "=");
             selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
                     selectQueryBuilder.length());
             return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler);
