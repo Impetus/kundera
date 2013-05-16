@@ -471,7 +471,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 translator.ensureCase(new StringBuilder(), tableInfo.getTableName()).toString());
 
         List<ColumnInfo> columns = tableInfo.getColumnMetadatas();
-        Properties props = getColumnFamilyProperties(tableInfo);
 
         StringBuilder queryBuilder = new StringBuilder();
 
@@ -810,6 +809,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             if (!found)
             {
+                if (tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+                {
+                    if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+                    {
+                        throw new SchemaGenerationException(
+                                "Composite/Compound columns are yet supported over Super column family by Cassandra",
+                                "cassandra", databaseName);
+                    }
+                    else
+                    {
+                        onCompoundKey(tableInfo);
+                    }
+                }
+                else
+                {
+                    cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+                    // Create Index Table if required
+                    createInvertedIndexTable(tableInfo);
+                }
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
             }
             if (isCQL3Enabled(tableInfo))
