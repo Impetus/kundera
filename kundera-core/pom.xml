@@ -10,7 +10,6 @@
 	<groupId>com.impetus.core</groupId>
 	<artifactId>kundera-core</artifactId>
 	<packaging>jar</packaging>
-	<version>2.6-SNAPSHOT</version>
 	<name>kundera-core</name>
 	<url>http://maven.apache.org</url>
 
