@@ -11,7 +11,6 @@
 	<groupId>com.impetus.client</groupId>
 	<artifactId>kundera-cassandra</artifactId>
 	<packaging>jar</packaging>
-	<version>2.6-SNAPSHOT</version>
 	<name>kundera-cassandra</name>
 	<url>http://maven.apache.org</url>
 
@@ -26,6 +25,10 @@
 		</repository>
 	</repositories>
 
+	<properties>
+		<cassandra.version>1.2.4</cassandra.version>
+	</properties>
+
 	<!-- Dependencies -->
 	<dependencies>
 		<dependency>
@@ -38,12 +41,12 @@
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.6-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.6-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -57,18 +60,13 @@
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-thrift</artifactId>
-			<version>1.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
-			<version>1.2.4</version>
+			<version>${cassandra.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-clientutil</artifactId>
-			<version>1.2.4</version>
+			<version>${cassandra.version}</version>
 		</dependency>
 
 
@@ -133,6 +131,24 @@
 	<!-- Assembly build -->
 	<build>
 		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<excludes>
+								<exclude>.git/**</exclude>
+								<exclude>.gitignore</exclude>
+							</excludes>
+							<includes>
+								<include>lucene/**</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
 			<plugin>
 				<!-- NOTE: We don't need a groupId specification because the group is 
 					org.apache.maven.plugins ...which is assumed by default. -->
