@@ -5,3 +5,8 @@
 target/
 test-output/
 
+## Eclipse stuff ##
+.project
+.classpath
+.settings
+bin
