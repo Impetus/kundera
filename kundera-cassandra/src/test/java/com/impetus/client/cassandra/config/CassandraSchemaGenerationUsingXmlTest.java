@@ -81,14 +81,14 @@ public class CassandraSchemaGenerationUsingXmlTest
                     Assert.assertEquals("CASSANDRAUSERXYZ", cfDef.getName());
                     Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
                     Assert.assertEquals("Standard", cfDef.getColumn_type());
-                    Assert.assertEquals("User Column Family", cfDef.getComment());
+                    Assert.assertTrue(cfDef.getComment().isEmpty());
                     Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
                     Assert.assertNull(cfDef.getSubcomparator_type());
                     Assert.assertEquals(2, cfDef.getColumn_metadataSize());
                     Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
                     Assert.assertTrue(cfDef.isReplicate_on_write());
-                    Assert.assertEquals(16, cfDef.getMin_compaction_threshold());
-                    Assert.assertEquals(64, cfDef.getMax_compaction_threshold());
+                    Assert.assertEquals(4, cfDef.getMin_compaction_threshold());
+                    Assert.assertEquals(32, cfDef.getMax_compaction_threshold());
                 }
                 else if ("CassandraDefaultUser".equals(cfDef.getName()))
                 {
@@ -119,10 +119,10 @@ public class CassandraSchemaGenerationUsingXmlTest
                     Assert.assertEquals("CASSANDRASUPERUSER", cfDef.getName());
                     Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
                     Assert.assertEquals("Super", cfDef.getColumn_type());
-                    Assert.assertEquals("User Super Column Family", cfDef.getComment());
-                    Assert.assertEquals(BytesType.class.getName(), cfDef.getComparator_type());
+                    Assert.assertTrue(cfDef.getComment().isEmpty());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
                     Assert.assertNotNull(cfDef.getSubcomparator_type());
-                    Assert.assertEquals(BytesType.class.getName(), cfDef.getSubcomparator_type());
+                    Assert.assertEquals(UTF8Type.class.getName(), cfDef.getSubcomparator_type());
                     Assert.assertEquals(0, cfDef.getColumn_metadataSize());
                     Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
                 }
