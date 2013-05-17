@@ -46,6 +46,8 @@ public class CQLTranslatorTest
     private EntityManagerFactory emf;
 
     private static final Log logger = LogFactory.getLog(CassandraCompositeTypeTest.class);
+    
+    private static final String KEYSPACE = "CompositeCassandra";
 
     /**
      * @throws java.lang.Exception
@@ -53,6 +55,7 @@ public class CQLTranslatorTest
     @Before
     public void setUp() throws Exception
     {
+    	CassandraCli.dropKeySpace(KEYSPACE);
         CassandraCli.cassandraSetUp();
         emf = Persistence.createEntityManagerFactory("composite_pu");
     }
@@ -79,7 +82,7 @@ public class CQLTranslatorTest
     @After
     public void tearDown()
     {
-        CassandraCli.dropKeySpace("CompositeCassandra");
+        CassandraCli.dropKeySpace(KEYSPACE);
         emf.close();
     }
 }
