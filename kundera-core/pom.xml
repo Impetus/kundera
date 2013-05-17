@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>r08</version>
+			<version>14.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
