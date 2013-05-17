@@ -42,7 +42,7 @@ public class HBaseCli
     /** The utility. */
     public static HBaseTestingUtility utility;
 
-    public static Boolean isStarted = false;
+    public static Boolean isStarted = true;
 
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
