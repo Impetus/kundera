@@ -194,7 +194,7 @@ public class CompositeDataTypeTest
         // "Select u from PrimeUserDataType u where u.tweetDate = ?1";
 
         final String withFirstCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId";
-        final String withSecondCompositeColClause = "Select u from PrimeUserDataType u where u.key.uniqueId = :uniqueId";
+        final String withSecondCompositeColClause = "Select u from PrimeUserDataType u where u.key.uniqueId >= :uniqueId1 and u.key.uniqueId <= :uniqueId2";
         final String withBothCompositeColClause = "Select u from PrimeUserDataType u where u.key.studentId = :studentId and u.key.uniqueId = :uniqueId";
         final String withSelectiveCompositeColClause = "Select u.key from PrimeUserDataType u where u.key = :key";
 
@@ -225,7 +225,8 @@ public class CompositeDataTypeTest
 
         // Query with composite key clause.
         q = em.createQuery(withSecondCompositeColClause);
-        q.setParameter("uniqueId", 78575785897L);
+        q.setParameter("uniqueId1", 78575785897L);
+        q.setParameter("uniqueId2", 78575785897L);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
