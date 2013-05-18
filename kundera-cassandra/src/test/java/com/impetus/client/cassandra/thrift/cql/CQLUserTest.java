@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.persistence.CassandraCli;
 
 /**
  * @author Kuldeep
@@ -34,6 +35,7 @@ public class CQLUserTest
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         Map propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);

@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
 
 /**
@@ -36,6 +37,7 @@ public class LoggingConfigurationTest
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         Map propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
