@@ -194,7 +194,10 @@ public final class CassandraCli
     {
         try
         {
-            client.system_drop_keyspace(keyspaceName);
+            if(client != null)
+            {
+                client.system_drop_keyspace(keyspaceName);
+            }
             // deleteCassandraFolders("/var/lib/cassandra/data/");
             // deleteCassandraFolders("/var/lib/cassandra/data/system/");
             // deleteCassandraFolders("/var/lib/cassandra/commitlog/");
