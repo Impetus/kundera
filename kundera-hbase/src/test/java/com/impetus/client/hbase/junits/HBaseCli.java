@@ -18,6 +18,8 @@ package com.impetus.client.hbase.junits;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -42,8 +44,6 @@ public class HBaseCli
     /** The utility. */
     public static HBaseTestingUtility utility;
 
-    public static Boolean isStarted = true;
-
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
     private static File zkDir;
@@ -57,34 +57,34 @@ public class HBaseCli
     public static void main(String arg[])
     {
         HBaseCli cli = new HBaseCli();
-        // s cli.init();
+         cli.startCluster();;
     }
 
     public void startCluster()
     {
-        if (!isStarted)
+        File workingDirectory = new File("./");
+        Configuration conf = new Configuration();
+        System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
+        conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
+        conf.set("fs.default.name", "file:///");
+        conf.set("zookeeper.session.timeout", "180000");
+        conf.set("hbase.zookeeper.peerport", "2888");
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("dfs.datanode.data.dir.perm", "755");
+        try
         {
-            File workingDirectory = new File("./");
-            Configuration conf = new Configuration();
-            System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
-            conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
-            conf.set("fs.default.name", "file:///");
-            conf.set("zookeeper.session.timeout", "180000");
-            conf.set("hbase.zookeeper.peerport", "2888");
-            conf.set("hbase.zookeeper.property.clientPort", "2181");
-            conf.set("dfs.datanode.data.dir.perm", "755");
-            try
-            {
-                masterDir = new File(workingDirectory, "hbase");
-                conf.set(HConstants.HBASE_DIR, masterDir.toURI().toURL().toString());
-            }
-            catch (MalformedURLException e1)
-            {
-                logger.error(e1.getMessage());
-            }
+            masterDir = new File(workingDirectory, "hbase");
+            conf.set(HConstants.HBASE_DIR, masterDir.toURI().toURL().toString());
+        }
+        catch (MalformedURLException e1)
+        {
+            logger.error(e1.getMessage());
+        }
 
-            Configuration hbaseConf = HBaseConfiguration.create(conf);
-            utility = new HBaseTestingUtility(hbaseConf);
+        Configuration hbaseConf = HBaseConfiguration.create(conf);
+        utility = new HBaseTestingUtility(hbaseConf);
+        if (!checkIfServerRunning())
+        {
             hTablePool = new HTablePool(conf, 1);
             try
             {
@@ -105,13 +105,7 @@ public class HBaseCli
                 logger.error(e.getMessage());
                 throw new RuntimeException(e);
             }
-            isStarted = true;
         }
-    }
-
-    public boolean isStarted()
-    {
-        return isStarted;
     }
 
     /**
@@ -268,7 +262,6 @@ public class HBaseCli
                 FileUtil.fullyDelete(zkDir);
                 FileUtil.fullyDelete(masterDir);
                 utility = null;
-                isStarted = false;
             }
         }
         catch (IOException e)
@@ -286,5 +279,27 @@ public class HBaseCli
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 2181);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
     }
 }

@@ -74,7 +74,7 @@ public class HumanTest
     {
         em.close();
         emf.close();
-        if (cli != null && cli.isStarted())
+        if (cli != null)
         {
             cli.dropTable("Humans");
             cli.dropTable("HumansPrivatePhoto");

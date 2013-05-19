@@ -133,10 +133,7 @@ public class PersonHBaseTest extends BaseTest
 
     private void init()
     {
-        if (!cli.isStarted)
-        {
             cli.startCluster();
-        }
         // cli.createTable("PERSON");
         // cli.addColumnFamily("PERSON", "PERSON");
         Object p1 = prepareHbaseInstance("1", 10);
@@ -209,7 +206,7 @@ public class PersonHBaseTest extends BaseTest
         }
         em.close();
         emf.close();
-        if (cli != null && cli.isStarted())
+        if (cli != null )
         {
             cli.dropTable("PERSON");
             cli.stopCluster("PERSON");

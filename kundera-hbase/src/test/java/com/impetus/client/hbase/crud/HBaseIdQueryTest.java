@@ -61,7 +61,7 @@ public class HBaseIdQueryTest extends BaseTest
         }
         em.close();
         emf.close();
-        if (cli != null && cli.isStarted())
+        if (cli != null)
         {
             cli.stopCluster("PERSON");
         }

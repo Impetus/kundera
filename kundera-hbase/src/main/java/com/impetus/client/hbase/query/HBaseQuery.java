@@ -38,7 +38,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
-import com.impetus.client.hbase.query.HBaseQuery.QueryTranslator;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;

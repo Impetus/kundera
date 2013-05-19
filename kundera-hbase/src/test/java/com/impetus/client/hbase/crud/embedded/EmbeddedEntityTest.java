@@ -175,7 +175,7 @@ public class EmbeddedEntityTest
     public static void tearDownAfterClass()
     {
         emf.close();
-        if (cli != null && cli.isStarted())
+        if (cli != null )
         {
             cli.dropTable("NETSTAT_DTL_SMRY");
         }

@@ -229,10 +229,7 @@ public abstract class AssociationBase
                 }
                 if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory") && RUN_IN_EMBEDDED_MODE)
                 {
-                    if (!HBaseCli.isStarted())
-                    {
-                        // HBaseCli.startCluster();
-                    }
+                    // HBaseCli.startCluster();
                     // HBaseCli.createTable("PERSONNEL");
                     // HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
                     // HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");

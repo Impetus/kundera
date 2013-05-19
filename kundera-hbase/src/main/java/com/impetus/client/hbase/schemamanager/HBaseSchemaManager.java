@@ -238,7 +238,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 catch (IOException ioe)
                 {
-                    logger.error("Table isn't in enabled state, Caused by:", ioe);
+                    logger.error("Error while creating table, Caused by:", ioe);
                     throw new SchemaGenerationException(ioe, "Hbase");
                 }
             }

@@ -18,6 +18,8 @@ package com.impetus.kundera.tests.cli;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -44,8 +46,6 @@ public final class HBaseCli
     /** The utility. */
     private static HBaseTestingUtility utility;
 
-    private static boolean isStarted;
-
     private static File zkDir;
 
     private static File masterDir;
@@ -66,7 +66,7 @@ public final class HBaseCli
      */
     public static void startCluster()
     {
-        if (!isStarted)
+        if (checkIfServerRunning())
         {
             File workingDirectory = new File("./");
             Configuration conf = new Configuration();
@@ -89,23 +89,25 @@ public final class HBaseCli
 
             Configuration hbaseConf = HBaseConfiguration.create(conf);
             utility = new HBaseTestingUtility(hbaseConf);
-            try
+            if (!checkIfServerRunning())
             {
-                MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
-                zkCluster.setDefaultClientPort(2181);
-                zkCluster.setTickTime(18000);
-                zkDir = new File(utility.getClusterTestDir().toString());
-                zkCluster.startup(zkDir);
-                utility.setZkCluster(zkCluster);
-                utility.startMiniCluster();
-                utility.getHBaseCluster().startMaster();
+                try
+                {
+                    MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
+                    zkCluster.setDefaultClientPort(2181);
+                    zkCluster.setTickTime(18000);
+                    zkDir = new File(utility.getClusterTestDir().toString());
+                    zkCluster.startup(zkDir);
+                    utility.setZkCluster(zkCluster);
+                    utility.startMiniCluster();
+                    utility.getHBaseCluster().startMaster();
+                }
+                catch (Exception e)
+                {
+                    logger.error(e.getMessage());
+                    throw new RuntimeException(e);
+                }
             }
-            catch (Exception e)
-            {
-                logger.error(e.getMessage());
-                throw new RuntimeException(e);
-            }
-            isStarted = true;
         }
     }
 
@@ -210,8 +212,25 @@ public final class HBaseCli
     // }
     // }
 
-    public static boolean isStarted()
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
     {
-        return isStarted;
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 2181);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
     }
 }

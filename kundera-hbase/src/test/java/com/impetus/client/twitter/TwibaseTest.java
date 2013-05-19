@@ -55,19 +55,13 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Override
     void startServer()
     {
-        if (!cli.isStarted())
-        {
-            cli.startCluster();
-        }
+        cli.startCluster();
     }
 
     @Override
     void stopServer()
     {
-        if (cli.isStarted())
-        {
-            cli.stopCluster();
-        }
+        cli.stopCluster();
     }
 
     @Override
