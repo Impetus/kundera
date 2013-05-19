@@ -177,9 +177,10 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.14.1</version>
 				<configuration>
-				    <forkMode>always</forkMode>
-					<parallel>tests</parallel>
-<!-- 					<threadCount>10</threadCount> -->
+				    <forkMode>pertest</forkMode>
+				    <argLine>-Xms256m -Xmx1024m -XX:MaxPermSize=512m</argLine>
+					<!-- <parallel>tests</parallel> -->
+					<!-- <threadCount>10</threadCount> -->
 				</configuration>
 			</plugin>
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 

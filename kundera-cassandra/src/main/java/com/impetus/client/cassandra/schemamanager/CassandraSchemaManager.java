@@ -462,8 +462,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      *             the schema disagreement exception
      */
-    private void onCompoundKey(TableInfo tableInfo) throws InvalidRequestException, TException,
-            SchemaDisagreementException
+    private void onCompoundKey(TableInfo tableInfo)
     {
         CQLTranslator translator = new CQLTranslator();
         String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
@@ -523,30 +522,173 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
 
-        cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
-        cassandra_client.set_keyspace(databaseName);
         try
         {
+            cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
+            cassandra_client.set_keyspace(databaseName);
             cassandra_client.execute_cql3_query(
                     ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error("Error occurred while validating " + databaseName + ", Caused by: ", e);
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+            log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , e, "Cassandra",
                     databaseName);
         }
         catch (UnavailableException e)
         {
-            log.error("Error occurred while validating " + databaseName + ", Caused by: ", e);
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+            log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , e, "Cassandra",
                     databaseName);
         }
         catch (TimedOutException e)
         {
-            log.error("Error occurred while validating " + databaseName + ", Caused by: ", e);
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+            log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (InvalidRequestException ire)
+        {
+            StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
+            translator.ensureCase(builder,databaseName);
+            builder.append(" to keyspace ");
+            translator.ensureCase(builder, tableInfo.getTableName());
+            if (ire.why.equals(builder.toString()))
+            {
+                for (ColumnInfo column : tableInfo.getColumnMetadatas())
+                {
+                    addColumnToTable(tableInfo, translator, column);
+                }
+            }
+            else
+            {
+                log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", ire);
+                throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , ire, "Cassandra",
+                        databaseName);            
+            }
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (TException e)
+        {
+            log.error("Error occurred while creating table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+    }
+
+    /**
+     * Adds column to table if not exists previously ie alter table.
+     * 
+     * @param tableInfo
+     * @param translator
+     * @param column
+     */
+    private void addColumnToTable(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column)
+    {
+        StringBuilder addColumnQuery = new StringBuilder("ALTER TABLE ");
+        translator.ensureCase(addColumnQuery, tableInfo.getTableName());
+        addColumnQuery.append(" ADD ");
+        translator.ensureCase(addColumnQuery,column.getColumnName());
+        addColumnQuery.append(" " + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType())));
+        try
+        {
+            cassandra_client.execute_cql3_query(ByteBuffer.wrap(addColumnQuery.toString().getBytes()),
+                    Compression.NONE, ConsistencyLevel.ONE);
+        }
+        catch (InvalidRequestException ireforAddColumn)
+        {
+            StringBuilder   ireforAddColumnbBuilder = new StringBuilder("Invalid column name ");
+            ireforAddColumnbBuilder.append(column.getColumnName() +" because it conflicts with an existing column");
+            if (ireforAddColumn.why.equals(ireforAddColumnbBuilder.toString()))
+            {
+                alterColumnType(tableInfo, translator, column);
+            }
+            else
+            {
+                log.error("Error occurred while altering column type of  table " + tableInfo.getTableName() + ", Caused by: ", ireforAddColumn);
+                throw new SchemaGenerationException("Error occurred while adding column into table " + tableInfo.getTableName() , ireforAddColumn, "Cassandra",
+                        databaseName);                        
+            }
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error occurred while altering column type of  table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while adding column into table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error occurred while adding column into table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while adding column into table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error occurred while adding column into table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while adding column into table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (TException e)
+        {
+            log.error("Error occurred while adding column into table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while adding column into table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+    }
+
+    /**
+     * Alters column type of an existing column.
+     * 
+     * @param tableInfo
+     * @param translator
+     * @param column
+     */
+    private void alterColumnType(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column)
+    {
+        StringBuilder alterColumnTypeQuery = new StringBuilder("ALTER TABLE ");
+        translator.ensureCase(alterColumnTypeQuery, tableInfo.getTableName());
+        alterColumnTypeQuery.append(" ALTER ");
+        translator.ensureCase(alterColumnTypeQuery,column.getColumnName());
+        alterColumnTypeQuery.append(" TYPE " + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType())));
+        try
+        {
+            cassandra_client.execute_cql3_query(ByteBuffer.wrap(alterColumnTypeQuery.toString().getBytes()),
+                    Compression.NONE, ConsistencyLevel.ONE);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  , e, "Cassandra",
+                    databaseName);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName() + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  , e, "Cassandra",
+                    databaseName);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  , e, "Cassandra",
+                    databaseName);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName() , e, "Cassandra",
+                    databaseName);
+        }
+        catch (TException e)
+        {
+            log.error("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName()  + ", Caused by: ", e);
+            throw new SchemaGenerationException("Error occurred while altering column type of column " + column.getColumnName()+" of   table " + tableInfo.getTableName() , e, "Cassandra",
                     databaseName);
         }
     }
@@ -809,7 +951,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             if (!found)
             {
-                if (tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+                if (tableInfo.getTableIdType() != null
+                        && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
                 {
                     if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
                     {
@@ -828,7 +971,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     // Create Index Table if required
                     createInvertedIndexTable(tableInfo);
                 }
-                cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
             }
             if (isCQL3Enabled(tableInfo))
             {
