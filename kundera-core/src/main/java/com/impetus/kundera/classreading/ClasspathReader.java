@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,9 +229,9 @@ public class ClasspathReader extends Reader
     {
         List<URL> list = new ArrayList<URL>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
+        assert classLoader != null;        
         URL[] urls = ((URLClassLoader) classLoader).getURLs();
-
+        
         for (String fullyQualifiedClassName : classesToScan)
         {
             String classRelativePath = fullyQualifiedClassName.replace(".", "/");

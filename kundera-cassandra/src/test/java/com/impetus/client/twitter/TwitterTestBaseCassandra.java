@@ -36,6 +36,7 @@ import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.ProfessionalDetailCassandra;
 import com.impetus.client.twitter.entities.TweetCassandra;
 import com.impetus.client.twitter.entities.UserCassandra;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for Cassandra Cassandra-cli commands for running with standalone
@@ -96,6 +97,7 @@ public abstract class TwitterTestBaseCassandra
             CassandraCli.initClient();
             createSchema();
         }
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         twitter = new TwitterServiceCassandra(persistenceUnitName);
 
     }

@@ -65,6 +65,7 @@ public class NativeQueryCQLV3Test
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         CassandraCli.cassandraSetUp();
         // CassandraCli.initClient();
         // CassandraCli.dropKeySpace(schema);
@@ -157,6 +158,7 @@ public class NativeQueryCQLV3Test
         Assert.assertEquals("UT", results.get(0).getState());
         Assert.assertEquals("Brandon Sanderson", results.get(0).getFull_name());
         Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
+        emf.close();
     }
 
     /**
@@ -263,7 +265,7 @@ public class NativeQueryCQLV3Test
         em.createNativeQuery(createColumnFamily, CassandraBatchEntity.class).executeUpdate();
         batchOps = "BEGIN BATCH INSERT INTO test1(id, url) VALUES (64907b40-29a1-11e2-93fa-90b11c71b811,'w') INSERT INTO test2(key, count) VALUES ('key1',12) APPLY BATCH";
         em.createNativeQuery(batchOps, CassandraBatchEntity.class).executeUpdate();
-
+        emf.close();
     }
 
     /**
