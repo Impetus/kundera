@@ -102,6 +102,7 @@ public class HBaseSchemaManagerTest
     public void tearDown() throws Exception
     {
         // if (HBaseCli.isStarted)
+//        cli.dropTable("HbaseEntitySimple");
         cli.stopCluster();
         appMetadata = null;
     }

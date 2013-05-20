@@ -67,12 +67,6 @@ public class StudentHBaseTest extends StudentBase<StudentHBase>
 
     }
 
-    // @Test
-    public void dummyTest()
-    {
-        // TODO HBase embedded server , connection refused
-    }
-
     @Test
     public void executeTests()
     {
@@ -450,86 +444,28 @@ public class StudentHBaseTest extends StudentBase<StudentHBase>
     void startServer() throws InterruptedException
     {
         cli = new HBaseCli();
-        // cli.init();
         cli.startCluster();
-        // TimeUnit.SECONDS.sleep(10);
     }
 
     @Override
     void stopServer() throws InterruptedException, MasterNotRunningException, ZooKeeperConnectionException, IOException
     {
-        // cli.stopCluster();
-        cli.stopCluster("STUDENT");
     }
 
     @Override
     void createSchema()
     {
-
-        // cli.addColumnFamily("STUDENT", columnFamily)
-        // HBaseAdmin admin = cli.utility.getHBaseAdmin();
-        // HTableDescriptor desc = new HTableDescriptor("STUDENT");
-        //
-        // desc.addFamily(new HColumnDescriptor("UNIQUE_ID"));
-        // desc.addFamily(new HColumnDescriptor("STUDENT_NAME"));
-        // desc.addFamily(new HColumnDescriptor("IS_EXCEPTIONAL"));
-        // desc.addFamily(new HColumnDescriptor("AGE"));
-        // desc.addFamily(new HColumnDescriptor("SEMESTER"));
-        // desc.addFamily(new HColumnDescriptor("DIGITAL_SIGNATURE"));
-        // desc.addFamily(new HColumnDescriptor("CGPA"));
-        // desc.addFamily(new HColumnDescriptor("PERCENTAGE"));
-        // desc.addFamily(new HColumnDescriptor("HEIGHT"));
-        // desc.addFamily(new HColumnDescriptor("ENROLMENT_DATE"));
-        // desc.addFamily(new HColumnDescriptor("ENROLMENT_TIME"));
-        // desc.addFamily(new HColumnDescriptor("JOINING_DATE_TIME"));
-        // desc.addFamily(new HColumnDescriptor("YEARS_SPENT"));
-        // desc.addFamily(new HColumnDescriptor("ROLL_NUMBER"));
-        // desc.addFamily(new HColumnDescriptor("MONTHLY_FEE"));
-        // desc.addFamily(new HColumnDescriptor("SQL_DATE"));
-        // desc.addFamily(new HColumnDescriptor("SQL_TIMESTAMP"));
-        // desc.addFamily(new HColumnDescriptor("SQL_TIME"));
-        // desc.addFamily(new HColumnDescriptor("BIG_INT"));
-        // desc.addFamily(new HColumnDescriptor("BIG_DECIMAL"));
-        // desc.addFamily(new HColumnDescriptor("CALENDAR"));
-
-        // cli.utility.createTable("STUDENT"[], desc.ge;
-
-        byte[][] families = new byte[][] { "UNIQUE_ID".getBytes(), "STUDENT_NAME".getBytes(),
-                "IS_EXCEPTIONAL".getBytes(), "AGE".getBytes(), "SEMESTER".getBytes(), "DIGITAL_SIGNATURE".getBytes(),
-                "CGPA".getBytes(), "PERCENTAGE".getBytes(), "HEIGHT".getBytes(), "ENROLMENT_DATE".getBytes(),
-                "ENROLMENT_TIME".getBytes(), "JOINING_DATE_TIME".getBytes(), "YEARS_SPENT".getBytes(),
-                "ROLL_NUMBER".getBytes(), "MONTHLY_FEE".getBytes(), "SQL_DATE".getBytes(), "SQL_TIMESTAMP".getBytes(),
-                "SQL_TIME".getBytes(), "SQL_TIMESTAMP".getBytes(), "SQL_TIME".getBytes(), "BIG_INT".getBytes(),
-                "BIG_DECIMAL".getBytes(), "CALENDAR".getBytes() };
-        // cli.createTable("STUDENT".getBytes(), families);
         cli.createTable("STUDENT");
-        // cli.addColumnFamily("STUDENT", "UNIQUE_ID");
-        // cli.addColumnFamily("STUDENT", "STUDENT_NAME");
-        // cli.addColumnFamily("STUDENT", "IS_EXCEPTIONAL");
-        // cli.addColumnFamily("STUDENT", "AGE");
-        // cli.addColumnFamily("STUDENT", "SEMESTER");
-        // cli.addColumnFamily("STUDENT", "DIGITAL_SIGNATURE");
-        // cli.addColumnFamily("STUDENT", "CGPA");
-        // cli.addColumnFamily("STUDENT", "PERCENTAGE");
-        // cli.addColumnFamily("STUDENT", "HEIGHT");
-        // cli.addColumnFamily("STUDENT", "ENROLMENT_DATE");
-        // cli.addColumnFamily("STUDENT", "ENROLMENT_TIME");
-        // cli.addColumnFamily("STUDENT", "JOINING_DATE_TIME");
-        // cli.addColumnFamily("STUDENT", "YEARS_SPENT");
-        // cli.addColumnFamily("STUDENT", "ROLL_NUMBER");
-        // cli.addColumnFamily("STUDENT", "MONTHLY_FEE");
-        // cli.addColumnFamily("STUDENT", "SQL_DATE");
-        // cli.addColumnFamily("STUDENT", "SQL_TIMESTAMP");
-        // cli.addColumnFamily("STUDENT", "SQL_TIME");
-        // cli.addColumnFamily("STUDENT", "BIG_INT");
-        // cli.addColumnFamily("STUDENT", "BIG_DECIMAL");
-        // cli.addColumnFamily("STUDENT", "CALENDAR");
     }
 
     @Override
     void deleteSchema()
     {
-        // TestUtilities.cleanLuceneDirectory("hbaseTest");
+        cli.dropTable("NETSTAT_DTL_SMRY");
+        cli.dropTable("STUDENT");
+        cli.dropTable("PERSON_HBASE");
+        cli.dropTable("PERSON");
+        cli.dropTable("Address");
     }
 
 }

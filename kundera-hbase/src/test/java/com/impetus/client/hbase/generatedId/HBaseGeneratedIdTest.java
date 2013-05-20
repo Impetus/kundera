@@ -1,4 +1,4 @@
-package com.impetus.client.generatedId;
+package com.impetus.client.hbase.generatedId;
 
 import java.util.List;
 
@@ -56,6 +56,17 @@ public class HBaseGeneratedIdTest
     public void tearDown() throws Exception
     {
         emf.close();
+        cli.dropTable("HBaseGeneratedIdDefault");
+        cli.dropTable("HBaseGeneratedIdStrategyAuto");
+        cli.dropTable("HBaseGeneratedIdStrategyIdentity");
+        cli.dropTable("HBaseGeneratedIdStrategySequence");
+        cli.dropTable("HBaseGeneratedIdStrategyTable");
+        cli.dropTable("HBaseGeneratedIdWithOutSequenceGenerator");
+        cli.dropTable("HBaseGeneratedIdWithOutTableGenerator");
+        cli.dropTable("HBaseGeneratedIdWithSequenceGenerator");
+        cli.dropTable("HBaseGeneratedIdWithTableGenerator");
+        cli.dropTable("kunderahbase");
+        cli.dropTable("kundera_sequences");
     }
 
     @Test
