@@ -178,6 +178,10 @@ public class EmbeddedEntityTest
         if (cli != null )
         {
             cli.dropTable("NETSTAT_DTL_SMRY");
+            cli.dropTable("STUDENT");
+            cli.dropTable("PERSON_HBASE");
+            cli.dropTable("PERSON");
+            cli.dropTable("Address");
         }
     }
 

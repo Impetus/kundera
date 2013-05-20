@@ -85,10 +85,10 @@ partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner
 
 # directories where Cassandra should store data on disk.
 data_file_directories:
-    - /var/lib/cassandra/data
+    - target/embeddedCassandra/data
 
 # commit log
-commitlog_directory: /var/lib/cassandra/commitlog
+commitlog_directory: target/embeddedCassandra/commitlog
 
 # policy for data disk failures:
 # stop: shut down gossip and Thrift, leaving the node effectively dead, but
@@ -166,7 +166,7 @@ row_cache_save_period: 0
 row_cache_provider: SerializingCacheProvider
 
 # saved caches
-saved_caches_directory: /var/lib/cassandra/saved_caches
+saved_caches_directory: target/embeddedCassandra/saved_caches
 
 # commitlog_sync may be either "periodic" or "batch." 
 # When in batch mode, Cassandra won't ack writes until the commit log

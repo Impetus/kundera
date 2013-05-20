@@ -25,7 +25,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
 
 /**
  * The Class MongoAuthenticationTest.
@@ -47,7 +52,7 @@ public class MongoAuthenticationTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        // do nothing.
+
     }
 
     /**
@@ -59,10 +64,21 @@ public class MongoAuthenticationTest extends BaseTest
         try
         {
             pu = "validAuthenticationMongoPu";
-            emf = Persistence.createEntityManagerFactory(pu);
-            Assert.assertNotNull(emf);
-            EntityManager em = emf.createEntityManager();
-            Assert.assertNotNull(em);
+            Mongo m = new Mongo();
+            String dbname = "KunderaAuthTests";
+            String username = "kunderaUser";
+            String password  = "kunderapassword";
+            DB db = m.getDB(dbname);
+            db.addUser(username, password.toCharArray());
+            db.requestDone();
+            if (db.authenticate(username, password.toCharArray()))
+            {
+                m.close();
+                emf = Persistence.createEntityManagerFactory(pu);
+                Assert.assertNotNull(emf);
+                EntityManager em = emf.createEntityManager();
+                Assert.assertNotNull(em);
+            }
         }
         catch (Exception e)
         {

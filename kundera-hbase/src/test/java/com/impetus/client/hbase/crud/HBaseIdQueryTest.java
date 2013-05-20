@@ -63,7 +63,12 @@ public class HBaseIdQueryTest extends BaseTest
         emf.close();
         if (cli != null)
         {
-            cli.stopCluster("PERSON");
+            cli.dropTable("NETSTAT_DTL_SMRY");
+            cli.dropTable("STUDENT");
+            cli.dropTable("PERSON_HBASE");
+            cli.dropTable("PERSON");
+            cli.dropTable("Address");
+            cli.stopCluster("PERSON_HBASE");
         }
         LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
     }

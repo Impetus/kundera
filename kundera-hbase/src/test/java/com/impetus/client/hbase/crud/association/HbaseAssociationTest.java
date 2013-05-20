@@ -26,13 +26,15 @@ public class HbaseAssociationTest
     /** The emf. */
     private EntityManagerFactory emf;
 
+    private HBaseCli cli;
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(HbaseAssociationTest.class);
 
     @Before
     public void setUp()
     {
-        HBaseCli cli = new HBaseCli();
+        cli = new HBaseCli();
         cli.startCluster();
         emf = Persistence.createEntityManagerFactory(HBASE_PU);
     }
@@ -83,6 +85,10 @@ public class HbaseAssociationTest
     @After
     public void tearDown()
     {
-
+        cli.dropTable("NETSTAT_DTL_SMRY");
+        cli.dropTable("STUDENT");
+        cli.dropTable("PERSON_HBASE");
+        cli.dropTable("PERSON");
+        cli.dropTable("Address");
     }
 }

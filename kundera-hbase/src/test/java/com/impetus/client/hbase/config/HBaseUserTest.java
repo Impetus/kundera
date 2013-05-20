@@ -57,7 +57,6 @@ public class HBaseUserTest
     @After
     public void tearDown() throws Exception
     {
-
     }
 
     @Test
@@ -118,6 +117,13 @@ public class HBaseUserTest
         {
             logger.error("Error during UserTest, caused by :" + ie);
         }
-        emf.close();
+        finally
+        {
+            emf.close();
+            if (HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"))
+            {
+                cli.dropTable("HBASEUSERXYZ");
+            }
+        }
     }
 }

@@ -412,19 +412,6 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    // /**
-    // * @param keyValues
-    // * the keyValues to set
-    // */
-    // public void addKeyValue(String entityName, KeyDiscriptor keyValue)
-    // {
-    // if (keyValues == null)
-    // {
-    // keyValues = new HashMap<String, KeyDiscriptor>();
-    // }
-    // this.keyValues.put(entityName, keyValue);
-    // }
-
     /**
      * @param keyValues
      *            the keyValues to set

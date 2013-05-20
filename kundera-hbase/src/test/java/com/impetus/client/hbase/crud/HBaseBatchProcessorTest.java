@@ -132,7 +132,8 @@ public class HBaseBatchProcessorTest
 
         if (cli != null )
         {
-            cli.stopCluster("PERSON");
+            cli.dropTable("PERSON_BATCH");
+            cli.stopCluster("PERSON_BATCH");
         }
 
     }
