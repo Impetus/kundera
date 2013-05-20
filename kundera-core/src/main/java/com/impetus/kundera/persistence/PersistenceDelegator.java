@@ -185,8 +185,8 @@ public final class PersistenceDelegator
             mainCache.addHeadNode(node);
         }
 
-        // Return a deep copy of this entity
-        return (E) ObjectUtils.deepCopy(e);
+        // Return a copy of this entity
+        return (E) (e);
     }
 
     /**
@@ -230,6 +230,9 @@ public final class PersistenceDelegator
             lock.readLock().lock();
             node.find();
             lock.readLock().unlock();
+        } else
+        {
+            
         }
         Object nodeData = node.getData();
         if (nodeData == null)
