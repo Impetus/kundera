@@ -100,7 +100,10 @@ public class ObjectGraphBuilder
         }
 
         // Generate and set Id if @GeneratedValue present.
+        if (initialNodeState != null && initialNodeState.getClass().equals(TransientState.class))
+        {
         idGenerator.generateAndSetId(entity, entityMetadata, pd);
+ 	}
 
         if (!validator.isValidEntityObject(entity))
         {
