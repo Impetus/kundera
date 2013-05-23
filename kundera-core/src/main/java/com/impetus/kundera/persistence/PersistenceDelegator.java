@@ -176,7 +176,8 @@ public final class PersistenceDelegator
         if (e == null)
             return null;
 
-        // Set this returned entity as head node if applicable
+        // I don't it's needed as already done via find () method!
+/*        // Set this returned entity as head node if applicable
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
         CacheBase mainCache = getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
@@ -184,7 +185,7 @@ public final class PersistenceDelegator
         {
             mainCache.addHeadNode(node);
         }
-
+*/
         // Return a copy of this entity
         return (E) (e);
     }
