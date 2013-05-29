@@ -89,7 +89,7 @@ public class PersistenceDelegatorTest
         catch (KunderaException e)
         {
             Assert.assertEquals(
-                    "java.lang.IllegalArgumentException: Entity object is invalid, operation failed. Please check previous log message for details",
+                    "com.impetus.kundera.KunderaException: Entitymatadata should not be null",
                     e.getMessage());
         }
 

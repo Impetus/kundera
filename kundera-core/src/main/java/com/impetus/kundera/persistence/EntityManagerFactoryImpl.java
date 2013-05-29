@@ -93,14 +93,16 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
-        if (properties == null)
+        Map<String, Object> propsMap = new HashMap<String, Object>();
+        
+        if (properties != null)
         {
-            properties = new HashMap<String, Object>();
+            propsMap.putAll(properties);
         }
 
         // TODO Devise some better (JPA) way
-        properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        this.properties = properties;
+        propsMap.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
+        this.properties = propsMap;
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         // Initialize L2 cache

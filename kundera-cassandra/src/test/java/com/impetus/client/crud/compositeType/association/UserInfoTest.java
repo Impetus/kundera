@@ -42,9 +42,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
 import com.impetus.client.crud.compositeType.CassandraEmbeddedAssociation;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.Client;
 
 /**
  * @author vivek.mishra
@@ -72,6 +74,9 @@ public class UserInfoTest
     public void onCRUD()
     {
         EntityManager em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get("composite_pu");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -122,6 +127,9 @@ public class UserInfoTest
     public void onQuery()
     {
         EntityManager em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get("composite_pu");
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
         // Persist
         UUID timeLineId = UUID.randomUUID();

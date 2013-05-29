@@ -177,7 +177,6 @@ public class PersonCassandraTest extends BaseTest
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
 
-        testCountResult();
         // perform merge after query.
         for (PersonCassandra person : persons)
         {
@@ -204,6 +203,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("'KK MISHRA'", p.getPersonName());
 
+        testCountResult();
         // Delete without WHERE clause.
 
         String deleteQuery = "DELETE from PersonCassandra";
@@ -227,7 +227,8 @@ public class PersonCassandraTest extends BaseTest
                 PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
         Assert.assertEquals("count",
                 PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
-
+                
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
 
     /**

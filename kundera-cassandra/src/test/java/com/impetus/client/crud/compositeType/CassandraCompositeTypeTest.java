@@ -104,6 +104,9 @@ public class CassandraCompositeTypeTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         onCRUD(em, key);
         em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody()); // assertion
@@ -115,6 +118,9 @@ public class CassandraCompositeTypeTest
         em.flush();
         em.close();
         em =emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
         result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNull(result);
 
@@ -136,6 +142,9 @@ public class CassandraCompositeTypeTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         onCRUD(em, key);
         em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime()); // assertion
@@ -146,6 +155,9 @@ public class CassandraCompositeTypeTest
         em.flush();
         em.close();
         em =emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
         result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNull(result);
 

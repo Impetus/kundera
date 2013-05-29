@@ -208,7 +208,7 @@ public class MetamodelConfiguration implements Configuration
             metamodel = new MetamodelImpl();
         }
 
-        Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
+        Map<String, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
         Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl) metamodel).getEntityNameToClassMap();
         Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
         Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap = new HashMap<String, IdDiscriptor>();
@@ -303,7 +303,7 @@ public class MetamodelConfiguration implements Configuration
      *             Signals that an I/O exception has occurred.
      */
     private List<Class<?>> scanClassAndPutMetadata(InputStream bits, Reader reader,
-            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
+            Map<String, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
             String persistenceUnit, String client, Map<String, List<String>> clazzToPuMap,
             Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap) throws IOException
     {
@@ -365,7 +365,7 @@ public class MetamodelConfiguration implements Configuration
                                 // persistence unit, it will be null.
                                 if (metadata != null)
                                 {
-                                    entityMetadataMap.put(clazz, metadata);
+                                    entityMetadataMap.put(clazz.getName(), metadata);
                                     mapClazztoPu(clazz, persistenceUnit, clazzToPuMap);
                                     processGeneratedValueAnnotation(clazz, persistenceUnit, metadata,
                                             entityNameToKeyDiscriptorMap);

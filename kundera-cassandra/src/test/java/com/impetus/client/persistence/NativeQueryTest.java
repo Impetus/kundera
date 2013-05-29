@@ -31,8 +31,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.pelops.PelopsClient;
+import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -99,7 +103,7 @@ public class NativeQueryTest
         // String nativeSql = "CREATE KEYSPACE " + schema
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE " + "\"KunderaExamples\"";
+        String useNativeSql = "USE " + "KunderaExamples";
 
         EntityManager em = emf.createEntityManager()/*
                                                      * new
@@ -109,6 +113,9 @@ public class NativeQueryTest
                                                      * PersistenceContextType
                                                      * .EXTENDED)
                                                      */;
+//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
+//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();
@@ -133,7 +140,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + "\"KunderaExamples\"";
+        String useNativeSql = "USE " + "KunderaExamples";
 
         EntityManager em = emf.createEntityManager()/*
                                                      * new
@@ -143,6 +150,9 @@ public class NativeQueryTest
                                                      * PersistenceContextType
                                                      * .EXTENDED)
                                                      */;
+//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
+//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();
@@ -167,7 +177,7 @@ public class NativeQueryTest
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + "\"KunderaExamples\"";
+        String useNativeSql = "USE " + "KunderaExamples";
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = emf.createEntityManager()/*
                                                      * new
@@ -177,6 +187,9 @@ public class NativeQueryTest
                                                      * PersistenceContextType
                                                      * .EXTENDED)
                                                      */;
+//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
+//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         // Query q = em.createNativeQuery(nativeSql,
         // CassandraEntitySample.class);
         // // q.getResultList();
@@ -226,7 +239,7 @@ public class NativeQueryTest
         q.getResultList();
 
         // select all
-        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970 ALLOW FILTERING";
+        String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970";
         q = em.createNativeQuery(selectAll, CassandraEntitySample.class);
         results = q.getResultList();
         Assert.assertNotNull(results);

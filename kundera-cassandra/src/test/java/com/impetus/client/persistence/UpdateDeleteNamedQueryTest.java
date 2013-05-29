@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 import junit.framework.Assert;
@@ -115,13 +116,14 @@ public class UpdateDeleteNamedQueryTest
     @Test
     public void testUpdate()
     {
-        EntityManager em = getEntityManagerFactory().createEntityManager();
+        EntityManagerFactory emf = getEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
 
         // String colFamilySql =
         // "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
         // Query q1 = em.createNativeQuery(colFamilySql,
         // CassandraEntitySample.class);
-        // q1.executeUpdate(); 
+        // q1.executeUpdate();
         //
         // String idxSql = "CREATE INDEX ON users (birthDate)";
         // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
@@ -154,7 +156,7 @@ public class UpdateDeleteNamedQueryTest
         result = em.find(CassandraEntitySample.class, "k");
         // Assert.assertNull(result); // This should be uncommented later. as
         // merge got some issue.
-
+        emf.close();
     }
 
     /**
