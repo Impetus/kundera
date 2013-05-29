@@ -52,6 +52,8 @@ public class TableInfo
     /** The is indexable. */
     private boolean isIndexable;
 
+    private List<IndexInfo> columnToBeIndexed = new ArrayList<IndexInfo>();
+
     /**
      * Instantiates a new table info.
      * 
@@ -280,4 +282,27 @@ public class TableInfo
         return isCompositeId;
     }
 
+    public List<IndexInfo> getColumnsToBeIndexed()
+    {
+        return this.columnToBeIndexed;
+    }
+
+    public IndexInfo getColumnToBeIndexed(String columnName)
+    {
+        IndexInfo idxInfo = new IndexInfo(columnName);
+        if (columnToBeIndexed.contains(idxInfo))
+        {
+            int index = columnToBeIndexed.indexOf(idxInfo);
+            return getColumnsToBeIndexed().get(index);
+        }
+        return idxInfo;
+    }
+
+    public void addToIndexedColumnList(IndexInfo indexInfo)
+    {
+        if (!columnToBeIndexed.contains(indexInfo))
+        {
+            columnToBeIndexed.add(indexInfo);
+        }
+    }
 }

@@ -16,6 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
+import com.impetus.kundera.configure.schema.IndexInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -53,6 +55,8 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
+import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -109,7 +113,7 @@ public class SchemaConfiguration implements Configuration
             log.info("Configuring schema export for: " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
-            Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
+            Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
 
             // Iterate each entity metadata.
             for (EntityMetadata entityMetadata : entityMetadataMap.values())
@@ -196,8 +200,8 @@ public class SchemaConfiguration implements Configuration
                     "CounterColumnType", String.class, idName, isCompositeId);
             if (!tableInfos.contains(tableGeneratorDiscriptor))
             {
-                tableGeneratorDiscriptor.addColumnInfo(getJoinColumn(
-                        keyValue.getTableDiscriptor().getValueColumnName(), Long.class));
+                tableGeneratorDiscriptor.addColumnInfo(getJoinColumn(tableGeneratorDiscriptor, keyValue
+                        .getTableDiscriptor().getValueColumnName(), Long.class));
                 tableInfos.add(tableGeneratorDiscriptor);
             }
         }
@@ -233,8 +237,8 @@ public class SchemaConfiguration implements Configuration
                 // if self association
                 if (targetEntityMetadata.equals(entityMetadata))
                 {
-                    tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName(), entityMetadata.getIdAttribute()
-                            .getJavaType()));
+                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(), entityMetadata
+                            .getIdAttribute().getJavaType()));
                 }
                 else
                 {
@@ -267,7 +271,7 @@ public class SchemaConfiguration implements Configuration
             // if relation type is one to one or many to one.
             else if (relation.isUnary() && relation.getJoinColumnName() != null)
             {
-                tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName(), targetEntityMetadata
+                tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(), targetEntityMetadata
                         .getIdAttribute().getJavaType()));
             }
             // if relation type is many to many and relation via join table.
@@ -285,9 +289,9 @@ public class SchemaConfiguration implements Configuration
                             String.class, joinColumnName.concat(inverseJoinColumnName), false);
                     if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
                     {
-                        joinTableInfo.addColumnInfo(getJoinColumn(joinColumnName, entityMetadata.getIdAttribute()
-                                .getJavaType()));
-                        joinTableInfo.addColumnInfo(getJoinColumn(inverseJoinColumnName, entityMetadata
+                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata
+                                .getIdAttribute().getJavaType()));
+                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, entityMetadata
                                 .getIdAttribute().getJavaType()));
                         tableInfos.add(joinTableInfo);
                     }
@@ -311,17 +315,19 @@ public class SchemaConfiguration implements Configuration
             int idx = targetTableInfos.indexOf(targetTableInfo);
             targetTableInfo = targetTableInfos.get(idx);
             if (!targetTableInfo.getColumnMetadatas().contains(
-                    getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType())))
+                    getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute().getBindableJavaType())))
             {
-                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType()));
+                targetTableInfo.addColumnInfo(getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                        .getBindableJavaType()));
             }
         }
         else
         {
             if (!targetTableInfo.getColumnMetadatas().contains(
-                    getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType())))
+                    getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute().getBindableJavaType())))
             {
-                targetTableInfo.addColumnInfo(getJoinColumn(joinColumn, m.getIdAttribute().getBindableJavaType()));
+                targetTableInfo.addColumnInfo(getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                        .getBindableJavaType()));
             }
             targetTableInfos.add(targetTableInfo);
         }
@@ -354,7 +360,7 @@ public class SchemaConfiguration implements Configuration
                 {
                     EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
 
-                    EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddable, attr.getName(),
+                    EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(tableInfo, embeddable, attr.getName(),
                             attr.getJavaType());
 
                     if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
@@ -364,7 +370,7 @@ public class SchemaConfiguration implements Configuration
                 }
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                    ColumnInfo columnInfo = getColumn(attr,
+                    ColumnInfo columnInfo = getColumn(tableInfo, attr,
                             columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                     {
@@ -403,10 +409,10 @@ public class SchemaConfiguration implements Configuration
      *            persistence unit
      * @return map of entity metadata.
      */
-    private Map<Class<?>, EntityMetadata> getEntityMetadataCol(ApplicationMetadata appMetadata, String persistenceUnit)
+    private Map<String, EntityMetadata> getEntityMetadataCol(ApplicationMetadata appMetadata, String persistenceUnit)
     {
         Metamodel metaModel = appMetadata.getMetamodel(persistenceUnit);
-        Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metaModel).getEntityMetadataMap();
+        Map<String, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metaModel).getEntityMetadataMap();
         return entityMetadataMap;
     }
 
@@ -418,8 +424,8 @@ public class SchemaConfiguration implements Configuration
      * @param embeddedEntityClass
      * @return
      */
-    private EmbeddedColumnInfo getEmbeddedColumn(EmbeddableType embeddableType, String embeddableColName,
-            Class embeddedEntityClass)
+    private EmbeddedColumnInfo getEmbeddedColumn(TableInfo tableInfo, EmbeddableType embeddableType,
+            String embeddableColName, Class embeddedEntityClass)
     {
         EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo(embeddableType);
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
@@ -432,7 +438,7 @@ public class SchemaConfiguration implements Configuration
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            columns.add(getColumn(attr, indexedColumns.get(attr.getName())));
+            columns.add(getColumn(tableInfo, attr, indexedColumns.get(attr.getName())));
         }
         embeddedColumnInfo.setColumns(columns);
         return embeddedColumnInfo;
@@ -445,7 +451,7 @@ public class SchemaConfiguration implements Configuration
      *            of Column.
      * @return Object of ColumnInfo.
      */
-    private ColumnInfo getColumn(Attribute column, PropertyIndex indexedColumn)
+    private ColumnInfo getColumn(TableInfo tableInfo, Attribute column, PropertyIndex indexedColumn)
     {
         ColumnInfo columnInfo = new ColumnInfo();
 
@@ -461,10 +467,9 @@ public class SchemaConfiguration implements Configuration
         if (indexedColumn != null && indexedColumn.getName() != null)
         {
             columnInfo.setIndexable(true);
-            columnInfo.setIndexType(indexedColumn.getIndexType());
-            columnInfo.setMaxValue(indexedColumn.getMax());
-            columnInfo.setMinValue(indexedColumn.getMin());
-
+            IndexInfo indexInfo = new IndexInfo(((AbstractAttribute) column).getJPAColumnName(),
+                    indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType());
+            tableInfo.addToIndexedColumnList(indexInfo);
             // Add more if required
         }
         return columnInfo;
@@ -479,11 +484,15 @@ public class SchemaConfiguration implements Configuration
      *            joinColumnName.
      * @return ColumnInfo object columnInfo.
      */
-    private ColumnInfo getJoinColumn(String joinColumnName, Class columnType)
+    private ColumnInfo getJoinColumn(TableInfo tableInfo, String joinColumnName, Class columnType)
     {
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(joinColumnName);
         columnInfo.setIndexable(true);
+
+        IndexInfo indexInfo = new IndexInfo(joinColumnName);
+        tableInfo.addToIndexedColumnList(indexInfo);
+
         columnInfo.setType(columnType);
         return columnInfo;
     }
