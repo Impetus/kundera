@@ -362,13 +362,13 @@ public class OTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
             cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
         }
     }
 
@@ -384,13 +384,13 @@ public class OTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID VARCHAR(150))");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
             cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID VARCHAR(150))");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
         }
     }
 
