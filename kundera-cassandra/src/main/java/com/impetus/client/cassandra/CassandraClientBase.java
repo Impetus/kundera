@@ -32,7 +32,6 @@ import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -95,7 +94,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -133,8 +131,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     protected CQLClient cqlClient;
 
-    protected boolean isCQLEnabled;
-
     /**
      * constructor using fields.
      * 
@@ -147,11 +143,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         this.externalProperties = externalProperties;
         this.cqlClient = new CQLClient();
         setBatchSize(persistenceUnit, this.externalProperties);
-        cqlVersion = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
-                : null;
-        cqlVersion = cqlVersion == null ? (CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
-                .getCqlVersion() : CassandraConstants.CQL_VERSION_2_0) : cqlVersion;
-        this.isCQLEnabled = cqlVersion.equals(CassandraConstants.CQL_VERSION_3_0);
+        populateCqlVersion(externalProperties);
     }
 
     /**
@@ -205,7 +197,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                         key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                         new ArrayList<CounterColumn>(0), counterSuperColumns);
-                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m)));
             }
 
         }
@@ -222,7 +214,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                         key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                         counterColumns, new ArrayList<CounterSuperColumn>(0));
-                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m)));
             }
         }
         return entities;
@@ -251,7 +243,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
             if (o != null)
             {
                 entities.add(o);
@@ -285,7 +277,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), superColumns,
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
 
-            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
             if (o != null)
             {
                 entities.add(o);
@@ -605,7 +597,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
-            if (isCQL3Enabled(metadata, metaModel))
+            if (isCql3Enabled(metadata))
             {
                 result = cqlClient.find(metaModel, metadata, rowId, relationNames);
             }
@@ -631,18 +623,43 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param metaModel
      * @return
      */
-    public boolean isCQL3Enabled(EntityMetadata metadata, MetamodelImpl metaModel)
+    public boolean isCql3Enabled(EntityMetadata metadata)
     {
-        isCQLEnabled = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())
-                || (isCQLEnabled && !metadata.getType().equals(Type.SUPER_COLUMN_FAMILY));
-        if (isCQLEnabled && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        if (metadata != null)
         {
-            log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed by using thrift");
-            return isCQLEnabled = false;
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            {
+                return true;
+            }
+            else if (getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
+                    && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
+            {
+                log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed using thrift");
+                return false;
+            }
+            return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
         }
-        return isCQLEnabled;
+        return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
     }
 
+    
+    /**
+     * Returns true in case of, composite Id and if cql3 opted and not a
+     * embedded entity.
+     * 
+     * @param metadata
+     * @param metaModel
+     * @return
+     */
+    public boolean isCql3Enabled()
+    {
+       return isCql3Enabled(null);
+    }
+    
     /**
      * Find.
      * 
@@ -758,7 +775,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                     Object e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
+                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational, isCql3Enabled(m));
                     if (e != null)
                     {
                         entities.add(e);
@@ -819,7 +836,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             tr.setId(id);
             tr.setColumnFamilyName(m.getTableName());
             tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
-            results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
+            results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq, isCql3Enabled(m)));
         }
         return results;
     }
@@ -962,10 +979,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public void close()
     {
         clear();
+        setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
         // nodes.clear();
         // nodes = null;
         closed = true;
-        // externalProperties = null;
+        externalProperties = null;
     }
 
     /**
@@ -1282,6 +1300,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         StringBuilder batchQueryBuilder = new StringBuilder(batchQuery);
         try
         {
+            boolean isCql3Enabled = false;
             for (Node node : nodes)
             {
                 if (node.isDirty())
@@ -1298,8 +1317,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                     // delete can not be executed in batch
 
-                    if (isCQL3Enabled(metadata, metaModel))
+                    if (isCql3Enabled(metadata))
                     {
+                        isCql3Enabled = true;
                         List<RelationHolder> relationHolders = getRelationHolders(node);
                         // onPersist(metadata, entity, id, relationHolders);
                         String query;
@@ -1356,7 +1376,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             }
 
-            if (!nodes.isEmpty() && isCQLEnabled)
+            if (!nodes.isEmpty() && isCql3Enabled)
             {
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
                 executeCQLQuery(batchQueryBuilder.toString());
@@ -1656,11 +1676,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Object pooledConnection = null;
         pooledConnection = getPooledConection(persistenceUnit);
         conn = getConnection(pooledConnection);
-        // conn.set_cql_version(getCqlVersion());
         try
         {
-            return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
-                    org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+            if (isCql3Enabled())
+            {
+                return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+            }
+            return conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery), org.apache.cassandra.thrift.Compression.NONE);
         }
         finally
         {
@@ -1709,6 +1732,28 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
             batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
+        }
+    }
+
+    private void populateCqlVersion(Map<String, Object> externalProperties)
+    {
+        String cqlVersion = externalProperties != null ? (String) externalProperties
+                .get(CassandraConstants.CQL_VERSION) : null;
+        if (cqlVersion == null
+                || !(cqlVersion != null && (cqlVersion.equals(CassandraConstants.CQL_VERSION_2_0) || cqlVersion
+                        .equals(CassandraConstants.CQL_VERSION_3_0))))
+        {
+            cqlVersion = (CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd.getCqlVersion()
+                    : CassandraConstants.CQL_VERSION_2_0);
+        }
+
+        if (cqlVersion.equals(CassandraConstants.CQL_VERSION_3_0))
+        {
+            setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        }
+        else
+        {
+            setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
         }
     }
 
@@ -1808,7 +1853,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                 new ArrayList<CounterSuperColumn>(0));
 
                         Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
-                                relationalField != null && !relationalField.isEmpty());
+                                relationalField != null && !relationalField.isEmpty(), isCql3Enabled(entityMetadata));
 
                         if (entity != null)
                         {

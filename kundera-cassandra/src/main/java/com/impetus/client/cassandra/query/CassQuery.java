@@ -117,13 +117,12 @@ public class CassQuery extends QueryImpl implements Query
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCQL3Enabled(m, metaModel))
+        if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             result = onQueryOverCQL3(m, client, metaModel, null);
         }
         else
         {
-
             if (appMetadata.isNative(getJPAQuery()))
             {
                 result = ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
@@ -188,7 +187,7 @@ public class CassQuery extends QueryImpl implements Query
             ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
                     m.getEntityClazz(), null);
         }
-        else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCQL3Enabled(m, metaModel))
+        else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             ls = onQueryOverCQL3(m, client, metaModel, m.getRelationNames());
         }

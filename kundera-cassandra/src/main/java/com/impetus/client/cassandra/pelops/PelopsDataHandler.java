@@ -58,15 +58,14 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /**
      * @param externalProperties
      */
-    public PelopsDataHandler(Map<String, Object> externalProperties, boolean isCQLEnabled)
+    public PelopsDataHandler(Map<String, Object> externalProperties)
     {
-        super(isCQLEnabled);
         this.externalProperty = externalProperties;
     }
 
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled) throws Exception
     {
         Selector selector = Pelops
                 .createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit(), externalProperty));
@@ -90,16 +89,16 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         tr = thriftTranslator
                 .translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(), m.getType(), tr);
 
-        return populateEntity(tr, m, relationNames, isWrapReq);
+        return populateEntity(tr, m, relationNames, isWrapReq, isCql3Enabled);
     }
 
     /** Translation Methods */
 
     @Override
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
+            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object... rowIds) throws Exception
     {
-        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
+        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel,isCql3Enabled, rowIds);
     }
 
     @Override

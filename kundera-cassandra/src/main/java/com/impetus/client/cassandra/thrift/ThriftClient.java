@@ -113,7 +113,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new ThriftDataHandler(pool, isCQLEnabled);
+        this.dataHandler = new ThriftDataHandler(pool);
         this.invertedIndexHandler = new ThriftInvertedIndexHandler(pool);
         this.reader = reader;
         this.pool = pool;
@@ -143,7 +143,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
-            if (isCQL3Enabled(entityMetadata, metaModel))
+            if (isCql3Enabled(entityMetadata))
             {
                 cqlClient.persist(entityMetadata, entity, conn, rlHolders);
             }
@@ -334,7 +334,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), rowIds);
+                    getConsistencyLevel(),isCql3Enabled(metadata), rowIds);
         }
         catch (Exception e)
         {
@@ -540,7 +540,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         List<Object> entities = null;
 
-        if (isCQLEnabled)
+        if (isCql3Enabled(m))
         {
             entities = findByRelationQuery(m, colName, colValue, entityClazz, dataHandler);
         }
@@ -625,7 +625,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
-            if (isCQL3Enabled(metadata, metaModel))
+            if (isCql3Enabled(metadata))
             {
                 String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
                 executeQuery(deleteQuery, metadata.getEntityClazz(), null);
@@ -790,7 +790,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key), m
                                     .getTableName(), columns, new ArrayList<SuperColumn>(0),
                                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0)), m,
-                            relationNames, isRelational);
+                            relationNames, isRelational, isCql3Enabled(m));
                     if (e != null)
                     {
                         entities.add(e);

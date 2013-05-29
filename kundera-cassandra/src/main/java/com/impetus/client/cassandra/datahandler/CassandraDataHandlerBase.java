@@ -77,11 +77,9 @@ public abstract class CassandraDataHandlerBase
     /** The thrift translator. */
     protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
 
-    protected boolean isCQLEnabled;
-
-    public CassandraDataHandlerBase(boolean isCQLEnabled)
+    public CassandraDataHandlerBase()
     {
-        this.isCQLEnabled = isCQLEnabled;
+
     }
 
     /**
@@ -203,14 +201,14 @@ public abstract class CassandraDataHandlerBase
      *             the exception
      */
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
+            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>();
         if (rowIds != null)
         {
             for (Object rowKey : rowIds)
             {
-                Object e = fromThriftRow(clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel);
+                Object e = fromThriftRow(clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel, isCql3Enabled);
                 if (e != null)
                 {
                     entities.add(e);
@@ -240,7 +238,7 @@ public abstract class CassandraDataHandlerBase
      *             the exception
      */
     public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCqlEnabled) throws Exception;
 
     /**
      * Populate embedded object.
@@ -580,7 +578,7 @@ public abstract class CassandraDataHandlerBase
      *            the is wrap req
      * @return the object
      */
-    public Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq)
+    public Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq, boolean isCql3Enabled)
     {
         Map<String, Object> relations = new HashMap<String, Object>();
         Object entity = null;
@@ -597,14 +595,14 @@ public abstract class CassandraDataHandlerBase
                 if (column != null)
                 {
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if (CassandraConstants.CQL_KEY.equals(thriftColumnName) && tr.getId() == null)
+                    if (CassandraConstants.CQL_KEY.equalsIgnoreCase(thriftColumnName) && tr.getId() == null)
                     {
                         entity = initialize(m, entity, null);
-                        setId(m, entity, column.getValue());
+                        setId(m, entity, column.getValue(), isCql3Enabled);
                     }
                     else
                     {
-                        entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+                        entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations, isCql3Enabled);
                     }
                 }
             }
@@ -678,7 +676,7 @@ public abstract class CassandraDataHandlerBase
                         else
                         {
                             scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
-                                    entity);
+                                    entity, isCql3Enabled);
                         }
 
                     }
@@ -692,7 +690,7 @@ public abstract class CassandraDataHandlerBase
                 if (counterColumn != null)
                 {
                     entity = initialize(m, entity, tr.getId());
-                    onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
+                    onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations, isCql3Enabled);
                 }
             }
 
@@ -751,7 +749,7 @@ public abstract class CassandraDataHandlerBase
                         else
                         {
                             scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
-                                    counterSuperColumn, entity);
+                                    counterSuperColumn, entity, isCql3Enabled);
                         }
                     }
                 }
@@ -783,9 +781,9 @@ public abstract class CassandraDataHandlerBase
                 PropertyAccessorHelper.getId(entity, m), relations) : entity;
     }
 
-    private void setId(EntityMetadata m, Object entity, Object columnValue)
+    private void setId(EntityMetadata m, Object entity, Object columnValue, boolean isCql3Enabled)
     {
-        if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+        if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
             setFieldValueViaCQL(entity, columnValue, m.getIdAttribute());
         }
@@ -871,12 +869,12 @@ public abstract class CassandraDataHandlerBase
      * @throws InstantiationException
      */
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject)
+            Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject, boolean isCql3Enabled)
             throws InstantiationException, IllegalAccessException
     {
         for (Column column : superColumn.getColumns())
         {
-            embeddedObject = onColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
+            embeddedObject = onColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations, isCql3Enabled);
         }
     }
 
@@ -901,12 +899,12 @@ public abstract class CassandraDataHandlerBase
      * @throws InstantiationException
      */
     private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject)
+            Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject, boolean isCql3Enabled)
             throws InstantiationException, IllegalAccessException
     {
         for (CounterColumn column : superColumn.getColumns())
         {
-            onCounterColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
+            onCounterColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations, isCql3Enabled);
         }
     }
 
@@ -995,7 +993,7 @@ public abstract class CassandraDataHandlerBase
      * @throws InstantiationException
      */
     private Object onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
-            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations, boolean isCql3Enabled)
             throws InstantiationException, IllegalAccessException
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
@@ -1005,9 +1003,9 @@ public abstract class CassandraDataHandlerBase
             LongAccessor accessor = new LongAccessor();
             Long value = accessor.fromBytes(Long.class, column.getValue());
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
-                    value.toString());
+                    value.toString(), isCql3Enabled);
         }
-        return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
+        return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue, isCql3Enabled);
     }
 
     /**
@@ -1031,12 +1029,12 @@ public abstract class CassandraDataHandlerBase
      * @throws InstantiationException
      */
     private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,
-            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations, boolean isCql3Enabled)
             throws InstantiationException, IllegalAccessException
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         String thriftColumnValue = new Long(column.getValue()).toString();
-        populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
+        populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue, isCql3Enabled);
     }
 
     /**
@@ -1060,7 +1058,7 @@ public abstract class CassandraDataHandlerBase
      * @throws InstantiationException
      */
     private Object populateViaThrift(EntityMetadata m, Object entity, EntityType entityType,
-            List<String> relationNames, Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
+            List<String> relationNames, Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue, boolean isCql3Enabled)
             throws InstantiationException, IllegalAccessException
     {
         if (relationNames == null || !relationNames.contains(thriftColumnName))
@@ -1081,10 +1079,10 @@ public abstract class CassandraDataHandlerBase
                         if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
                                 && thriftColumnName.equals(idColumnName))
                         {
-                            setId(m, entity, thriftColumnValue);
+                            setId(m, entity, thriftColumnValue, isCql3Enabled);
                             PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
                         }
-                        if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
+                        if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
                         {
                             setFieldValueViaCQL(entity, thriftColumnValue, attribute);
                         }
@@ -1110,7 +1108,7 @@ public abstract class CassandraDataHandlerBase
 
                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
                 Object value;
-                if (isCQLEnabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                 {
                     value = getFieldValueViaCQL(thriftColumnValue, relationMetadata.getIdAttribute());
                 }
