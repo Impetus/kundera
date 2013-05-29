@@ -53,7 +53,7 @@ import com.impetus.kundera.client.Client;
  * 
  */
 public class UserInfoTest
-{
+{   
     private EntityManagerFactory emf;
 
     /**
@@ -84,7 +84,7 @@ public class UserInfoTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
-        timeLine.setTweetDate(new Date());
+        timeLine.setTweetDate(currentDate);
 
         UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
         timeLine.setUserInfo(userInfo);
@@ -137,7 +137,7 @@ public class UserInfoTest
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         CassandraEmbeddedAssociation timeLine = new CassandraEmbeddedAssociation(key);
         timeLine.setTweetBody("my first tweet");
-        timeLine.setTweetDate(new Date());
+        timeLine.setTweetDate(currentDate);
 
         UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
         timeLine.setUserInfo(userInfo);
