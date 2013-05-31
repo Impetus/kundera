@@ -330,8 +330,10 @@ public class MetamodelConfiguration implements Configuration
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
                 {
-                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+//                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
 
+                    Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+                    
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName())
                             && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
                     {

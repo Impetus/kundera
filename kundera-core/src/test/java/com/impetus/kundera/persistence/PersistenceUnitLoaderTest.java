@@ -68,7 +68,7 @@ public class PersistenceUnitLoaderTest
     {
         try
         {
-            Enumeration<URL> xmls = Thread.currentThread().getContextClassLoader()
+            Enumeration<URL> xmls = this.getClass().getClassLoader()
                     .getResources("META-INF/persistence.xml");
 
             while (xmls.hasMoreElements())

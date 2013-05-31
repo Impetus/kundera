@@ -440,8 +440,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public ClassLoader getClassLoader()
     {
-        // TODO: vivek need to review for OSGI model.
-        return Thread.currentThread().getContextClassLoader();
+        return this.getClass().getClassLoader();
     }
 
     /*

@@ -119,7 +119,7 @@ public class PersistenceUnitConfiguration implements Configuration
         Enumeration<URL> xmls = null;
         try
         {
-            xmls = Thread.currentThread().getContextClassLoader().getResources("META-INF/persistence.xml");
+            xmls = this.getClass().getClassLoader().getResources("META-INF/persistence.xml");
         }
         catch (IOException ioex)
         {
