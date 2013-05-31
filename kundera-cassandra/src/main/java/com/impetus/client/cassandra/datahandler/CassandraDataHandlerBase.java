@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.datahandler;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,6 +61,8 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.BigDecimalAccessor;
+import com.impetus.kundera.property.accessor.DoubleAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 
@@ -1237,6 +1240,13 @@ public abstract class CassandraDataHandlerBase
                     // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
+                {
+                    DoubleAccessor accessor = new DoubleAccessor();
+                    Double value = accessor.fromBytes(Double.class, (byte[]) thriftColumnValue);
+                    // String value =
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
+                }
                 else
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (byte[]) thriftColumnValue);
@@ -1279,6 +1289,11 @@ public abstract class CassandraDataHandlerBase
                 objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
                         String.valueOf(value));
                 return objValue;
+            }else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
+            {
+                DoubleAccessor doubleAccessor = new DoubleAccessor();
+                Double value = doubleAccessor.fromBytes(Double.class, (byte[]) thriftColumnValue);
+               return value;
             }
             else
             {
