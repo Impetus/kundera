@@ -218,9 +218,14 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             {
                 try
                 {
-                    admin.getTableDescriptor(tableInfo.getTableName().getBytes());
-                    admin.disableTable(tableInfo.getTableName());
-                    admin.deleteTable(tableInfo.getTableName());
+                    if (admin.isTableAvailable(tableInfo.getTableName()))
+                    {
+                        if (admin.isTableEnabled(tableInfo.getTableName()))
+                        {
+                            admin.disableTable(tableInfo.getTableName());
+                        }
+                        admin.deleteTable(tableInfo.getTableName());
+                    }
                 }
                 catch (TableNotFoundException e)
                 {
@@ -235,6 +240,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 try
                 {
                     admin.createTable(hTableDescriptor);
+                    if (admin.isTableDisabled(tableInfo.getTableName()))
+                    {
+                        admin.enableTable(tableInfo.getTableName());
+                    }
                 }
                 catch (IOException ioe)
                 {
@@ -258,8 +267,14 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 {
                     try
                     {
-                        admin.disableTable(tableInfo.getTableName());
-                        admin.deleteTable(tableInfo.getTableName());
+                        if (admin.isTableAvailable(tableInfo.getTableName()))
+                        {
+                            if (admin.isTableEnabled(tableInfo.getTableName()))
+                            {
+                                admin.disableTable(tableInfo.getTableName());
+                            }
+                            admin.deleteTable(tableInfo.getTableName());
+                        }
                     }
                     catch (TableNotFoundException tnfe)
                     {

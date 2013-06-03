@@ -36,8 +36,8 @@ public class UserCassandraGeneratedId
 {
     @Id
     @Column(name = "PERSON_ID")
-    @GeneratedValue(strategy=GenerationType.TABLE)
-    private String personId;
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    private int personId;
 
     @Column(name = "PERSON_NAME")
     private String personName;
@@ -46,7 +46,7 @@ public class UserCassandraGeneratedId
     @JoinColumn(name = "ADDRESS_ID")
     private AddressMongoGeneratedId address;
 
-    public String getPersonId()
+    public int getPersonId()
     {
         return personId;
     }

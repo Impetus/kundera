@@ -134,9 +134,9 @@
 			<version>5.1.6</version> <scope>test</scope> </dependency> -->
 
 		<dependency>
-			<groupId>hsqldb</groupId>
+			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>1.8.0.7</version>
+			<version>2.2.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -339,7 +339,7 @@
 			<artifactId>kundera-rest</artifactId>
 			<version>2.6-SNAPSHOT</version>
 		</dependency>
-	    <dependency>
+		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
 			<version>2.6-SNAPSHOT</version>
@@ -417,18 +417,15 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
-			<groupId>com.impetus.client</groupId>
-			<artifactId>kundera-oracle-nosql</artifactId>
-			<version>2.5-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency> -->
+		<!-- <dependency> <groupId>com.impetus.client</groupId> <artifactId>kundera-oracle-nosql</artifactId> 
+			<version>2.5-SNAPSHOT</version> <type>test-jar</type> <scope>test</scope> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.1.7.Final</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

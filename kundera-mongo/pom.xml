@@ -39,6 +39,13 @@
 		</dependency>
 
 		<!-- contiperf dependency should not be here -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>4.1.7.Final</version>
+			<scope>test</scope>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.databene</groupId>

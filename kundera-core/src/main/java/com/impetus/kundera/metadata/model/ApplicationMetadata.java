@@ -79,10 +79,10 @@ public class ApplicationMetadata
     public void addEntityMetadata(String persistenceUnit, Class<?> clazz, EntityMetadata entityMetadata)
     {
         Metamodel metamodel = getMetamodelMap().get(persistenceUnit);
-        Map<Class<?>, EntityMetadata> entityClassToMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
+        Map<String, EntityMetadata> entityClassToMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
         if (entityClassToMetadataMap == null || entityClassToMetadataMap.isEmpty())
         {
-            entityClassToMetadataMap.put(clazz, entityMetadata);
+            entityClassToMetadataMap.put(clazz.getName(), entityMetadata);
         }
         else
         {

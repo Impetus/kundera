@@ -53,9 +53,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
     private ConnectionPool pool;
 
-    public ThriftDataHandler(ConnectionPool pool, boolean isCQLEnabled)
+    public ThriftDataHandler(ConnectionPool pool)
     {
-        super(isCQLEnabled);
         this.pool = pool;
     }
 
@@ -69,7 +68,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      */
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled) throws Exception
     {
         // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
 
@@ -86,7 +85,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
         Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
-        e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns);
+        e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns, isCql3Enabled);
         PelopsUtils.releaseConnection(pool, conn);
         return e;
     }
@@ -107,7 +106,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      * @throws CharacterCodingException
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow) throws CharacterCodingException
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow,boolean isCql3Enabled) throws CharacterCodingException
     {
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (ByteBuffer key : columnOrSuperColumnsFromRow.keySet())
@@ -117,7 +116,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
             tr.setId(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.array()));
             tr = dataGenerator.translateToThriftRow(columnOrSuperColumnsFromRow, m.isCounterColumnType(), m.getType(),
                     tr);
-            e = populateEntity(tr, m, relationNames, isWrapReq);
+            e = populateEntity(tr, m, relationNames, isWrapReq,isCql3Enabled);
         }
         return e;
     }

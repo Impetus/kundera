@@ -43,7 +43,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 public class MetamodelImpl implements Metamodel
 {
     /** The entity metadata map. */
-    Map<Class<?>, EntityMetadata> entityMetadataMap;
+    Map<String, EntityMetadata> entityMetadataMap;
 
     /** The entity name to class map. */
     Map<String, Class<?>> entityNameToClassMap;
@@ -179,7 +179,7 @@ public class MetamodelImpl implements Metamodel
     public MetamodelImpl()
     {
         super();
-        setEntityMetadataMap(new HashMap<Class<?>, EntityMetadata>());
+        setEntityMetadataMap(new HashMap<String, EntityMetadata>());
     }
 
     /**
@@ -187,11 +187,11 @@ public class MetamodelImpl implements Metamodel
      * 
      * @return the entityMetadataMap
      */
-    public Map<Class<?>, EntityMetadata> getEntityMetadataMap()
+    public Map<String, EntityMetadata> getEntityMetadataMap()
     {
         if (entityMetadataMap == null)
         {
-            entityMetadataMap = new HashMap<Class<?>, EntityMetadata>();
+            entityMetadataMap = new HashMap<String, EntityMetadata>();
         }
         return entityMetadataMap;
     }
@@ -202,7 +202,7 @@ public class MetamodelImpl implements Metamodel
      * @param entityMetadataMap
      *            the entityMetadataMap to set
      */
-    public void setEntityMetadataMap(Map<Class<?>, EntityMetadata> entityMetadataMap)
+    public void setEntityMetadataMap(Map<String, EntityMetadata> entityMetadataMap)
     {
         this.entityMetadataMap = entityMetadataMap;
     }
@@ -217,7 +217,7 @@ public class MetamodelImpl implements Metamodel
      */
     public void addEntityMetadata(Class<?> clazz, EntityMetadata entityMetadata)
     {
-        getEntityMetadataMap().put(clazz, entityMetadata);
+        getEntityMetadataMap().put(clazz.getName(), entityMetadata);
     }
 
     /**
@@ -229,7 +229,7 @@ public class MetamodelImpl implements Metamodel
      */
     public EntityMetadata getEntityMetadata(Class<?> entityClass)
     {
-        return getEntityMetadataMap().get(entityClass);
+        return getEntityMetadataMap().get(entityClass.getName());
     }
 
     /**

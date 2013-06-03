@@ -80,13 +80,13 @@ public class MetadataResource
                 schema.setSchemaName(schemaStr);
 
                 MetamodelImpl metamodel = KunderaMetadataManager.getMetamodel(persistenceUnit);
-                Map<Class<?>, EntityMetadata> metamodelMap = metamodel.getEntityMetadataMap();
+                Map<String, EntityMetadata> metamodelMap = metamodel.getEntityMetadataMap();
 
-                for (Class<?> clazz : metamodelMap.keySet())
+                for (String clazz : metamodelMap.keySet())
                 {
                     EntityMetadata m = metamodelMap.get(clazz);
                     Table table = new Table();
-                    table.setEntityClassName(clazz.getSimpleName());
+                    table.setEntityClassName(clazz);
                     table.setTableName(m.getTableName());
 
                     schema.addTable(table);

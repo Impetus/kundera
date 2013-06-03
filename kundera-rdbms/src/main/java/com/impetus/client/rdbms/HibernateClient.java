@@ -55,6 +55,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class HibernateClient.
@@ -153,8 +154,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         if (s == null)
         {
             s = getSessionFactory().openStatelessSession();
-
-            s.beginTransaction();
+//
+//            s.beginTransaction();
         }
 
         Object result = null;
@@ -472,12 +473,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         String tableName = m.getTableName();
         String aliasName = "_" + tableName;
         StringBuilder queryBuilder = new StringBuilder("Select ");
-        queryBuilder.append(aliasName);
-        queryBuilder.append(".* ");
+        //queryBuilder.append(aliasName);
+        queryBuilder.append("* ");
         queryBuilder.append("From ");
         queryBuilder.append(getFromClause(m.getSchema(), tableName));
         queryBuilder.append(" ");
-        queryBuilder.append(aliasName);
+        //queryBuilder.append(aliasName);
         queryBuilder.append(" Where ");
         queryBuilder.append(colName);
         queryBuilder.append(" = ");
@@ -487,6 +488,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s = getSessionFactory().openStatelessSession();
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
+//        tx.commit();
         return q.list();
     }
 

@@ -16,7 +16,6 @@
 
 package com.impetus.client.cassandra.pelops;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import javax.persistence.PersistenceException;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.IndexClause;
@@ -129,7 +127,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(externalProperties, isCQLEnabled);
+        this.dataHandler = new PelopsDataHandler(externalProperties);
         this.invertedIndexHandler = new PelopsInvertedIndexHandler(externalProperties);
         this.reader = reader;
     }
@@ -174,7 +172,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), rowIds);
+                    getConsistencyLevel(), isCql3Enabled(metadata), rowIds);
         }
         catch (Exception e)
         {
@@ -195,8 +193,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
-
-        if (isCQL3Enabled(metadata, metaModel))
+        if (isCql3Enabled(metadata))
         {
             String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
             executeQuery(deleteQuery, metadata.getEntityClazz(), null);
@@ -367,8 +364,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List<Object> findByRelation(String colName, Object colValue, Class clazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
         List<Object> entities = null;
-        if (isCQLEnabled)
+        if (isCql3Enabled(m))
         {
             entities = findByRelationQuery(m, colName, colValue, clazz, dataHandler);
         }
@@ -433,20 +432,14 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
         }
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
-
-        if (isCQL3Enabled(metadata, metaModel))
+        if (isCql3Enabled(metadata))
         {
             Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
             try
             {
-                client.set_cql_version(getCqlVersion());
                 client.set_keyspace(metadata.getSchema());
                 String insert_Query = createInsertQuery(metadata, entity, client, rlHolders);
-                client.set_cql_version(getCqlVersion());
-                client.execute_cql3_query(ByteBuffer.wrap(insert_Query.getBytes(Constants.CHARSET_UTF8)),
-                        Compression.NONE, getConsistencyLevel());
+                executeCQLQuery(insert_Query);
             }
             catch (InvalidRequestException e)
             {
@@ -454,11 +447,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 throw new KunderaException(e);
             }
             catch (TException e)
-            {
-                log.error("Error during persist, Caused by: ", e);
-                throw new KunderaException(e);
-            }
-            catch (UnsupportedEncodingException e)
             {
                 log.error("Error during persist, Caused by: ", e);
                 throw new KunderaException(e);

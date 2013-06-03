@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -100,7 +101,10 @@ public class ObjectGraphBuilder
         }
 
         // Generate and set Id if @GeneratedValue present.
+        if (initialNodeState != null && initialNodeState.getClass().equals(TransientState.class))
+        {
         idGenerator.generateAndSetId(entity, entityMetadata, pd);
+ 	}
 
         if (!validator.isValidEntityObject(entity))
         {

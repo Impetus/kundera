@@ -228,7 +228,7 @@ public class ClasspathReader extends Reader
     public final URL[] findResourcesByContextLoader()
     {
         List<URL> list = new ArrayList<URL>();
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader classLoader = this.getClass().getClassLoader();
         assert classLoader != null;        
         URL[] urls = ((URLClassLoader) classLoader).getURLs();
         

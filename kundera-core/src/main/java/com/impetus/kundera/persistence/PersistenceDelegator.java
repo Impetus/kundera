@@ -205,7 +205,8 @@ public final class PersistenceDelegator
         if (e == null)
             return null;
 
-        // Set this returned entity as head node if applicable
+        // I don't it's needed as already done via find () method!
+/*        // Set this returned entity as head node if applicable
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
         CacheBase mainCache = getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
@@ -213,9 +214,9 @@ public final class PersistenceDelegator
         {
             mainCache.addHeadNode(node);
         }
-
-        // Return a deep copy of this entity
-        return (E) ObjectUtils.deepCopy(e, persistenceCache.getMainCache());
+*/
+        // Return a copy of this entity
+        return (E) (e);
     }
 
     /**
@@ -259,6 +260,9 @@ public final class PersistenceDelegator
             lock.readLock().lock();
             node.find();
             lock.readLock().unlock();
+        } else
+        {
+            
         }
         Object nodeData = node.getData();
         if (nodeData == null)
@@ -267,7 +271,7 @@ public final class PersistenceDelegator
         }
         else
         {
-            return (E) ObjectUtils.deepCopy(nodeData, persistenceCache.getMainCache());
+            return (E) ObjectUtils.deepCopy(nodeData);
         }
 
     }

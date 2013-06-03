@@ -183,7 +183,7 @@ public abstract class AssociationBase
                 EntityMetadata mAdd = KunderaMetadataManager.getEntityMetadata(clazz);
                 for (Metamodel m : metaModels.values())
                 {
-                    mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz);
+                    mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz.getName());
                     if (mAdd != null)
                     {
                         break;

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.index.IndexType;
-import com.impetus.kundera.configure.schema.ColumnInfo;
+import com.impetus.kundera.configure.schema.IndexInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -256,23 +256,20 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     private void createIndexes(TableInfo tableInfo, DBCollection collection)
     {
-        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+        for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
         {
-            if (columnInfo.isIndexable())
-            {
                 DBObject keys = new BasicDBObject();
-                getIndexType(columnInfo.getIndexType(), keys, columnInfo.getColumnName());
+                getIndexType(indexInfo.getIndexType(), keys, indexInfo.getColumnName());
                 DBObject options = new BasicDBObject();
-                if (columnInfo.getMinValue() != null)
+                if (indexInfo.getMinValue() != null)
                 {
-                    options.put(MongoDBConstants.MIN, columnInfo.getMinValue());
+                    options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
                 }
-                if (columnInfo.getMaxValue() != null)
+                if (indexInfo.getMaxValue() != null)
                 {
-                    options.put(MongoDBConstants.MAX, columnInfo.getMaxValue());
+                    options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
                 }
                 collection.ensureIndex(keys, options);
-            }
         }
     }
 

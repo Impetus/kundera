@@ -148,7 +148,7 @@ public class ManagedState extends NodeState
         {
 
             nodeStateContext.setData(nodeData);
-            nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
+            nodeStateContext.getPersistenceCache().getMainCache().processNodeMapping((Node) nodeStateContext);
 
             // This node is fresh and hence NOT dirty
             nodeStateContext.setDirty(false);

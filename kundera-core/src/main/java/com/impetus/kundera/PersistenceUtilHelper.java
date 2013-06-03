@@ -31,6 +31,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.PersistenceUtil;
 import javax.persistence.spi.LoadState;
 
+import org.hibernate.collection.spi.PersistentCollection;
+
 //import org.hibernate.collection.spi.PersistentCollection;
 
 import com.impetus.kundera.proxy.KunderaProxy;
@@ -127,9 +129,12 @@ public class PersistenceUtilHelper
     }
 
     public static boolean instanceOfHibernatePersistentCollection(Object o){
+    	
+    	if(o == null) return false;
+    	
         try
         {
-            return o instanceof org.hibernate.collection.spi.PersistentCollection;
+            return o.getClass().isAssignableFrom(PersistentCollection.class);
         } catch ( Exception e ) {
             return false;
         } catch ( NoClassDefFoundError e ){

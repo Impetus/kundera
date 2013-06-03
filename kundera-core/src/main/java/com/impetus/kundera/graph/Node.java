@@ -631,7 +631,7 @@ public class Node implements NodeStateContext
     @Override
     public Node clone()
     {
-        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData(), this.persistenceCache.getMainCache()), this.persistenceCache,
+        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache,
                 this.entityId);
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);

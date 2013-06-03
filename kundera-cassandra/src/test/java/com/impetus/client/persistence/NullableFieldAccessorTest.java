@@ -104,6 +104,8 @@ public class NullableFieldAccessorTest
         Assert.assertEquals("kuldeep mishra", findEntity.getFull_name());
         Assert.assertEquals("delhi", findEntity.getState());
         Assert.assertNull(findEntity.getBirth_date());
+        
+        emf.close();
 
     }
 

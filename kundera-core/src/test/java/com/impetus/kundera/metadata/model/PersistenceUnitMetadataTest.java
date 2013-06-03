@@ -19,7 +19,7 @@ public class PersistenceUnitMetadataTest
     @BeforeClass
     public static void setUp() throws Exception
     {
-        Enumeration<URL> xmls = Thread.currentThread().getContextClassLoader().getResources("META-INF/persistence.xml");
+        Enumeration<URL> xmls = PersistenceUnitMetadata.class.getClassLoader().getResources("META-INF/persistence.xml");
 
         while (xmls.hasMoreElements())
         {

@@ -137,7 +137,7 @@ public class ReflectUtils
             Class<?> c = null;
             try
             {
-                c = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+                c = Class.forName(className, true, ReflectUtils.class.getClassLoader());
             }
             catch (ClassNotFoundException e)
             {

@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.hbase.junits;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -70,7 +72,7 @@ public class HBaseCli
         conf.set("zookeeper.session.timeout", "180000");
         conf.set("hbase.zookeeper.peerport", "2888");
         conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("dfs.datanode.data.dir.perm", "755");
+//        conf.set("dfs.datanode.data.dir.perm", "700");
         try
         {
             masterDir = new File(workingDirectory, "hbase");
@@ -83,6 +85,29 @@ public class HBaseCli
 
         Configuration hbaseConf = HBaseConfiguration.create(conf);
         utility = new HBaseTestingUtility(hbaseConf);
+        
+        // Change permission for dfs.data.dir, please refer
+        // https://issues.apache.org/jira/browse/HBASE-5711 for more details.
+        try {
+            Process process = Runtime.getRuntime().exec("/bin/sh -c umask");
+            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            int rc = process.waitFor();
+            if(rc == 0) {
+                String umask = br.readLine();
+
+                int umaskBits = Integer.parseInt(umask, 8);
+                int permBits = 0777 & ~umaskBits;
+                String perms = Integer.toString(permBits, 8);
+                
+                logger.info("Setting dfs.datanode.data.dir.perm to " + perms);
+                utility.getConfiguration().set("dfs.datanode.data.dir.perm", perms);
+            } else {
+                logger.warn("Failed running umask command in a shell, nonzero return value");
+            }
+        } catch (Exception e) {
+            // ignore errors, we might not be running on POSIX, or "sh" might not be on the path
+            logger.warn("Couldn't get umask", e);
+        }
         if (!checkIfServerRunning())
         {
             hTablePool = new HTablePool(conf, 1);

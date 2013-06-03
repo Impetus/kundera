@@ -52,9 +52,9 @@ public class ThriftClientTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("KunderaExamples");
         em.close();
         emf.close();
+        CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     @Test
@@ -129,12 +129,6 @@ public class ThriftClientTest
         Assert.assertNotNull(ids4);
         Assert.assertTrue(ids4.length == 1);
         Assert.assertEquals("2", ids4[0]);
-    }
-
-    @Test
-    public void deleteByColumn()
-    {
-        // fail("Not yet implemented");
     }
 
     private void createSchema() throws InvalidRequestException, SchemaDisagreementException, TException
