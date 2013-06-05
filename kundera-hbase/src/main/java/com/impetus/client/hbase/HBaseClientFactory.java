@@ -175,8 +175,15 @@ public class HBaseClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new HBasePropertyReader();
+            propertyReader = new HBasePropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
+    }
+
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
     }
 }

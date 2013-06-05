@@ -37,6 +37,7 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
+import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
@@ -54,7 +55,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
-import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.MainCache;
@@ -757,11 +757,11 @@ public final class PersistenceDelegator
      * @param client 
      */
 
-    void loadClient(String persistenceUnit, Client client)
+    void loadClient(String persistenceUnit/*, Client client*/)
     {
        if (!clientMap.containsKey(persistenceUnit))
         {
-            clientMap.put(persistenceUnit, /*ClientResolver.discoverClient(persistenceUnit)*/client);
+            clientMap.put(persistenceUnit, ClientResolver.discoverClient(persistenceUnit)/*client*/);
         }
     }
 

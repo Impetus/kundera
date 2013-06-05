@@ -123,4 +123,11 @@ public class RDBMSClientFactory extends GenericClientFactory
     {
         return null;
     }
+
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
+    }
 }

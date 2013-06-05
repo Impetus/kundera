@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import java.util.Map;
+
 /**
  * Class Dummy Property Reader for test
  * 
@@ -34,8 +36,9 @@ public class DummyPropertyReader extends AbstractPropertyReader implements Prope
      * .kundera.configure.ClientProperties)
      */
 
-    public DummyPropertyReader()
+    public DummyPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         dsmd = new DummySchemaMetadata();
     }
 

@@ -80,61 +80,61 @@ public class RedisClientFactory extends GenericClientFactory
         Properties props = puMetadata.getProperties();
         String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
                 : (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        if(contactNode == null)
+        if (contactNode == null)
         {
-        	contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
         }
         String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
                 : (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        
-        if(defaultPort == null)
+
+        if (defaultPort == null)
         {
-        	defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
         }
-        
+
         String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
                 : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
-        if(password == null)
+        if (password == null)
         {
-        	password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
         }
-        
+
         String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-        
-        if(maxActivePerNode == null)
+
+        if (maxActivePerNode == null)
         {
-        	maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
-        
+
         String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-        
-        if(maxIdlePerNode == null)
+
+        if (maxIdlePerNode == null)
         {
-        	maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
         }
-        
+
         String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-        
-        if(minIdlePerNode == null)
+
+        if (minIdlePerNode == null)
         {
-        	minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
         }
-        
+
         String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        
-        if(maxTotal == null)
+
+        if (maxTotal == null)
         {
-        	maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
         }
-        
+
         String txTimeOut = props.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
 
-        if(txTimeOut == null)
+        if (txTimeOut == null)
         {
-        	txTimeOut = (String) externalProperties.get(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
+            txTimeOut = (String) externalProperties.get(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
         }
-        
+
         JedisPoolConfig poolConfig = onPoolConfig(WHEN_EXHAUSTED_FAIL, maxActivePerNode, maxIdlePerNode,
                 minIdlePerNode, maxTotal);
 
@@ -161,13 +161,15 @@ public class RedisClientFactory extends GenericClientFactory
             // Jedis connection = new Jedis(contactNode,
             // Integer.valueOf(defaultPort));
 
-//            if (password != null)
-//            {
-//                // connection.auth(password);
-//            }
+            // if (password != null)
+            // {
+            // // connection.auth(password);
+            // }
             // connection.connect();
-        	// Connection to made available at the time of getConnection(). YCSB performance fixes and ideally it is needed at that time only. 
-        	// No need to cache it at factory level as needed to managed within entity manager boundary! 
+            // Connection to made available at the time of getConnection(). YCSB
+            // performance fixes and ideally it is needed at that time only.
+            // No need to cache it at factory level as needed to managed within
+            // entity manager boundary!
             return null;
         }
     }
@@ -272,7 +274,6 @@ public class RedisClientFactory extends GenericClientFactory
             }
             Jedis connection = new Jedis(contactNode, Integer.parseInt(defaultPort));
 
-
             if (password != null)
             {
                 connection.auth(password);
@@ -360,9 +361,15 @@ public class RedisClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new RedisPropertyReader();
+            propertyReader = new RedisPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
     }
 
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
+    }
 }

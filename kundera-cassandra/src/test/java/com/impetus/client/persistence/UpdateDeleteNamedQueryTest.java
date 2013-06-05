@@ -214,7 +214,7 @@ public class UpdateDeleteNamedQueryTest
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
-        CassandraPropertyReader reader = new CassandraPropertyReader();
+        CassandraPropertyReader reader = new CassandraPropertyReader(null);
         reader.read(persistenceUnit);
         String[] persistenceUnits = new String[] { persistenceUnit };
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();

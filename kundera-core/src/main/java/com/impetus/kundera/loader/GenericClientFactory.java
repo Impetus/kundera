@@ -17,6 +17,8 @@ package com.impetus.kundera.loader;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -35,6 +37,11 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.service.Host;
+import com.impetus.kundera.service.policy.HostRetryService;
+import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
+import com.impetus.kundera.service.policy.LoadBalancingPolicy;
+import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
  * Abstract class to hold generic definitions for client factory
@@ -71,6 +78,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** Holds persistence unit related property */
     protected Map<String, Object> externalProperties = new HashMap<String, Object>();
+
+    /** Holds LoadBalancer instance **/
+    protected LoadBalancingPolicy loadBalancingPolicy;
+
+    /** Holds Instance of retry service */
+    protected HostRetryService hostRetryService;
+
+    /** Holds one pool instance per host */
+    protected ConcurrentMap<Host, Object> hostPools = new ConcurrentHashMap<Host, Object>();
 
     /**
      * Load.
@@ -290,5 +306,30 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             client = null;
         }
         externalProperties = null;
+        hostPools.clear();
+    }
+
+    protected abstract void initializeLoadBalancer(String loadBalancingPolicyName);
+
+    protected enum LoadBalancer
+    {
+        ROUNDROBIN, LEASTACTIVE;
+
+        public static LoadBalancer getValue(String loadBalancename)
+        {
+            if (loadBalancename.equalsIgnoreCase(ROUNDROBIN.name()))
+            {
+                return ROUNDROBIN;
+            }
+            else if (loadBalancename.equalsIgnoreCase(LEASTACTIVE.name()))
+            {
+                return LEASTACTIVE;
+            }
+            else
+            {
+                logger.warn("Using default load balancer : " + ROUNDROBIN.name());
+                return ROUNDROBIN;
+            }
+        }
     }
 }

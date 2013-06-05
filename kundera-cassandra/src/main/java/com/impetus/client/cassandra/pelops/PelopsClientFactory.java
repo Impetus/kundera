@@ -150,8 +150,15 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new CassandraPropertyReader();
+            propertyReader = new CassandraPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
+    }
+
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
     }
 }

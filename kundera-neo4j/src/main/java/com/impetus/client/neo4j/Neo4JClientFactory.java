@@ -160,7 +160,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new Neo4JPropertyReader();
+            propertyReader = new Neo4JPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -191,5 +191,10 @@ public class Neo4JClientFactory extends GenericClientFactory
      * 
      * @Override public void run() { graphDb.shutdown(); } }); }
      */
-
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
+    }
 }

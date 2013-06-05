@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.hbase.config;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,8 +48,9 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      */
     public static HBaseSchemaMetadata hsmd;
 
-    public HBasePropertyReader()
+    public HBasePropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         hsmd = new HBaseSchemaMetadata();
     }
 

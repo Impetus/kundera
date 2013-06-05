@@ -21,6 +21,7 @@ import java.util.Properties;
 import javax.persistence.PersistenceException;
 
 import net.dataforte.cassandra.pool.ConnectionPool;
+import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -33,9 +34,7 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
-import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
+import com.impetus.client.cassandra.service.CassandraHost;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -45,9 +44,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class PelopsUtils
 {
-
-    private static final int _DEFAULT_SHOCKET_TIMEOUT = 120000;
-
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
 
@@ -170,117 +166,40 @@ public class PelopsUtils
      * @param puProperties
      * @return the pool config policy
      */
-    public static PoolConfiguration setPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
-            PoolConfiguration prop, Map<String, Object> puProperties)
+    public static PoolConfiguration setPoolConfigPolicy(CassandraHost cassandraHost, PoolConfiguration prop)
     {
-        Properties props = persistenceUnitMetadata.getProperties();
-        String maxActivePerNode = null;
-        String maxIdlePerNode = null;
-        String minIdlePerNode = null;
-        String maxTotal = null;
-        String testOnBorrow = null;
-        String testWhileIdle = null;
-        String testOnConnect = null;
-        String testOnReturn = null;
-        String socketTimeOut = null;
-        if (puProperties != null)
+        int maxActivePerNode = cassandraHost.getMaxActive();
+        int maxIdlePerNode = cassandraHost.getMaxIdle();
+        int minIdlePerNode = cassandraHost.getMinIdle();
+        int maxTotal = cassandraHost.getMaxTotal();
+        boolean testOnBorrow = cassandraHost.isTestOnBorrow();
+        boolean testWhileIdle = cassandraHost.isTestWhileIdle();
+        boolean testOnConnect = cassandraHost.isTestOnConnect();
+        boolean testOnReturn = cassandraHost.isTestOnReturn();
+        int socketTimeOut = cassandraHost.getSocketTimeOut();
+        HostFailoverPolicy paramHostFailoverPolicy = cassandraHost.getHostFailoverPolicy();
+        if (maxActivePerNode > 0)
         {
-            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-            testOnBorrow = (String) puProperties.get(CassandraConstants.TEST_ON_BORROW);
-            testOnConnect = (String) puProperties.get(CassandraConstants.TEST_ON_CONNECT);
-            testOnReturn = (String) puProperties.get(CassandraConstants.TEST_ON_RETURN);
-            testWhileIdle = (String) puProperties.get(CassandraConstants.TEST_WHILE_IDLE);
-            socketTimeOut = (String) puProperties.get(CassandraConstants.SOCKET_TIMEOUT);
+            prop.setInitialSize(maxActivePerNode);
         }
-
-        if (maxActivePerNode == null)
+        if (maxIdlePerNode > 0)
         {
-            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            prop.setMaxIdle(maxIdlePerNode);
         }
-        if (maxIdlePerNode == null)
+        if (minIdlePerNode > 0)
         {
-            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            prop.setMinIdle(minIdlePerNode);
         }
-        if (minIdlePerNode == null)
+        if (maxTotal > 0)
         {
-            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            prop.setMaxActive(maxTotal);
         }
-        if (maxTotal == null)
-        {
-            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        }
-        try
-        {
-            if (!StringUtils.isEmpty(maxActivePerNode))
-            {
-                prop.setInitialSize(Integer.parseInt(maxActivePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxIdlePerNode))
-            {
-                prop.setMaxIdle(Integer.parseInt(maxIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(minIdlePerNode))
-            {
-                prop.setMinIdle(Integer.parseInt(minIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxTotal))
-            {
-                prop.setMaxActive(Integer.parseInt(maxTotal));
-            }
-
-            CassandraSchemaMetadata csm = CassandraPropertyReader.csmd;
-            Properties connProps = csm.getConnectionProperties();
-            if (connProps != null)
-            {
-                if (testOnBorrow == null)
-                {
-                    testOnBorrow = connProps.getProperty(CassandraConstants.TEST_ON_BORROW);
-                }
-                if (testOnConnect == null)
-                {
-                    testOnConnect = connProps.getProperty(CassandraConstants.TEST_ON_CONNECT);
-                }
-                if (testOnReturn == null)
-                {
-                    testOnReturn = connProps.getProperty(CassandraConstants.TEST_ON_RETURN);
-                }
-                if (testWhileIdle == null)
-                {
-                    testWhileIdle = connProps.getProperty(CassandraConstants.TEST_WHILE_IDLE);
-                }
-                if (socketTimeOut == null)
-                {
-                    socketTimeOut = connProps.getProperty(CassandraConstants.SOCKET_TIMEOUT);
-                }
-            }
-
-            prop.setTestOnBorrow(Boolean.parseBoolean(testOnBorrow));
-            prop.setTestOnConnect(Boolean.parseBoolean(testOnConnect));
-            prop.setTestOnReturn(Boolean.parseBoolean(testOnReturn));
-            prop.setTestWhileIdle(Boolean.parseBoolean(testWhileIdle));
-
-            if (!StringUtils.isEmpty(socketTimeOut))
-            {
-                prop.setSocketTimeout(Integer.parseInt(socketTimeOut));
-            }
-            else
-            {
-                prop.setSocketTimeout(_DEFAULT_SHOCKET_TIMEOUT);
-            }
-
-        }
-        catch (NumberFormatException e)
-        {
-            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
-                    + " persistence unit couldn't be parsed. Default pool policy would be used");
-            prop = null;
-        }
+        prop.setSocketTimeout(socketTimeOut);
+        prop.setTestOnBorrow(testOnBorrow);
+        prop.setTestOnConnect(testOnConnect);
+        prop.setTestOnReturn(testOnReturn);
+        prop.setTestWhileIdle(testWhileIdle);
+        prop.setFailoverPolicy(paramHostFailoverPolicy);
         return prop;
     }
 

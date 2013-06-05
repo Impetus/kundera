@@ -42,7 +42,7 @@ public class AbstractPropertyReaderTest
     @Before
     public void setUp() throws Exception
     {
-        reader = new DummyPropertyReader();
+        reader = new DummyPropertyReader(null);
         new PersistenceUnitConfiguration(pu).configure();
     }
 
