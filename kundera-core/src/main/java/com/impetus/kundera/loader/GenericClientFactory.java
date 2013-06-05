@@ -39,9 +39,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.policy.HostRetryService;
-import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
 import com.impetus.kundera.service.policy.LoadBalancingPolicy;
-import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
  * Abstract class to hold generic definitions for client factory
@@ -174,9 +172,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             {
                 indexManager = new IndexManager(null);
             }
-
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
         }
     }
 
