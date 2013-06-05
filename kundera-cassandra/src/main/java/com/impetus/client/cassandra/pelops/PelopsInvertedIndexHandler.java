@@ -33,6 +33,8 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.exceptions.NotFoundException;
 import org.scale7.cassandra.pelops.exceptions.PelopsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -51,7 +53,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
-    private static final Log log = LogFactory.getLog(PelopsInvertedIndexHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PelopsInvertedIndexHandler.class);
 
     private Map<String, Object> externalProperty;
 

@@ -50,6 +50,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Book;
 import com.impetus.kundera.rest.common.CassandraCli;
@@ -88,7 +90,7 @@ public class CRUDResourceTest extends JerseyTest
 
     private static final String _KEYSPACE = "KunderaExamples";
 
-    private static Log log = LogFactory.getLog(CRUDResourceTest.class);
+    private static Logger log = LoggerFactory.getLogger(CRUDResourceTest.class);
 
     static String mediaType = MediaType.APPLICATION_XML;
 

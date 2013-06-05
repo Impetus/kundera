@@ -42,6 +42,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.twitter.entities.ProfessionalDetailCassandra;
@@ -56,7 +58,7 @@ import com.impetus.kundera.Constants;
 public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
 {
     /** The Constant LOG. */
-    private static final Log log = LogFactory.getLog(TwissandraSuperColumnDatatypeTest.class);
+    private static final Logger log = LoggerFactory.getLogger(TwissandraSuperColumnDatatypeTest.class);
 
     @Before
     public void setUp() throws Exception

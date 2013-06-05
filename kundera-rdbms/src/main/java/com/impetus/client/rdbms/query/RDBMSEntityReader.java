@@ -37,6 +37,8 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
@@ -63,7 +65,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(RDBMSEntityReader.class);
+    private static Logger log = LoggerFactory.getLogger(RDBMSEntityReader.class);
 
     /** The conditions. */
     private Queue conditions;

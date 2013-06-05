@@ -34,6 +34,8 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.Writer;
 import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
@@ -54,7 +56,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class HBaseWriter implements Writer
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseWriter.class);
+    private static Logger log = LoggerFactory.getLogger(HBaseWriter.class);
 
     /*
      * (non-Javadoc)

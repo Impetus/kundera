@@ -17,6 +17,8 @@ package com.impetus.client.neo4j.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
@@ -32,7 +34,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
 {
 
     /** log instance */
-    private static Log log = LogFactory.getLog(Neo4JPropertyReader.class);
+    private static Logger log = LoggerFactory.getLogger(Neo4JPropertyReader.class);
 
     /** Neo4J schema metadata instance */
     public static Neo4JSchemaMetadata nsmd;

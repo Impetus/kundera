@@ -17,6 +17,8 @@ package com.impetus.client.oraclenosql.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
@@ -31,7 +33,7 @@ import com.impetus.kundera.configure.PropertyReader;
 public class OracleNoSQLPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
     /** log instance */
-    private static Log log = LogFactory.getLog(OracleNoSQLPropertyReader.class);
+    private static Logger log = LoggerFactory.getLogger(OracleNoSQLPropertyReader.class);
 
     /** OracleNoSQL schema metadata instance */
     public static OracleNoSQLSchemaMetadata osmd;

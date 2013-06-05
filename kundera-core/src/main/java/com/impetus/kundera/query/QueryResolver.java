@@ -22,6 +22,8 @@ import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -39,7 +41,7 @@ public class QueryResolver
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(QueryResolver.class);
+    private static Logger log = LoggerFactory.getLogger(QueryResolver.class);
 
     /** The kundera query. */
     KunderaQuery kunderaQuery;

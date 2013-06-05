@@ -47,6 +47,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
@@ -92,7 +94,7 @@ public class DataTypeTest extends JerseyTest
 
     private static final String PROFESSIONAL_CLASS_NAME = "Professional";
 
-    private static Log log = LogFactory.getLog(DataTypeTest.class);
+    private static Logger log = LoggerFactory.getLogger(DataTypeTest.class);
 
     static String mediaType = MediaType.APPLICATION_XML;
 

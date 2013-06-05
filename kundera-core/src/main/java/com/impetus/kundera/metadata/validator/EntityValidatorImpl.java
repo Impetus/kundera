@@ -30,6 +30,8 @@ import javax.persistence.TableGenerator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -45,7 +47,7 @@ public class EntityValidatorImpl implements EntityValidator
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityValidatorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityValidatorImpl.class);
 
     /** cache for validated classes. */
     private List<Class<?>> classes = new ArrayList<Class<?>>();

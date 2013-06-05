@@ -20,6 +20,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -32,7 +34,7 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
 class HBaseClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(HBaseClientProperties.class);
+    private static Logger log = LoggerFactory.getLogger(HBaseClientProperties.class);
 
     private static final String FILTER = "hbase.filter";
 

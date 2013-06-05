@@ -19,6 +19,8 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -35,7 +37,7 @@ import com.thoughtworks.xstream.XStream;
 public abstract class AbstractPropertyReader
 {
     /** The log instance. */
-    private Log log = LogFactory.getLog(AbstractPropertyReader.class);
+    private Logger log = LoggerFactory.getLogger(AbstractPropertyReader.class);
 
     /** The xStream instance */
     private XStream xStream;

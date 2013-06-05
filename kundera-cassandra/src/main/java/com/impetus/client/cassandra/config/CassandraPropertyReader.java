@@ -20,8 +20,8 @@ import java.util.Properties;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
@@ -41,7 +41,7 @@ import com.impetus.kundera.configure.PropertyReader;
 public class CassandraPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
     /** The log instance. */
-    private Log log = LogFactory.getLog(CassandraPropertyReader.class);
+    private Logger logger = LoggerFactory.getLogger(CassandraPropertyReader.class);
 
     /** csmd instance of CassandraSchemaMetadata */
 
@@ -179,7 +179,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         }
                         else
                         {
-                            log.warn("This is not valid cql version type, please provide valid one.");
+                            logger.warn("Invalid {0} cql version provided, valid are {1},{2} .", cqlVersion,
+                                CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
                         }
                     }
                 }

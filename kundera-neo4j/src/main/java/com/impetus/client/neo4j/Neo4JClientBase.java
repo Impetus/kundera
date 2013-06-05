@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientBase;
@@ -37,7 +39,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public abstract class Neo4JClientBase extends ClientBase implements ClientPropertiesSetter
 {
-    private static Log log = LogFactory.getLog(Neo4JClientBase.class);
+    private static Logger log = LoggerFactory.getLogger(Neo4JClientBase.class);
 
     /** Batch size. */
     protected int batchSize;

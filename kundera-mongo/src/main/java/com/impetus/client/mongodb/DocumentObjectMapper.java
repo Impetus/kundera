@@ -27,6 +27,8 @@ import javax.persistence.metamodel.Attribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -45,7 +47,7 @@ public class DocumentObjectMapper
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(DocumentObjectMapper.class);
+    private static Logger log = LoggerFactory.getLogger(DocumentObjectMapper.class);
 
     /**
      * Creates a MongoDB document object wrt a given Java object. columns in the

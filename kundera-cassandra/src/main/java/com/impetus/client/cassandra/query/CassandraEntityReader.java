@@ -26,6 +26,8 @@ import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.kundera.Constants;
@@ -61,7 +63,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
 
     /** The log. */
-    private static Log log = LogFactory.getLog(CassandraEntityReader.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraEntityReader.class);
 
     /**
      * Instantiates a new cassandra entity reader.

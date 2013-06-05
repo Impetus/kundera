@@ -23,6 +23,8 @@ import javax.persistence.metamodel.Type;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation for <code>IdentifiableType</code>.
@@ -44,7 +46,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
     private Set<SingularAttribute<? super X, ?>> idClassAttributes;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(AbstractIdentifiableType.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractIdentifiableType.class);
 
     /**
      * Instantiates a new abstract identifiable type.

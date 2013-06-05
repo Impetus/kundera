@@ -24,6 +24,8 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -44,7 +46,7 @@ public class MetadataBuilder
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetadataBuilder.class);
+    private static Logger log = LoggerFactory.getLogger(MetadataBuilder.class);
 
     /** The metadata processors. */
     private List<MetadataProcessor> metadataProcessors;

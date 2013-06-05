@@ -32,9 +32,9 @@ import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
@@ -53,7 +53,7 @@ import com.impetus.kundera.query.QueryHandlerException;
 public abstract class InvertedIndexHandlerBase
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(InvertedIndexHandlerBase.class);
+    private static Logger log = LoggerFactory.getLogger(InvertedIndexHandlerBase.class);
 
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
             Map<Boolean, List<IndexClause>> indexClauseMap)

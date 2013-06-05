@@ -66,6 +66,8 @@ import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -110,7 +112,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(CassandraClientBase.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraClientBase.class);
 
     /** The cql version. */
     private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
@@ -393,22 +395,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException ire)
         {
-            log.error("Error during executing delete, Caused by :" + ire);
+            log.error("Error during executing delete, Caused by {0}", ire);
             throw new PersistenceException(ire);
         }
         catch (UnavailableException ue)
         {
-            log.error("Error during executing delete, Caused by :" + ue);
+            log.error("Error during executing delete, Caused by {0}" ,ue);
             throw new PersistenceException(ue);
         }
         catch (TimedOutException toe)
         {
-            log.error("Error during executing delete, Caused by :" + toe);
+            log.error("Error during executing delete, Caused by {0}" , toe);
             throw new PersistenceException(toe);
         }
         catch (TException te)
         {
-            log.error("Error during executing delete, Caused by :" + te);
+            log.error("Error during executing delete, Caused by {0}" , te);
             throw new PersistenceException(te);
         }
         finally

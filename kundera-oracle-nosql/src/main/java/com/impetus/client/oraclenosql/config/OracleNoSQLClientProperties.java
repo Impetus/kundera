@@ -23,6 +23,8 @@ import oracle.kv.Durability;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.kundera.client.Client;
@@ -36,7 +38,7 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
 public class OracleNoSQLClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(OracleNoSQLClientProperties.class);
+    private static Logger log = LoggerFactory.getLogger(OracleNoSQLClientProperties.class);
 
     private static final String WRITE_TIMEOUT = "write.timeout";
 

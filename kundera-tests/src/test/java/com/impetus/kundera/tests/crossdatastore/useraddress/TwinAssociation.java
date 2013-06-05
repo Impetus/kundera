@@ -27,6 +27,8 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -42,7 +44,7 @@ public abstract class TwinAssociation extends AssociationBase {
 	protected static List<Map<Class, String>> combinations = new ArrayList<Map<Class, String>>();
 
 	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(TwinAssociation.class);
+	private static Logger log = LoggerFactory.getLogger(TwinAssociation.class);
 
 	/**
 	 * Inits the.
@@ -123,8 +125,7 @@ public abstract class TwinAssociation extends AssociationBase {
 				tearDownInternal(ALL_PUs_UNDER_TEST);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.error(e);
+			log.error("Error during switching persistence unit",e);
 			Assert.fail("Failure caused by:" + e);
 		}
 	}

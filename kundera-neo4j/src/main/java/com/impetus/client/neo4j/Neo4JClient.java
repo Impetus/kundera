@@ -41,6 +41,8 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.neo4j.unsafe.batchinsert.LuceneBatchInserterIndexProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.neo4j.config.Neo4JPropertyReader;
 import com.impetus.client.neo4j.config.Neo4JPropertyReader.Neo4JSchemaMetadata;
@@ -77,7 +79,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, TransactionBinder, Batcher
 {
 
-    private static Log log = LogFactory.getLog(Neo4JClient.class);
+    private static Logger log = LoggerFactory.getLogger(Neo4JClient.class);
 
     /**
      * Reference to Neo4J client factory.

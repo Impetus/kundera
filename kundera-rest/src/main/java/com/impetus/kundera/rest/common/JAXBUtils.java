@@ -26,6 +26,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
@@ -38,7 +40,7 @@ import com.sun.jersey.api.json.JSONUnmarshaller;
  */
 public class JAXBUtils
 {
-    private static Log log = LogFactory.getLog(JAXBUtils.class);
+    private static Logger log = LoggerFactory.getLogger(JAXBUtils.class);
 
     /**
      * Converts <code>InputStream</code> to Object using JAXB

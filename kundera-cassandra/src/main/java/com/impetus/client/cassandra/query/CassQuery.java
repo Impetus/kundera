@@ -36,6 +36,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -69,7 +71,7 @@ public class CassQuery extends QueryImpl implements Query
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CassQuery.class);
+    private static Logger log = LoggerFactory.getLogger(CassQuery.class);
 
     /** The reader. */
     private EntityReader reader;

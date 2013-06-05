@@ -31,6 +31,8 @@ import javax.transaction.UserTransaction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.persistence.ResourceManager;
 
@@ -60,7 +62,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     private static transient KunderaJTAUserTransaction currentTx;
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
+    private static final Logger log = LoggerFactory.getLogger(KunderaJTAUserTransaction.class);
 
     /**
      * Instantiates a new kundera jta user transaction.

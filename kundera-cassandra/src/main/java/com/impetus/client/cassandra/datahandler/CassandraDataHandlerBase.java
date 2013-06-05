@@ -38,6 +38,8 @@ import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -72,7 +74,7 @@ public abstract class CassandraDataHandlerBase
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(CassandraDataHandlerBase.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraDataHandlerBase.class);
 
     /** The thrift translator. */
     protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();

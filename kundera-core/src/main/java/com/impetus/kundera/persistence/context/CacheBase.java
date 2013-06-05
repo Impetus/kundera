@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -39,7 +41,7 @@ import com.impetus.kundera.utils.ObjectUtils;
  * @author amresh.singh
  */
 public class CacheBase {
-    private static Log log = LogFactory.getLog(CacheBase.class);
+    private static Logger log = LoggerFactory.getLogger(CacheBase.class);
 
     private Map<String, Node> nodeMappings;
 

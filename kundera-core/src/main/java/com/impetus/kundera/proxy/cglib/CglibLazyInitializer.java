@@ -28,6 +28,8 @@ import net.sf.cglib.proxy.NoOp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
@@ -42,7 +44,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(CglibLazyInitializer.class);
+    private static final Logger log = LoggerFactory.getLogger(CglibLazyInitializer.class);
 
     /** The entity name. */
     private String entityName;

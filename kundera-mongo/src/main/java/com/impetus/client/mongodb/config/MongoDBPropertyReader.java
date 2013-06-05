@@ -19,6 +19,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
@@ -39,7 +41,7 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 public class MongoDBPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
     /** log instance */
-    private static Log log = LogFactory.getLog(MongoDBPropertyReader.class);
+    private static Logger log = LoggerFactory.getLogger(MongoDBPropertyReader.class);
 
     /** MongoDB schema metadata instance */
     public static MongoDBSchemaMetadata msmd;

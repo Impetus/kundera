@@ -28,6 +28,8 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.schema.SchemaMetadata;
 import com.impetus.kundera.metadata.processor.MetaModelBuilder;
@@ -49,7 +51,7 @@ public class ApplicationMetadata
     private Map<String, PersistenceUnitMetadata> persistenceUnitMetadataMap = new ConcurrentHashMap<String, PersistenceUnitMetadata>();
 
     /** The Constant log. */
-    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(EntityManagerFactoryImpl.class);
 
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
 

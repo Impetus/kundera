@@ -46,6 +46,8 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class CassandraCli.
@@ -62,7 +64,7 @@ public final class CassandraCli
     public static Cassandra.Client client;
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CassandraCli.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraCli.class);
 
     /**
      * Cassandra set up.
@@ -122,26 +124,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error(e1);
+                log.error("Error while adding keyspace",e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error(ess);
+                log.error("Error while adding keyspace",ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error(sde);
+                log.error("Error while adding keyspace",sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error(e);
+            log.error("Error while adding keyspace",e);
         }
         catch (TException e)
         {
-            log.error(e);
+            log.error("Error while adding keyspace",e);
         }
 
     }
@@ -210,11 +212,11 @@ public final class CassandraCli
         }
         catch (SchemaDisagreementException e)
         {
-            log.error(e);
+            log.error("Error while dropping keyspace",e);
         }
         catch (TException e)
         {
-            log.error(e);
+            log.error("Error while dropping keyspace",e);
         }
     }
 
@@ -247,11 +249,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error(e);
+            log.error("Error while keyspace check ",e);
         }
         catch (TException e)
         {
-            log.error(e);
+            log.error("Error while keyspace check ",e);
         }
         return false;
     }

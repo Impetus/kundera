@@ -42,6 +42,8 @@ import oracle.kv.lob.InputStreamVersion;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 
@@ -61,7 +63,7 @@ public class OracleNoSQLDataHandler
     private String persistenceUnit;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(OracleNoSQLDataHandler.class);
+    private static Logger log = LoggerFactory.getLogger(OracleNoSQLDataHandler.class);
 
     /**
      * Instantiates a new mongo db data handler.
@@ -89,17 +91,17 @@ public class OracleNoSQLDataHandler
             }
             catch (DurabilityException e)
             {
-                log.error(e);
+                log.error("Error while executing operations",e);
                 throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             catch (OperationExecutionException e)
             {
-                log.error(e);
+                log.error("Error while executing operations",e);
                 throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             catch (FaultException e)
             {
-                log.error(e);
+                log.error("Error while executing operations",e);
                 throw new PersistenceException("Error while Persisting data using batch. Caused by: " + e + ".");
             }
             finally

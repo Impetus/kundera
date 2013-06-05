@@ -29,6 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
@@ -50,7 +52,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     private long timestamp = System.currentTimeMillis();
 
     /** The log. */
-    private static Log log = LogFactory.getLog(PelopsDataHandler.class);
+    private static Logger log = LoggerFactory.getLogger(PelopsDataHandler.class);
 
     /** Holds external properties */
     private Map<String, Object> externalProperty;

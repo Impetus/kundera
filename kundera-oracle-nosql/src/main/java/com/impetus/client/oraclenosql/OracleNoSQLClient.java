@@ -51,6 +51,8 @@ import oracle.kv.Value;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
@@ -109,7 +111,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     private Consistency consistency = OracleNOSQLConstants.DEFAULT_CONSISTENCY;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(OracleNoSQLClient.class);
+    private static Logger log = LoggerFactory.getLogger(OracleNoSQLClient.class);
 
     /**
      * Instantiates a new oracle no sqldb client.

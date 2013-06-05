@@ -53,6 +53,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -94,7 +96,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(ThriftClient.class);
+    private static Logger log = LoggerFactory.getLogger(ThriftClient.class);
 
     /** The data handler. */
     private ThriftDataHandler dataHandler;

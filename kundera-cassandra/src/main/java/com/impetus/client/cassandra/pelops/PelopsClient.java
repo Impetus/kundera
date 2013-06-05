@@ -55,6 +55,8 @@ import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.exceptions.PelopsException;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -92,7 +94,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(PelopsClient.class);
+    private static Logger log = LoggerFactory.getLogger(PelopsClient.class);
 
     /** The closed. */
     private boolean closed = false;

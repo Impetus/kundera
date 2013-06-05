@@ -29,6 +29,8 @@ import java.util.Set;
 import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import org.hibernate.collection.internal.PersistentSet;
 //import org.hibernate.collection.spi.PersistentCollection;
 //import org.hibernate.proxy.HibernateProxy;
@@ -60,7 +62,7 @@ import com.impetus.kundera.utils.ObjectUtils;
 public final class AssociationBuilder
 {
 
-    private static Log log = LogFactory.getLog(AssociationBuilder.class);
+    private static Logger log = LoggerFactory.getLogger(AssociationBuilder.class);
 
     /**
      * Populates entities related via join table for <code>entity</code>

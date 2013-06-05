@@ -41,6 +41,8 @@ import javax.transaction.UserTransaction;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
@@ -60,7 +62,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 {
 
     /** The Constant log. */
-    private static Log logger = LogFactory.getLog(EntityManagerImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(EntityManagerImpl.class);
 
     /** The factory. */
     private EntityManagerFactory factory;

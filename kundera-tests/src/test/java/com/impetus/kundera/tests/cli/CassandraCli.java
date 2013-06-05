@@ -42,6 +42,8 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class CassandraCli.
@@ -58,7 +60,7 @@ public final class CassandraCli
     public static Cassandra.Client client;
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CassandraCli.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraCli.class);
 
     /** The tr. */
     private static TTransport tr;

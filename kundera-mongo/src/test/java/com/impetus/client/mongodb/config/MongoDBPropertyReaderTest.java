@@ -29,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
@@ -46,7 +48,7 @@ import com.mongodb.ReadPreference;
 public class MongoDBPropertyReaderTest
 {
 
-    private static Log log = LogFactory.getLog(MongoDBPropertyReaderTest.class);
+    private static Logger log = LoggerFactory.getLogger(MongoDBPropertyReaderTest.class);
 
     private List<Connection> connections = new ArrayList<Connection>();
 

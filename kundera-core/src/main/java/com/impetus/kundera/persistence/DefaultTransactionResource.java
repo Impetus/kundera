@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
@@ -40,7 +42,7 @@ public class DefaultTransactionResource implements TransactionResource
     private Client client;
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(DefaultTransactionResource.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultTransactionResource.class);
 
     private List<Node> nodes = new ArrayList<Node>();
 

@@ -28,8 +28,6 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.junit.ContiPerfRule;
 import org.databene.contiperf.report.CSVSummaryReportModule;
@@ -39,6 +37,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
@@ -53,7 +53,7 @@ public class MongoCompositeTypeTest
 {
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(MongoCompositeTypeTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoCompositeTypeTest.class);
 
     @Rule
     public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
@@ -345,20 +345,20 @@ public class MongoCompositeTypeTest
             }
             catch (SecurityException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating database",e);
             }
 
             catch (NoSuchFieldException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating database",e);
             }
             catch (IllegalArgumentException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating database",e);
             }
             catch (IllegalAccessException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating database",e);
             }
         }
 

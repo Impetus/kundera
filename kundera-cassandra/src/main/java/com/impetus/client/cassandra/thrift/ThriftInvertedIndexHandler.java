@@ -38,9 +38,9 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -63,7 +63,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(ThriftInvertedIndexHandler.class);
+    private static Logger log = LoggerFactory.getLogger(ThriftInvertedIndexHandler.class);
 
     private ConnectionPool pool;
 

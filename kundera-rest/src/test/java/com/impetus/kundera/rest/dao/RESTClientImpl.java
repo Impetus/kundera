@@ -26,6 +26,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.Professional;
@@ -43,7 +45,7 @@ import com.sun.jersey.api.client.WebResource;
  */
 public class RESTClientImpl implements RESTClient
 {
-    private static Log log = LogFactory.getLog(RESTClientImpl.class);
+    private static Logger log = LoggerFactory.getLogger(RESTClientImpl.class);
 
     private WebResource webResource = null;
 

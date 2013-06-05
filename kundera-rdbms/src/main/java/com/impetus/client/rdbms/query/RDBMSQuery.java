@@ -22,6 +22,8 @@ import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
@@ -44,7 +46,7 @@ import com.impetus.kundera.query.QueryImpl;
 public class RDBMSQuery extends QueryImpl implements Query
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(RDBMSQuery.class);
+    private static Logger log = LoggerFactory.getLogger(RDBMSQuery.class);
 
     /** The reader. */
     private EntityReader reader;

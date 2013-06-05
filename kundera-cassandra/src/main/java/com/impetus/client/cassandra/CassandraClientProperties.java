@@ -18,8 +18,8 @@ package com.impetus.client.cassandra;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.Client;
@@ -33,7 +33,7 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
 class CassandraClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(CassandraClientProperties.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraClientProperties.class);
 
     private static final String CONSISTENCY_LEVEL = "consistency.level";
 

@@ -24,6 +24,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Read CSV File class reads the csv file.
@@ -37,7 +39,7 @@ public class ReadCSVFile
 
     public static Map<String, Integer> columnFieldIndexMap = new HashMap<String, Integer>();
 
-    private static final Log log = LogFactory.getLog(ReadCSVFile.class);
+    private static final Logger log = LoggerFactory.getLogger(ReadCSVFile.class);
 
     /**
      * Return csv file content as a map.

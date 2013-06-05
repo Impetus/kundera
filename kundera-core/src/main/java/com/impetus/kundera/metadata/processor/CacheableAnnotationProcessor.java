@@ -19,6 +19,8 @@ import javax.persistence.Cacheable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -40,7 +42,7 @@ public class CacheableAnnotationProcessor implements MetadataProcessor
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CacheableAnnotationProcessor.class);
+    private static Logger log = LoggerFactory.getLogger(CacheableAnnotationProcessor.class);
 
     /*
      * (non-Javadoc)
