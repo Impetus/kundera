@@ -187,8 +187,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List<KeySlice> ks)
     {
         List<Object> entities;
+        
         if (m.getType().isSuperColumnFamilyMetadata())
         {
+            if(log.isInfoEnabled())
+            {
+                log.info("On counter column for super column family of entity {0}.", m.getEntityClazz());
+            }
+            
             Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
                     .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
             entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
@@ -206,6 +212,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else
         {
 
+            if(log.isInfoEnabled())
+            {
+                log.info("On counter column for column family of entity {0}", m.getEntityClazz());
+            }
+            
             Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper.transformKeySlices(ks,
                     ColumnOrSuperColumnHelper.COUNTER_COLUMN);
             entities = new ArrayList<Object>(qCounterColumnResults.size());
@@ -246,6 +257,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
             Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
+            
+            if(log.isInfoEnabled())
+            {
+                log.info("Populating data for entity of clazz {0} and row key {1}.", m.getEntityClazz(), tr.getId());
+            }
+            
             if (o != null)
             {
                 entities.add(o);
@@ -280,6 +297,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
 
             Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
+            
+            if(log.isInfoEnabled())
+            {
+                log.info("Populating data for super column family of clazz {0} and row key {1}.", m.getEntityClazz(), tr.getId());
+            }
+            
             if (o != null)
             {
                 entities.add(o);
@@ -389,28 +412,33 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             pooledConnection = getPooledConection(metadata.getPersistenceUnit());
             conn = getConnection(pooledConnection);
 
+            if(log.isInfoEnabled())
+            {
+                log.info("Removing data for counter column family {0}.", metadata.getTableName());
+            }
+            
             conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
                     path, consistencyLevel);
 
         }
         catch (InvalidRequestException ire)
         {
-            log.error("Error during executing delete, Caused by {0}", ire);
+            log.error("Error during executing delete, Caused by: .", ire);
             throw new PersistenceException(ire);
         }
         catch (UnavailableException ue)
         {
-            log.error("Error during executing delete, Caused by {0}" ,ue);
+            log.error("Error during executing delete, Caused by: ." ,ue);
             throw new PersistenceException(ue);
         }
         catch (TimedOutException toe)
         {
-            log.error("Error during executing delete, Caused by {0}" , toe);
+            log.error("Error during executing delete, Caused by: ." , toe);
             throw new PersistenceException(toe);
         }
         catch (TException te)
         {
-            log.error("Error during executing delete, Caused by {0}" , te);
+            log.error("Error during executing delete, Caused by: ." , te);
             throw new PersistenceException(te);
         }
         finally
@@ -460,7 +488,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (columnFamilyDefToUpdate == null)
             {
-                throw new PersistenceException("Join table does not exist in database");
+                  log.error("Join table {0} not available.", tableName);    
+                throw new PersistenceException("table" + tableName + " not found!");
             }
             // create a column family, in case it is not already available.
 
@@ -511,27 +540,27 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
+            log.warn("Could not create secondary index on column family {0}, Caused by: . ", tableName,e);
 
         }
         catch (SchemaDisagreementException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
+            log.warn("Could not create secondary index on column family {0}, Caused by: . ", tableName,e);
 
         }
         catch (TException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
+            log.warn("Could not create secondary index on column family {0}, Caused by: . ", tableName,e);
 
         }
         catch (NotFoundException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
+            log.warn("Could not create secondary index on column family {0}, Caused by: . ", tableName,e);
 
         }
         catch (PropertyAccessException e)
         {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e);
+            log.warn("Could not create secondary index on column family {0}, Caused by: . ", tableName,e);
 
         }
         finally
@@ -610,7 +639,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval ", e);
+            log.error("Error while retrieving records from database for entity {0} and key {1}, Caused by: .", clazz,rowId, e);
+            
             throw new PersistenceException(e);
         }
 
@@ -640,7 +670,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             else if (getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
                     && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
             {
-                log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed using thrift");
+                log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed using thrift, returning false.");
                 return false;
             }
             return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
@@ -678,13 +708,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap, CassandraDataHandler dataHandler)
     {
         List<E> entities = null;
+        String entityId =null;
         try
         {
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
             entities = new ArrayList<E>();
             for (String superColumnName : superColumnMap.keySet())
             {
-                String entityId = superColumnMap.get(superColumnName);
+                entityId = superColumnMap.get(superColumnName);
                 List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
                         entityMetadata.getTableName(), entityId,
                         new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
@@ -698,6 +729,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
+            log.error("Error while retrieving records from database for entity {0} and key {1}, Caused by: . ", entityClass,entityId, e);
             throw new KunderaException(e);
         }
         return entities;
@@ -719,6 +751,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
     {
+        if(log.isInfoEnabled())
+        {
+            log.info("Executing cql query {0}.", cqlQuery);
+        }
         return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
     }
 
@@ -785,10 +821,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 }
                 catch (IllegalStateException e)
                 {
+                    log.error("Error while returning entities for {0}, Caused by: .",m.getEntityClazz(),e);
                     throw new KunderaException(e);
                 }
                 catch (Exception e)
                 {
+                    log.error("Error while returning entities for {0}, Caused by: .",m.getEntityClazz(),e);
                     throw new KunderaException(e);
                 }
             }
@@ -884,6 +922,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         insert_Query = StringUtils
                 .replace(insert_Query, CQLTranslator.COLUMNS, translation.get(TranslationType.COLUMN));
 
+        if(log.isInfoEnabled())
+        {
+            log.info("Returning cql query {0}.",insert_Query);
+        }
+        
         return insert_Query;
     }
 
@@ -933,6 +976,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         // strip last "," clause.
         builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
         onWhereClause(entityMetadata, rowId, translator, builder, metaModel);
+        
+        if(log.isInfoEnabled())
+        {
+            log.info("Returning update query {0}.",builder.toString());
+        }
         return builder.toString();
     }
 
@@ -971,7 +1019,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         else
         {
-            log.warn("Please provide resonable consistency Level");
+            log.warn("Invalid consistency level {null} provided, default level will be used.");
         }
     }
 
@@ -1030,6 +1078,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
         onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
+        
+        if(log.isInfoEnabled())
+        {
+            log.info("Returning delete query {0}.", deleteQueryBuilder.toString());
+        }
         return deleteQueryBuilder.toString();
     }
 
@@ -1386,27 +1439,27 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while persisting record. Details: " + e);
+            log.error("Error while persisting record. Caused by: ." , e);
             throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error("Error while persisting record. Details: " + e);
+            log.error("Error while persisting record. Caused by: ." , e);
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while persisting record. Details: " + e);
+            log.error("Error while persisting record. Caused by: ." , e);
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while persisting record. Details: " + e);
+            log.error("Error while persisting record. Caused by: ." + e);
             throw new KunderaException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while persisting record. Details: " + e);
+            log.error("Error while persisting record. Caused by: ." , e);
             throw new KunderaException(e);
         }
         finally
@@ -1446,7 +1499,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         // check for counter column
         if (isUpdate && entityMetadata.isCounterColumnType())
         {
-            throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
+            throw new UnsupportedOperationException("Invalid operation! Merge is not possible over counter column.");
         }
 
         ThriftRow tf = null;
@@ -1457,7 +1510,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception e)
         {
-            log.error("Error during persisting record, Details:" + e);
+            log.error("Error during persisting record for entity {0}, Caused by: .", entityMetadata.getEntityClazz(),entityMetadata.getTableName(), e);
             throw new KunderaException(e);
         }
 
@@ -1578,12 +1631,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error during borrowing a connection, Details:" + irex);
+            log.error("Error during borrowing a connection for persistence unit {0}, Caused by: ." ,irex);
             throw new KunderaException(irex);
         }
         catch (TException tex)
         {
-            log.error("Error during borrowing a connection, Details:" + tex);
+            log.error("Error during borrowing a connection for persistence unit {0}, Caused by: ." ,persistenceUnit, tex);
             throw new KunderaException(tex);
         }
         finally
@@ -1597,66 +1650,67 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /**
      * Return the generated value of id.
      * 
-     * @param discriptor
+     * @param descriptor
      * @param pu
      * @return
      */
-    public Long getGeneratedValue(TableGeneratorDiscriptor discriptor, String pu)
+    public Long getGeneratedValue(TableGeneratorDiscriptor descriptor, String pu)
     {
-        Cassandra.Client conn = getRawClient(pu, discriptor.getSchema());
+        Cassandra.Client conn = getRawClient(pu, descriptor.getSchema());
         try
         {
-            conn.set_keyspace(discriptor.getSchema());
-            ColumnPath columnPath = new ColumnPath(discriptor.getTable());
-            columnPath.setColumn(discriptor.getValueColumnName().getBytes());
+            conn.set_keyspace(descriptor.getSchema());
+            ColumnPath columnPath = new ColumnPath(descriptor.getTable());
+            columnPath.setColumn(descriptor.getValueColumnName().getBytes());
             long latestCount = 0l;
 
             try
             {
-                latestCount = conn.get(ByteBuffer.wrap(discriptor.getPkColumnValue().getBytes()), columnPath,
+                latestCount = conn.get(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnPath,
                         getConsistencyLevel()).counter_column.value;
             }
             catch (NotFoundException e)
             {
+                log.warn("Counter value not found for {0}, resetting it to zero.", descriptor.getPkColumnName());
                 latestCount = 0;
             }
-            ColumnParent columnParent = new ColumnParent(discriptor.getTable());
+            ColumnParent columnParent = new ColumnParent(descriptor.getTable());
 
             CounterColumn counterColumn = new CounterColumn(
-                    ByteBuffer.wrap(discriptor.getValueColumnName().getBytes()), 1);
+                    ByteBuffer.wrap(descriptor.getValueColumnName().getBytes()), 1);
 
-            conn.add(ByteBuffer.wrap(discriptor.getPkColumnValue().getBytes()), columnParent, counterColumn,
+            conn.add(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnParent, counterColumn,
                     getConsistencyLevel());
 
             if (latestCount == 0)
             {
-                return (long) discriptor.getInitialValue();
+                return (long) descriptor.getInitialValue();
             }
             else
             {
-                return (latestCount + 1) * discriptor.getAllocationSize();
+                return (latestCount + 1) * descriptor.getAllocationSize();
             }
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while using keyspace. Details:", e);
-            throw new KunderaException("Error while using keyspace", e);
+            log.error("Error while using keyspace, Caused by: .", e);
+            throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error("Error while using keyspace. Details:", e);
-            throw new KunderaException("Error while using keyspace", e);
+            log.error("Error while using keyspace. Caused by: .", e);
+            throw new KunderaException(e);
         }
 
         catch (UnavailableException e)
         {
-            log.error("Error while reading counter value from table " + discriptor.getTable() + ". Details:", e);
-            throw new KunderaException("Error while reading counter value from table", e);
+            log.error("Error while reading counter value from table{0}, Caused by: .", descriptor.getTable(), e);
+            throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while adding counter value to table " + discriptor.getTable() + ". Details:", e);
-            throw new KunderaException("Error while adding counter value to table ", e);
+            log.error("Error while reading counter value from table{0}, Caused by: .", descriptor.getTable(), e);
+            throw new KunderaException(e);
         }
     }
 
@@ -1684,6 +1738,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
                         org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+            }
+            
+            if(log.isInfoEnabled())
+            {
+                log.info("Executing cql query {0}.",cqlQuery);
             }
             return conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery), org.apache.cassandra.thrift.Compression.NONE);
         }
@@ -1726,7 +1785,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 batchSize = Integer.valueOf(batch_Size);
                 if (batchSize == 0)
                 {
-                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0.");
                 }
             }
         }
@@ -1832,12 +1891,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List returnedEntities = new ArrayList();
             try
             {
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getMetamodel(entityMetadata.getPersistenceUnit());
-
-                if (log.isDebugEnabled())
+                if (log.isInfoEnabled())
                 {
-                    log.info("executing query " + cqlQuery);
+                    log.info("Executing query {0}.",cqlQuery);
                 }
                 result = executeCQLQuery(cqlQuery);
                 if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
@@ -1870,32 +1926,32 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
             catch (InvalidRequestException e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
             catch (UnavailableException e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
             catch (TimedOutException e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
             catch (SchemaDisagreementException e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
             catch (TException e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
             catch (Exception e)
             {
-                log.error("Error while executing native CQL query Caused by:", e);
+                log.error("Error while executing native CQL query Caused by: .", e);
                 throw new PersistenceException(e);
             }
 

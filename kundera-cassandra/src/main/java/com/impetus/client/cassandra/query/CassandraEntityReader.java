@@ -24,8 +24,6 @@ import java.util.Set;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +106,10 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
+        if(log.isInfoEnabled())
+        {
+            log.info("On populate relation via JPQL");
+        }
         List<EnhanceEntity> ls = null;
         List<String> relationNames = m.getRelationNames();
         boolean isParent = m.isParent();

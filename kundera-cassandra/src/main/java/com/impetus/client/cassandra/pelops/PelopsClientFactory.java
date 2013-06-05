@@ -93,6 +93,12 @@ public class PelopsClientFactory extends GenericClientFactory
 
             // Add pool with specified policy. null means default operand
             // policy.
+            
+            if(logger.isInfoEnabled())
+            {
+                logger.info("Initializing connection pool for keyspace {0}, host {1},port {2}.", keyspace,contactNodes,defaultPort);
+            }
+            
             Pelops.addPool(poolName, cluster, keyspace, policy, null);
 
         }
@@ -103,6 +109,11 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
+        if(logger.isInfoEnabled())
+        {
+            logger.info("Initializing pelops client for persistence unit {0}", persistenceUnit);
+        }
+
         return new PelopsClient(indexManager, reader, persistenceUnit, externalProperties);
     }
 

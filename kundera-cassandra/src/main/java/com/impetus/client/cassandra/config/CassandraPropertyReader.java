@@ -98,6 +98,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 replication = schema.getSchemaProperties().getProperty(CassandraConstants.REPLICATION_FACTOR);
             }
+            
+            if(logger.isInfoEnabled())
+            {
+                logger.info("Returning replication factor value {0}", replication);
+            }
             return replication;
         }
 
@@ -111,6 +116,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
             {
                 placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
+            }
+            
+            if(logger.isInfoEnabled())
+            {
+                logger.info("Returning placement strategy value {0}", placementStrategy);
             }
             return placementStrategy;
         }
@@ -138,6 +148,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
+            
+            if(logger.isWarnEnabled())
+            {
+                logger.warn("No data store configuration found, returning null.");
+            }
+            
             return null;
         }
 
@@ -156,6 +172,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         break;
                     }
                 }
+            }
+            
+            if(logger.isInfoEnabled())
+            {
+                logger.info("Returning inverted indexing enabled value {0}.", result);
             }
             return result;
         }
@@ -179,7 +200,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         }
                         else
                         {
-                            logger.warn("Invalid {0} cql version provided, valid are {1},{2} .", cqlVersion,
+                            logger.warn("Invalid {0} cql version provided, valid are {1},{2}.", cqlVersion,
                                 CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
                         }
                     }
@@ -220,6 +241,13 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
+            
+
+            if(logger.isWarnEnabled())
+            {
+                logger.warn("No column family schema found, returning null.");
+            }
+            
             return null;
         }
 
@@ -230,6 +258,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 return ds.getConnection().getProperties();
             }
+            
+            if(logger.isWarnEnabled())
+            {
+                logger.warn("No connection properties found, returning null.");
+            }
+            
             return null;
         }
     }

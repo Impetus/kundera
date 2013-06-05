@@ -86,7 +86,19 @@ public class PelopsUtils
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-        return contactNodes + ":" + defaultPort + ":" + keyspace;
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append(contactNodes);
+        builder.append(":");
+        builder.append(defaultPort);
+        builder.append(":");
+        builder.append(keyspace);
+        
+        if(logger.isInfoEnabled())
+        {
+            logger.info("Returning pool name {0}", builder.toString());
+        }
+        return builder.toString();
     }
 
     /**
@@ -155,8 +167,7 @@ public class PelopsUtils
         }
         catch (NumberFormatException e)
         {
-            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
-                    + " persistence unit couldn't be parsed. Default pool policy would be used");
+            logger.warn("Some Connection pool related property for {0} persistence unit couldn't be parsed. Default pool policy would be used." , persistenceUnitMetadata.getPersistenceUnitName());
             policy = null;
         }
         return policy;
@@ -340,7 +351,13 @@ public class PelopsUtils
         }
         catch (TException te)
         {
+            logger.error("Error while retrieving cassandra connection, Caused by: .",te);
             throw new PersistenceException(te);
+        }
+        
+        if(logger.isInfoEnabled())
+        {
+            logger.info("No connection established, returning null.");
         }
         return null;
     }
@@ -350,6 +367,11 @@ public class PelopsUtils
         if (pool != null && conn != null)
         {
             pool.release(conn);
+        }
+        
+        if(logger.isInfoEnabled())
+        {
+            logger.info("Releasing connection.");
         }
     }
 }
