@@ -204,7 +204,7 @@ public class CassandraPropertiesTest
         }
         catch (Exception e)
         {
-            log.info("kundera-cassandra.properties file not found");
+            log.info("kundera-cassandra.properties file not found.");
 
         }
         return null;

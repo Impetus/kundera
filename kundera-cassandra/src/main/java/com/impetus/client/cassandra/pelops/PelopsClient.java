@@ -168,7 +168,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (Exception e)
         {
-            log.error("Error while retrieving records for entity {0}, row keys {1}", entityClass,rowIds);
+            log.error("Error while retrieving records for entity {}, row keys {}", entityClass,rowIds);
             throw new KunderaException(e);
         }
 
@@ -267,7 +267,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         
         if(log.isInfoEnabled())
         {
-            log.info(" Persisted data with join table column family {0}", joinTableData.getJoinTableName());
+            log.info(" Persisted data with join table column family {}", joinTableData.getJoinTableName());
         }
         mutator.execute(getConsistencyLevel());
     }
@@ -398,7 +398,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (PelopsException e)
             {
-                log.warn("Error while retrieving entities for given column {0} for class {1}.", colName,clazz);
+                log.warn("Error while retrieving entities for given column {} for class {}.", colName,clazz);
                 return entities;
             }
             entities = new ArrayList<Object>(qResults.size());
@@ -452,27 +452,27 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             catch (InvalidRequestException e)
             {
-                log.error("Error during persist while executing query {0}, Caused by: .", insert_Query, e);
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
             catch (TException e)
             {
-                log.error("Error during persist while executing query {0}, Caused by: .", insert_Query, e);
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
             catch (UnavailableException e)
             {
-                log.error("Error during persist while executing query {0}, Caused by: .", insert_Query, e);
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
             catch (TimedOutException e)
             {
-                log.error("Error during persist while executing query {0}, Caused by: .", insert_Query, e);
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
             catch (SchemaDisagreementException e)
             {
-                log.error("Error during persist while executing query {0}, Caused by: .", insert_Query, e);
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
         }
@@ -497,7 +497,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 if(log.isInfoEnabled())
                 {
-                    log.info("Persisting counter column family record for row key {0}", tf.getId());
+                    log.info("Persisting counter column family record for row key {}", tf.getId());
                 }
                 List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
                 List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
@@ -526,7 +526,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 {
                     if(log.isInfoEnabled())
                     {
-                        log.info("Persisting column family record for row key {0}", tf.getId());
+                        log.info("Persisting column family record for row key {}", tf.getId());
                     }
 
                     // Bytes.from
@@ -541,7 +541,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     {
                         if(log.isInfoEnabled())
                         {
-                            log.info("Persisting super column family record for row key {0}", tf.getId());
+                            log.info("Persisting super column family record for row key {}", tf.getId());
                         }
 
                         mutator.writeSubColumns(metadata.getTableName(),
@@ -604,7 +604,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         
         if(log.isInfoEnabled())
         {
-            log.info("Retrieving record of super column family {0} for row key {1}", columnFamily, rowId);
+            log.info("Retrieving record of super column family {} for row key {}", columnFamily, rowId);
         }
 
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),

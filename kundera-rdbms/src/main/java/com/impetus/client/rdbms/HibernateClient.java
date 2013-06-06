@@ -252,7 +252,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (HibernateException e)
         {
-            log.error("Error while persisting object of {0}", metadata.getEntityClazz(),e);
+            log.error("Error while persisting object of {}", metadata.getEntityClazz(),e);
             throw new PersistenceException(e);
         }
         /*finally

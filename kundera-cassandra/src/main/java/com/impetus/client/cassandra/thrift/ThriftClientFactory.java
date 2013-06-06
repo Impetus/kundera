@@ -143,11 +143,16 @@ public class ThriftClientFactory extends GenericClientFactory
         PelopsUtils.setPoolConfigPolicy(persistenceUnitMetadata, prop, externalProperties);
         try
         {
+            if(logger.isInfoEnabled())
+            {
+                logger.info("Initializing connection for keyspace {},host {},port {}", keyspace,contactNodes,defaultPort);
+            }
+            
             pool = new ConnectionPool(prop);
         }
         catch (TException e)
         {
-            logger.error("Error during pool creation: caused by ", e);
+            logger.error("Error during creating poo, Caused by: .", e);
             throw new ClientLoaderException(e);
         }
         return null;

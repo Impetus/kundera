@@ -65,7 +65,7 @@ public class CQLTranslatorTest
     @Test
     public void testPrepareColumns()
     {
-        logger.info("On prepare columns");
+        logger.info("On prepare columns.");
         CQLTranslator translator = new CQLTranslator();
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();

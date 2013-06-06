@@ -36,6 +36,7 @@ import com.impetus.client.twitter.entities.ExternalLinkCassandra;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.TweetCassandra;
 import com.impetus.client.twitter.entities.UserCassandra;
+import com.impetus.kundera.KunderaException;
 
 /**
  * Data access object class for implementation of twitter.
@@ -60,8 +61,8 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
             }
             catch (Exception e)
             {
-                log.error(e.toString());
-                e.printStackTrace();
+                log.error(e.getMessage(),e);
+                throw new KunderaException(e);
             }
         }
 

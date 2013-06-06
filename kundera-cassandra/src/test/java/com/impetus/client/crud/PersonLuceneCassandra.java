@@ -36,8 +36,6 @@ public class PersonLuceneCassandra
 
     private static final long serialVersionUID = 6068131491098913126L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(PersonLuceneCassandra.class);
-
     public static final String UID = "uid";
 
     public static final String EID = "eid";

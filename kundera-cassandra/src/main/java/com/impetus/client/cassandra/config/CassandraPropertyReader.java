@@ -101,7 +101,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             
             if(logger.isInfoEnabled())
             {
-                logger.info("Returning replication factor value {0}", replication);
+                logger.info("Returning replication factor value {}", replication);
             }
             return replication;
         }
@@ -120,7 +120,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             
             if(logger.isInfoEnabled())
             {
-                logger.info("Returning placement strategy value {0}", placementStrategy);
+                logger.info("Returning placement strategy value {}", placementStrategy);
             }
             return placementStrategy;
         }
@@ -176,7 +176,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             
             if(logger.isInfoEnabled())
             {
-                logger.info("Returning inverted indexing enabled value {0}.", result);
+                logger.info("Returning inverted indexing enabled value {}.", result);
             }
             return result;
         }
@@ -200,7 +200,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         }
                         else
                         {
-                            logger.warn("Invalid {0} cql version provided, valid are {1},{2}.", cqlVersion,
+                            logger.warn("Invalid {} cql version provided, valid are {},{}.", cqlVersion,
                                 CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
                         }
                     }

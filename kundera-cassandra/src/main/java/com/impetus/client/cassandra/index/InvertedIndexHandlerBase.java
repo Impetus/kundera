@@ -93,7 +93,7 @@ public abstract class InvertedIndexHandlerBase
 
         if (log.isInfoEnabled())
         {
-            log.info("RowKey: {0} ; Super column Name: {1} on condition.",rowKey,superColumnNameStr, condition);
+            log.info("RowKey: {} ; Super column Name: {} on condition.",rowKey,superColumnNameStr, condition);
         }
 
         // TODO: Second check unnecessary but unavoidable as filter clause

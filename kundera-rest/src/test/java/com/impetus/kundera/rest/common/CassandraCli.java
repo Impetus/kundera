@@ -125,26 +125,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error("Error while creating keyspace {0}", keyspaceName,e1);
+                log.error("Error while creating keyspace {}", keyspaceName,e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error("Error while creating keyspace {0}", keyspaceName,ess);
+                log.error("Error while creating keyspace {}", keyspaceName,ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error("Error while creating keyspace {0}", keyspaceName,sde);
+                log.error("Error while creating keyspace {}", keyspaceName,sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error("Error while creating keyspace {0}", keyspaceName,e);
+            log.error("Error while creating keyspace {}", keyspaceName,e);
         }
         catch (TException e)
         {
-            log.error("Error while creating keyspace {0}", keyspaceName,e);
+            log.error("Error while creating keyspace {}", keyspaceName,e);
         }
 
     }
@@ -163,15 +163,15 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while creating keyspace {0}", keyspaceName,e);
+            log.error("Error while creating keyspace {}", keyspaceName,e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while creating keyspace {0}", keyspaceName,e);
+            log.error("Error while creating keyspace {}", keyspaceName,e);
         }
         catch (TException e)
         {
-            log.error("Error while creating keyspace {0}", keyspaceName,e);
+            log.error("Error while creating keyspace {}", keyspaceName,e);
         }
 
     }
@@ -188,11 +188,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while creating keyspace {0}", keySpaceName,e);
+            log.error("Error while creating keyspace {}", keySpaceName,e);
         }
         catch (TException e)
         {
-            log.error("Error while creating keyspace {0}", keySpaceName,e);
+            log.error("Error while creating keyspace {}", keySpaceName,e);
         }
         return false;
     }

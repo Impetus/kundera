@@ -181,7 +181,7 @@ public abstract class CassandraDataHandlerBase
         
         if(log.isInfoEnabled())
         {
-            log.info("Returning entity {0} for class {1}", e,clazz);
+            log.info("Returning entity {} for class {}", e,clazz);
         }
         return e;
     }
@@ -1216,7 +1216,7 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn("Error while setting field{0} value via CQL, Caused by: .", attribute.getName(),pae);
+                log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
             }
         }
     }
@@ -1261,7 +1261,7 @@ public abstract class CassandraDataHandlerBase
         }
         catch (PropertyAccessException pae)
         {
-            log.warn("Error while setting field{0} value via CQL, Caused by: .", attribute.getName(),pae);
+            log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
         }
         return null;
     }

@@ -104,7 +104,7 @@ public class CassQuery extends QueryImpl implements Query
     {
         if (log.isDebugEnabled())
         {
-            log.debug("Populating entities for Cassandra query {0}.", getJPAQuery());
+            log.debug("Populating entities for Cassandra query {}.", getJPAQuery());
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -314,7 +314,7 @@ public class CassQuery extends QueryImpl implements Query
         
         if(log.isInfoEnabled())
         {
-            log.info("Preparing index clause for query {0}", getJPAQuery());
+            log.info("Preparing index clause for query {}", getJPAQuery());
         }
 
         for (Object o : getKunderaQuery().getFilterClauseQueue())

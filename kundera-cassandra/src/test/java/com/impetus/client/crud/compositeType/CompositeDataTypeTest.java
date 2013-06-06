@@ -30,8 +30,6 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,9 +89,6 @@ public class CompositeDataTypeTest
 
     /** The calendar. */
     protected Calendar calendar = Calendar.getInstance();
-
-    /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(CompositeDataTypeTest.class);
 
     /**
      * @throws java.lang.Exception

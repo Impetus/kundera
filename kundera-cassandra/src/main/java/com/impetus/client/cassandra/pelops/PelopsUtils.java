@@ -96,7 +96,7 @@ public class PelopsUtils
         
         if(logger.isInfoEnabled())
         {
-            logger.info("Returning pool name {0}", builder.toString());
+            logger.info("Returning pool name {}", builder.toString());
         }
         return builder.toString();
     }
@@ -167,7 +167,7 @@ public class PelopsUtils
         }
         catch (NumberFormatException e)
         {
-            logger.warn("Some Connection pool related property for {0} persistence unit couldn't be parsed. Default pool policy would be used." , persistenceUnitMetadata.getPersistenceUnitName());
+            logger.warn("Some Connection pool related property for {} persistence unit couldn't be parsed. Default pool policy would be used." , persistenceUnitMetadata.getPersistenceUnitName());
             policy = null;
         }
         return policy;

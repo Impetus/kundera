@@ -49,6 +49,8 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * The Class CassandraCli.
  * 
@@ -124,26 +126,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error("Error while adding keyspace",e1);
+                log.error("Error while adding keyspace, Caused by: .",e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error("Error while adding keyspace",ess);
+                log.error("Error while adding keyspace, Caused by: .",ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error("Error while adding keyspace",sde);
+                log.error("Error while adding keyspace, Caused by: .",sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error("Error while adding keyspace",e);
+            log.error("Error while adding keyspace, Caused by: .",e);
         }
         catch (TException e)
         {
-            log.error("Error while adding keyspace",e);
+            log.error("Error while adding keyspace, Caused by: .",e);
         }
 
     }
@@ -212,11 +214,11 @@ public final class CassandraCli
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while dropping keyspace",e);
+            log.error("Error while dropping keyspace, Caused by: .",e);
         }
         catch (TException e)
         {
-            log.error("Error while dropping keyspace",e);
+            log.error("Error while dropping keyspace, Caused by: .",e);
         }
     }
 
@@ -249,11 +251,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while keyspace check ",e);
+            log.error("Error while keyspace check, Caused by: .",e);
         }
         catch (TException e)
         {
-            log.error("Error while keyspace check ",e);
+            log.error("Error while keyspace check, Caused by: .",e);
         }
         return false;
     }
@@ -337,33 +339,34 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
+        
         catch (TException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
         catch (UnsupportedEncodingException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            throw new KunderaException(e);
         }
     }
 }

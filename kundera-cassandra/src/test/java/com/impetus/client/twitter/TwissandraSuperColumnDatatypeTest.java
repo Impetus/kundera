@@ -35,8 +35,6 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Assert;
@@ -117,27 +115,27 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         }
         catch (IOException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (UnavailableException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 
@@ -905,11 +903,11 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 
