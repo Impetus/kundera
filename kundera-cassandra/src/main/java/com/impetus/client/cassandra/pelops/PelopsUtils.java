@@ -18,19 +18,12 @@ package com.impetus.client.cassandra.pelops;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.PersistenceException;
-
-import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.lang.StringUtils;
-import org.apache.thrift.TException;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +75,20 @@ public class PelopsUtils
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-        return contactNodes + ":" + defaultPort + ":" + keyspace;
+        return generatePoolName(contactNodes, defaultPort, keyspace);
+    }
+
+    /**
+     * Generate pool name.
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param puProperties
+     * @return the string
+     */
+    public static String generatePoolName(String node, String portAsString, String keyspace)
+    {
+        return node + ":" + portAsString + ":" + keyspace;
     }
 
     /**
@@ -181,6 +187,7 @@ public class PelopsUtils
         if (maxActivePerNode > 0)
         {
             prop.setInitialSize(maxActivePerNode);
+            prop.setMaxActive(maxActivePerNode);
         }
         if (maxIdlePerNode > 0)
         {
@@ -225,50 +232,5 @@ public class PelopsUtils
             authenticator = new SimpleConnectionAuthenticator(userName, password);
         }
         return authenticator;
-    }
-
-    /**
-     * Returns instance of {@link IPooledConnection} for a given persistence
-     * unit
-     * 
-     * @param persistenceUnit
-     * @param puProperties
-     * @return
-     */
-    public static IPooledConnection getCassandraConnection(String persistenceUnit, Map<String, Object> puProperties)
-    {
-        return Pelops.getDbConnPool(generatePoolName(persistenceUnit, puProperties)).getConnection();
-    }
-
-    public static void releaseConnection(IPooledConnection conn)
-    {
-        if (conn != null)
-        {
-            conn.release();
-        }
-    }
-
-    public static Cassandra.Client getCassandraConnection(ConnectionPool pool)
-    {
-        try
-        {
-            if (pool != null)
-            {
-                return pool.getConnection();
-            }
-        }
-        catch (TException te)
-        {
-            throw new PersistenceException(te);
-        }
-        return null;
-    }
-
-    public static void releaseConnection(ConnectionPool pool, Cassandra.Client conn)
-    {
-        if (pool != null && conn != null)
-        {
-            pool.release(conn);
-        }
     }
 }

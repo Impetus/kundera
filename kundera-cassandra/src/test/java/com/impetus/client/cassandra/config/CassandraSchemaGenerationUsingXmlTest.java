@@ -3,6 +3,9 @@
  */
 package com.impetus.client.cassandra.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
@@ -22,6 +25,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
@@ -44,7 +48,9 @@ public class CassandraSchemaGenerationUsingXmlTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(keyspaceName);
-        emf = Persistence.createEntityManagerFactory("CassandraXmlPropertyTest");
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+        emf = Persistence.createEntityManagerFactory("CassandraXmlPropertyTest", propertyMap);
     }
 
     /**

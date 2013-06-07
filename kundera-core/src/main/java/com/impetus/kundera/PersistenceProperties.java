@@ -27,6 +27,9 @@ public interface PersistenceProperties
     /** The Constant KUNDERA_NODES. */
     public static final String KUNDERA_NODES = "kundera.nodes";
 
+    /** The Constant KUNDERA_NODES. */
+    public static final String KUNDERA_NODE_PORT = "kundera.node.port";
+    
     /** The Constant KUNDERA_PORT. */
     public static final String KUNDERA_PORT = "kundera.port";
 

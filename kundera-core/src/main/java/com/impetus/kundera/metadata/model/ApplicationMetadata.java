@@ -49,7 +49,7 @@ public class ApplicationMetadata
     private Map<String, PersistenceUnitMetadata> persistenceUnitMetadataMap = new ConcurrentHashMap<String, PersistenceUnitMetadata>();
 
     /** The Constant log. */
-    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    private static Log logger = LogFactory.getLog(ApplicationMetadata.class);
 
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
 

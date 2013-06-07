@@ -226,7 +226,7 @@ public class EntityValidatorImpl implements EntityValidator
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         if (metadata != null)
         {
-            SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit(), puProperties)
+            SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit())
                     .getSchemaManager(puProperties);
             if (schemaManager != null && !schemaManager.validateEntity(clazz))
             {

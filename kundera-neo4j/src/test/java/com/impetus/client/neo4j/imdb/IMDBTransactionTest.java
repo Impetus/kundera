@@ -15,12 +15,21 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.io.File;
+
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.kernel.impl.util.FileUtils;
+
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case for validating transaction handling provided by Kundera for Neo4J
@@ -29,6 +38,21 @@ import org.junit.Test;
  */
 public class IMDBTransactionTest extends IMDBTestBase
 {
+
+    /*    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        FileUtils.deleteRecursively(new File(datastoreFilePath));
+//        emf.close();
+    }*/
 
     /**
      * @throws java.lang.Exception
@@ -52,8 +76,8 @@ public class IMDBTransactionTest extends IMDBTestBase
         em.remove(actor2);
         em.getTransaction().commit();
 
-        em.close();
-        emf.close();
+//        em.close();
+        clean();
     }
 
     @Test

@@ -50,12 +50,11 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
-
-    private ConnectionPool pool;
+    // private ConnectionPool pool;
 
     public ThriftDataHandler(ConnectionPool pool)
     {
-        this.pool = pool;
+        // this.pool = pool;
     }
 
     /*
@@ -68,25 +67,21 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      */
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn) throws Exception
     {
         // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
 
         Object e = null;
-
-        Cassandra.Client conn = PelopsUtils.getCassandraConnection(pool);
-
         SlicePredicate predicate = new SlicePredicate();
         predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
 
         ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
-        List<ColumnOrSuperColumn> columnOrSuperColumns = conn.get_slice(key, new ColumnParent(m.getTableName()),
+        List<ColumnOrSuperColumn> columnOrSuperColumns = ((Cassandra.Client)conn).get_slice(key, new ColumnParent(m.getTableName()),
                 predicate, consistencyLevel);
 
         Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
         e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns, isCql3Enabled);
-        PelopsUtils.releaseConnection(pool, conn);
         return e;
     }
 
@@ -106,7 +101,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      * @throws CharacterCodingException
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow,boolean isCql3Enabled) throws CharacterCodingException
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow, boolean isCql3Enabled)
+            throws CharacterCodingException
     {
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (ByteBuffer key : columnOrSuperColumnsFromRow.keySet())
@@ -116,7 +112,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
             tr.setId(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.array()));
             tr = dataGenerator.translateToThriftRow(columnOrSuperColumnsFromRow, m.isCounterColumnType(), m.getType(),
                     tr);
-            e = populateEntity(tr, m, relationNames, isWrapReq,isCql3Enabled);
+            e = populateEntity(tr, m, relationNames, isWrapReq, isCql3Enabled);
         }
         return e;
     }

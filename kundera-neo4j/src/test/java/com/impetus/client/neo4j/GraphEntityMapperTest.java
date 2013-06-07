@@ -62,7 +62,7 @@ public class GraphEntityMapperTest
 
     GraphDatabaseService graphDb;
 
-    final static String PU = "neo4jTest";
+    final static String PU = "imdb";
 
     /**
      * @throws java.lang.Exception

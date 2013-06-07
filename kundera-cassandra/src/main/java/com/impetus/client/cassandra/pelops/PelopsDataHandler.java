@@ -65,7 +65,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
 
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn) throws Exception
     {
         Selector selector = Pelops
                 .createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit(), externalProperty));
@@ -96,9 +96,17 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
 
     @Override
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object... rowIds) throws Exception
+            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn, Object... rowIds) throws Exception
     {
-        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel,isCql3Enabled, rowIds);
+        try
+        {
+            return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, isCql3Enabled, conn,
+                    rowIds);
+        }
+        finally
+        {
+
+        }
     }
 
     @Override

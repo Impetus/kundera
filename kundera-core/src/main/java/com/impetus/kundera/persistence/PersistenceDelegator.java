@@ -37,7 +37,6 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
-import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
@@ -757,11 +756,11 @@ public final class PersistenceDelegator
      * @param client 
      */
 
-    void loadClient(String persistenceUnit/*, Client client*/)
+    void loadClient(String persistenceUnit, Client client)
     {
        if (!clientMap.containsKey(persistenceUnit))
         {
-            clientMap.put(persistenceUnit, ClientResolver.discoverClient(persistenceUnit)/*client*/);
+            clientMap.put(persistenceUnit, /*ClientResolver.discoverClient(persistenceUnit)*/client);
         }
     }
 

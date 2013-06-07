@@ -72,12 +72,6 @@ public class RedisGeneratedIdTest
         emf.close();
     }
 
-    // @Test
-    public void testDemo()
-    {
-
-    }
-
     @Test
     public void testPersist()
     {

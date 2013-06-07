@@ -19,8 +19,6 @@ import com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLBigDe
 public class StudentOracleNoSQLBigDecimalTest extends OracleNoSQLBase
 {
 
-    private static final String keyspace = "KunderaTests";
-
     private EntityManagerFactory emf;
 
     @Before

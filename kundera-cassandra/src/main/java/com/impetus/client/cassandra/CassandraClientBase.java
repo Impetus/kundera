@@ -646,7 +646,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
     }
 
-    
     /**
      * Returns true in case of, composite Id and if cql3 opted and not a
      * embedded entity.
@@ -657,9 +656,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public boolean isCql3Enabled()
     {
-       return isCql3Enabled(null);
+        return isCql3Enabled(null);
     }
-    
+
     /**
      * Find.
      * 
@@ -1410,7 +1409,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         finally
         {
             clear();
-            releaseConnection(pooledConnection);
+            if (pooledConnection != null)
+            {
+                releaseConnection(pooledConnection);
+            }
         }
 
         return recordsExecuted;
@@ -1683,6 +1685,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
                         org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
             }
+//            conn.set_cql_version(getCqlVersion());
             return conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery), org.apache.cassandra.thrift.Compression.NONE);
         }
         finally

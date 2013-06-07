@@ -130,21 +130,25 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
      */
     protected void teardownInternal(String persistenceUnit)
     {
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            deleteSchema();
+        }
+
+        if (em != null)
+        {
+            em.close();
+        }
+        if (emf != null)
+        {
+            emf.close();
+        }
 
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopServer();
         }
 
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            deleteSchema();
-        }
-
-        if (emf != null)
-        {
-            emf.close();
-        }
     }
 
     /**

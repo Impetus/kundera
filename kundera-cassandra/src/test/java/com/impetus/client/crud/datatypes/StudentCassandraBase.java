@@ -262,7 +262,7 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
         o.setSqlDate(newSqlDate);
         o.setSqlTime(sqlTime);
         o.setSqlTimestamp(sqlTimestamp);
-        // o.setBigDecimal(bigDecimal);
+        o.setBigDecimal(bigDecimal);
         o.setBigInteger(bigInteger);
         o.setCalendar(calendar);
         return (E) o;

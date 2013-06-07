@@ -56,7 +56,7 @@ public abstract class InvertedIndexHandlerBase
     private static Log log = LogFactory.getLog(InvertedIndexHandlerBase.class);
 
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            Map<Boolean, List<IndexClause>> indexClauseMap)
+            Map<Boolean, List<IndexClause>> indexClauseMap, Object conn)
     {
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
 
@@ -69,7 +69,7 @@ public abstract class InvertedIndexHandlerBase
             for (IndexExpression expression : o.getExpressions())
             {
                 searchAndAddToResults(m, persistenceUnit, consistencyLevel, columnFamilyName, searchResults,
-                        expression, isRowKeyQuery);
+                        expression, isRowKeyQuery, conn);
             }
 
         }
@@ -81,7 +81,8 @@ public abstract class InvertedIndexHandlerBase
      * search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression,
+            boolean isRowKeyQuery, Object conn)
     {
         SearchResult searchResult = new SearchResult();
 
@@ -130,7 +131,7 @@ public abstract class InvertedIndexHandlerBase
             // EQUAL Operator
             case EQ:
                 SuperColumn thriftSuperColumn = getSuperColumnForRow(consistencyLevel, columnFamilyName, rowKey,
-                        superColumnName, persistenceUnit);
+                        superColumnName, persistenceUnit, conn);
 
                 if (thriftSuperColumn != null)
                     thriftSuperColumns.add(thriftSuperColumn);
@@ -146,22 +147,22 @@ public abstract class InvertedIndexHandlerBase
             // Greater than operator
             case GT:
                 searchSuperColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, superColumnName,
-                        thriftSuperColumns, superColumnName, new byte[0]);
+                        thriftSuperColumns, superColumnName, new byte[0], conn);
                 break;
             // Less than Operator
             case LT:
                 searchSuperColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, superColumnName,
-                        thriftSuperColumns, new byte[0], superColumnName);
+                        thriftSuperColumns, new byte[0], superColumnName, conn);
                 break;
             // Greater than-equals to operator
             case GTE:
                 searchSuperColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, superColumnName,
-                        thriftSuperColumns, superColumnName, new byte[0]);
+                        thriftSuperColumns, superColumnName, new byte[0], conn);
                 break;
             // Less than equal to operator
             case LTE:
                 searchSuperColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, superColumnName,
-                        thriftSuperColumns, new byte[0], superColumnName);
+                        thriftSuperColumns, new byte[0], superColumnName, conn);
                 break;
 
             default:
@@ -212,7 +213,7 @@ public abstract class InvertedIndexHandlerBase
         }
     }
 
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, Object conn)
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
@@ -254,7 +255,7 @@ public abstract class InvertedIndexHandlerBase
                                 if (superColumnName != null)
                                 {
                                     deleteColumn(indexColumnFamily, rowKey, superColumnName,
-                                            metadata.getPersistenceUnit(), consistencyLevel, columnName);
+                                            metadata.getPersistenceUnit(), consistencyLevel, columnName, conn);
                                 }
                             }
                         }
@@ -273,7 +274,7 @@ public abstract class InvertedIndexHandlerBase
                             if (superColumnName != null)
                             {
                                 deleteColumn(indexColumnFamily, rowKey, superColumnName, metadata.getPersistenceUnit(),
-                                        consistencyLevel, columnName);
+                                        consistencyLevel, columnName, conn);
                             }
 
                         }
@@ -291,7 +292,7 @@ public abstract class InvertedIndexHandlerBase
      *            TODO
      */
     protected abstract void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName,
-            String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName);
+            String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName, Object conn);
 
     /**
      * @param consistencyLevel
@@ -301,10 +302,10 @@ public abstract class InvertedIndexHandlerBase
      * @return
      */
     protected abstract SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName,
-            String rowKey, byte[] superColumnName, String persistenceUnit);
+            String rowKey, byte[] superColumnName, String persistenceUnit, Object conn);
 
     protected abstract void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
             String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns,
-            byte[] start, byte[] finish);
+            byte[] start, byte[] finish, Object conn);
 
 }

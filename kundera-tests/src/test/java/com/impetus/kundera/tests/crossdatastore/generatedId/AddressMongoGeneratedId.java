@@ -18,7 +18,6 @@ package com.impetus.kundera.tests.crossdatastore.generatedId;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -32,7 +31,7 @@ public class AddressMongoGeneratedId
 {
     @Id
     @Column(name = "ADDRESS_ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue()
     private String addressId;
 
     @Column(name = "STREET")
@@ -52,5 +51,4 @@ public class AddressMongoGeneratedId
     {
         this.street = street;
     }
-
 }

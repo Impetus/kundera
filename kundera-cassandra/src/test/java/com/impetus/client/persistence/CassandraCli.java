@@ -194,7 +194,7 @@ public final class CassandraCli
     {
         try
         {
-            if(client != null)
+            if (client != null)
             {
                 client.system_drop_keyspace(keyspaceName);
             }
@@ -314,7 +314,6 @@ public final class CassandraCli
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new Cassandra.Client(protocol);
         socket.open();
-
     }
 
     /**
@@ -335,33 +334,27 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (UnavailableException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (TimedOutException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (SchemaDisagreementException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (TException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         catch (UnsupportedEncodingException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 }

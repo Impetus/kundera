@@ -40,9 +40,7 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("imdb");
-        em = emf.createEntityManager();
-
+        init();
     }
 
     /**
@@ -51,8 +49,7 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
     @After
     public void tearDown() throws Exception
     {
-        em.close();
-        emf.close();
+        clean();
     }
 
     @Test

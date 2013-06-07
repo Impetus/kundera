@@ -65,7 +65,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
-            ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
+            ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler, Object conn)
     {
         // Index in Inverted Index table if applicable
         boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata);
@@ -116,9 +116,9 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      */
     @Override
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            Map<Boolean, List<IndexClause>> indexClauseMap)
+            Map<Boolean, List<IndexClause>> indexClauseMap, Object conn)
     {
-        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
+        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap, conn);
     }
 
     /**
@@ -137,7 +137,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     @Override
     public void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
             String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns,
-            byte[] start, byte[] finish)
+            byte[] start, byte[] finish, Object conn)
     {
         SlicePredicate colPredicate = new SlicePredicate();
         SliceRange sliceRange = new SliceRange();
@@ -168,14 +168,14 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      */
 
     @Override
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, Object conn)
     {
-        super.delete(entity, metadata, consistencyLevel);
+        super.delete(entity, metadata, consistencyLevel, conn);
     }
 
     @Override
     public SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
-            byte[] superColumnName, String persistenceUnit)
+            byte[] superColumnName, String persistenceUnit, Object conn)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
         SuperColumn thriftSuperColumn = null;
@@ -205,7 +205,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      * @param mutator
      */
     public void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName, String persistenceUnit,
-            ConsistencyLevel consistencyLevel, byte[] columnName)
+            ConsistencyLevel consistencyLevel, byte[] columnName, Object conn)
     {
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit, externalProperty));
         mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(superColumnName));

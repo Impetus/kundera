@@ -18,6 +18,7 @@ package com.impetus.kundera.configure.schema.api;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
@@ -46,7 +47,7 @@ public abstract class AbstractSchemaManager
     protected String port;
 
     /** The host variable . */
-    protected String host;
+    protected String[] hosts;
 
     /** The kundera_client variable. */
     protected String clientFactory;
@@ -151,8 +152,14 @@ public abstract class AbstractSchemaManager
         // get type of schema of operation.
         if (operationType == null)
             operationType = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
+      
+        String[] hostArray = hostName.split(",");
+        hosts = new String[hostArray.length];
+        for (int i = 0; i < hostArray.length; i++)
+        {
+            hosts[i] = hostArray[i].trim();
+        }
 
-        this.host = hostName;
         this.port = portName;
         this.databaseName = schemaName;
         this.operation = operationType;

@@ -385,14 +385,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected boolean initiateClient()
     {
-        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        String message = null;
+        for (String host : hosts)
         {
-            log.error("Host or port should not be null, Port should be numeric.");
-            throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
-        }
-
-        if (cassandra_client == null)
-        {
+            if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+            {
+                log.error("Host or port should not be null, Port should be numeric.");
+                throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
+            }
             TSocket socket = new TSocket(host, Integer.parseInt(port));
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport);
@@ -403,19 +403,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     socket.open();
                 }
+                return true;
             }
             catch (TTransportException e)
             {
-                log.error("Error while opening socket, Caused by: ", e);
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (NumberFormatException e)
-            {
-                log.error("Error during creating schema in cassandra, Caused by: ", e);
-                throw new SchemaGenerationException(e, "Cassandra");
+                message = e.getMessage();
+                log.error("Error while opening socket for host  { }, Caused by: ", host, e);
             }
         }
-        return cassandra_client != null ? true : false;
+        throw new SchemaGenerationException("Error while opening socket, Caused by: " + message);
     }
 
     /**
@@ -589,10 +585,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         catch (InvalidRequestException ire)
         {
             StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
-//            translator.ensureCase(builder, databaseName);
-//            builder.append(" to keyspace ");
-//            translator.ensureCase(builder, tableInfo.getTableName());
-            if (ire.getWhy() != null && ire.getWhy().contains(builder.toString()) && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+            // translator.ensureCase(builder, databaseName);
+            // builder.append(" to keyspace ");
+            // translator.ensureCase(builder, tableInfo.getTableName());
+            if (ire.getWhy() != null && ire.getWhy().contains(builder.toString())
+                    && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
             {
                 for (ColumnInfo column : tableInfo.getColumnMetadatas())
                 {
@@ -626,8 +623,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
                     "Cassandra", databaseName);
         }
-        
-        // After successful  schema operation, perform index creation.
+
+        // After successful schema operation, perform index creation.
         createIndex(tableInfo);
     }
 
@@ -640,18 +637,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         StringBuilder indexQueryBuilder = new StringBuilder("create index $COLUMN_NAME on \"");
         indexQueryBuilder.append(tableInfo.getTableName());
-        indexQueryBuilder.append( "\"(\"$COLUMN_NAME\")");
+        indexQueryBuilder.append("\"(\"$COLUMN_NAME\")");
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
         {
-            String replacedWithindexName  = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME", indexInfo.getColumnName());
+            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME",
+                    indexInfo.getColumnName());
             try
             {
-                cassandra_client.execute_cql3_query(ByteBuffer.wrap(replacedWithindexName.getBytes()), Compression.NONE,
-                        ConsistencyLevel.ONE);
+                cassandra_client.execute_cql3_query(ByteBuffer.wrap(replacedWithindexName.getBytes()),
+                        Compression.NONE, ConsistencyLevel.ONE);
             }
             catch (InvalidRequestException ire)
             {
-                if (ire.getWhy() != null && !ire.getWhy().equals("Index already exists") && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+                if (ire.getWhy() != null && !ire.getWhy().equals("Index already exists")
+                        && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
                 {
                     onLogException(tableInfo, indexInfo, ire);
                 }
@@ -677,9 +676,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     private void onLogException(TableInfo tableInfo, IndexInfo indexInfo, Exception ire)
     {
-        log.error("Error occurred while creating indexes on column "+ indexInfo.getColumnName() + " of table " + tableInfo.getTableName() + ", Caused by: ", ire);
-        throw new SchemaGenerationException("Error occurred while creating indexes on column "+ indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire,
-                "Cassandra", databaseName);
+        log.error("Error occurred while creating indexes on column " + indexInfo.getColumnName() + " of table "
+                + tableInfo.getTableName() + ", Caused by: ", ire);
+        throw new SchemaGenerationException("Error occurred while creating indexes on column "
+                + indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire, "Cassandra", databaseName);
     }
 
     /**
@@ -1577,11 +1577,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             isValid = validateColumns(metadata, iter.next().getAttributes()) ? true : false;
         }
-        // for (EmbeddedColumn embeddedColumn : embeddedColumns)
-        // {
-        // isValid = validateColumns(embeddedColumn.getColumns()) ? true :
-        // false;
-        // }
         return isValid;
     }
 

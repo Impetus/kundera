@@ -38,7 +38,6 @@ import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -94,8 +93,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
 
-    /** The closed. */
-    private boolean closed = false;
+    // /** The closed. */
+    // private boolean closed = false;
 
     /** The data handler. */
     private PelopsDataHandler dataHandler;
@@ -106,10 +105,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     /** The reader. */
     private EntityReader reader;
 
-    /** The timestamp. */
-    private long timestamp;
+    // /** The timestamp. */
+    // private long timestamp;
+    //
+    // private List<Mutation> mutations;
 
-    private List<Mutation> mutations;
+    private PelopsClientFactory clientFactory;
 
     /**
      * default constructor.
@@ -121,8 +122,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * @param persistenceUnit
      *            the persistence unit
      */
-    public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit,
-            Map<String, Object> externalProperties)
+    public PelopsClient(IndexManager indexManager, EntityReader reader, PelopsClientFactory clientFactory,
+            String persistenceUnit, Map<String, Object> externalProperties)
     {
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
@@ -130,6 +131,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.dataHandler = new PelopsDataHandler(externalProperties);
         this.invertedIndexHandler = new PelopsInvertedIndexHandler(externalProperties);
         this.reader = reader;
+        this.clientFactory = clientFactory;
     }
 
     @Override
@@ -169,14 +171,19 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         List entities = null;
+        Object conn = getPooledConection(getPersistenceUnit());
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), isCql3Enabled(metadata), rowIds);
+                    getConsistencyLevel(), isCql3Enabled(metadata), conn, rowIds);
         }
         catch (Exception e)
         {
             throw new KunderaException(e);
+        }
+        finally
+        {
+            releaseConnection(conn);
         }
 
         return entities;
@@ -219,8 +226,18 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         getIndexManager().remove(metadata, entity, pKey.toString());
 
         // Delete from Inverted Index if applicable
-        invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
-
+        Object conn = getPooledConection(getPersistenceUnit());
+        try
+        {
+            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), conn);
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                releaseConnection(conn);
+            }
+        }
     }
 
     @Override
@@ -229,7 +246,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.indexManager.flush();
         this.dataHandler = null;
         this.invertedIndexHandler = null;
-        closed = true;
+        // closed = true;
     }
 
     /**
@@ -474,7 +491,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 String columnFamily = metadata.getTableName();
                 tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
-                timestamp = System.currentTimeMillis();
+                // timestamp = System.currentTimeMillis();
             }
             catch (Exception e)
             {
@@ -545,7 +562,17 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         super.indexNode(node, entityMetadata);
 
         // Write to inverted index table if applicable
-        invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler);
+        // Delete from Inverted Index if applicable
+        Object conn = getPooledConection(getPersistenceUnit());
+        try
+        {
+            invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler,
+                    conn);
+        }
+        finally
+        {
+            releaseConnection(conn);
+        }
     }
 
     /**
@@ -777,8 +804,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
-
-        return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
+        // Delete from Inverted Index if applicable
+        Object conn = getPooledConection(getPersistenceUnit());
+        try
+        {
+            return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap, conn);
+        }
+        finally
+        {
+            releaseConnection(conn);
+        }
     }
 
     /*
@@ -794,13 +829,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     protected IPooledConnection getPooledConection(String persistenceUnit)
     {
-        return PelopsUtils.getCassandraConnection(persistenceUnit, getExternalProperties());
+        // return PelopsUtils.getCassandraConnection(persistenceUnit,
+        // getExternalProperties());
+        return clientFactory.getConnection();
 
     }
 
     protected void releaseConnection(Object conn)
     {
-        PelopsUtils.releaseConnection((IPooledConnection) conn);
+        // PelopsUtils.releaseConnection((IPooledConnection) conn);
+        clientFactory.releaseConnection((IPooledConnection) conn);
     }
 
     @Override

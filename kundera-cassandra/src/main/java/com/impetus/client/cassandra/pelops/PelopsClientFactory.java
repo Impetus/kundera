@@ -15,33 +15,59 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import net.dataforte.cassandra.pool.ConnectionPool;
+import net.dataforte.cassandra.pool.PoolConfiguration;
+import net.dataforte.cassandra.pool.PoolProperties;
+
+import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.exceptions.TransportException;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.impetus.client.cassandra.common.CassandraClientFactory;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
+import com.impetus.client.cassandra.service.CassandraHost;
+import com.impetus.client.cassandra.service.CassandraHostConfiguration;
+import com.impetus.client.cassandra.service.CassandraRetryService;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.service.Host;
+import com.impetus.kundera.service.HostConfiguration;
+import com.impetus.kundera.service.policy.LoadBalancingPolicy;
+import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
  * A factory for creating PelopsCliobjects.
  */
-public class PelopsClientFactory extends GenericClientFactory
+public class PelopsClientFactory extends GenericClientFactory implements CassandraClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
+
+    protected HostConfiguration configuration;
 
     @Override
     public void initialize(Map<String, Object> externalProperty)
@@ -49,52 +75,59 @@ public class PelopsClientFactory extends GenericClientFactory
         reader = new CassandraEntityReader();
         initializePropertyReader();
         setExternalProperties(externalProperty);
+        configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
+                getPersistenceUnit());
+        hostRetryService = new CassandraRetryService(configuration, this);
     }
 
     @Override
     protected Object createPoolOrConnection()
     {
+        logger.info("Creating pool");
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNodes = null;
-        String defaultPort = null;
         String keyspace = null;
         if (externalProperties != null)
         {
-            contactNodes = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
-            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
             keyspace = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        }
-
-        if (contactNodes == null)
-        {
-            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        }
-        if (defaultPort == null)
-        {
-            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         }
         if (keyspace == null)
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
 
-        if (Pelops.getDbConnPool(poolName) == null)
+        for (Host host : ((CassandraHostConfiguration) configuration).getCassandraHosts())
         {
-            onValidation(contactNodes, defaultPort);
+            CassandraHost cassandraHost = (CassandraHost) host;
+            String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties);
 
-            Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
-                    PelopsUtils.getAuthenticationRequest(props)), false);
+            if (Pelops.getDbConnPool(poolName) == null)
+            {
+                try
+                {
+                    Cluster cluster = new Cluster(cassandraHost.getHost(), new IConnection.Config(
+                            cassandraHost.getPort(), true, -1, PelopsUtils.getAuthenticationRequest(props)), false);
 
-            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata, externalProperties);
+                    Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata, externalProperties);
 
-            // Add pool with specified policy. null means default operand
-            // policy.
-            Pelops.addPool(poolName, cluster, keyspace, policy, null);
-
+                    // Add pool with specified policy. null means default
+                    // operand
+                    // policy.
+                    Pelops.addPool(poolName, cluster, keyspace, policy, null);
+                    hostPools.put(cassandraHost, Pelops.getDbConnPool(poolName));
+                }
+                catch (TransportException e)
+                {
+                    logger.warn("Node " + host.getHost() + " are down");
+                    if (host.isRetryHost())
+                    {
+                        logger.info("Scheduling node for future retry");
+                        ((CassandraRetryService) hostRetryService).add((CassandraHost) host);
+                    }
+                }
+            }
         }
         // TODO return a thrift pool
         return null;
@@ -103,7 +136,8 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new PelopsClient(indexManager, reader, persistenceUnit, externalProperties);
+        ConnectionPool pool = getPoolUsingPolicy();
+        return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties);
     }
 
     @Override
@@ -158,7 +192,118 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
     {
-        throw new UnsupportedOperationException("Load balancing feature is not supported in "
-                + this.getClass().getSimpleName());
+        if (loadBalancingPolicyName != null)
+        {
+            switch (LoadBalancer.getValue(loadBalancingPolicyName))
+            {
+            case ROUNDROBIN:
+                loadBalancingPolicy = new RoundRobinBalancingPolicy();
+                break;
+            case LEASTACTIVE:
+                loadBalancingPolicy = new PelopsLeastActiveBalancingPolcy();
+                break;
+            default:
+                loadBalancingPolicy = new RoundRobinBalancingPolicy();
+                break;
+            }
+        }
+        loadBalancingPolicy = new RoundRobinBalancingPolicy();
+    }
+
+    /**
+     * 
+     * @param host
+     * @param port
+     * @return
+     */
+    private ConnectionPool getNewPool(String host, int port)
+    {
+        CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(host, port);
+        hostPools.remove(cassandraHost);
+        return getPoolUsingPolicy();
+    }
+
+    /**
+     * 
+     * @return pool an the basis of LoadBalancing policy.
+     */
+    private ConnectionPool getPoolUsingPolicy()
+    {
+        ConnectionPool pool = null;
+        if (!hostPools.isEmpty())
+        {
+            pool = (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
+        }
+        return pool;
+    }
+
+    IPooledConnection getConnection()
+    {
+        return Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit(), externalProperties))
+                .getConnection();
+    }
+
+    void releaseConnection(IPooledConnection conn)
+    {
+        if (conn != null)
+        {
+            conn.release();
+        }
+    }
+
+    @Override
+    public boolean addCassandraHost(CassandraHost cassandraHost)
+    {
+        String keysapce = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+        PoolConfiguration prop = new PoolProperties();
+        prop.setHost(cassandraHost.getHost());
+        prop.setPort(cassandraHost.getPort());
+        prop.setKeySpace(keysapce);
+
+        PelopsUtils.setPoolConfigPolicy(cassandraHost, prop);
+        try
+        {
+            ConnectionPool pool = new ConnectionPool(prop);
+            hostPools.put(cassandraHost, pool);
+            return true;
+        }
+        catch (TException e)
+        {
+            logger.warn("Node " + cassandraHost.getHost() + " are still down");
+            return false;
+        }
+    }
+
+    private class PelopsLeastActiveBalancingPolcy implements LoadBalancingPolicy
+    {
+
+        /**
+         * 
+         * @return pool object for host which has least active connections
+         *         determined by maxActive connection.
+         * 
+         */
+        @Override
+        public Object getPool(Collection<Object> pools)
+        {
+            List<Object> vals = Lists.newArrayList(pools);
+            Collections.shuffle(vals);
+            Collections.sort(vals, new ShufflingCompare());
+            Iterator<Object> iterator = vals.iterator();
+            Object concurrentConnectionPool = iterator.next();
+            return concurrentConnectionPool;
+        }
+
+        private final class ShufflingCompare implements Comparator<Object>
+        {
+            public int compare(Object o1, Object o2)
+            {
+                Policy policy1 = ((CommonsBackedPool) ((IThriftPool) o1)).getPolicy();
+                Policy policy2 = ((CommonsBackedPool) ((IThriftPool) o2)).getPolicy();
+
+                return policy1.getMaxActivePerNode() - policy2.getMaxActivePerNode();
+            }
+        }
     }
 }

@@ -39,74 +39,87 @@ import com.impetus.kundera.loader.ClientFactory;
 /**
  * The Class RedisClientFactoryTest. Junit for {@link RedisClientFactory}
  */
-public class RedisClientFactoryTest {
+public class RedisClientFactoryTest
+{
 
-	/** The Constant REDIS_PU. */
-	private static final String REDIS_PU = "redis_pu";
+    /** The Constant REDIS_PU. */
+    private static final String REDIS_PU = "redis_pu";
 
-	/** The emf. */
-	private EntityManagerFactory emf;
+    /** The emf. */
+    private EntityManagerFactory emf;
 
-	/** The logger. */
-	private static Logger logger = LoggerFactory
-			.getLogger(RedisClientFactoryTest.class);
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(RedisClientFactoryTest.class);
 
-	/**
-	 * Setup.
-	 */
-	@Before
-	public void setup() {
-		Map<String, String> properties = new HashMap<String, String>(1);
-		properties.put("kundera.transaction.timeout", "30000");
-		properties.put("kundera.pool.size.max.active", "10");
-		emf = Persistence.createEntityManagerFactory(REDIS_PU, properties);
-	}
+    /**
+     * Setup.
+     */
+    @Before
+    public void setup()
+    {
+        Map<String, String> properties = new HashMap<String, String>(1);
+        properties.put("kundera.transaction.timeout", "30000");
+        properties.put("kundera.pool.size.max.active", "10");
+        emf = Persistence.createEntityManagerFactory(REDIS_PU, properties);
+    }
 
-	/**
-	 * Test connection.
-	 */
-	@Test
-	public void testConnection() {
-		logger.info("On test connection");
+    /**
+     * Test connection.
+     */
+    @Test
+    public void testConnection()
+    {
+        logger.info("On test connection");
 
-		ClientFactory clientFactory = ClientResolver.getClientFactory(REDIS_PU);
-		Assert.assertNotNull(clientFactory);
-		Assert.assertEquals(RedisClientFactory.class, clientFactory.getClass());
-		Field connectionField;
-		try {
-			String field_name = "connectionPoolOrConnection";
-			connectionField = ((RedisClientFactory) clientFactory).getClass()
-					.getSuperclass().getDeclaredField(field_name);
+        ClientFactory clientFactory = ClientResolver.getClientFactory(REDIS_PU);
+        Assert.assertNotNull(clientFactory);
+        Assert.assertEquals(RedisClientFactory.class, clientFactory.getClass());
+        Field connectionField;
+        try
+        {
+            String field_name = "connectionPoolOrConnection";
+            connectionField = ((RedisClientFactory) clientFactory).getClass().getSuperclass()
+                    .getDeclaredField(field_name);
 
-			if (!connectionField.isAccessible()) {
-				connectionField.setAccessible(true);
-			}
+            if (!connectionField.isAccessible())
+            {
+                connectionField.setAccessible(true);
+            }
 
-			Object connectionObj = connectionField.get(clientFactory);
+            Object connectionObj = connectionField.get(clientFactory);
 
-			Assert.assertNotNull(connectionObj);
+            Assert.assertNotNull(connectionObj);
 
-		} catch (SecurityException e) {
-			logger.error(e.getMessage());
-			Assert.fail(e.getMessage());
-		} catch (NoSuchFieldException e) {
-			logger.error(e.getMessage());
-			Assert.fail(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			logger.error(e.getMessage());
-			Assert.fail(e.getMessage());
-		} catch (IllegalAccessException e) {
-			logger.error(e.getMessage());
-			Assert.fail(e.getMessage());
-		}
+        }
+        catch (SecurityException e)
+        {
+            logger.error(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            logger.error(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            logger.error(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error(e.getMessage());
+            Assert.fail(e.getMessage());
+        }
 
-	}
+    }
 
-	/**
-	 * Tear down.
-	 */
-	@After
-	public void tearDown() {
-		emf.close();
-	}
+    /**
+     * Tear down.
+     */
+    @After
+    public void tearDown()
+    {
+        emf.close();
+    }
 }

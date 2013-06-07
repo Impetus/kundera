@@ -47,7 +47,7 @@ public class EntityManagerImplTest
     @Before
     public void setUp()
     {
-        KunderaMetadata.INSTANCE.unloadKunderaMetadata("kunderatest");
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory("kunderatest");
 
         em = emf.createEntityManager();

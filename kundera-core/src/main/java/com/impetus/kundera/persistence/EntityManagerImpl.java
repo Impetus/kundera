@@ -44,6 +44,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientResolverException;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
@@ -70,9 +73,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
     /** Flush mode for this EM, default is AUTO. */
     private FlushModeType flushMode = FlushModeType.AUTO;
-
-    // /** The session. */
-    // private EntityManagerSession session;
 
     /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
@@ -133,7 +133,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
         for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
         {
-            this.persistenceDelegator.loadClient(pu);
+            this.persistenceDelegator.loadClient(pu, discoverClient(pu));
         }
 
         if (logger.isDebugEnabled())
@@ -900,16 +900,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         return (String) getEntityManagerFactory().getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
-    // /**
-    // * Gets the session.
-    // *
-    // * @return the session
-    // */
-    // private EntityManagerSession getSession()
-    // {
-    // return session;
-    // }
-
     /**
      * Gets the persistence delegator.
      * 
@@ -981,5 +971,25 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
         throw new IllegalArgumentException("Mismatch in expected return type. Expected:" + paramClass
                 + " But actual class is:" + ((QueryImpl) q).getKunderaQuery().getEntityClass());
+    }
+
+    /**
+     * Gets the client.
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @return the client
+     */
+    private Client discoverClient(String persistenceUnit)
+    {
+        logger.info("Returning client instance for:" + persistenceUnit);
+
+        ClientFactory clientFactory = ((EntityManagerFactoryImpl) getEntityManagerFactory())
+                .getClientFactory(persistenceUnit);
+        if (clientFactory != null)
+        {
+            return clientFactory.getClientInstance();
+        }
+        throw new ClientResolverException(" No client configured for: " + persistenceUnit);
     }
 }

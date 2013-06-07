@@ -134,7 +134,8 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        this.externalProperties = null;
+        this.externalProperties = null;        
+        ((GraphDatabaseService) getConnectionPoolOrConnection()).shutdown();
         // Not required for multithreaded clients
     }
 

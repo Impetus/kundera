@@ -15,6 +15,8 @@
  */
 package com.impetus.client.neo4j;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 import javax.persistence.EntityManagerFactory;
@@ -26,11 +28,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case for {@link Neo4JClientFactory}
@@ -112,11 +118,18 @@ public class Neo4JClientFactoryTest
 
     /**
      * Tear down.
+     * @throws IOException 
      */
     @After
-    public void tearDown()
+    public void tearDown() throws IOException
     {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+
         emf.close();
+
+        if (datastoreFilePath != null)
+            FileUtils.deleteRecursively(new File(datastoreFilePath));
     }
 
 }

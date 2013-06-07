@@ -229,21 +229,25 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         public Properties getConnectionProperties()
         {
             DataStore ds = getDataStore();
+            Properties properties = new Properties();
             if (ds != null && ds.getConnection() != null)
             {
-                return ds.getConnection().getProperties();
+                properties = ds.getConnection().getProperties();
+                return properties;
             }
-            return new Properties();
+            return properties;
         }
-        
+
         public List<Server> getConnectionServers()
         {
             DataStore ds = getDataStore();
+            List<Server> servers = new ArrayList<Server>();
             if (ds != null && ds.getConnection() != null)
             {
-                return ds.getConnection().getServers();
+                servers = ds.getConnection().getServers();
+                return servers;
             }
-            return new ArrayList<Server>();
+            return servers;
         }
     }
 }

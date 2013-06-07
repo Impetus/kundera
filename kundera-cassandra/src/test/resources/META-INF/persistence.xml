@@ -312,7 +312,7 @@
 		</properties>
 	</persistence-unit>
 	
-	<!-- <persistence-unit name="load-balancing-test">
+	<persistence-unit name="load-balancing-test">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -328,6 +328,6 @@
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderacassandraloadbalancer.xml" />
 		</properties>
-	</persistence-unit> -->
+	</persistence-unit>
 
 </persistence>

@@ -122,7 +122,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         }
         catch (Exception e)
         {
-            log.error("Error during query execution" + e.getMessage());
+            log.error("Error during query execution ", e);
             throw new QueryHandlerException(e);
         }
         return result;

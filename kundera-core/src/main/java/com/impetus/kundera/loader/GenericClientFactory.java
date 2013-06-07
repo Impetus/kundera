@@ -38,7 +38,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.service.Host;
-import com.impetus.kundera.service.policy.HostRetryService;
+import com.impetus.kundera.service.policy.RetryService;
 import com.impetus.kundera.service.policy.LoadBalancingPolicy;
 
 /**
@@ -81,7 +81,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     protected LoadBalancingPolicy loadBalancingPolicy;
 
     /** Holds Instance of retry service */
-    protected HostRetryService hostRetryService;
+    protected RetryService hostRetryService;
 
     /** Holds one pool instance per host */
     protected ConcurrentMap<Host, Object> hostPools = new ConcurrentHashMap<Host, Object>();
@@ -117,8 +117,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      */
     protected void loadClientMetadata(Map<String, Object> puProperties)
     {
-        if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
-        {
+      /*  if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
+        {*/
             ClientMetadata clientMetadata = new ClientMetadata();
             String luceneDirectoryPath = puProperties != null ? (String) puProperties
                     .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
@@ -173,7 +173,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                 indexManager = new IndexManager(null);
             }
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-        }
+       /* }*/
     }
 
     /**

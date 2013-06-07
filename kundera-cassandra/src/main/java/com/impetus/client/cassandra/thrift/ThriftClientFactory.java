@@ -15,46 +15,45 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 import net.dataforte.cassandra.pool.PoolProperties;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+import com.impetus.client.cassandra.common.CassandraClientFactory;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.cassandra.service.CassandraHost;
-import com.impetus.client.cassandra.service.CassandraHostConfigurator;
-import com.impetus.client.cassandra.service.ThriftLeastActiveBalancingPolcy;
+import com.impetus.client.cassandra.service.CassandraHostConfiguration;
+import com.impetus.client.cassandra.service.CassandraRetryService;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
-import com.impetus.kundera.service.policy.HostRetryService;
+import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
 import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
@@ -64,7 +63,7 @@ import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
  * 
  * @author amresh.singh
  */
-public class ThriftClientFactory extends GenericClientFactory
+public class ThriftClientFactory extends GenericClientFactory implements CassandraClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
@@ -108,7 +107,7 @@ public class ThriftClientFactory extends GenericClientFactory
         }
         schemaManager = null;
         externalProperties = null;
-        ((CassandraHostRetryService) hostRetryService).shutdown();
+        ((CassandraRetryService) hostRetryService).shutdown();
     }
 
     @Override
@@ -120,9 +119,9 @@ public class ThriftClientFactory extends GenericClientFactory
         String loadBalancingPolicyName = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
                 .getConnectionProperties().getProperty(Constants.LOADBALANCING_POLICY) : null;
         initializeLoadBalancer(loadBalancingPolicyName);
-        configuration = new CassandraHostConfigurator(externalProperties, CassandraPropertyReader.csmd,
+        configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
                 getPersistenceUnit());
-        hostRetryService = new CassandraHostRetryService();
+        hostRetryService = new CassandraRetryService(configuration, this);
     }
 
     @Override
@@ -143,55 +142,30 @@ public class ThriftClientFactory extends GenericClientFactory
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
 
-        for (CassandraHost cassandraHost : ((CassandraHostConfigurator) configuration).getCassandraHosts())
+        for (Host host : ((CassandraHostConfiguration) configuration).getCassandraHosts())
         {
             PoolConfiguration prop = new PoolProperties();
-            prop.setHost(cassandraHost.getHost());
-            prop.setPort(cassandraHost.getPort());
+            prop.setHost(host.getHost());
+            prop.setPort(host.getPort());
             prop.setKeySpace(keyspace);
 
-            PelopsUtils.setPoolConfigPolicy(cassandraHost, prop);
+            PelopsUtils.setPoolConfigPolicy((CassandraHost) host, prop);
             try
             {
                 ConnectionPool pool = new ConnectionPool(prop);
-                hostPools.put(cassandraHost, pool);
+                hostPools.put(host, pool);
             }
             catch (TException e)
             {
-                logger.warn("Node " + cassandraHost.getHost() + " are down");
-                if (cassandraHost.isRetryHost())
+                logger.warn("Node " + host.getHost() + " are down");
+                if (host.isRetryHost())
                 {
-                    addHostToDownedHostSet(cassandraHost);
+                    logger.info("Scheduling node for future retry");
+                    ((CassandraRetryService) hostRetryService).add((CassandraHost) host);
                 }
             }
         }
         return null;
-    }
-
-    private void addHostToDownedHostSet(CassandraHost cassandraHost)
-    {
-        logger.info("Scheduling node for future retry");
-        ((CassandraHostConfigurator) configuration).addHostToDownedHost(cassandraHost);
-    }
-
-    private boolean addCassandraHost(CassandraHost cassandraHost)
-    {
-        PoolConfiguration prop = new PoolProperties();
-        prop.setHost(cassandraHost.getHost());
-        prop.setPort(cassandraHost.getPort());
-
-        PelopsUtils.setPoolConfigPolicy(cassandraHost, prop);
-        try
-        {
-            ConnectionPool pool = new ConnectionPool(prop);
-            hostPools.put(cassandraHost, pool);
-            return true;
-        }
-        catch (TException e)
-        {
-            logger.warn("Node " + cassandraHost.getHost() + " are still down");
-            return false;
-        }
     }
 
     @Override
@@ -205,13 +179,13 @@ public class ThriftClientFactory extends GenericClientFactory
      * 
      * @return pool an the basis of LoadBalancing policy.
      */
-    protected ConnectionPool getPoolUsingPolicy()
+    private ConnectionPool getPoolUsingPolicy()
     {
-        if (hostPools.isEmpty())
+        ConnectionPool pool = null;
+        if (!hostPools.isEmpty())
         {
-            throw new KunderaException("All hosts are down. please check serevers manully.");
+            pool = (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
         }
-        ConnectionPool pool = (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values(), null);
         return pool;
     }
 
@@ -221,115 +195,15 @@ public class ThriftClientFactory extends GenericClientFactory
         return false;
     }
 
-    class CassandraHostRetryService extends HostRetryService
+    /**
+     * 
+     * @param host
+     * @param port
+     * @return
+     */
+    private ConnectionPool getNewPool(String host, int port)
     {
-        private Set<CassandraHost> downedHost;
-
-        public CassandraHostRetryService()
-        {
-            super(((CassandraHostConfigurator) configuration).getRetryDelay());
-            sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds, this.retryDelayInSeconds,
-                    TimeUnit.SECONDS);
-        }
-
-        @Override
-        protected boolean verifyConnection(Host host)
-        {
-            try
-            {
-                TSocket socket = new TSocket(host.getHost(), host.getPort());
-                TTransport transport = new TFramedTransport(socket);
-                TProtocol protocol = new TBinaryProtocol(transport);
-                Cassandra.Client client = new Cassandra.Client(protocol);
-                socket.open();
-                return client.describe_cluster_name() != null;
-            }
-            catch (TTransportException e)
-            {
-                logger.warn("Node " + host.getHost() + " are still down");
-                return false;
-            }
-            catch (TException e)
-            {
-                logger.warn("Node " + host.getHost() + " are still down");
-                return false;
-            }
-        }
-
-        /*
-         * public void add(final CassandraHost cassandraHost) {
-         * downedHost.add(cassandraHost);
-         * 
-         * // schedule a check of this host immediately, executor.submit(new
-         * Runnable() {
-         * 
-         * @Override public void run() { if (downedHost.contains(cassandraHost)
-         * && verifyConnection(cassandraHost)) { if
-         * (addCassandraHost(cassandraHost)) { downedHost.remove(cassandraHost);
-         * } return; } } }); }
-         */
-
-        class RetryRunner implements Runnable
-        {
-
-            @Override
-            public void run()
-            {
-                if (!downedHost.isEmpty())
-                {
-                    try
-                    {
-                        retryDownedHosts();
-                    }
-                    catch (Throwable t)
-                    {
-                        logger.error("Error while retrying downed hosts caused by : ", t);
-                    }
-                }
-            }
-
-            private void retryDownedHosts()
-            {
-
-                Iterator<CassandraHost> iter = downedHost.iterator();
-                while (iter.hasNext())
-                {
-                    CassandraHost host = iter.next();
-
-                    if (host == null)
-                    {
-                        continue;
-                    }
-
-                    boolean reconnected = verifyConnection(host);
-                    if (reconnected)
-                    {
-                        addCassandraHost(host);
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void shutdown()
-        {
-
-            if (sf != null)
-            {
-                sf.cancel(true);
-            }
-            if (executor != null)
-            {
-                executor.shutdownNow();
-            }
-        }
-    }
-
-    public ConnectionPool getOtherPoolIfAvailable(String host, int port)
-    {
-        CassandraHost cassandraHost = ((CassandraHostConfigurator) configuration).getCassandraHost(host, port);
-        addHostToDownedHostSet(cassandraHost);
-        hostPools.get(cassandraHost);
+        CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(host, port);
         hostPools.remove(cassandraHost);
         return getPoolUsingPolicy();
     }
@@ -347,6 +221,102 @@ public class ThriftClientFactory extends GenericClientFactory
             case LEASTACTIVE:
                 loadBalancingPolicy = new ThriftLeastActiveBalancingPolcy();
                 break;
+            default:
+                loadBalancingPolicy = new RoundRobinBalancingPolicy();
+                break;
+            }
+        }
+        loadBalancingPolicy = new RoundRobinBalancingPolicy();
+    }
+
+    Cassandra.Client getConnection(ConnectionPool pool)
+    {
+        boolean success = false;
+        while (pool != null && !success)
+        {
+            try
+            {
+                success = true;
+                if (pool != null)
+                {
+                    return pool.getConnection();
+                }
+            }
+            catch (TException te)
+            {
+                success = false;
+                logger.warn("{} :{}  host appears to be down, trying for next ", pool.getPoolProperties().getHost(),
+                        pool.getPoolProperties().getPort());
+                pool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
+            }
+        }
+        throw new KunderaException("All hosts are down. please check servers manully.");
+    }
+
+    void releaseConnection(ConnectionPool pool, Cassandra.Client conn)
+    {
+        if (pool != null && conn != null)
+        {
+            pool.release(conn);
+        }
+    }
+
+    /**
+     * Adds a pool in hostPools map for given host.
+     * 
+     * @param cassandraHost
+     * @return true id added successfully.
+     */
+    public boolean addCassandraHost(CassandraHost cassandraHost)
+    {
+        String keysapce = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+        PoolConfiguration prop = new PoolProperties();
+        prop.setHost(cassandraHost.getHost());
+        prop.setPort(cassandraHost.getPort());
+        prop.setKeySpace(keysapce);
+
+        PelopsUtils.setPoolConfigPolicy(cassandraHost, prop);
+        try
+        {
+            ConnectionPool pool = new ConnectionPool(prop);
+            hostPools.put(cassandraHost, pool);
+            return true;
+        }
+        catch (TException e)
+        {
+            logger.warn("Node " + cassandraHost.getHost() + " are still down");
+            return false;
+        }
+    }
+
+    private class ThriftLeastActiveBalancingPolcy extends LeastActiveBalancingPolicy
+    {
+
+        /**
+         * 
+         * @return pool object for host which has least active connections
+         *         determined by maxActive connection.
+         * 
+         */
+        @Override
+        public Object getPool(Collection<Object> pools)
+        {
+            List<Object> vals = Lists.newArrayList(pools);
+            Collections.shuffle(vals);
+            Collections.sort(vals, new ShufflingCompare());
+            Iterator<Object> iterator = vals.iterator();
+            Object concurrentConnectionPool = iterator.next();
+            return concurrentConnectionPool;
+        }
+
+        private final class ShufflingCompare implements Comparator<Object>
+        {
+            public int compare(Object o1, Object o2)
+            {
+                PoolConfiguration props1 = ((ConnectionPool) o1).getPoolProperties();
+                PoolConfiguration props2 = ((ConnectionPool) o2).getPoolProperties();
+                return props1.getMaxActive() - props2.getMaxActive();
             }
         }
     }

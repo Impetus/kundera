@@ -7,21 +7,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KunderaThreadFactory implements ThreadFactory
 {
     private ConcurrentHashMap<String, AtomicInteger> counters = new ConcurrentHashMap<String, AtomicInteger>();
-
     private final String name;
 
-    public KunderaThreadFactory(Class<?> clazz)
+    public KunderaThreadFactory(final String threadName)
     {
-        this.name = "Kundera." + clazz.getName();
+        this.name = threadName;
     }
 
-    private int getNextThreadNumber()
+    private int getNext()
     {
-        if (!counters.containsKey(name))
+        AtomicInteger threadCount = counters.get(name);
+        if (threadCount==null)
         {
-            counters.putIfAbsent(name, new AtomicInteger());
+            counters.put(name, new AtomicInteger());
         }
-        return counters.get(name).incrementAndGet();
+        return threadCount.incrementAndGet();
     }
 
     @Override
@@ -29,7 +29,10 @@ public class KunderaThreadFactory implements ThreadFactory
     {
         Thread t = new Thread(r);
         t.setDaemon(true);
-        t.setName(name + "-" + getNextThreadNumber());
+        StringBuilder tdNameBuilder = new StringBuilder(name);
+        tdNameBuilder.append("#");
+        tdNameBuilder.append(getNext());
+        t.setName(tdNameBuilder.toString());
         return t;
     }
 }

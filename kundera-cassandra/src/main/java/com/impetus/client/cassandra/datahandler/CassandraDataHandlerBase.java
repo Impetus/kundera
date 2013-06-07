@@ -61,7 +61,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.BigDecimalAccessor;
 import com.impetus.kundera.property.accessor.DoubleAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
@@ -204,14 +203,14 @@ public abstract class CassandraDataHandlerBase
      *             the exception
      */
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object... rowIds) throws Exception
+            ConsistencyLevel consistencyLevel, boolean isCql3Enabled,Object conn, Object... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>();
         if (rowIds != null)
         {
             for (Object rowKey : rowIds)
             {
-                Object e = fromThriftRow(clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel, isCql3Enabled);
+                Object e = fromThriftRow(clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel, isCql3Enabled, conn);
                 if (e != null)
                 {
                     entities.add(e);
@@ -241,7 +240,7 @@ public abstract class CassandraDataHandlerBase
      *             the exception
      */
     public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCqlEnabled) throws Exception;
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCqlEnabled, Object conn) throws Exception;
 
     /**
      * Populate embedded object.

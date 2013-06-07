@@ -66,8 +66,7 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
             em.getTransaction().commit();
         }
 
-        em.close();
-        emf.close();
+        clean();
     }
 
     @Test

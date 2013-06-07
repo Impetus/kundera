@@ -44,6 +44,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
 
@@ -71,6 +72,8 @@ public class ObjectUtils
 
     /**
      * @param source
+     * @param mainCache
+     *            TODO
      * @return
      */
     private static Object deepCopyUsingMetadata(Object source, Map<Object, Object> copiedObjectMap)
@@ -216,7 +219,9 @@ public class ObjectUtils
                 Field relationField = relation.getProperty();
                 Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
 
-                if (sourceRelationObject != null && !( PersistenceUtilHelper.instanceOfHibernateAbstractPersistentCollection(sourceRelationObject)))
+                if (sourceRelationObject != null
+                        && !(PersistenceUtilHelper
+                                .instanceOfHibernateAbstractPersistentCollection(sourceRelationObject)))
                 {
                     if (sourceRelationObject instanceof KunderaProxy)
                     {
@@ -236,8 +241,7 @@ public class ObjectUtils
 
                         for (Object obj : (Collection) sourceRelationObject)
                         {
-                            Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
-
+                            Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj);
                             m.invoke(targetRelationObject, copyTargetRelObj);
                         }
 
@@ -252,8 +256,15 @@ public class ObjectUtils
                         {
                             Object valObj = ((Map) sourceRelationObject).get(keyObj);
 
-                            Object copyTargetKeyObj = deepCopyUsingMetadata(keyObj, copiedObjectMap);
-                            Object copyTargetValueObj = deepCopyUsingMetadata(valObj, copiedObjectMap);
+                            // Object copyTargetKeyObj =
+                            // deepCopyUsingMetadata(keyObj, copiedObjectMap,
+                            // mainCache);
+                            Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj);
+
+                            // Object copyTargetValueObj =
+                            // deepCopyUsingMetadata(valObj, copiedObjectMap,
+                            // mainCache);
+                            Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj);
 
                             m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
                         }
@@ -261,7 +272,10 @@ public class ObjectUtils
                     }
                     else
                     {
-                        targetRelationObject = deepCopyUsingMetadata(sourceRelationObject, copiedObjectMap);
+                        // targetRelationObject =
+                        // deepCopyUsingMetadata(sourceRelationObject,
+                        // copiedObjectMap, mainCache);
+                        targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject);
                     }
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
@@ -294,6 +308,21 @@ public class ObjectUtils
         }
 
         return target;
+    }
+
+    private static Object searchInCacheThenCopy(Map<Object, Object> copiedObjectMap, Object sourceObject)
+    {
+        Object copyTargetRelObj = null;
+        /*
+         * if(mainCache == null || mainCache.getNodeFromCache(sourceObject) ==
+         * null) {
+         */
+        copyTargetRelObj = deepCopyUsingMetadata(sourceObject, copiedObjectMap);
+        /*
+         * } else { copyTargetRelObj = mainCache.getNodeFromCache(sourceObject);
+         * }
+         */
+        return copyTargetRelObj;
     }
 
     /**

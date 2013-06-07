@@ -44,7 +44,7 @@ public interface InvertedIndexHandler
      * @param cdHandler
      */
     void write(Node node, EntityMetadata entityMetadata, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            CassandraDataHandler cdHandler);
+            CassandraDataHandler cdHandler, Object conn);
 
     /**
      * Searches records from Inverted index table.
@@ -56,7 +56,7 @@ public interface InvertedIndexHandler
      * @return
      */
     List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            Map<Boolean, List<IndexClause>> indexClauseMap);
+            Map<Boolean, List<IndexClause>> indexClauseMap, Object conn);
 
     /**
      * Deletes a record from inverted index table.
@@ -65,6 +65,6 @@ public interface InvertedIndexHandler
      * @param metadata
      * @param consistencyLevel
      */
-    void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel);
+    void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, Object conn);
 
 }
