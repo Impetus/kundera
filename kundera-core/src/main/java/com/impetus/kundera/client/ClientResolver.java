@@ -44,27 +44,6 @@ public final class ClientResolver
     /** logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(ClientResolver.class);
 
-    /**
-     * Gets the client.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @return the client
-     */
-    public static Client discoverClient(String persistenceUnit)
-    {
-        logger.info("Returning client instance for:" + persistenceUnit);
-        // ClientMetadata clientMetadata =
-        // KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        // ClientFactory clientFactory =
-        // /*clientFactories.get(persistenceUnit)*/ clientMetadata != null ?
-        // clientMetadata.getClientFactory() : null ;
-        // if (clientFactory != null)
-        // {
-        // return clientFactory.getClientInstance();
-        // }
-        throw new ClientResolverException(" No client configured for:" + persistenceUnit);
-    }
 
     /**
      * Gets the client factory.
@@ -75,27 +54,7 @@ public final class ClientResolver
      */
     public static ClientFactory getClientFactory(String persistenceUnit, Map<String, Object> puProperties)
     {
-        ClientFactory clientFactory /* = clientFactories.get(persistenceUnit) */;
-        // if (clientFactory != null)
-        // return clientFactory;
-        // ClientMetadata clientMetadata =
-        // KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        // if (clientMetadata != null)
-        // {
-        // clientFactory = clientMetadata.getClientFactory();
-        // if (clientFactory != null)
-        // {
-        // return clientFactory;
-        // }
-        // }
-        // else
-        // {
-        // clientMetadata = new ClientMetadata();
-        // }
-        clientFactory = instantiateClientFactory(persistenceUnit, puProperties);
-        // clientMetadata.setClientFactory(clientFactory);
-        // KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit,
-        // clientMetadata);
+        ClientFactory clientFactory = instantiateClientFactory(persistenceUnit, puProperties);
         clientFactories.put(persistenceUnit, clientFactory);
         return clientFactory;
     }
@@ -174,9 +133,6 @@ public final class ClientResolver
             logger.error("Client Factory Not Configured For Specified Client Type : ");
             throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
         }
-
-        // clientFactories.put(persistenceUnit, clientFactory);
-
         logger.info("Finishing factory initialization");
         return clientFactory;
     }

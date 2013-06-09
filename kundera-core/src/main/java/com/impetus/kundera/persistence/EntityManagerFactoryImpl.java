@@ -41,14 +41,12 @@ import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
-import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.configure.ClientMetadataBuilder;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Implementation class for {@link EntityManagerFactory}

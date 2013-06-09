@@ -110,7 +110,7 @@ public class SchemaConfiguration implements Configuration
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
-            log.info("Configuring schema export for: " + persistenceUnit);
+            log.info("Configuring schema export for : " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);

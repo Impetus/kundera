@@ -197,7 +197,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                         key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                         new ArrayList<CounterColumn>(0), counterSuperColumns);
-                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m)));
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
             }
 
         }
@@ -214,7 +214,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                         key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                         counterColumns, new ArrayList<CounterSuperColumn>(0));
-                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m)));
+                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
             }
         }
         return entities;
@@ -243,7 +243,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
             if (o != null)
             {
                 entities.add(o);
@@ -277,7 +277,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     key.toByteArray()), m.getTableName(), new ArrayList<Column>(0), superColumns,
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
 
-            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation, isCql3Enabled(m));
+            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
             if (o != null)
             {
                 entities.add(o);
@@ -384,7 +384,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Object pooledConnection = null;
         try
         {
-            pooledConnection = getPooledConection(metadata.getPersistenceUnit());
+            pooledConnection = getConection(metadata.getPersistenceUnit());
             conn = getConnection(pooledConnection);
 
             conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
@@ -428,14 +428,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            List of columns
      * @param columnType
      */
-    protected void createIndexesOnColumns(EntityMetadata m, String tableName, String poolName, List<Column> columns,
+    protected void createIndexesOnColumns(EntityMetadata m, String tableName, List<Column> columns,
             Class columnType)
     {
         Object pooledConnection = null;
         try
         {
             Cassandra.Client api = null;
-            pooledConnection = getPooledConection(persistenceUnit);
+            pooledConnection = getConection(persistenceUnit);
             api = getConnection(pooledConnection);
             KsDef ksDef = api.describe_keyspace(m.getSchema());
             List<CfDef> cfDefs = ksDef.getCf_defs();
@@ -654,7 +654,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param metaModel
      * @return
      */
-    public boolean isCql3Enabled()
+    private boolean isCql3Enabled()
     {
         return isCql3Enabled(null);
     }
@@ -774,7 +774,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                     Object e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational, isCql3Enabled(m));
+                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -835,7 +835,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             tr.setId(id);
             tr.setColumnFamilyName(m.getTableName());
             tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
-            results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq, isCql3Enabled(m)));
+            results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
         }
         return results;
     }
@@ -980,7 +980,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         clear();
         setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
         // nodes.clear();
-        // nodes = null;
+//         nodes = null;
         closed = true;
         externalProperties = null;
     }
@@ -1365,7 +1365,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (!batchMutationMap.isEmpty())
             {
-                pooledConnection = getPooledConection(persistenceUnit);
+                pooledConnection = getConection(persistenceUnit);
                 conn = getConnection(pooledConnection);
 
                 for (Class<?> entityClass : batchMutationMap.keySet())
@@ -1570,7 +1570,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         Cassandra.Client client = null;
         Object pooledConnection;
-        pooledConnection = getPooledConection(persistenceUnit);
+        pooledConnection = getConection(persistenceUnit);
         client = getConnection(pooledConnection);
         try
         {
@@ -1676,7 +1676,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         Cassandra.Client conn = null;
         Object pooledConnection = null;
-        pooledConnection = getPooledConection(persistenceUnit);
+        pooledConnection = getConection(persistenceUnit);
         conn = getConnection(pooledConnection);
         try
         {
@@ -1685,7 +1685,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
                         org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
             }
-//            conn.set_cql_version(getCqlVersion());
             return conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery), org.apache.cassandra.thrift.Compression.NONE);
         }
         finally
@@ -1784,7 +1783,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 + this.getClass().getSimpleName());
     }
 
-    protected abstract Object getPooledConection(String persistenceUnit);
+    protected abstract Object getConection(String persistenceUnit);
 
     protected abstract void releaseConnection(Object conn);
 
@@ -1856,7 +1855,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                 new ArrayList<CounterSuperColumn>(0));
 
                         Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
-                                relationalField != null && !relationalField.isEmpty(), isCql3Enabled(entityMetadata));
+                                relationalField != null && !relationalField.isEmpty());
 
                         if (entity != null)
                         {

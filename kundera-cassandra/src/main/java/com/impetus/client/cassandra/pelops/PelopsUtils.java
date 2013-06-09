@@ -15,31 +15,21 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
-import java.util.Map;
-import java.util.Properties;
-
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
-import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.service.CassandraHost;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * The Class PelopsUtils.
  */
 public class PelopsUtils
 {
-    /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
-
     /**
      * Generate pool name.
      * 
@@ -48,47 +38,9 @@ public class PelopsUtils
      * @param puProperties
      * @return the string
      */
-    public static String generatePoolName(String persistenceUnit, Map<String, Object> puProperties)
+    public static String generatePoolName(String node, int port, String keyspace)
     {
-        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit);
-        Properties props = persistenceUnitMetadatata.getProperties();
-        String contactNodes = null;
-        String defaultPort = null;
-        String keyspace = null;
-        if (puProperties != null)
-        {
-            contactNodes = (String) puProperties.get(PersistenceProperties.KUNDERA_NODES);
-            defaultPort = (String) puProperties.get(PersistenceProperties.KUNDERA_PORT);
-            keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        }
-
-        if (contactNodes == null)
-        {
-            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        }
-        if (defaultPort == null)
-        {
-            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        }
-        if (keyspace == null)
-        {
-            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        }
-        return generatePoolName(contactNodes, defaultPort, keyspace);
-    }
-
-    /**
-     * Generate pool name.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @param puProperties
-     * @return the string
-     */
-    public static String generatePoolName(String node, String portAsString, String keyspace)
-    {
-        return node + ":" + portAsString + ":" + keyspace;
+        return node + ":" + port + ":" + keyspace;
     }
 
     /**
@@ -99,67 +51,24 @@ public class PelopsUtils
      * @param puProperties
      * @return the pool config policy
      */
-    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
-            Map<String, Object> puProperties)
+    public static Policy getPoolConfigPolicy(CassandraHost cassandraHost)
     {
         Policy policy = new Policy();
-
-        Properties props = persistenceUnitMetadata.getProperties();
-        String maxActivePerNode = null;
-        String maxIdlePerNode = null;
-        String minIdlePerNode = null;
-        String maxTotal = null;
-        if (puProperties != null)
+        if (cassandraHost.getMaxActive() > 0)
         {
-            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            policy.setMaxActivePerNode(cassandraHost.getMaxActive());
         }
-
-        if (maxActivePerNode == null)
+        if (cassandraHost.getMaxIdle() > 0)
         {
-            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            policy.setMaxIdlePerNode(cassandraHost.getMaxIdle());
         }
-        if (maxIdlePerNode == null)
+        if (cassandraHost.getMinIdle() > 0)
         {
-            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            policy.setMinIdlePerNode(cassandraHost.getMinIdle());
         }
-        if (minIdlePerNode == null)
+        if (cassandraHost.getMaxTotal() > 0)
         {
-            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-        }
-        if (maxTotal == null)
-        {
-            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        }
-        try
-        {
-            if (!StringUtils.isEmpty(maxActivePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxActivePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxIdlePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(minIdlePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(minIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxTotal))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxTotal));
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
-                    + " persistence unit couldn't be parsed. Default pool policy would be used");
-            policy = null;
+            policy.setMaxTotal(cassandraHost.getMaxTotal());
         }
         return policy;
     }
@@ -221,11 +130,8 @@ public class PelopsUtils
      *         are not provided.
      * 
      */
-    public static SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
+    public static SimpleConnectionAuthenticator getAuthenticationRequest(String userName, String password)
     {
-        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-
         SimpleConnectionAuthenticator authenticator = null;
         if (userName != null || password != null)
         {

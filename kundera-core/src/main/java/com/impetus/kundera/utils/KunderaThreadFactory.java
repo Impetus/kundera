@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KunderaThreadFactory implements ThreadFactory
 {
     private ConcurrentHashMap<String, AtomicInteger> counters = new ConcurrentHashMap<String, AtomicInteger>();
+
     private final String name;
 
     public KunderaThreadFactory(final String threadName)
@@ -17,9 +18,10 @@ public class KunderaThreadFactory implements ThreadFactory
     private int getNext()
     {
         AtomicInteger threadCount = counters.get(name);
-        if (threadCount==null)
+        if (threadCount == null)
         {
-            counters.put(name, new AtomicInteger());
+            threadCount = new AtomicInteger();
+            counters.put(name, threadCount);
         }
         return threadCount.incrementAndGet();
     }

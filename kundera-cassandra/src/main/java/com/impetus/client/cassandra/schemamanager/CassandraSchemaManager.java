@@ -623,8 +623,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
                     "Cassandra", databaseName);
         }
-
         // After successful schema operation, perform index creation.
+
         createIndex(tableInfo);
     }
 

@@ -69,7 +69,7 @@ public interface CassandraDataHandler
      *             the exception
      */
     List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel,  boolean isCql3Enabled,Object conn, Object... rowIds) throws Exception;
+            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception;
 
     /**
      * From thrift row.
@@ -91,7 +91,7 @@ public interface CassandraDataHandler
      *             the exception
      */
     Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn) throws Exception;
+            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
     /**
      * Populate entity.
@@ -106,8 +106,7 @@ public interface CassandraDataHandler
      *            the is wrap req
      * @return the object
      */
-    Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            boolean isCql3Enabled);
+    Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq);
 
     /**
      * @param e

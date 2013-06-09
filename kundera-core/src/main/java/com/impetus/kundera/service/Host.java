@@ -59,4 +59,14 @@ public interface Host
      * @return true/false.
      */
     public boolean isRetryHost();
+
+    /**
+     * @return the Username
+     */
+    String getUser();
+
+    /**
+     * @return the Username
+     */
+    String getPassword();
 }

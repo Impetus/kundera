@@ -48,6 +48,7 @@ public class IdGenerator
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
+        
         if (keyValue != null)
         {
             Client<?> client = pd.getClient(m);

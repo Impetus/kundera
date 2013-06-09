@@ -15,21 +15,10 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import java.io.File;
-
-import javax.persistence.Persistence;
-
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
-
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Test case for validating transaction handling provided by Kundera for Neo4J
@@ -39,9 +28,14 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public class IMDBTransactionTest extends IMDBTestBase
 {
 
+
     /*    @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);
     }
 
     @AfterClass
@@ -54,13 +48,13 @@ public class IMDBTransactionTest extends IMDBTestBase
 //        emf.close();
     }*/
 
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();
     }
 

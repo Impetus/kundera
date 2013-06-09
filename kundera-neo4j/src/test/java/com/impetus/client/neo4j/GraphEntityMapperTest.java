@@ -88,8 +88,8 @@ public class GraphEntityMapperTest
         em.close();
         emf.close();
 
-        if (datastoreFilePath != null)
-            FileUtils.deleteRecursively(new File(datastoreFilePath));
+        /*if (datastoreFilePath != null)
+            FileUtils.deleteRecursively(new File(datastoreFilePath));*/
     }
 
     /**

@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.dataforte.cassandra.pool.ConnectionPool;
-
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -47,7 +46,6 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
@@ -65,16 +63,16 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     /** log for this class. */
     private static Log log = LogFactory.getLog(ThriftInvertedIndexHandler.class);
 
-    private ConnectionPool pool;
+    private final ThriftClient thriftClient;
 
-    public ThriftInvertedIndexHandler(ConnectionPool pool)
+    public ThriftInvertedIndexHandler(final ThriftClient thriftClient)
     {
-        this.pool = pool;
+        this.thriftClient = thriftClient;
     }
 
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
-            ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler, Object conn)
+            ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
     {
         // Write to Inverted Index table if applicable
         boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata);
@@ -87,6 +85,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
             List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(), entityMetadata,
                     indexColumnFamily);
+            Client conn = thriftClient.getConection(persistenceUnit);
             try
             {
                 String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
@@ -155,27 +154,32 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                 log.error("Unable to insert records into inverted index, Caused by: ", e);
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
+            finally
+            {
+                thriftClient.releaseConnection(conn);
+            }
         }
     }
 
     @Override
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            Map<Boolean, List<IndexClause>> indexClauseMap, Object conn)
+            Map<Boolean, List<IndexClause>> indexClauseMap)
     {
 
-        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap, conn);
+        return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
     }
 
     @Override
     protected void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
             String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns,
-            byte[] start, byte[] finish, Object conn)
+            byte[] start, byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
         SliceRange sliceRange = new SliceRange();
         sliceRange.setStart(start);
         sliceRange.setFinish(finish);
         colPredicate.setSlice_range(sliceRange);
+        Client conn = thriftClient.getConection(persistenceUnit);
 
         List<ColumnOrSuperColumn> coscList = null;
         try
@@ -204,7 +208,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
-
+        finally
+        {
+            thriftClient.releaseConnection(conn);
+        }
         List<SuperColumn> allThriftSuperColumns = ThriftDataResultHelper.transformThriftResult(coscList,
                 ColumnFamilyType.SUPER_COLUMN, null);
 
@@ -222,11 +229,12 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     protected SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName,
-            String rowKey, byte[] superColumnName, String persistenceUnit, Object conn)
+            String rowKey, byte[] superColumnName, String persistenceUnit)
     {
         ColumnPath cp = new ColumnPath(columnFamilyName);
         cp.setSuper_column(superColumnName);
         ColumnOrSuperColumn cosc = null;
+        Client conn = thriftClient.getConection(persistenceUnit);
 
         try
         {
@@ -256,27 +264,30 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             log.error("Unable to search from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to search from inverted index", e);
         }
-
+        finally
+        {
+            thriftClient.releaseConnection(conn);
+        }
         SuperColumn thriftSuperColumn = ThriftDataResultHelper.transformThriftResult(cosc,
                 ColumnFamilyType.SUPER_COLUMN, null);
         return thriftSuperColumn;
     }
 
     @Override
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, Object conn)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
 
-        super.delete(entity, metadata, consistencyLevel, conn);
+        super.delete(entity, metadata, consistencyLevel);
 
     }
 
     @Override
     protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName,
-            String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName, Object conn)
+            String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName)
     {
         ColumnPath cp = new ColumnPath(indexColumnFamily);
         cp.setSuper_column(superColumnName);
-
+        Client conn = thriftClient.getConection(persistenceUnit);
         try
         {
             ColumnOrSuperColumn cosc;
@@ -296,7 +307,6 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             {
                 cp.setColumn(columnName);
             }
-
             ((Cassandra.Client) conn).remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
                     consistencyLevel);
         }
@@ -319,6 +329,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         {
             log.error("Unable to delete data from inverted index, Caused by: ", e);
             throw new IndexingException("Unable to delete data from inverted index", e);
+        }
+        finally
+        {
+            thriftClient.releaseConnection(conn);
         }
     }
 }

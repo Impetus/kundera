@@ -137,6 +137,7 @@ public class KunderaMetadata
             clientMetadata.setClientImplementor(null);
             clientMetadata.setIndexImplementor(null);
             clientMetadata.setLuceneIndexDir(null);
+//            clientMetadata.setClientFactory(null);
             clientMetadata = null;
         }
     }

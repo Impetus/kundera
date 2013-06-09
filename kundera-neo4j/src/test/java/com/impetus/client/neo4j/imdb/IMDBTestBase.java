@@ -41,7 +41,7 @@ public class IMDBTestBase
 
     protected Actor actor2;
 
-    protected EntityManagerFactory emf;
+    protected static EntityManagerFactory emf;
 
     protected EntityManager em;
 
@@ -198,7 +198,7 @@ public class IMDBTestBase
         em.close();
         emf.close();
 
-        if (datastoreFilePath != null)
-            FileUtils.deleteRecursively(new File(datastoreFilePath));
+        /*if (datastoreFilePath != null)
+            FileUtils.deleteRecursively(new File(datastoreFilePath));*/
     }
 }

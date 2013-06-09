@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.service;
 
-import java.util.Properties;
-
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.impetus.kundera.service.Host;
 
@@ -60,8 +60,6 @@ public class CassandraHost implements Host
 
     private int port;
 
-    private Properties properties = new Properties();
-
     private int initialSize;
 
     private boolean testOnBorrow;
@@ -78,6 +76,10 @@ public class CassandraHost implements Host
 
     private boolean retryHost;
 
+    private String userName;
+
+    private String password;
+
     public CassandraHost(String host)
     {
         this.host = host;
@@ -88,12 +90,6 @@ public class CassandraHost implements Host
     {
         this.host = host;
         this.port = port;
-    }
-
-    public CassandraHost(String host, int port, Properties hostProperties)
-    {
-        this(host, port);
-        this.properties = hostProperties;
     }
 
     @Override
@@ -108,11 +104,6 @@ public class CassandraHost implements Host
         return port;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj)
     {
@@ -124,15 +115,21 @@ public class CassandraHost implements Host
         return other.host.equals(this.host) && other.port == this.port;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    @Override
+    public int hashCode()
+    {
+        StringBuilder builder = new StringBuilder(host);
+        builder.append(port);
+        return HashCodeBuilder.reflectionHashCode(builder);
+    }
+
     @Override
     public String toString()
     {
-        return host;
+        StringBuilder builder = new StringBuilder(host);
+        builder.append(":");
+        builder.append(port);
+        return builder.toString();
     }
 
     public void setInitialSize(int initialSize)
@@ -308,5 +305,27 @@ public class CassandraHost implements Host
     public void setRetryHost(boolean retryHost)
     {
         this.retryHost = retryHost;
+    }
+
+    @Override
+    public String getUser()
+    {
+        return this.userName;
+    }
+
+    @Override
+    public String getPassword()
+    {
+        return this.password;
+    }
+
+    public void setUserName(String userName)
+    {
+        this.userName = userName;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 }

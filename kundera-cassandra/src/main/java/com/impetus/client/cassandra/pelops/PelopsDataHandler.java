@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -27,7 +26,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -35,8 +33,6 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -52,28 +48,22 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /** The log. */
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
-    /** Holds external properties */
-    private Map<String, Object> externalProperty;
+    private final PelopsClient pelopsClient;
 
     /**
      * @param externalProperties
      */
-    public PelopsDataHandler(Map<String, Object> externalProperties)
+    public PelopsDataHandler(final PelopsClient pelopsClient)
     {
-        this.externalProperty = externalProperties;
+        super(pelopsClient);
+        this.pelopsClient = pelopsClient;
     }
 
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
-        Selector selector = Pelops
-                .createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit(), externalProperty));
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-
-        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet();
+        Selector selector = pelopsClient.getSelector();
 
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
         rowKeys.add(ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType())));
@@ -89,24 +79,16 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         tr = thriftTranslator
                 .translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(), m.getType(), tr);
 
-        return populateEntity(tr, m, relationNames, isWrapReq, isCql3Enabled);
+        return populateEntity(tr, m, relationNames, isWrapReq);
     }
 
     /** Translation Methods */
 
     @Override
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
-            ConsistencyLevel consistencyLevel, boolean isCql3Enabled, Object conn, Object... rowIds) throws Exception
+            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
     {
-        try
-        {
-            return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, isCql3Enabled, conn,
-                    rowIds);
-        }
-        finally
-        {
-
-        }
+        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
     }
 
     @Override

@@ -48,7 +48,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.exceptions.PelopsException;
@@ -112,6 +111,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     private PelopsClientFactory clientFactory;
 
+    private IThriftPool pool;
+
     /**
      * default constructor.
      * 
@@ -123,15 +124,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the persistence unit
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, PelopsClientFactory clientFactory,
-            String persistenceUnit, Map<String, Object> externalProperties)
+            String persistenceUnit, Map<String, Object> externalProperties, IThriftPool pool)
     {
         super(persistenceUnit, externalProperties);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(externalProperties);
-        this.invertedIndexHandler = new PelopsInvertedIndexHandler(externalProperties);
+        this.dataHandler = new PelopsDataHandler(this);
+        this.invertedIndexHandler = new PelopsInvertedIndexHandler(this);
         this.reader = reader;
         this.clientFactory = clientFactory;
+        this.pool = pool;
     }
 
     @Override
@@ -171,11 +173,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         List entities = null;
-        Object conn = getPooledConection(getPersistenceUnit());
+        Object conn = getConection(getPersistenceUnit());
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), isCql3Enabled(metadata), conn, rowIds);
+                    getConsistencyLevel(), rowIds);
         }
         catch (Exception e)
         {
@@ -214,8 +216,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             else
             {
-                RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                        getExternalProperties()));
+                RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
                 rowDeletor.deleteRow(metadata.getTableName(),
                         CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()),
                         getConsistencyLevel());
@@ -226,10 +227,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         getIndexManager().remove(metadata, entity, pKey.toString());
 
         // Delete from Inverted Index if applicable
-        Object conn = getPooledConection(getPersistenceUnit());
+        Object conn = getConection(getPersistenceUnit());
         try
         {
-            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), conn);
+            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
         }
         finally
         {
@@ -246,7 +247,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.indexManager.flush();
         this.dataHandler = null;
         this.invertedIndexHandler = null;
-        // closed = true;
     }
 
     /**
@@ -254,9 +254,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     public void persistJoinTable(JoinTableData joinTableData)
     {
-
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), getExternalProperties());
-        Mutator mutator = Pelops.createMutator(poolName);
+        Mutator mutator = clientFactory.getMutator(pool);
 
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -283,7 +281,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 columns.add(column);
             }
 
-            createIndexesOnColumns(entityMetadata, joinTableName, poolName, columns, columnType);
+            createIndexesOnColumns(entityMetadata, joinTableName, columns, columnType);
             // Object pk = key;
 
             mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(key)),
@@ -296,8 +294,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Class columnJavaType)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        Selector selector = clientFactory.getSelector(pool);
 
         List<Column> columns = selector.getColumnsFromRow(joinTableName,
                 Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
@@ -312,8 +309,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        Selector selector = clientFactory.getSelector(pool);
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         // String childIdStr = (String) columnValue;
@@ -356,8 +352,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
         // rowDeletor.deleteRow(tableName, columnValue.toString(),
         // getConsistencyLevel());
         rowDeletor.deleteRow(tableName, CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
@@ -381,8 +376,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List<Object> findByRelation(String colName, Object colValue, Class clazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
         List<Object> entities = null;
         if (isCql3Enabled(m))
         {
@@ -390,10 +383,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         else
         {
-
-            Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                    getExternalProperties()));
-
+            Selector selector = clientFactory.getSelector(pool);
             SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
             IndexClause ix = Selector.newIndexClause(
                     Bytes.EMPTY,
@@ -491,7 +481,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 String columnFamily = metadata.getTableName();
                 tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
-                // timestamp = System.currentTimeMillis();
             }
             catch (Exception e)
             {
@@ -499,9 +488,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 throw new KunderaException(e);
             }
             addRelationsToThriftRow(metadata, tf, rlHolders);
-
-            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                    getExternalProperties()));
+            Mutator mutator = clientFactory.getMutator(pool);
             if (metadata.isCounterColumnType())
             {
                 List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
@@ -563,11 +550,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         // Write to inverted index table if applicable
         // Delete from Inverted Index if applicable
-        Object conn = getPooledConection(getPersistenceUnit());
+        Object conn = getConection(getPersistenceUnit());
         try
         {
-            invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler,
-                    conn);
+            invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler);
         }
         finally
         {
@@ -595,8 +581,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        Selector selector = clientFactory.getSelector(pool);
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
         rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
 
@@ -647,9 +632,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns)
     {
-        // ixClause can be 0,1 or more!
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        Selector selector = clientFactory.getSelector(pool);
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         if (columns != null && !columns.isEmpty())
@@ -665,10 +648,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                 try
                 {
-                    IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                            getExternalProperties()));
-                    // thrift.get
-                    IPooledConnection connection = thrift.getConnection();
+                    IPooledConnection connection = clientFactory.getConnection(pool);
                     org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
                     List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
                             slicePredicate, Selector.newKeyRange("", "", maxResult), getConsistencyLevel());
@@ -772,8 +752,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions) throws Exception
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit(),
-                getExternalProperties()));
+        Selector selector = clientFactory.getSelector(pool);
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         if (columns != null && !columns.isEmpty())
@@ -805,10 +784,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
         // Delete from Inverted Index if applicable
-        Object conn = getPooledConection(getPersistenceUnit());
+        Object conn = getConection(getPersistenceUnit());
         try
         {
-            return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap, conn);
+            return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
         }
         finally
         {
@@ -827,17 +806,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    protected IPooledConnection getPooledConection(String persistenceUnit)
+    protected IPooledConnection getConection(String persistenceUnit)
     {
-        // return PelopsUtils.getCassandraConnection(persistenceUnit,
-        // getExternalProperties());
-        return clientFactory.getConnection();
-
+        return clientFactory.getConnection(pool);
     }
 
     protected void releaseConnection(Object conn)
     {
-        // PelopsUtils.releaseConnection((IPooledConnection) conn);
         clientFactory.releaseConnection((IPooledConnection) conn);
     }
 
@@ -846,4 +821,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return getGeneratedValue(discriptor, getPersistenceUnit());
     }
+
+    Mutator getMutator()
+    {
+        return clientFactory.getMutator(pool);
+    }
+
+    Selector getSelector()
+    {
+        return clientFactory.getSelector(pool);
+    }
+
+    RowDeletor getRowDeletor()
+    {
+        return clientFactory.getRowDeletor(pool);
+    }
+
 }

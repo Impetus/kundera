@@ -249,5 +249,5 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             }
             return servers;
         }
-    }
+   }
 }

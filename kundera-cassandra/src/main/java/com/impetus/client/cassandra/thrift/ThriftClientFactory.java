@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.impetus.client.cassandra.common.CassandraClientFactory;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
@@ -63,7 +62,7 @@ import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
  * 
  * @author amresh.singh
  */
-public class ThriftClientFactory extends GenericClientFactory implements CassandraClientFactory
+public class ThriftClientFactory extends GenericClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);

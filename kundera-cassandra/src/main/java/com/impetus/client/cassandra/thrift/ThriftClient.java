@@ -58,7 +58,6 @@ import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.Constants;
@@ -116,8 +115,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.clientFactory = clientFactory;
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new ThriftDataHandler(pool);
-        this.invertedIndexHandler = new ThriftInvertedIndexHandler(pool);
+        this.dataHandler = new ThriftDataHandler(this);
+        this.invertedIndexHandler = new ThriftInvertedIndexHandler(this);
         this.reader = reader;
         this.clientFactory = clientFactory;
         this.pool = pool;
@@ -138,7 +137,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        Cassandra.Client conn = /* /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+        Cassandra.Client conn = getConection(getPersistenceUnit());
         try
         {
 
@@ -204,8 +203,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit(), getExternalProperties());
-
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
@@ -245,7 +242,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     insertionList.add(mut);
                 }
 
-                createIndexesOnColumns(entityMetadata, joinTableName, poolName, columns, columnType);
+                createIndexesOnColumns(entityMetadata, joinTableName, columns, columnType);
 
                 // Create Mutation Map
                 Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
@@ -255,7 +252,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                 // Write Mutation map to database
 
-                conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+                conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
 
                 conn.set_keyspace(entityMetadata.getSchema());
 
@@ -299,17 +296,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         // Write to inverted index table if applicable
         // setCassandraClient();
-
-        Cassandra.Client conn = getPooledConection(getPersistenceUnit());
-        try
-        {
-            invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler,
-                    conn);
-        }
-        finally
-        {
-            releaseConnection(conn);
-        }
+        invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler);
     }
 
     /**
@@ -343,12 +330,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
 
         List entities = null;
-        Cassandra.Client conn = getPooledConection(getPersistenceUnit());
+        Cassandra.Client conn = getConection(getPersistenceUnit());
 
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), isCql3Enabled(metadata), conn, rowIds);
+                    getConsistencyLevel(), rowIds);
         }
         catch (Exception e)
         {
@@ -396,7 +383,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
+
             coscList = conn.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
 
         }
@@ -451,7 +439,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
             results = conn.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
         }
         catch (InvalidRequestException e)
@@ -517,7 +505,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
             List<KeySlice> keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
 
             rowKeys = ThriftDataResultHelper.getRowKeys(keySlices, metadata);
@@ -584,7 +572,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Cassandra.Client conn = null;
             try
             {
-                conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+                conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
                 keySlices = conn.get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
             }
             catch (InvalidRequestException e)
@@ -641,7 +629,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
@@ -670,7 +658,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             getIndexManager().remove(metadata, entity, pKey.toString());
 
             // Delete from Inverted Index if applicable
-            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), conn);
+            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
         }
         catch (InvalidRequestException e)
         {
@@ -715,7 +703,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Cassandra.Client conn = null;
         try
         {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
             ColumnPath path = new ColumnPath(tableName);
             // cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()),
             // path,
@@ -811,7 +799,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key), m
                                     .getTableName(), columns, new ArrayList<SuperColumn>(0),
                                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0)), m,
-                            relationNames, isRelational, isCql3Enabled(m));
+                            relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -864,7 +852,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 sliceRange.setFinish(Bytes.EMPTY.getBytes());
                 slicePredicate.setSlice_range(sliceRange);
             }
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
 
             if (ixClause.isEmpty())
             {
@@ -991,7 +979,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             keyRange.setRow_filterIsSet(true);
         }
 
-        Cassandra.Client conn = /* PelopsUtils.getCassandraConnection(pool) */getPooledConection(persistenceUnit);
+        Cassandra.Client conn = /* PelopsUtils.getCassandraConnection(pool) */getConection(persistenceUnit);
 
         List<KeySlice> keys = conn.get_range_slices(cp, slicePredicate, keyRange, getConsistencyLevel());
 
@@ -1010,15 +998,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
-        Cassandra.Client conn = getPooledConection(getPersistenceUnit());
-        try
-        {
-            return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap, conn);
-        }
-        finally
-        {
-            releaseConnection(conn);
-        }
+        return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
     }
 
     /*
@@ -1032,7 +1012,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    protected Cassandra.Client getPooledConection(String persistenceUnit)
+    protected Cassandra.Client getConection(String persistenceUnit)
+    {
+        Cassandra.Client client = clientFactory.getConnection(pool);
+        return client;
+    }
+
+    Cassandra.Client getConection()
     {
         Cassandra.Client client = clientFactory.getConnection(pool);
         return client;
