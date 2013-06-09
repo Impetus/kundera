@@ -37,6 +37,8 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -62,7 +64,7 @@ public class CassandraCompositeTypeTest
     private EntityManagerFactory emf;
 
     /** The Constant logger. */
-    private static final Log logger = LogFactory.getLog(CassandraCompositeTypeTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CassandraCompositeTypeTest.class);
 
     // @Rule
     // public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new

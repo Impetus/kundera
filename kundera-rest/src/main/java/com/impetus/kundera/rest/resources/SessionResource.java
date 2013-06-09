@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.Response;
@@ -44,7 +46,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.SESSION_RESOURCE_PATH)
 public class SessionResource
 {
-    private static Log log = LogFactory.getLog(SessionResource.class);
+    private static Logger log = LoggerFactory.getLogger(SessionResource.class);
 
     /**
      * Handler for GET method requests for this resource Generates Session token

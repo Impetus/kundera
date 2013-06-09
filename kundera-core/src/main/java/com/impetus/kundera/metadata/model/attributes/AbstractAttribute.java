@@ -29,6 +29,8 @@ import javax.persistence.metamodel.Type;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class for to provide generalisation, abstraction to
@@ -44,7 +46,7 @@ public abstract class AbstractAttribute<X, T>
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(AbstractAttribute.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractAttribute.class);
 
     /** The attrib type. */
     protected Type<T> attribType;

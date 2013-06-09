@@ -36,6 +36,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -58,7 +60,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 {
 
     /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(TableProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TableProcessor.class);
 
     /** holds pu prperties */
     private Map puProperties;

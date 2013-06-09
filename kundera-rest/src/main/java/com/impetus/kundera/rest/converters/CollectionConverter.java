@@ -21,6 +21,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.StreamUtils;
@@ -33,7 +35,7 @@ import com.impetus.kundera.rest.common.StreamUtils;
  */
 public class CollectionConverter
 {
-    private static Log log = LogFactory.getLog(CollectionConverter.class);
+    private static Logger log = LoggerFactory.getLogger(CollectionConverter.class);
 
     /**
      * Converts a collection of <code>genericClass</code> objects to String

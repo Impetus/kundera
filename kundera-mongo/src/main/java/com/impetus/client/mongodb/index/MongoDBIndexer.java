@@ -23,6 +23,8 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
@@ -38,7 +40,7 @@ import com.impetus.kundera.metadata.model.PropertyIndex;
 public class MongoDBIndexer implements Indexer
 {
     /** log for this class. */
-    private static Log LOG = LogFactory.getLog(MongoDBIndexer.class);
+    private static Logger LOG = LoggerFactory.getLogger(MongoDBIndexer.class);
 
     /** The client. */
     MongoDBClient client;

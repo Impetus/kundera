@@ -26,6 +26,8 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
@@ -73,7 +75,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private MongoDBDataHandler handler;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(MongoDBClient.class);
+    private static Logger log = LoggerFactory.getLogger(MongoDBClient.class);
 
     private List<Node> nodes = new ArrayList<Node>();
 
@@ -726,15 +728,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public void setHandler(MongoDBDataHandler handler)
     {
         this.handler = handler;
-    }
-
-    /**
-     * @param log
-     *            the log to set
-     */
-    public static void setLog(Log log)
-    {
-        MongoDBClient.log = log;
     }
 
     /**

@@ -35,6 +35,8 @@ import jxl.write.biff.RowsExceededException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * WriteToExcelFile class responsible create a excel file and write content into
@@ -51,7 +53,7 @@ public class WriteToExcelFile
 
     private String inputFile;
 
-    private static final Log log = LogFactory.getLog(WriteToExcelFile.class);
+    private static final Logger log = LoggerFactory.getLogger(WriteToExcelFile.class);
 
     public void setOutputFile(String inputFile)
     {

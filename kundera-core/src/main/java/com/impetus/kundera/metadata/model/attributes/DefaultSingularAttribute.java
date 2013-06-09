@@ -25,6 +25,8 @@ import javax.persistence.metamodel.Type;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation class for <code> {@link SetAttribute} </code> interface.
@@ -42,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> implements SingularAttribute<X, T>
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(DefaultSingularAttribute.class);
+    private static Logger log = LoggerFactory.getLogger(DefaultSingularAttribute.class);
 
     /** Attribute is an id? */
     private boolean isId;

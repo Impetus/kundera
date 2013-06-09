@@ -278,6 +278,11 @@ public class ThriftClientFactory extends GenericClientFactory
         PelopsUtils.setPoolConfigPolicy(cassandraHost, prop);
         try
         {
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Initializing connection for keyspace {},host {},port {}", keysapce,
+                        cassandraHost.getHost(), cassandraHost.getPort());
+            }
             ConnectionPool pool = new ConnectionPool(prop);
             hostPools.put(cassandraHost, pool);
             return true;

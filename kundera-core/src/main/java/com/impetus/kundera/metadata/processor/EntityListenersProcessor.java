@@ -33,6 +33,8 @@ import javax.persistence.PreUpdate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataProcessor;
@@ -59,7 +61,7 @@ public class EntityListenersProcessor implements MetadataProcessor
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(EntityListenersProcessor.class);
+    private static Logger log = LoggerFactory.getLogger(EntityListenersProcessor.class);
 
     // list of all valid JPA Entity Listeners
     /** The Constant JPAListenersAnnotations. */

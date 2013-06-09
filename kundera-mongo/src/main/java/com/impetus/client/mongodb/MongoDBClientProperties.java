@@ -19,6 +19,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
@@ -33,7 +35,7 @@ import com.mongodb.WriteConcern;
 public class MongoDBClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(MongoDBClientProperties.class);
+    private static Logger log = LoggerFactory.getLogger(MongoDBClientProperties.class);
 
     public static final String WRITE_CONCERN = "write.concern";
 

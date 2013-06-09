@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
@@ -38,7 +40,7 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
 {
 
     /** log instance */
-    private static Log log = LogFactory.getLog(RedisPropertyReader.class);
+    private static Logger log = LoggerFactory.getLogger(RedisPropertyReader.class);
 
     /** MongoDB schema metadata instance */
     public static RedisSchemaMetadata rsmd;

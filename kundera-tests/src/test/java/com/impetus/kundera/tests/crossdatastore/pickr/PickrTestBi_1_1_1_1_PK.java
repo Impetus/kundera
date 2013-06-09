@@ -37,6 +37,8 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.album.AlbumBi_1_1_1_1_PK;
@@ -49,7 +51,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.Phot
  */
 public class PickrTestBi_1_1_1_1_PK extends PickrBaseTest
 {
-    private static Log log = LogFactory.getLog(PickrTestBi_1_1_1_1_PK.class);
+    private static Logger log = LoggerFactory.getLogger(PickrTestBi_1_1_1_1_PK.class);
 
     @Before
     public void setUp() throws Exception

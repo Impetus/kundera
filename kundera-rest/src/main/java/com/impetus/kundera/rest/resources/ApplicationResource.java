@@ -28,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.Response;
@@ -43,7 +45,7 @@ import com.impetus.kundera.rest.repository.EMFRepository;
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.APPLICATION_RESOURCE_PATH)
 public class ApplicationResource
 {
-    private static Log log = LogFactory.getLog(ApplicationResource.class);
+    private static Logger log = LoggerFactory.getLogger(ApplicationResource.class);
 
     /**
      * Handler for GET method requests for this resource Generates Application

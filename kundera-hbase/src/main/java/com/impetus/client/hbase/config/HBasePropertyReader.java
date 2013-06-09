@@ -19,6 +19,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseConstants;
 import com.impetus.kundera.PersistenceProperties;
@@ -41,7 +43,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
     /**
      * The log instance.
      */
-    private static Log log = LogFactory.getLog(HBasePropertyReader.class);
+    private static Logger log = LoggerFactory.getLogger(HBasePropertyReader.class);
 
     /**
      * The Hbase schema metadata instance.

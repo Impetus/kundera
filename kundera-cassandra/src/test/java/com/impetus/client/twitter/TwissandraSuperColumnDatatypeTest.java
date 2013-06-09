@@ -35,13 +35,13 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.twitter.entities.ProfessionalDetailCassandra;
@@ -56,7 +56,7 @@ import com.impetus.kundera.Constants;
 public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
 {
     /** The Constant LOG. */
-    private static final Log log = LogFactory.getLog(TwissandraSuperColumnDatatypeTest.class);
+    private static final Logger log = LoggerFactory.getLogger(TwissandraSuperColumnDatatypeTest.class);
 
     @Before
     public void setUp() throws Exception
@@ -115,27 +115,27 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         }
         catch (IOException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (UnavailableException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            log.error(e.getMessage(),e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 
@@ -903,11 +903,11 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
     }
 

@@ -114,6 +114,12 @@ public class PelopsClientFactory extends GenericClientFactory
                             cassandraHost.getPort(), true, -1, PelopsUtils.getAuthenticationRequest(
                                     cassandraHost.getUser(), cassandraHost.getPassword())), false);
 
+                    if (logger.isInfoEnabled())
+                    {
+                        logger.info("Initializing connection pool for keyspace {}, host {},port {}.", keyspace,
+                                cassandraHost.getHost(), cassandraHost.getPort());
+                    }
+
                     Policy policy = PelopsUtils.getPoolConfigPolicy(cassandraHost);
 
                     // Add pool with specified policy. null means default
@@ -140,6 +146,10 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
+        if (logger.isInfoEnabled())
+        {
+            logger.info("Initializing pelops client for persistence unit {}", persistenceUnit);
+        }
         IThriftPool pool = getPoolUsingPolicy();
         return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties, pool);
     }

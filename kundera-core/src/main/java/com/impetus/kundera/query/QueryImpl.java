@@ -41,6 +41,8 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
@@ -78,7 +80,7 @@ public abstract class QueryImpl implements Query
     protected PersistenceDelegator persistenceDelegeator;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(QueryImpl.class);
+    private static Logger log = LoggerFactory.getLogger(QueryImpl.class);
 
     private Set<Parameter<?>> parameters;
 

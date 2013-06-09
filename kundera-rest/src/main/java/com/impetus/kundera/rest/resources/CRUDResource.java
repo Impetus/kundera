@@ -36,6 +36,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -55,7 +57,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
 public class CRUDResource
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(CRUDResource.class);
+    private static Logger log = LoggerFactory.getLogger(CRUDResource.class);
 
     @Context
     UriInfo uriInfo;

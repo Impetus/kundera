@@ -26,6 +26,8 @@ import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import org.hibernate.collection.internal.PersistentSet;
 //import org.hibernate.collection.spi.PersistentCollection;
 //import org.hibernate.proxy.HibernateProxy;
@@ -51,7 +53,7 @@ public class AbstractEntityReader
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(AbstractEntityReader.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractEntityReader.class);
 
     /** The lucene query from jpa query. */
     protected String luceneQueryFromJPAQuery;

@@ -27,6 +27,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -46,7 +48,7 @@ import com.impetus.kundera.rest.dto.Table;
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
 public class MetadataResource
 {
-    private static Log log = LogFactory.getLog(MetadataResource.class);
+    private static Logger log = LoggerFactory.getLogger(MetadataResource.class);
 
     /**
      * Handler for GET requests. Returns schema List and related metadata for

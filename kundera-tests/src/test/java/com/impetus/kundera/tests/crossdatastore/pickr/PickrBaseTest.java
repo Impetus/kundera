@@ -31,6 +31,8 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.PersistenceProperties;
@@ -61,7 +63,7 @@ public abstract class PickrBaseTest
 
     protected RDBMSCli cli;
 
-    private static Log log = LogFactory.getLog(PickrBaseTest.class);
+    private static Logger log = LoggerFactory.getLogger(PickrBaseTest.class);
 
     protected void setUp() throws Exception
     {

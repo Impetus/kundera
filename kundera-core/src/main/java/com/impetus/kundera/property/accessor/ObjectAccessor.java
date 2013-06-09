@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -37,7 +39,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class ObjectAccessor implements PropertyAccessor<Object>
 {
 
-    public static Log log = LogFactory.getLog(ObjectAccessor.class);
+    public static Logger log = LoggerFactory.getLogger(ObjectAccessor.class);
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /*

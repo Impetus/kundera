@@ -28,6 +28,8 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
@@ -109,7 +111,7 @@ public final class EntityMetadata
     private boolean isParent;
 
     /** The log. */
-    private static Log log = LogFactory.getLog(EntityMetadata.class);
+    private static Logger log = LoggerFactory.getLogger(EntityMetadata.class);
 
     /**
      * The Enum Type.

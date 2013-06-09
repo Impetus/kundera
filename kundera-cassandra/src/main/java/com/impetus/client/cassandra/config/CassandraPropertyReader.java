@@ -22,8 +22,8 @@ import java.util.Properties;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
@@ -44,7 +44,7 @@ import com.impetus.kundera.configure.PropertyReader;
 public class CassandraPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
     /** The log instance. */
-    private Log log = LogFactory.getLog(CassandraPropertyReader.class);
+    private Logger logger = LoggerFactory.getLogger(CassandraPropertyReader.class);
 
     /** csmd instance of CassandraSchemaMetadata */
 
@@ -102,6 +102,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 replication = schema.getSchemaProperties().getProperty(CassandraConstants.REPLICATION_FACTOR);
             }
+
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Returning replication factor value {}", replication);
+            }
             return replication;
         }
 
@@ -115,6 +120,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
             {
                 placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
+            }
+
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Returning placement strategy value {}", placementStrategy);
             }
             return placementStrategy;
         }
@@ -142,6 +152,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
+
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("No data store configuration found, returning null.");
+            }
+
             return null;
         }
 
@@ -160,6 +176,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         break;
                     }
                 }
+            }
+
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Returning inverted indexing enabled value {}.", result);
             }
             return result;
         }
@@ -183,7 +204,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         }
                         else
                         {
-                            log.warn("This is not valid cql version type, please provide valid one.");
+                            logger.warn("Invalid {} cql version provided, valid are {},{}.", cqlVersion,
+                                    CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
                         }
                     }
                 }
@@ -223,6 +245,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
+
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("No column family schema found, returning null.");
+            }
+
             return null;
         }
 
@@ -234,6 +262,10 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 properties = ds.getConnection().getProperties();
                 return properties;
+            }
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("No connection properties found, returning none.");
             }
             return properties;
         }
@@ -249,5 +281,5 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             }
             return servers;
         }
-   }
+    }
 }

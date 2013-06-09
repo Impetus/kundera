@@ -44,6 +44,8 @@ import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -61,7 +63,7 @@ public class EmbeddedRDBMSUserTest
     private static final String KEYSPACE = "KunderaTests";
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(EmbeddedRDBMSUserTest.class);
+    private static Logger log = LoggerFactory.getLogger(EmbeddedRDBMSUserTest.class);
 
     /**
      * @throws java.lang.Exception

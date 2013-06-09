@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
@@ -45,7 +47,7 @@ public class CQLTranslatorTest
 {
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(CassandraCompositeTypeTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CassandraCompositeTypeTest.class);
     
     private static final String KEYSPACE = "CompositeCassandra";
 
@@ -63,7 +65,7 @@ public class CQLTranslatorTest
     @Test
     public void testPrepareColumns()
     {
-        logger.info("On prepare columns");
+        logger.info("On prepare columns.");
         CQLTranslator translator = new CQLTranslator();
         UUID timeLineId = UUID.randomUUID();
         Date currentDate = new Date();

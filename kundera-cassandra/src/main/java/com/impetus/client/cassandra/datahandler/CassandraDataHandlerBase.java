@@ -37,8 +37,8 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -75,7 +75,7 @@ public abstract class CassandraDataHandlerBase
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(CassandraDataHandlerBase.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraDataHandlerBase.class);
 
     /** The thrift translator. */
     protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
@@ -182,6 +182,11 @@ public abstract class CassandraDataHandlerBase
 
                 }
             }
+        }
+        
+        if(log.isInfoEnabled())
+        {
+            log.info("Returning entity {} for class {}", e,clazz);
         }
         return e;
     }
@@ -549,14 +554,6 @@ public abstract class CassandraDataHandlerBase
 
                 if (thriftColumnName != null && thriftColumnName.startsWith(inverseJoinColumnName))
                 {
-                    // EntityMetadata relationMetadata =
-                    // KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
-                    // Object value =
-                    // PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),(byte[])
-                    // thriftColumnValue);
-                    // String val =
-                    // PropertyAccessorFactory.STRING.fromBytes(String.class,
-                    // thriftColumnValue);
                     Object val = PropertyAccessorHelper.getObject(columnJavaType, thriftColumnValue);
                     foreignKeys.add(val);
                 }
@@ -770,12 +767,12 @@ public abstract class CassandraDataHandlerBase
         }
         catch (InstantiationException iex)
         {
-            log.error("Eror while retrieving data, Caused by: ", iex);
+            log.error("Eror while retrieving data, Caused by: .", iex);
             throw new PersistenceException(iex);
         }
         catch (IllegalAccessException iaex)
         {
-            log.error("Eror while retrieving data, Caused by: ", iaex);
+            log.error("Eror while retrieving data, Caused by: .", iaex);
             throw new PersistenceException(iaex);
         }
 
@@ -801,29 +798,6 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
-    /*    *//**
-     * Initialize.
-     * 
-     * @param tr
-     *            the tr
-     * @param m
-     *            the m
-     * @param entity
-     *            the entity
-     * @return the object
-     * @throws InstantiationException
-     *             the instantiation exception
-     * @throws IllegalAccessException
-     *             the illegal access exception
-     */
-    /*
-     * private Object initialize(ThriftRow tr, EntityMetadata m, Object entity)
-     * throws InstantiationException, IllegalAccessException { if (entity ==
-     * null) { entity = m.getEntityClazz().newInstance();
-     * PropertyAccessorHelper.setId(entity, m, tr.getId()); }
-     * 
-     * return entity; }
-     */
     /**
      * Initialize.
      * 
@@ -1185,12 +1159,12 @@ public abstract class CassandraDataHandlerBase
             catch (InstantiationException iex)
             {
                 // TODO Auto-generated catch block
-                log.error("Error while retrieving data, Caused by: ", iex);
+                log.error("Error while retrieving data, Caused by: .", iex);
                 throw new PersistenceException(iex);
             }
             catch (IllegalAccessException iaex)
             {
-                log.error("Error while retrieving data, Caused by: ", iaex);
+                log.error("Error while retrieving data, Caused by: .", iaex);
                 throw new PersistenceException(iaex);
             }
         }
@@ -1214,7 +1188,7 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn("Error while setting field value, Caused by: " + pae);
+                log.warn("Error while setting field value, Caused by: .", pae);
             }
         }
     }
@@ -1262,7 +1236,7 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn("Error while setting field value via CQL, Caused by: ", pae);
+                log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
             }
         }
     }
@@ -1313,7 +1287,7 @@ public abstract class CassandraDataHandlerBase
         }
         catch (PropertyAccessException pae)
         {
-            log.warn("Error reading property while getting field value via CQL, Caused by: ", pae);
+            log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
         }
         return null;
     }
@@ -1464,9 +1438,6 @@ public abstract class CassandraDataHandlerBase
             }
         }
     }
-
-    // private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow
-    // tr, EntityMetadata m, Object e, Object id)
 
     /**
      * Prepare column.
@@ -1700,8 +1671,8 @@ public abstract class CassandraDataHandlerBase
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("For counter column arguments should be numeric type, Caused by :", nfe);
-                    throw new KunderaException("For counter column,arguments should be numeric type.", nfe);
+                    log.error("For counter column arguments should be numeric type, Caused by: .", nfe);
+                    throw new KunderaException(nfe);
                 }
             }
         }

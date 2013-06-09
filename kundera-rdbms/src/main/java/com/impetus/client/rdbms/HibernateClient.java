@@ -39,6 +39,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
@@ -76,7 +78,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     private Map<String, Object> puProperties;
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(HibernateClient.class);
+    private static final Logger log = LoggerFactory.getLogger(HibernateClient.class);
 
     /**
      * Instantiates a new hibernate client.
@@ -250,12 +252,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (HibernateException e)
         {
-            log.error(e);
+            log.error("Error while persisting object of {}", metadata.getEntityClazz(),e);
             throw new PersistenceException(e);
         }
-        finally
+        /*finally
         {
-        }
+          // empty finally block.
+        }*/
     }
 
     /**

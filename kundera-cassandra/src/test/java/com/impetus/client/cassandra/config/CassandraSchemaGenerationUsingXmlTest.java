@@ -142,17 +142,17 @@ public class CassandraSchemaGenerationUsingXmlTest
         catch (NotFoundException nfe)
         {
             Assert.fail();
-            logger.error("Error in test, caused by :" + nfe.getMessage());
+            logger.error("Error in test, Caused by: .",nfe.getMessage());
         }
         catch (InvalidRequestException ire)
         {
             Assert.fail();
-            logger.error("Error in test, caused by :" + ire.getMessage());
+            logger.error("Error in test, Caused by: .",ire.getMessage());
         }
         catch (TException te)
         {
             Assert.fail();
-            logger.error("Error in test, caused by :" + te.getMessage());
+            logger.error("Error in test, caused by: .",te.getMessage());
         }
     }
 }

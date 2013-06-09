@@ -23,6 +23,8 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.utils.DeepEquals;
@@ -39,7 +41,7 @@ import com.impetus.kundera.utils.DeepEquals;
 public class ElementCollectionCacheManager
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(ElementCollectionCacheManager.class);
+    private static Logger log = LoggerFactory.getLogger(ElementCollectionCacheManager.class);
 
     /* Single instance */
     /** The instance. */

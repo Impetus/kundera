@@ -33,6 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.compositeType.MongoCompositeTypeTest;
 import com.impetus.client.crud.compositeType.MongoCompoundKey;
@@ -50,7 +52,7 @@ public class UserInfoTest
 
     private EntityManagerFactory emf;
 
-    private static final Log logger = LogFactory.getLog(MongoCompositeTypeTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(MongoCompositeTypeTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -294,20 +296,20 @@ public class UserInfoTest
             }
             catch (SecurityException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating db",e);
             }
-
+ 
             catch (NoSuchFieldException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating db",e);
             }
             catch (IllegalArgumentException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating db",e);
             }
             catch (IllegalAccessException e)
             {
-                logger.error(e);
+                logger.error("Error while truncating db",e);
             }
         }
 

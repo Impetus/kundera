@@ -33,6 +33,8 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaPersistenceUnitUtil;
@@ -57,7 +59,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 {
 
     /** the log used by this class. */
-    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(EntityManagerFactoryImpl.class);
 
     /** Whether or not the factory has been closed. */
     private boolean closed;

@@ -21,6 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.entities.EmbeddableTransientEntity;
 import com.impetus.kundera.metadata.entities.TransientEntity;
@@ -34,7 +36,7 @@ public class MetaModelBuilderForTransientEntityTest
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetaModelBuilderForTransientEntityTest.class);
+    private static Logger log = LoggerFactory.getLogger(MetaModelBuilderForTransientEntityTest.class);
 
     /** The builder. */
     @SuppressWarnings("rawtypes")

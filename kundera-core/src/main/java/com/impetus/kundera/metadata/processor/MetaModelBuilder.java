@@ -50,6 +50,8 @@ import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.attributes.DefaultCollectionAttribute;
@@ -79,7 +81,7 @@ import com.impetus.kundera.metadata.model.type.DefaultMappedSuperClass;
 public final class MetaModelBuilder<X, T>
 {
     /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(MetaModelBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MetaModelBuilder.class);
 
     /** The managed type. */
     private AbstractManagedType<X> managedType;

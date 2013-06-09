@@ -43,6 +43,8 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.graphdb.index.UniqueFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -70,7 +72,7 @@ public final class GraphEntityMapper
     private static final String PROXY_NODE_VALUE = "$PROXY_NODE$";
 
     /** The log. */
-    private static Log log = LogFactory.getLog(GraphEntityMapper.class);
+    private static Logger log = LoggerFactory.getLogger(GraphEntityMapper.class);
 
     private Neo4JIndexManager indexer;
 

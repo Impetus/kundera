@@ -47,6 +47,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
@@ -66,7 +68,7 @@ public class LuceneIndexer extends DocumentIndexer
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(LuceneIndexer.class);
+    private static Logger log = LoggerFactory.getLogger(LuceneIndexer.class);
 
     /** The w. */
     private static IndexWriter w;

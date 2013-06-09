@@ -38,6 +38,8 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
@@ -75,7 +77,7 @@ public abstract class AssociationBase
     protected IMDBDaoImpl dao;
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(AssociationBase.class);
+    private static Logger log = LoggerFactory.getLogger(AssociationBase.class);
 
     /** The col families. */
     private String[] colFamilies;

@@ -22,6 +22,8 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
@@ -32,7 +34,7 @@ public class EntityEventDispatcher
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityManager.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityManager.class);
 
     /**
      * Fire event listeners.

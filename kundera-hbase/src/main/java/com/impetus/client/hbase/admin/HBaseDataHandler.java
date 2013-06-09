@@ -46,6 +46,8 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
@@ -75,7 +77,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class HBaseDataHandler implements DataHandler
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseDataHandler.class);
+    private static Logger log = LoggerFactory.getLogger(HBaseDataHandler.class);
 
     /** The admin. */
     private HBaseAdmin admin;

@@ -32,6 +32,8 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.exceptions.NotFoundException;
 import org.scale7.cassandra.pelops.exceptions.PelopsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -50,7 +52,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
-    private static final Log log = LogFactory.getLog(PelopsInvertedIndexHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PelopsInvertedIndexHandler.class);
 
     private final PelopsClient pelopsClient;
 
@@ -186,12 +188,12 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (NotFoundException e)
         {
-            log.error("Error while fetching super column for Row " + rowKey + ", Caused by: ", e);
+            log.error("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
             return null;
         }
         catch (PelopsException e)
         {
-            log.error("Error while fetching super column for Row " + rowKey + ", Caused by: ", e);
+            log.error("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
             return null;
         }
         return thriftSuperColumn;

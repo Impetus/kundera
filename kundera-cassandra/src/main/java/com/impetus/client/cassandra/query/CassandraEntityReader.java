@@ -24,8 +24,8 @@ import java.util.Set;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.kundera.Constants;
@@ -61,7 +61,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
 
     /** The log. */
-    private static Log log = LogFactory.getLog(CassandraEntityReader.class);
+    private static Logger log = LoggerFactory.getLogger(CassandraEntityReader.class);
 
     /**
      * Instantiates a new cassandra entity reader.
@@ -106,6 +106,10 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
+        if(log.isInfoEnabled())
+        {
+            log.info("On populate relation via JPQL");
+        }
         List<EnhanceEntity> ls = null;
         List<String> relationNames = m.getRelationNames();
         boolean isParent = m.isParent();

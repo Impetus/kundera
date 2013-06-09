@@ -29,11 +29,14 @@ import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.TweetCassandra;
 import com.impetus.client.twitter.entities.UserCassandra;
+import com.impetus.kundera.KunderaException;
 
 /**
  * Data access object class for implementation of twitter.
@@ -42,7 +45,7 @@ import com.impetus.client.twitter.entities.UserCassandra;
  */
 public class TwitterServiceCassandra extends SuperDaoCassandra implements TwitterCassandra
 {
-    private static final Log log = LogFactory.getLog(TwitterServiceCassandra.class);
+    private static final Logger log = LoggerFactory.getLogger(TwitterServiceCassandra.class);
 
     private EntityManager em;
 
@@ -58,8 +61,8 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
             }
             catch (Exception e)
             {
-                log.error(e);
-                e.printStackTrace();
+                log.error(e.getMessage(),e);
+                throw new KunderaException(e);
             }
         }
 

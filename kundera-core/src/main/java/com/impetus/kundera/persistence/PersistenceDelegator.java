@@ -32,6 +32,8 @@ import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
@@ -72,7 +74,7 @@ public final class PersistenceDelegator
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(PersistenceDelegator.class);
+    private static final Logger log = LoggerFactory.getLogger(PersistenceDelegator.class);
 
     /** The closed. */
     private boolean closed;

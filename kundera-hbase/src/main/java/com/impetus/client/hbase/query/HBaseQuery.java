@@ -35,6 +35,8 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
@@ -63,7 +65,7 @@ public class HBaseQuery extends QueryImpl implements Query
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseQuery.class);
+    private static Logger log = LoggerFactory.getLogger(HBaseQuery.class);
 
     /**
      * Holds reference to entity reader.

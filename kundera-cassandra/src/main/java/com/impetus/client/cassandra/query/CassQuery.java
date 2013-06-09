@@ -32,10 +32,10 @@ import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -69,7 +69,7 @@ public class CassQuery extends QueryImpl implements Query
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CassQuery.class);
+    private static Logger log = LoggerFactory.getLogger(CassQuery.class);
 
     /** The reader. */
     private EntityReader reader;
@@ -104,7 +104,7 @@ public class CassQuery extends QueryImpl implements Query
     {
         if (log.isDebugEnabled())
         {
-            log.debug("Populating entities for Cassandra query.");
+            log.debug("Populating entities for Cassandra query {}.", getJPAQuery());
         }
         List<Object> result = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -229,8 +229,6 @@ public class CassQuery extends QueryImpl implements Query
         {
             List result = getResultList();
             return result != null ? result.size() : 0;
-            // throw new
-            // QueryHandlerException("executeUpdate() is currently supported for native queries only");
         }
 
         return 0;
@@ -286,6 +284,11 @@ public class CassQuery extends QueryImpl implements Query
             }
             return columns;
         }
+        
+        if(log.isInfoEnabled())
+        {
+            log.info("No record found, returning null.");
+        }
         return null;
     }
 
@@ -308,6 +311,12 @@ public class CassQuery extends QueryImpl implements Query
         // check if id column are mixed with other columns or not?
         String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         boolean idPresent = false;
+        
+        if(log.isInfoEnabled())
+        {
+            log.info("Preparing index clause for query {}", getJPAQuery());
+        }
+
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -390,12 +399,12 @@ public class CassQuery extends QueryImpl implements Query
 
             if (!idPresent)
             {
-                throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+                throw new UnsupportedOperationException("Condition " + condition + " is not suported in  cassandra.");
             }
             else
             {
-                throw new UnsupportedOperationException(" Condition " + condition
-                        + " is not suported for query on row key!");
+                throw new UnsupportedOperationException("Condition " + condition
+                        + " is not suported for query on row key.");
 
             }
         }

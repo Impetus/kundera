@@ -40,6 +40,8 @@ import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
@@ -78,7 +80,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         TableGenerator
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseClient.class);
+    private static Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
     /** The handler. */
     private DataHandler handler;

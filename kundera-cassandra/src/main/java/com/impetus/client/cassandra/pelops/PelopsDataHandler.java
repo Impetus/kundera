@@ -24,8 +24,6 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -42,11 +40,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 final class PelopsDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
-    /** The timestamp. */
-    private long timestamp = System.currentTimeMillis();
-
-    /** The log. */
-    private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
     private final PelopsClient pelopsClient;
 

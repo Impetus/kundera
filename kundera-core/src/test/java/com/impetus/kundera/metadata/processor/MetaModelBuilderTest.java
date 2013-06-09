@@ -40,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.entities.AssociationEntity;
 import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
@@ -72,7 +74,7 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 public class MetaModelBuilderTest
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetaModelBuilderTest.class);
+    private static Logger log = LoggerFactory.getLogger(MetaModelBuilderTest.class);
 
     /** The builder. */
     @SuppressWarnings("rawtypes")

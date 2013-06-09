@@ -15,21 +15,36 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
+import java.util.Map;
+
+import javax.persistence.PersistenceException;
+
+import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TException;
+import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.service.CassandraHost;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * The Class PelopsUtils.
  */
 public class PelopsUtils
 {
+
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
+
     /**
      * Generate pool name.
      * 

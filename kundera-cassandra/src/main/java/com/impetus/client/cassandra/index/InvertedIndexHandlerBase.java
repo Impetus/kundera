@@ -32,9 +32,9 @@ import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
@@ -53,7 +53,7 @@ import com.impetus.kundera.query.QueryHandlerException;
 public abstract class InvertedIndexHandlerBase
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(InvertedIndexHandlerBase.class);
+    private static Logger log = LoggerFactory.getLogger(InvertedIndexHandlerBase.class);
 
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -92,8 +92,10 @@ public abstract class InvertedIndexHandlerBase
         Object pk = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), superColumnName);
         IndexOperator condition = expression.getOp();
 
-        if (log.isDebugEnabled())
-            log.debug("rowKey: " + rowKey + "; Super column Name: " + superColumnNameStr + "; condition: " + condition);
+        if (log.isInfoEnabled())
+        {
+            log.info("RowKey: {} ; Super column Name: {} on condition.",rowKey,superColumnNameStr, condition);
+        }
 
         // TODO: Second check unnecessary but unavoidable as filter clause
         // property is incorrectly passed as column name

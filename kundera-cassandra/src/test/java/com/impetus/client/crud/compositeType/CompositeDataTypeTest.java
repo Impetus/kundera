@@ -30,11 +30,11 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -89,9 +89,6 @@ public class CompositeDataTypeTest
 
     /** The calendar. */
     protected Calendar calendar = Calendar.getInstance();
-
-    /** The Constant logger. */
-    private static final Log logger = LogFactory.getLog(CompositeDataTypeTest.class);
 
     /**
      * @throws java.lang.Exception

@@ -33,6 +33,8 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -63,7 +65,7 @@ final class MongoDBDataHandler
 {
 
     /** The log. */
-    private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
+    private static Logger log = LoggerFactory.getLogger(MongoDBDataHandler.class);
 
     /**
      * Gets the entity from document.

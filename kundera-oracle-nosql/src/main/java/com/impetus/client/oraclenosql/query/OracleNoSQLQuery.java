@@ -26,6 +26,8 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
@@ -47,7 +49,7 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class OracleNoSQLQuery extends QueryImpl implements Query
 {
-    private static Log log = LogFactory.getLog(OracleNoSQLQuery.class);
+    private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
     public OracleNoSQLQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
