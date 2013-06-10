@@ -16,8 +16,7 @@
 package com.impetus.kundera.proxy;
 
 /**
- * Interface for proxies.
- * 
+ * Interface for proxies.* 
  * @author animesh.kumar
  */
 public interface KunderaProxy

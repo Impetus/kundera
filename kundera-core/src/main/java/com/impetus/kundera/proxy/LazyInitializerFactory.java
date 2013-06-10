@@ -52,5 +52,7 @@ public interface LazyInitializerFactory
      */
     KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, final Method getIdentifierMethod,
             final Method setIdentifierMethod, final Object id, final PersistenceDelegator pd);
+    
+    KunderaProxy getProxy();
 
 }

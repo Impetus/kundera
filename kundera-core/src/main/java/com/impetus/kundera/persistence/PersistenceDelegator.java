@@ -28,10 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
-import javax.persistence.metamodel.Metamodel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +48,10 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.IdDiscriptor;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
-import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.MainCache;
@@ -65,7 +59,7 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
-import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.query.QueryResolver;
 import com.impetus.kundera.utils.ObjectUtils;
 
@@ -251,10 +245,25 @@ public final class PersistenceDelegator
         }
         else
         {
-            return (E) ObjectUtils.deepCopy(nodeData);
+        	 E e =  (E) ObjectUtils.deepCopy(nodeData);            
+             setProxyOwners(entityMetadata, e);
+             return e;
         }
 
     }
+
+	/**
+	 * @param <E>
+	 * @param entityMetadata
+	 * @param e
+	 */
+	private <E> void setProxyOwners(EntityMetadata entityMetadata, E e) {
+		KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata()
+				.getLazyInitializerFactory().getProxy();
+		if (kunderaProxy != null) {
+			kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+		}
+	}
 
     /**
      * Retrieves a {@link List} of Entities for given Primary Keys
@@ -901,3 +910,4 @@ public final class PersistenceDelegator
         }
     }
 }
+

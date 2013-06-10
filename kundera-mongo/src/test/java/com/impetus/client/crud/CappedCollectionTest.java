@@ -94,7 +94,7 @@ public class CappedCollectionTest
 
         // Index should not have been created
         List<DBObject> indexInfo = collection.getIndexInfo();
-        Assert.assertTrue(indexInfo.isEmpty());
+        Assert.assertTrue(indexInfo.isEmpty() || indexInfo.size() == 1);
 
         // Insert "Max" records successfully
         for (int i = 1; i <= max; i++)

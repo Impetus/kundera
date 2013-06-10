@@ -341,11 +341,7 @@ public class MetamodelConfiguration implements Configuration
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()
                                 + ". Make sure no two entity classes with the same name "
                                 + " are specified for persistence unit " + persistenceUnit);
-                    }
-
-                    // This is required just to keep hibernate happy.
-                    // As somehow it complains for lazily loading of entities
-                    // while building session factory.
+                    } 
 
                     entityNameToClassMap.put(clazz.getSimpleName(), clazz);
 

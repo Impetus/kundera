@@ -33,8 +33,6 @@ import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-//import org.hibernate.collection.internal.AbstractPersistentCollection;
-import com.impetus.kundera.PersistenceUtilHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +44,8 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.proxy.collection.ProxyCollection;
 
 /**
  * Provides utility methods for operation on objects
@@ -216,12 +216,24 @@ public class ObjectUtils
                 Field relationField = relation.getProperty();
                 Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
 
-                if (sourceRelationObject != null && !( PersistenceUtilHelper.instanceOfHibernateAbstractPersistentCollection(sourceRelationObject)))
+                if (sourceRelationObject != null)
                 {
                     if (sourceRelationObject instanceof KunderaProxy)
                     {
                         PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
                         continue;
+                    }
+                    else if(ProxyHelper.isPersistentCollection(sourceRelationObject))
+                    {
+                    	PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
+                    	continue;
+                    }
+                    else if(ProxyHelper.isKunderaProxyCollection(sourceRelationObject))
+                    {
+                    	ProxyCollection pc = ((ProxyCollection) sourceRelationObject).getCopy();                    	
+                    	pc.setOwner(target);
+                    	PropertyAccessorHelper.set(target, relationField, pc);
+                    	continue;
                     }
 
                     Object targetRelationObject = null;
@@ -236,11 +248,14 @@ public class ObjectUtils
 
                         for (Object obj : (Collection) sourceRelationObject)
                         {
-                            Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
+                            if(obj != null)
+                            {
+                            	Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
 
-                            m.invoke(targetRelationObject, copyTargetRelObj);
+                                m.invoke(targetRelationObject, copyTargetRelObj);
+
+                            }
                         }
-
                     }
                     else if (Map.class.isAssignableFrom(relationObjectClass))
                     {
