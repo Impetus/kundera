@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.mongodb.DB;
 
 /**
@@ -320,6 +321,7 @@ public class MongoCompositeTypeTest
     {
         truncateMongo();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     /**
@@ -345,20 +347,20 @@ public class MongoCompositeTypeTest
             }
             catch (SecurityException e)
             {
-                logger.error("Error while truncating database",e);
+                logger.error("Error while truncating database", e);
             }
 
             catch (NoSuchFieldException e)
             {
-                logger.error("Error while truncating database",e);
+                logger.error("Error while truncating database", e);
             }
             catch (IllegalArgumentException e)
             {
-                logger.error("Error while truncating database",e);
+                logger.error("Error while truncating database", e);
             }
             catch (IllegalAccessException e)
             {
-                logger.error("Error while truncating database",e);
+                logger.error("Error while truncating database", e);
             }
         }
 

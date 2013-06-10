@@ -126,15 +126,6 @@ final class MongoDBDataHandler
 
             for (Attribute column : columns)
             {
-                if (column.getName().equals(m.getIdAttribute().getName()))
-                {
-                    System.out.println(column.getName());
-                    System.out.println(column);
-                    System.out.println(m.getIdAttribute().getName());
-                    System.out.println(m.getIdAttribute());
-                    System.out.println();
-                }
-
                 if (!column.getName().equals(m.getIdAttribute().getName()))
                 {
                     String fieldName = ((AbstractAttribute) column).getJPAColumnName();
