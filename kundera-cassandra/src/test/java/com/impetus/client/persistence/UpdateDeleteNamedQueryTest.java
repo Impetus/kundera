@@ -45,12 +45,14 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * Test case for update/delete via JPQL.
@@ -218,6 +220,11 @@ public class UpdateDeleteNamedQueryTest
         reader.read(persistenceUnit);
         String[] persistenceUnits = new String[] { persistenceUnit };
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
+        
+        CoreMetadata coreMetadata = new CoreMetadata();
+        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+        
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

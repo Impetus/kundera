@@ -38,12 +38,14 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * @author kuldeep.mishra
@@ -152,7 +154,12 @@ public class NullableFieldAccessorTest
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        new ClientFactoryConfiguraton(null, persistenceUnit).configure();
+        new ClientFactoryConfiguraton(null, persistenceUnit).configure();  
+        
+        CoreMetadata coreMetadata = new CoreMetadata();
+        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+        
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

@@ -35,7 +35,7 @@ public class UserOTOPK
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
     @PrimaryKeyJoinColumn
     private AddressOTOPK address;
 

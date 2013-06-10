@@ -166,6 +166,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         {
             PersonnelUni1ToM p = (PersonnelUni1ToM) dao.findPerson(PersonnelUni1ToM.class, "unionetomany_1");
             Assert.assertNotNull(p);
+            Assert.assertEquals(2, p.getAddresses().size());
             p.setPersonName("Saurabh");
 
             for (HabitatUni1ToM address : p.getAddresses())
@@ -244,6 +245,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         PersonnelUni1ToM pAfterMerge = (PersonnelUni1ToM) dao.findPerson(PersonnelUni1ToM.class, "unionetomany_1");
         Assert.assertNotNull(pAfterMerge);
         Assert.assertEquals("Saurabh", pAfterMerge.getPersonName());
+        Assert.assertEquals(2, pAfterMerge.getAddresses().size());
 
         for (HabitatUni1ToM address : pAfterMerge.getAddresses())
         {

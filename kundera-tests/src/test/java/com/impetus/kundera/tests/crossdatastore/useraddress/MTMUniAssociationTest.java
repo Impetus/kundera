@@ -195,6 +195,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         PersonnelUniMToM p1 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_1");
         Assert.assertNotNull(p1);
         p1.setPersonName("Saurabh");
+        Assert.assertEquals(2, p1.getAddresses().size());
         for (HabitatUniMToM address : p1.getAddresses())
         {
             address.setStreet("Brand New Street");
@@ -203,6 +204,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         PersonnelUniMToM p1AfterMerge = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_1");
         Assert.assertNotNull(p1AfterMerge);
         Assert.assertEquals("Saurabh", p1AfterMerge.getPersonName());
+        Assert.assertEquals(2, p1AfterMerge.getAddresses().size());
         for (HabitatUniMToM address : p1AfterMerge.getAddresses())
         {
             Assert.assertEquals("Brand New Street", address.getStreet());
@@ -210,6 +212,7 @@ public class MTMUniAssociationTest extends TwinAssociation
 
         PersonnelUniMToM p2 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_2");
         Assert.assertNotNull(p2);
+        Assert.assertEquals(2, p2.getAddresses().size());
         p2.setPersonName("Vijay");
         for (HabitatUniMToM address : p2.getAddresses())
         {
@@ -219,6 +222,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         PersonnelUniMToM p2AfterMerge = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_2");
         Assert.assertNotNull(p2AfterMerge);
         Assert.assertEquals("Vijay", p2AfterMerge.getPersonName());
+        Assert.assertEquals(2, p2AfterMerge.getAddresses().size());
         for (HabitatUniMToM address : p2AfterMerge.getAddresses())
         {
             Assert.assertEquals("Brand New Street", address.getStreet());

@@ -100,7 +100,7 @@ public class UserAddressDaoImpl extends BaseDao
         String query = "Select p from " + entityClass.getSimpleName() + " p where p.personId = " + personId;
         Query q = em.createQuery(query);
         List persons = q.getResultList();
-        closeEntityManager();
+        //closeEntityManager();
         assert persons != null;
         assert !persons.isEmpty();
         assert persons.size() == 1;
@@ -114,7 +114,7 @@ public class UserAddressDaoImpl extends BaseDao
         String query = "Select p from " + entityClass.getSimpleName() + " p where p.personName = " + personName;
         Query q = em.createQuery(query);
         List persons = q.getResultList();
-        closeEntityManager();
+        //closeEntityManager();
 
         return persons;
     }
