@@ -29,16 +29,10 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * @author kuldeep.mishra
  * 
  */
-public class ClientFactoryConfiguraton implements Configuration
+public class ClientFactoryConfiguraton extends AbstractSchemaConfiguration implements Configuration
 {
     /** The log instance. */
     private static Logger log = LoggerFactory.getLogger(ClientFactoryConfiguraton.class);
-
-    /** Holding instance for persistence units. */
-    private String[] persistenceUnits;
-
-    /** Holding persistenceUnit properties */
-    private Map externalProperties;
 
     /**
      * Constructor parameterised with persistence units.
@@ -46,10 +40,9 @@ public class ClientFactoryConfiguraton implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    public ClientFactoryConfiguraton(Map puProperties, String... persistenceUnits)
+    public ClientFactoryConfiguraton(Map externalProperties, String... persistenceUnits)
     {
-        this.persistenceUnits = persistenceUnits;
-        this.externalProperties = puProperties;
+        super(persistenceUnits, externalProperties);
     }
 
     @Override
@@ -61,7 +54,7 @@ public class ClientFactoryConfiguraton implements Configuration
         {
             log.info("Loading Client(s) For Persistence Unit(s) " + pu);
 
-            Map<String, Object> puProperty = KunderaCoreUtils.getExternalProperties(pu, externalProperties,
+            Map<String, Object> puProperty = KunderaCoreUtils.getExternalProperties(pu, externalPropertyMap,
                     persistenceUnits);
 
             ClientResolver.getClientFactory(pu, puProperty).load(pu, puProperty);
