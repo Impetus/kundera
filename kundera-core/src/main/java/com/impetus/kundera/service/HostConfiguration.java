@@ -107,8 +107,8 @@ public abstract class HostConfiguration
     {
         if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
         {
-            logger.error("Host or port should not be null / port should be numeric");
-            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+            logger.error("Host or port should not be null / port should be numeric.");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric.");
         }
     }
 

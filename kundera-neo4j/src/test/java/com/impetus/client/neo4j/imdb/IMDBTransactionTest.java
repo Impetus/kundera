@@ -15,6 +15,8 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import javax.persistence.Persistence;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,6 +57,7 @@ public class IMDBTransactionTest extends IMDBTestBase
     @Before
     public void setUp() throws Exception
     {
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();
     }
 

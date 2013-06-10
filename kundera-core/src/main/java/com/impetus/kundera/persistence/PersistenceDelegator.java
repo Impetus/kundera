@@ -203,7 +203,6 @@ public final class PersistenceDelegator
     public <E> E findById(Class<E> entityClass, Object primaryKey)
     {
         E e = find(entityClass, primaryKey);
-
         if (e == null)
             return null;
 
@@ -262,10 +261,6 @@ public final class PersistenceDelegator
             lock.readLock().lock();
             node.find();
             lock.readLock().unlock();
-        }
-        else
-        {
-
         }
         Object nodeData = node.getData();
         if (nodeData == null)

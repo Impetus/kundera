@@ -1728,7 +1728,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("Max_Compaction_Threshold should be numeric type, Caused by: ", nfe);
+                    log.error("Max_Compaction_Threshold should be numeric type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1752,7 +1752,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("Min_Compaction_Threshold should be numeric type, Caused by: ", nfe);
+                    log.error("Min_Compaction_Threshold should be numeric type, Caused by: . ", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1814,7 +1814,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("GC_GRACE_SECONDS should be numeric type, Caused by: ", nfe);
+                    log.error("GC_GRACE_SECONDS should be numeric type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1848,7 +1848,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: ", nfe);
+                    log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }

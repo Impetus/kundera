@@ -180,7 +180,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             this.persistenceUnits = null;
             this.properties = null;
             clientFactories.clear();
-            clientFactories = null;
+            clientFactories = new ConcurrentHashMap<String, ClientFactory>();
         }
         else
         {

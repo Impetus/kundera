@@ -15,7 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import javax.persistence.Persistence;
 import javax.persistence.metamodel.Metamodel;
 
 import junit.framework.Assert;

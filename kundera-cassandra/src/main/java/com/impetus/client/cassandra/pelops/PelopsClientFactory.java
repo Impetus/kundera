@@ -56,7 +56,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
-import com.impetus.kundera.service.policy.LoadBalancingPolicy;
+import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
 import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
@@ -404,7 +404,14 @@ public class PelopsClientFactory extends GenericClientFactory
         }
     }
 
-    private class PelopsLeastActiveBalancingPolcy implements LoadBalancingPolicy
+    /**
+     * Extends LeastActiveBalancingPolicy class and provide own implementation
+     * in order to support least active balancing policy.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    private class PelopsLeastActiveBalancingPolcy extends LeastActiveBalancingPolicy
     {
 
         /**
@@ -413,7 +420,6 @@ public class PelopsClientFactory extends GenericClientFactory
          *         determined by maxActive connection.
          * 
          */
-        @Override
         public Object getPool(Collection<Object> pools)
         {
             List<Object> vals = Lists.newArrayList(pools);
@@ -424,6 +430,13 @@ public class PelopsClientFactory extends GenericClientFactory
             return concurrentConnectionPool;
         }
 
+        /**
+         * Compares two pool object on the basis of their maxActive connection
+         * per node.
+         * 
+         * @author Kuldeep Mishra
+         * 
+         */
         private final class ShufflingCompare implements Comparator<Object>
         {
             public int compare(Object o1, Object o2)

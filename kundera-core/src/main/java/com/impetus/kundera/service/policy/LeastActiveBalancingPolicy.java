@@ -18,6 +18,10 @@ package com.impetus.kundera.service.policy;
 import java.util.Collection;
 
 /**
+ * Abstract class leastActiveBalancingPolicy, all client factory will have a class which will extends it
+ * in order to support least active load.
+ * balancing policy.
+ * 
  * @author Kuldeep.Mishra
  * 
  */
@@ -25,7 +29,7 @@ public abstract class LeastActiveBalancingPolicy implements LoadBalancingPolicy
 {
 
     /**
-     *@return pool object for host which has least active connections.
+     * @return pool object for host which has least active connections.
      * 
      */
     @Override

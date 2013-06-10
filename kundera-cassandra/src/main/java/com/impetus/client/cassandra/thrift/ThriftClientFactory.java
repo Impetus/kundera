@@ -294,6 +294,13 @@ public class ThriftClientFactory extends GenericClientFactory
         }
     }
 
+    /**
+     * Extends LeastActiveBalancingPolicy class and provide own implementation
+     * in order to support least active balancing policy.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
     private class ThriftLeastActiveBalancingPolcy extends LeastActiveBalancingPolicy
     {
 
@@ -314,6 +321,12 @@ public class ThriftClientFactory extends GenericClientFactory
             return concurrentConnectionPool;
         }
 
+        /**
+         * Compares two pool object on the basis of their maxActive connection.
+         * 
+         * @author Kuldeep Mishra
+         * 
+         */
         private final class ShufflingCompare implements Comparator<Object>
         {
             public int compare(Object o1, Object o2)

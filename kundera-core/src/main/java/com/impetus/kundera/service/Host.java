@@ -15,7 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.service;
 
+import com.impetus.kundera.service.policy.LoadBalancingPolicy;
+
 /**
+ * Host interface all module will implement it in order to provide
+ * {@link LoadBalancingPolicy }.
  * 
  * @author Kuldeep.Mishra
  * 
