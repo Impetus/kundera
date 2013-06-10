@@ -16,7 +16,6 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +54,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.metadata.validator.EntityValidator;
-import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -67,17 +64,11 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * @author Kuldeep.Kumar
  * 
  */
-public class SchemaConfiguration implements Configuration
+public class SchemaConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(SchemaConfiguration.class);
-
-    /** Holding instance for persistence units. */
-    private String[] persistenceUnits;
-
-    /** Holding persistenceUnit properties */
-    private Map externalPropertyMap;
 
     /**
      * pu to schema metadata map .
@@ -92,8 +83,7 @@ public class SchemaConfiguration implements Configuration
      */
     public SchemaConfiguration(Map externalProperties, String... persistenceUnits)
     {
-        this.persistenceUnits = persistenceUnits;
-        this.externalPropertyMap = externalProperties;
+        super(persistenceUnits,externalProperties);
     }
 
     @Override
