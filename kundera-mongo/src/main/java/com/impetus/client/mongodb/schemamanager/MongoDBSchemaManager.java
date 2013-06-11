@@ -111,7 +111,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
             boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (tableInfo.isIndexable() && !isCappedCollection)
+            if (!isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
             }
@@ -150,7 +150,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
 
             boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (tableInfo.isIndexable() && !isCappedCollection)
+            if (!isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
             }

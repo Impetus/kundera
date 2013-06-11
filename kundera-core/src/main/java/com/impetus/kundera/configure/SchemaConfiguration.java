@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -118,10 +117,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 String idName = entityMetadata.getIdAttribute() != null ? ((AbstractAttribute) entityMetadata
                         .getIdAttribute()).getJPAColumnName() : null;
 
-                boolean isCompositeId = idClassName.isAnnotationPresent(Embeddable.class);
-
-                TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
-                        type.name(), idClassName, idName, isCompositeId);
+                TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), type.name(), idClassName, idName);
 
                 // check for tableInfos not empty and contains the present
                 // tableInfo.
@@ -145,8 +141,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     tableInfos.add(tableInfo);
                 }
                 // Add table for GeneratedValue if opted TableStrategy
-                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName,
-                        isCompositeId);
+                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName);
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
         }
@@ -180,14 +175,13 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      * @param isCompositeId
      */
     private void addTableGenerator(ApplicationMetadata appMetadata, String persistenceUnit, List<TableInfo> tableInfos,
-            EntityMetadata entityMetadata, Class idClassName, String idName, boolean isCompositeId)
+            EntityMetadata entityMetadata, Class idClassName, String idName)
     {
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(entityMetadata.getEntityClazz().getName());
         if (keyValue != null && keyValue.getTableDiscriptor() != null)
         {
-            TableInfo tableGeneratorDiscriptor = new TableInfo(keyValue.getTableDiscriptor().getTable(), false,
-                    "CounterColumnType", String.class, idName, isCompositeId);
+            TableInfo tableGeneratorDiscriptor = new TableInfo(keyValue.getTableDiscriptor().getTable(), "CounterColumnType", String.class, idName);
             if (!tableInfos.contains(tableGeneratorDiscriptor))
             {
                 tableGeneratorDiscriptor.addColumnInfo(getJoinColumn(tableGeneratorDiscriptor, keyValue
@@ -236,9 +230,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     Type targetEntityType = targetEntityMetadata.getType();
                     Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
                     String idName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
-                    boolean isCompositeId = idClass.isAnnotationPresent(Embeddable.class);
-                    TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
-                            targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass, idName, isCompositeId);
+                    TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),targetEntityType.name(), idClass, idName);
 
                     // In case of different persistence unit. case for poly glot
                     // persistence.
@@ -275,8 +267,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                         .getInverseJoinColumns().toArray()[0] : null;
                 if (joinTableName != null)
                 {
-                    TableInfo joinTableInfo = new TableInfo(joinTableName, false, Type.COLUMN_FAMILY.name(),
-                            String.class, joinColumnName.concat(inverseJoinColumnName), false);
+                    TableInfo joinTableInfo = new TableInfo(joinTableName, Type.COLUMN_FAMILY.name(),
+                            String.class, joinColumnName.concat(inverseJoinColumnName));
                     if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
                     {
                         joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata

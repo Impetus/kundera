@@ -40,8 +40,6 @@ public class TableInfo
     /** The table id name. */
     private String idColumnName;
 
-    /** The table id type /. */
-    private boolean isCompositeId;
 
     /** The type. */
     private String type;
@@ -49,9 +47,9 @@ public class TableInfo
     /** The embedded column metadatas. */
     private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
 
-    /** The is indexable. */
-    private boolean isIndexable;
-
+    /**
+     * 
+     */
     private List<IndexInfo> columnToBeIndexed = new ArrayList<IndexInfo>();
 
     /**
@@ -66,15 +64,13 @@ public class TableInfo
      * @param idClassType
      *            the id class type
      */
-    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, Class idClassType,
-            String idColumnName, boolean isCompositeId)
+    public TableInfo(String tableName,String tableSchemaType, Class idClassType,
+            String idColumnName)
     {
         this.tableName = tableName;
-        this.isIndexable = isIndexable;
         this.type = tableSchemaType;
         this.idClazz = idClassType;
         this.idColumnName = idColumnName;
-        this.isCompositeId = isCompositeId;
     }
 
     /**
@@ -117,8 +113,6 @@ public class TableInfo
         strBuilder.append(tableName);
         strBuilder.append(" | type: ==>");
         strBuilder.append(type);
-        strBuilder.append(" | isIndexable: ==>");
-        strBuilder.append(isIndexable);
         return strBuilder.toString();
     }
 
@@ -241,47 +235,19 @@ public class TableInfo
     }
 
     /**
-     * Checks if is indexable.
+     * Returns name of id attribute.
      * 
-     * @return the isIndexable
+     * @return id attribute name.
      */
-    public boolean isIndexable()
-    {
-        return isIndexable;
-    }
-
-    /**
-     * Sets the indexable.
-     * 
-     * @param isIndexable
-     *            the isIndexable to set
-     */
-    public void setIndexable(boolean isIndexable)
-    {
-        this.isIndexable = isIndexable;
-    }
-
-    /**
-     * Sets the type.
-     * 
-     * @param type
-     *            the type to set
-     */
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-
     public String getIdColumnName()
     {
         return idColumnName;
     }
 
-    public boolean isCompositeId()
-    {
-        return isCompositeId;
-    }
-
+    /**
+     * Returns list of index information object.
+     * @return
+     */
     public List<IndexInfo> getColumnsToBeIndexed()
     {
         return this.columnToBeIndexed;
