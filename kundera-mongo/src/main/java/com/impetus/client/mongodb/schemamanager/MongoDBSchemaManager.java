@@ -69,9 +69,9 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /**
      * Export schema handles the handleOperation method.
      */
-    public void exportSchema()
+    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
-        super.exportSchema();
+        super.exportSchema(persistenceUnit,schemas);
     }
 
     /**

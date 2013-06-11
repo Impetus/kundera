@@ -16,6 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     /**
      * pu to schema metadata map .
      */
-    private Map<String, List<TableInfo>> puToSchemaMetadata;
+    private Map<String, List<TableInfo>> puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
 
     /**
      * Constructor using persistence units as parameter.
@@ -97,7 +98,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
 
         EntityValidator validator = new EntityValidatorImpl(externalPropertyMap);
 
-        puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
+//        puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
 
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
@@ -149,18 +150,25 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 // Validating entity against counter column family.
                 validator.validateEntity(entityMetadata.getEntityClazz());
             }
+            
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
+            SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
+
+            if (schemaManager != null)
+            {
+                schemaManager.exportSchema(persistenceUnit, tableInfos);
+            }
         }
 
-        for (String persistenceUnit : persistenceUnits)
+/*        for (String persistenceUnit : persistenceUnits)
         {
             SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
             if (schemaManager != null)
             {
-                schemaManager.exportSchema();
+                schemaManager.exportSchema(persistenceUnit, puToSchemaMetadata.get(persistenceUnit));
             }
         }
-    }
+*/    }
 
     /**
      * Return schema manager for pu.

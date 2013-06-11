@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.configure.schema.api;
 
+import java.util.List;
+import java.util.Map;
+
+import com.impetus.kundera.configure.schema.TableInfo;
+
 /**
  * Interface to define methods to be implemented by different schema managers.
  * 
@@ -27,7 +32,7 @@ public interface SchemaManager
      * Exports schema according to configured schema operation e.g.
      * {create,create-drop,update,validate}
      */
-    void exportSchema();
+    void exportSchema(String persistenceUnit, List<TableInfo> puToSchemaCol);
 
     /**
      * Method required to drop auto create schema,in case of schema operation as
