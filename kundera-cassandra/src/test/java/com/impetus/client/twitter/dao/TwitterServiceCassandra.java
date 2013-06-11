@@ -27,8 +27,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,7 +134,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
         em.persist(user);
     }
 
-/*    @Override
+    @Override
     public void startFollowing(String userId, String friendUserId)
     {
         UserCassandra user = em.find(UserCassandra.class, userId);
@@ -157,7 +155,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
 
         user.addFollower(follower);
         em.persist(user);
-    }*/
+    }
 
     @Override
     public UserCassandra findUserById(String userId)
@@ -205,7 +203,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
         }
     }
 
-/*    @Override
+    @Override
     public List<UserCassandra> getFollowers(String userId)
     {
         Query q = em.createQuery("select u from UserCassandra u where u.userId =:userId");
@@ -216,7 +214,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
             return null;
         }
         return users.get(0).getFollowers();
-    }*/
+    }
 
     @Override
     public List<UserCassandra> findPersonalDetailByName(String name)

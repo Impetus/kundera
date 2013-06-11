@@ -314,7 +314,7 @@ public abstract class TwitterTestBaseCassandra
 
     /**
      * User1 follows user2.
-     *//*
+     */
     protected void user1FollowsUser2()
     {
         twitter.createEntityManager();
@@ -322,16 +322,16 @@ public abstract class TwitterTestBaseCassandra
         twitter.closeEntityManager();
     }
 
-    *//**
+    /**
      * User1 adds user2 as follower.
-     *//*
+     */
     protected void user1AddsUser2AsFollower()
     {
         twitter.createEntityManager();
         twitter.addFollower(userId1, userId2);
         twitter.closeEntityManager();
     }
-*/
+
     /**
      * Gets the all tweets.
      * 
@@ -470,7 +470,7 @@ public abstract class TwitterTestBaseCassandra
      * 
      * @return the all followers
      */
-   /* protected void getAllFollowers()
+    protected void getAllFollowers()
     {
         twitter.createEntityManager();
         List<UserCassandra> follower1 = twitter.getFollowers(userId1);
@@ -482,7 +482,7 @@ public abstract class TwitterTestBaseCassandra
 
         Assert.assertNull(follower1);
         Assert.assertNotNull(follower2);
-    }*/
+    }
 
     /**
      * @return
