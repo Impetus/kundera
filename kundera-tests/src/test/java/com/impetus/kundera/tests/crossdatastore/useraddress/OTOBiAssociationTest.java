@@ -88,7 +88,7 @@ public class OTOBiAssociationTest extends TwinAssociation
         address.setAddressId("bionetoonefk_a");
         address.setStreet("123, New street");
         person.setAddress(address);
-        address.setPerson(person);
+        //address.setPerson(person);
 
         dao.insert(person);
         col.add(person);
@@ -101,7 +101,21 @@ public class OTOBiAssociationTest extends TwinAssociation
     {
         // Find Person
         PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPerson(PersonnelBi1To1FK.class, "bionetoonefk_1");
-        assertPersonnel(p);
+        //assertPersonnel(p);
+        
+        //Assert.assertNotNull(p);
+        Assert.assertEquals("bionetoonefk_1", p.getPersonId());
+        Assert.assertEquals("Amresh", p.getPersonName());
+
+        //HabitatBi1To1FK address = p.getAddress();
+        Assert.assertNotNull(p.getAddress());
+        Assert.assertEquals("bionetoonefk_a", p.getAddress().getAddressId());
+        Assert.assertEquals("123, New street", p.getAddress().getStreet());
+
+        PersonnelBi1To1FK pp = p.getAddress().getPerson();
+        Assert.assertNotNull(pp);
+        Assert.assertEquals("bionetoonefk_1", pp.getPersonId());
+        Assert.assertEquals("Amresh", pp.getPersonName());
     }
 
     @Override

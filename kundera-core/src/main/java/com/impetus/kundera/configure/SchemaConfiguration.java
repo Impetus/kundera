@@ -16,7 +16,6 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,17 +66,10 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * @author Kuldeep.Kumar
  * 
  */
-public class SchemaConfiguration implements Configuration
+public class SchemaConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
-
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(SchemaConfiguration.class);
-
-    /** Holding instance for persistence units. */
-    private String[] persistenceUnits;
-
-    /** Holding persistenceUnit properties */
-    private Map externalPropertyMap;
 
     /**
      * pu to schema metadata map .
@@ -92,8 +84,7 @@ public class SchemaConfiguration implements Configuration
      */
     public SchemaConfiguration(Map externalProperties, String... persistenceUnits)
     {
-        this.persistenceUnits = persistenceUnits;
-        this.externalPropertyMap = externalProperties;
+        super(persistenceUnits,externalProperties);
     }
 
     @Override
@@ -105,12 +96,14 @@ public class SchemaConfiguration implements Configuration
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
+        EntityValidator validator = new EntityValidatorImpl(externalPropertyMap);
+
         puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
 
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
-            log.info("Configuring schema export for: " + persistenceUnit);
+            log.info("Configuring schema export for : " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
@@ -157,25 +150,41 @@ public class SchemaConfiguration implements Configuration
                 // Add table for GeneratedValue if opted TableStrategy
                 addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName,
                         isCompositeId);
+
+                // Validating entity against counter column family.
+                validator.validateEntity(entityMetadata.getEntityClazz());
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
         }
+
         for (String persistenceUnit : persistenceUnits)
         {
-            Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalPropertyMap, persistenceUnits);
-            if (getSchemaProperty(persistenceUnit, externalProperties) != null
-                    && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
+            SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
+            if (schemaManager != null)
             {
-                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
-                SchemaManager schemaManager = clientFactory != null ? clientFactory
-                        .getSchemaManager(externalProperties) : null;
-                if (schemaManager != null)
-                {
-                    schemaManager.exportSchema();
-                }
+                schemaManager.exportSchema();
             }
         }
+    }
+
+    /**
+     * Return schema manager for pu.
+     * 
+     * @param persistenceUnit
+     * @return
+     */
+    private SchemaManager getSchemaManagerForPu(final String persistenceUnit)
+    {
+        SchemaManager schemaManager = null;
+        Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                externalPropertyMap, persistenceUnits);
+        if (getSchemaProperty(persistenceUnit, externalProperties) != null
+                && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
+        {
+            ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
+            schemaManager = clientFactory != null ? clientFactory.getSchemaManager(externalProperties) : null;
+        }
+        return schemaManager;
     }
 
     /**

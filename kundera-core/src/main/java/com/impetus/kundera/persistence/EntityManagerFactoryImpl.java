@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
@@ -42,11 +43,12 @@ import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
-import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.client.ClientResolverException;
+import com.impetus.kundera.configure.ClientMetadataBuilder;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Implementation class for {@link EntityManagerFactory}
@@ -85,6 +87,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     private final PersistenceUtilHelper.MetadataCache cache = new PersistenceUtilHelper.MetadataCache();
 
+    /** ClientFactory map holds one clientfactory for one persistence unit */
+    private Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
+
     /**
      * Use this if you want to construct this directly.
      * 
@@ -106,6 +111,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         propsMap.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = propsMap;
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
+
+        // configure client factories
+        configureClientFactories();
 
         // Initialize L2 cache
         this.cacheProvider = initSecondLevelCache();
@@ -166,12 +174,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
             for (String pu : persistenceUnits)
             {
-                ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu)).destroy();
+                ((ClientLifeCycleManager) clientFactories.get(pu)).destroy();
                 KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
             }
             this.persistenceUnits = null;
             this.properties = null;
-
+            clientFactories.clear();
+            clientFactories = new ConcurrentHashMap<String, ClientFactory>();
         }
         else
         {
@@ -331,6 +340,19 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     }
 
     /**
+     * Initialize and load clientFactory for all persistenceUnit with external
+     * properties.
+     * 
+     * @param persistenceUnit
+     * @param externalProperties
+     */
+    private void configureClientFactories()
+    {
+        ClientMetadataBuilder builder = new ClientMetadataBuilder(getProperties(), getPersistenceUnits());
+        builder.buildClientFactoryMetadata(clientFactories);
+    }
+
+    /**
      * Inits the second level cache.
      * 
      * @return the cache provider
@@ -381,40 +403,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return persistenceUnits;
     }
 
-    /**
-     * @param puProperty
-     */
-    private Map<String, Object> getExternalProperties(String pu)
+    ClientFactory getClientFactory(final String pu)
     {
-        Map<String, Object> puProperty;
-        if (persistenceUnits.length > 1 && properties != null)
+        ClientFactory clientFactory = clientFactories.get(pu);
+        if (clientFactory != null)
         {
-            puProperty = (Map<String, Object>) properties.get(pu);
-
-            // if property found then return it, if it is null by pass it, else
-            // throw invalidConfiguration.
-            if (puProperty != null)
-            {
-                return fetchPropertyMap(puProperty);
-            }
+            return clientFactory;
         }
-        return properties;
-    }
-
-    /**
-     * @param puProperty
-     * @return
-     */
-    private Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
-    {
-        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
-        {
-            return puProperty;
-        }
-        else
-        {
-            throw new InvalidConfigurationException(
-                    "For cross data store persistence, please specify as: Map {pu,Map of properties}");
-        }
+        logger.error("Client Factory Not Configured For Specified Client Type : ");
+        throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
     }
 }

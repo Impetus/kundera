@@ -101,9 +101,10 @@ public class RedisClientTest
         em.close();
     }
 
-//    @Test
+    @Test
     public void testCRUDWithBatch()
     {
+        
         Map<String, String> batchProperty = new HashMap<String, String>(1);
         batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(REDIS_PU, batchProperty);

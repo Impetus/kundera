@@ -31,13 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.LuceneIndexer;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -71,12 +67,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         }
 
         Set<Object> results = new HashSet<Object>();
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(m.getPersistenceUnit()).getProperties()
-                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
 
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(m.getPersistenceUnit());
         OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
 
         Set<Object> resultsFromIdSearch = new HashSet<Object>();
@@ -183,7 +174,7 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         return interpreter;
     }
 
-    private void addToResults(Set results, Set resultsToAdd, String operation)
+    /*private void addToResults(Set results, Set resultsToAdd, String operation)
     {
         if (resultsToAdd == null || resultsToAdd.isEmpty())
         {
@@ -204,6 +195,6 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         }
 
         resultsToAdd.clear();
-    }
+    }*/
 
 }

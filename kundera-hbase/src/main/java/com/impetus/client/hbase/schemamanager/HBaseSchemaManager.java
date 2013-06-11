@@ -50,6 +50,8 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
  */
 public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
+    private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
+
     /**
      * Hbase admin variable holds the admin authorities.
      */
@@ -301,44 +303,62 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected boolean initiateClient()
     {
+        String message = null;
+        for (String host : hosts)
+        {
+            vaildateHostPort(host, port);
+
+            Configuration hadoopConf = new Configuration();
+            hadoopConf.set("hbase.master", host + ":" + port);
+            conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                    .getConnection() : null;
+            if (conn != null && conn.getProperties() != null)
+            {
+                String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
+                String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
+                vaildateHostPort(zookeeperHost, zookeeperPort);
+                hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : host);
+                hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort
+                        : DEFAULT_ZOOKEEPER_PORT);
+            }
+            else
+            {
+                hadoopConf.set("hbase.zookeeper.quorum", host);
+                hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
+            }
+            HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
+            try
+            {
+                admin = new HBaseAdmin(conf);
+                return true;
+            }
+            catch (MasterNotRunningException mnre)
+            {
+                message = mnre.getMessage();
+                logger.error("Master not running exception, Caused by:", mnre);
+            }
+            catch (ZooKeeperConnectionException zkce)
+            {
+                message = zkce.getMessage();
+                logger.error("Unable to connect to zookeeper, Caused by:", zkce);
+            }
+        }
+        throw new SchemaGenerationException("Master not running exception, Caused by:" + message);
+    }
+
+    /**
+     * Validate host and port.
+     * 
+     * @param host
+     * @param port
+     */
+    private void vaildateHostPort(String host, String port)
+    {
         if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
         {
             logger.error("Host or port should not be null / port should be numeric");
             throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
         }
-
-        Configuration hadoopConf = new Configuration();
-        hadoopConf.set("hbase.master", host + ":" + port);
-        conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
-                .getConnection() : null;
-        if (conn != null && conn.getProperties() != null)
-        {
-            String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
-            String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
-            hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : host);
-            hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : "2181");
-        }
-        else
-        {
-            hadoopConf.set("hbase.zookeeper.quorum", host);
-            hadoopConf.set("hbase.zookeeper.property.clientPort", "2181");
-        }
-        HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
-        try
-        {
-            admin = new HBaseAdmin(conf);
-        }
-        catch (MasterNotRunningException mnre)
-        {
-            logger.error("Master not running exception, Caused by:", mnre);
-            throw new SchemaGenerationException(mnre, "Hbase");
-        }
-        catch (ZooKeeperConnectionException zkce)
-        {
-            logger.error("Unable to connect to zookeeper, Caused by:", zkce);
-            throw new SchemaGenerationException(zkce, "Hbase");
-        }
-        return true;
     }
 
     /**

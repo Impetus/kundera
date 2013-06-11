@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.config;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
@@ -27,6 +29,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Server;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
@@ -47,8 +50,9 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
     public static CassandraSchemaMetadata csmd;
 
-    public CassandraPropertyReader()
+    public CassandraPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         csmd = new CassandraSchemaMetadata();
     }
 
@@ -98,8 +102,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 replication = schema.getSchemaProperties().getProperty(CassandraConstants.REPLICATION_FACTOR);
             }
-            
-            if(logger.isInfoEnabled())
+
+            if (logger.isInfoEnabled())
             {
                 logger.info("Returning replication factor value {}", replication);
             }
@@ -117,8 +121,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             {
                 placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
             }
-            
-            if(logger.isInfoEnabled())
+
+            if (logger.isInfoEnabled())
             {
                 logger.info("Returning placement strategy value {}", placementStrategy);
             }
@@ -127,10 +131,10 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public boolean isCounterColumn(String schemaName, String cfName)
         {
-            Table t = getColumnFamily(schemaName, cfName);
-            if (t != null)
+            Table table = getColumnFamily(schemaName, cfName);
+            if (table != null)
             {
-                return t.getProperties().getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS)
+                return table.getProperties().getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS)
                         .equalsIgnoreCase(CounterColumnType.class.getSimpleName()) ? true : false;
             }
             return false;
@@ -148,12 +152,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            
-            if(logger.isWarnEnabled())
+
+            if (logger.isWarnEnabled())
             {
                 logger.warn("No data store configuration found, returning null.");
             }
-            
+
             return null;
         }
 
@@ -173,8 +177,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     }
                 }
             }
-            
-            if(logger.isInfoEnabled())
+
+            if (logger.isInfoEnabled())
             {
                 logger.info("Returning inverted indexing enabled value {}.", result);
             }
@@ -201,7 +205,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         else
                         {
                             logger.warn("Invalid {} cql version provided, valid are {},{}.", cqlVersion,
-                                CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
+                                    CassandraConstants.CQL_VERSION_2_0, CassandraConstants.CQL_VERSION_3_0);
                         }
                     }
                 }
@@ -233,38 +237,49 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             Schema schema = getSchema(schemaName);
             if (schema != null && schema.getTables() != null)
             {
-                for (Table t : schema.getTables())
+                for (Table table : schema.getTables())
                 {
-                    if (t != null && t.getName() != null && t.getName().equalsIgnoreCase(cfName))
+                    if (table != null && table.getName() != null && table.getName().equalsIgnoreCase(cfName))
                     {
-                        return t;
+                        return table;
                     }
                 }
             }
-            
 
-            if(logger.isWarnEnabled())
+            if (logger.isWarnEnabled())
             {
                 logger.warn("No column family schema found, returning null.");
             }
-            
+
             return null;
         }
 
         public Properties getConnectionProperties()
         {
             DataStore ds = getDataStore();
+            Properties properties = new Properties();
             if (ds != null && ds.getConnection() != null)
             {
-                return ds.getConnection().getProperties();
+                properties = ds.getConnection().getProperties();
+                return properties;
             }
-            
-            if(logger.isWarnEnabled())
+            if (logger.isWarnEnabled())
             {
-                logger.warn("No connection properties found, returning null.");
+                logger.warn("No connection properties found, returning none.");
             }
-            
-            return null;
+            return properties;
+        }
+
+        public List<Server> getConnectionServers()
+        {
+            DataStore ds = getDataStore();
+            List<Server> servers = new ArrayList<Server>();
+            if (ds != null && ds.getConnection() != null)
+            {
+                servers = ds.getConnection().getServers();
+                return servers;
+            }
+            return servers;
         }
     }
 }

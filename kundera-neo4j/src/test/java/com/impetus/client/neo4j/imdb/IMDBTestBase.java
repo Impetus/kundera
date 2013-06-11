@@ -41,7 +41,7 @@ public class IMDBTestBase
 
     protected Actor actor2;
 
-    protected EntityManagerFactory emf;
+    protected static EntityManagerFactory emf;
 
     protected EntityManager em;
 

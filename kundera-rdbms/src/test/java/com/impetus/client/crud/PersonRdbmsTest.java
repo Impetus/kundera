@@ -140,6 +140,8 @@ public class PersonRdbmsTest extends BaseTest
         {
             em.remove(val);
         }
+        em.close();
+        emf.close();
         cli.update("DELETE FROM TESTDB.PERSON");
         cli.update("DROP TABLE TESTDB.PERSON");
         cli.update("DROP SCHEMA TESTDB");

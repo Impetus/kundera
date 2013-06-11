@@ -241,7 +241,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         // DBCursor cursor = dbCollection.findOne(query);
         DBObject fetchedDocument = dbCollection.findOne(query);
-        ;
 
         /*
          * if (cursor.hasNext()) { fetchedDocument = cursor.next(); } else {
@@ -651,7 +650,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         String documentName = metadata.getTableName();
         DBObject document = null;
         document = new BasicDBObject();
-
         document = handler.getDocumentFromEntity(document, metadata, entity, relationHolders);
 
         if (isUpdate)

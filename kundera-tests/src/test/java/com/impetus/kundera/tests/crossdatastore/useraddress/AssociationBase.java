@@ -36,8 +36,6 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,6 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
-import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
 import com.mongodb.DB;
 
@@ -309,7 +306,7 @@ public abstract class AssociationBase
         }
 
         // HBaseCli.stopCluster();
-        // dao.closeEntityManagerFactory();
+//        dao.closeEntityManagerFactory();
     }
 
     /**
@@ -344,19 +341,19 @@ public abstract class AssociationBase
             }
             catch (SecurityException e)
             {
-                log.error("Error while truncating db",e);
+                log.error("Error while truncating db", e);
             }
             catch (NoSuchFieldException e)
             {
-                log.error("Error while truncating db",e);
+                log.error("Error while truncating db", e);
             }
             catch (IllegalArgumentException e)
             {
-                log.error("Error while truncating db",e);
+                log.error("Error while truncating db", e);
             }
             catch (IllegalAccessException e)
             {
-                log.error("Error while truncating db",e);
+                log.error("Error while truncating db", e);
             }
         }
 

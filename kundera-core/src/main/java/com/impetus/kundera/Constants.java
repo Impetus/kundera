@@ -93,6 +93,20 @@ public final class Constants
 
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
+    public final static String LOADBALANCING_POLICY = "loadbalancing.policy";
+    
+    public final static String FAILOVER_POLICY = "failover.policy";
+
+    public final static String FAIL_FAST = "fail.fast";
+
+    public final static String ON_FAIL_TRY_ONE_NEXT_AVAILABLE = "on.fail.try.one.next.available";
+
+    public final static String ON_FAIL_TRY_ALL_AVAILABLE = "on.fail.try.all.available";
+    
+    public final static String RETRY_DELAY = "retry.delay";
+    
+    public final static String RETRY = "retry";
+
     // public final static String INVERTED_INDEXING_ENABLED =
     // "inverted.indexing.enabled";
 

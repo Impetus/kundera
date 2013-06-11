@@ -80,7 +80,7 @@ public class CassandraSchemaManagerValidateEntityTest
     public void testValidateEntity()
     {
         getEntityManagerFactory();
-        CassandraPropertyReader reader = new CassandraPropertyReader();
+        CassandraPropertyReader reader = new CassandraPropertyReader(null);
         reader.read(persistenceUnit);
         CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         boolean valid = manager.validateEntity(ValidCounterColumnFamily.class);

@@ -81,7 +81,8 @@ public abstract class InvertedIndexHandlerBase
      * search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression,
+            boolean isRowKeyQuery)
     {
         SearchResult searchResult = new SearchResult();
 

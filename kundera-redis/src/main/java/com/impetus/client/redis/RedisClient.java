@@ -69,7 +69,6 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
-import com.impetus.kundera.property.accessor.StringAccessor;
 
 /**
  * Redis client implementation for REDIS.
@@ -170,8 +169,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         try
         {
             result = fetch(entityClass, key, connection, null);
-
-        }
+       }
         catch (InstantiationException e)
         {
             logger.error("Error during find by key:", e);

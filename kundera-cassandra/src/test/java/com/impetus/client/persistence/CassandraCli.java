@@ -37,8 +37,6 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -126,26 +124,26 @@ public final class CassandraCli
             }
             catch (TException e1)
             {
-                log.error("Error while adding keyspace, Caused by: .",e1);
+                log.error("Error while adding keyspace, Caused by: .", e1);
             }
             catch (InvalidRequestException ess)
             {
-                log.error("Error while adding keyspace, Caused by: .",ess);
+                log.error("Error while adding keyspace, Caused by: .", ess);
             }
             catch (SchemaDisagreementException sde)
             {
-                log.error("Error while adding keyspace, Caused by: .",sde);
+                log.error("Error while adding keyspace, Caused by: .", sde);
             }
 
         }
 
         catch (InvalidRequestException e)
         {
-            log.error("Error while adding keyspace, Caused by: .",e);
+            log.error("Error while adding keyspace, Caused by: .", e);
         }
         catch (TException e)
         {
-            log.error("Error while adding keyspace, Caused by: .",e);
+            log.error("Error while adding keyspace, Caused by: .", e);
         }
 
     }
@@ -198,7 +196,7 @@ public final class CassandraCli
     {
         try
         {
-            if(client != null)
+            if (client != null)
             {
                 client.system_drop_keyspace(keyspaceName);
             }
@@ -214,11 +212,11 @@ public final class CassandraCli
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while dropping keyspace, Caused by: .",e);
+            log.error("Error while dropping keyspace, Caused by: .", e);
         }
         catch (TException e)
         {
-            log.error("Error while dropping keyspace, Caused by: .",e);
+            log.error("Error while dropping keyspace, Caused by: .", e);
         }
     }
 
@@ -251,11 +249,11 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while keyspace check, Caused by: .",e);
+            log.error("Error while keyspace check, Caused by: .", e);
         }
         catch (TException e)
         {
-            log.error("Error while keyspace check, Caused by: .",e);
+            log.error("Error while keyspace check, Caused by: .", e);
         }
         return false;
     }
@@ -318,7 +316,6 @@ public final class CassandraCli
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new Cassandra.Client(protocol);
         socket.open();
-
     }
 
     /**
@@ -339,33 +336,32 @@ public final class CassandraCli
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
-        
         catch (TException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
         catch (UnsupportedEncodingException e)
         {
-            log.error("Error while executing cql query {}, Caused by: .",cqlQuery,e);
+            log.error("Error while executing cql query {}, Caused by: .", cqlQuery, e);
             throw new KunderaException(e);
         }
     }

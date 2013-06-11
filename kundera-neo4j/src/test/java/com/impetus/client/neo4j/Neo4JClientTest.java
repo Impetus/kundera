@@ -48,7 +48,7 @@ public class Neo4JClientTest
 
     GraphEntityMapper mapper;
 
-    final static String PU = "neo4jTest";
+    final static String PU = "imdb";
 
     /**
      * @throws java.lang.Exception
@@ -74,8 +74,8 @@ public class Neo4JClientTest
         em.close();
         emf.close();
 
-        if (datastoreFilePath != null)
-            FileUtils.deleteRecursively(new File(datastoreFilePath));
+       /* if (datastoreFilePath != null)
+            FileUtils.deleteRecursively(new File(datastoreFilePath));*/
     }
 
     /**

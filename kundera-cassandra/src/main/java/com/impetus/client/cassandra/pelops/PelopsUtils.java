@@ -16,11 +16,11 @@
 package com.impetus.client.cassandra.pelops;
 
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.PersistenceException;
 
 import net.dataforte.cassandra.pool.ConnectionPool;
+import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -33,20 +33,14 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
-import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
+import com.impetus.client.cassandra.service.CassandraHost;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * The Class PelopsUtils.
  */
 public class PelopsUtils
 {
-
-    private static final int _DEFAULT_SHOCKET_TIMEOUT = 120000;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
@@ -59,46 +53,9 @@ public class PelopsUtils
      * @param puProperties
      * @return the string
      */
-    public static String generatePoolName(String persistenceUnit, Map<String, Object> puProperties)
+    public static String generatePoolName(String node, int port, String keyspace)
     {
-        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit);
-        Properties props = persistenceUnitMetadatata.getProperties();
-        String contactNodes = null;
-        String defaultPort = null;
-        String keyspace = null;
-        if (puProperties != null)
-        {
-            contactNodes = (String) puProperties.get(PersistenceProperties.KUNDERA_NODES);
-            defaultPort = (String) puProperties.get(PersistenceProperties.KUNDERA_PORT);
-            keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        }
-
-        if (contactNodes == null)
-        {
-            contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        }
-        if (defaultPort == null)
-        {
-            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        }
-        if (keyspace == null)
-        {
-            keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        }
-        
-        StringBuilder builder = new StringBuilder();
-        builder.append(contactNodes);
-        builder.append(":");
-        builder.append(defaultPort);
-        builder.append(":");
-        builder.append(keyspace);
-        
-        if(logger.isInfoEnabled())
-        {
-            logger.info("Returning pool name {}", builder.toString());
-        }
-        return builder.toString();
+        return node + ":" + port + ":" + keyspace;
     }
 
     /**
@@ -109,66 +66,24 @@ public class PelopsUtils
      * @param puProperties
      * @return the pool config policy
      */
-    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
-            Map<String, Object> puProperties)
+    public static Policy getPoolConfigPolicy(CassandraHost cassandraHost)
     {
         Policy policy = new Policy();
-
-        Properties props = persistenceUnitMetadata.getProperties();
-        String maxActivePerNode = null;
-        String maxIdlePerNode = null;
-        String minIdlePerNode = null;
-        String maxTotal = null;
-        if (puProperties != null)
+        if (cassandraHost.getMaxActive() > 0)
         {
-            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            policy.setMaxActivePerNode(cassandraHost.getMaxActive());
         }
-
-        if (maxActivePerNode == null)
+        if (cassandraHost.getMaxIdle() > 0)
         {
-            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            policy.setMaxIdlePerNode(cassandraHost.getMaxIdle());
         }
-        if (maxIdlePerNode == null)
+        if (cassandraHost.getMinIdle() > 0)
         {
-            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            policy.setMinIdlePerNode(cassandraHost.getMinIdle());
         }
-        if (minIdlePerNode == null)
+        if (cassandraHost.getMaxTotal() > 0)
         {
-            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-        }
-        if (maxTotal == null)
-        {
-            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        }
-        try
-        {
-            if (!StringUtils.isEmpty(maxActivePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxActivePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxIdlePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(minIdlePerNode))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(minIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxTotal))
-            {
-                policy.setMaxActivePerNode(Integer.parseInt(maxTotal));
-            }
-        }
-        catch (NumberFormatException e)
-        {
-            logger.warn("Some Connection pool related property for {} persistence unit couldn't be parsed. Default pool policy would be used." , persistenceUnitMetadata.getPersistenceUnitName());
-            policy = null;
+            policy.setMaxTotal(cassandraHost.getMaxTotal());
         }
         return policy;
     }
@@ -181,117 +96,41 @@ public class PelopsUtils
      * @param puProperties
      * @return the pool config policy
      */
-    public static PoolConfiguration setPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata,
-            PoolConfiguration prop, Map<String, Object> puProperties)
+    public static PoolConfiguration setPoolConfigPolicy(CassandraHost cassandraHost, PoolConfiguration prop)
     {
-        Properties props = persistenceUnitMetadata.getProperties();
-        String maxActivePerNode = null;
-        String maxIdlePerNode = null;
-        String minIdlePerNode = null;
-        String maxTotal = null;
-        String testOnBorrow = null;
-        String testWhileIdle = null;
-        String testOnConnect = null;
-        String testOnReturn = null;
-        String socketTimeOut = null;
-        if (puProperties != null)
+        int maxActivePerNode = cassandraHost.getMaxActive();
+        int maxIdlePerNode = cassandraHost.getMaxIdle();
+        int minIdlePerNode = cassandraHost.getMinIdle();
+        int maxTotal = cassandraHost.getMaxTotal();
+        boolean testOnBorrow = cassandraHost.isTestOnBorrow();
+        boolean testWhileIdle = cassandraHost.isTestWhileIdle();
+        boolean testOnConnect = cassandraHost.isTestOnConnect();
+        boolean testOnReturn = cassandraHost.isTestOnReturn();
+        int socketTimeOut = cassandraHost.getSocketTimeOut();
+        HostFailoverPolicy paramHostFailoverPolicy = cassandraHost.getHostFailoverPolicy();
+        if (maxActivePerNode > 0)
         {
-            maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-            testOnBorrow = (String) puProperties.get(CassandraConstants.TEST_ON_BORROW);
-            testOnConnect = (String) puProperties.get(CassandraConstants.TEST_ON_CONNECT);
-            testOnReturn = (String) puProperties.get(CassandraConstants.TEST_ON_RETURN);
-            testWhileIdle = (String) puProperties.get(CassandraConstants.TEST_WHILE_IDLE);
-            socketTimeOut = (String) puProperties.get(CassandraConstants.SOCKET_TIMEOUT);
+            prop.setInitialSize(maxActivePerNode);
+            prop.setMaxActive(maxActivePerNode);
         }
-
-        if (maxActivePerNode == null)
+        if (maxIdlePerNode > 0)
         {
-            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            prop.setMaxIdle(maxIdlePerNode);
         }
-        if (maxIdlePerNode == null)
+        if (minIdlePerNode > 0)
         {
-            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            prop.setMinIdle(minIdlePerNode);
         }
-        if (minIdlePerNode == null)
+        if (maxTotal > 0)
         {
-            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            prop.setMaxActive(maxTotal);
         }
-        if (maxTotal == null)
-        {
-            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        }
-        try
-        {
-            if (!StringUtils.isEmpty(maxActivePerNode))
-            {
-                prop.setInitialSize(Integer.parseInt(maxActivePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxIdlePerNode))
-            {
-                prop.setMaxIdle(Integer.parseInt(maxIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(minIdlePerNode))
-            {
-                prop.setMinIdle(Integer.parseInt(minIdlePerNode));
-            }
-
-            if (!StringUtils.isEmpty(maxTotal))
-            {
-                prop.setMaxActive(Integer.parseInt(maxTotal));
-            }
-
-            CassandraSchemaMetadata csm = CassandraPropertyReader.csmd;
-            Properties connProps = csm.getConnectionProperties();
-            if (connProps != null)
-            {
-                if (testOnBorrow == null)
-                {
-                    testOnBorrow = connProps.getProperty(CassandraConstants.TEST_ON_BORROW);
-                }
-                if (testOnConnect == null)
-                {
-                    testOnConnect = connProps.getProperty(CassandraConstants.TEST_ON_CONNECT);
-                }
-                if (testOnReturn == null)
-                {
-                    testOnReturn = connProps.getProperty(CassandraConstants.TEST_ON_RETURN);
-                }
-                if (testWhileIdle == null)
-                {
-                    testWhileIdle = connProps.getProperty(CassandraConstants.TEST_WHILE_IDLE);
-                }
-                if (socketTimeOut == null)
-                {
-                    socketTimeOut = connProps.getProperty(CassandraConstants.SOCKET_TIMEOUT);
-                }
-            }
-
-            prop.setTestOnBorrow(Boolean.parseBoolean(testOnBorrow));
-            prop.setTestOnConnect(Boolean.parseBoolean(testOnConnect));
-            prop.setTestOnReturn(Boolean.parseBoolean(testOnReturn));
-            prop.setTestWhileIdle(Boolean.parseBoolean(testWhileIdle));
-
-            if (!StringUtils.isEmpty(socketTimeOut))
-            {
-                prop.setSocketTimeout(Integer.parseInt(socketTimeOut));
-            }
-            else
-            {
-                prop.setSocketTimeout(_DEFAULT_SHOCKET_TIMEOUT);
-            }
-
-        }
-        catch (NumberFormatException e)
-        {
-            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
-                    + " persistence unit couldn't be parsed. Default pool policy would be used");
-            prop = null;
-        }
+        prop.setSocketTimeout(socketTimeOut);
+        prop.setTestOnBorrow(testOnBorrow);
+        prop.setTestOnConnect(testOnConnect);
+        prop.setTestOnReturn(testOnReturn);
+        prop.setTestWhileIdle(testWhileIdle);
+        prop.setFailoverPolicy(paramHostFailoverPolicy);
         return prop;
     }
 
@@ -306,72 +145,13 @@ public class PelopsUtils
      *         are not provided.
      * 
      */
-    public static SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
+    public static SimpleConnectionAuthenticator getAuthenticationRequest(String userName, String password)
     {
-        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-
         SimpleConnectionAuthenticator authenticator = null;
         if (userName != null || password != null)
         {
             authenticator = new SimpleConnectionAuthenticator(userName, password);
         }
         return authenticator;
-    }
-
-    /**
-     * Returns instance of {@link IPooledConnection} for a given persistence
-     * unit
-     * 
-     * @param persistenceUnit
-     * @param puProperties
-     * @return
-     */
-    public static IPooledConnection getCassandraConnection(String persistenceUnit, Map<String, Object> puProperties)
-    {
-        return Pelops.getDbConnPool(generatePoolName(persistenceUnit, puProperties)).getConnection();
-    }
-
-    public static void releaseConnection(IPooledConnection conn)
-    {
-        if (conn != null)
-        {
-            conn.release();
-        }
-    }
-
-    public static Cassandra.Client getCassandraConnection(ConnectionPool pool)
-    {
-        try
-        {
-            if (pool != null)
-            {
-                return pool.getConnection();
-            }
-        }
-        catch (TException te)
-        {
-            logger.error("Error while retrieving cassandra connection, Caused by: .",te);
-            throw new PersistenceException(te);
-        }
-        
-        if(logger.isInfoEnabled())
-        {
-            logger.info("No connection established, returning null.");
-        }
-        return null;
-    }
-
-    public static void releaseConnection(ConnectionPool pool, Cassandra.Client conn)
-    {
-        if (pool != null && conn != null)
-        {
-            pool.release(conn);
-        }
-        
-        if(logger.isInfoEnabled())
-        {
-            logger.info("Releasing connection.");
-        }
     }
 }

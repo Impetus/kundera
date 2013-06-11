@@ -24,7 +24,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.schema.TableInfo;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -46,7 +45,7 @@ public abstract class AbstractSchemaManager
     protected String port;
 
     /** The host variable . */
-    protected String host;
+    protected String[] hosts;
 
     /** The kundera_client variable. */
     protected String clientFactory;
@@ -59,9 +58,6 @@ public abstract class AbstractSchemaManager
 
     /** The operation variable. */
     protected String operation;
-
-    /** The use secondry index variable. */
-    protected boolean useSecondryIndex = false;
 
     protected List<Schema> schemas = null;
 
@@ -130,13 +126,11 @@ public abstract class AbstractSchemaManager
         String portName = null;
         String operationType = null;
         String schemaName = null;
-        boolean isSecondryIndexEnabled = false;
         if (externalProperties != null)
         {
             portName = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
             hostName = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
             schemaName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
-            isSecondryIndexEnabled = MetadataUtils.useSecondryIndex(pu);
             // get type of schema of operation.
             operationType = (String) externalProperties.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
         }
@@ -146,17 +140,21 @@ public abstract class AbstractSchemaManager
             hostName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
         if (schemaName == null)
             schemaName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-        if (!isSecondryIndexEnabled)
-            isSecondryIndexEnabled = MetadataUtils.useSecondryIndex(pu);
         // get type of schema of operation.
         if (operationType == null)
             operationType = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
 
-        this.host = hostName;
+        String[] hostArray = hostName.split(",");
+        hosts = new String[hostArray.length];
+        for (int i = 0; i < hostArray.length; i++)
+        {
+            hosts[i] = hostArray[i].trim();
+        }
+
         this.port = portName;
         this.databaseName = schemaName;
         this.operation = operationType;
-        this.useSecondryIndex = isSecondryIndexEnabled;
+        // this.useSecondryIndex = isSecondryIndexEnabled;
     }
 
     /**

@@ -14,7 +14,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.persistence.CassandraCli;
+import com.impetus.client.crud.RDBMSCli;
+import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * @author impadmin
@@ -26,6 +27,8 @@ public class CrossdatastoreGeneratedIdTest
 
     private EntityManager em;
 
+    private RDBMSCli cli;
+
     /**
      * @throws java.lang.Exception
      */
@@ -33,8 +36,7 @@ public class CrossdatastoreGeneratedIdTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence
-                .createEntityManagerFactory("secIdxAddCassandra,redis,rdbms,addMongo,oracle_kvstore,piccandra,picongo,addCassandra");
+        emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo");
         em = emf.createEntityManager();
     }
 
@@ -71,5 +73,4 @@ public class CrossdatastoreGeneratedIdTest
         Assert.assertEquals("sector 20, G Block", result.get(0).getAddress().getStreet());
         Assert.assertEquals("Kuldeep", result.get(0).getPersonName());
     }
-
 }

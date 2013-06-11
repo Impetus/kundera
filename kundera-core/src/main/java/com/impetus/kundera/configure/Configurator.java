@@ -49,8 +49,8 @@ public final class Configurator
     {
         configurer.add(new PersistenceUnitConfiguration(persistenceUnits));
         configurer.add(new MetamodelConfiguration(properties, persistenceUnits));
-        configurer.add(new SchemaConfiguration(properties, persistenceUnits));
-        configurer.add(new ClientFactoryConfiguraton(properties, persistenceUnits));
+//        configurer.add(new SchemaConfiguration(properties, persistenceUnits));
+//        configurer.add(new ClientFactoryConfiguraton(properties, persistenceUnits));
     }
 
     /**

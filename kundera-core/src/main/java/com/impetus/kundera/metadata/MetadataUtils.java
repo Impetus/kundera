@@ -300,13 +300,13 @@ public class MetadataUtils
         return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
     }
 
-    /**
+   /* *//**
      * Returns lucene indexing directory.
      * 
      * @param persistenceUnit
      *            persistence unit name
      * @return lucene directory
-     */
+     *//*
     public static String getLuceneDirectory(String persistenceUnit)
     {
         if (!useSecondryIndex(persistenceUnit))
@@ -316,7 +316,7 @@ public class MetadataUtils
         }
 
         return null;
-    }
+    }*/
 
     public static boolean isParent(EntityMetadata m)
     {

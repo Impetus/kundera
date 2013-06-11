@@ -91,7 +91,7 @@ public interface TwitterCassandra
      * @param friendUserId
      *            the friend user id
      */
-    void startFollowing(String userId, String friendUserId);
+    //void startFollowing(String userId, String friendUserId);
 
     /**
      * Adds the follower whose row key is <code>followerUserId</code> to User
@@ -102,7 +102,7 @@ public interface TwitterCassandra
      * @param followerUserId
      *            the follower user id
      */
-    void addFollower(String userId, String followerUserId);
+   // void addFollower(String userId, String followerUserId);
 
     UserCassandra findUserById(String userId);
 
@@ -128,7 +128,7 @@ public interface TwitterCassandra
      *            user id
      * @return list of all followers.
      */
-    List<UserCassandra> getFollowers(String userId);
+    //List<UserCassandra> getFollowers(String userId);
 
     /************** Queries ***********************/
 

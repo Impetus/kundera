@@ -16,8 +16,11 @@
 package com.impetus.kundera.configure;
 
 /**
- * Defines interface to configure metamodel and persistence unit based
- * configurations
+ * Interface to be implemented by different configuration implementations:
+ *  <b>{@link MetamodelConfiguration} </b>
+ *  <b>{@link PersistenceUnitConfiguration}</b>
+ *  <b>{@link SchemaConfiguration}</b>
+ *  <b>{@link ClientFactoryConfiguraton}</b>
  * 
  * @author vivek.mishra
  * 
@@ -26,7 +29,7 @@ interface Configuration
 {
 
     /**
-     * Configures and load meta-information for parameterised persistence units.
+     * Configures and load meta-information for parameterized persistence units.
      */
     void configure();
 

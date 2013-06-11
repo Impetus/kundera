@@ -43,6 +43,7 @@ import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -61,17 +62,11 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * 
  * @author vivek.mishra
  */
-public class MetamodelConfiguration implements Configuration
+public class MetamodelConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(MetamodelConfiguration.class);
-
-    /** Holding instance for persistence units. */
-    protected String[] persistenceUnits;
-
-    /** Holding persistenceUnit properties */
-    private Map externalProperyMap;
 
     /**
      * Constructor using persistence units as parameter.
@@ -81,8 +76,7 @@ public class MetamodelConfiguration implements Configuration
      */
     public MetamodelConfiguration(Map properties, String... persistenceUnits)
     {
-        this.persistenceUnits = persistenceUnits;
-        this.externalProperyMap = properties;
+        super(persistenceUnits, properties);
     }
 
     /*
@@ -146,7 +140,7 @@ public class MetamodelConfiguration implements Configuration
             classesToScan = puMetadata.getManagedClassNames();
             managedURLs = puMetadata.getManagedURLs();
             Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalProperyMap, persistenceUnits);
+                    externalPropertyMap, persistenceUnits);
 
             client = externalProperties != null ? (String) externalProperties
                     .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
@@ -248,8 +242,7 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
-        // processGeneratedValueAnnotation(classes, persistenceUnit);
-        validateEntityForClientSpecificProperty(classes, persistenceUnit);
+//        validateEntityForClientSpecificProperty(classes, persistenceUnit);
 
     }
 
@@ -265,7 +258,7 @@ public class MetamodelConfiguration implements Configuration
         {
             String pu = getPersistenceUnitOfEntity(clazz);
             EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalProperyMap, persistenceUnits));
+                    externalPropertyMap, persistenceUnits));
             if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
                     && persistenceUnit.equalsIgnoreCase(pu))
             {
@@ -355,7 +348,7 @@ public class MetamodelConfiguration implements Configuration
                             if (null == metadata)
                             {
                                 MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client,
-                                        KunderaCoreUtils.getExternalProperties(persistenceUnit, externalProperyMap,
+                                        KunderaCoreUtils.getExternalProperties(persistenceUnit, externalPropertyMap,
                                                 persistenceUnits));
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
 
@@ -445,7 +438,9 @@ public class MetamodelConfiguration implements Configuration
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
         String pu = getPersistenceUnitOfEntity(clazz);
-        if (pu != null && pu.equals(persistenceUnit))
+        String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
+                .getClient();
+        if (pu != null && pu.equals(persistenceUnit) || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
         {
             Field f = (Field) m.getIdAttribute().getJavaMember();
 

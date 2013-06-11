@@ -136,7 +136,7 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new OracleNoSQLPropertyReader();
+            propertyReader = new OracleNoSQLPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -159,5 +159,12 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String storeName = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         return KVStoreFactory.getStore(new KVStoreConfig(storeName, hostName + ":" + defaultPort));
+    }
+
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
     }
 }

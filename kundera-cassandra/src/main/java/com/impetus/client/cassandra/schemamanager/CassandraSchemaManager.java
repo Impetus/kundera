@@ -308,27 +308,27 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while updating{}, Caused by: ." ,databaseName, e);
+            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (TException e)
         {
-            log.error("Error occurred while updating{}, Caused by: ." ,databaseName, e);
+            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error occurred while updating{}, Caused by: ." ,databaseName, e);
+            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (UnavailableException e)
         {
-            log.error("Error occurred while updating{}, Caused by: ." ,databaseName, e);
+            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (TimedOutException e)
         {
-            log.error("Error occurred while updating{}, Caused by: ." ,databaseName, e);
+            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
     }
@@ -348,17 +348,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName , e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName , e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
         catch (TException e)
         {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName , e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException(e);
         }
     }
@@ -371,14 +371,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected boolean initiateClient()
     {
-        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        String message = null;
+        for (String host : hosts)
         {
-            log.error("Host or port should not be null, Port should be numeric.");
-            throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
-        }
-
-        if (cassandra_client == null)
-        {
+            if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+            {
+                log.error("Host or port should not be null, Port should be numeric.");
+                throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
+            }
             TSocket socket = new TSocket(host, Integer.parseInt(port));
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport);
@@ -389,11 +389,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     socket.open();
                 }
+                return true;
             }
             catch (TTransportException e)
             {
-                log.error("Error while opening socket, Caused by: .", e);
-                throw new SchemaGenerationException(e, "Cassandra");
+                message = e.getMessage();
+                log.error("Error while opening socket for host  { }, Caused by: . ", host, e);
             }
             catch (NumberFormatException e)
             {
@@ -401,7 +402,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 throw new SchemaGenerationException(e, "Cassandra");
             }
         }
-        return cassandra_client != null ? true : false;
+        throw new SchemaGenerationException("Error while opening socket, Caused by: ." + message);
     }
 
     /**
@@ -572,10 +573,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         catch (InvalidRequestException ire)
         {
             StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
-//            translator.ensureCase(builder, databaseName);
-//            builder.append(" to keyspace ");
-//            translator.ensureCase(builder, tableInfo.getTableName());
-            if (ire.getWhy() != null && ire.getWhy().contains(builder.toString()) && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+            // translator.ensureCase(builder, databaseName);
+            // builder.append(" to keyspace ");
+            // translator.ensureCase(builder, tableInfo.getTableName());
+            if (ire.getWhy() != null && ire.getWhy().contains(builder.toString())
+                    && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
             {
                 for (ColumnInfo column : tableInfo.getColumnMetadatas())
                 {
@@ -599,18 +601,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error occurred while creating table{}, Caused by: ." ,tableInfo.getTableName() , e);
+            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
                     "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while creating table{}, Caused by: ." ,tableInfo.getTableName() , e);
+            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
                     "Cassandra", databaseName);
         }
-        
-        // After successful  schema operation, perform index creation.
+        // After successful schema operation, perform index creation.
+
         createIndex(tableInfo);
     }
 
@@ -623,18 +625,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         StringBuilder indexQueryBuilder = new StringBuilder("create index $COLUMN_NAME on \"");
         indexQueryBuilder.append(tableInfo.getTableName());
-        indexQueryBuilder.append( "\"(\"$COLUMN_NAME\")");
+        indexQueryBuilder.append("\"(\"$COLUMN_NAME\")");
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
         {
-            String replacedWithindexName  = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME", indexInfo.getColumnName());
+            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME",
+                    indexInfo.getColumnName());
             try
             {
-                cassandra_client.execute_cql3_query(ByteBuffer.wrap(replacedWithindexName.getBytes()), Compression.NONE,
-                        ConsistencyLevel.ONE);
+                cassandra_client.execute_cql3_query(ByteBuffer.wrap(replacedWithindexName.getBytes()),
+                        Compression.NONE, ConsistencyLevel.ONE);
             }
             catch (InvalidRequestException ire)
             {
-                if (ire.getWhy() != null && !ire.getWhy().equals("Index already exists") && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+                if (ire.getWhy() != null && !ire.getWhy().equals("Index already exists")
+                        && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
                 {
                     onLogException(tableInfo, indexInfo, ire);
                 }
@@ -682,31 +686,31 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException ire)
         {
-            log.error("Error occurred while droping table {}, Caused by: ." ,tableInfo.getTableName(), ire);
+            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), ire);
             throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), ire,
                     "Cassandra", databaseName);
         }
         catch (UnavailableException ue)
         {
-            log.error("Error occurred while droping table {}, Caused by: ." ,tableInfo.getTableName(), ue);
+            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), ue);
             throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), ue,
                     "Cassandra", databaseName);
         }
         catch (TimedOutException toe)
         {
-            log.error("Error occurred while droping table {}, Caused by: ." ,tableInfo.getTableName(), toe);
+            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), toe);
             throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), toe,
                     "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException sde)
         {
-            log.error("Error occurred while droping table {}, Caused by: ." ,tableInfo.getTableName(), sde);
+            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), sde);
             throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), sde,
                     "Cassandra", databaseName);
         }
         catch (TException te)
         {
-            log.error("Error occurred while droping table {}, Caused by: ." ,tableInfo.getTableName(), te);
+            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), te);
             throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), te,
                     "Cassandra", databaseName);
         }
@@ -742,32 +746,34 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             else
             {
-                log.error("Error occurred while altering column type of  table {}, Caused by: ." ,tableInfo.getTableName(), ireforAddColumn);
+                log.error("Error occurred while altering column type of  table {}, Caused by: .",
+                        tableInfo.getTableName(), ireforAddColumn);
                 throw new SchemaGenerationException("Error occurred while adding column into table "
                         + tableInfo.getTableName(), ireforAddColumn, "Cassandra", databaseName);
             }
         }
         catch (UnavailableException e)
         {
-            log.error("Error occurred while altering column type of  table {}, Caused by: ." ,tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of  table {}, Caused by: .", tableInfo.getTableName(),
+                    e);
             throw new SchemaGenerationException("Error occurred while adding column into table "
                     + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (TimedOutException e)
         {
-            log.error("Error occurred while adding column into table {}, Caused by: ." ,tableInfo.getTableName(), e);
+            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while adding column into table "
                     + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error occurred while adding column into table {}, Caused by: ." ,tableInfo.getTableName(), e);
+            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while adding column into table "
                     + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while adding column into table {}, Caused by: ." ,tableInfo.getTableName(), e);
+            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while adding column into table "
                     + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
@@ -795,31 +801,36 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: ." ,column.getColumnName(),tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
+                    column.getColumnName(), tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while altering column type of column "
                     + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (UnavailableException e)
         {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: ." ,column.getColumnName(),tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
+                    column.getColumnName(), tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while altering column type of column "
                     + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (TimedOutException e)
         {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: ." ,column.getColumnName(),tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
+                    column.getColumnName(), tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while altering column type of column "
                     + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: ." ,column.getColumnName(),tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
+                    column.getColumnName(), tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while altering column type of column "
                     + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: ." ,column.getColumnName(),tableInfo.getTableName(), e);
+            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
+                    column.getColumnName(), tableInfo.getTableName(), e);
             throw new SchemaGenerationException("Error occurred while altering column type of column "
                     + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
         }
@@ -888,8 +899,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());
             return cfDef;
         }
-        
-        if(log.isInfoEnabled())
+
+        if (log.isInfoEnabled())
         {
             log.info("returning null as column family definition.");
         }
@@ -953,13 +964,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error occurred while validating {}, Caused by: .",databaseName, e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("Error occurred while validating {}, Caused by: .",databaseName, e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
             throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
@@ -1564,11 +1575,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             isValid = validateColumns(metadata, iter.next().getAttributes()) ? true : false;
         }
-        // for (EmbeddedColumn embeddedColumn : embeddedColumns)
-        // {
-        // isValid = validateColumns(embeddedColumn.getColumns()) ? true :
-        // false;
-        // }
         return isValid;
     }
 
@@ -1608,7 +1614,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         if (!(clazz.equals(Integer.class) || clazz.equals(int.class) || clazz.equals(Long.class) || clazz
                 .equals(long.class)))
         {
-            log.warn("Default valdation class :{}, For counter column type, fields of Entity should be either long type or integer type.",CounterColumnType.class.getSimpleName());
+            log.warn(
+                    "Default valdation class :{}, For counter column type, fields of Entity should be either long type or integer type.",
+                    CounterColumnType.class.getSimpleName());
             return isValid = false;
         }
         return isValid;
@@ -1720,7 +1728,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("Max_Compaction_Threshold should be numeric type, Caused by: ", nfe);
+                    log.error("Max_Compaction_Threshold should be numeric type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1744,7 +1752,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("Min_Compaction_Threshold should be numeric type, Caused by: ", nfe);
+                    log.error("Min_Compaction_Threshold should be numeric type, Caused by: . ", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1806,7 +1814,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("GC_GRACE_SECONDS should be numeric type, Caused by: ", nfe);
+                    log.error("GC_GRACE_SECONDS should be numeric type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }
@@ -1840,7 +1848,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 catch (NumberFormatException nfe)
                 {
-                    log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: ", nfe);
+                    log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: .", nfe);
                     throw new SchemaGenerationException(nfe);
                 }
             }

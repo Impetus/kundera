@@ -257,7 +257,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new MongoDBPropertyReader();
+            propertyReader = new MongoDBPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -376,5 +376,12 @@ public class MongoDBClientFactory extends GenericClientFactory
                 }
             }
         }
+    }
+
+    @Override
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
+        throw new UnsupportedOperationException("Load balancing feature is not supported in "
+                + this.getClass().getSimpleName());
     }
 }

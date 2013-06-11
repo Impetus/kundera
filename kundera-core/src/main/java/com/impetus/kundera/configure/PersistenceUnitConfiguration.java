@@ -44,7 +44,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
  * @author vivek.mishra
  */
 
-public class PersistenceUnitConfiguration implements Configuration
+public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
 
     /** The log instance. */
@@ -52,9 +52,6 @@ public class PersistenceUnitConfiguration implements Configuration
 
     /** The Constant PROVIDER_IMPLEMENTATION_NAME. */
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();
-
-    /** Holding instance for persistence units. */
-    protected String[] persistenceUnits;
 
     /**
      * Constructor parameterised with persistence units.
@@ -64,7 +61,7 @@ public class PersistenceUnitConfiguration implements Configuration
      */
     public PersistenceUnitConfiguration(String... persistenceUnits)
     {
-        this.persistenceUnits = persistenceUnits;
+        super(persistenceUnits,null);
     }
 
     /*

@@ -52,8 +52,14 @@ public class ThriftClientTest
     @After
     public void tearDown() throws Exception
     {
-        em.close();
-        emf.close();
+        if (em != null)
+        {
+            em.close();
+        }
+        if (emf != null)
+        {
+            emf.close();
+        }
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
@@ -65,7 +71,7 @@ public class ThriftClientTest
         findIdsByColumn();
     }
 
-    public void persistJoinTable()
+    private void persistJoinTable()
     {
         JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, "KunderaExamples", "PERSON_ADDRESS",
                 "PERSON_ID", "ADDRESS_ID", PersonMToM.class);
@@ -84,7 +90,7 @@ public class ThriftClientTest
 
     }
 
-    public void getColumnsById()
+    private void getColumnsById()
     {
         List columns1 = client.getColumnsById("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "1",
                 String.class);
@@ -104,7 +110,7 @@ public class ThriftClientTest
 
     }
 
-    public void findIdsByColumn()
+    private void findIdsByColumn()
     {
         Object[] ids1 = client.findIdsByColumn("KunderaExamples", "PERSON_ADDRESS", "PERSON_ID", "ADDRESS_ID", "A",
                 PersonMToM.class);

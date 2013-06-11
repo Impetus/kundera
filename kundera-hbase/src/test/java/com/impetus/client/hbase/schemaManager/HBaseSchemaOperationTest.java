@@ -145,7 +145,8 @@ public class HBaseSchemaOperationTest
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
-
+        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+        schemaManager.exportSchema();
         Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
 
         HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
@@ -157,7 +158,7 @@ public class HBaseSchemaOperationTest
             Assert.assertNotNull(columnDescriptor.getNameAsString());
             Assert.assertEquals(HBASE_ENTITY_SIMPLE, columnDescriptor.getNameAsString());
         }
-        ((HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit)).destroy();
+        schemaManager.dropSchema();
         Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
     }
 

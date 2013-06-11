@@ -43,8 +43,8 @@
 	<persistence-unit name="addMongoJTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
-			<!-- <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -93,8 +93,8 @@
 	<persistence-unit name="addMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
-			<!-- <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -201,8 +201,8 @@
 	<persistence-unit name="picongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
-			<!-- <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="Pickr" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -217,8 +217,8 @@
 	<persistence-unit name="redis">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<!-- <property name="kundera.nodes" value="localhost" /> -->
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="localhost" />
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.port" value="6379" />
 			<property name="kundera.keyspace" value="RedisK" />
 			<property name="kundera.dialect" value="redis" />

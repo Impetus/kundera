@@ -123,6 +123,11 @@ public class KunderaMetadata
         this.clientMetadata.put(persistenceUnit, clientMetadata);
     }
 
+    /**
+     * Unloads client metadata for given pu.
+     * 
+     * @param pu
+     */
     public void unloadKunderaMetadata(final String pu)
     {
         ClientMetadata clientMetadata = getClientMetadata(pu);
@@ -133,8 +138,7 @@ public class KunderaMetadata
             clientMetadata.setIndexImplementor(null);
             clientMetadata.setLuceneIndexDir(null);
             clientMetadata = null;
+            addClientMetadata(pu, null);
         }
-        // this.clientMetadata.clear();
-        this.getApplicationMetadata().unloadApplicationMatadata(pu);
     }
 }

@@ -535,7 +535,7 @@ public class Node implements NodeStateContext
             for (NodeLink parentNodeLink : parents.keySet())
             {
                 if (!parentNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_MANY))
-                    parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());
+                    parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, this.getEntityId());   
             }
         }
 
@@ -645,6 +645,11 @@ public class Node implements NodeStateContext
     public Object getEntityId()
     {
         return this.entityId;
+    }
+
+    public void setEntityId(Object id)
+    {
+        this.entityId = id;
     }
 
     public void handlePreEvent()
