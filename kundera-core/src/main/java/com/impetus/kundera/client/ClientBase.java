@@ -30,6 +30,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Base class for all Client implementations providing common utility methods to
@@ -82,8 +83,8 @@ public abstract class ClientBase
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
         /* id = */onPersist(metadata, entity, id, relationHolders);
-        // node.setEntityId(id);
-        node.setData(entity);
+        id = PropertyAccessorHelper.getId(entity, metadata);
+        node.setEntityId(id);
         indexNode(node, metadata);
     }
 

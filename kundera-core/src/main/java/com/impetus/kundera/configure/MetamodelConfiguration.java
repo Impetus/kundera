@@ -43,6 +43,7 @@ import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -241,8 +242,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
-        // processGeneratedValueAnnotation(classes, persistenceUnit);
-        validateEntityForClientSpecificProperty(classes, persistenceUnit);
+//        validateEntityForClientSpecificProperty(classes, persistenceUnit);
 
     }
 
@@ -442,7 +442,9 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
         String pu = getPersistenceUnitOfEntity(clazz);
-        if (pu != null && pu.equals(persistenceUnit))
+        String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
+                .getClient();
+        if (pu != null && pu.equals(persistenceUnit) || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
         {
             Field f = (Field) m.getIdAttribute().getJavaMember();
 

@@ -38,29 +38,12 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public final class ClientResolver
 {
 
-    /** The client factories. */
-   static Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
+    // /** The client factories. */
+    static Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
 
     /** logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(ClientResolver.class);
 
-    /**
-     * Gets the client.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @return the client
-     */
-    public static Client discoverClient(String persistenceUnit)
-    {
-        logger.info("Returning client instance for:" + persistenceUnit);
-        ClientFactory clientFactory = clientFactories.get(persistenceUnit);
-        if (clientFactory != null)
-        {
-            return clientFactory.getClientInstance();
-        }
-        throw new ClientResolverException(" No client configured for:" + persistenceUnit);
-    }
 
     /**
      * Gets the client factory.
@@ -71,11 +54,22 @@ public final class ClientResolver
      */
     public static ClientFactory getClientFactory(String persistenceUnit, Map<String, Object> puProperties)
     {
-        ClientFactory clientFactory = clientFactories.get(persistenceUnit);
+        ClientFactory clientFactory = instantiateClientFactory(persistenceUnit, puProperties);
+        clientFactories.put(persistenceUnit, clientFactory);
+        return clientFactory;
+    }
 
-        if (clientFactory != null)
-            return clientFactory;
-
+    /**
+     * Creates new instance of client factory for given persistence unit.
+     * 
+     * @param persistenceUnit
+     * @param puProperties
+     * @param clientFactory
+     * @return new instance of clientFactory
+     */
+    private static ClientFactory instantiateClientFactory(String persistenceUnit, Map<String, Object> puProperties)
+    {
+        ClientFactory clientFactory = null;
         logger.info("Initializing client factory for: " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
@@ -139,16 +133,19 @@ public final class ClientResolver
             logger.error("Client Factory Not Configured For Specified Client Type : ");
             throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
         }
-
-        clientFactories.put(persistenceUnit, clientFactory);
-
         logger.info("Finishing factory initialization");
         return clientFactory;
     }
 
     public static ClientFactory getClientFactory(String pu)
     {
-        return clientFactories.get(pu);
+        ClientFactory clientFactory = clientFactories.get(pu);
+        if (clientFactory != null)
+        {
+            return clientFactory;
+        }
+        logger.error("Client Factory Not Configured For Specified Client Type : ");
+        throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
     }
 
     /**

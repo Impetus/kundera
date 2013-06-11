@@ -35,17 +35,6 @@ public class ColumnInfo
     /** The type variable. */
     private Class type;
 
-    /** Maximum allowed value for this column */
-    private Integer maxValue;
-
-    /** Minimum allowed value for this column */
-    private Integer minValue;
-
-    /**
-     * The index type;
-     */
-    private String indexType;
-
     /**
      * Instantiates a new column info.
      */
@@ -159,56 +148,4 @@ public class ColumnInfo
     {
         this.type = type;
     }
-
-    /**
-     * @return the indexType
-     */
-    public String getIndexType()
-    {
-        return indexType;
-    }
-
-    /**
-     * @param indexType
-     *            the indexType to set
-     */
-    public void setIndexType(String indexType)
-    {
-        this.indexType = indexType;
-    }
-
-    /**
-     * @return the maxValue
-     */
-    public Integer getMaxValue()
-    {
-        return maxValue;
-    }
-
-    /**
-     * @param maxValue
-     *            the maxValue to set
-     */
-    public void setMaxValue(Integer maxValue)
-    {
-        this.maxValue = maxValue;
-    }
-
-    /**
-     * @return the minValue
-     */
-    public Integer getMinValue()
-    {
-        return minValue;
-    }
-
-    /**
-     * @param minValue
-     *            the minValue to set
-     */
-    public void setMinValue(Integer minValue)
-    {
-        this.minValue = minValue;
-    }
-
 }

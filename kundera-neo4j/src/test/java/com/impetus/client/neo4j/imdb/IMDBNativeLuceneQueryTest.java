@@ -65,8 +65,7 @@ public class IMDBNativeLuceneQueryTest extends IMDBTestBase
             em.getTransaction().commit();
         }
 
-        em.close();
-        emf.close();
+        clean();
     }
 
     @Test

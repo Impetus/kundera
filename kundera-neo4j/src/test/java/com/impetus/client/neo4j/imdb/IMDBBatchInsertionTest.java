@@ -32,6 +32,7 @@ import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -71,6 +72,7 @@ public class IMDBBatchInsertionTest
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf.close();
 
         if (datastoreFilePath != null)

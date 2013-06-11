@@ -17,6 +17,8 @@ package com.impetus.kundera.loader;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -35,6 +37,10 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.service.Host;
+import com.impetus.kundera.service.policy.LoadBalancingPolicy;
+import com.impetus.kundera.service.policy.RetryService;
+import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 
 /**
  * Abstract class to hold generic definitions for client factory
@@ -58,7 +64,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     private Object connectionPoolOrConnection;
 
     /** The index manager. */
-    protected IndexManager indexManager;
+    protected IndexManager indexManager = new IndexManager(null);
 
     /** The reader. */
     protected EntityReader reader;
@@ -71,6 +77,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** Holds persistence unit related property */
     protected Map<String, Object> externalProperties = new HashMap<String, Object>();
+
+    /** Holds LoadBalancer instance **/
+    protected LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
+
+    /** Holds Instance of retry service */
+    protected RetryService hostRetryService;
+
+    /** Holds one pool instance per host */
+    protected ConcurrentMap<Host, Object> hostPools = new ConcurrentHashMap<Host, Object>();
 
     /**
      * Load.
@@ -103,64 +118,62 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      */
     protected void loadClientMetadata(Map<String, Object> puProperties)
     {
+        ClientMetadata clientMetadata = new ClientMetadata();
+        String luceneDirectoryPath = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
+
+        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+
+        if (luceneDirectoryPath == null)
+        {
+            luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit)
+                    .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+        }
+
+        if (luceneDirectoryPath != null)
+        {
+            // Add client metadata
+            clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
+
+            // Set Index Manager
+            indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                    luceneDirectoryPath));
+        }
+        else if (indexerClass != null)
+        {
+            try
+            {
+                Class<?> indexerClazz = Class.forName(indexerClass);
+                Indexer indexer = (Indexer) indexerClazz.newInstance();
+                indexManager = new IndexManager(indexer);
+                clientMetadata.setIndexImplementor(indexerClass);
+            }
+            catch (ClassNotFoundException cnfex)
+            {
+                logger.error("Error while initialzing indexer:" + indexerClass, cnfex);
+                throw new KunderaException(cnfex);
+            }
+            catch (InstantiationException iex)
+            {
+                logger.error("Error while initialzing indexer:" + indexerClass, iex);
+                throw new KunderaException(iex);
+            }
+            catch (IllegalAccessException iaex)
+            {
+                logger.error("Error while initialzing indexer:" + indexerClass, iaex);
+                throw new KunderaException(iaex);
+            }
+        }
+        else
+        {
+            indexManager = new IndexManager(null);
+        }
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
-            ClientMetadata clientMetadata = new ClientMetadata();
-            String luceneDirectoryPath = puProperties != null ? (String) puProperties
-                    .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
-
-            String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperties()
-                    .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
-
-            if (luceneDirectoryPath == null)
-            {
-                luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getPersistenceUnitMetadata(persistenceUnit)
-                        .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
-            }
-
-            if (luceneDirectoryPath != null)
-            {
-                // Add client metadata
-                clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
-
-                // Set Index Manager
-                indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                        luceneDirectoryPath));
-            }
-            else if (indexerClass != null)
-            {
-                try
-                {
-                    Class<?> indexerClazz = Class.forName(indexerClass);
-                    Indexer indexer = (Indexer) indexerClazz.newInstance();
-                    indexManager = new IndexManager(indexer);
-                    clientMetadata.setIndexImplementor(indexerClass);
-                }
-                catch (ClassNotFoundException cnfex)
-                {
-                    logger.error("Error while initialzing indexer:" + indexerClass, cnfex);
-                    throw new KunderaException(cnfex);
-                }
-                catch (InstantiationException iex)
-                {
-                    logger.error("Error while initialzing indexer:" + indexerClass, iex);
-                    throw new KunderaException(iex);
-                }
-                catch (IllegalAccessException iaex)
-                {
-                    logger.error("Error while initialzing indexer:" + indexerClass, iaex);
-                    throw new KunderaException(iaex);
-                }
-            }
-            else
-            {
-                indexManager = new IndexManager(null);
-            }
-
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
         }
     }
 
@@ -290,5 +303,30 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             client = null;
         }
         externalProperties = null;
+        hostPools.clear();
+    }
+
+    protected abstract void initializeLoadBalancer(String loadBalancingPolicyName);
+
+    protected enum LoadBalancer
+    {
+        ROUNDROBIN, LEASTACTIVE;
+
+        public static LoadBalancer getValue(String loadBalancename)
+        {
+            if (loadBalancename != null && loadBalancename.equalsIgnoreCase(ROUNDROBIN.name()))
+            {
+                return ROUNDROBIN;
+            }
+            else if (loadBalancename != null && loadBalancename.equalsIgnoreCase(LEASTACTIVE.name()))
+            {
+                return LEASTACTIVE;
+            }
+            else
+            {
+                logger.info("Using default load balancer {} . " + ROUNDROBIN.name());
+                return ROUNDROBIN;
+            }
+        }
     }
 }

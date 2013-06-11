@@ -16,6 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +45,13 @@ public abstract class AbstractPropertyReader
 
     protected PersistenceUnitMetadata puMetadata;
 
+    protected Map externalProperties;
+
+    public AbstractPropertyReader(Map externalProperties)
+    {
+        this.externalProperties = externalProperties;
+    }
+
     /**
      * Reads property file which is given in persistence unit
      * 
@@ -51,10 +59,13 @@ public abstract class AbstractPropertyReader
      */
     final public void read(String pu)
     {
-        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String propertyFileName = puMetadata != null ? puMetadata
-                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-
+        String propertyFileName = externalProperties != null ? (String)externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) :null;
+        if (propertyFileName == null)
+        {
+            puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+            propertyFileName = puMetadata != null ? puMetadata
+                    .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+        }
         if (propertyFileName != null && PropertyType.value(propertyFileName).equals(PropertyType.xml))
         {
             onXml(onParseXML(propertyFileName, puMetadata));

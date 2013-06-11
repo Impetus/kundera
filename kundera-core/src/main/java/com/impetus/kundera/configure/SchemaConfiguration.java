@@ -53,6 +53,8 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
+import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -65,7 +67,6 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  */
 public class SchemaConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
-
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(SchemaConfiguration.class);
 
@@ -94,12 +95,14 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
+        EntityValidator validator = new EntityValidatorImpl(externalPropertyMap);
+
         puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
 
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
-            log.info("Configuring schema export for: " + persistenceUnit);
+            log.info("Configuring schema export for : " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
@@ -142,25 +145,41 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 }
                 // Add table for GeneratedValue if opted TableStrategy
                 addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName);
+
+                // Validating entity against counter column family.
+                validator.validateEntity(entityMetadata.getEntityClazz());
             }
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
         }
+
         for (String persistenceUnit : persistenceUnits)
         {
-            Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalPropertyMap, persistenceUnits);
-            if (getSchemaProperty(persistenceUnit, externalProperties) != null
-                    && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
+            SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
+            if (schemaManager != null)
             {
-                ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
-                SchemaManager schemaManager = clientFactory != null ? clientFactory
-                        .getSchemaManager(externalProperties) : null;
-                if (schemaManager != null)
-                {
-                    schemaManager.exportSchema();
-                }
+                schemaManager.exportSchema();
             }
         }
+    }
+
+    /**
+     * Return schema manager for pu.
+     * 
+     * @param persistenceUnit
+     * @return
+     */
+    private SchemaManager getSchemaManagerForPu(final String persistenceUnit)
+    {
+        SchemaManager schemaManager = null;
+        Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                externalPropertyMap, persistenceUnits);
+        if (getSchemaProperty(persistenceUnit, externalProperties) != null
+                && !getSchemaProperty(persistenceUnit, externalProperties).isEmpty())
+        {
+            ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
+            schemaManager = clientFactory != null ? clientFactory.getSchemaManager(externalProperties) : null;
+        }
+        return schemaManager;
     }
 
     /**

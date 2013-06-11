@@ -37,7 +37,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 /**
  * The Class MongoDBSchemaManager manages auto schema operation
@@ -194,29 +193,27 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected boolean initiateClient()
     {
-        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        String message = null;
+        for (String host : hosts)
         {
-            logger.error("Host or port should not be null / port should be numeric");
-            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+            if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+            {
+                logger.error("Host or port should not be null / port should be numeric");
+                throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+            }
+            try
+            {
+                mongo = new Mongo(host, Integer.parseInt(port));
+                db = mongo.getDB(databaseName);
+                return true;
+            }
+            catch (UnknownHostException e)
+            {
+                message = e.getMessage();
+                logger.error("Database host cannot be resolved, Caused by", e);
+            }
         }
-
-        int localport = Integer.parseInt(port);
-        try
-        {
-            mongo = new Mongo(host, localport);
-            db = mongo.getDB(databaseName);
-        }
-        catch (UnknownHostException e)
-        {
-            logger.error("Database host cannot be resolved, Caused by", e);
-            throw new SchemaGenerationException(e, "mongoDb");
-        }
-        catch (MongoException e)
-        {
-            throw new SchemaGenerationException(e);
-        }
-
-        return true;
+        throw new SchemaGenerationException("Database host cannot be resolved, Caused by" + message);
     }
 
     /**
@@ -258,18 +255,18 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     {
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
         {
-                DBObject keys = new BasicDBObject();
-                getIndexType(indexInfo.getIndexType(), keys, indexInfo.getColumnName());
-                DBObject options = new BasicDBObject();
-                if (indexInfo.getMinValue() != null)
-                {
-                    options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
-                }
-                if (indexInfo.getMaxValue() != null)
-                {
-                    options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
-                }
-                collection.ensureIndex(keys, options);
+            DBObject keys = new BasicDBObject();
+            getIndexType(indexInfo.getIndexType(), keys, indexInfo.getColumnName());
+            DBObject options = new BasicDBObject();
+            if (indexInfo.getMinValue() != null)
+            {
+                options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
+            }
+            if (indexInfo.getMaxValue() != null)
+            {
+                options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
+            }
+            collection.ensureIndex(keys, options);
         }
     }
 

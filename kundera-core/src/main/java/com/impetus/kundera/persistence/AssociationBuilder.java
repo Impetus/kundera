@@ -26,16 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.impetus.kundera.PersistenceUtilHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.hibernate.collection.internal.PersistentSet;
-//import org.hibernate.collection.spi.PersistentCollection;
-//import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;

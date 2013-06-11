@@ -50,27 +50,42 @@ public class IdGenerator
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
+        
         if (keyValue != null)
         {
             Client<?> client = pd.getClient(m);
-            if (client != null)
+
+            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
+                    .getClient();
+            if (clientFactoryName != null
+                    && !clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
             {
-                GenerationType type = keyValue.getStrategy();
-                switch (type)
+                if (client != null)
                 {
-                case TABLE:
-                    onTableGenerator(m, client, keyValue, e);
-                    break;
-                case SEQUENCE:
-                    onSequenceGenerator(m, client, keyValue, e);
-                    break;
-                case AUTO:
-                    onAutoGenerator(m, client, e);
-                    break;
-                case IDENTITY:
-                    throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
-                            + " Strategy not supported by this client :" + client.getClass().getName());
+                    GenerationType type = keyValue.getStrategy();
+                    switch (type)
+                    {
+                    case TABLE:
+                        onTableGenerator(m, client, keyValue, e);
+                        break;
+                    case SEQUENCE:
+                        onSequenceGenerator(m, client, keyValue, e);
+                        break;
+                    case AUTO:
+                        onAutoGenerator(m, client, e);
+                        break;
+                    case IDENTITY:
+                        throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
+                                + " Strategy not supported by this client :" + client.getClass().getName());
+                    }
                 }
+            }
+            else
+            {
+                int hashCode = e.hashCode();
+                Object generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
+                        Integer.class, new Integer(hashCode));
+                PropertyAccessorHelper.setId(e, m, generatedId);
             }
         }
     }

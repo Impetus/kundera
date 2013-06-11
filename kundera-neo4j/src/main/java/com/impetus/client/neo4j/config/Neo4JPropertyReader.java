@@ -15,6 +15,8 @@
  */
 package com.impetus.client.neo4j.config;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
@@ -39,8 +41,9 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
     /** Neo4J schema metadata instance */
     public static Neo4JSchemaMetadata nsmd;
 
-    public Neo4JPropertyReader()
+    public Neo4JPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         nsmd = new Neo4JSchemaMetadata();
     }
 

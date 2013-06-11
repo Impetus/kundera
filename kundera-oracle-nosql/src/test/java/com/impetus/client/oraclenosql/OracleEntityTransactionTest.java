@@ -297,7 +297,8 @@ public class OracleEntityTransactionTest
         String deleteQuery = "Delete from PersonKVStore p";
         Query query = em.createQuery(deleteQuery);
         int updateCount = query.executeUpdate();
-
+        em.close();
+        emf.close();
     }
 
     /**

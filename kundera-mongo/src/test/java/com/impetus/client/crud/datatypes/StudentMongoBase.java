@@ -27,6 +27,7 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import com.impetus.client.crud.BaseTest;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * The Class StudentBase.
@@ -140,11 +141,11 @@ public abstract class StudentMongoBase<E extends StudentEntityDef> extends BaseT
         {
             deleteSchema();
         }
-
         if (emf != null)
         {
             emf.close();
         }
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     /**

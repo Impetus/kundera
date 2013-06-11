@@ -30,6 +30,27 @@ import org.junit.Test;
 public class IMDBTransactionTest extends IMDBTestBase
 {
 
+
+    /*    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(IMDB_PU);
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        FileUtils.deleteRecursively(new File(datastoreFilePath));
+//        emf.close();
+    }*/
+
+
     /**
      * @throws java.lang.Exception
      */
@@ -52,8 +73,8 @@ public class IMDBTransactionTest extends IMDBTestBase
         em.remove(actor2);
         em.getTransaction().commit();
 
-        em.close();
-        emf.close();
+//        em.close();
+        clean();
     }
 
     @Test

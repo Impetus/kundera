@@ -15,6 +15,8 @@
  */
 package com.impetus.client.oraclenosql.config;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
@@ -38,8 +40,9 @@ public class OracleNoSQLPropertyReader extends AbstractPropertyReader implements
     /** OracleNoSQL schema metadata instance */
     public static OracleNoSQLSchemaMetadata osmd;
 
-    public OracleNoSQLPropertyReader()
+    public OracleNoSQLPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         osmd = new OracleNoSQLSchemaMetadata();
     }
 

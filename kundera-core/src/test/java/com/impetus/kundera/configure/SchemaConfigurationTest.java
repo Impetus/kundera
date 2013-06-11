@@ -60,6 +60,8 @@ public class SchemaConfigurationTest
 
     private String[] persistenceUnits = new String[] { persistenceUnit };
 
+    private ClientMetadataBuilder builder;
+
     /**
      * Sets the up before class.
      * 
@@ -91,7 +93,8 @@ public class SchemaConfigurationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null, persistenceUnit);
+        builder = new ClientMetadataBuilder(null, persistenceUnits);
+        // configuration = new SchemaConfiguration(null, persistenceUnit);
         puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
     }
 
@@ -115,7 +118,8 @@ public class SchemaConfigurationTest
         intialize();
         try
         {
-            configuration.configure();
+            Map map = new HashMap();
+            builder.buildClientFactoryMetadata(map);
         }
         catch (ClientResolverException cre)
         {
@@ -136,8 +140,8 @@ public class SchemaConfigurationTest
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        // props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-        // "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
+                "com.impetus.kundera.cache.ehcache.CoreTestClientFactory");
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);

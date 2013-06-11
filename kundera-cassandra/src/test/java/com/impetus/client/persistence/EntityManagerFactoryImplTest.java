@@ -126,13 +126,13 @@ public class EntityManagerFactoryImplTest
     private void checkEMFPropertyAfterClosing(String _PU1, EntityManagerFactory emf)
     {
         Assert.assertFalse(emf.isOpen());
-        Assert.assertNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(_PU1));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(_PU1));
+        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(_PU1));
+        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(_PU1));
         Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(_PU1));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(_PU1));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(_PU1));
+        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(_PU1));
+        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(_PU1));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(_PU1));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getSchemaMetadata().getPuToSchemaMetadata()
+        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getSchemaMetadata().getPuToSchemaMetadata()
                 .get(_PU1));
     }
 

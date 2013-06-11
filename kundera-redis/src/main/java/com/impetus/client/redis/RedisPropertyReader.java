@@ -45,8 +45,9 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
     /** MongoDB schema metadata instance */
     public static RedisSchemaMetadata rsmd;
 
-    public RedisPropertyReader()
+    public RedisPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         rsmd = new RedisSchemaMetadata();
     }
 

@@ -85,7 +85,7 @@ public class MongoDBPropertyReaderTest
     @Test
     public void testRead()
     {
-        PropertyReader reader = new MongoDBPropertyReader();
+        PropertyReader reader = new MongoDBPropertyReader(null);
         reader.read(pu);
         dbSchemaMetadata = MongoDBPropertyReader.msmd;
 

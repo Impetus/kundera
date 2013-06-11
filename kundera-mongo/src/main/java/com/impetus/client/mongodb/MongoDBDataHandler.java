@@ -31,8 +31,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +126,7 @@ final class MongoDBDataHandler
 
             for (Attribute column : columns)
             {
-                if (!column.equals(m.getIdAttribute()))
+                if (!column.getName().equals(m.getIdAttribute().getName()))
                 {
                     String fieldName = ((AbstractAttribute) column).getJPAColumnName();
 

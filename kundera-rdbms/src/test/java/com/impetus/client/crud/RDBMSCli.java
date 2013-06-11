@@ -176,7 +176,7 @@ public class RDBMSCli
 
     public void dropSchema(final String schemaName) throws SQLException
     {
-        String sql = "drop schema " + schemaName;
+        String sql = "drop schema " + schemaName ;
         update(sql);
     }
 

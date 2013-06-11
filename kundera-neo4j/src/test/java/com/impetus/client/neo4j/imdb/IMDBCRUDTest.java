@@ -43,8 +43,7 @@ public class IMDBCRUDTest extends IMDBTestBase
     @After
     public void tearDown() throws Exception
     {
-        em.close();
-        emf.close();
+        clean();
     }
 
     @Test

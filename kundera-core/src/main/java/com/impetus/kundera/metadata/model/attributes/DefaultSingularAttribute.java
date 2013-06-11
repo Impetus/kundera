@@ -159,5 +159,4 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     {
         return attribType.getJavaType();
     }
-
 }

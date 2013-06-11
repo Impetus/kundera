@@ -22,11 +22,9 @@ import java.util.Set;
 
 import javax.persistence.MapKeyJoinColumn;
 
-import com.impetus.kundera.PersistenceUtilHelper;
 import org.apache.commons.lang.StringUtils;
-//import org.hibernate.collection.spi.PersistentCollection;
-//import org.hibernate.proxy.HibernateProxy;
 
+import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
@@ -101,10 +99,11 @@ public class ObjectGraphBuilder
         }
 
         // Generate and set Id if @GeneratedValue present.
+
         if (initialNodeState != null && initialNodeState.getClass().equals(TransientState.class))
         {
-        idGenerator.generateAndSetId(entity, entityMetadata, pd);
- 	}
+            idGenerator.generateAndSetId(entity, entityMetadata, pd);
+        }
 
         if (!validator.isValidEntityObject(entity))
         {
@@ -183,8 +182,7 @@ public class ObjectGraphBuilder
                 if (Collection.class.isAssignableFrom(childObject.getClass()))
                 {
                     // For each entity in the collection, construct a child
-                    // node
-                    // and add to graph
+                    // node and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
                     if (childrenObjects != null

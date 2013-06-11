@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb.config;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,8 +47,9 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements Pro
     /** MongoDB schema metadata instance */
     public static MongoDBSchemaMetadata msmd;
 
-    public MongoDBPropertyReader()
+    public MongoDBPropertyReader(Map externalProperties)
     {
+        super(externalProperties);
         msmd = new MongoDBSchemaMetadata();
     }
 
