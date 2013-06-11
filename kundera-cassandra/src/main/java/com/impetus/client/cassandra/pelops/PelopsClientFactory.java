@@ -425,6 +425,7 @@ public class PelopsClientFactory extends GenericClientFactory
             List<Object> vals = Lists.newArrayList(pools);
             Collections.shuffle(vals);
             Collections.sort(vals, new ShufflingCompare());
+            Collections.reverse(vals);
             Iterator<Object> iterator = vals.iterator();
             Object concurrentConnectionPool = iterator.next();
             return concurrentConnectionPool;
@@ -444,7 +445,10 @@ public class PelopsClientFactory extends GenericClientFactory
                 Policy policy1 = ((CommonsBackedPool) ((IThriftPool) o1)).getPolicy();
                 Policy policy2 = ((CommonsBackedPool) ((IThriftPool) o2)).getPolicy();
 
-                return policy1.getMaxActivePerNode() - policy2.getMaxActivePerNode();
+                int activeConnections1 = ((CommonsBackedPool) ((IThriftPool) o1)).getConnectionsActive();
+                int activeConnections2 = ((CommonsBackedPool) ((IThriftPool) o2)).getConnectionsActive();
+
+                return (policy1.getMaxActivePerNode() - activeConnections1) - (policy2.getMaxActivePerNode() - activeConnections2);
             }
         }
     }

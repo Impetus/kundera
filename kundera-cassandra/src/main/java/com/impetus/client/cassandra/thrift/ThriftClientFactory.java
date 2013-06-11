@@ -29,6 +29,8 @@ import net.dataforte.cassandra.pool.PoolProperties;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.thrift.TException;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -316,6 +318,7 @@ public class ThriftClientFactory extends GenericClientFactory
             List<Object> vals = Lists.newArrayList(pools);
             Collections.shuffle(vals);
             Collections.sort(vals, new ShufflingCompare());
+            Collections.reverse(vals);
             Iterator<Object> iterator = vals.iterator();
             Object concurrentConnectionPool = iterator.next();
             return concurrentConnectionPool;
@@ -333,7 +336,11 @@ public class ThriftClientFactory extends GenericClientFactory
             {
                 PoolConfiguration props1 = ((ConnectionPool) o1).getPoolProperties();
                 PoolConfiguration props2 = ((ConnectionPool) o2).getPoolProperties();
-                return props1.getMaxActive() - props2.getMaxActive();
+
+                int activeConnections1 = ((ConnectionPool) o1).getActive();
+                int activeConnections2 = ((ConnectionPool) o2).getActive();
+
+                return (props1.getMaxActive() - activeConnections1) - (props2.getMaxActive() - activeConnections2);
             }
         }
     }
