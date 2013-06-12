@@ -30,7 +30,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * Abstract class containing common methods for all interfaces extending {@link Collection} interface and {@link Map} interface
  * @author amresh.singh
  */
-public abstract class ProxyBase implements ProxyCollection {
+public abstract class AbstractProxyBase implements ProxyCollection {
 	
 	private PersistenceDelegator delegator;
 	private Object owner;
@@ -39,7 +39,7 @@ public abstract class ProxyBase implements ProxyCollection {
 	
 	protected Collection dataCollection;
 
-	public ProxyBase() {
+	public AbstractProxyBase() {
 	}
 	
 	@Override
@@ -52,7 +52,7 @@ public abstract class ProxyBase implements ProxyCollection {
 	/**
 	 * @param delegator
 	 */
-	public ProxyBase(PersistenceDelegator delegator, Relation relation) {
+	public AbstractProxyBase(PersistenceDelegator delegator, Relation relation) {
 		this.delegator = delegator;
 		this.relation = relation;
 	}
@@ -100,8 +100,13 @@ public abstract class ProxyBase implements ProxyCollection {
 
 	@Override
 	public Object getRelationValue(String relationName) {
-		if(relationsMap == null) return null;
-		return relationsMap.get(relationName);
+		Object result = null;
+		
+		if(relationsMap != null)
+		{
+			result =  relationsMap.get(relationName);
+		}
+		return result;
 	}
 
 	@Override
@@ -151,30 +156,37 @@ public abstract class ProxyBase implements ProxyCollection {
 	
 	protected boolean contains(Object arg0) {
 		
+		boolean result = false;
+		
 		eagerlyLoadDataCollection();
 		if(getDataCollection() != null)
 		{
-			return getDataCollection().contains(arg0);
+			result = getDataCollection().contains(arg0);
 		}		
-		return false;
+		return result;
 	}
 	
-	protected boolean containsAll(Collection arg0) {
+	protected boolean containsAll(final Collection arg0) {
 		eagerlyLoadDataCollection();
+		
+		boolean result = false;
+		
 		if(getDataCollection() != null)
 		{
-			return getDataCollection().containsAll(arg0);
+			result = getDataCollection().containsAll(arg0);
 		}
-		return false;
+		return result;
 	}
 	
-	protected boolean isEmpty() {
+	protected boolean isEmpty() {		
+		boolean result = true;
+		
 		eagerlyLoadDataCollection();	
 		if(getDataCollection() != null)
 		{
-			return getDataCollection().isEmpty();
+			result = getDataCollection().isEmpty();
 		}
-		return true;
+		return result;
 	}
 	
 	protected int size() {		

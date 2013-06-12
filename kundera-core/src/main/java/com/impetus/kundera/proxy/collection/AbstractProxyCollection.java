@@ -22,105 +22,121 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
- * Abstract class containing common methods for all interfaces extending {@link Collection} interface
+ * Abstract class containing common methods for all interfaces extending
+ * {@link Collection} interface
+ * 
  * @author amresh.singh
  */
-public class AbstractProxyCollection extends ProxyBase {
-	
+public class AbstractProxyCollection extends AbstractProxyBase {
+
+	/**
+	 * Default constructor
+	 */
 	public AbstractProxyCollection() {
-		
-	}	
-	
+		super();
+	}
+
 	/**
 	 * @param delegator
 	 */
-	public AbstractProxyCollection(PersistenceDelegator delegator, Relation relation) {
+	public AbstractProxyCollection(final PersistenceDelegator delegator,
+			final Relation relation) {
 		super(delegator, relation);
 	}
-	
-	protected boolean add(Object object) {
+
+	protected boolean add(final Object object) {
 		eagerlyLoadDataCollection();
-		if(dataCollection != null && ! dataCollection.contains(object) && object  != null)
-		{
+
+		boolean result = false;
+		if (dataCollection != null && !dataCollection.contains(object)
+				&& object != null) {
 			getPersistenceDelegator().persist(object);
 			dataCollection.add(object);
-			return true;
-		}		
-		return false;
+			result = true;
+		}
+		return result;
 	}
-	
-	protected boolean addAll(Collection c) {
+
+	protected boolean addAll(final Collection collection) {
 		eagerlyLoadDataCollection();
-		if(dataCollection != null && c != null && ! c.isEmpty())
-		{
-			for(Object o : c)
-			{
-				if(! dataCollection.contains(o) && o != null)
-				{
+
+		boolean result = false;
+
+		if (dataCollection != null && collection != null
+				&& !collection.isEmpty()) {
+			for (Object o : collection) {
+				if (!dataCollection.contains(o) && o != null) {
 					getPersistenceDelegator().persist(o);
-					dataCollection.add(o);					
+					dataCollection.add(o);
 				}
 			}
-			return true;
+			result = true;
 		}
-		return false;
+		return result;
 	}
-	
-	protected boolean remove(Object object) {
+
+	protected boolean remove(final Object object) {
 		eagerlyLoadDataCollection();
-		if(dataCollection != null && object != null)
-		{
+
+		boolean result = false;
+		if (dataCollection != null && object != null) {
 			getPersistenceDelegator().remove(object);
-			if(dataCollection.contains(object))
-			{
+			if (dataCollection.contains(object)) {
 				dataCollection.remove(object);
 			}
-			return true;
+			result = true;
 		}
-		return false;
+		return result;
 	}
-	
-	protected boolean removeAll(Collection c) {
+
+	protected boolean removeAll(final Collection collection) {
 		eagerlyLoadDataCollection();
-		if(dataCollection != null && c != null && ! c.isEmpty())
-		{
-			for(Object o : c)
-			{
-				if(o != null) {
+		boolean result = false;
+		if (dataCollection != null && collection != null
+				&& !collection.isEmpty()) {
+			for (Object o : collection) {
+				if (o != null) {
 					getPersistenceDelegator().remove(o);
 				}
 			}
-			
-			dataCollection.removeAll(c);
-			return true;
+
+			dataCollection.removeAll(collection);
+			result = true;
 		}
-		return false;
-	}
-	
-	protected boolean retainAll(Collection  c) {
-		eagerlyLoadDataCollection();
-		if (dataCollection != null && c != null && !c.isEmpty()) {
-			return dataCollection.retainAll(c);
-		}
-		return false;
-	}
-	
-	protected Iterator iterator() {
-		if(getDataCollection() != null)
-		{
-			eagerlyLoadDataCollection();	
-			return getDataCollection().iterator();
-		}
-		return null;
-	}
-	
-	protected Object[] toArray() {		
-		eagerlyLoadDataCollection();
-		return dataCollection == null ? new Object[0] : dataCollection.toArray();
+		return result;
 	}
 
-	protected Object[] toArray(Object[] arg0) {		
+	protected boolean retainAll(final Collection collection) {
+		boolean result = false;
 		eagerlyLoadDataCollection();
-		return dataCollection == null ? new Object[0] : dataCollection.toArray(arg0);
+
+		if (dataCollection != null && collection != null
+				&& !collection.isEmpty()) {
+			result = dataCollection.retainAll(collection);
+		}
+
+		return result;
+	}
+
+	protected Iterator iterator() {
+
+		Iterator result = null;
+		if (getDataCollection() != null) {
+			eagerlyLoadDataCollection();
+			result = getDataCollection().iterator();
+		}
+		return result;
+	}
+
+	protected Object[] toArray() {
+		eagerlyLoadDataCollection();
+		return dataCollection == null ? new Object[0] : dataCollection
+				.toArray();
+	}
+
+	protected Object[] toArray(final Object[] arg0) {
+		eagerlyLoadDataCollection();
+		return dataCollection == null ? new Object[0] : dataCollection
+				.toArray(arg0);
 	}
 }

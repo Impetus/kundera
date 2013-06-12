@@ -29,11 +29,14 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 public class ProxySet extends AbstractProxyCollection implements
 		ProxyCollection, Set {
 
+	/**
+	 * Default constructor
+	 */
 	public ProxySet() {
-
+		super();
 	}	
 
-	public ProxySet(PersistenceDelegator delegator, Relation relation) {
+	public ProxySet(final PersistenceDelegator delegator, final Relation relation) {
 		super(delegator, relation);
 	}
 	
@@ -45,12 +48,12 @@ public class ProxySet extends AbstractProxyCollection implements
 	}
 
 	@Override
-	public boolean contains(Object arg0) {
+	public boolean contains(final Object arg0) {
 		return super.contains(arg0);
 	}
 
 	@Override
-	public boolean containsAll(Collection arg0) {
+	public boolean containsAll(final Collection arg0) {
 		return super.containsAll(arg0);
 	}
 
@@ -65,28 +68,28 @@ public class ProxySet extends AbstractProxyCollection implements
 	}
 	
 	@Override
-	public boolean add(Object object) {
+	public boolean add(final Object object) {
 		return super.add(object);
 	}
 
 	@Override
-	public boolean addAll(Collection c) {
-		return super.addAll(c);
+	public boolean addAll(final Collection collection) {
+		return super.addAll(collection);
 	}
 	
 	@Override
-	public boolean remove(Object object) {
+	public boolean remove(final Object object) {
 		return super.remove(object);
 	}
 
 	@Override
-	public boolean removeAll(Collection c) {
-		return super.removeAll(c);
+	public boolean removeAll(final Collection collection) {
+		return super.removeAll(collection);
 	}
 
 	@Override
-	public boolean retainAll(Collection  c) {
-		return super.retainAll(c);
+	public boolean retainAll(final Collection  collection) {
+		return super.retainAll(collection);
 	}
 	
 	@Override
@@ -100,7 +103,7 @@ public class ProxySet extends AbstractProxyCollection implements
 	}
 
 	@Override
-	public Object[] toArray(Object[] arg0) {		
+	public Object[] toArray(final Object[] arg0) {		
 		return super.toArray(arg0);
 	}
 }

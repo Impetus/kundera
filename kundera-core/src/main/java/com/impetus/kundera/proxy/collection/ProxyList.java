@@ -30,22 +30,25 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 public class ProxyList extends AbstractProxyCollection implements
 		ProxyCollection, List {
 	
+	/**
+	 * Default constructor
+	 */
 	public ProxyList() {
-
+		super();
 	}	
 
-	public ProxyList(PersistenceDelegator delegator, Relation relation) {
+	public ProxyList(final PersistenceDelegator delegator, final Relation relation) {
 		super(delegator, relation);
 	}
 	
 	/////////////Methods from Collection interface////////////////////////////
 	@Override
-	public boolean contains(Object arg0) {
+	public boolean contains(final Object arg0) {
 		return super.contains(arg0);
 	}
 
 	@Override
-	public boolean containsAll(Collection arg0) {
+	public boolean containsAll(final Collection arg0) {
 		return super.containsAll(arg0);
 	}
 	
@@ -62,28 +65,28 @@ public class ProxyList extends AbstractProxyCollection implements
 	
 
 	@Override
-	public boolean add(Object arg0) {
+	public boolean add(final Object arg0) {
 		return super.add(arg0);
 	}
 	
 	@Override
-	public boolean addAll(Collection arg0) {
+	public boolean addAll(final Collection arg0) {
 		return super.addAll(arg0);
 	}
 	
 	@Override
-	public boolean remove(Object arg0) {
+	public boolean remove(final Object arg0) {
 		return super.remove(arg0);
 	}
 	
 	@Override
-	public boolean removeAll(Collection c) {
-		return super.removeAll(c);
+	public boolean removeAll(final Collection collection) {
+		return super.removeAll(collection);
 	}
 	
 	@Override
-	public boolean retainAll(Collection c) {
-		return super.retainAll(c);
+	public boolean retainAll(final Collection collection) {
+		return super.retainAll(collection);
 	}
 	
 	@Override
@@ -97,7 +100,7 @@ public class ProxyList extends AbstractProxyCollection implements
 	}
 
 	@Override
-	public Object[] toArray(Object[] arg0) {
+	public Object[] toArray(final Object[] arg0) {
 		return super.toArray(arg0);
 	}
 	
@@ -109,7 +112,7 @@ public class ProxyList extends AbstractProxyCollection implements
 	//////////////Methods from List interface ///////////////////////
 
 	@Override
-	public void add(int arg0, Object arg1) {
+	public void add(final int arg0, final Object arg1) {
 		eagerlyLoadDataCollection();
 		
 		List dataList = (List) dataCollection;
@@ -122,137 +125,150 @@ public class ProxyList extends AbstractProxyCollection implements
 	}	
 
 	@Override
-	public boolean addAll(int i, Collection c) {
+	public boolean addAll(final int index, final Collection collection) {
 		eagerlyLoadDataCollection();
+		
+		boolean result = false;
 		
 		List dataList = (List) dataCollection;
 		
-		if(dataList != null && c != null && ! c.isEmpty())
+		if(dataList != null && collection != null && ! collection.isEmpty())
 		{
-			int j = 0;
-			for(Object o : c)
+			int position = 0;
+			for(Object o : collection)
 			{
 				if(! dataList.contains(o) && o != null)
 				{
 					getPersistenceDelegator().persist(o);
-					dataList.add(i + j++, o);					
+					dataList.add(index + position++, o);					
 				}
 			}
-			return true;
+			result = true;
 		}
-		return false;
+		return result;
 	}
 	
 	@Override
-	public Object get(int arg0) {
+	public Object get(final int arg0) {
 		eagerlyLoadDataCollection();
 		
+		Object result = null;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return null;
+			result = dataList.get(arg0);
 		}
-		return dataList.get(arg0);
+		return result; 
 	}
 
 	@Override
-	public int indexOf(Object arg0) {
+	public int indexOf(final Object arg0) {
 		eagerlyLoadDataCollection();
 		
+		int index = -1;
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return -1;
+			index = dataList.indexOf(arg0); 
 		}
-		return dataList.indexOf(arg0);
+		return index; 
 	}		
 
 	@Override
-	public int lastIndexOf(Object arg0) {
+	public int lastIndexOf(final Object arg0) {
 		eagerlyLoadDataCollection();
 		
+		int index = -1;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return -1;
+			index = dataList.lastIndexOf(arg0);
 		}
-		return dataList.lastIndexOf(arg0);
+		return index;
 	}
 
 	@Override
 	public ListIterator listIterator() {
 		eagerlyLoadDataCollection();
 		
+		ListIterator iterator = null;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return null;
+			iterator = dataList.listIterator(); 
 		}
-		return dataList.listIterator();
+		return iterator;
 	}
 
 	@Override
-	public ListIterator listIterator(int arg0) {
+	public ListIterator listIterator(final int arg0) {
 		eagerlyLoadDataCollection();
 		
+		ListIterator iterator = null;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return null;
+			iterator = dataList.listIterator(arg0);			
 		}
-		return dataList.listIterator(arg0);
+		return iterator;
 	}
 
 	@Override
-	public Object remove(int arg0) {
+	public Object remove(final int arg0) {
 		eagerlyLoadDataCollection();
 		
+		Object result = null;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty() && ! dataList.contains(arg0))
+		if(dataList != null && ! dataList.isEmpty() && dataList.contains(arg0))
 		{
-			return null;
-		}
-		
-		Object entity = dataList.get(arg0);				
-		getPersistenceDelegator().remove(arg0);
-		
-		return dataList.remove(arg0);	
-			
+			getPersistenceDelegator().remove(arg0);			
+			result = dataList.remove(arg0);
+		}	
+		return result;		
 	}	
 
 	@Override
-	public Object set(int arg0, Object arg1) {
+	public Object set(final int arg0, final Object arg1) {
 		eagerlyLoadDataCollection();		
 		List dataList = (List) dataCollection;
 		
-		if(dataList == null || dataList.isEmpty())
-		{
-			return null;
-		}
+		Object result = null;
 		
-		if(dataList.get(arg0) == null)
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			getPersistenceDelegator().persist(arg1);
-			return dataList.set(arg0, arg1);
+			if(dataList.get(arg0) == null)
+			{
+				getPersistenceDelegator().persist(arg1);
+				result = dataList.set(arg0, arg1);
+				
+			}
+			else
+			{
+				getPersistenceDelegator().merge(arg1);
+				result = dataList.set(arg0, arg1);
+			}	
 			
 		}
-		else
-		{
-			getPersistenceDelegator().merge(arg1);
-			return dataList.set(arg0, arg1);
-		}			
+		return result;		
 	}	
 
 	@Override
-	public List subList(int arg0, int arg1) {
+	public List subList(final int arg0, final int arg1) {
 		eagerlyLoadDataCollection();
 		
+		List result = null;
+		
 		List dataList = (List) dataCollection;
-		if(dataList == null || dataList.isEmpty())
+		if(dataList != null && ! dataList.isEmpty())
 		{
-			return null;
+			result =  dataList.subList(arg0, arg1);
 		}
-		return dataList.subList(arg0, arg1);
+		return result;
 	}	
 
 }

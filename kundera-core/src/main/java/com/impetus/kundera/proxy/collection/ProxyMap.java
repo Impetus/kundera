@@ -26,14 +26,17 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * Proxy class used to represent instances for {@link Map}
  * @author amresh.singh
  */
-public class ProxyMap extends ProxyBase implements
+public class ProxyMap extends AbstractProxyBase implements
 		ProxyCollection, Map {
 	
+	/**
+	 * Default constructor
+	 */
 	public ProxyMap() {
-
+		super();
 	}	
 
-	public ProxyMap(PersistenceDelegator delegator, Relation relation) {
+	public ProxyMap(final PersistenceDelegator delegator, final Relation relation) {
 		super(delegator, relation);
 	}	
 	
@@ -57,79 +60,91 @@ public class ProxyMap extends ProxyBase implements
 	/////////////////////////Methods from Map interface	////////////////
 	
 	@Override
-	public boolean containsKey(Object arg0) {		
+	public boolean containsKey(final Object arg0) {		
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		boolean result = false;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return false;
+			result = dataMap.containsKey(arg0);			
 		}
-		return dataMap.containsKey(arg0);
+		return result;
 	}
 
 	@Override
-	public boolean containsValue(Object arg0) {
+	public boolean containsValue(final Object arg0) {
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		boolean result = false;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return false;
+			result = dataMap.containsValue(arg0);			
 		}
-		return dataMap.containsValue(arg0);
+		return result;
 	}
 
 	@Override
 	public Set entrySet() {
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Set result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
+			result = dataMap.entrySet();			
 		}
-		return dataMap.entrySet();
+		return result;
 	}
 
 	@Override
-	public Object get(Object arg0) {
+	public Object get(final Object arg0) {
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Object result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
+			result = dataMap.get(arg0);			
 		}
-		return dataMap.get(arg0);
+		return result;
 	}	
 
 	@Override
 	public Set keySet() {
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Set result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
+			result = dataMap.keySet();			
 		}
-		return dataMap.keySet();
+		return result;
 	}
 
 	@Override
-	public Object put(Object arg0, Object arg1) {
+	public Object put(final Object arg0, final Object arg1) {
 		eagerlyLoadDataCollection();		
 		Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Object result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
-		}	
-		return dataMap.put(arg0, arg1);
+			result =  dataMap.put(arg0, arg1);
+		}
+		return result;
 	}
 
 	@Override
-	public void putAll(Map arg0) {
+	public void putAll(final Map arg0) {
 		eagerlyLoadDataCollection();		
 		Map dataMap = (Map) dataCollection;
 		
@@ -141,27 +156,31 @@ public class ProxyMap extends ProxyBase implements
 	}
 
 	@Override
-	public Object remove(Object arg0) {
+	public Object remove(final Object arg0) {
 		eagerlyLoadDataCollection();		
 		Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Object result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
+			result = dataMap.remove(arg0);
 		}
-		return dataMap.remove(arg0);
+		return result;
 	}	
 
 	@Override
 	public Collection values() {
 		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
+		final Map dataMap = (Map) dataCollection;
 		
-		if(dataMap == null || dataMap.isEmpty())
+		Collection result = null;
+		
+		if(dataMap != null && ! dataMap.isEmpty())
 		{
-			return null;
+			result =  dataMap.values();			
 		}
-		return dataMap.values();
+		return result;
 	}
 
 }
