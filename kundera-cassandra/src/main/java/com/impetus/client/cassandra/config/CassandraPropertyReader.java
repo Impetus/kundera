@@ -142,22 +142,24 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public DataStore getDataStore()
         {
-            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            if (getClientProperties() != null)
             {
-                for (DataStore dataStore : getClientProperties().getDatastores())
+                if (getClientProperties().getDatastores() != null)
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("cassandra"))
+                    for (DataStore dataStore : getClientProperties().getDatastores())
                     {
-                        return dataStore;
+                        if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("cassandra"))
+                        {
+                            return dataStore;
+                        }
                     }
                 }
-            }
 
-            if (logger.isWarnEnabled())
-            {
-                logger.warn("No data store configuration found, returning null.");
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("No data store configuration found, returning null.");
+                }
             }
-
             return null;
         }
 
@@ -178,9 +180,9 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                 }
             }
 
-            if (logger.isInfoEnabled())
+            if (logger.isWarnEnabled())
             {
-                logger.info("Returning inverted indexing enabled value {}.", result);
+                logger.warn("Returning inverted indexing enabled value {}.", result);
             }
             return result;
         }
@@ -235,22 +237,24 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         public Table getColumnFamily(String schemaName, String cfName)
         {
             Schema schema = getSchema(schemaName);
-            if (schema != null && schema.getTables() != null)
+            if (schema != null)
             {
-                for (Table table : schema.getTables())
+                if (schema.getTables() != null)
                 {
-                    if (table != null && table.getName() != null && table.getName().equalsIgnoreCase(cfName))
+                    for (Table table : schema.getTables())
                     {
-                        return table;
+                        if (table != null && table.getName() != null && table.getName().equalsIgnoreCase(cfName))
+                        {
+                            return table;
+                        }
                     }
                 }
-            }
 
-            if (logger.isWarnEnabled())
-            {
-                logger.warn("No column family schema found, returning null.");
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("No column family schema found, returning null.");
+                }
             }
-
             return null;
         }
 
@@ -258,14 +262,17 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
         {
             DataStore ds = getDataStore();
             Properties properties = new Properties();
-            if (ds != null && ds.getConnection() != null)
+            if (ds != null)
             {
-                properties = ds.getConnection().getProperties();
-                return properties;
-            }
-            if (logger.isWarnEnabled())
-            {
-                logger.warn("No connection properties found, returning none.");
+                if (ds.getConnection() != null)
+                {
+                    properties = ds.getConnection().getProperties();
+                    return properties;
+                }
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("No connection properties found, returning none.");
+                }
             }
             return properties;
         }

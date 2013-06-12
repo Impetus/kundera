@@ -371,7 +371,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected boolean initiateClient()
     {
-        String message = null;
+        Throwable message = null;
         for (String host : hosts)
         {
             if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
@@ -393,8 +393,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (TTransportException e)
             {
-                message = e.getMessage();
-                log.error("Error while opening socket for host  { }, Caused by: . ", host, e);
+                message = e;
+                log.warn("Error while opening socket for host {}, skipping for next available node ", host);
             }
             catch (NumberFormatException e)
             {
@@ -402,7 +402,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 throw new SchemaGenerationException(e, "Cassandra");
             }
         }
-        throw new SchemaGenerationException("Error while opening socket, Caused by: ." + message);
+        throw new SchemaGenerationException("Error while opening socket, Caused by: .", message, "Cassandra");
     }
 
     /**
@@ -664,9 +664,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     private void onLogException(TableInfo tableInfo, IndexInfo indexInfo, Exception ire)
     {
-        log.error("Error occurred while creating indexes on column{} of table {}, , Caused by: .",indexInfo.getColumnName(),tableInfo.getTableName(), ire);
-        throw new SchemaGenerationException("Error occurred while creating indexes on column "+ indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire,
-                "Cassandra", databaseName);
+        log.error("Error occurred while creating indexes on column{} of table {}, , Caused by: .",
+                indexInfo.getColumnName(), tableInfo.getTableName(), ire);
+        throw new SchemaGenerationException("Error occurred while creating indexes on column "
+                + indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire, "Cassandra", databaseName);
     }
 
     /**
