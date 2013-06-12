@@ -105,39 +105,34 @@ public class PelopsClientFactory extends GenericClientFactory
         {
             CassandraHost cassandraHost = (CassandraHost) host;
             String poolName = PelopsUtils.generatePoolName(cassandraHost.getHost(), cassandraHost.getPort(), keyspace);
-
-            if (Pelops.getDbConnPool(poolName) == null)
+            if (PelopsUtils.verifyConnection(cassandraHost.getHost(), cassandraHost.getPort()))
             {
-                try
+                Cluster cluster = new Cluster(cassandraHost.getHost(), new IConnection.Config(cassandraHost.getPort(),
+                        true, -1, PelopsUtils.getAuthenticationRequest(cassandraHost.getUser(),
+                                cassandraHost.getPassword())), false);
+
+                if (logger.isInfoEnabled())
                 {
-                    Cluster cluster = new Cluster(cassandraHost.getHost(), new IConnection.Config(
-                            cassandraHost.getPort(), true, -1, PelopsUtils.getAuthenticationRequest(
-                                    cassandraHost.getUser(), cassandraHost.getPassword())), false);
-
-                    if (logger.isInfoEnabled())
-                    {
-                        logger.info("Initializing connection pool for keyspace {}, host {},port {}.", keyspace,
-                                cassandraHost.getHost(), cassandraHost.getPort());
-                    }
-
-                    Policy policy = PelopsUtils.getPoolConfigPolicy(cassandraHost);
-
-                    // Add pool with specified policy. null means default
-                    // operand
-                    // policy.
-                    Pelops.addPool(poolName, cluster, keyspace, policy, null);
+                    logger.info("Initializing connection pool for keyspace {}, host {},port {}.", keyspace,
+                            cassandraHost.getHost(), cassandraHost.getPort());
                 }
-                catch (TransportException e)
+
+                Policy policy = PelopsUtils.getPoolConfigPolicy(cassandraHost);
+
+                // Add pool with specified policy. null means default operand
+                // policy.
+                Pelops.addPool(poolName, cluster, keyspace, policy, null);
+                hostPools.put(cassandraHost, Pelops.getDbConnPool(poolName));
+            }
+            else
+            {
+                logger.warn("Node " + host.getHost() + " are down");
+                if (host.isRetryHost())
                 {
-                    logger.warn("Node " + host.getHost() + " are down");
-                    if (host.isRetryHost())
-                    {
-                        logger.info("Scheduling node for future retry");
-                        ((CassandraRetryService) hostRetryService).add((CassandraHost) host);
-                    }
+                    logger.info("Scheduling node for future retry");
+                    ((CassandraRetryService) hostRetryService).add((CassandraHost) host);
                 }
             }
-            hostPools.put(cassandraHost, Pelops.getDbConnPool(poolName));
         }
         // TODO return a thrift pool
         return null;
@@ -222,19 +217,6 @@ public class PelopsClientFactory extends GenericClientFactory
 
     /**
      * 
-     * @param host
-     * @param port
-     * @return
-     */
-    private IThriftPool getNewPool(String host, int port)
-    {
-        CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(host, port);
-        hostPools.remove(cassandraHost);
-        return getPoolUsingPolicy();
-    }
-
-    /**
-     * 
      * @return pool an the basis of LoadBalancing policy.
      */
     private IThriftPool getPoolUsingPolicy()
@@ -252,23 +234,20 @@ public class PelopsClientFactory extends GenericClientFactory
         boolean success = false;
         while (!success)
         {
-            try
+            success = true;
+            if (pool != null)
             {
-                success = true;
-                if (pool != null)
+                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                String host = nodes[0].getAddress();
+                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                if (PelopsUtils.verifyConnection(host, thriftPort))
                 {
                     return pool.getConnection();
                 }
+                removePool(pool);
             }
-            catch (TransportException te)
-            {
-                success = false;
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
-                logger.warn("{} :{}  host appears to be down, trying for next ", nodes, ((CommonsBackedPool) pool)
-                        .getCluster().getConnectionConfig().getThriftPort());
-                pool = getNewPool(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
-                        .getThriftPort());
-            }
+            success = false;
+            pool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
@@ -278,23 +257,20 @@ public class PelopsClientFactory extends GenericClientFactory
         boolean success = false;
         while (!success)
         {
-            try
+            success = true;
+            if (pool != null)
             {
-                success = true;
-                if (pool != null)
-                {
-                    return Pelops.createMutator(getPoolName(pool));
-                }
-            }
-            catch (TransportException te)
-            {
-                success = false;
                 Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
-                logger.warn("{} :{}  host appears to be down, trying for next ", nodes, ((CommonsBackedPool) pool)
-                        .getCluster().getConnectionConfig().getThriftPort());
-                pool = getNewPool(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
-                        .getThriftPort());
+                String host = nodes[0].getAddress();
+                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                if (PelopsUtils.verifyConnection(host, thriftPort))
+                {
+                    return Pelops.createMutator(PelopsUtils.getPoolName(pool));
+                }
+                removePool(pool);
             }
+            success = false;
+            pool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
@@ -304,26 +280,21 @@ public class PelopsClientFactory extends GenericClientFactory
         boolean success = false;
         while (!success)
         {
-            try
+            if (pool != null)
             {
-                success = true;
-                if (pool != null)
-                {
-                    return Pelops.createSelector(getPoolName(pool));
-                }
-            }
-            catch (TransportException te)
-            {
-                success = false;
                 Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
-                logger.warn("{} :{}  host appears to be down, trying for next ", nodes, ((CommonsBackedPool) pool)
-                        .getCluster().getConnectionConfig().getThriftPort());
-                pool = getNewPool(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
-                        .getThriftPort());
+                String host = nodes[0].getAddress();
+                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                if (PelopsUtils.verifyConnection(host, thriftPort))
+                {
+                    return Pelops.createSelector(PelopsUtils.getPoolName(pool));
+                }
+                removePool(pool);
             }
+            success = false;
+            pool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
-
     }
 
     RowDeletor getRowDeletor(IThriftPool pool)
@@ -331,34 +302,22 @@ public class PelopsClientFactory extends GenericClientFactory
         boolean success = false;
         while (!success)
         {
-            try
+            if (pool != null)
             {
-                success = true;
-                if (pool != null)
-                {
-                    return Pelops.createRowDeletor(getPoolName(pool));
-                }
-            }
-            catch (TransportException te)
-            {
-                success = false;
                 Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
-                logger.warn("{} :{}  host appears to be down, trying for next ", nodes, ((CommonsBackedPool) pool)
-                        .getCluster().getConnectionConfig().getThriftPort());
-                pool = getNewPool(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
-                        .getThriftPort());
+                String host = nodes[0].getAddress();
+                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                if (PelopsUtils.verifyConnection(host, thriftPort))
+                {
+                    return Pelops.createRowDeletor(PelopsUtils.getPoolName(pool));
+                }
+                removePool(pool);
             }
+            success = false;
+            pool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
 
-    }
-
-    private String getPoolName(IThriftPool pool)
-    {
-        org.scale7.cassandra.pelops.Cluster.Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
-        String poolName = PelopsUtils.generatePoolName(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster()
-                .getConnectionConfig().getThriftPort(), ((CommonsBackedPool) pool).getKeyspace());
-        return poolName;
     }
 
     void releaseConnection(IPooledConnection conn)
@@ -405,6 +364,22 @@ public class PelopsClientFactory extends GenericClientFactory
     }
 
     /**
+     * Removes downed host pool from pool map.
+     * 
+     * @param pool
+     */
+    private void removePool(IThriftPool pool)
+    {
+        Pelops.removePool(PelopsUtils.getPoolName(pool));
+        Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+        logger.warn("{} :{}  host appears to be down, trying for next ", nodes, ((CommonsBackedPool) pool).getCluster()
+                .getConnectionConfig().getThriftPort());
+        CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort());
+        hostPools.remove(cassandraHost);
+    }
+
+    /**
      * Extends LeastActiveBalancingPolicy class and provide own implementation
      * in order to support least active balancing policy.
      * 
@@ -448,7 +423,8 @@ public class PelopsClientFactory extends GenericClientFactory
                 int activeConnections1 = ((CommonsBackedPool) ((IThriftPool) o1)).getConnectionsActive();
                 int activeConnections2 = ((CommonsBackedPool) ((IThriftPool) o2)).getConnectionsActive();
 
-                return (policy1.getMaxActivePerNode() - activeConnections1) - (policy2.getMaxActivePerNode() - activeConnections2);
+                return (policy1.getMaxActivePerNode() - activeConnections1)
+                        - (policy2.getMaxActivePerNode() - activeConnections2);
             }
         }
     }

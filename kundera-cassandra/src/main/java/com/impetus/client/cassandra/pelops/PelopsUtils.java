@@ -24,10 +24,18 @@ import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
@@ -153,5 +161,36 @@ public class PelopsUtils
             authenticator = new SimpleConnectionAuthenticator(userName, password);
         }
         return authenticator;
+    }
+
+    public static boolean verifyConnection(String host, int port)
+    {
+        try
+        {
+            TSocket socket = new TSocket(host, port);
+            TTransport transport = new TFramedTransport(socket);
+            TProtocol protocol = new TBinaryProtocol(transport);
+            Cassandra.Client client = new Cassandra.Client(protocol);
+            socket.open();
+            return client.describe_cluster_name() != null;
+        }
+        catch (TTransportException e)
+        {
+            logger.warn("{}:{} is still down", host, port);
+            return false;
+        }
+        catch (TException e)
+        {
+            logger.warn("{}:{} is still down", host, port);
+            return false;
+        }
+    }
+
+    public static String getPoolName(IThriftPool pool)
+    {
+        org.scale7.cassandra.pelops.Cluster.Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+        String poolName = PelopsUtils.generatePoolName(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster()
+                .getConnectionConfig().getThriftPort(), ((CommonsBackedPool) pool).getKeyspace());
+        return poolName;
     }
 }
