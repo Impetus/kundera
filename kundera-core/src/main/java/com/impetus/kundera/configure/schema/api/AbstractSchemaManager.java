@@ -17,7 +17,6 @@ package com.impetus.kundera.configure.schema.api;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
@@ -80,24 +79,24 @@ public abstract class AbstractSchemaManager
         this.externalProperties = externalProperties;
     }
 
-    // @Override
+//     @Override
     /**
      * Export schema handles the handleOperation method.
      * 
      * @param hbase
      */
-    protected void exportSchema()
+    protected void exportSchema(final String persistenceUnit,List<TableInfo> tables)
     {
 
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+//        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         // Actually, start 1 pu.
-        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
-        Set<String> pus = puToSchemaCol.keySet();
-        for (String pu : pus)
-        {
+//        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
+//        Set<String> pus = puToSchemaCol.keySet();
+//        for (String pu : pus)
+//        {
             // Get persistence unit metadata
-            puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu);
+            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
             String paramString = externalProperties != null ? (String) externalProperties
                     .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
             if (clientFactory != null
@@ -105,22 +104,22 @@ public abstract class AbstractSchemaManager
                             PersistenceProperties.KUNDERA_CLIENT_FACTORY))) || (paramString != null && clientFactory
                             .equalsIgnoreCase(paramString))))
             {
-                readConfigProperties(pu);
+                readConfigProperties(puMetadata);
 
                 // invoke handle operation.
                 if (operation != null && initiateClient())
                 {
-                    tableInfos = puToSchemaCol.get(pu);
-                    handleOperations(tableInfos);
+                    tableInfos = tables;
+                    handleOperations(tables);
                 }
             }
-        }
+     //   }
     }
 
     /**
      * @param pu
      */
-    private void readConfigProperties(String pu)
+    private void readConfigProperties(final PersistenceUnitMetadata puMetadata)
     {
         String hostName = null;
         String portName = null;

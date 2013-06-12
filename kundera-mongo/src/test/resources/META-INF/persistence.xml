@@ -107,7 +107,7 @@
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaMongoSchemaGeneration" />
 			<property name="kundera.dialect" value="mongodb" />
-			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.ddl.auto.prepare" value="create-drop" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.client.property" value="kunderaMongoTest.xml" />

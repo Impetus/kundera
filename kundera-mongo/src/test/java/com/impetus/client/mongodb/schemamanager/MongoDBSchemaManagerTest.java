@@ -28,7 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.mongodb.MongoDBClient;
+import com.impetus.client.mongodb.MongoDBClientFactory;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientResolver;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -48,6 +50,8 @@ public class MongoDBSchemaManagerTest
     private EntityManagerFactory emf;
 
     private EntityManager em;
+    
+    
 
     /**
      * @throws java.lang.Exception
@@ -121,10 +125,15 @@ public class MongoDBSchemaManagerTest
      * {@link com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager#dropSchema()}
      * .
      */
-    // @Test
+     @Test
     public void testDropSchema()
     {
-
+//         testCreate();
+         MongoDBClientFactory clientFactory = (MongoDBClientFactory) ClientResolver.getClientFactory(persistenceUnit);
+         clientFactory.getSchemaManager(null).dropSchema();
+         DBCollection collection = db.getCollection("MongoDBEntitySimple");
+         Assert.assertTrue(collection.getIndexInfo().isEmpty());
+         Assert.assertEquals(0,collection.getCount());
     }
 
     /**

@@ -81,8 +81,8 @@ public class ActorTest
     public void test() throws NotFoundException, InvalidRequestException, TException, UnsupportedEncodingException
     {
         getEntityManagerFactory("create");
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
-        schemaManager.exportSchema();
+//        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
+//        schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("Actor", "KunderaCoreExmples"));

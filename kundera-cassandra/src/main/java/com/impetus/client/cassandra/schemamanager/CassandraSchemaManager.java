@@ -140,11 +140,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * Export schema handles the handleOperation method.
      */
-    public void exportSchema()
+    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
         cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
                 : CassandraConstants.CQL_VERSION_3_0;
-        super.exportSchema();
+        super.exportSchema(persistenceUnit,schemas);
     }
 
     /**
