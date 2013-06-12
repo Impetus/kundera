@@ -29,7 +29,6 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.configure.schema.SchemaMetadata;
 import com.impetus.kundera.metadata.processor.MetaModelBuilder;
 
 /**
@@ -49,8 +48,6 @@ public class ApplicationMetadata
 
     /** The Constant log. */
     private static Logger logger = LoggerFactory.getLogger(ApplicationMetadata.class);
-
-    private SchemaMetadata schemaMetadata = new SchemaMetadata();
 
     // private MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
 
@@ -352,14 +349,6 @@ public class ApplicationMetadata
     }
 
     /**
-     * @return the schemaMetadata
-     */
-    public SchemaMetadata getSchemaMetadata()
-    {
-        return schemaMetadata;
-    }
-
-    /**
      * @return the metaModelBuilder
      */
     public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
@@ -415,7 +404,5 @@ public class ApplicationMetadata
             puMetadata.setProvider(null);
             puMetadata = null;
         }
-
-        this.schemaMetadata.getPuToSchemaMetadata().remove(pu);
     }
 }

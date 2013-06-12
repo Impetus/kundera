@@ -81,9 +81,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     /**
      * Export schema handles the handleOperation method.
      */
-    public void exportSchema()
+    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
-        super.exportSchema();
+        super.exportSchema(persistenceUnit,schemas);
     }
 
     /**

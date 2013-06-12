@@ -34,7 +34,6 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.HBaseClientFactory;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
@@ -145,8 +144,8 @@ public class HBaseSchemaOperationTest
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-        schemaManager.exportSchema();
+//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+//        schemaManager.exportSchema();
         Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
 
         HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
@@ -158,7 +157,9 @@ public class HBaseSchemaOperationTest
             Assert.assertNotNull(columnDescriptor.getNameAsString());
             Assert.assertEquals(HBASE_ENTITY_SIMPLE, columnDescriptor.getNameAsString());
         }
-        schemaManager.dropSchema();
+
+        HBaseClientFactory clientFactory = (HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit);
+        clientFactory.getSchemaManager(null).dropSchema();
         Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
     }
 
@@ -186,8 +187,8 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("update");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-        schemaManager.exportSchema();
+//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+//        schemaManager.exportSchema();
 
         Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
 
@@ -240,8 +241,8 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("validate");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-        schemaManager.exportSchema();
+//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+//        schemaManager.exportSchema();
         if (!admin.isTableDisabled(HBASE_ENTITY_SIMPLE))
         {
             admin.disableTable(HBASE_ENTITY_SIMPLE);
@@ -276,8 +277,8 @@ public class HBaseSchemaOperationTest
             }
 
             getEntityManagerFactory("validate");
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-            schemaManager.exportSchema();
+//            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+//            schemaManager.exportSchema();
         }
         catch (SchemaGenerationException sgex)
         {

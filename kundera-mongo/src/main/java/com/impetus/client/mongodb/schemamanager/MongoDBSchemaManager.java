@@ -69,9 +69,9 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /**
      * Export schema handles the handleOperation method.
      */
-    public void exportSchema()
+    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
-        super.exportSchema();
+        super.exportSchema(persistenceUnit,schemas);
     }
 
     /**
@@ -110,7 +110,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
             boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (tableInfo.isIndexable() && !isCappedCollection)
+            if (!isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
             }
@@ -149,7 +149,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
 
             boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (tableInfo.isIndexable() && !isCappedCollection)
+            if (!isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
             }
