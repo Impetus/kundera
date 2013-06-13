@@ -17,7 +17,6 @@ package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,19 +36,15 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -126,7 +121,7 @@ final class MongoDBDataHandler
 
             for (Attribute column : columns)
             {
-                if (!column.getName().equals(m.getIdAttribute().getName()))
+                if (!column.equals(m.getIdAttribute()))
                 {
                     String fieldName = ((AbstractAttribute) column).getJPAColumnName();
 
@@ -137,7 +132,7 @@ final class MongoDBDataHandler
                     }
                     else if (!column.isAssociation())
                     {
-                        setColumnValue(document, entity, column);
+                        DocumentObjectMapper.setColumnValue(document, entity, column);
                     }
                     else if (relations != null)
                     {
@@ -162,7 +157,6 @@ final class MongoDBDataHandler
                             }
                             relationValue.put(fieldName, colValue);
                         }
-
                     }
                 }
             }
@@ -176,7 +170,6 @@ final class MongoDBDataHandler
             {
                 return entity;
             }
-
         }
         catch (InstantiationException e)
         {
@@ -194,74 +187,6 @@ final class MongoDBDataHandler
             return entity;
         }
 
-    }
-
-    /**
-     * Setter for column value, by default converted from string value, in case
-     * of map it is automatically converted into map using BasicDBObject.
-     * 
-     * @param document
-     *            mongo document
-     * @param entity
-     *            searched entity.
-     * @param column
-     *            column field.
-     */
-    private void setColumnValue(DBObject document, Object entity, Attribute column)
-    {
-        Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
-        if (value != null)
-        {
-            if (column.getJavaType().isEnum())
-            {
-                EnumAccessor accessor = new EnumAccessor();
-                value = accessor.fromString(column.getJavaType(), value.toString());
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
-            }
-            else if (column.getJavaType().isAssignableFrom(Map.class))
-            {
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
-            }
-            else if (column.getJavaType().isAssignableFrom(Point.class))
-            {
-                BasicDBList list = (BasicDBList) value;
-
-                Object xObj = list.get(0);
-                Object yObj = list.get(1);
-
-                if (xObj != null && yObj != null)
-                {
-                    try
-                    {
-                        double x = Double.parseDouble(xObj.toString());
-                        double y = Double.parseDouble(yObj.toString());
-
-                        Point point = new Point(x, y);
-                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), point);
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        log.error("Error while reading geolocation data for column " + column
-                                + ";Reason - possible corrupt data. " + e.getMessage());
-                        throw new EntityReaderException("Error while reading geolocation data for column " + column
-                                + ";Reason - possible corrupt data.", e);
-                    }
-
-                }
-
-            }
-            else if (value instanceof BasicDBList)
-            {
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(),
-                        Arrays.asList(((BasicDBList) value).toArray()));
-            }
-            else
-            {
-                value = MongoDBUtils.populateValue(value, value.getClass());
-                value = MongoDBUtils.getTranslatedObject(value, value.getClass(), column.getJavaType());
-                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
-            }
-        }
     }
 
     /**
@@ -313,17 +238,15 @@ final class MongoDBDataHandler
                     }
                     else if (!column.isAssociation())
                     {
-                        extractEntityField(entity, dbObj, column);
+                        DocumentObjectMapper.extractEntityField(entity, dbObj, column);
                     }
-
                 }
-                catch (PropertyAccessException e1)
+                catch (PropertyAccessException paex)
                 {
                     log.error("Can't access property " + column.getName());
                 }
             }
         }
-
         if (relations != null)
         {
             for (RelationHolder rh : relations)
@@ -332,69 +255,7 @@ final class MongoDBDataHandler
                         MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
-
         return dbObj;
-    }
-
-    /**
-     * Extract entity field.
-     * 
-     * @param entity
-     *            the entity
-     * @param dbObj
-     *            the db obj
-     * @param column
-     *            the column
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private void extractEntityField(Object entity, DBObject dbObj, Attribute column) throws PropertyAccessException
-    {
-        // A column field may be a collection(not defined as 1-to-M
-        // relationship)
-        if (column.getJavaType().isAssignableFrom(List.class) || column.getJavaType().isAssignableFrom(Set.class))
-        {
-            Collection collection = (Collection) PropertyAccessorHelper.getObject(entity,
-                    (Field) column.getJavaMember());
-            if (collection != null)
-            {
-                BasicDBList basicDBList = new BasicDBList();
-
-                for (Object o : collection)
-                {
-                    basicDBList.add(o);
-                }
-
-                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
-            }
-
-        }
-        else if (column.getJavaType().isAssignableFrom(Map.class))
-        {
-            Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-            BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
-            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), builder.get());
-        }
-
-        else if (column.getJavaType().isAssignableFrom(Point.class))
-        {
-            Point p = (Point) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-            if (p != null)
-            {
-                double[] coordinate = new double[] { p.getX(), p.getY() };
-                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), coordinate);
-            }
-        }
-        else
-        {
-            // TODO : this should have been handled by DocumentObjectMapper.
-            Object valObj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-            if (valObj != null)
-            {
-                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
-                        MongoDBUtils.populateValue(valObj, column.getJavaType()));
-            }
-        }
     }
 
     /**
@@ -520,9 +381,7 @@ final class MongoDBDataHandler
                             Object embeddedObject = new DocumentObjectMapper().getObjectFromDocument(
                                     (BasicDBObject) dbObj, embeddedObjectClass, superColumn.getAttributes());
                             Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
-
                         }
-
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
@@ -538,7 +397,6 @@ final class MongoDBDataHandler
                                 + "it wasn't stored as BasicDBObject, possible problem in format.");
                     }
                 }
-
             }
         }
         return list;
@@ -590,8 +448,6 @@ final class MongoDBDataHandler
     {
         Field embeddedField = (Field) column.getJavaMember();
         Object embeddedDocumentObject = null;
-        // Object embeddedObject = PropertyAccessorHelper.getObject(entity,
-        // (Field) column.getJavaMember());
         if (column.isCollection())
         {
             Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedField);
