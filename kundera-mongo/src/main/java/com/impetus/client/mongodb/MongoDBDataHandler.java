@@ -132,7 +132,7 @@ final class MongoDBDataHandler
                     }
                     else if (!column.isAssociation())
                     {
-                        DocumentObjectMapper.setColumnValue(document, entity, column);
+                        DocumentObjectMapper.setFieldValue(document, entity, column);
                     }
                     else if (relations != null)
                     {
@@ -238,7 +238,7 @@ final class MongoDBDataHandler
                     }
                     else if (!column.isAssociation())
                     {
-                        DocumentObjectMapper.extractEntityField(entity, dbObj, column);
+                        DocumentObjectMapper.extractFieldValue(entity, dbObj, column);
                     }
                 }
                 catch (PropertyAccessException paex)

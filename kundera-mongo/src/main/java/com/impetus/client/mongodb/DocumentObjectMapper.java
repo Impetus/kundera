@@ -26,7 +26,6 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.PluralAttribute.CollectionType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.attributes.AttributeType;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -73,7 +73,7 @@ public class DocumentObjectMapper
 
         for (Attribute column : columns)
         {
-            extractEntityField(obj, dBObj, column);
+            extractFieldValue(obj, dBObj, column);
         }
         return dBObj;
     }
@@ -123,7 +123,7 @@ public class DocumentObjectMapper
             Object obj = clazz.newInstance();
             for (Attribute column : columns)
             {
-                setColumnValue(documentObj, obj, column);
+                setFieldValue(documentObj, obj, column);
             }
             return obj;
         }
@@ -148,7 +148,7 @@ public class DocumentObjectMapper
      * @param column
      *            column field.
      */
-    static void setColumnValue(DBObject document, Object entityObject, Attribute column)
+    static void setFieldValue(DBObject document, Object entityObject, Attribute column)
     {
         Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
         if (value != null)
@@ -156,7 +156,7 @@ public class DocumentObjectMapper
             Class javaType = column.getJavaType();
             try
             {
-                switch (JavaType.getJavaType(javaType))
+                switch (AttributeType.getType(javaType))
                 {
                 case MAP:
                     PropertyAccessorHelper.set(entityObject, (Field) column.getJavaMember(),
@@ -190,8 +190,9 @@ public class DocumentObjectMapper
                         }
                         catch (NumberFormatException e)
                         {
-                            log.error("Error while reading geolocation data for column " + column
-                                    + "; Reason - possible corrupt data. " + e.getMessage());
+                            log.error(
+                                    "Error while reading geolocation data for column {} ; Reason - possible corrupt data, Caused by : .",
+                                    column, e);
                             throw new EntityReaderException("Error while reading geolocation data for column " + column
                                     + "; Reason - possible corrupt data.", e);
                         }
@@ -209,9 +210,11 @@ public class DocumentObjectMapper
                     break;
                 }
             }
-            catch (PropertyAccessException e)
+            catch (PropertyAccessException paex)
             {
-                throw new PersistenceException(e);
+                log.error("Error while setting column {} value, caused by : .",
+                        ((AbstractAttribute) column).getJPAColumnName(), paex);
+                throw new PersistenceException(paex);
             }
         }
     }
@@ -228,16 +231,16 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    static void extractEntityField(Object entity, DBObject dbObj, Attribute column) throws PropertyAccessException
+    static void extractFieldValue(Object entity, DBObject dbObj, Attribute column) throws PropertyAccessException
     {
-        Object valueObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-
-        if (valueObject != null)
+        try
         {
-            Class javaType = column.getJavaType();
-            try
+            Object valueObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+
+            if (valueObject != null)
             {
-                switch (JavaType.getJavaType(javaType))
+                Class javaType = column.getJavaType();
+                switch (AttributeType.getType(javaType))
                 {
                 case MAP:
                     Map mapObj = (Map) valueObject;
@@ -267,10 +270,12 @@ public class DocumentObjectMapper
                     break;
                 }
             }
-            catch (PropertyAccessException e)
-            {
-                throw new PersistenceException(e);
-            }
+        }
+        catch (PropertyAccessException paex)
+        {
+            log.error("Error while getting column {} value, caused by : .",
+                    ((AbstractAttribute) column).getJPAColumnName(), paex);
+            throw new PersistenceException(paex);
         }
     }
 
@@ -314,40 +319,5 @@ public class DocumentObjectMapper
         }
 
         return embeddedCollection;
-    }
-
-    private enum JavaType
-    {
-        ENUM, LIST, SET, MAP, POINT, PRIMITIVE;
-
-        private static JavaType getJavaType(Class javaType)
-        {
-            JavaType type = null;
-            if (javaType.isAssignableFrom(List.class))
-            {
-                type = LIST;
-            }
-            else if (javaType.isAssignableFrom(Map.class))
-            {
-                type = MAP;
-            }
-            else if (javaType.isAssignableFrom(Set.class))
-            {
-                type = SET;
-            }
-            else if (javaType.isEnum())
-            {
-                type = ENUM;
-            }
-            else if (javaType.isAssignableFrom(Point.class))
-            {
-                type = POINT;
-            }
-            else
-            {
-                type = PRIMITIVE;
-            }
-            return type;
-        }
     }
 }
