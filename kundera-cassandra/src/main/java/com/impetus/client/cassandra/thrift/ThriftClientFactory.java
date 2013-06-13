@@ -29,8 +29,6 @@ import net.dataforte.cassandra.pool.PoolProperties;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.thrift.TException;
-import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
-import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,15 +231,12 @@ public class ThriftClientFactory extends GenericClientFactory
     Cassandra.Client getConnection(ConnectionPool pool)
     {
         boolean success = false;
-        while (pool != null && !success)
+        while (!success)
         {
             try
             {
                 success = true;
-                if (pool != null)
-                {
-                    return pool.getConnection();
-                }
+                return pool.getConnection();
             }
             catch (TException te)
             {

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.service.Host;
@@ -38,10 +39,11 @@ import com.impetus.kundera.service.HostConfiguration;
 import com.impetus.kundera.service.policy.RetryService;
 
 /**
- * Cassandra retry service, retries for downed cassandra server with a fix delay, and add it to hostspool map when it up.
+ * Cassandra retry service, retries for downed cassandra server with a fix
+ * delay, and add it to hostspool map when it up.
  * 
  * @author Kuldeep.Mishra
- *
+ * 
  */
 public class CassandraRetryService extends RetryService
 {
@@ -64,25 +66,7 @@ public class CassandraRetryService extends RetryService
     @Override
     protected boolean verifyConnection(Host host)
     {
-        try
-        {
-            TSocket socket = new TSocket(host.getHost(), host.getPort());
-            TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
-            Cassandra.Client client = new Cassandra.Client(protocol);
-            socket.open();
-            return client.describe_cluster_name() != null;
-        }
-        catch (TTransportException e)
-        {
-            logger.warn("Node " + host.getHost() + " are still down");
-            return false;
-        }
-        catch (TException e)
-        {
-            logger.warn("Node " + host.getHost() + " are still down");
-            return false;
-        }
+        return PelopsUtils.verifyConnection(host.getHost(), host.getPort());
     }
 
     class RetryRunner implements Runnable
