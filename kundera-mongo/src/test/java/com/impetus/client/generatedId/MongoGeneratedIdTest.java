@@ -32,7 +32,7 @@ import com.impetus.kundera.KunderaException;
 public class MongoGeneratedIdTest
 {
 
-    EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -80,6 +80,7 @@ public class MongoGeneratedIdTest
         }
         catch (KunderaException e)
         {
+            e.printStackTrace();
             Assert.fail();
         }
         MongoGeneratedIdStrategyAuto strategyAuto = new MongoGeneratedIdStrategyAuto();
