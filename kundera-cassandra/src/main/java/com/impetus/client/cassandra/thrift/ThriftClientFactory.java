@@ -180,12 +180,11 @@ public class ThriftClientFactory extends GenericClientFactory
      */
     private ConnectionPool getPoolUsingPolicy()
     {
-        ConnectionPool pool = null;
         if (!hostPools.isEmpty())
         {
-            pool = (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
+            return (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
         }
-        return pool;
+        throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     @Override

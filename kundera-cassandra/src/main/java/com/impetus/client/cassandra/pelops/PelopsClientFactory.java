@@ -221,12 +221,11 @@ public class PelopsClientFactory extends GenericClientFactory
      */
     private IThriftPool getPoolUsingPolicy()
     {
-        IThriftPool pool = null;
         if (!hostPools.isEmpty())
         {
-            pool = (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
+            return (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
         }
-        return pool;
+        throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     IPooledConnection getConnection(IThriftPool pool)
