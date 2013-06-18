@@ -164,7 +164,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         List entities = null;
-        Object conn = getConection(getPersistenceUnit());
+        Object conn = getConection();
         try
         {
             entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
@@ -219,7 +219,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         getIndexManager().remove(metadata, entity, pKey.toString());
 
         // Delete from Inverted Index if applicable
-        Object conn = getConection(getPersistenceUnit());
+        Object conn = getConection();
         try
         {
             invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
@@ -573,7 +573,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         // Write to inverted index table if applicable
         // Delete from Inverted Index if applicable
-        Object conn = getConection(getPersistenceUnit());
+        Object conn = getConection();
         try
         {
             invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), getConsistencyLevel(), dataHandler);
@@ -818,7 +818,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
         // Delete from Inverted Index if applicable
-        Object conn = getConection(getPersistenceUnit());
+        Object conn = getConection();
         try
         {
             return invertedIndexHandler.search(m, getPersistenceUnit(), getConsistencyLevel(), indexClauseMap);
@@ -840,7 +840,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    protected IPooledConnection getConection(String persistenceUnit)
+    protected IPooledConnection getConection()
     {
         return clientFactory.getConnection(pool);
     }

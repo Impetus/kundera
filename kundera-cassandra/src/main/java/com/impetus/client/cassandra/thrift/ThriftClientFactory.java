@@ -228,22 +228,24 @@ public class ThriftClientFactory extends GenericClientFactory
         loadBalancingPolicy = new RoundRobinBalancingPolicy();
     }
 
-    Cassandra.Client getConnection(ConnectionPool pool)
+    Connection getConnection(ConnectionPool pool)
     {
+        ConnectionPool connectionPool = pool;
         boolean success = false;
         while (!success)
         {
             try
             {
                 success = true;
-                return pool.getConnection();
+                Cassandra.Client client = connectionPool.getConnection();
+                return new Connection(client, connectionPool);
             }
             catch (TException te)
             {
                 success = false;
                 logger.warn("{} :{}  host appears to be down, trying for next ", pool.getPoolProperties().getHost(),
                         pool.getPoolProperties().getPort());
-                pool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
+                connectionPool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
             }
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
@@ -337,6 +339,35 @@ public class ThriftClientFactory extends GenericClientFactory
 
                 return (props1.getMaxActive() - activeConnections1) - (props2.getMaxActive() - activeConnections2);
             }
+        }
+    }
+
+    /**
+     * Connection class holds client and related pool.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    class Connection
+    {
+        private Cassandra.Client client;
+
+        private ConnectionPool pool;
+
+        public Connection(org.apache.cassandra.thrift.Cassandra.Client client, ConnectionPool pool)
+        {
+            this.client = client;
+            this.pool = pool;
+        }
+
+        public Cassandra.Client getClient()
+        {
+            return client;
+        }
+
+        public ConnectionPool getPool()
+        {
+            return pool;
         }
     }
 }

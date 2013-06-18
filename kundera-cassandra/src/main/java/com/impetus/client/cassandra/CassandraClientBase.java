@@ -407,7 +407,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Object pooledConnection = null;
         try
         {
-            pooledConnection = getConection(metadata.getPersistenceUnit());
+            pooledConnection = getConection();
             conn = getConnection(pooledConnection);
 
             if(log.isInfoEnabled())
@@ -463,7 +463,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             Cassandra.Client api = null;
-            pooledConnection = getConection(persistenceUnit);
+            pooledConnection = getConection();
             api = getConnection(pooledConnection);
             KsDef ksDef = api.describe_keyspace(m.getSchema());
             List<CfDef> cfDefs = ksDef.getCf_defs();
@@ -1418,7 +1418,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (!batchMutationMap.isEmpty())
             {
-                pooledConnection = getConection(persistenceUnit);
+                pooledConnection = getConection();
                 conn = getConnection(pooledConnection);
 
                 for (Class<?> entityClass : batchMutationMap.keySet())
@@ -1624,7 +1624,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         Cassandra.Client client = null;
         Object pooledConnection;
-        pooledConnection = getConection(persistenceUnit);
+        pooledConnection = getConection();
         client = getConnection(pooledConnection);
         try
         {
@@ -1731,7 +1731,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         Cassandra.Client conn = null;
         Object pooledConnection = null;
-        pooledConnection = getConection(persistenceUnit);
+        pooledConnection = getConection();
         conn = getConnection(pooledConnection);
         try
         {
@@ -1843,7 +1843,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 + this.getClass().getSimpleName());
     }
 
-    protected abstract Object getConection(String persistenceUnit);
+    protected abstract Object getConection();
 
     protected abstract void releaseConnection(Object conn);
 
