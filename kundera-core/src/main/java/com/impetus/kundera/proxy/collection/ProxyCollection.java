@@ -27,24 +27,47 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  */
 public interface ProxyCollection {
 
+	/**
+	 * Returns owning entity that holds this proxy collection 
+	 */
 	Object getOwner();
 
+	/**
+	 * Sets owning entity that holds this collection for later use while eagerly loading
+	 */
 	void setOwner(Object owner);
 
+	/**
+	 * Returns instance of {@link PersistenceDelegator} which is required for eagerly loading 
+	 * associated collection at the time it is requested
+	 */
 	PersistenceDelegator getPersistenceDelegator();
-
-	void setPersistenceDelegator(PersistenceDelegator delegator);
-
-	void addRelationToMap(String relationName, Object relationValue);
+	
+	/**
+	 * Retrieves {@link Map} of Relation name and values required for eagerly fetching this proxy collection
+	 * at the time it is requested
+	 */
 	Map<String, Object> getRelationsMap();
-	void setRelationsMap(Map<String, Object> relationsMap);
-	Object getRelationValue(String relationName);
+	
+	/**
+	 * Sets {@link Map} of Relation name and values required for eagerly fetching this proxy collection
+	 * at the time it is requested
+	 */
+	void setRelationsMap(Map<String, Object> relationsMap);	
 
+	/**
+	 * Instance of {@link Relation} corresponding to this proxy collection
+	 */
 	Relation getRelation();
-	void setRelation(Relation relation);
 	
-	Collection getDataCollection();
-	void setDataCollection(Collection dataCollection);
-	
+	/**
+	 * Retrieves actual collection data that implementor of this interface holds.
+	 * Unless proxy collection is eagerly loaded, this values would normally be null 
+	 */
+	Collection getDataCollection();	
+
+	/**
+	 * Retrieves a copy of this proxy collection
+	 */
 	ProxyCollection getCopy();
 }

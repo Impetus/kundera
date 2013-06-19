@@ -16,7 +16,6 @@
 package com.impetus.kundera.proxy.collection;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -40,14 +39,7 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 	protected Collection dataCollection;
 
 	public AbstractProxyBase() {
-	}
-	
-	@Override
-	public ProxyCollection getCopy() {
-		ProxyCollection proxyCollection = new ProxySet(getPersistenceDelegator(), getRelation());
-		proxyCollection.setRelationsMap(getRelationsMap());
-		return proxyCollection;
-	}
+	}	
 
 	/**
 	 * @param delegator
@@ -73,22 +65,6 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 	}
 
 	@Override
-	public void setPersistenceDelegator(PersistenceDelegator delegator) {
-		this.delegator = delegator;
-
-	}
-
-	@Override
-	public void addRelationToMap(String relationName, Object relationValue) {
-		if(relationsMap == null)
-		{
-			relationsMap = new HashMap<String, Object>();			
-		}
-		relationsMap.put(relationName, relationValue);
-		
-	}
-
-	@Override
 	public Map<String, Object> getRelationsMap() {
 		return relationsMap;
 	}
@@ -98,36 +74,17 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 		this.relationsMap = relationsMap;		
 	}
 
-	@Override
-	public Object getRelationValue(String relationName) {
-		Object result = null;
-		
-		if(relationsMap != null)
-		{
-			result =  relationsMap.get(relationName);
-		}
-		return result;
-	}
 
 	@Override
 	public Relation getRelation() {
 		return relation;
 	}
 
-	@Override
-	public void setRelation(Relation relation) {
-		this.relation = relation;		
-	}	
-	
+
 	@Override
 	public Collection getDataCollection() {
 		return dataCollection;
 	}
-
-	@Override
-	public void setDataCollection(Collection dataCollection) {
-		this.dataCollection = dataCollection;		
-	}	
 
 	/**
 	 * 

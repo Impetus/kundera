@@ -41,6 +41,13 @@ public class ProxyList extends AbstractProxyCollection implements
 		super(delegator, relation);
 	}
 	
+	@Override
+	public ProxyCollection getCopy() {
+		ProxyCollection proxyCollection = new ProxyList(getPersistenceDelegator(), getRelation());
+		proxyCollection.setRelationsMap(getRelationsMap());
+		return proxyCollection;
+	}
+	
 	/////////////Methods from Collection interface////////////////////////////
 	@Override
 	public boolean contains(final Object arg0) {

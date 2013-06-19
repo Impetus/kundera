@@ -40,6 +40,13 @@ public class ProxySet extends AbstractProxyCollection implements
 		super(delegator, relation);
 	}
 	
+	@Override
+	public ProxyCollection getCopy() {
+		ProxyCollection proxyCollection = new ProxySet(getPersistenceDelegator(), getRelation());
+		proxyCollection.setRelationsMap(getRelationsMap());
+		return proxyCollection;
+	}
+	
 	
 	/////////////Methods from Collection interface////////////////////////////
 	@Override

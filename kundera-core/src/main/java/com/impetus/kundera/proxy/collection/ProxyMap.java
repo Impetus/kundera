@@ -40,6 +40,13 @@ public class ProxyMap extends AbstractProxyBase implements
 		super(delegator, relation);
 	}	
 	
+	@Override
+	public ProxyCollection getCopy() {
+		ProxyCollection proxyCollection = new ProxyMap(getPersistenceDelegator(), getRelation());
+		proxyCollection.setRelationsMap(getRelationsMap());
+		return proxyCollection;
+	}
+	
 	/////////////////////////Methods from Collection interface	////////////////
 
 	@Override

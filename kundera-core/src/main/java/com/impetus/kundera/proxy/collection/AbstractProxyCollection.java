@@ -27,7 +27,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * 
  * @author amresh.singh
  */
-public class AbstractProxyCollection extends AbstractProxyBase {
+public abstract class AbstractProxyCollection extends AbstractProxyBase {
 
 	/**
 	 * Default constructor
@@ -138,5 +138,5 @@ public class AbstractProxyCollection extends AbstractProxyBase {
 		eagerlyLoadDataCollection();
 		return dataCollection == null ? new Object[0] : dataCollection
 				.toArray(arg0);
-	}
+	}	
 }

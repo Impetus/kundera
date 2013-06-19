@@ -345,11 +345,12 @@ public abstract class CassandraDataHandlerBase
      *            the m
      * @param columnFamily
      *            the colmun family
+     * @param columnTTLs TODO
      * @return the base data accessor. thrift row
      * @throws Exception
      *             the exception
      */
-    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily) throws Exception
+    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception
     {
         // timestamp to use in thrift column objects
         // long timestamp = System.currentTimeMillis();
@@ -361,7 +362,7 @@ public abstract class CassandraDataHandlerBase
 
         long timestamp = System.currentTimeMillis();
         // Add super columns to thrift row
-        onColumnOrSuperColumnThriftRow(timestamp, tr, m, e, id);
+        onColumnOrSuperColumnThriftRow(tr, m, e, id, timestamp, columnTTLs);
         return tr;
     }
 
@@ -1294,9 +1295,6 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * On column or super column thrift row.
-     * 
-     * @param timestamp2
-     *            the timestamp2
      * @param tr
      *            the tr
      * @param m
@@ -1305,9 +1303,12 @@ public abstract class CassandraDataHandlerBase
      *            the e
      * @param id
      *            the id
+     * @param timestamp
+     *            the timestamp2
+     * @param columnTTLs TODO
      */
 
-    private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id)
+    private void onColumnOrSuperColumnThriftRow(ThriftRow tr, EntityMetadata m, Object e, Object id, long timestamp, Object columnTTLs)
     {
 
         // Iterate through Super columns
@@ -1327,11 +1328,10 @@ public abstract class CassandraDataHandlerBase
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
 
                 // if attribute is embeddable.
-
                 if (metaModel.isEmbeddable(attribute.isCollection() ? ((PluralAttribute) attribute)
                         .getBindableJavaType() : attribute.getJavaType()))
                 {
-                    onEmbeddable(timestamp2, tr, m, e, id, attribute);
+                    onEmbeddable(timestamp, tr, m, e, id, attribute);
                 }
                 else
                 {
@@ -1340,17 +1340,37 @@ public abstract class CassandraDataHandlerBase
                     if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                     {
 
-                        prepareSuperColumn(tr, m, value, name, timestamp2);
+                        prepareSuperColumn(tr, m, value, name, timestamp);
                     }
                     else
-                    {
-                        prepareColumn(tr, m, value, name, timestamp2);
+                    {    
+                    	int ttl = getTTLForColumn(columnTTLs, attribute);                  	                   	                  	
+                    	prepareColumn(tr, m, value, name, timestamp, ttl);
                     }
                 }
             }
         }
 
     }
+
+	/**
+	 * Determined TTL for a given column
+	 */
+	private int getTTLForColumn(Object columnTTLs, Attribute attribute) {
+		Integer ttl = null;
+		if(columnTTLs != null)
+		{
+			if(columnTTLs instanceof Map)
+			{
+				ttl = (Integer)(columnTTLs == null ? 0 : ((Map)columnTTLs).get(((AbstractAttribute) attribute).getJPAColumnName()));
+			}
+			else if(columnTTLs instanceof Integer)
+			{
+				ttl = (Integer) columnTTLs;
+			}
+		}
+		return ttl == null ? 0 : ttl;
+	}
 
     private Object getColumnValue(EntityMetadata m, Object e, Field field)
     {
@@ -1379,8 +1399,9 @@ public abstract class CassandraDataHandlerBase
      *            the name
      * @param timestamp
      *            the timestamp
+     * @param ttl TODO
      */
-    private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
+    private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp, int ttl)
     {
         if (value != null)
         {
@@ -1391,10 +1412,11 @@ public abstract class CassandraDataHandlerBase
             }
             else
             {
-                Column column = prepareColumn((byte[]) value, name, timestamp);
+                Column column = prepareColumn((byte[]) value, name, timestamp, ttl);
                 tr.addColumn(column);
             }
-        }
+        }      
+
     }
 
     /**
@@ -1429,7 +1451,7 @@ public abstract class CassandraDataHandlerBase
             {
                 SuperColumn superCol = new SuperColumn();
                 superCol.setName(name);
-                Column column = prepareColumn((byte[]) value, name, timestamp);
+                Column column = prepareColumn((byte[]) value, name, timestamp, 0);
                 List<Column> subColumn = new ArrayList<Column>();
                 subColumn.add(column);
                 superCol.setColumns(subColumn);
@@ -1448,14 +1470,16 @@ public abstract class CassandraDataHandlerBase
      *            the name
      * @param timestamp
      *            the timestamp
+     * @param ttl TODO
      * @return the column
      */
-    private Column prepareColumn(byte[] value, byte[] name, long timestamp)
+    private Column prepareColumn(byte[] value, byte[] name, long timestamp, int ttl)
     {
         Column column = new Column();
         column.setName(name);
         column.setValue(value);
-        column.setTimestamp(timestamp);
+        column.setTimestamp(timestamp);    
+        if(ttl != 0) column.setTtl(ttl);        
         return column;
     }
 
@@ -1473,7 +1497,7 @@ public abstract class CassandraDataHandlerBase
         CounterColumn counterColumn = new CounterColumn();
         counterColumn.setName(name);
         LongAccessor accessor = new LongAccessor();
-        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));
+        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));        
         return counterColumn;
     }
 
