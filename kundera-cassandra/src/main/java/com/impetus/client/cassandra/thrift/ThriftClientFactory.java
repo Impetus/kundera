@@ -231,12 +231,15 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         ConnectionPool connectionPool = pool;
         boolean success = false;
+        int retry = 3;
         while (!success)
         {
             try
             {
                 success = true;
                 Cassandra.Client client = connectionPool.getConnection();
+                logger.info("Retruning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
+                        .getPoolProperties().getPort());
                 return new Connection(client, connectionPool);
             }
             catch (TException te)
@@ -347,7 +350,7 @@ public class ThriftClientFactory extends GenericClientFactory
      * @author Kuldeep.Mishra
      * 
      */
-    class Connection
+    public class Connection
     {
         private Cassandra.Client client;
 

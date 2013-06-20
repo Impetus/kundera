@@ -90,4 +90,6 @@ public interface CassandraConstants
     public static final String TEST_ON_RETURN = "testonretrun";
 
     public static final String SOCKET_TIMEOUT = "socket.timeout";
+
+    public static final String MAX_WAIT = "max.wait";
 }

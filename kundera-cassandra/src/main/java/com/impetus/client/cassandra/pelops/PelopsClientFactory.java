@@ -223,6 +223,7 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (!hostPools.isEmpty())
         {
+            logger.info("Retruning pool using {} policy.", loadBalancingPolicy.getClass());
             return (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
@@ -230,90 +231,98 @@ public class PelopsClientFactory extends GenericClientFactory
 
     IPooledConnection getConnection(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
             success = true;
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
                 if (PelopsUtils.verifyConnection(host, thriftPort))
                 {
-                    return pool.getConnection();
+                    logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return iThriftPool.getConnection();
                 }
-                removePool(pool);
+                removePool(iThriftPool);
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     Mutator getMutator(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
             success = true;
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
                 if (PelopsUtils.verifyConnection(host, thriftPort))
                 {
-                    return Pelops.createMutator(PelopsUtils.getPoolName(pool));
+                    logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(pool);
+                removePool(iThriftPool);
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     Selector getSelector(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
                 if (PelopsUtils.verifyConnection(host, thriftPort))
                 {
-                    return Pelops.createSelector(PelopsUtils.getPoolName(pool));
+                    logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(pool);
+                removePool(iThriftPool);
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     RowDeletor getRowDeletor(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
                 if (PelopsUtils.verifyConnection(host, thriftPort))
                 {
-                    return Pelops.createRowDeletor(PelopsUtils.getPoolName(pool));
+                    logger.info("Retruning rowDeletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(pool);
+                removePool(iThriftPool);
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
 

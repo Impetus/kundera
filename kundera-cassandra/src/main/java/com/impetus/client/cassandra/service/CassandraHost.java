@@ -80,6 +80,8 @@ public class CassandraHost implements Host
 
     private String password;
 
+    private int maxWait;
+
     public CassandraHost(String host)
     {
         this.host = host;
@@ -327,5 +329,15 @@ public class CassandraHost implements Host
     public void setPassword(String password)
     {
         this.password = password;
+    }
+
+    public void setMaxWait(int maxWait)
+    {
+        this.maxWait = maxWait;
+    }
+
+    public int getMaxWait()
+    {
+        return this.maxWait;
     }
 }

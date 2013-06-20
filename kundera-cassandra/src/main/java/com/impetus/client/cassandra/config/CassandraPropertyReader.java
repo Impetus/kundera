@@ -178,12 +178,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         break;
                     }
                 }
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Returning inverted indexing enabled value {}.", result);
+                }
             }
 
-            if (logger.isWarnEnabled())
-            {
-                logger.warn("Returning inverted indexing enabled value {}.", result);
-            }
             return result;
         }
 

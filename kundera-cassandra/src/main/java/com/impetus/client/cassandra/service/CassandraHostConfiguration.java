@@ -104,6 +104,7 @@ public class CassandraHostConfiguration extends HostConfiguration
         String socketTimeOut = null;
         String userName = null;
         String password = null;
+        String maxWaitInMilli = null;
         if (puProperties != null)
         {
             maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
@@ -117,6 +118,7 @@ public class CassandraHostConfiguration extends HostConfiguration
             socketTimeOut = (String) puProperties.get(CassandraConstants.SOCKET_TIMEOUT);
             userName = (String) puProperties.get(PersistenceProperties.KUNDERA_USERNAME);
             password = (String) puProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            maxWaitInMilli = (String) puProperties.get(CassandraConstants.MAX_WAIT);
         }
 
         if (maxActivePerNode == null)
@@ -135,6 +137,11 @@ public class CassandraHostConfiguration extends HostConfiguration
         {
             maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
         }
+        if (maxWaitInMilli == null)
+        {
+            maxWaitInMilli = props.getProperty(CassandraConstants.MAX_WAIT);
+        }
+
         if (userName == null)
         {
             userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
@@ -161,6 +168,10 @@ public class CassandraHostConfiguration extends HostConfiguration
             if (!StringUtils.isEmpty(maxTotal))
             {
                 cassandraHost.setMaxActive(Integer.parseInt(maxTotal));
+            }
+            if (!StringUtils.isEmpty(maxWaitInMilli))
+            {
+                cassandraHost.setMaxWait(Integer.parseInt(maxWaitInMilli));
             }
 
             if (testOnBorrow == null)
