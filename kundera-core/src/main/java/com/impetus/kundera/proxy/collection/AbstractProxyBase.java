@@ -148,6 +148,6 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 	
 	protected int size() {		
 		eagerlyLoadDataCollection();	
-		return dataCollection == null ? 0 : dataCollection.size();
+		return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : dataCollection.size();
 	}
 }
