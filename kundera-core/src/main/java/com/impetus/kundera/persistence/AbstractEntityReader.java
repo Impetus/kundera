@@ -348,66 +348,6 @@ public class AbstractEntityReader
             PersistenceDelegator pd)
     {
         associationBuilder = new AssociationBuilder();
-        /*
-         * Object entityId = PropertyAccessorHelper.getId(entity, m);
-         * associationBuilder = new AssociationBuilder();
-         * 
-         * for (Relation relation : m.getRelations()) { // validate relation
-         * ForeignKey type = relation.getType(); Field f =
-         * relation.getProperty(); if (isTraversalRequired(relationsMap, type))
-         * { // Check whether that relation is already populated or not, //
-         * before proceeding further. Object object =
-         * PropertyAccessorHelper.getObject(entity, f);
-         * 
-         * // Populate Many-to-many relationships if
-         * (relation.getType().equals(ForeignKey.MANY_TO_MANY)) { // First, Save
-         * this entity to persistence cache
-         * PersistenceCacheManager.addEntityToPersistenceCache(entity, pd,
-         * entityId); associationBuilder.populateRelationForM2M(entity, m, pd,
-         * relation, object, relationsMap); }
-         * 
-         * // Populate other type of relationships else if (object == null ||
-         * PersistenceUtilHelper.instanceOfHibernateProxy(object) ||
-         * PersistenceUtilHelper.instanceOfHibernatePersistentSet(object) ||
-         * PersistenceUtilHelper
-         * .instanceOfHibernatePersistentCollection(object)) { boolean
-         * isBidirectionalRelation = relation.isBiDirectional();
-         * 
-         * Class<?> childClass = relation.getTargetEntity(); EntityMetadata
-         * childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
-         * 
-         * Object relationValue = null; String relationName = null;
-         * 
-         * if (isBidirectionalRelation &&
-         * !StringUtils.isBlank(relation.getMappedBy()) &&
-         * (relation.getType().equals(ForeignKey.ONE_TO_ONE) ||
-         * relation.getType().equals( ForeignKey.MANY_TO_ONE))) { relationName =
-         * ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(); } else {
-         * relationName = MetadataUtils.getMappedName(m, relation); }
-         * 
-         * relationValue = relationsMap != null ? relationsMap.get(relationName)
-         * : null;
-         * 
-         * if (relationValue != null) { // 1-1 or M-1 relationship, because ID
-         * is held at // this side of entity and hence // relationship entities
-         * would be retrieved from // database based on these IDs already
-         * available associationBuilder .populateRelationFromValue(entity, pd,
-         * relation, relationValue, childMetadata);
-         * 
-         * } else { // 1-M relationship, since ID is stored at other // side of
-         * // entity and as a result relation value will be // null // This
-         * requires running query (either Lucene or // Native // based on
-         * secondary indexes supported by // underlying // database) // Running
-         * query returns all those associated // entities // that // hold parent
-         * entity ID as foreign key
-         * associationBuilder.populateRelationViaQuery(entity, pd, entityId,
-         * relation, relationName, childMetadata); } }
-         * 
-         * } else if (relation.isJoinedByPrimaryKey()) {
-         * PropertyAccessorHelper.set(entity, f,
-         * pd.findById(relation.getTargetEntity(), entityId)); } } return
-         * entity;
-         */
         return handleAssociation(entity, relationsMap, m, pd);
 
     }
