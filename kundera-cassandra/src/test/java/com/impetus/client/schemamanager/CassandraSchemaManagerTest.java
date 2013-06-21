@@ -58,6 +58,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -65,6 +66,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * CassandraSchemaManagerTest class test the auto creation schema property in
@@ -281,6 +283,11 @@ public class CassandraSchemaManagerTest
 
         new ClientFactoryConfiguraton(null, _PU).configure();
         new SchemaConfiguration(null, _PU).configure();
+        
+        CoreMetadata coreMetadata = new CoreMetadata();
+        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+        
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

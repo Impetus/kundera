@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * The Class StudentDaoTest.
@@ -67,8 +68,6 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
         teardownInternal(persistenceUnit);
         try
         {
-            cli.update("DELETE FROM TESTDB.PERSON");
-            cli.update("DROP TABLE TESTDB.PERSON");
             cli.update("DELETE FROM TESTDB.STUDENT");
             cli.update("DROP TABLE TESTDB.STUDENT");
             cli.update("DROP SCHEMA TESTDB");
@@ -79,6 +78,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
             // do nothing..weird!!
         }
         // cli.dropSchema("TESTDB");
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @SuppressWarnings("deprecation")

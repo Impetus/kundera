@@ -17,20 +17,16 @@ package com.impetus.kundera.persistence;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.impetus.kundera.PersistenceUtilHelper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import javax.persistence.FetchType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.hibernate.collection.internal.PersistentSet;
-//import org.hibernate.collection.spi.PersistentCollection;
-//import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -39,10 +35,10 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.ProxyHelper;
 
 /**
  * The Class AbstractEntityReader.
@@ -58,7 +54,7 @@ public class AbstractEntityReader
     /** The lucene query from jpa query. */
     protected String luceneQueryFromJPAQuery;
 
-    AssociationBuilder associationBuilder;
+    private AssociationBuilder associationBuilder;
 
     /**
      * Retrieves an entity from ID
@@ -100,96 +96,272 @@ public class AbstractEntityReader
      * @param pd
      * @return
      */
-    public Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
-            PersistenceDelegator pd)
+    public Object handleAssociation(final Object entity, final Map<String, Object> relationsMap,
+            final EntityMetadata m, final PersistenceDelegator pd)
     {
-        Object entityId = PropertyAccessorHelper.getId(entity, m);
-        associationBuilder = new AssociationBuilder();
 
         for (Relation relation : m.getRelations())
         {
-            // validate relation
-            ForeignKey type = relation.getType();
-            Field f = relation.getProperty();
-            if (isTraversalRequired(relationsMap, type))
+            ForeignKey relationType = relation.getType();
+
+            Object relationalObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
+
+            // TODO: Need to check if object is a collection instance but empty!
+            if (relationalObject == null || ProxyHelper.isHibernateProxy(relationalObject)
+                    || ProxyHelper.isPersistentCollection(relationalObject))
             {
-                // Check whether that relation is already populated or not,
-                // before proceeding further.
-                Object object = PropertyAccessorHelper.getObject(entity, f);
-
-                // Populate Many-to-many relationships
-                if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
-                {
-                    // First, Save this entity to persistence cache
-                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-                    associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
-                }
-
-                // Populate other type of relationships
-                else if (object == null || PersistenceUtilHelper.instanceOfHibernateProxy( object ) || PersistenceUtilHelper.instanceOfHibernatePersistentSet( object )
-                        || PersistenceUtilHelper.instanceOfHibernatePersistentCollection( object ))
-                {
-                    Field biDirectionalField = associationBuilder.getBiDirectionalField(relation.getTargetEntity(),
-                            entity.getClass());
-                    boolean isBidirectionalRelation = (biDirectionalField != null);
-
-                    Class<?> childClass = relation.getTargetEntity();
-                    EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
-
-                    Object relationValue = null;
-                    String relationName = null;
-
-                    if (isBidirectionalRelation
-                            && !StringUtils.isBlank(relation.getMappedBy())
-                            && (relation.getType().equals(ForeignKey.ONE_TO_ONE) || relation.getType().equals(
-                                    ForeignKey.MANY_TO_ONE)))
-                    {
-                        relationName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-                    }
-                    else
-                    {
-                        relationName = MetadataUtils.getMappedName(m, relation);
-                    }
-
-                    relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
-
-                    if (relationValue != null)
-                    {
-                        // 1-1 or M-1 relationship, because ID is held at
-                        // this side of entity and hence
-                        // relationship entities would be retrieved from
-                        // database based on these IDs already available
-                        associationBuilder
-                                .populateRelationFromValue(entity, pd, relation, relationValue, childMetadata);
-
-                    }
-                    else
-                    {
-                        // 1-M relationship, since ID is stored at other
-                        // side of
-                        // entity and as a result relation value will be
-                        // null
-                        // This requires running query (either Lucene or
-                        // Native
-                        // based on secondary indexes supported by
-                        // underlying
-                        // database)
-                        // Running query returns all those associated
-                        // entities
-                        // that
-                        // hold parent entity ID as foreign key
-                        associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName,
-                                childMetadata);
-                    }
-                }
-
-            }
-            else if (relation.isJoinedByPrimaryKey())
-            {
-                PropertyAccessorHelper.set(entity, f, pd.findById(relation.getTargetEntity(), entityId));
+                onRelation(entity, relationsMap, m, pd, relation, relationType);
             }
         }
         return entity;
+    }
+
+    private void onRelation(final Object entity, final Map<String, Object> relationsMap, final EntityMetadata m,
+            final PersistenceDelegator pd, Relation relation, ForeignKey relationType)
+    {
+
+        FetchType fetchType = relation.getFetchType();
+
+        if (fetchType.equals(FetchType.LAZY))
+        {
+            final Object entityId = PropertyAccessorHelper.getId(entity, m);
+            associationBuilder.setProxyRelationObject(entity, relationsMap, m, pd, entityId, relation);
+        }
+        else
+        {
+            if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
+            {
+                // First, Save this entity to persistence cache
+                Field f = relation.getProperty();
+                Object object = PropertyAccessorHelper.getObject(entity, f);
+                final Object entityId = PropertyAccessorHelper.getId(entity, m);
+                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
+                associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
+            }
+            else
+            {
+                onRelation(entity, relationsMap, relation, m, pd);
+            }
+        }
+    }
+
+    /**
+     * Method to handle one to one association relation events.
+     * 
+     * @param entity
+     *            relation owning entity.
+     * @param entityId
+     *            entity id of relation owning entity.
+     * @param relationsMap
+     *            contains relation name and it's value.
+     * @param m
+     *            entity metadata.
+     */
+    private void onRelation(Object entity, Map<String, Object> relationsMap, final Relation relation,
+            final EntityMetadata metadata, final PersistenceDelegator pd)
+    {
+        final Object entityId = PropertyAccessorHelper.getId(entity, metadata);
+
+        // if relation map contains value, then invoke target entity with find
+        // by id.
+        // else invoke target entity for find by relation, pass it's entityId as
+        // a column value and relation.getJoinColumnName as column name.
+
+        Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
+        // EntityMetadata targetEntityMetadata = null;
+        EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+
+        List relationalEntities = fetchRelations(relation, metadata, pd, entityId, relationValue, targetEntityMetadata);
+
+        // parse for associated relation.
+
+        if (relationalEntities != null)
+        {
+            for (Object relationEntity : relationalEntities)
+            {
+                onParseRelation(entity, pd, targetEntityMetadata, relationEntity, relation);
+            }
+        }
+
+    }
+
+    private void onParseRelation(Object entity, final PersistenceDelegator pd, EntityMetadata targetEntityMetadata,
+            Object relationEntity, Relation relation)
+    {
+        parseRelations(entity, getEntity(relationEntity), getPersistedRelations(relationEntity), pd,
+                targetEntityMetadata);
+
+        // if relation ship is unary, no problem else we need to add
+        setRelationToEntity(entity, relationEntity, relation);
+    }
+
+    private void setRelationToEntity(Object entity, Object relationEntity, Relation relation)
+    {
+        if (relation.getTargetEntity().isAssignableFrom(getEntity(relationEntity).getClass()))
+        {
+
+            if (relation.isUnary())
+            {
+                PropertyAccessorHelper.set(entity, relation.getProperty(), getEntity(relationEntity));
+            }
+            else
+            {
+                Object associationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
+                if (associationObject == null || ProxyHelper.isHibernateProxy(associationObject)
+                        || ProxyHelper.isPersistentCollection(associationObject))
+                {
+                    associationObject = PropertyAccessorHelper.getCollectionInstance(relation.getProperty());
+                    PropertyAccessorHelper.set(entity, relation.getProperty(), associationObject);
+                }
+
+                ((Collection) associationObject).add(getEntity(relationEntity));
+            }
+        }
+    }
+
+    private void parseRelations(final Object originalEntity, final Object relationEntity,
+            final Map<String, Object> relationsMap, final PersistenceDelegator pd, final EntityMetadata metadata)
+    {
+
+        for (Relation relation : metadata.getRelations())
+        {
+
+            FetchType fetchType = relation.getFetchType();
+
+            if (fetchType.equals(FetchType.LAZY))
+            {
+                final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
+                associationBuilder.setProxyRelationObject(relationEntity, relationsMap, metadata, pd, entityId,
+                        relation);
+            }
+            else
+            {
+
+                if (relation.isUnary() && relation.getTargetEntity().isAssignableFrom(originalEntity.getClass()))
+                {
+                    // PropertyAccessorHelper.set(relationEntity,
+                    // relation.getProperty(), originalEntity);
+
+                    Object associationObject = PropertyAccessorHelper.getObject(relationEntity, relation.getProperty());
+                    if (relation.getType().equals(ForeignKey.ONE_TO_ONE)
+                            || ((associationObject == null || ProxyHelper.isHibernateProxy(associationObject)) || ProxyHelper
+                                    .isPersistentCollection(associationObject)))
+                    {
+                        PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
+                    }
+                    else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName()))
+                    {
+                        PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
+                    }
+                }
+                else
+                {
+                    // Here
+                    // onRelation(relationEntity, relationsMap, metadata, pd,
+                    // relation, relationType);
+                    final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
+                    Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
+                    final EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                            .getTargetEntity());
+                    List immediateRelations = fetchRelations(relation, metadata, pd, entityId, relationValue,
+                            targetEntityMetadata);
+                    // System.out.println("dddd");
+                    // Here in case of one-to-many/many-to-one we should skip
+                    // this
+                    // relation as it
+                    if (immediateRelations != null && !immediateRelations.isEmpty())
+                    {
+                        // immediateRelations.remove(originalEntity); // As it
+                        // is
+                        // already
+                        // in process.
+
+                        for (Object immediateRelation : immediateRelations)
+                        {
+                            // System.out.println("Here");
+                            if (!compareTo(getEntity(immediateRelation), originalEntity))
+                            {
+                                onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation, relation);
+                            }
+                        }
+
+                        setRelationToEntity(relationEntity, originalEntity, relation);
+                    }
+
+                    /**
+                 * 
+                 */
+
+                }
+            }
+        }
+
+    }
+
+    private List fetchRelations(final Relation relation, final EntityMetadata metadata, final PersistenceDelegator pd,
+            final Object entityId, Object relationValue, EntityMetadata targetEntityMetadata)
+    {
+        List relationalEntities = new ArrayList();
+
+        if ((relationValue != null && relation.isUnary()) || (relation.isJoinedByPrimaryKey()))
+        {
+            // Call it
+            Object relationEntity = pd.getClient(targetEntityMetadata).find(relation.getTargetEntity(),
+                    relationValue != null ? relationValue : entityId);
+            if (relationEntity != null)
+            {
+                relationalEntities.add(relationEntity);
+            }
+        }
+        else if (!relation.isUnary())
+        {
+            // Now these entities may be enhance entities and may not be as
+            // well.
+            Client associatedClient = pd.getClient(targetEntityMetadata);
+            if (!MetadataUtils.useSecondryIndex(targetEntityMetadata.getPersistenceUnit()))
+            {
+
+                relationalEntities = associationBuilder.getAssociatedEntitiesFromIndex(relation.getProperty()
+                        .getDeclaringClass(), entityId, targetEntityMetadata.getEntityClazz(), associatedClient);
+            }
+            else
+            {
+
+                relationalEntities = associatedClient.findByRelation(relation.getJoinColumnName(), entityId,
+                        relation.getTargetEntity());
+            }
+        }
+        return relationalEntities;
+    }
+
+    /**
+     * Recursively fetches associated entities for a given <code>entity</code>
+     * 
+     * @param entity
+     * @param relationsMap
+     * @param client
+     * @param m
+     * @param pd
+     * @return
+     */
+    public Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
+            PersistenceDelegator pd)
+    {
+        associationBuilder = new AssociationBuilder();
+        return handleAssociation(entity, relationsMap, m, pd);
+
+    }
+
+    private Map<String, Object> getPersistedRelations(Object relationEntity)
+    {
+        return relationEntity != null && relationEntity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) relationEntity)
+                .getRelations() : null;
+    }
+
+    private Object getEntity(Object relationEntity)
+    {
+        return relationEntity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) relationEntity)
+                .getEntity() : relationEntity;
     }
 
     /**
@@ -201,7 +373,7 @@ public class AbstractEntityReader
     {
         return !(relationsMap == null && (type.equals(ForeignKey.ONE_TO_ONE) || type.equals(ForeignKey.MANY_TO_ONE)));
     }
-
+   
     /**
      * On association using lucene.
      * 
@@ -284,5 +456,21 @@ public class AbstractEntityReader
             throw new EntityReaderException("Error while Getting ID for entity " + entity, e);
         }
 
+    }
+
+    private boolean compareTo(Object relationalEntity, Object originalEntity)
+    {
+        if (relationalEntity != null && originalEntity != null
+                && relationalEntity.getClass().isAssignableFrom(originalEntity.getClass()))
+        {
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(originalEntity.getClass());
+
+            Object relationalEntityId = PropertyAccessorHelper.getId(relationalEntity, metadata);
+            Object originalEntityId = PropertyAccessorHelper.getId(originalEntity, metadata);
+
+            return relationalEntityId.equals(originalEntityId);
+        }
+
+        return false;
     }
 }

@@ -22,6 +22,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -29,7 +30,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests")
+@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
 @IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelBi1ToM
 {
@@ -41,6 +42,7 @@ public class PersonnelBi1ToM
     private String personName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "person")
+//    @JoinColumn(name="PERSON_ID")
     private Set<HabitatBi1ToM> addresses;
 
     public String getPersonId()

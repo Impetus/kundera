@@ -31,7 +31,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests")
+@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
 @IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelUniMToM
 {
@@ -42,7 +42,7 @@ public class PersonnelUniMToM
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "PERSONNEL_ADDRESS", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
     private Set<HabitatUniMToM> addresses;
 

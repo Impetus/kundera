@@ -103,5 +103,4 @@ public class ObjectGraphTest
         assertEquals(1, child1.getParents().size());
 
     }
-
 }

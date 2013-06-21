@@ -70,12 +70,12 @@ public class UserCassandra
     private List<UserCassandra> followers; // List of users who are following me
 
     // One-to-one, will be persisted separately
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     @JoinColumn(name = "PREFERENCE_ID")
     private PreferenceCassandra preference;
 
     // One to many, will be persisted separately
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private Set<ExternalLinkCassandra> externalLinks;
 
@@ -202,7 +202,7 @@ public class UserCassandra
         this.externalLinks.add(externalLink);
     }
 
-    /**
+   /**
      * @return the friends
      */
     public List<UserCassandra> getFriends()

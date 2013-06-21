@@ -39,8 +39,6 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +64,9 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
  * The Class QueryImpl.
  * 
  * @author vivek.mishra
+ * @param <E>
  */
-public abstract class QueryImpl implements Query
+public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Query<E>
 {
 
     /** The query. */
@@ -90,6 +89,8 @@ public abstract class QueryImpl implements Query
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
+
+    private int fetchSize;
 
     /**
      * Instantiates a new query impl.
@@ -1153,4 +1154,19 @@ public abstract class QueryImpl implements Query
         return columnAsList.toArray(new String[] {});
     }
 
+  /*  public void setFetchSize(int fetchsize)
+    {
+        this.fetchSize = fetchsize;
+    }
+
+    public int getFetchSize()
+    {
+        return this.fetchSize;
+    }
+
+    public abstract E next();
+
+    public abstract List<E> next(int size);
+
+    public abstract void close();*/
 }

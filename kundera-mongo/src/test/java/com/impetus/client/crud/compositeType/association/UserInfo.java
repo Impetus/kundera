@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType.association;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,9 +52,9 @@ public class UserInfo
     @Column(name = "age")
     private int age;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private MongoPrimeUser timeLine;
+    private List<MongoPrimeUser> timeLine;
 
     /**
      * 
@@ -74,7 +77,12 @@ public class UserInfo
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
-        this.timeLine = timeLine;
+        if(this.timeLine == null)
+        {
+            this.timeLine = new ArrayList<MongoPrimeUser>();
+        }
+        
+        this.timeLine.add(timeLine);
     }
 
     /**
@@ -112,7 +120,7 @@ public class UserInfo
     /**
      * @return the timeLine
      */
-    public MongoPrimeUser getTimeLine()
+    public List<MongoPrimeUser> getTimeLine()
     {
         return timeLine;
     }

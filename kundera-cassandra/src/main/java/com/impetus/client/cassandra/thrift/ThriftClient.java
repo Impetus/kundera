@@ -146,7 +146,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if (isCql3Enabled(entityMetadata))
             {
-                cqlClient.persist(entityMetadata, entity, ((Connection) conn).getClient(), rlHolders);
+                cqlClient.persist(entityMetadata, entity, conn.getClient(), rlHolders,
+                        getTtlValues().get(entityMetadata.getTableName()));
             }
             else
             {
@@ -194,6 +195,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             // PelopsUtils.releaseConnection(pool, conn);
             releaseConnection(conn);
+
+            if (isTtlPerRequest())
+            {
+                getTtlValues().clear();
+            }
         }
     }
 
@@ -228,7 +234,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
                     Column column = new Column();
                     column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
-                            + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
+                            + Constants.JOIN_COLUMN_NAME_SEPARATOR + value));
                     // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
                     // value));
                     column.setValue(PropertyAccessorHelper.getBytes(value));
@@ -617,7 +623,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             if (keySlices != null)
             {
                 entities = new ArrayList<Object>(keySlices.size());
-                populateData(m, keySlices, entities, false, null);
+                populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
             }
         }
         return entities;

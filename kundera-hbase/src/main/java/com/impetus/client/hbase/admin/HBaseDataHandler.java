@@ -33,8 +33,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -138,7 +136,6 @@ public class HBaseDataHandler implements DataHandler
                 HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
                 htDescriptor.addFamily(familyMetadata);
             }
-
             admin.createTable(htDescriptor);
         }
     }
@@ -191,16 +188,15 @@ public class HBaseDataHandler implements DataHandler
             }
             else
             {
-                log.warn("Table " + tableName + " doesn't exist, so no question of adding column family "
-                        + columnFamilyName + " to it!");
+                log.warn("Table {} doesn't exist, so no question of adding column family {} to it!", tableName,
+                        columnFamilyName);
             }
         }
         catch (IOException e)
         {
-            log.error("Error while adding column family " + columnFamilyName + " to table " + tableName);
+            log.error("Error while adding column family {}, to table{} . ", columnFamilyName, tableName);
             throw e;
         }
-
     }
 
     /*
@@ -295,20 +291,14 @@ public class HBaseDataHandler implements DataHandler
     public void writeData(String tableName, EntityMetadata m, Object entity, Object rowId,
             List<RelationHolder> relations) throws IOException
     {
-
         HTableInterface hTable = gethTable(tableName);
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        Map<String, EmbeddableType> columnFamilies = metaModel.getEmbeddables(m.getEntityClazz());
-        Set<String> keys = metaModel.getEmbeddables(m.getEntityClazz()).keySet();
-
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         Set<Attribute> attributes = entityType.getAttributes();
-
-        Map<String, Object> relationValue = null;
 
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashSet<Attribute>(), entity, null);
         List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
@@ -331,7 +321,6 @@ public class HBaseDataHandler implements DataHandler
         {
             hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations);
         }
-
         puthTable(hTable);
     }
 
@@ -493,11 +482,6 @@ public class HBaseDataHandler implements DataHandler
     {
         try
         {
-            /* Set Row Key */
-
-            // PropertyAccessorHelper.setId(entity, m, HBaseUtils.fromBytes(m,
-            // hbaseData.getRowKey()));
-
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)
             List<KeyValue> hbaseValues = hbaseData.getColumns();
@@ -519,7 +503,6 @@ public class HBaseDataHandler implements DataHandler
                 String key = ((AbstractAttribute) column).getJPAColumnName();
                 if (metaModel.isEmbeddable(javaType))
                 {
-
                     EmbeddableType columnFamily = metaModel.embeddable(javaType);
 
                     Field columnFamilyFieldInEntity = (Field) column.getJavaMember();
@@ -605,14 +588,10 @@ public class HBaseDataHandler implements DataHandler
                             String cfInHbase = Bytes.toString(colData.getFamily());
 
                             byte[] columnValue = colData.getValue();
-                            // if (!cfInHbase.equals(key))
-                            // {
                             if (relationNames != null && relationNames.contains(cfInHbase) && columnValue.length != 0)
                             {
                                 relations.put(cfInHbase, getObjectFromByteArray(entityType, columnValue, cfInHbase, m));
                             }
-                            // continue;
-                            // }
                             // Set Hbase data into the column family object
 
                             String colName = Bytes.toString(colData.getQualifier());
@@ -635,7 +614,6 @@ public class HBaseDataHandler implements DataHandler
                         }
                         PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);
                     }
-
                 }
                 else if (!column.getName().equals(m.getIdAttribute().getName()))
                 {
@@ -645,7 +623,6 @@ public class HBaseDataHandler implements DataHandler
                     for (KeyValue colData : hbaseValues)
                     {
                         String hbaseColumn = Bytes.toString(colData.getQualifier());
-                        // String colName = getColumnName(hbaseColumn);
                         String colName = hbaseColumn;
                         byte[] columnValue = colData.getValue();
                         if (relationNames != null && relationNames.contains(colName) && columnValue.length != 0)
@@ -661,12 +638,10 @@ public class HBaseDataHandler implements DataHandler
                     }
                 }
             }
-
             if (!relations.isEmpty())
             {
                 return new EnhanceEntity(entity, rowKey, relations);
             }
-
             return entity;
         }
         catch (PropertyAccessException e1)
@@ -681,7 +656,6 @@ public class HBaseDataHandler implements DataHandler
         {
             throw new RuntimeException(e1);
         }
-
     }
 
     /**
@@ -701,7 +675,6 @@ public class HBaseDataHandler implements DataHandler
     private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField,
             Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) throws PropertyAccessException
     {
-
         String colName = Bytes.toString(colData.getQualifier());
         byte[] columnValue = colData.getValue();
 
@@ -719,7 +692,6 @@ public class HBaseDataHandler implements DataHandler
                 columnFamilyObj = HBaseUtils.fromBytes(columnValue, columnFamilyObj.getClass());
             }
         }
-
     }
 
     /*
@@ -732,14 +704,12 @@ public class HBaseDataHandler implements DataHandler
     public void deleteRow(Object rowKey, String tableName) throws IOException
     {
         hbaseWriter.delete(gethTable(tableName), rowKey, tableName);
-
     }
 
     @Override
     public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
-
         throw new PersistenceException("Not applicable for HBase");
     }
 
@@ -798,19 +768,17 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (InstantiationException iex)
         {
-            log.error("Error while creating an instance of " + clazz);
+            log.error("Error while creating an instance of {} .", clazz);
             throw new PersistenceException(iex);
-            // return enhancedEntity;
         }
         catch (IllegalAccessException iaex)
         {
-            log.error("Illegal Access while reading data from " + tableName + ", Caused by:" + iaex.getMessage());
+            log.error("Illegal Access while reading data from {}, Caused by: .", tableName, iaex);
             throw new PersistenceException(iaex);
-            // return enhancedEntity;
         }
         catch (Exception e)
         {
-            log.error("Error while creating an instance of " + clazz);
+            log.error("Error while creating an instance of {}, Caused by: .", clazz, e);
             throw new PersistenceException(e);
         }
         finally
@@ -894,7 +862,6 @@ public class HBaseDataHandler implements DataHandler
             String qualifier) throws IOException, InstantiationException, IllegalAccessException
     {
         List returnedResults = new ArrayList();
-
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -915,7 +882,7 @@ public class HBaseDataHandler implements DataHandler
             }
         }
         List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, m.getTableName(),
-                isCollection ? qualifier : null, /* !isCollection ? columns : */null);
+                isCollection ? qualifier : null, null);
         if (results != null)
         {
             for (HBaseData row : results)
@@ -927,7 +894,6 @@ public class HBaseDataHandler implements DataHandler
                 returnedResults.add(populateEntityFromHbaseData(entity, row, m, row.getRowKey(), m.getRelationNames()));
             }
         }
-
         return returnedResults;
     }
 
@@ -955,8 +921,7 @@ public class HBaseDataHandler implements DataHandler
                 return colValue;
             }
         }
-
-        log.warn("No value found for : " + jpaColumnName + " returning null");
+        log.warn("No value found for column {}, returning null.", jpaColumnName);
         return null;
     }
 
@@ -990,10 +955,10 @@ public class HBaseDataHandler implements DataHandler
                 {
                     columnFamilyObject = PropertyAccessorHelper.getObject(entity, columnFamilyField);
                 }
-                catch (PropertyAccessException e1)
+                catch (PropertyAccessException paex)
                 {
-                    log.error("Error while getting " + columnFamilyName + " field from entity " + entity);
-                    throw new KunderaException(e1);
+                    log.error("Error while getting {}, field from entity {} .", columnFamilyName, entity);
+                    throw new KunderaException(paex);
                 }
 
                 if (columnFamilyObject != null)
@@ -1041,11 +1006,9 @@ public class HBaseDataHandler implements DataHandler
                                 addColumnFamilyToTable(tableName, dynamicCFName);
                                 persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
                             }
-
                             // Clear embedded collection cache for GC
                             ecCacheHandler.clearCache();
                         }
-
                     }
                     else
                     {
@@ -1059,7 +1022,6 @@ public class HBaseDataHandler implements DataHandler
                         {
                             persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, tableName));
                         }
-
                     }
                 }
             }
@@ -1068,7 +1030,6 @@ public class HBaseDataHandler implements DataHandler
                 columnWrapper.addColumn(column);
             }
         }
-
     }
 
     /**
@@ -1078,7 +1039,10 @@ public class HBaseDataHandler implements DataHandler
     public void batch_insert(Map<HTableInterface, List<HBaseDataWrapper>> data) throws IOException
     {
         hbaseWriter.persistRows(data);
-
     }
 
+    public void setFetchSize(final int fetchSize)
+    {
+        ((HBaseReader) hbaseReader).setFetchSize(fetchSize);
+    }
 }

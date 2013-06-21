@@ -33,8 +33,6 @@ import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-//import org.hibernate.collection.internal.AbstractPersistentCollection;
-import com.impetus.kundera.PersistenceUtilHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,305 +42,334 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.proxy.collection.ProxyCollection;
 
 /**
  * Provides utility methods for operation on objects
  * 
  * @author amresh.singh
  */
-public class ObjectUtils
-{
-    /** The log. */
-    private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
+public class ObjectUtils {
+	/** The log. */
+	private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
-    public static final Object deepCopy(Object source)
-    {
-        Map<Object, Object> copiedObjectMap = new HashMap<Object, Object>();
+	public static final Object deepCopy(Object source) {
+		Map<Object, Object> copiedObjectMap = new HashMap<Object, Object>();
 
-        Object target = deepCopyUsingMetadata(source, copiedObjectMap);
+		Object target = deepCopyUsingMetadata(source, copiedObjectMap);
 
-        copiedObjectMap.clear();
-        copiedObjectMap = null;
+		copiedObjectMap.clear();
+		copiedObjectMap = null;
 
-        return target;
-    }
+		return target;
+	}
 
-    /**
-     * @param source
-     * @param mainCache
-     *            TODO
-     * @return
-     */
-    private static Object deepCopyUsingMetadata(Object source, Map<Object, Object> copiedObjectMap)
-    {
-        Object target = null;
-        try
-        {
-            if (source == null)
-                return null;
+	/**
+	 * @param source
+	 * @param mainCache
+	 *            TODO
+	 * @return
+	 */
+	private static Object deepCopyUsingMetadata(Object source,
+			Map<Object, Object> copiedObjectMap) {
+		Object target = null;
+		try {
+			if (source == null)
+				return null;
 
-            Class<?> sourceObjectClass = source.getClass();
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
-            if (metadata == null)
-            {
+			Class<?> sourceObjectClass = source.getClass();
+			EntityMetadata metadata = KunderaMetadataManager
+					.getEntityMetadata(sourceObjectClass);
+			if (metadata == null) {
 
-                return source;
-            }
+				return source;
+			}
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());
+			MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE
+					.getApplicationMetadata().getMetamodel(
+							metadata.getPersistenceUnit());
 
-            EntityType entityType = metaModel.entity(sourceObjectClass);
+			EntityType entityType = metaModel.entity(sourceObjectClass);
 
-            // May break for mapped super class.
+			// May break for mapped super class.
 
-            Object id = null;
-            if (metadata.getRelations() != null && !metadata.getRelations().isEmpty())
-            {
-                id = PropertyAccessorHelper.getId(source, metadata);
+			Object id = null;
+			if (metadata.getRelations() != null
+					&& !metadata.getRelations().isEmpty()) {
+				id = PropertyAccessorHelper.getId(source, metadata);
 
-                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
-                keyBuilder.append("#");
-                keyBuilder.append(id);
-                Object copiedObjectInMap = copiedObjectMap.get(keyBuilder.toString());
-                if (copiedObjectInMap != null)
-                {
-                    return copiedObjectInMap;
-                }
-            }
-            // Copy Columns (in a table that doesn't have any embedded objects
+				StringBuilder keyBuilder = new StringBuilder(
+						sourceObjectClass.getName());
+				keyBuilder.append("#");
+				keyBuilder.append(id);
+				Object copiedObjectInMap = copiedObjectMap.get(keyBuilder
+						.toString());
+				if (copiedObjectInMap != null) {
+					return copiedObjectInMap;
+				}
+			}
+			// Copy Columns (in a table that doesn't have any embedded objects
 
-            target = sourceObjectClass.newInstance();
+			target = sourceObjectClass.newInstance();
 
-            Iterator<Attribute> iter = entityType.getAttributes().iterator();
-            while (iter.hasNext())
-            {
-                Attribute attrib = iter.next();
+			Iterator<Attribute> iter = entityType.getAttributes().iterator();
+			while (iter.hasNext()) {
+				Attribute attrib = iter.next();
 
-                Field columnField = (Field) attrib.getJavaMember();
-                if (attrib.getPersistentAttributeType().equals(PersistentAttributeType.EMBEDDED)
-                        || attrib.getPersistentAttributeType().equals(PersistentAttributeType.ELEMENT_COLLECTION))
-                {
-                    EmbeddableType embeddedColumn = metaModel.embeddable(((AbstractAttribute) attrib)
-                            .getBindableJavaType());
+				Field columnField = (Field) attrib.getJavaMember();
+				if (attrib.getPersistentAttributeType().equals(
+						PersistentAttributeType.EMBEDDED)
+						|| attrib.getPersistentAttributeType().equals(
+								PersistentAttributeType.ELEMENT_COLLECTION)) {
+					EmbeddableType embeddedColumn = metaModel
+							.embeddable(((AbstractAttribute) attrib)
+									.getBindableJavaType());
 
-                    Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, columnField);
-                    if (sourceEmbeddedObj != null)
-                    {
-                        if (columnField.getAnnotation(Embedded.class) != null)
-                        {
-                            // Copy embedded objects
-                            Class<?> embeddedColumnClass = columnField.getType();
-                            Object targetEmbeddedObj = embeddedColumnClass.newInstance();
+					Object sourceEmbeddedObj = PropertyAccessorHelper
+							.getObject(source, columnField);
+					if (sourceEmbeddedObj != null) {
+						if (columnField.getAnnotation(Embedded.class) != null) {
+							// Copy embedded objects
+							Class<?> embeddedColumnClass = columnField
+									.getType();
+							Object targetEmbeddedObj = embeddedColumnClass
+									.newInstance();
 
-                            Set<Attribute> columns = embeddedColumn.getAttributes();
-                            for (Attribute column : columns)
-                            {
+							Set<Attribute> columns = embeddedColumn
+									.getAttributes();
+							for (Attribute column : columns) {
 
-                                PropertyAccessorHelper.set(
-                                        targetEmbeddedObj,
-                                        (Field) column.getJavaMember(),
-                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj,
-                                                (Field) column.getJavaMember()));
-                            }
+								PropertyAccessorHelper
+										.set(targetEmbeddedObj,
+												(Field) column.getJavaMember(),
+												PropertyAccessorHelper
+														.getObjectCopy(
+																sourceEmbeddedObj,
+																(Field) column
+																		.getJavaMember()));
+							}
 
-                            PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
-                        }
-                        else if (columnField.getAnnotation(ElementCollection.class) != null)
-                        {
-                            // Copy element collections
-                            if (sourceEmbeddedObj instanceof Collection)
-                            {
-                                Class<?> ecDeclaredClass = columnField.getType();
-                                Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
-                                Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
+							PropertyAccessorHelper.set(target, columnField,
+									targetEmbeddedObj);
+						} else if (columnField
+								.getAnnotation(ElementCollection.class) != null) {
+							// Copy element collections
+							if (sourceEmbeddedObj instanceof Collection) {
+								Class<?> ecDeclaredClass = columnField
+										.getType();
+								Class<?> actualEcObjectClass = sourceEmbeddedObj
+										.getClass();
+								Class<?> genericClass = PropertyAccessorHelper
+										.getGenericClass(columnField);
 
-                                Object targetCollectionObject = actualEcObjectClass.newInstance();
+								Object targetCollectionObject = actualEcObjectClass
+										.newInstance();
 
-                                for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
-                                {
-                                    Object targetEcObj = genericClass.newInstance();
-                                    for (Field f : genericClass.getDeclaredFields())
-                                    {
-                                        PropertyAccessorHelper.set(targetEcObj, f,
-                                                PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+								for (Object sourceEcObj : (Collection) sourceEmbeddedObj) {
+									Object targetEcObj = genericClass
+											.newInstance();
+									for (Field f : genericClass
+											.getDeclaredFields()) {
+										PropertyAccessorHelper
+												.set(targetEcObj,
+														f,
+														PropertyAccessorHelper
+																.getObjectCopy(
+																		sourceEcObj,
+																		f));
 
-                                    }
+									}
 
-                                    if (List.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
+									if (List.class
+											.isAssignableFrom(ecDeclaredClass)) {
+										Method m = actualEcObjectClass
+												.getMethod("add", Object.class);
+										m.invoke(targetCollectionObject,
+												targetEcObj);
 
-                                    }
-                                    else if (Set.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
-                                    }
+									} else if (Set.class
+											.isAssignableFrom(ecDeclaredClass)) {
+										Method m = actualEcObjectClass
+												.getMethod("add", Object.class);
+										m.invoke(targetCollectionObject,
+												targetEcObj);
+									}
 
-                                }
-                                PropertyAccessorHelper.set(target, columnField, targetCollectionObject);
-                            }
+								}
+								PropertyAccessorHelper.set(target, columnField,
+										targetCollectionObject);
+							}
 
-                        }
-                        else if (columnField.getAnnotation(javax.persistence.Column.class) != null)
-                        {
-                            // Copy columns
-                            PropertyAccessorHelper.set(target, columnField, sourceEmbeddedObj);
-                        }
-                    }
+						} else if (columnField
+								.getAnnotation(javax.persistence.Column.class) != null) {
+							// Copy columns
+							PropertyAccessorHelper.set(target, columnField,
+									sourceEmbeddedObj);
+						}
+					}
 
-                }
-                else if (attrib.getPersistentAttributeType().equals(PersistentAttributeType.BASIC))
-                {
+				} else if (attrib.getPersistentAttributeType().equals(
+						PersistentAttributeType.BASIC)) {
 
-                    PropertyAccessorHelper.set(target, columnField,
-                            PropertyAccessorHelper.getObjectCopy(source, columnField));
-                }
-            }
+					PropertyAccessorHelper.set(target, columnField,
+							PropertyAccessorHelper.getObjectCopy(source,
+									columnField));
+				}
+			}
 
-            // Put this object into copied object map
-            if (id != null)
-            {
-                StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
-                keyBuilder.append("#");
-                keyBuilder.append(id);
-                copiedObjectMap.put(keyBuilder.toString(), target);
-            }
-            // Copy Relationships recursively
-            for (Relation relation : metadata.getRelations())
-            {
-                Field relationField = relation.getProperty();
-                Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
+			// Put this object into copied object map
+			if (id != null) {
+				StringBuilder keyBuilder = new StringBuilder(
+						sourceObjectClass.getName());
+				keyBuilder.append("#");
+				keyBuilder.append(id);
+				copiedObjectMap.put(keyBuilder.toString(), target);
+			}
+			// Copy Relationships recursively
+			for (Relation relation : metadata.getRelations()) {
+				Field relationField = relation.getProperty();
+				Object sourceRelationObject = PropertyAccessorHelper.getObject(
+						source, relationField);
 
-                if (sourceRelationObject != null
-                        && !(PersistenceUtilHelper
-                                .instanceOfHibernateAbstractPersistentCollection(sourceRelationObject)))
-                {
-                    if (sourceRelationObject instanceof KunderaProxy)
-                    {
-                        PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
-                        continue;
-                    }
+				if (sourceRelationObject != null)
 
-                    Object targetRelationObject = null;
+				{
+					if (sourceRelationObject instanceof KunderaProxy) {
+						PropertyAccessorHelper.set(target, relationField,
+								sourceRelationObject);
+						continue;
+					} else if (ProxyHelper
+							.isPersistentCollection(sourceRelationObject)) {
+						PropertyAccessorHelper.set(target, relationField,
+								sourceRelationObject);
+						continue;
+					} else if (ProxyHelper
+							.isKunderaProxyCollection(sourceRelationObject)) {
+						ProxyCollection pc = ((ProxyCollection) sourceRelationObject)
+								.getCopy();
+						pc.setOwner(target);
+						PropertyAccessorHelper.set(target, relationField, pc);
+						continue;
+					}
 
-                    Class<?> relationObjectClass = relation.getProperty().getType();
-                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
+					Object targetRelationObject = null;
 
-                    if (Collection.class.isAssignableFrom(relationObjectClass))
-                    {
-                        targetRelationObject = actualRelationObjectClass.newInstance();
-                        Method m = actualRelationObjectClass.getMethod("add", Object.class);
+					Class<?> relationObjectClass = relation.getProperty()
+							.getType();
+					Class<?> actualRelationObjectClass = sourceRelationObject
+							.getClass();
 
-                        for (Object obj : (Collection) sourceRelationObject)
-                        {
-                            Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj);
-                            m.invoke(targetRelationObject, copyTargetRelObj);
-                        }
+					if (Collection.class.isAssignableFrom(relationObjectClass)) {
+						targetRelationObject = actualRelationObjectClass
+								.newInstance();
+						Method m = actualRelationObjectClass.getMethod("add",
+								Object.class);
 
-                    }
-                    else if (Map.class.isAssignableFrom(relationObjectClass))
-                    {
-                        targetRelationObject = actualRelationObjectClass.newInstance();
-                        Method m = actualRelationObjectClass.getMethod("put", new Class<?>[] { Object.class,
-                                Object.class });
+						for (Object obj : (Collection) sourceRelationObject) {
 
-                        for (Object keyObj : ((Map) sourceRelationObject).keySet())
-                        {
-                            Object valObj = ((Map) sourceRelationObject).get(keyObj);
+							Object copyTargetRelObj = searchInCacheThenCopy(
+									copiedObjectMap, obj);
+							m.invoke(targetRelationObject, copyTargetRelObj);
+						}
+					} else if (Map.class.isAssignableFrom(relationObjectClass)) {
+						targetRelationObject = actualRelationObjectClass
+								.newInstance();
+						Method m = actualRelationObjectClass.getMethod("put",
+								new Class<?>[] { Object.class, Object.class });
 
-                            // Object copyTargetKeyObj =
-                            // deepCopyUsingMetadata(keyObj, copiedObjectMap,
-                            // mainCache);
-                            Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj);
+						for (Object keyObj : ((Map) sourceRelationObject)
+								.keySet()) {
+							Object valObj = ((Map) sourceRelationObject)
+									.get(keyObj);
 
-                            // Object copyTargetValueObj =
-                            // deepCopyUsingMetadata(valObj, copiedObjectMap,
-                            // mainCache);
-                            Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj);
+							// Object copyTargetKeyObj =
+							// deepCopyUsingMetadata(keyObj, copiedObjectMap,
+							// mainCache);
+							Object copyTargetKeyObj = searchInCacheThenCopy(
+									copiedObjectMap, keyObj);
 
-                           m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
-                        }
+							// Object copyTargetValueObj =
+							// deepCopyUsingMetadata(valObj, copiedObjectMap,
+							// mainCache);
+							Object copyTargetValueObj = searchInCacheThenCopy(
+									copiedObjectMap, valObj);
 
-                    }
-                    else
-                    {
-                        // targetRelationObject =
-                        // deepCopyUsingMetadata(sourceRelationObject,
-                        // copiedObjectMap, mainCache);
-                        targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject);
-                    }
-                    PropertyAccessorHelper.set(target, relationField, targetRelationObject);
-                }
+							m.invoke(targetRelationObject, new Object[] {
+									copyTargetKeyObj, copyTargetValueObj });
+						}
 
-            }
+					} else {
+						// targetRelationObject =
+						// deepCopyUsingMetadata(sourceRelationObject,
+						// copiedObjectMap, mainCache);
+						targetRelationObject = searchInCacheThenCopy(
+								copiedObjectMap, sourceRelationObject);
+					}
+					PropertyAccessorHelper.set(target, relationField,
+							targetRelationObject);
+				}
+			}
+		}
 
-        }
-        catch (InstantiationException e)
-        {
-            log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:"
-                    + e.getMessage());
-            return null;
-        }
-        catch (IllegalAccessException e)
-        {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
-            return null;
-        }
+		catch (InstantiationException e) {
+			log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:"
+					+ e.getMessage());
+			return null;
+		} catch (IllegalAccessException e) {
+			log.warn("Returning null as error during clone, Caused by:"
+					+ e.getMessage());
+			return null;
+		}
 
-        catch (InvocationTargetException e)
-        {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
-            return null;
-        }
+		catch (InvocationTargetException e) {
+			log.warn("Returning null as error during clone, Caused by:"
+					+ e.getMessage());
+			return null;
+		}
 
-        catch (NoSuchMethodException e)
-        {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
-            return null;
-        }
+		catch (NoSuchMethodException e) {
+			log.warn("Returning null as error during clone, Caused by:"
+					+ e.getMessage());
+			return null;
+		}
 
-        return target;
-    }
+		return target;
+	}
 
-    private static Object searchInCacheThenCopy(Map<Object, Object> copiedObjectMap, Object sourceObject)
-    {
-        Object copyTargetRelObj = null;
-        /*
-         * if(mainCache == null || mainCache.getNodeFromCache(sourceObject) ==
-         * null) {
-         */
-        copyTargetRelObj = deepCopyUsingMetadata(sourceObject, copiedObjectMap);
-        /*
-         * } else { copyTargetRelObj = mainCache.getNodeFromCache(sourceObject);
-         * }
-         */
-        return copyTargetRelObj;
-    }
+	private static Object searchInCacheThenCopy(
+			Map<Object, Object> copiedObjectMap, Object sourceObject) {
+		Object copyTargetRelObj = null;
+		/*
+		 * if(mainCache == null || mainCache.getNodeFromCache(sourceObject) ==
+		 * null) {
+		 */
+		copyTargetRelObj = deepCopyUsingMetadata(sourceObject, copiedObjectMap);
+		/*
+		 * } else { copyTargetRelObj = mainCache.getNodeFromCache(sourceObject);
+		 * }
+		 */
+		return copyTargetRelObj;
+	}
 
-    /**
-     * Gets the field instance.
-     * 
-     * @param chids
-     *            the chids
-     * @param f
-     *            the f
-     * @return the field instance
-     */
-    public static Object getFieldInstance(List chids, Field f)
-    {
+	/**
+	 * Gets the field instance.
+	 * 
+	 * @param chids
+	 *            the chids
+	 * @param f
+	 *            the f
+	 * @return the field instance
+	 */
+	public static Object getFieldInstance(List chids, Field f) {
 
-        if (Set.class.isAssignableFrom(f.getType()))
-        {
-            Set col = new HashSet(chids);
-            return col;
-        }
-        return chids;
-    }
+		if (Set.class.isAssignableFrom(f.getType())) {
+			Set col = new HashSet(chids);
+			return col;
+		}
+		return chids;
+	}
 
 }

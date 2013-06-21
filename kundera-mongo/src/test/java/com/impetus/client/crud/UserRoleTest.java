@@ -40,7 +40,7 @@ import com.impetus.client.utils.MongoUtils;
 public class UserRoleTest
 {
 
-    EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /** The em. */
     private EntityManager em;

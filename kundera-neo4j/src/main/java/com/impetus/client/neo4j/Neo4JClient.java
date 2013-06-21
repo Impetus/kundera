@@ -565,8 +565,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
                         // If this relationship is bidirectional, put source
                         // entity into Map field for target entity
-                        Field bidirectionalField = new AssociationBuilder().getBiDirectionalField(m.getEntityClazz(),
-                                targetEntityClass);
+                        Field bidirectionalField = relation.getBiDirectionalField();
                         Map<Object, Object> sourceEntitiesMap = new HashMap<Object, Object>();
                         if (bidirectionalField != null)
                         {

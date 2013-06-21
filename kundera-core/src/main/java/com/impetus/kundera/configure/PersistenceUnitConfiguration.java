@@ -61,7 +61,7 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      */
     public PersistenceUnitConfiguration(String... persistenceUnits)
     {
-        super(persistenceUnits,null);
+        super(persistenceUnits, null);
     }
 
     /*
@@ -97,7 +97,7 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         }
         catch (InvalidConfigurationException icex)
         {
-            log.error("Error occurred during persistence unit configuration, Caused by:" + icex.getMessage());
+            log.error("Error occurred during persistence unit configuration, Caused by: .", icex);
             throw new PersistenceLoaderException(icex);
         }
 
@@ -125,9 +125,8 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
 
         if (xmls == null || !xmls.hasMoreElements())
         {
-            log.info("Could not find any META-INF/persistence.xml " + " file in the classpath");
-            throw new InvalidConfigurationException("Could not find any META-INF/persistence.xml "
-                    + " file in the classpath");
+            log.error("Could not find any META-INF/persistence.xml file in the classpath");
+            throw new InvalidConfigurationException("Could not find any META-INF/persistence.xml file in the classpath");
         }
 
         Set<String> persistenceUnitNames = new HashSet<String>();

@@ -26,12 +26,14 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 import net.sf.cglib.proxy.NoOp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
@@ -52,6 +54,9 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     /** The id. */
     private Object id;
 
+    /** The target. */
+    private Object owner;
+    
     /** The target. */
     private Object target;
 
@@ -116,7 +121,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * @throws PersistenceException
      *             the persistence exception
      */
-    public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass,
+    public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, 
             final Class<?>[] interfaces, final Method getIdentifierMethod, final Method setIdentifierMethod,
             final Object id, final PersistenceDelegator pd) throws PersistenceException
     {
@@ -253,6 +258,17 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 }
             }
             Object target = getImplementation();
+            
+            String[] strArr = entityName.split("#");
+            String fieldName = strArr[1];
+            
+            if(owner != null)
+            {
+            	EntityMetadata m = KunderaMetadataManager.getEntityMetadata(owner.getClass());
+            	Relation r = m.getRelation(fieldName);            
+            	PropertyAccessorHelper.set(owner, r.getProperty(), target);            	
+            }
+            
             try
             {
                 final Object returnValue;
@@ -283,7 +299,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
         {
             // while constructor is running
             throw new LazyInitializationException("unexpected case hit, method=" + method.getName());
-        }
+        }        
 
     }
 
@@ -446,5 +462,17 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         this.persistenceDelegator = null;
     }
+	
+	@Override
+	public void setOwner(Object owner) throws PersistenceException {
+		if(! owner.getClass().equals(persistentClass))
+		this.owner = owner;		
+	}
+
+	@Override
+	public Object getOwner() throws PersistenceException {
+		return owner;
+	}     
 
 }
+

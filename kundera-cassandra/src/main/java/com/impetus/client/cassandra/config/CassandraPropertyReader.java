@@ -183,7 +183,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                     logger.warn("Returning inverted indexing enabled value {}.", result);
                 }
             }
-
             return result;
         }
 

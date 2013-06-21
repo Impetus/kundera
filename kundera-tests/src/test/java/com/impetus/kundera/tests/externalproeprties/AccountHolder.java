@@ -8,12 +8,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * @author Kuldeep Mishra
  * 
  */
 @Entity
 @Table(name = "ACCOUNTHOLDER", schema = "KunderaTests@secIdxAddCassandra")
+//@IndexCollection(columns = { @Index(name = "PERSON_ID") })
 public class AccountHolder
 {
 

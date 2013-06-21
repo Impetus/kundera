@@ -23,8 +23,8 @@ import java.util.Set;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
-
 import com.impetus.kundera.PersistenceUtilHelper;
+
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
@@ -37,6 +37,9 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.PersistenceValidator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.proxy.collection.ProxyCollection;
 import com.impetus.kundera.utils.DeepEquals;
 
 /**
@@ -168,7 +171,7 @@ public class ObjectGraphBuilder
             // Child Object set in this entity
             Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            if (childObject != null && !(PersistenceUtilHelper.instanceOfHibernateProxy(childObject)))
+            if (childObject != null && !ProxyHelper.isProxy(childObject))
             {
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
                 if (metadata != null && relation.isJoinedByPrimaryKey())
@@ -186,7 +189,7 @@ public class ObjectGraphBuilder
                     Collection childrenObjects = (Collection) childObject;
 
                     if (childrenObjects != null
-                            && !(PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
+                            && !ProxyHelper.isProxyCollection(childrenObjects))
 
                         for (Object childObj : childrenObjects)
                         {
@@ -200,7 +203,7 @@ public class ObjectGraphBuilder
                 {
                     Map childrenObjects = (Map) childObject;
                     if (childrenObjects != null
-                            && !(PersistenceUtilHelper.instanceOfHibernatePersistentCollection(childrenObjects)))
+                            && !ProxyHelper.isProxyCollection(childrenObjects))
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {
@@ -230,7 +233,12 @@ public class ObjectGraphBuilder
     private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject,
             NodeState initialNodeState)
     {
-        if (childObject instanceof Map.Entry)
+        if(childObject instanceof KunderaProxy || childObject instanceof ProxyCollection)
+        {
+        	return;
+        }
+    	
+        else if (childObject instanceof Map.Entry)
         {
             Map.Entry entry = (Map.Entry) childObject;
             Object relObject = entry.getKey();

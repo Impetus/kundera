@@ -23,13 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -61,7 +58,7 @@ import com.impetus.kundera.query.QueryImpl;
  * @author vivek.mishra
  * 
  */
-public class HBaseQuery extends QueryImpl implements Query
+public class HBaseQuery extends QueryImpl
 {
 
     /** the log used by this class. */
@@ -142,7 +139,6 @@ public class HBaseQuery extends QueryImpl implements Query
             List result = getResultList();
             return result != null ? result.size() : 0;
         }
-
         return 0;
     }
 
@@ -227,7 +223,6 @@ public class HBaseQuery extends QueryImpl implements Query
             List results = null;
             return populateUsingLucene(m, client, results, null);
         }
-        // return null;
     }
 
     /**
@@ -244,7 +239,6 @@ public class HBaseQuery extends QueryImpl implements Query
                     m.getPersistenceUnit());
 
             EntityType entity = metaModel.entity(m.getEntityClazz());
-            int count = 0;
             for (int i = startWith; i < columns.length; i++)
             {
                 if (columns[i] != null)
@@ -266,7 +260,6 @@ public class HBaseQuery extends QueryImpl implements Query
                                                                                                  // type
                         Attribute attribute = embeddableType.getAttribute(embeddedFieldName);
                         translatedColumns.add(((AbstractAttribute) attribute).getJPAColumnName());
-
                     }
                     else
                     {
@@ -275,9 +268,7 @@ public class HBaseQuery extends QueryImpl implements Query
                         Attribute col = entity.getAttribute(fieldName);
                         onEmbeddable(translatedColumns, metaModel, col,
                                 metaModel.isEmbeddable(((AbstractAttribute) col).getBindableJavaType()));
-
                     }
-
                 }
             }
         }
@@ -292,7 +283,6 @@ public class HBaseQuery extends QueryImpl implements Query
     private void onEmbeddable(List<String> translatedColumns, MetamodelImpl metaModel, Attribute col,
             boolean isEmbeddable)
     {
-
         if (isEmbeddable)
         {
             EmbeddableType embeddableType = metaModel.embeddable(col.getJavaType());
@@ -365,19 +355,10 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
-
-                    // StringTokenizer tokenizer = new StringTokenizer(name,
-                    // ".");
-                    // if (tokenizer.countTokens() > 1)
-                    // {
-                    // tokenizer.nextToken();
-                    // name = tokenizer.nextToken();
-                    // }
-                    if (/* (!isIdColumn) || */idColumn.equalsIgnoreCase(name))
+                    if (idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
                     }
-
                     onParseFilter(condition, name, value, isIdColumn, m);
                 }
                 else
@@ -387,10 +368,9 @@ public class HBaseQuery extends QueryImpl implements Query
                     if (opr.equalsIgnoreCase("or"))
                     {
                         log.error("Support for OR clause is not enabled with in Hbase");
-                        throw new QueryHandlerException("unsupported clause " + opr + " for Hbase");
+                        throw new QueryHandlerException("Unsupported clause " + opr + " for Hbase");
                     }
                 }
-
             }
         }
 
@@ -407,7 +387,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 queryClause.put(isIdColumn, new FilterList(filterList));
                 return queryClause;
             }
-
             return null;
         }
 
@@ -445,7 +424,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
                         valueInBytes);
                 addToFilter(f);
-
             }
             else
             {
@@ -460,8 +438,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 else if (operator.equals(CompareOp.EQUAL))
                 {
                     rowKey = getBytes(m.getIdAttribute().getName(), m, value);
-                    // startRow = getBytes(m.getIdAttribute().getName(), m,
-                    // value);
                     endRow = null;
                     isFindById = true;
                 }
@@ -509,7 +485,6 @@ public class HBaseQuery extends QueryImpl implements Query
 
             }
             filterList.add(f);
-
         }
     }
 
@@ -520,14 +495,11 @@ public class HBaseQuery extends QueryImpl implements Query
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());
-        // Field f = null;
         Class fieldClazz = null;
-        boolean isId = false;
         if (idCol.getName().equals(jpaFieldName))
         {
             Field f = (Field) idCol.getJavaMember();
             fieldClazz = f.getType();
-            isId = true;
         }
         else
         {
@@ -545,23 +517,41 @@ public class HBaseQuery extends QueryImpl implements Query
             }
             else
             {
-
                 String fieldName = m.getFieldName(jpaFieldName);
                 Attribute col = entity.getAttribute(fieldName);
-                // Column col = m.getColumn(jpaFieldName);
                 fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
-                // f = (Field) col.getJavaMember();
             }
         }
 
-        if (fieldClazz != null /* && f.getType() != null */)
+        if (fieldClazz != null)
         {
             return HBaseUtils.getBytes(value, fieldClazz);
         }
         else
         {
-            log.error("Error while handling data type for:" + jpaFieldName);
+            log.error("Error while handling data type for {} .", jpaFieldName);
             throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
+    }
+
+    @Override
+    public Object next()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List next(int size)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

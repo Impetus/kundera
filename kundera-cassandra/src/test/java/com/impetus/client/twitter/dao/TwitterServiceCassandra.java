@@ -27,8 +27,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,6 +160,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public UserCassandra findUserById(String userId)
     {
+        em.clear();
         UserCassandra user = em.find(UserCassandra.class, userId);
         return user;
     }
@@ -181,7 +180,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> getAllUsers()
     {
-
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u");
 
         List<UserCassandra> users = q.getResultList();
@@ -192,6 +191,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<TweetCassandra> getAllTweets(String userId)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.userId =:userId");
         q.setParameter("userId", userId);
         List<UserCassandra> users = q.getResultList();
@@ -208,6 +208,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> getFollowers(String userId)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.userId =:userId");
         q.setParameter("userId", userId);
         List<UserCassandra> users = q.getResultList();
@@ -221,6 +222,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findPersonalDetailByName(String name)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u.personalDetail.name from UserCassandra u where u.personalDetail.name =:name");
         q.setParameter("name", name);
@@ -231,6 +233,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<TweetCassandra> findTweetByBody(String tweetBody)
     {
+        em.clear();
         Query q = em.createQuery("select u.tweets.body from UserCassandra u where u.tweets.body like :body");
         q.setParameter("body", tweetBody);
         List<TweetCassandra> tweets = q.getResultList();
@@ -240,6 +243,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<TweetCassandra> findTweetByDevice(String deviceName)
     {
+        em.clear();
         Query q = em.createQuery("select u.tweets.device from UserCassandra u where u.tweets.device =:device");
         q.setParameter("device", deviceName);
         List<TweetCassandra> tweets = q.getResultList();
@@ -249,6 +253,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findByRelationshipAndDevice(String relationship, String device)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u.tweets.device from UserCassandra u where u.tweets.device=:device and u.personalDetail.relationshipStatus=:relation");
         q.setParameter("device", device);
@@ -260,6 +265,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public UserCassandra findByUserIdAndTweetDevice(String userId, String device)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.tweets.device=:device and u.userId=:userId");
         q.setParameter("device", device);
         q.setParameter("userId", userId);
@@ -275,6 +281,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByProfessionId(long professionId)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.professionId =:professionId");
         q.setParameter("professionId", professionId);
@@ -285,6 +292,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByDepartment(String departmentName)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.departmentName =:departmentName");
         q.setParameter("departmentName", departmentName);
@@ -295,6 +303,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findExceptionalUsers()
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.isExceptional =:isExceptional");
         q.setParameter("isExceptional", true);
@@ -305,6 +314,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByAge(int age)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.age =:age");
         q.setParameter("age", age);
         List<UserCassandra> users = q.getResultList();
@@ -314,6 +324,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByGrade(char grade)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.grade =:grade");
         q.setParameter("grade", grade);
         List<UserCassandra> users = q.getResultList();
@@ -323,6 +334,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByDigitalSignature(byte digitalSignature)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.digitalSignature =:digitalSignature");
         q.setParameter("digitalSignature", digitalSignature);
@@ -333,6 +345,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByRating(short rating)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.rating =:rating");
         q.setParameter("rating", rating);
         List<UserCassandra> users = q.getResultList();
@@ -342,6 +355,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByCompliance(float compliance)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.compliance =:compliance");
         q.setParameter("compliance", compliance);
         List<UserCassandra> users = q.getResultList();
@@ -351,6 +365,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByHeight(double height)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.height =:height");
         q.setParameter("height", height);
         List<UserCassandra> users = q.getResultList();
@@ -360,6 +375,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByEnrolmentDate(Date enrolmentDate)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.enrolmentDate =:enrolmentDate");
         q.setParameter("enrolmentDate", enrolmentDate);
@@ -370,6 +386,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByEnrolmentTime(Date enrolmentTime)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.enrolmentTime =:enrolmentTime");
         q.setParameter("enrolmentTime", enrolmentTime);
@@ -380,6 +397,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByJoiningDateAndTime(Date joiningDateAndTime)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.joiningDateAndTime =:joiningDateAndTime");
         q.setParameter("joiningDateAndTime", joiningDateAndTime);
@@ -390,6 +408,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByYearsSpent(Integer yearsSpent)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.yearsSpent =:yearsSpent");
         q.setParameter("yearsSpent", yearsSpent);
         List<UserCassandra> users = q.getResultList();
@@ -399,6 +418,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByUniqueId(Long uniqueId)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.uniqueId =:uniqueId");
         q.setParameter("uniqueId", uniqueId);
         List<UserCassandra> users = q.getResultList();
@@ -408,6 +428,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByMonthlySalary(Double monthlySalary)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.monthlySalary =:monthlySalary");
         q.setParameter("monthlySalary", monthlySalary);
@@ -418,6 +439,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByBirthday(java.sql.Date birthday)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.birthday =:birthday");
         q.setParameter("birthday", birthday);
         List<UserCassandra> users = q.getResultList();
@@ -427,6 +449,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByBirthtime(Time birthtime)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.birthtime =:birthtime");
         q.setParameter("birthtime", birthtime);
         List<UserCassandra> users = q.getResultList();
@@ -436,6 +459,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByAnniversary(Timestamp anniversary)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.anniversary =:anniversary");
         q.setParameter("anniversary", anniversary);
         List<UserCassandra> users = q.getResultList();
@@ -445,6 +469,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByJobAttempts(BigInteger jobAttempts)
     {
+        em.clear();
         Query q = em.createQuery("select u from UserCassandra u where u.professionalDetail.jobAttempts =:jobAttempts");
         q.setParameter("jobAttempts", jobAttempts);
         List<UserCassandra> users = q.getResultList();
@@ -454,6 +479,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByAccumulatedWealth(BigDecimal accumulatedWealth)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.accumulatedWealth =:accumulatedWealth");
         q.setParameter("accumulatedWealth", accumulatedWealth);
@@ -464,6 +490,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     @Override
     public List<UserCassandra> findUserByGraduationDay(Calendar graduationDay)
     {
+        em.clear();
         Query q = em
                 .createQuery("select u from UserCassandra u where u.professionalDetail.graduationDay =:graduationDay");
         q.setParameter("graduationDay", graduationDay);

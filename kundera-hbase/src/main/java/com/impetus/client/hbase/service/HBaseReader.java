@@ -17,6 +17,7 @@ package com.impetus.client.hbase.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
@@ -40,6 +41,12 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 public class HBaseReader implements Reader
 {
 
+    private ResultScanner scanner = null;
+
+    Iterator<Result> resultsIter;
+
+    private int fetchSize;
+
     /*
      * (non-Javadoc)
      * 
@@ -53,26 +60,26 @@ public class HBaseReader implements Reader
             String... columns) throws IOException
     {
         List<HBaseData> results = null;
-
-        // Get g = prepareGet(rowKey, filter);
-
-        ResultScanner scanner = null;
-
-        // only in case of find by id
-        Scan scan = null;
-        if (rowKey != null)
+        if (scanner == null)
         {
-            byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
-            Get g = new Get(rowKeyBytes);
-            scan = new Scan(g);
-        }
-        else
-        {
-            scan = new Scan();
-        }
-        setScanCriteria(filter, columnFamily, null, scan, columns);
-        scanner = hTable.getScanner(scan);
 
+            // only in case of find by id
+            Scan scan = null;
+            if (rowKey != null)
+            {
+                byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
+                Get g = new Get(rowKeyBytes);
+                scan = new Scan(g);
+            }
+            else
+            {
+                scan = new Scan();
+            }
+            setScanCriteria(filter, columnFamily, null, scan, columns);
+
+            scanner = hTable.getScanner(scan);
+
+        }
         return scanResults(columnFamily, results, scanner);
     }
 
@@ -102,33 +109,34 @@ public class HBaseReader implements Reader
             String columnFamily, String qualifier, String[] columns) throws IOException
     {
         List<HBaseData> results = null;
-        Scan s = null;
-        if (startRow != null && endRow != null && startRow.equals(endRow))
+        if (scanner == null)
         {
-            Get g = new Get(startRow);
-            s = new Scan(g);
+            Scan s = null;
+            if (startRow != null && endRow != null && startRow.equals(endRow))
+            {
+                Get g = new Get(startRow);
+                s = new Scan(g);
+            }
+            else if (startRow != null && endRow != null)
+            {
+                s = new Scan(startRow, endRow);
+            }
+            else if (startRow != null)
+            {
+                s = new Scan(startRow);
+            }
+            else if (endRow != null)
+            {
+                s = new Scan();
+                s.setStopRow(endRow);
+            }
+            else
+            {
+                s = new Scan();
+            }
+            setScanCriteria(filter, columnFamily, qualifier, s, columns);
+            scanner = hTable.getScanner(s);
         }
-        else if (startRow != null && endRow != null)
-        {
-            s = new Scan(startRow, endRow);
-        }
-        else if (startRow != null)
-        {
-            s = new Scan(startRow);
-        }
-        else if (endRow != null)
-        {
-            s = new Scan();
-            s.setStopRow(endRow);
-        }
-        else
-        {
-            s = new Scan();
-        }
-
-        setScanCriteria(filter, columnFamily, qualifier, s, columns);
-
-        ResultScanner scanner = hTable.getScanner(s);
         return scanResults(null, results, scanner);
     }
 
@@ -173,11 +181,16 @@ public class HBaseReader implements Reader
      * @param scanner
      *            result scanner.
      * @return collection of scanned results.
+     * @throws IOException
      */
-    private List<HBaseData> scanResults(String columnFamily, List<HBaseData> results, ResultScanner scanner)
+    private List<HBaseData> scanResults(final String columnFamily, List<HBaseData> results, final ResultScanner scanner)
+            throws IOException
     {
         HBaseData data = null;
-        for (Result result : scanner)
+
+        int fetch = fetchSize > 0 ? fetchSize : 1;
+
+        for (Result result : scanner.next(fetch))
         {
             List<KeyValue> values = result.list();
             for (KeyValue value : values)
@@ -193,7 +206,6 @@ public class HBaseReader implements Reader
             }
             results.add(data);
         }
-
         return results;
     }
 
@@ -202,13 +214,18 @@ public class HBaseReader implements Reader
             final String columnName, final Class rowKeyClazz) throws IOException
     {
         List<Object> rowKeys = new ArrayList<Object>();
-        Scan s = new Scan();
-        s.setFilter(filter);
-        s.addColumn(Bytes.toBytes(columnFamilyName), Bytes.toBytes(columnName));
 
-        ResultScanner scanner = hTable.getScanner(s);
+        if (scanner == null)
+        {
+            Scan s = new Scan();
+            s.setFilter(filter);
+            s.addColumn(Bytes.toBytes(columnFamilyName), Bytes.toBytes(columnName));
+            scanner = hTable.getScanner(s);
+        }
 
-        for (Result result : scanner)
+        int fetch = fetchSize > 0 ? fetchSize : 1;
+
+        for (Result result : scanner.next(fetch))
         {
 
             for (KeyValue keyValue : result.list())
@@ -224,8 +241,8 @@ public class HBaseReader implements Reader
         return null;
     }
 
-    public List<HBaseData> loadAll(HTableInterface hTable, List<Object> rows, String columnFamily, String[] columns)
-            throws IOException
+    public List<HBaseData> loadAll(final HTableInterface hTable, final List<Object> rows, final String columnFamily,
+            final String[] columns) throws IOException
     {
         List<HBaseData> results = null;
 
@@ -265,7 +282,43 @@ public class HBaseReader implements Reader
             }
         }
         return results;
-
     }
 
+    public void setFetchSize(final int fetchSize)
+    {
+        this.fetchSize = fetchSize;
+    }
+
+    public HBaseData scroll()
+    {
+        HBaseData data = null;
+        while (resultsIter.hasNext())
+        {
+            Result result = resultsIter.next();
+            List<KeyValue> values = result.list();
+            for (KeyValue value : values)
+            {
+                data = new HBaseData(new String(value.getFamily()), value.getRow());
+                break;
+            }
+            data.setColumns(values);
+        }
+        return data;
+    }
+
+    public List<HBaseData> scroll(final int chunkSize)
+    {
+        List<HBaseData> results = new ArrayList<HBaseData>();
+        for (int i = 1; i <= chunkSize; i++)
+        {
+            HBaseData data = scroll();
+            if (data == null)
+            {
+                resultsIter = null;
+                break;
+            }
+            results.add(data);
+        }
+        return results;
+    }
 }

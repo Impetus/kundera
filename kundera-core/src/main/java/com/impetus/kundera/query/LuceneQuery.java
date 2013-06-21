@@ -20,8 +20,6 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * 
  * @author animesh.kumar
  */
-public class LuceneQuery extends QueryImpl implements Query
+public class LuceneQuery extends QueryImpl
 {
 
     /** the log used by this class. */
@@ -171,4 +169,25 @@ public class LuceneQuery extends QueryImpl implements Query
 
         return 0;
     }
+
+  /*  @Override
+    public Object next()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List next(int size)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+        
+    }*/
 }
