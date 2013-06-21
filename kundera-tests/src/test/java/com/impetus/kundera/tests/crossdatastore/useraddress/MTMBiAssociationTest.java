@@ -51,7 +51,6 @@ public class MTMBiAssociationTest extends TwinAssociation
 //                                                                                                                  * ,
 //                                                                                                                  * "addHbase"
 //                                                                                                                  */};
-
     /**
      * Inits the.
      */

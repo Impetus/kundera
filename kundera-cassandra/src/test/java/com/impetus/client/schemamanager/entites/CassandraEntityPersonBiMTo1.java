@@ -25,8 +25,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+
 
 /**
  * The Class CassandraEntityPersonBiMTo1.
@@ -51,8 +50,7 @@ public class CassandraEntityPersonBiMTo1
 
     /** The address. */
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ADDRESS_ID")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinColumn(name = "ADDRESS_ID")    
     private CassandraEntityAddressBiMTo1 address;
 
     /**

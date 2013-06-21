@@ -113,8 +113,9 @@ public interface CassandraDataHandler
      * @param id
      * @param m
      * @param columnFamily
+     * @param columnTTLs TODO
      * @return
      * @throws Exception
      */
-    ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily) throws Exception;
+    ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception;
 }

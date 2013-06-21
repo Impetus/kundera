@@ -48,10 +48,12 @@ import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
@@ -98,7 +100,7 @@ public abstract class AssociationBase
     private String persistenceUnits = "rdbms,redis,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-            "oracle_kvstore" /* , "addHbase" */};
+    "oracle_kvstore" /* , "addHbase" */};
 
     protected RDBMSCli cli;
 
@@ -206,6 +208,10 @@ public abstract class AssociationBase
                 // clazz, mAdd);
                 PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getPersistenceUnitMetadata(pu);
+                
+                CoreMetadata coreMetadata = new CoreMetadata();
+                coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+                KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
 
                 String client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
                 if (client.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory")

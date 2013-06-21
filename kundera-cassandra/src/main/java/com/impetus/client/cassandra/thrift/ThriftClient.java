@@ -146,7 +146,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             if (isCql3Enabled(entityMetadata))
             {
-                cqlClient.persist(entityMetadata, entity, conn, rlHolders);
+                cqlClient.persist(entityMetadata, entity, conn, rlHolders, getTtlValues().get(entityMetadata.getTableName()));
             }
             else
             {
@@ -194,6 +194,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             // PelopsUtils.releaseConnection(pool, conn);
             releaseConnection(conn);
+            
+            if(isTtlPerRequest())
+            {
+            	getTtlValues().clear();
+            }
         }
     }
 

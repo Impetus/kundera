@@ -31,13 +31,10 @@ import javax.persistence.PersistenceException;
 import javax.persistence.PersistenceUtil;
 import javax.persistence.spi.LoadState;
 
-import org.hibernate.collection.internal.PersistentBag;
-import org.hibernate.collection.spi.PersistentCollection;
-
-//import org.hibernate.collection.spi.PersistentCollection;
-
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializer;
+import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.proxy.collection.AbstractProxyCollection;
 
 /**
  * Helper for {@link PersistenceUtil}
@@ -113,86 +110,23 @@ public class PersistenceUtilHelper
         if (o == null)
         {
             return LoadState.NOT_LOADED;
-        }
+        }             
         else if (o instanceof KunderaProxy)
         {
             final boolean isInitialized = !((KunderaProxy) o).getKunderaLazyInitializer().isUninitialized();
             return isInitialized ? LoadState.LOADED : LoadState.NOT_LOADED;
         }
-        else if (instanceOfHibernatePersistentCollection( o ))
+        else if(ProxyHelper.isKunderaProxyCollection(o))
         {
-            return hibernateLoadState( o );
-        }
+        final boolean isInitialized = ((AbstractProxyCollection) o).getDataCollection() != null;
+            return isInitialized ? LoadState.LOADED : LoadState.NOT_LOADED;
+        }       
         else
         {
             return LoadState.UNKNOWN;
         }
-    }
+    }   
 
-    public static boolean instanceOfHibernatePersistentCollection(Object o){
-    	
-    	if(o == null) return false;
-    	
-        try
-        {
-            return o.getClass().isAssignableFrom(PersistentCollection.class);
-        } catch ( Exception e ) {
-            return false;
-        } catch ( NoClassDefFoundError e ){
-            return false;
-        }
-    }
-
-    private static LoadState hibernateLoadState(Object o){
-
-        final boolean isInitialized = ((org.hibernate.collection.spi.PersistentCollection) o).wasInitialized();
-        return isInitialized ? LoadState.LOADED : LoadState.NOT_LOADED;
-
-    }
-
-    public static boolean instanceOfHibernateProxy(Object o){
-        try
-        {
-            return o instanceof org.hibernate.proxy.HibernateProxy;
-        } catch ( Exception e ){
-           return false;
-        } catch ( NoClassDefFoundError e ){
-            return false;
-        }
-    }
-
-    public static boolean instanceOfHibernatePersistentBag(Object o){
-        try
-        {
-            return o instanceof PersistentBag;
-        } catch ( Exception e ){
-           return false;
-        } catch ( NoClassDefFoundError e ){
-            return false;
-        }
-    }
-
-    public static boolean instanceOfHibernatePersistentSet(Object o){
-        try
-        {
-            return o instanceof org.hibernate.collection.internal.PersistentSet;
-        } catch ( Exception e){
-            return false;
-        } catch ( NoClassDefFoundError e ){
-            return false;
-        }
-    }
-
-    public static boolean instanceOfHibernateAbstractPersistentCollection(Object o){
-        try
-        {
-            return o instanceof org.hibernate.collection.internal.AbstractPersistentCollection;
-        } catch ( Exception e){
-            return false;
-        } catch ( NoClassDefFoundError e ){
-            return false;
-        }
-    }
 
 
     /**

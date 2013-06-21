@@ -117,6 +117,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /** The consistency level. */
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+    
+    private boolean ttlPerRequest = false;
+    private boolean ttlPerSession = false;
+    private Map<String, Object> ttlValues = new HashMap<String, Object>();
+    
 
     /** The closed. */
     private boolean closed = false;
@@ -885,10 +890,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param entity
      * @param cassandra_client
      * @param rlHolders
+     * @param ttlColumns TTL values for each columns
      * @return
      */
     protected String createInsertQuery(EntityMetadata entityMetadata, Object entity, Cassandra.Client cassandra_client,
-            List<RelationHolder> rlHolders)
+            List<RelationHolder> rlHolders, Object ttlColumns)
     {
         CQLTranslator translator = new CQLTranslator();
         String insert_Query = translator.INSERT_QUERY;
@@ -922,6 +928,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         if(log.isInfoEnabled())
         {
             log.info("Returning cql query {}.",insert_Query);
+        }
+        
+        if(ttlColumns != null && ttlColumns instanceof Integer)
+        {
+        	int ttl = ((Integer)ttlColumns).intValue();
+        	if(ttl != 0)
+        	{
+        		insert_Query = insert_Query + " USING TTL " + ttl; 
+        	}
+        	 
         }
         
         return insert_Query;
@@ -1026,7 +1042,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public void close()
     {
         clear();
-        setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
+        setCqlVersion(CassandraConstants.CQL_VERSION_2_0);       
+        
         // nodes.clear();
 //         nodes = null;
         closed = true;
@@ -1321,6 +1338,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             nodes.clear();
             nodes = null;
             nodes = new ArrayList<Node>();
+        } 
+        
+        if(ttlPerSession)
+        {
+        	ttlValues.clear();
         }
     }
 
@@ -1381,7 +1403,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         }
                         else
                         {
-                            query = createInsertQuery(metadata, entity, conn, relationHolders);
+                            query = createInsertQuery(metadata, entity, conn, relationHolders, getTtlValues().get(metadata.getTableName()));
                         }
                         batchQueryBuilder.append(query);
                     }
@@ -1507,7 +1529,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             String columnFamily = entityMetadata.getTableName();
-            tf = getDataHandler().toThriftRow(entity, id, entityMetadata, columnFamily);
+            tf = getDataHandler().toThriftRow(entity, id, entityMetadata, columnFamily, getTtlValues().get(columnFamily));
         }
         catch (Exception e)
         {
@@ -1857,7 +1879,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected class CQLClient
     {
         public void persist(EntityMetadata entityMetadata, Object entity,
-                org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders)
+                org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders, Object ttlColumns)
                 throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
                 TimedOutException, SchemaDisagreementException
         {
@@ -1868,7 +1890,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
             else
             {
-                query = createInsertQuery(entityMetadata, entity, conn, rlHolders);
+                query = createInsertQuery(entityMetadata, entity, conn, rlHolders, ttlColumns);
             }
             // conn.set_cql_version(getCqlVersion());
             conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
@@ -2008,4 +2030,47 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler);
         }
     }
+
+	/**
+	 * @return the ttlPerRequest
+	 */
+	public boolean isTtlPerRequest() {
+		return ttlPerRequest;
+	}
+
+	/**
+	 * @param ttlPerRequest the ttlPerRequest to set
+	 */
+	public void setTtlPerRequest(boolean ttlPerRequest) {
+		this.ttlPerRequest = ttlPerRequest;
+	}
+
+	/**
+	 * @return the ttlPerSession
+	 */
+	public boolean isTtlPerSession() {
+		return ttlPerSession;
+	}
+
+	/**
+	 * @param ttlPerSession the ttlPerSession to set
+	 */
+	public void setTtlPerSession(boolean ttlPerSession) {
+		this.ttlPerSession = ttlPerSession;
+	}
+
+	/**
+	 * @return the ttlValues
+	 */
+	public Map<String, Object> getTtlValues() {
+		return ttlValues;
+	}
+
+	/**
+	 * @param ttlValues the ttlValues to set
+	 */
+	public void setTtlValues(Map<String, Object> ttlValues) {
+		this.ttlValues = ttlValues;
+	}   
+    
 }

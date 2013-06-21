@@ -412,7 +412,6 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertNotNull(mobileTweets);
         Assert.assertEquals(1, webTweets.size());
         Assert.assertEquals(1, mobileTweets.size());
-
     }
 
     public void getTweetsByRelationshipAndDevice()
@@ -553,7 +552,7 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertFalse(user1.getTweets().isEmpty());
         Assert.assertEquals(2, user1.getTweets().size());
         Assert.assertNotNull(user1.getExternalLinks());
-        Assert.assertFalse(user1.getExternalLinks().isEmpty());
+        Assert.assertFalse(user1.getExternalLinks().isEmpty());        
         Assert.assertEquals(2, user1.getExternalLinks().size());
     }
 
@@ -570,7 +569,7 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertEquals(2, user2.getTweets().size());
         Assert.assertNotNull(user2.getExternalLinks());
         Assert.assertFalse(user2.getExternalLinks().isEmpty());
-        Assert.assertEquals(2, user2.getExternalLinks().size());
+        Assert.assertEquals(2, user2.getExternalLinks().size());        
     }
 
     private void assertUpdatedUser1(UserCassandra user1)

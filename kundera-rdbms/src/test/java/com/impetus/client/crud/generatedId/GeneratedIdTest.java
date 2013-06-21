@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author impadmin
@@ -55,6 +56,20 @@ public class GeneratedIdTest
         cli.dropSchema("TESTDB");
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        try
+        {
+            cli.update("DELETE FROM TESTDB.USERGENERATEDID");
+            cli.update("DROP TABLE TESTDB.USERGENERATEDID");
+            cli.update("DELETE FROM TESTDB.ADDRESSGENERATEDID");
+            cli.update("DROP TABLE TESTDB.ADDRESSGENERATEDID");
+            cli.update("DROP SCHEMA TESTDB");
+            cli.closeConnection();
+        }
+        catch (SQLException e)
+        {
+            // do nothing..weird!!
+        }
     }
 
     @Test

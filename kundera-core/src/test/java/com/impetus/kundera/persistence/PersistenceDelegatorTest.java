@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -70,7 +72,14 @@ public class PersistenceDelegatorTest
     @Test
     public void testPersist()
     {
-        PersonnelDTO dto = new PersonnelDTO();
+        try {
+			em.persist(null);
+			Assert.fail("A null entity should have thrown exception while persisting");
+		} catch (Exception e1) {
+			Assert.assertTrue(e1.getCause().getClass().equals(IllegalArgumentException.class));
+		}    	
+    	
+    	PersonnelDTO dto = new PersonnelDTO();
         try
         {
             em.persist(dto);
@@ -145,6 +154,28 @@ public class PersistenceDelegatorTest
         }
         dto = em.find(PersonnelDTO.class, "123");
         Assert.assertNotNull(dto);
+    }
+    
+    @Test
+    public void testFindForObjectArray()
+    {
+        PersonnelDTO dto = new PersonnelDTO();
+        dto.setPersonId("111");
+        em.persist(dto);
+        
+        dto = new PersonnelDTO();
+        dto.setPersonId("222");
+        em.persist(dto);
+        
+        dto = new PersonnelDTO();
+        dto.setPersonId("333");
+        em.persist(dto);
+        
+        PersistenceDelegator pd = ((EntityManagerImpl) em).getPersistenceDelegator();
+        
+        List<PersonnelDTO> persons = pd.find(PersonnelDTO.class, new String[]{"111", "222", "333"});
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(3, persons.size());
     }
 
     @Test

@@ -39,7 +39,7 @@ public class PersonnelUni1ToM
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "PERSON_ID")
     private Set<HabitatUni1ToM> addresses;
 

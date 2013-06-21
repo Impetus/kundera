@@ -52,7 +52,7 @@ public class UserInfo
     @Column(name = "age")
     private int age;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private List<MongoPrimeUser> timeLine;
 

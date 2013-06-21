@@ -454,7 +454,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             try
             {
                 client.set_keyspace(metadata.getSchema());
-                insert_Query = createInsertQuery(metadata, entity, client, rlHolders);
+                insert_Query = createInsertQuery(metadata, entity, client, rlHolders, getTtlValues().get(metadata.getTableName()));
                 executeCQLQuery(insert_Query);
             }
             catch (InvalidRequestException e)
@@ -489,7 +489,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             try
             {
                 String columnFamily = metadata.getTableName();
-                tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
+                tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily, getTtlValues().get(columnFamily));
             }
             catch (Exception e)
             {
@@ -558,6 +558,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
             mutator.execute(getConsistencyLevel());
             tf = null;
+            
+            if(isTtlPerRequest())
+            {
+            	getTtlValues().clear();
+            }
         }
     }
 

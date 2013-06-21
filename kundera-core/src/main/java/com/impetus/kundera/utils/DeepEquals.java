@@ -14,8 +14,6 @@
  ******************************************************************************/
 package com.impetus.kundera.utils;
 
-import com.impetus.kundera.PersistenceUtilHelper;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -30,14 +28,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.hibernate.collection.internal.AbstractPersistentCollection;
-import org.hibernate.collection.internal.PersistentList;
-import org.hibernate.collection.internal.PersistentMap;
-import org.hibernate.collection.internal.PersistentSet;
-import org.hibernate.collection.spi.PersistentCollection;
-
-//import org.hibernate.collection.spi.PersistentCollection;
+import com.impetus.kundera.PersistenceUtilHelper;
+import com.impetus.kundera.proxy.ProxyHelper;
 
 /**
  * Deeply compare two (2) objects. This method will call any overridden equals()
@@ -262,12 +254,13 @@ public class DeepEquals {
 						boolean isPersistentCollection = false;
 						if(dk._key1 != null)
 						{
-							isPersistentCollection = dk._key1.getClass()
+							isPersistentCollection = ProxyHelper.isProxyCollection(dk._key1);
+							/*isPersistentCollection = dk._key1.getClass()
 									.isAssignableFrom(PersistentSet.class)
 									|| dk._key1.getClass().isAssignableFrom(
 											PersistentList.class)
 											|| dk._key1.getClass().isAssignableFrom(
-													PersistentMap.class);
+													PersistentMap.class);*/
 							
 						}
 					
@@ -307,9 +300,7 @@ public class DeepEquals {
 		Collection col1 = (Collection) dualKey._key1;
 		Collection col2 = (Collection) dualKey._key2;
 
-		if (PersistenceUtilHelper.instanceOfHibernatePersistentCollection(col1)
-				|| PersistenceUtilHelper
-						.instanceOfHibernatePersistentCollection(col2)) {
+		if (ProxyHelper.isProxyCollection(col1) || ProxyHelper.isProxyCollection(col2)) {
 			return false;
 		}
 
@@ -345,9 +336,7 @@ public class DeepEquals {
 	 */
 	private static boolean compareUnordered(Collection col1, Collection col2,
 			Set visited) {
-		if (PersistenceUtilHelper.instanceOfHibernatePersistentCollection(col1)
-				|| PersistenceUtilHelper
-						.instanceOfHibernatePersistentCollection(col2)) {
+		if (ProxyHelper.isProxyCollection(col1) || ProxyHelper.isProxyCollection(col2)) {
 			return false;
 		}
 
@@ -430,8 +419,7 @@ public class DeepEquals {
 			}
 
 			if (obj instanceof Collection
-					&& !(PersistenceUtilHelper
-							.instanceOfHibernatePersistentCollection(obj))) {
+					&& !ProxyHelper.isProxyCollection(obj)) {
 				stack.addAll(0, (Collection) obj);
 				continue;
 			}

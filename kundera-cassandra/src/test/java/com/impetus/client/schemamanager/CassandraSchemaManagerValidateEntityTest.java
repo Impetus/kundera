@@ -35,12 +35,14 @@ import com.impetus.client.schemamanager.entites.ValidCounterColumnFamily;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * @author impadmin
@@ -140,6 +142,11 @@ public class CassandraSchemaManagerValidateEntityTest
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        
+        CoreMetadata coreMetadata = new CoreMetadata();
+        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+        
         // EntityManagerFactoryImpl emf = new
         // EntityManagerFactoryImpl(persistenceUnit, props);
         // return emf;
