@@ -21,6 +21,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -28,7 +29,7 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
  */
 public class StoreBuilder {
 	
-	public static Node buildStoreNode(PersistenceCache pc)
+	public static Node buildStoreNode(PersistenceCache pc, NodeState initialState, CascadeType cascadeType)
 	{
 		
 		
@@ -42,18 +43,18 @@ public class StoreBuilder {
         String b2Id = ObjectGraphUtils.getNodeId("A2", b2.getClass());
         String b3Id = ObjectGraphUtils.getNodeId("A3", b3.getClass());
 
-        Node headNode = new Node(storeId, store, null, pc, "1");
+        Node headNode = new Node(storeId, store, initialState, pc, "1");
 
-        Node child1 = new Node(b1Id, b1, null, pc, "A1");
-        Node child2 = new Node(b2Id, b2, null, pc, "A2");
-        Node child3 = new Node(b3Id, b3, null, pc, "A3");
+        Node child1 = new Node(b1Id, b1, initialState, pc, "A1");
+        Node child2 = new Node(b2Id, b2, initialState, pc, "A2");
+        Node child3 = new Node(b3Id, b3, initialState, pc, "A3");
 
         NodeLink linkB1 = new NodeLink(storeId, b1Id);
         NodeLink linkB2 = new NodeLink(storeId, b2Id);
         NodeLink linkB3 = new NodeLink(storeId, b3Id);
 
         List<CascadeType> cascadeTypes = new ArrayList<CascadeType>();
-        cascadeTypes.add(CascadeType.PERSIST);
+        cascadeTypes.add(cascadeType);
         
         linkB1.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID"); linkB1.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
         linkB2.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID"); linkB2.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
