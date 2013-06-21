@@ -410,7 +410,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             entities = new ArrayList<Object>(qResults.size());
             // iterate through complete map and
-            populateData(m, qResults, entities, false, null, dataHandler);
+            populateData(m, qResults, entities, false, m.getRelationNames(), dataHandler);
         }
         return entities;
     }

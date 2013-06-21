@@ -77,9 +77,9 @@
 
   <repositories>
      <repository>
-      <id>atlassian</id>
+      <id>clover</id>
       <name>Clover maven repo</name>
-      <url>https://repository.atlassian.com/maven2/</url>
+      <url>http://mirrors.ibiblio.org/pub/mirrors/maven</url>
       <releases>
         <enabled>true</enabled>
       </releases>

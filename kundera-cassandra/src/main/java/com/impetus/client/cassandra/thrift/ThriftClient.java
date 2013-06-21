@@ -233,7 +233,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
                     Column column = new Column();
                     column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
-                            + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
+                            + Constants.JOIN_COLUMN_NAME_SEPARATOR + value));
                     // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
                     // value));
                     column.setValue(PropertyAccessorHelper.getBytes(value));
@@ -622,7 +622,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             if (keySlices != null)
             {
                 entities = new ArrayList<Object>(keySlices.size());
-                populateData(m, keySlices, entities, false, null);
+                populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
             }
         }
         return entities;

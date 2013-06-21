@@ -118,7 +118,7 @@ public class PersistenceUtilHelper
         }
         else if(ProxyHelper.isKunderaProxyCollection(o))
         {
-        	final boolean isInitialized = ((AbstractProxyCollection) o).getDataCollection() != null;
+        final boolean isInitialized = ((AbstractProxyCollection) o).getDataCollection() != null;
             return isInitialized ? LoadState.LOADED : LoadState.NOT_LOADED;
         }       
         else

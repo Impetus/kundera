@@ -170,6 +170,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
                     "It's manadatory to use @JoinTable with parent side of ManyToMany relationship.");
         }
 
+        relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
 
         // Set whether this entity has at least one Join table relation, if not
@@ -179,6 +180,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
             metadata.setRelationViaJoinTable(relation.isRelatedViaJoinTable());
         }
 
+        
     }
 
     @Override

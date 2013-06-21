@@ -22,6 +22,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -41,6 +42,7 @@ public class PersonnelBi1ToM
     private String personName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "person")
+//    @JoinColumn(name="PERSON_ID")
     private Set<HabitatBi1ToM> addresses;
 
     public String getPersonId()

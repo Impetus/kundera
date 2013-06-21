@@ -85,6 +85,7 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
             relation.setJoinTableMetadata(jtMetadata);
         }
 
+        relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
 
     }

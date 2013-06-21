@@ -98,8 +98,6 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
 
         EntityValidator validator = new EntityValidatorImpl(externalPropertyMap);
 
-//        puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
-
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
@@ -152,23 +150,20 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             }
             
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
-            SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
 
-            if (schemaManager != null)
-            {
-                schemaManager.exportSchema(persistenceUnit, tableInfos);
-            }
         }
 
-/*        for (String persistenceUnit : persistenceUnits)
+        // Need to iterate, as in case of non unary relations 
+        for(String persistenceUnit:persistenceUnits)
         {
             SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
+
             if (schemaManager != null)
             {
                 schemaManager.exportSchema(persistenceUnit, puToSchemaMetadata.get(persistenceUnit));
             }
         }
-*/    }
+    }
 
     /**
      * Return schema manager for pu.

@@ -49,6 +49,11 @@ public class GeneratedIdTest
     @After
     public void tearDown() throws Exception
     {
+        cli.update("DELETE FROM TESTDB.UserGeneratedId");
+        cli.update("DROP TABLE TESTDB.UserGeneratedId");
+        cli.update("DELETE FROM TESTDB.AddressGeneratedId");
+        cli.update("DROP TABLE TESTDB.AddressGeneratedId");
+        cli.dropSchema("TESTDB");
         em.close();
         emf.close();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
