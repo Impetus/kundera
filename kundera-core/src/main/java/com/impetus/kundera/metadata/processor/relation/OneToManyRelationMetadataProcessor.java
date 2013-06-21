@@ -26,6 +26,7 @@ import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -86,7 +87,34 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
         }
+        else
+        {
+            
+            String joinColumnName = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
+            if (relation.getMappedBy() != null)
+            {
+                try
+                {
 
+                    Field mappedField = metadata.getEntityClazz().getDeclaredField(relation.getMappedBy());
+                    if (mappedField != null && mappedField.isAnnotationPresent(JoinColumn.class))
+                    {
+                        joinColumnName = mappedField.getAnnotation(JoinColumn.class).name();
+                    }
+                }
+                catch (NoSuchFieldException e)
+                {
+                    // do nothing, it means not a case of self association
+                }
+                catch (SecurityException e)
+                {
+                    // do nothing, it means not a case of self association
+                }
+            }
+            relation.setJoinColumnName(joinColumnName);
+        }
+
+        relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
         metadata.setParent(true);
 

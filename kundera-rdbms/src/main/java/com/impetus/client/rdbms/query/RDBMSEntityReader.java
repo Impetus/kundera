@@ -49,6 +49,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
@@ -311,7 +312,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         for (Relation r : entityMetadata.getRelations())
         {
-            if (r.getJoinColumnName() != null)
+            if (r.getJoinColumnName() != null && !r.getType().equals(ForeignKey.MANY_TO_MANY))
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);

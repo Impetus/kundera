@@ -121,6 +121,7 @@ public class ManagedState extends NodeState
         {
             return;
         }
+        
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
         // Recursively retrieve relationship entities (if there are any)
         if (ee != null && ee.getEntity() != null)

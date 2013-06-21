@@ -66,7 +66,8 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
         Assert.assertEquals(Movie.class, m2.getEntityClazz());
         Assert.assertEquals(Role.class, m2.getRelation("actors").getMapKeyJoinClass());
         Assert.assertEquals(Actor.class, m2.getRelation("actors").getTargetEntity());
-        Assert.assertNull(m2.getRelation("actors").getJoinColumnName());
+        Assert.assertNotNull(m2.getRelation("actors").getJoinColumnName());
+        Assert.assertEquals(m2.getRelation("actors").getJoinColumnName(),"actors");
 
         EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(Role.class);
         Assert.assertNotNull(m3);

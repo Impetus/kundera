@@ -81,8 +81,8 @@ public class UserInfoTest
         // Find
         UserInfo result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, result.getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, result.getTimeLine().get(0).getKey().getTimeLineId());
         Assert.assertEquals("Vivek", result.getFirstName());
         Assert.assertEquals(31, result.getAge());
 
@@ -97,8 +97,8 @@ public class UserInfoTest
         result = null;
         result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, result.getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, result.getTimeLine().get(0).getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getFirstName());
         Assert.assertEquals(23, result.getAge());
 
@@ -145,8 +145,8 @@ public class UserInfoTest
         Assert.assertEquals("Vivek", results.get(0).getFirstName());
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, results.get(0).getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().get(0).getKey().getTimeLineId());
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
@@ -157,8 +157,8 @@ public class UserInfoTest
         Assert.assertEquals("Vivek", results.get(0).getFirstName());
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, results.get(0).getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().get(0).getKey().getTimeLineId());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
@@ -169,8 +169,8 @@ public class UserInfoTest
         Assert.assertEquals("Vivek", results.get(0).getFirstName());
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, results.get(0).getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, results.get(0).getTimeLine().get(0).getKey().getTimeLineId());
 
         final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.firstName from UserInfo u where u.userInfoId = :id";
         // Query with composite key clause.
@@ -234,8 +234,8 @@ public class UserInfoTest
 
         UserInfo result = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNotNull(result);
-        Assert.assertEquals(currentDate, result.getTimeLine().getTweetDate());
-        Assert.assertEquals(timeLineId, result.getTimeLine().getKey().getTimeLineId());
+        Assert.assertEquals(currentDate, result.getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(timeLineId, result.getTimeLine().get(0).getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getFirstName());
         Assert.assertEquals(31, result.getAge());
         em.close();

@@ -231,12 +231,15 @@ public class ThriftClientFactory extends GenericClientFactory
     Cassandra.Client getConnection(ConnectionPool pool)
     {
         boolean success = false;
+        
+        Cassandra.Client connection = null;
         while (!success)
         {
             try
             {
                 success = true;
-                return pool.getConnection();
+                connection = pool.getConnection();
+                return connection;
             }
             catch (TException te)
             {
@@ -246,7 +249,8 @@ public class ThriftClientFactory extends GenericClientFactory
                 pool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
             }
         }
-        throw new KunderaException("All hosts are down. please check servers manully.");
+        
+      throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     void releaseConnection(ConnectionPool pool, Cassandra.Client conn)

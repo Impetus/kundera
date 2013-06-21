@@ -16,10 +16,17 @@
 package com.impetus.kundera.metadata.model;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
+
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class Relation.
@@ -69,6 +76,7 @@ public final class Relation
      */
     private boolean isJoinedByPrimaryKey;
 
+    private Field biDirectionalField; 
     /**
      * 
      * The Enum ForeignKey.
@@ -228,7 +236,19 @@ public final class Relation
      */
     public String getJoinColumnName()
     {
-        return joinColumnName;
+
+        if(joinColumnName == null && isJoinedByPrimaryKey)
+        {
+            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity);
+            joinColumnName  = ((AbstractAttribute)joinClassMetadata.getIdAttribute()).getJPAColumnName();
+        }
+        
+        if(joinTableMetadata != null)
+        {
+            joinColumnName = joinTableMetadata.getJoinColumns() != null? joinTableMetadata.getJoinColumns().iterator().next():null;
+        }
+        
+        return joinColumnName !=null? joinColumnName:property.getName();
     }
 
     /**
@@ -323,5 +343,44 @@ public final class Relation
     public boolean isCollection()
     {
         return type.equals(Relation.ForeignKey.ONE_TO_MANY) || type.equals(Relation.ForeignKey.MANY_TO_MANY);
+    }
+
+
+    public boolean isBiDirectional()
+    {
+        return biDirectionalField != null;       
+    }
+    
+    public Field getBiDirectionalField()
+    {
+        return biDirectionalField;
+    }
+    
+    public void setBiDirectionalField(Class referencedClass)
+    {
+        Field[] fields = this.getTargetEntity().getDeclaredFields();
+        Class<?> clazzz = null;
+        for (Field field : fields)
+        {
+            clazzz = field.getType();
+            if (PropertyAccessorHelper.isCollection(clazzz))
+            {
+                ParameterizedType type = (ParameterizedType) field.getGenericType();
+                Type[] types = type.getActualTypeArguments();
+                clazzz = (Class<?>) types[0];
+            }
+            else if (Map.class.isAssignableFrom(clazzz))
+            {
+                ParameterizedType type = (ParameterizedType) field.getGenericType();
+                Type[] types = type.getActualTypeArguments();
+                clazzz = (Class<?>) types[1];
+            }
+            if (clazzz.equals(referencedClass))
+            {
+                biDirectionalField = field;
+                break;
+            }
+        }
+ 
     }
 }

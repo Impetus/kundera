@@ -16,8 +16,6 @@
 package com.impetus.kundera.persistence;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -98,12 +96,12 @@ public final class AssociationBuilder
 
     }
 
-    /**
+/*    *//**
      * @param entity
      * @param pd
      * @param relation
      * @param relationValue
-     */
+     *//*
     void populateRelationFromValue(Object entity, PersistenceDelegator pd, Relation relation, Object relationValue,
             EntityMetadata childMetadata)
     {
@@ -117,8 +115,8 @@ public final class AssociationBuilder
             PropertyAccessorHelper.set(entity, relation.getProperty(), child);
 
             // If child has any bidirectional relationship, process them here
-            Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
-            boolean isBidirectionalRelation = (biDirectionalField != null);
+            Field biDirectionalField = relation.getBiDirectionalField();
+            boolean isBidirectionalRelation = relation.isBiDirectional();
 
             if (isBidirectionalRelation)
             {
@@ -139,14 +137,14 @@ public final class AssociationBuilder
             }
         }
     }
-
-    /**
+*/
+  /*  *//**
      * @param entity
      * @param pd
      * @param entityId
      * @param relation
      * @param relationName
-     */
+     *//*
     void populateRelationViaQuery(Object entity, PersistenceDelegator pd, Object entityId, Relation relation,
             String relationName, EntityMetadata childMetadata)
     {
@@ -164,7 +162,7 @@ public final class AssociationBuilder
         }
         else
         {
-            associatedObjects = getAssociatedEntitiesFromIndex(entity, entityId, childClass, childClient);
+            associatedObjects = getAssociatedEntitiesFromIndex(entity.getClass(), entityId, childClass, childClient);
         }
 
         List associatedEntities = new ArrayList();
@@ -185,10 +183,10 @@ public final class AssociationBuilder
         }
 
         // If child has any bidirectional relationship, process them here
-        Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
+        Field biDirectionalField = relation.getBiDirectionalField();
 
         boolean traversalRequired = true;
-        boolean isBidirectionalRelation = (biDirectionalField != null);
+        boolean isBidirectionalRelation = relation.isBiDirectional();
 
         if (isBidirectionalRelation && associatedEntities != null)
         {
@@ -213,7 +211,7 @@ public final class AssociationBuilder
                 // reverseRelation.getProperty(), entity);
             }
 
-            traversalRequired = (reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) /*
+            traversalRequired = (reverseRelation.getType().equals(ForeignKey.ONE_TO_ONE) 
                                                                                           * &&
                                                                                           * !
                                                                                           * StringUtils
@@ -226,8 +224,8 @@ public final class AssociationBuilder
                                                                                           * (
                                                                                           * )
                                                                                           * )
-                                                                                          */)
-                    || (reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE) /*
+                                                                                          )
+                    || (reverseRelation.getType().equals(ForeignKey.MANY_TO_ONE) 
                                                                                   * &&
                                                                                   * !
                                                                                   * StringUtils
@@ -240,7 +238,7 @@ public final class AssociationBuilder
                                                                                   * (
                                                                                   * )
                                                                                   * )
-                                                                                  */);
+                                                                                  );
 
         }
 
@@ -282,7 +280,7 @@ public final class AssociationBuilder
         }
 
     }
-
+*/
     /**
      * Populates a relationship of type {@link Collection} (i.e. those of type
      * {@link Set} or {@link List})
@@ -329,8 +327,8 @@ public final class AssociationBuilder
             Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
 
             // If child has any bidirectional relationship, process them here
-            Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
-            boolean isBidirectionalRelation = (biDirectionalField != null);
+            Field biDirectionalField = relation.getBiDirectionalField();
+            boolean isBidirectionalRelation = relation.isBiDirectional();
 
             if (isBidirectionalRelation && obj != null)
             {
@@ -460,17 +458,17 @@ public final class AssociationBuilder
      *      TODO: Which secondary index to use should be transparent. All we
      *      should bother about is indexer.index(), indexer.search() etc.
      */
-    private List getAssociatedEntitiesFromIndex(Object entity, Object entityId, Class<?> childClass, Client childClient)
+    List getAssociatedEntitiesFromIndex(Class owningClazz, Object entityId, Class<?> childClass, Client childClient)
     {
 
         List associatedEntities;
         IndexManager indexManager = childClient.getIndexManager();
 
-        Map<String, Object> results = indexManager != null ? indexManager.search(entity.getClass(), childClass,
+        Map<String, Object> results = indexManager != null ? indexManager.search(owningClazz, childClass,
                 entityId) : new HashMap<String, Object>();
         Set rsSet = results != null ? new HashSet(results.values()) : new HashSet();
 
-        if (childClass.equals(entity.getClass()))
+        if (childClass.equals(owningClazz))
         {
             associatedEntities = (List<Object>) childClient.findAll(childClass, null, rsSet.toArray(new Object[] {}));
         }
@@ -481,14 +479,14 @@ public final class AssociationBuilder
         return associatedEntities;
     }
 
-    /**
+/*    *//**
      * Returns associated bi-directional field.
      * 
      * @param originalClazz
      *            Original class
      * @param referencedClass
      *            Referenced class.
-     */
+     *//*
     public Field getBiDirectionalField(Class originalClazz, Class referencedClass)
     {
         Field[] fields = referencedClass.getDeclaredFields();
@@ -517,8 +515,8 @@ public final class AssociationBuilder
         }
         return biDirectionalField;
     }
-
-    /**
+*/
+   /* *//**
      * Sets associated entities to <code>entity</code>
      * 
      * @param entity
@@ -526,7 +524,7 @@ public final class AssociationBuilder
      * @param associatedEntities
      * @return
      * @throws PropertyAccessException
-     */
+     *//*
     private Set<?> setAssociatedEntities(Object entity, Field f, List<?> associatedEntities)
             throws PropertyAccessException
     {
@@ -542,5 +540,5 @@ public final class AssociationBuilder
         }
         return chids;
     }
-
+*/
 }

@@ -31,6 +31,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.PersistenceUtil;
 import javax.persistence.spi.LoadState;
 
+import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.collection.spi.PersistentCollection;
 
 //import org.hibernate.collection.spi.PersistentCollection;
@@ -153,6 +154,17 @@ public class PersistenceUtilHelper
         try
         {
             return o instanceof org.hibernate.proxy.HibernateProxy;
+        } catch ( Exception e ){
+           return false;
+        } catch ( NoClassDefFoundError e ){
+            return false;
+        }
+    }
+
+    public static boolean instanceOfHibernatePersistentBag(Object o){
+        try
+        {
+            return o instanceof PersistentBag;
         } catch ( Exception e ){
            return false;
         } catch ( NoClassDefFoundError e ){

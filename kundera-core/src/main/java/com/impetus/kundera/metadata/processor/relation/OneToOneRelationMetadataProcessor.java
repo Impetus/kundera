@@ -24,9 +24,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
@@ -75,7 +77,10 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
 
         if (isJoinedByPK)
         {
+            
             relation.setJoinedByPrimaryKey(true);
+            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity.getClass());
+            relation.setJoinColumnName(joinClassMetadata != null? ((AbstractAttribute)joinClassMetadata.getIdAttribute()).getJPAColumnName(): null);
         }
         else if (isJoinedByFK)
         {
@@ -84,14 +89,15 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         }
         else if (isJoinedByTable)
         {
-
-            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-
+            throw new UnsupportedOperationException("@JoinTable not supported for one to one association");
+/*            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
-        }
+*/        }
 
+        relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
+        
     }
 
     @Override

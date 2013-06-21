@@ -91,6 +91,10 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
+//    private String persistenceUnits = "redis,rdbms,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
+//    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
+//            "oracle_kvstore" , "addHbase"};
+
     private String persistenceUnits = "rdbms,redis,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
@@ -362,19 +366,22 @@ public abstract class AssociationBase
     private void truncateRedis()
 
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata("redis");
-        Properties props = puMetadata.getProperties();
-        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
-                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
-                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
-        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
-                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-        Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
-        connection.auth(password);
-        connection.connect();
-        connection.flushDB();
+        if (RedisPropertyReader.rsmd != null)
+        {
+            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata("redis");
+            Properties props = puMetadata.getProperties();
+            String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                    : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+            String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+            String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+            Jedis connection = new Jedis(contactNode, Integer.valueOf(defaultPort));
+            connection.auth(password);
+            connection.connect();
+            connection.flushDB();
+        }
     }
 
     /**

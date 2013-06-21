@@ -231,6 +231,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
                                 + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id
                                 + "'";
+//                        if(log.isInfoEnabled())
+//                        {
+                         log.warn("Executing query {}",updateSql);
+//                        }
                         s.createSQLQuery(updateSql).executeUpdate();
                     }
                 }
