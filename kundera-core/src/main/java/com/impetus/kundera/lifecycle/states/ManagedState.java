@@ -140,7 +140,7 @@ public class ManagedState extends NodeState
             {
                 // This entity has associated entities, find them recursively.
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
-                        nodeStateContext.getPersistenceDelegator());
+                        nodeStateContext.getPersistenceDelegator(),false);
             }
         }
 

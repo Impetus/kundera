@@ -319,7 +319,7 @@ public final class AssociationBuilder
             for (Object associatedEntity : associatedEntities)
             {
                 associatedEntity = childClient.getReader().recursivelyFindEntities(associatedEntity, null,
-                        childMetadata, pd);
+                        childMetadata, pd,false);
             }
         }
 

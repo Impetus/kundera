@@ -18,6 +18,8 @@ package com.impetus.kundera.proxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import javassist.util.proxy.ProxyFactory;
+
 import com.impetus.kundera.proxy.collection.ProxyCollection;
 
 /**
@@ -66,7 +68,7 @@ public class ProxyHelper {
 	
 	public static boolean isProxy(Object o)
 	{
-		return isKunderaProxy(o) || isHibernateProxy(o);
+		return isKunderaProxy(o) || isHibernateProxy(o) || ProxyFactory.isProxyClass(o.getClass());
 	}
 	
 	public static boolean isProxyCollection(Object o)
@@ -76,6 +78,6 @@ public class ProxyHelper {
 	
 	public static boolean isProxyOrCollection(Object o)
 	{
-		return isProxy(o) || isProxyCollection(o); 
+		return isProxy(o) || isProxyCollection(o) ; 
 	}
 }

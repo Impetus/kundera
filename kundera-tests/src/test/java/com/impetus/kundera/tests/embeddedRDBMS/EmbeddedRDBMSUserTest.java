@@ -299,6 +299,7 @@ public class EmbeddedRDBMSUserTest
         {
             cli.update("DELETE FROM KUNDERATESTS.user");
             cli.update("DROP TABLE KUNDERATESTS.user");
+            cli.shutdown();
         }
         catch (Exception e)
         {

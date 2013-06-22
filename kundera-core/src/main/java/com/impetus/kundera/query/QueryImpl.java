@@ -216,7 +216,7 @@ public abstract class QueryImpl implements Query
                 EnhanceEntity ee = (EnhanceEntity) e;
 
                 result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                        persistenceDelegeator));
+                        persistenceDelegeator,false));
             }
         }
 

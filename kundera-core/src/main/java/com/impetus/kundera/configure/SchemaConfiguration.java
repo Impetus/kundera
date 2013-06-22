@@ -31,6 +31,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
@@ -105,7 +106,10 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
+            
+            PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
 
+            if(puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
             // Iterate each entity metadata.
             for (EntityMetadata entityMetadata : entityMetadataMap.values())
             {
@@ -136,6 +140,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 }
 
                 List<Relation> relations = entityMetadata.getRelations();
+                
                 parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
 
                 if (!found)

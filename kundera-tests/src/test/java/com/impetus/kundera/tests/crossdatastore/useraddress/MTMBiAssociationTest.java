@@ -416,22 +416,26 @@ public class MTMBiAssociationTest extends TwinAssociation
         try
         {
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.PERSONNEL TO PUBLIC"); 
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
             cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.PERSONNEL TO PUBLIC"); 
         }
         try
         {
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID VARCHAR(150) , ADDRESS_ID VARCHAR(150))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.PERSONNEL_ADDRESS TO PUBLIC"); 
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
             cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID VARCHAR(150) , ADDRESS_ID VARCHAR(150))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.PERSONNEL_ADDRESS TO PUBLIC"); 
         }
     }
 
@@ -448,12 +452,15 @@ public class MTMBiAssociationTest extends TwinAssociation
         try
         {
             cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.ADDRESS TO PUBLIC"); 
+
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
             cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
             cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("GRANT ALL PRIVILEGES ON KUNDERATESTS.ADDRESS TO PUBLIC"); 
         }
 
     }

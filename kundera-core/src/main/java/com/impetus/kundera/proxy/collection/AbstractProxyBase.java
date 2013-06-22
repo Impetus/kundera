@@ -83,7 +83,7 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 
 	@Override
 	public Collection getDataCollection() {
-		return dataCollection;
+		return dataCollection != null && !dataCollection.isEmpty()?dataCollection:null;
 	}
 
 	/**
@@ -91,14 +91,14 @@ public abstract class AbstractProxyBase implements ProxyCollection {
 	 */
     protected void eagerlyLoadDataCollection()
     {
-        if (dataCollection == null)
+        if (getDataCollection() == null)
         {
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(getOwner().getClass());
-            Object entityId = PropertyAccessorHelper.getId(getOwner(), m);
+//            Object entityId = PropertyAccessorHelper.getId(getOwner(), m);
             
-//            getPersistenceDelegator().getClient(m).getReader().recursivelyFindEntities(getOwner(), relationsMap, m, pd)
-            new AssociationBuilder().setConcreteRelationObject(getOwner(), getRelationsMap(), m,
-                    getPersistenceDelegator(), entityId, getRelation());
+            getPersistenceDelegator().getClient(m).getReader().recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(),true);
+//            new AssociationBuilder().setConcreteRelationObject(getOwner(), getRelationsMap(), m,
+//                    getPersistenceDelegator(), entityId, getRelation());
 
             dataCollection = (Collection) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
             PropertyAccessorHelper.set(getOwner(), getRelation().getProperty(), dataCollection);

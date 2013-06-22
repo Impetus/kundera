@@ -159,7 +159,7 @@ public class KunderaPersistenceProviderUtilTest
             // Loaded because LAZY initialization currently not implemented in
             // Kundera
             LoadState loadStateWithoutReference = util.isLoadedWithoutReference(album2, "albumName");
-            Assert.assertEquals(LoadState.LOADED, loadStateWithoutReference);
+            Assert.assertEquals(LoadState.NOT_LOADED, loadStateWithoutReference);
 
             // Load state after field referred
             album2.getAlbumName();
@@ -199,12 +199,12 @@ public class KunderaPersistenceProviderUtilTest
 
             // Load state before field referred
             LoadState loadState = util.isLoaded(album2);
-            Assert.assertEquals(LoadState.UNKNOWN, loadState);
+            Assert.assertEquals(LoadState.NOT_LOADED, loadState);
 
             // Load state after field referred
             album2.getAlbumName();
             loadState = util.isLoaded(album2);
-            Assert.assertEquals(LoadState.UNKNOWN, loadState);
+            Assert.assertEquals(LoadState.LOADED, loadState);
         }
         catch (Exception e)
         {

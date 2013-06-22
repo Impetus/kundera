@@ -80,7 +80,7 @@ public class RDBMSCli
         // db writes out to files and performs clean shuts down
         // otherwise there will be an unclean shutdown
         // when program ends
-        st.execute("SHUTDOWN");
+        st.execute("clean SHUTDOWN");
         closeConnection();
     }
 
@@ -172,6 +172,7 @@ public class RDBMSCli
     {
         String sql = "CREATE schema " + schemaName + " AUTHORIZATION DBA";
         update(sql);
+//        update("set " + schemaName);
     }
 
     public void dropSchema(final String schemaName) throws SQLException
