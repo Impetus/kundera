@@ -265,8 +265,15 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             if(owner != null)
             {
             	EntityMetadata m = KunderaMetadataManager.getEntityMetadata(owner.getClass());
-            	Relation r = m.getRelation(fieldName);            
-            	PropertyAccessorHelper.set(owner, r.getProperty(), target);            	
+            	Relation r = m.getRelation(fieldName);     
+            	PropertyAccessorHelper.set(owner, r.getProperty(), target);
+                
+                if(r.getBiDirectionalField() != null && method.getReturnType().equals(m.getEntityClazz()))
+                {
+                    PropertyAccessorHelper.set(target, r.getBiDirectionalField(), owner);
+                }
+            
+                proxy = target;
             }
             
             try

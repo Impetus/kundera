@@ -53,6 +53,16 @@ public interface LazyInitializerFactory
     KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, final Method getIdentifierMethod,
             final Method setIdentifierMethod, final Object id, final PersistenceDelegator pd);
     
-    KunderaProxy getProxy();
+    /**
+     * Returns proxy instance for a given entity name, null if none exists
+     * @param entityName
+     * @return
+     */
+    KunderaProxy getProxy(String entityName);
+    
+    /**
+     * Clears all proxy objects stored in this factory
+     */
+    void clearProxies();
 
 }

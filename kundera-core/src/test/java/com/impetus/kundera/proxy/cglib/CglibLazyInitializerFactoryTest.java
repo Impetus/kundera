@@ -35,14 +35,13 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
 /**
  * @author amresh.singh
  */
-public class CglibLazyInitializerFactoryTest {
+public class CglibLazyInitializerFactoryTest
+{
 
-	
-	
-	private static EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
+
     private static EntityManager em;
-	
-	
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -58,33 +57,36 @@ public class CglibLazyInitializerFactoryTest {
         emf.close();
     }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-		
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
 
-	/**
-	 * Test method for {@link com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory#getProxy(java.lang.String, java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method, java.lang.Object, com.impetus.kundera.persistence.PersistenceDelegator)}.
-	 */
-	@Test
-	public void testGetProxy() {
-		
-		LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();		
-		KunderaProxy proxy = factory.getProxy("personnel", PersonnelDTO.class, null, null, "1", null);		
-		LazyInitializer li = proxy.getKunderaLazyInitializer();		
-		Assert.assertEquals(CglibLazyInitializer.class, li.getClass());
-		Assert.assertTrue(li.isUninitialized());
-		Assert.assertFalse(li.isUnwrap());
-		Assert.assertEquals("personnel", li.getEntityName());
-		Assert.assertEquals("1", li.getIdentifier());
-		Assert.assertNull(li.getOwner());
-		Assert.assertNull(li.getPersistenceDelegator());
-		Assert.assertEquals(PersonnelDTO.class, li.getPersistentClass());
-		
-	}
-	
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory#getProxy(java.lang.String, java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method, java.lang.Object, com.impetus.kundera.persistence.PersistenceDelegator)}
+     * .
+     */
+    @Test
+    public void testGetProxy()
+    {
+
+        LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        KunderaProxy proxy = factory.getProxy("personnel", PersonnelDTO.class, null, null, "1", null);
+        LazyInitializer li = proxy.getKunderaLazyInitializer();
+        Assert.assertEquals(CglibLazyInitializer.class, li.getClass());
+        Assert.assertTrue(li.isUninitialized());
+        Assert.assertFalse(li.isUnwrap());
+        Assert.assertEquals("personnel", li.getEntityName());
+        Assert.assertEquals("1", li.getIdentifier());
+        Assert.assertNull(li.getOwner());
+        Assert.assertNull(li.getPersistenceDelegator());
+        Assert.assertEquals(PersonnelDTO.class, li.getPersistentClass());
+
+    }
 
 }

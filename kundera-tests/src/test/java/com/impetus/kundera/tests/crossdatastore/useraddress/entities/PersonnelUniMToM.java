@@ -42,7 +42,7 @@ public class PersonnelUniMToM
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "PERSONNEL_ADDRESS", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
     private Set<HabitatUniMToM> addresses;
 

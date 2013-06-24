@@ -31,233 +31,292 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
-public class RemovedStateTest {
+public class RemovedStateTest
+{
 
-	PersistenceCache pc;
-	RemovedState state;
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		pc = new PersistenceCache();
-		state = new RemovedState();
-	}
+    PersistenceCache pc;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-		pc = null;
-	}
+    RemovedState state;
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#initialize(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testInitialize() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
-		state.initialize(storeNode);
-		Assert.assertNotNull(pc);
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception
+    {
+        pc = new PersistenceCache();
+        state = new RemovedState();
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handlePersist(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandlePersist() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);	
-		state.handlePersist(storeNode);
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        pc = null;
+    }
 
-		Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());			
-		}
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#initialize(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testInitialize()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.initialize(storeNode);
+        Assert.assertNotNull(pc);
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRemove(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleRemove() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REMOVE);	
-		state.handleRemove(storeNode);
-		
-		Assert.assertEquals(RemovedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());			
-		}
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handlePersist(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandlePersist()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handlePersist(storeNode);
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRefresh(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleRefresh() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REFRESH);	
-		try {
-			state.handleRefresh(storeNode);
-			Assert.fail("Refresh operation in Removed state should have thrown exception");
-		} catch (Exception e) {
-			Assert.assertEquals(IllegalArgumentException.class, e.getClass());
-		}
-	}
+        Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleMerge(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleMerge() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);	
-		try {
-			state.handleMerge(storeNode);
-			Assert.fail("Merge operation in Removed state should have thrown exception");
-		} catch (Exception e) {
-			Assert.assertEquals(IllegalArgumentException.class, e.getClass());
-		}
-	}
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
+        }
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleDetach(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleDetach() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.DETACH);	
-		state.handleDetach(storeNode);
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRemove(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleRemove()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REMOVE);
+        state.handleRemove(storeNode);
 
-		Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(DetachedState.class, childNode.getCurrentNodeState().getClass());			
-		}
-	}
+        Assert.assertEquals(RemovedState.class, storeNode.getCurrentNodeState().getClass());
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleClose(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleClose() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleClose(storeNode);
-	}
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
+        }
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleLock(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleLock() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleLock(storeNode);
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRefresh(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleRefresh()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REFRESH);
+        try
+        {
+            state.handleRefresh(storeNode);
+            Assert.fail("Refresh operation in Removed state should have thrown exception");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(IllegalArgumentException.class, e.getClass());
+        }
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleCommit(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleCommit() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);	
-		state.handleCommit(storeNode);
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleMerge(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleMerge()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);
+        try
+        {
+            state.handleMerge(storeNode);
+            Assert.fail("Merge operation in Removed state should have thrown exception");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(IllegalArgumentException.class, e.getClass());
+        }
+    }
 
-		Assert.assertEquals(TransientState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());			
-		}
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleDetach(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleDetach()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.DETACH);
+        state.handleDetach(storeNode);
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRollback(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleRollback() {
-		//Extended
-		pc.setPersistenceContextType(PersistenceContextType.EXTENDED);
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);	
-		state.handleRollback(storeNode);
+        Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
 
-		Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
-		}
-		
-		//Transactional
-		pc.setPersistenceContextType(PersistenceContextType.TRANSACTION);
-		storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);	
-		state.handleRollback(storeNode);
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(DetachedState.class, childNode.getCurrentNodeState().getClass());
+        }
+    }
 
-		Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
-		}
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleClose(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleClose()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleClose(storeNode);
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleFind(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleFind() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleFind(storeNode);
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleLock(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleLock()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleLock(storeNode);
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleGetReference(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleGetReference() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleGetReference(storeNode);
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleCommit(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleCommit()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleCommit(storeNode);
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleContains(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleContains() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleContains(storeNode);
-	}
+        Assert.assertEquals(TransientState.class, storeNode.getCurrentNodeState().getClass());
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleClear(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleClear() {
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.handleClear(storeNode);
-	}
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
+        }
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.RemovedState#handleFlush(com.impetus.kundera.lifecycle.NodeStateContext)}.
-	 */
-	@Test
-	public void testHandleFlush() {
-		try {
-			Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);	
-			state.handleFlush(storeNode);
-			Assert.fail("Exception should be thrown because client is not available");
-		} catch (Exception e) {
-			Assert.assertNotNull(e);
-		}
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleRollback(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleRollback()
+    {
+        // Extended
+        pc.setPersistenceContextType(PersistenceContextType.EXTENDED);
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleRollback(storeNode);
+
+        Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
+        }
+
+        // Transactional
+        pc.setPersistenceContextType(PersistenceContextType.TRANSACTION);
+        storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleRollback(storeNode);
+
+        Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
+        }
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleFind(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleFind()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleFind(storeNode);
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleGetReference(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleGetReference()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleGetReference(storeNode);
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleContains(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleContains()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleContains(storeNode);
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleClear(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleClear()
+    {
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.handleClear(storeNode);
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.RemovedState#handleFlush(com.impetus.kundera.lifecycle.NodeStateContext)}
+     * .
+     */
+    @Test
+    public void testHandleFlush()
+    {
+        try
+        {
+            Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+            state.handleFlush(storeNode);
+            Assert.fail("Exception should be thrown because client is not available");
+        }
+        catch (Exception e)
+        {
+            Assert.assertNotNull(e);
+        }
+    }
 
 }

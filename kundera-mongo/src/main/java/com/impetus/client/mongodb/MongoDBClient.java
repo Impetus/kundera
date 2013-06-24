@@ -133,6 +133,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             for (Object childId : values)
             {
                 DBObject dbObj = new BasicDBObject();
+                dbObj.put("_id", joinColumnValue.toString() + childId);
                 dbObj.put(joinColumnName, MongoDBUtils.populateValue(joinColumnValue, joinColumnValue.getClass()));
                 dbObj.put(invJoinColumnName, MongoDBUtils.populateValue(childId, childId.getClass()));
                 documents.add(dbObj);

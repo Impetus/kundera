@@ -621,7 +621,12 @@ public final class AssociationBuilder
                 EntityMetadata parentEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
                         .getTargetEntity());
                 Object owner = null;
-                KunderaProxy kp = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().getProxy();
+                
+                String entityName = m.getEntityClazz().getName() + "_" + entityId + "#"
+                + relation.getProperty().getName();
+                
+                KunderaProxy kp = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().getProxy(entityName);
+                
                 if (kp != null)
                 {
                     owner = kp.getKunderaLazyInitializer().getOwner();
@@ -638,8 +643,7 @@ public final class AssociationBuilder
                             log.debug("Creating proxy for >> " + parentEntityMetadata.getEntityClazz().getName() + "#"
                                     + relation.getProperty().getName() + "_" + relationValue);
                         }
-                        String entityName = m.getEntityClazz().getName() + "_" + entityId + "#"
-                                + relation.getProperty().getName();
+                        
 
                         Object proxy = getLazyEntity(entityName, relation.getTargetEntity(),
                                 parentEntityMetadata.getReadIdentifierMethod(),
