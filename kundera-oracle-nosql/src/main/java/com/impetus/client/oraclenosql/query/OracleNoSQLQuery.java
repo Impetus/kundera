@@ -17,6 +17,7 @@ package com.impetus.client.oraclenosql.query;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -24,8 +25,6 @@ import java.util.Set;
 import javax.persistence.Query;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ import com.impetus.kundera.query.QueryImpl;
  * 
  * @author amresh.singh
  */
-public class OracleNoSQLQuery extends QueryImpl implements Query
+public class OracleNoSQLQuery extends QueryImpl
 {
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
@@ -174,27 +173,17 @@ public class OracleNoSQLQuery extends QueryImpl implements Query
         return interpreter;
     }
 
-    /*private void addToResults(Set results, Set resultsToAdd, String operation)
+    @Override
+    public void close()
     {
-        if (resultsToAdd == null || resultsToAdd.isEmpty())
-        {
-            return;
-        }
+        // TODO Auto-generated method stub
+        
+    }
 
-        if (operation == null)
-        {
-            results.addAll(resultsToAdd);
-        }
-        else if (operation.equalsIgnoreCase("OR"))
-        {
-            results.addAll(resultsToAdd);
-        }
-        else if (operation.equalsIgnoreCase("AND"))
-        {
-            results.retainAll(resultsToAdd);
-        }
-
-        resultsToAdd.clear();
-    }*/
-
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

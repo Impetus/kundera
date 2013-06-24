@@ -41,11 +41,11 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 public class HBaseReader implements Reader
 {
 
-    private ResultScanner scanner = null;
+    private ThreadLocal<ResultScanner> scanner = null;
 
-    Iterator<Result> resultsIter;
+    private ThreadLocal<Iterator<Result>> resultsIter;
 
-    private int fetchSize;
+    private ThreadLocal<Integer> fetchSize;
 
     /*
      * (non-Javadoc)
@@ -76,11 +76,12 @@ public class HBaseReader implements Reader
                 scan = new Scan();
             }
             setScanCriteria(filter, columnFamily, null, scan, columns);
-
-            scanner = hTable.getScanner(scan);
-
+             scanner = new ThreadLocal<ResultScanner>();
+             scanner.set(hTable.getScanner(scan)) ;
+             resultsIter = new ThreadLocal<Iterator<Result>>(); 
+             resultsIter.set(scanner.get().iterator());
         }
-        return scanResults(columnFamily, results, scanner);
+        return scanResults(columnFamily, results);
     }
 
     /*
@@ -135,9 +136,15 @@ public class HBaseReader implements Reader
                 s = new Scan();
             }
             setScanCriteria(filter, columnFamily, qualifier, s, columns);
-            scanner = hTable.getScanner(s);
+//            scanner = hTable.getScanner(s);
+//            resultsIter = scanner.iterator();
+            scanner = new ThreadLocal<ResultScanner>();
+            scanner.set(hTable.getScanner(s)) ;
+            resultsIter = new ThreadLocal<Iterator<Result>>(); 
+            resultsIter.set(scanner.get().iterator());
+
         }
-        return scanResults(null, results, scanner);
+        return scanResults(null, results);
     }
 
     /**
@@ -183,29 +190,35 @@ public class HBaseReader implements Reader
      * @return collection of scanned results.
      * @throws IOException
      */
-    private List<HBaseData> scanResults(final String columnFamily, List<HBaseData> results, final ResultScanner scanner)
+    private List<HBaseData> scanResults(final String columnFamily, List<HBaseData> results)
             throws IOException
     {
         HBaseData data = null;
 
-        int fetch = fetchSize > 0 ? fetchSize : 1;
+//        int fetch = fetchSize !=null ? fetchSize : 0;
 
-        for (Result result : scanner.next(fetch))
+        if (fetchSize == null)
         {
-            List<KeyValue> values = result.list();
-            for (KeyValue value : values)
+            for (Result result : scanner.get())
             {
-                data = new HBaseData(columnFamily != null ? columnFamily : new String(value.getFamily()),
-                        value.getRow());
-                break;
+                List<KeyValue> values = result.list();
+                for (KeyValue value : values)
+                {
+                    data = new HBaseData(columnFamily != null ? columnFamily : new String(value.getFamily()),
+                            value.getRow());
+                    break;
+                }
+                data.setColumns(values);
+                if (results == null)
+                {
+                    results = new ArrayList<HBaseData>();
+                }
+                results.add(data);
             }
-            data.setColumns(values);
-            if (results == null)
-            {
-                results = new ArrayList<HBaseData>();
-            }
-            results.add(data);
-        }
+            
+            scanner=null;
+            resultsIter=null;
+        } 
         return results;
     }
 
@@ -220,12 +233,18 @@ public class HBaseReader implements Reader
             Scan s = new Scan();
             s.setFilter(filter);
             s.addColumn(Bytes.toBytes(columnFamilyName), Bytes.toBytes(columnName));
-            scanner = hTable.getScanner(s);
+            scanner = new ThreadLocal<ResultScanner>();
+            scanner.set(hTable.getScanner(s)) ;
+            resultsIter = new ThreadLocal<Iterator<Result>>(); 
+            resultsIter.set(scanner.get().iterator());
+
         }
 
-        int fetch = fetchSize > 0 ? fetchSize : 1;
+//        int fetch = fetchSize !=null ? fetchSize : 0;
 
-        for (Result result : scanner.next(fetch))
+        if (fetchSize == null)
+        {
+        for (Result result : scanner.get())
         {
 
             for (KeyValue keyValue : result.list())
@@ -233,7 +252,7 @@ public class HBaseReader implements Reader
                 rowKeys.add(HBaseUtils.fromBytes(keyValue.getRow(), rowKeyClazz));
             }
         }
-
+        }
         if (rowKeys != null && !rowKeys.isEmpty())
         {
             return rowKeys.toArray(new Object[0]);
@@ -286,15 +305,15 @@ public class HBaseReader implements Reader
 
     public void setFetchSize(final int fetchSize)
     {
-        this.fetchSize = fetchSize;
+        this.fetchSize = new ThreadLocal<Integer>();
+      this.fetchSize.set(fetchSize);  
+        
     }
 
-    public HBaseData scroll()
+    public HBaseData next()
     {
         HBaseData data = null;
-        while (resultsIter.hasNext())
-        {
-            Result result = resultsIter.next();
+            Result result = resultsIter.get().next();
             List<KeyValue> values = result.list();
             for (KeyValue value : values)
             {
@@ -302,7 +321,6 @@ public class HBaseReader implements Reader
                 break;
             }
             data.setColumns(values);
-        }
         return data;
     }
 
@@ -311,7 +329,7 @@ public class HBaseReader implements Reader
         List<HBaseData> results = new ArrayList<HBaseData>();
         for (int i = 1; i <= chunkSize; i++)
         {
-            HBaseData data = scroll();
+            HBaseData data = next();
             if (data == null)
             {
                 resultsIter = null;
@@ -321,4 +339,23 @@ public class HBaseReader implements Reader
         }
         return results;
     }
+    
+    public boolean hasNext()
+    {
+        if(scanner != null)
+        {
+            return resultsIter.get().hasNext();
+        }
+        
+        return false;
+    }
+
+    public void reset()
+    {
+        scanner=null;
+        fetchSize=null;
+        resultsIter=null;
+    }
+
+    
 }

@@ -784,4 +784,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             throw new KunderaException(ioex);
         }
     }
+
+    public void reset()
+    {
+        ((HBaseDataHandler)handler).reset();
+    }
+    
+    public Object next(EntityMetadata m)
+    {
+        return ((HBaseDataHandler)handler).next(m);
+    }
+    
+    public boolean hasNext()
+    {
+        return ((HBaseDataHandler)handler).hasNext();
+    }
+
+
 }

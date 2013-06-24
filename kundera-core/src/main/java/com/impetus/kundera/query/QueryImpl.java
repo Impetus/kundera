@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1154,7 +1155,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return columnAsList.toArray(new String[] {});
     }
 
-  /*  public void setFetchSize(int fetchsize)
+    public void setFetchSize(int fetchsize)
     {
         this.fetchSize = fetchsize;
     }
@@ -1164,9 +1165,11 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return this.fetchSize;
     }
 
-    public abstract E next();
+//    public abstract E next();
 
-    public abstract List<E> next(int size);
+//    public abstract List<E> next(int size);
 
-    public abstract void close();*/
+    public abstract void close();
+    
+    public abstract Iterator<E> iterate();
 }

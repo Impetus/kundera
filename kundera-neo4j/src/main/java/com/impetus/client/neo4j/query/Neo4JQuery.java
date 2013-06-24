@@ -16,9 +16,8 @@
 package com.impetus.client.neo4j.query;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import javax.persistence.Query;
 
 import com.impetus.client.neo4j.Neo4JClient;
 import com.impetus.client.neo4j.Neo4JEntityReader;
@@ -38,7 +37,7 @@ import com.impetus.kundera.query.QueryImpl;
  * 
  * @author amresh.singh
  */
-public class Neo4JQuery extends QueryImpl implements Query
+public class Neo4JQuery extends QueryImpl
 {
     private static final String NATIVE_QUERY_TYPE = "native.query.type";
 
@@ -197,6 +196,20 @@ public class Neo4JQuery extends QueryImpl implements Query
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

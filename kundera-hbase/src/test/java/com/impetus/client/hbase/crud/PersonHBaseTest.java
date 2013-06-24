@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,25 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
 
+        
+        query = "select p.personId from PersonHBase p";
+        com.impetus.kundera.query.Query<PersonHBase> queryObject = (com.impetus.kundera.query.Query<PersonHBase>) em.createQuery(query);
+        queryObject.setFetchSize(1);
+        
+        Iterator<PersonHBase> resultIterator = queryObject.iterate();
+        PersonHBase person =null;
+        int counter = 0;
+        while(resultIterator.hasNext())
+        {
+            counter++;
+            person = resultIterator.next();
+            Assert.assertNotNull(person.getPersonId());
+            Assert.assertNull(person.getPersonName());
+        }
+        
+        Assert.assertEquals(3, counter);
+
+        
         query = "Select p.personId from PersonHBase p where p.personName = vivek";
         // // find by name.
         q = em.createQuery(query);

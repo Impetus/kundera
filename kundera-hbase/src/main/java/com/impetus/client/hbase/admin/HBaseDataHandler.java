@@ -1045,4 +1045,36 @@ public class HBaseDataHandler implements DataHandler
     {
         ((HBaseReader) hbaseReader).setFetchSize(fetchSize);
     }
+
+    public Object next(EntityMetadata m)
+    {
+        Object entity = null;
+        HBaseData result = ((HBaseReader) hbaseReader).next();
+        List<HBaseData> results = new ArrayList<HBaseData>();
+        List output = new ArrayList();
+        results.add(result);
+        try
+        {
+            output = onRead(m.getTableName(), m.getEntityClazz(), m, output, gethTable(m.getTableName()), entity,
+                    m.getRelationNames(), results);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            // TODOOOOO handle it
+        }
+
+        return output != null && !output.isEmpty() ? output.get(0) : output;
+    }
+
+    public boolean hasNext()
+    {
+        return ((HBaseReader) hbaseReader).hasNext();
+    }
+
+    public void reset()
+    {
+        ((HBaseReader) hbaseReader).reset();
+    }
+
 }
