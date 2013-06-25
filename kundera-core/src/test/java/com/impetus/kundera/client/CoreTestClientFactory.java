@@ -48,8 +48,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new CoreTestClient();
-
+        return new CoreTestClient(indexManager, persistenceUnit);
     }
 
     @Override
@@ -69,19 +68,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     {
         return super.getConnectionPoolOrConnection();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.ClientFactory#load(java.lang.String,
-     * java.util.Map)
-     */
-    @Override
-    public void load(String persistenceUnit, Map<String, Object> puProperties)
-    {
-        // TODO Auto-generated method stub
-
-    }
+  
 
     /*
      * (non-Javadoc)

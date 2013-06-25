@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -13,6 +14,12 @@ import com.impetus.kundera.query.LuceneQuery;
 
 public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
 {
+    public CoreTestClient(IndexManager indexManager, String persistenceUnit)
+    {
+        this.indexManager = indexManager;
+        this.persistenceUnit = persistenceUnit;       
+    }
+    
 
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
@@ -99,8 +106,6 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-
-
     }
 
     @Override

@@ -67,9 +67,9 @@ public abstract class PersonAddressTestBase
     {
       insert();
       find();
-      //findPersonByIdColumn();
-      //findPersonByName();
-      //findAddressByIdColumn();
+      findPersonByIdColumn();
+      findPersonByName();
+      findAddressByIdColumn();
       //findAddressByStreet();
       update();
       remove();
