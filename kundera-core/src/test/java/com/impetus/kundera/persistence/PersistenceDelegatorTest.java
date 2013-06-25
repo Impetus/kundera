@@ -30,8 +30,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.cache.ehcache.CoreTestClient;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.configure.CoreEntityAddressUni1To1;
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;

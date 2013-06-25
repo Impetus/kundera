@@ -33,13 +33,13 @@ public class SampleEntity
 {
 
     @Id
-    private Integer key;
-
-    @Column(name = "field", nullable = false)
-    private String field;
+    private Integer key;   
 
     @Column(name = "name")
     private String name;
+    
+    @Column(name = "city", nullable = false)
+    private String city;
 
     public SampleEntity()
     {
@@ -61,23 +61,22 @@ public class SampleEntity
     public void setKey(Integer key)
     {
         this.key = key;
+    }   
+
+    /**
+     * @return the city
+     */
+    public String getCity()
+    {
+        return city;
     }
 
     /**
-     * @return the field
+     * @param city the city to set
      */
-    public String getField()
+    public void setCity(String city)
     {
-        return field;
-    }
-
-    /**
-     * @param field
-     *            the field to set
-     */
-    public void setField(String field)
-    {
-        this.field = field;
+        this.city = city;
     }
 
     /**

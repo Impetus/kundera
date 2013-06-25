@@ -70,7 +70,7 @@
 			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="rdbms" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -86,7 +86,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -102,7 +102,7 @@
 			<property name="kundera.keyspace" value="KunderaMetaDataTest" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -128,7 +128,7 @@
 			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />

@@ -48,7 +48,7 @@ public class ConfiguratorTest
 {
     private final String _persistenceUnit = "kunderatest";
 
-    private final String kundera_client = "com.impetus.kundera.cache.ehcache.CoreTestClientFactory";
+    private final String kundera_client = "com.impetus.kundera.client.CoreTestClientFactory";
 
     private String _keyspace = "kunderatest";
 
