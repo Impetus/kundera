@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.entities.SampleEntity;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
@@ -93,6 +94,85 @@ public class EntityManagerImplTest
             em.close();
         if (emf != null)
             emf.close();
+        
+        dropDatabase();
+    }
+    
+    private void dropDatabase()
+    {
+        DummyDatabase.INSTANCE.dropDatabase();
+    }
+    
+    @Test
+    public void testSingleEntityCRUD_EmNotCleared()
+    {
+        //Persist
+        final SampleEntity entity = new SampleEntity();
+        entity.setKey(1);
+        entity.setName("Amry");
+        entity.setCity("Delhi");      
+        em.persist(entity);        
+        SampleEntity found = em.find(SampleEntity.class, 1);
+        assertSampleEntity(found); 
+        
+        found.setName("Xamry");
+        found.setCity("Noida");
+        em.merge(found);
+        
+        SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
+        assertUpdatedSampleEntity(foundAfterMerge);
+        
+        em.remove(foundAfterMerge);
+        SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
+        Assert.assertNull(foundAfterDeletion);
+    }
+    
+    @Test
+    public void testSingleEntityCRUD_EmCleared()
+    {
+        //Persist
+        final SampleEntity entity = new SampleEntity();
+        entity.setKey(1);
+        entity.setName("Amry");
+        entity.setCity("Delhi");      
+        em.persist(entity);    
+        em.clear();
+        SampleEntity found = em.find(SampleEntity.class, 1);
+        assertSampleEntity(found); 
+        
+        found.setName("Xamry");
+        found.setCity("Noida");
+        em.clear();
+        em.merge(found);
+        
+        SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
+        assertUpdatedSampleEntity(foundAfterMerge);
+        
+        em.clear();        
+        em.remove(foundAfterMerge);
+        SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
+        Assert.assertNull(foundAfterDeletion);
+    }
 
+    /**
+     * @param found
+     */
+    private void assertSampleEntity(SampleEntity found)
+    {
+        Assert.assertNotNull(found);
+        Assert.assertEquals(new Integer(1), found.getKey());
+        Assert.assertEquals("Amry", found.getName());
+        Assert.assertEquals("Delhi", found.getCity());
+    }
+    
+    /**
+     * @param found
+     */
+    private void assertUpdatedSampleEntity(SampleEntity found)
+    {
+        Assert.assertNotNull(found);
+        Assert.assertEquals(new Integer(1), found.getKey());
+        Assert.assertEquals("Xamry", found.getName());
+        Assert.assertEquals("Noida", found.getCity());
     }
 }

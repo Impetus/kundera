@@ -34,99 +34,111 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 /**
  * @author amresh.singh
  */
-public class NodeStateTest {
+public class NodeStateTest
+{
 
-	PersistenceCache pc;
-	
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		pc = new PersistenceCache();
-	}
+    PersistenceCache pc;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception
+    {
+        pc = new PersistenceCache();
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.NodeState#moveNodeToNextState(com.impetus.kundera.lifecycle.NodeStateContext, com.impetus.kundera.lifecycle.states.NodeState)}.
-	 */
-	@Test
-	public void testMoveNodeToNextState() {	
-		NodeState nodeState = new TransientState();
-		NodeStateContext node = new Node("1", PersonnelDTO.class, nodeState, pc, "1");
-		nodeState.moveNodeToNextState(node, new ManagedState());
-		Assert.assertEquals(ManagedState.class, node.getCurrentNodeState().getClass());
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+    }
 
-	/**
-	 * Test method for {@link com.impetus.kundera.lifecycle.states.NodeState#recursivelyPerformOperation(com.impetus.kundera.lifecycle.NodeStateContext, com.impetus.kundera.lifecycle.states.NodeState.OPERATION)}.
-	 */
-	@Test
-	public void testRecursivelyPerformOperation() {
-		//Persist operation		
-		NodeState state = new TransientState();	
-		Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);		
-		state.recursivelyPerformOperation(storeNode, OPERATION.PERSIST);		
-		Assert.assertEquals(TransientState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
-		}
-		
-		//Merge operation		
-		state = new DetachedState();
-		storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);			
-		state.recursivelyPerformOperation(storeNode, OPERATION.MERGE);		
-		Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
-		}
-		
-		//Remove Operation
-		state = new ManagedState();
-		storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REMOVE);			
-		state.recursivelyPerformOperation(storeNode, OPERATION.REMOVE);		
-		Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
-		}
-		
-		//Refresh Operation
-		state = new DetachedState();
-		storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REFRESH);			
-		try {
-			state.recursivelyPerformOperation(storeNode, OPERATION.REFRESH);
-			Assert.fail("Refresh operation in Detached state should have thrown an exception");
-		} catch (Exception e) {
-			Assert.assertEquals(IllegalArgumentException.class, e.getClass());
-		}	
-		
-		//Remove Operation
-		state = new ManagedState();
-		storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.DETACH);			
-		state.recursivelyPerformOperation(storeNode, OPERATION.DETACH);		
-		Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
-		
-		for(Node childNode : storeNode.getChildren().values())
-		{
-			Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-			Assert.assertEquals(DetachedState.class, childNode.getCurrentNodeState().getClass());
-		}
-		
-	}
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.NodeState#moveNodeToNextState(com.impetus.kundera.lifecycle.NodeStateContext, com.impetus.kundera.lifecycle.states.NodeState)}
+     * .
+     */
+    @Test
+    public void testMoveNodeToNextState()
+    {
+        NodeState nodeState = new TransientState();
+        NodeStateContext node = new Node("1", PersonnelDTO.class, nodeState, pc, "1");
+        nodeState.moveNodeToNextState(node, new ManagedState());
+        Assert.assertEquals(ManagedState.class, node.getCurrentNodeState().getClass());
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.lifecycle.states.NodeState#recursivelyPerformOperation(com.impetus.kundera.lifecycle.NodeStateContext, com.impetus.kundera.lifecycle.states.NodeState.OPERATION)}
+     * .
+     */
+    @Test
+    public void testRecursivelyPerformOperation()
+    {
+        // Persist operation
+        NodeState state = new TransientState();
+        Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+        state.recursivelyPerformOperation(storeNode, OPERATION.PERSIST);
+        Assert.assertEquals(TransientState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
+        }
+
+        // Merge operation
+        state = new DetachedState();
+        storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);
+        state.recursivelyPerformOperation(storeNode, OPERATION.MERGE);
+        Assert.assertEquals(DetachedState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
+        }
+
+        // Remove Operation
+        state = new ManagedState();
+        storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REMOVE);
+        state.recursivelyPerformOperation(storeNode, OPERATION.REMOVE);
+        Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
+        }
+
+        // Refresh Operation
+        state = new DetachedState();
+        storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.REFRESH);
+        try
+        {
+            state.recursivelyPerformOperation(storeNode, OPERATION.REFRESH);
+            Assert.fail("Refresh operation in Detached state should have thrown an exception");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(IllegalArgumentException.class, e.getClass());
+        }
+
+        // Remove Operation
+        state = new ManagedState();
+        storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.DETACH);
+        state.recursivelyPerformOperation(storeNode, OPERATION.DETACH);
+        Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
+
+        for (Node childNode : storeNode.getChildren().values())
+        {
+            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+            Assert.assertEquals(DetachedState.class, childNode.getCurrentNodeState().getClass());
+        }
+
+    }
 
 }

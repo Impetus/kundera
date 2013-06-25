@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.cache.ehcache.CoreTestClientFactory;
+import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.KunderaMetadataManager;

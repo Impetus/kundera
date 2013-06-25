@@ -269,25 +269,43 @@ public final class PersistenceDelegator
         }
         else
         {
-        	 E e =  (E) ObjectUtils.deepCopy(nodeData);            
+            E e =  (E) ObjectUtils.deepCopy(nodeData);            
              setProxyOwners(entityMetadata, e);
              return e;
         }
 
     }
 
-	/**
-	 * @param <E>
-	 * @param entityMetadata
-	 * @param e
-	 */
-	private <E> void setProxyOwners(EntityMetadata entityMetadata, E e) {
-		KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata()
-				.getLazyInitializerFactory().getProxy();
-		if (kunderaProxy != null) {
-			kunderaProxy.getKunderaLazyInitializer().setOwner(e);
-		}
-	}
+    /**
+     * @param <E>
+     * @param entityMetadata
+     * @param e
+     */
+    private <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
+    {
+       
+          /*KunderaProxy kunderaProxy =
+          KunderaMetadata.INSTANCE.getCoreMetadata()
+          .getLazyInitializerFactory().getProxy(); if (kunderaProxy != null) {
+          kunderaProxy.getKunderaLazyInitializer().setOwner(e); }*/
+         
+
+        Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
+        for (Relation r : entityMetadata.getRelations())
+        {
+            String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
+                    + r.getProperty().getName();
+
+            KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
+                    .getProxy(entityName);
+
+            if (kunderaProxy != null)
+            {
+                kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+            }
+        }
+
+    }
 
     /**
      * Retrieves a {@link List} of Entities for given Primary Keys
@@ -603,6 +621,8 @@ public final class PersistenceDelegator
             clientMap.clear();
             clientMap = null;
         }
+        
+        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.
