@@ -18,17 +18,24 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         DummySchema schema = DummyDatabase.INSTANCE.getSchema(entityMetadata.getSchema());        
-        DummyTable table = new DummyTable();
-        table.addRecord(id, entity);
+       
         
         if(schema == null)
         {
             schema = new DummySchema();
+            DummyTable table = new DummyTable();
+            table.addRecord(id, entity);
             schema.addTable(entityMetadata.getTableName(), table);
             DummyDatabase.INSTANCE.addSchema(entityMetadata.getSchema(), schema);
         }
         else
         {
+            DummyTable table = schema.getTable(entityMetadata.getTableName());
+            if(table == null)
+            {
+                table = new DummyTable();
+            }
+            table.addRecord(id, entity);            
             schema.addTable(entityMetadata.getTableName(), table);            
         }         
     }
