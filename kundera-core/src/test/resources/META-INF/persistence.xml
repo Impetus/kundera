@@ -8,7 +8,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<!-- <jar-file>/home/impetus/perf_n.jar</jar-file> <jar-file>/home/impetus/perf.jar</jar-file> -->
 		<class>com.impetus.kundera.entity.PersonnelDTO</class>
-		<class>com.impetus.kundera.persistence.event.PersonEventDispatch</class>		
+		<class>com.impetus.kundera.persistence.event.PersonEventDispatch</class>				
 		<class>com.impetus.kundera.graph.Store</class>
 		<class>com.impetus.kundera.graph.BillingCounter</class>
 		<!-- <class>com.impetus.kundera.configure.CoreEntityAddressUni1To1</class> 
@@ -136,8 +136,9 @@
 		</properties>
 	</persistence-unit>
 	
-	<persistence-unit name="patest">
+	<persistence-unit name="patest">		
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.query.Person</class>
 		<class>com.impetus.kundera.polyglot.entities.PersonU11FK</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressU11FK</class>
 		<class>com.impetus.kundera.polyglot.entities.PersonB11FK</class>
