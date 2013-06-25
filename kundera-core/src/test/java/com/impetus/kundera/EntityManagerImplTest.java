@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
+import java.util.HashMap;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -113,7 +115,9 @@ public class EntityManagerImplTest
         entity.setCity("Delhi");      
         em.persist(entity);        
         SampleEntity found = em.find(SampleEntity.class, 1);
-        assertSampleEntity(found); 
+        assertSampleEntity(found);
+        
+        Assert.assertTrue(em.contains(found));
         
         found.setName("Xamry");
         found.setCity("Noida");
@@ -121,6 +125,7 @@ public class EntityManagerImplTest
         
         SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
         assertUpdatedSampleEntity(foundAfterMerge);
+        em.flush();       
         
         em.remove(foundAfterMerge);
         SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
@@ -135,9 +140,14 @@ public class EntityManagerImplTest
         entity.setKey(1);
         entity.setName("Amry");
         entity.setCity("Delhi");      
-        em.persist(entity);    
+        em.persist(entity); 
+        
+        Assert.assertTrue(em.contains(entity));
         em.clear();
-        SampleEntity found = em.find(SampleEntity.class, 1);
+        Assert.assertFalse(em.contains(entity));
+        
+        SampleEntity found = em.find(SampleEntity.class, 1, new HashMap<String, Object>());
+        
         assertSampleEntity(found); 
         
         found.setName("Xamry");
@@ -148,8 +158,20 @@ public class EntityManagerImplTest
         SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
         assertUpdatedSampleEntity(foundAfterMerge);
         
+        //Modify record in dummy database directly
+        SampleEntity se = (SampleEntity)DummyDatabase.INSTANCE.getSchema("KunderaTest").getTable("table").getRecord(new Integer(1));
+        se.setCity("Singapore");     
+        
+        em.refresh(foundAfterMerge);        
+        SampleEntity found2 = em.find(SampleEntity.class, 1);
+        Assert.assertEquals("Singapore", found2.getCity());
+        
+        em.detach(foundAfterMerge);        
+        em.clear();
+        found = em.find(SampleEntity.class, 1);
+        
         em.clear();        
-        em.remove(foundAfterMerge);
+        em.remove(found);
         SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
         Assert.assertNull(foundAfterDeletion);
     }

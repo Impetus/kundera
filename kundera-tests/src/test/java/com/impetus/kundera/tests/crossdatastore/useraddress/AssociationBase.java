@@ -307,7 +307,7 @@ public abstract class AssociationBase
 
             truncateMongo();
 
-            truncateRedis();
+            //truncateRedis();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
