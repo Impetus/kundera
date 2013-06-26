@@ -159,7 +159,7 @@ public class ThriftClientFactory extends GenericClientFactory
                 logger.warn("Node " + host.getHost() + " are down");
                 if (host.isRetryHost())
                 {
-                    logger.info("Scheduling node for future retry");
+                    logger.warn("Scheduling node for future retry");
                     ((CassandraRetryService) hostRetryService).add((CassandraHost) host);
                 }
             }
