@@ -120,9 +120,9 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase {
 
 	protected Iterator iterator() {
 
+    eagerlyLoadDataCollection();
 		Iterator result = null;
 		if (getDataCollection() != null) {
-			eagerlyLoadDataCollection();
 			result = getDataCollection().iterator();
 		}
 		return result;

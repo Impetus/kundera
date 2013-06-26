@@ -31,7 +31,6 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
@@ -302,6 +301,12 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                                 .getIdAttribute().getJavaType()));
                         joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, entityMetadata
                                 .getIdAttribute().getJavaType()));
+
+//                        // Do not delete above lines. Currently join table columns are of type string only.
+//                        // It needs to be fixed later.
+//                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, String.class));
+//                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, String.class));
+
                         tableInfos.add(joinTableInfo);
                     }
                 }

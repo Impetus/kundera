@@ -357,7 +357,7 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     static void loadDataForPersonnelAddress()
-    {
+    {/*
         try
         {
             KsDef ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
@@ -396,7 +396,7 @@ public class MTMBiAssociationIntTest extends TwinAssociation
             e.printStackTrace();
         }
 
-    }
+    */}
 
     /*
      * (non-Javadoc)
