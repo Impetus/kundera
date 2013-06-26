@@ -48,20 +48,20 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
     
     static Map<String, KunderaProxy> proxies = new HashMap<String, KunderaProxy>(); 
     
-    KunderaProxy kunderaProxy = null;
+    //KunderaProxy kunderaProxy = null;
 	
 
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
             Method setIdentifierMethod, Object id, PersistenceDelegator pd)
     {
-        KunderaProxy kp = proxies.get(entityName);
+        /*KunderaProxy kp = proxies.get(entityName);
         if(kp == null)
-        {
-            kunderaProxy =  (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
+        {*/
+         KunderaProxy   kunderaProxy =  (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
                     new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, pd);
             proxies.put(entityName, kunderaProxy);
-        }  
+        //}  
         
         return kunderaProxy;
     }
