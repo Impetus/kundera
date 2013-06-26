@@ -108,7 +108,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             
             PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
 
-            if(externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
+            if(externalPropertyMap != null && externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
             // Iterate each entity metadata.
             for (EntityMetadata entityMetadata : entityMetadataMap.values())
             {
