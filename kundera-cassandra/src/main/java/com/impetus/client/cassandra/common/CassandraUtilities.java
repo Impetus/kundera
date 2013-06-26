@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
@@ -64,6 +66,16 @@ public class CassandraUtilities
 
     }
 
+    
+    public static byte[] toBytes(final Object value)
+    {
+        if(value != null)
+        {
+           return toBytes(value,value.getClass()).toByteArray();
+        }
+        
+        return null;
+    }
     /**
      * @param value
      * @param f

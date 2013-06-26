@@ -613,7 +613,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         // After successful schema operation, perform index creation.
 
-        createIndex(tableInfo);
+//        createIndex(tableInfo);
     }
 
     /**
@@ -851,10 +851,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         for (ColumnInfo colInfo : columns)
         {
-            String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
-            String cqlType = translator.getCQLType(dataType);
-            translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
-            queryBuilder.append(" ,");
+                String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
+                String cqlType = translator.getCQLType(dataType);
+                translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
+                queryBuilder.append(" ,");
         }
     }
 

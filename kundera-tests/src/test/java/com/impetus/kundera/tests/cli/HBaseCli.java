@@ -15,18 +15,22 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.cli;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.InvalidFamilyOperationException;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,76 +41,94 @@ import org.slf4j.LoggerFactory;
  * @author vivek.mishra
  * 
  */
-public final class HBaseCli
+public class HBaseCli
 {
-
-    /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
-
     /** The utility. */
-    private static HBaseTestingUtility utility;
+    public static HBaseTestingUtility utility;
+
+    private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
     private static File zkDir;
 
     private static File masterDir;
 
-    /**
-     * The main method.
-     * 
-     * @param arg
-     *            the arguments
-     */
+    private MiniZooKeeperCluster zkCluster;
+
+    private HTablePool hTablePool;
+
     public static void main(String arg[])
     {
-        startCluster();
+        HBaseCli cli = new HBaseCli();
+         cli.startCluster();;
     }
 
-    /**
-     * Starts a new cluster.
-     */
-    public static void startCluster()
+    public void startCluster()
     {
-        if (checkIfServerRunning())
+        File workingDirectory = new File("./");
+        Configuration conf = new Configuration();
+        System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
+        conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
+        conf.set("fs.default.name", "file:///");
+        conf.set("zookeeper.session.timeout", "180000");
+        conf.set("hbase.zookeeper.peerport", "2888");
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+//        conf.set("dfs.datanode.data.dir.perm", "700");
+        try
         {
-            File workingDirectory = new File("./");
-            Configuration conf = new Configuration();
-            System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
-            conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
-            conf.set("fs.default.name", "file:///");
-            conf.set("zookeeper.session.timeout", "180000");
-            conf.set("hbase.zookeeper.peerport", "2888");
-            conf.set("hbase.zookeeper.property.clientPort", "2181");
-            conf.set("dfs.datanode.data.dir.perm", "755");
+            masterDir = new File(workingDirectory, "hbase");
+            conf.set(HConstants.HBASE_DIR, masterDir.toURI().toURL().toString());
+        }
+        catch (MalformedURLException e1)
+        {
+            logger.error(e1.getMessage());
+        }
+
+        Configuration hbaseConf = HBaseConfiguration.create(conf);
+        utility = new HBaseTestingUtility(hbaseConf);
+        
+        // Change permission for dfs.data.dir, please refer
+        // https://issues.apache.org/jira/browse/HBASE-5711 for more details.
+        try {
+            Process process = Runtime.getRuntime().exec("/bin/sh -c umask");
+            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            int rc = process.waitFor();
+            if(rc == 0) {
+                String umask = br.readLine();
+
+                int umaskBits = Integer.parseInt(umask, 8);
+                int permBits = 0777 & ~umaskBits;
+                String perms = Integer.toString(permBits, 8);
+                
+                logger.info("Setting dfs.datanode.data.dir.perm to " + perms);
+                utility.getConfiguration().set("dfs.datanode.data.dir.perm", perms);
+            } else {
+                logger.warn("Failed running umask command in a shell, nonzero return value");
+            }
+        } catch (Exception e) {
+            // ignore errors, we might not be running on POSIX, or "sh" might not be on the path
+            logger.warn("Couldn't get umask", e);
+        }
+        if (!checkIfServerRunning())
+        {
+            hTablePool = new HTablePool(conf, 1);
             try
             {
-                masterDir = new File(workingDirectory, "hbase");
-                conf.set(HConstants.HBASE_DIR, masterDir.toURI().toURL().toString());
-            }
-            catch (MalformedURLException e1)
-            {
-                logger.error(e1.getMessage());
-            }
+                zkCluster = new MiniZooKeeperCluster(conf);
+                zkCluster.setDefaultClientPort(2181);
+                zkCluster.setTickTime(18000);
+                // utility.setupClusterTestDir();
+                zkDir = new File(utility.getClusterTestDir().toString());
 
-            Configuration hbaseConf = HBaseConfiguration.create(conf);
-            utility = new HBaseTestingUtility(hbaseConf);
-            if (!checkIfServerRunning())
+                zkCluster.startup(zkDir);
+                utility.setZkCluster(zkCluster);
+                utility.startMiniCluster();
+                utility.getHBaseCluster().startMaster();
+            }
+            catch (Exception e)
             {
-                try
-                {
-                    MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
-                    zkCluster.setDefaultClientPort(2181);
-                    zkCluster.setTickTime(18000);
-                    zkDir = new File(utility.getClusterTestDir().toString());
-                    zkCluster.startup(zkDir);
-                    utility.setZkCluster(zkCluster);
-                    utility.startMiniCluster();
-                    utility.getHBaseCluster().startMaster();
-                }
-                catch (Exception e)
-                {
-                    logger.error(e.getMessage());
-                    throw new RuntimeException(e);
-                }
+                e.printStackTrace();
+                logger.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -117,7 +139,7 @@ public final class HBaseCli
      * @param tableName
      *            the table name
      */
-    public static void createTable(String tableName)
+    public void createTable(String tableName)
     {
         try
         {
@@ -136,6 +158,18 @@ public final class HBaseCli
         }
     }
 
+    public void createTable(byte[] tableName, byte[][] families)
+    {
+        try
+        {
+            utility.createTable(tableName, families);
+        }
+        catch (IOException e)
+        {
+
+        }
+    }
+
     /**
      * Adds the column family.
      * 
@@ -144,17 +178,35 @@ public final class HBaseCli
      * @param columnFamily
      *            the column family
      */
-    public static void addColumnFamily(String tableName, String columnFamily)
+    public void addColumnFamily(String tableName, String columnFamily)
     {
         try
         {
             utility.getHBaseAdmin().disableTable(tableName);
             utility.getHBaseAdmin().addColumn(tableName, new HColumnDescriptor(columnFamily));
             utility.getHBaseAdmin().enableTable(tableName);
+            while (utility.getHBaseAdmin().isTableEnabled(columnFamily))
+            {
+                return;
+            }
+
         }
         catch (InvalidFamilyOperationException ife)
         {
-            logger.info("Column family:" + columnFamily + " already exist!");
+            logger.info("Column family:" + columnFamily + " already exist!", ife);
+        }
+        catch (IOException e)
+        {
+            logger.error("", e);
+        }
+    }
+
+    public void dropTable(String tableName)
+    {
+        try
+        {
+            utility.getHBaseAdmin().disableTable(tableName);
+            utility.getHBaseAdmin().deleteTable(tableName);
         }
         catch (IOException e)
         {
@@ -163,54 +215,96 @@ public final class HBaseCli
     }
 
     /**
-     * Destroyes cluster.
+     * Destroys cluster.
      */
-    // public static void stopCluster()
-    // {
-    // try
-    // {
-    // if (utility != null)
-    // {
-    // utility.cleanupTestDir();
-    // utility.shutdownMiniCluster();
-    // utility = null;
-    // FileUtil.fullyDelete(zkDir);
-    // FileUtil.fullyDelete(masterDir);
-    // isStarted = false;
-    // }
-    // }
-    // catch (IOException e)
-    // {
-    // logger.error(e.getMessage());
-    // }
-    // /*
-    // * DO NOT DELETE IT! HTable table =
-    // * utility.createTable("test".getBytes(), "testcol".getBytes());
-    // * utility.getHBaseAdmin().disableTable("test");
-    // * utility.getHBaseAdmin().addColumn("test", new
-    // * HColumnDescriptor("testColFamily"));
-    // * utility.getHBaseAdmin().enableTable("test");
-    // * logger.info("Server is running : "
-    // * +utility.getHBaseAdmin().isMasterRunning());
-    // *
-    // * Put p = new Put(Bytes.toBytes("1"));
-    // * p.add(Bytes.toBytes("testColFamily"),
-    // * Bytes.toBytes("col1"),"col1".getBytes()); table.put(p);
-    // * logger.info("Table exist:" +
-    // * utility.getHBaseAdmin().tableExists("test")); Get g = new
-    // * Get(Bytes.toBytes("1")); Result r = table.get(g);
-    // * logger.info("Row count:" + r.list().size());
-    // * utility.getHBaseAdmin().disableTable("test");
-    // * logger.info("Deleting table...");
-    // * utility.getHBaseAdmin().deleteTable("test");
-    // * logger.info("Shutting down now..."); utility.shutdownMiniCluster();
-    // */
-    // catch (Exception e)
-    // {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
+    public static void stopCluster(String... tableName)
+    {
+        // try
+        // {
+        // if (utility != null)
+        // {
+        // // utility.getMiniHBaseCluster().shutdown();
+        // // File workingDirectory = new File("./");
+        // // utility.closeRegion("localhost");
+        // utility.cleanupTestDir();
+        // // utility.cleanupTestDir(dir.getAbsolutePath());
+        // // ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir,
+        // // 2000);
+        // // ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
+        // // String path = (String)this.makeFullPath(null,bean);
+        //
+        // // MBeanS
+        // // MBeanRegistry.getInstance().unregister(bean);
+        // // MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        // // mbs.unregisterMBean(makeObjectName(path,bean));
+        // // utility.getHbaseCluster().shutdown();
+        // utility.shutdownMiniCluster();
+        // FileUtil.fullyDelete(zkDir);
+        // FileUtil.fullyDelete(masterDir);
+        // utility = null;
+        // isStarted = false;
+        // }
+        // }
+        // catch (IOException e)
+        // {
+        // logger.error(e.getMessage());
+        // }
+        // catch (NullPointerException e)
+        // {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        // catch (Exception e)
+        // {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        //
+    }
+
+    public static void cleanUp()
+    {
+        try
+        {
+            if (utility != null)
+            {
+                // utility.getMiniHBaseCluster().shutdown();
+                // File workingDirectory = new File("./");
+                // utility.closeRegion("localhost");
+                utility.cleanupTestDir();
+                // utility.cleanupTestDir(dir.getAbsolutePath());
+                // ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir,
+                // 2000);
+                // ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
+                // String path = (String)this.makeFullPath(null,bean);
+
+                // MBeanS
+                // MBeanRegistry.getInstance().unregister(bean);
+                // MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+                // mbs.unregisterMBean(makeObjectName(path,bean));
+                // utility.getHbaseCluster().shutdown();
+                utility.shutdownMiniCluster();
+                FileUtil.fullyDelete(zkDir);
+                FileUtil.fullyDelete(masterDir);
+                utility = null;
+            }
+        }
+        catch (IOException e)
+        {
+            logger.error(e.getMessage());
+        }
+        catch (NullPointerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
 
     /**
      * Check if server running.
