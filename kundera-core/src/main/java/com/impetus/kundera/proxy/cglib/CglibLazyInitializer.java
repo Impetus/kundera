@@ -271,8 +271,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 if(r.getBiDirectionalField() != null && method.getReturnType().equals(m.getEntityClazz()))
                 {
                     PropertyAccessorHelper.set(target, r.getBiDirectionalField(), owner);
-                }
-            
+                }            
                 proxy = target;
             }
             
@@ -358,6 +357,15 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     public final boolean isUninitialized()
     {
         return !initialized;
+    }  
+    
+
+    /**
+     * @param initialized the initialized to set
+     */
+    public void setInitialized(boolean initialized)
+    {
+        this.initialized = initialized;
     }
 
     /**
@@ -472,7 +480,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 	
 	@Override
 	public void setOwner(Object owner) throws PersistenceException {
-		if(! owner.getClass().equals(persistentClass))
+		if(owner != null && ! owner.getClass().equals(persistentClass))
 		this.owner = owner;		
 	}
 

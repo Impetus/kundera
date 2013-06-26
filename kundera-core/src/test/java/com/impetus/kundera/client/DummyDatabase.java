@@ -65,8 +65,9 @@ public class DummyDatabase
             {
                 schema.dropSchema();
             }
+            schemas.clear();
         }
-        schemas.clear();
+        
     }
 }
 

@@ -75,6 +75,11 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
     @Override
     public void clearProxies()
     {
+        for(KunderaProxy proxy : proxies.values())
+        {
+            proxy.getKunderaLazyInitializer().setOwner(null);
+            proxy.getKunderaLazyInitializer().setInitialized(false);
+        }        
         proxies.clear();
     }   
 

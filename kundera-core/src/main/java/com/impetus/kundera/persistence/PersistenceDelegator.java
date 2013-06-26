@@ -293,15 +293,18 @@ public final class PersistenceDelegator
         Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
         for (Relation r : entityMetadata.getRelations())
         {
-            String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
-                    + r.getProperty().getName();
-
-            KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
-                    .getProxy(entityName);
-
-            if (kunderaProxy != null)
+            if(r.isUnary())
             {
-                kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
+                + r.getProperty().getName();
+                
+                KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
+                .getProxy(entityName);
+                
+                if (kunderaProxy != null)
+                {
+                    kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                }                
             }
         }
 
@@ -328,7 +331,8 @@ public final class PersistenceDelegator
         Set pKeys = new HashSet(Arrays.asList(primaryKeys));
         for (Object primaryKey : pKeys)
         {
-            entities.add(find(entityClass, primaryKey));
+            E e = find(entityClass, primaryKey);
+            if(e != null) entities.add(e);
         }
         return entities;
     }

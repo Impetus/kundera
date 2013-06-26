@@ -109,4 +109,6 @@ public interface LazyInitializer
     public void setOwner(Object owner) throws PersistenceException;
     
     public Object getOwner() throws PersistenceException;
+    
+    public void setInitialized(boolean initialized);
 }

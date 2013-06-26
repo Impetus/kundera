@@ -278,7 +278,6 @@ public class PersonTest
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
-
     }
 
    

@@ -312,7 +312,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         for (Relation r : entityMetadata.getRelations())
         {
-            if (r.getJoinColumnName() != null && !r.getType().equals(ForeignKey.MANY_TO_MANY))
+            if (!r.getType().equals(ForeignKey.MANY_TO_MANY)
+                    && (r.getProperty().isAnnotationPresent(OneToOne.class) && StringUtils.isBlank(r.getMappedBy()) || r
+                            .getProperty().isAnnotationPresent(ManyToOne.class)))
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);

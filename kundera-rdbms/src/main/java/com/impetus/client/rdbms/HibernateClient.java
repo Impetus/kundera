@@ -463,7 +463,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 }
             }
         }
-
+        
         s.getTransaction().commit();
         return q.list();
     }
