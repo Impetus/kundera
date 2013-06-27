@@ -30,6 +30,7 @@ import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.proxy.collection.ProxyCollection;
 
 /**
  * Deeply compare two (2) objects. This method will call any overridden equals()
@@ -227,7 +228,7 @@ public class DeepEquals {
 					// Defer value comparisons to future iterations.
 					DualKey dk = new DualKey(entry1.getValue(),
 							saveEntry2.getValue());
-					if (!visited.contains(dk)) {
+					if (! (visited instanceof ProxyCollection) && !visited.contains(dk)) {
 						stack.addFirst(dk);
 					}
 				}
@@ -269,7 +270,7 @@ public class DeepEquals {
 							dk._key1 = null;
 						}
 						
-						if (!visited.contains(dk)) {
+						if (dk._key1 != null && !visited.contains(dk)) {
 							stack.addFirst(dk);
 						}
 					}					

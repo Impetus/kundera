@@ -38,7 +38,7 @@ import com.impetus.kundera.annotations.Index;
  */
 @Entity
 @Table(name = "tweets", schema = "KunderaTests@secIdxAddCassandra")
-@Index(columns = { "body", "tweeted_at" }, index = true)
+@Index(columns = { "body", "tweeted_at","user_id"}, index = true)
 public class Tweets
 {
 

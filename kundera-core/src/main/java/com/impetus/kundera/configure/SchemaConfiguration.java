@@ -107,8 +107,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
             
             PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
-
-            if(externalPropertyMap != null && externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
+            
             // Iterate each entity metadata.
             for (EntityMetadata entityMetadata : entityMetadataMap.values())
             {
@@ -160,11 +159,18 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         // Need to iterate, as in case of non unary relations 
         for(String persistenceUnit:persistenceUnits)
         {
+            PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
+            
+            if (externalPropertyMap != null
+                    && externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
+                    || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
+            {
             SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
 
             if (schemaManager != null)
             {
                 schemaManager.exportSchema(persistenceUnit, puToSchemaMetadata.get(persistenceUnit));
+            }
             }
         }
     }

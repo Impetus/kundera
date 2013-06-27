@@ -168,6 +168,14 @@ public abstract class QueryImpl implements Query
         if (kunderaQuery.isDeleteUpdate())
         {
             onDeleteOrUpdate(results);
+        }      
+        
+        if(results != null)
+        {
+            for(Object obj : results)
+            {
+                persistenceDelegeator.setProxyOwners(m, obj);
+            }
         }
         return results != null ? results : new ArrayList();
     }

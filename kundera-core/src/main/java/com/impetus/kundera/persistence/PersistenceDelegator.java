@@ -134,8 +134,9 @@ public final class PersistenceDelegator
         {
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
-        }
-
+        }  
+        
+        
         EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object.
@@ -281,7 +282,7 @@ public final class PersistenceDelegator
      * @param entityMetadata
      * @param e
      */
-    private <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
+    public <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
     {
        
           /*KunderaProxy kunderaProxy =
@@ -639,6 +640,7 @@ public final class PersistenceDelegator
         // Move all nodes tied to this EM into detached state
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
+        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
     }
 
     /**

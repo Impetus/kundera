@@ -26,132 +26,156 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * Abstract class containing common methods for all interfaces extending {@link Collection} interface and {@link Map} interface
+ * Abstract class containing common methods for all interfaces extending
+ * {@link Collection} interface and {@link Map} interface
+ * 
  * @author amresh.singh
  */
-public abstract class AbstractProxyBase implements ProxyCollection {
-	
-	private PersistenceDelegator delegator;
-	private Object owner;
-	private Map<String, Object> relationsMap;
-	private Relation relation;
-	
-	protected Collection dataCollection;
+public abstract class AbstractProxyBase implements ProxyCollection
+{
 
-	public AbstractProxyBase() {
-	}	
+    private PersistenceDelegator delegator;
 
-	/**
-	 * @param delegator
-	 */
-	public AbstractProxyBase(PersistenceDelegator delegator, Relation relation) {
-		this.delegator = delegator;
-		this.relation = relation;
-	}
+    private Object owner;
 
-	@Override
-	public Object getOwner() {
-		return owner;
-	}
+    private Map<String, Object> relationsMap;
 
-	@Override
-	public void setOwner(Object owner) {
-		this.owner = owner;
-	}
+    private Relation relation;
 
-	@Override
-	public PersistenceDelegator getPersistenceDelegator() {
-		return delegator;
-	}
+    protected Collection dataCollection;
 
-	@Override
-	public Map<String, Object> getRelationsMap() {
-		return relationsMap;
-	}
+    public AbstractProxyBase()
+    {
+    }
 
-	@Override
-	public void setRelationsMap(Map<String, Object> relationsMap) {
-		this.relationsMap = relationsMap;		
-	}
+    /**
+     * @param delegator
+     */
+    public AbstractProxyBase(PersistenceDelegator delegator, Relation relation)
+    {
+        this.delegator = delegator;
+        this.relation = relation;
+    }
 
+    @Override
+    public Object getOwner()
+    {
+        return owner;
+    }
 
-	@Override
-	public Relation getRelation() {
-		return relation;
-	}
+    @Override
+    public void setOwner(Object owner)
+    {
+        this.owner = owner;
+    }
 
+    @Override
+    public PersistenceDelegator getPersistenceDelegator()
+    {
+        return delegator;
+    }
 
-	@Override
-	public Collection getDataCollection() {
-		return dataCollection != null && !dataCollection.isEmpty()?dataCollection:null;
-	}
+    @Override
+    public Map<String, Object> getRelationsMap()
+    {
+        return relationsMap;
+    }
 
-	/**
+    @Override
+    public void setRelationsMap(Map<String, Object> relationsMap)
+    {
+        this.relationsMap = relationsMap;
+    }
+
+    @Override
+    public Relation getRelation()
+    {
+        return relation;
+    }
+
+    @Override
+    public Collection getDataCollection()
+    {
+        return dataCollection != null && !dataCollection.isEmpty() ? dataCollection : null;
+    }
+
+    /**
 	 * 
 	 */
     protected void eagerlyLoadDataCollection()
     {
-        if (getDataCollection() == null)
+        if (getDataCollection() == null || getDataCollection() instanceof ProxyCollection)
         {
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(getOwner().getClass());
-//            Object entityId = PropertyAccessorHelper.getId(getOwner(), m);
-            
-            getPersistenceDelegator().getClient(m).getReader().recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(),true);
-//            new AssociationBuilder().setConcreteRelationObject(getOwner(), getRelationsMap(), m,
-//                    getPersistenceDelegator(), entityId, getRelation());
+            // Object entityId = PropertyAccessorHelper.getId(getOwner(), m);
+
+            getPersistenceDelegator().getClient(m).getReader()
+                    .recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(), true);
+            // new AssociationBuilder().setConcreteRelationObject(getOwner(),
+            // getRelationsMap(), m,
+            // getPersistenceDelegator(), entityId, getRelation());
 
             dataCollection = (Collection) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
+            if (dataCollection instanceof ProxyCollection)
+            {
+                dataCollection = null;
+            }
             PropertyAccessorHelper.set(getOwner(), getRelation().getProperty(), dataCollection);
         }
-    }	
-	
-	
-	/////////////////////Common collection implementation////////////////////////////	
-	protected void clear()
-	{
-		eagerlyLoadDataCollection();
-		if (getDataCollection() != null) {
-			getDataCollection().clear();
-		}
-	}
-	
-	protected boolean contains(Object arg0) {
-		
-		boolean result = false;
-		
-		eagerlyLoadDataCollection();
-		if(getDataCollection() != null)
-		{
-			result = getDataCollection().contains(arg0);
-		}		
-		return result;
-	}
-	
-	protected boolean containsAll(final Collection arg0) {
-		eagerlyLoadDataCollection();
-		
-		boolean result = false;
-		
-		if(getDataCollection() != null)
-		{
-			result = getDataCollection().containsAll(arg0);
-		}
-		return result;
-	}
-	
-	protected boolean isEmpty() {		
-		boolean result = true;
-		
-		eagerlyLoadDataCollection();	
-		if(getDataCollection() != null)
-		{
-			result = getDataCollection().isEmpty();
-		}
-		return result;
-	}
-	
-	protected int size() {		
-		eagerlyLoadDataCollection();	
-		return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : dataCollection.size();
-	}
+    }
+
+    // ///////////////////Common collection
+    // implementation////////////////////////////
+    protected void clear()
+    {
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            getDataCollection().clear();
+        }
+    }
+
+    protected boolean contains(Object arg0)
+    {
+
+        boolean result = false;
+
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = getDataCollection().contains(arg0);
+        }
+        return result;
+    }
+
+    protected boolean containsAll(final Collection arg0)
+    {
+        eagerlyLoadDataCollection();
+
+        boolean result = false;
+
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = getDataCollection().containsAll(arg0);
+        }
+        return result;
+    }
+
+    protected boolean isEmpty()
+    {
+        boolean result = true;
+
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = getDataCollection().isEmpty();
+        }
+        return result;
+    }
+
+    protected int size()
+    {
+        eagerlyLoadDataCollection();
+        return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : dataCollection.size();
+    }
 }

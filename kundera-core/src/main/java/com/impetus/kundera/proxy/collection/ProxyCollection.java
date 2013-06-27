@@ -23,51 +23,55 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * Top level interface for all proxy collections (including maps)
+ * 
  * @author amresh.singh
  */
-public interface ProxyCollection {
+public interface ProxyCollection
+{
 
-	/**
-	 * Returns owning entity that holds this proxy collection 
-	 */
-	Object getOwner();
+    /**
+     * Returns owning entity that holds this proxy collection
+     */
+    Object getOwner();
 
-	/**
-	 * Sets owning entity that holds this collection for later use while eagerly loading
-	 */
-	void setOwner(Object owner);
+    /**
+     * Sets owning entity that holds this collection for later use while eagerly
+     * loading
+     */
+    void setOwner(Object owner);
 
-	/**
-	 * Returns instance of {@link PersistenceDelegator} which is required for eagerly loading 
-	 * associated collection at the time it is requested
-	 */
-	PersistenceDelegator getPersistenceDelegator();
-	
-	/**
-	 * Retrieves {@link Map} of Relation name and values required for eagerly fetching this proxy collection
-	 * at the time it is requested
-	 */
-	Map<String, Object> getRelationsMap();
-	
-	/**
-	 * Sets {@link Map} of Relation name and values required for eagerly fetching this proxy collection
-	 * at the time it is requested
-	 */
-	void setRelationsMap(Map<String, Object> relationsMap);	
+    /**
+     * Returns instance of {@link PersistenceDelegator} which is required for
+     * eagerly loading associated collection at the time it is requested
+     */
+    PersistenceDelegator getPersistenceDelegator();
 
-	/**
-	 * Instance of {@link Relation} corresponding to this proxy collection
-	 */
-	Relation getRelation();
-	
-	/**
-	 * Retrieves actual collection data that implementor of this interface holds.
-	 * Unless proxy collection is eagerly loaded, this values would normally be null 
-	 */
-	Collection getDataCollection();	
+    /**
+     * Retrieves {@link Map} of Relation name and values required for eagerly
+     * fetching this proxy collection at the time it is requested
+     */
+    Map<String, Object> getRelationsMap();
 
-	/**
-	 * Retrieves a copy of this proxy collection
-	 */
-	ProxyCollection getCopy();
+    /**
+     * Sets {@link Map} of Relation name and values required for eagerly
+     * fetching this proxy collection at the time it is requested
+     */
+    void setRelationsMap(Map<String, Object> relationsMap);
+
+    /**
+     * Instance of {@link Relation} corresponding to this proxy collection
+     */
+    Relation getRelation();
+
+    /**
+     * Retrieves actual collection data that implementor of this interface
+     * holds. Unless proxy collection is eagerly loaded, this values would
+     * normally be null
+     */
+    Collection getDataCollection();
+
+    /**
+     * Retrieves a copy of this proxy collection
+     */
+    ProxyCollection getCopy();
 }

@@ -175,7 +175,6 @@ public abstract class TwitterTestBaseCassandra
 
         UserCassandra user2 = twitter.findUserById(userId2);
         assertUser2(user2);
-        twitter.closeEntityManager();
     }
 
     protected void updateUser()

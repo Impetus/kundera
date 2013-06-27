@@ -105,10 +105,10 @@ public interface LazyInitializer
     public abstract Object getImplementation();
 
     public abstract void setImplementation(Object paramObject);
-    
+
     public void setOwner(Object owner) throws PersistenceException;
-    
+
     public Object getOwner() throws PersistenceException;
-    
+
     public void setInitialized(boolean initialized);
 }

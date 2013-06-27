@@ -45,7 +45,7 @@ public class EmployeeInfoTest
         EmployeeAddress address_info = new EmployeeAddress();
         address_info.setStreet("street");
         emp_info.setAddress(address_info);
-        emp_info.setEmployeeName("vivek");
+//        emp_info.setEmployeeName("vivek");
         em.persist(emp_info);
 
         em.clear();

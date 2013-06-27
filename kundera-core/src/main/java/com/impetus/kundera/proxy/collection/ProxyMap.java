@@ -24,170 +24,186 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * Proxy class used to represent instances for {@link Map}
+ * 
  * @author amresh.singh
  */
-public class ProxyMap extends AbstractProxyBase implements
-		ProxyCollection, Map {
-	
-	/**
-	 * Default constructor
-	 */
-	public ProxyMap() {
-		super();
-	}	
+public class ProxyMap extends AbstractProxyBase implements ProxyCollection, Map
+{
 
-	public ProxyMap(final PersistenceDelegator delegator, final Relation relation) {
-		super(delegator, relation);
-	}	
-	
-	@Override
-	public ProxyCollection getCopy() {
-		ProxyCollection proxyCollection = new ProxyMap(getPersistenceDelegator(), getRelation());
-		proxyCollection.setRelationsMap(getRelationsMap());
-		return proxyCollection;
-	}
-	
-	/////////////////////////Methods from Collection interface	////////////////
+    /**
+     * Default constructor
+     */
+    public ProxyMap()
+    {
+        super();
+    }
 
-	@Override
-	public void clear() {
-		super.clear();
-	}
-	
-	@Override
-	public boolean isEmpty() {
-		return super.isEmpty();
-	}
-	
-	@Override
-	public int size() {
-		return super.size();
-	}
+    public ProxyMap(final PersistenceDelegator delegator, final Relation relation)
+    {
+        super(delegator, relation);
+    }
 
-	/////////////////////////Methods from Map interface	////////////////
-	
-	@Override
-	public boolean containsKey(final Object arg0) {		
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		boolean result = false;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.containsKey(arg0);			
-		}
-		return result;
-	}
+    @Override
+    public ProxyCollection getCopy()
+    {
+        ProxyCollection proxyCollection = new ProxyMap(getPersistenceDelegator(), getRelation());
+        proxyCollection.setRelationsMap(getRelationsMap());
+        return proxyCollection;
+    }
 
-	@Override
-	public boolean containsValue(final Object arg0) {
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		boolean result = false;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.containsValue(arg0);			
-		}
-		return result;
-	}
+    // ///////////////////////Methods from Collection interface ////////////////
 
-	@Override
-	public Set entrySet() {
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		Set result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.entrySet();			
-		}
-		return result;
-	}
+    @Override
+    public void clear()
+    {
+        super.clear();
+    }
 
-	@Override
-	public Object get(final Object arg0) {
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		Object result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.get(arg0);			
-		}
-		return result;
-	}	
+    @Override
+    public boolean isEmpty()
+    {
+        return super.isEmpty();
+    }
 
-	@Override
-	public Set keySet() {
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		Set result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.keySet();			
-		}
-		return result;
-	}
+    @Override
+    public int size()
+    {
+        return super.size();
+    }
 
-	@Override
-	public Object put(final Object arg0, final Object arg1) {
-		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
-		
-		Object result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result =  dataMap.put(arg0, arg1);
-		}
-		return result;
-	}
+    // ///////////////////////Methods from Map interface ////////////////
 
-	@Override
-	public void putAll(final Map arg0) {
-		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
-		
-		if(dataMap != null && dataMap.isEmpty())
-		{
-			dataMap.putAll(arg0);
-		}	
+    @Override
+    public boolean containsKey(final Object arg0)
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
 
-	}
+        boolean result = false;
 
-	@Override
-	public Object remove(final Object arg0) {
-		eagerlyLoadDataCollection();		
-		Map dataMap = (Map) dataCollection;
-		
-		Object result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result = dataMap.remove(arg0);
-		}
-		return result;
-	}	
+        if (dataMap != null && !(dataMap instanceof ProxyMap) && !dataMap.isEmpty())
+        {
+            result = dataMap.containsKey(arg0);
+        }
+        return result;
+    }
 
-	@Override
-	public Collection values() {
-		eagerlyLoadDataCollection();		
-		final Map dataMap = (Map) dataCollection;
-		
-		Collection result = null;
-		
-		if(dataMap != null && ! dataMap.isEmpty())
-		{
-			result =  dataMap.values();			
-		}
-		return result;
-	}
+    @Override
+    public boolean containsValue(final Object arg0)
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
+
+        boolean result = false;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.containsValue(arg0);
+        }
+        return result;
+    }
+
+    @Override
+    public Set entrySet()
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
+
+        Set result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.entrySet();
+        }
+        return result;
+    }
+
+    @Override
+    public Object get(final Object arg0)
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
+
+        Object result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.get(arg0);
+        }
+        return result;
+    }
+
+    @Override
+    public Set keySet()
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
+
+        Set result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.keySet();
+        }
+        return result;
+    }
+
+    @Override
+    public Object put(final Object arg0, final Object arg1)
+    {
+        eagerlyLoadDataCollection();
+        Map dataMap = (Map) dataCollection;
+
+        Object result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.put(arg0, arg1);
+        }
+        return result;
+    }
+
+    @Override
+    public void putAll(final Map arg0)
+    {
+        eagerlyLoadDataCollection();
+        Map dataMap = (Map) dataCollection;
+
+        if (dataMap != null && dataMap.isEmpty())
+        {
+            dataMap.putAll(arg0);
+        }
+
+    }
+
+    @Override
+    public Object remove(final Object arg0)
+    {
+        eagerlyLoadDataCollection();
+        Map dataMap = (Map) dataCollection;
+
+        Object result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.remove(arg0);
+        }
+        return result;
+    }
+
+    @Override
+    public Collection values()
+    {
+        eagerlyLoadDataCollection();
+        final Map dataMap = (Map) dataCollection;
+
+        Collection result = null;
+
+        if (dataMap != null && !dataMap.isEmpty())
+        {
+            result = dataMap.values();
+        }
+        return result;
+    }
 
 }

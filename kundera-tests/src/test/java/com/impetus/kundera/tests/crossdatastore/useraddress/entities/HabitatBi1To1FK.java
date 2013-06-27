@@ -37,7 +37,7 @@ public class HabitatBi1To1FK
     @Column(name = "STREET")
     private String street;
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "address", fetch = FetchType.EAGER)
     private PersonnelBi1To1FK person;
 
     public String getAddressId()
