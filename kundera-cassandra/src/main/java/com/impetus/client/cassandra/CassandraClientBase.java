@@ -757,7 +757,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             log.info("Executing cql query {}.", cqlQuery);
         }
-        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
+        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler,false);
     }
 
     public Map<String, Object> getExternalProperties()
@@ -1453,7 +1453,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (!nodes.isEmpty() && isCql3Enabled)
             {
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
-                executeCQLQuery(batchQueryBuilder.toString());
+                executeCQLQuery(batchQueryBuilder.toString(),false);
             }
         }
         catch (InvalidRequestException e)
@@ -1748,7 +1748,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    protected CqlResult executeCQLQuery(String cqlQuery) throws InvalidRequestException, UnavailableException,
+    protected CqlResult executeCQLQuery(String cqlQuery,boolean isCql3Enabled) throws InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException, TException
     {
         Cassandra.Client conn = null;
@@ -1757,7 +1757,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         conn = getConnection(pooledConnection);
         try
         {
-            if (isCql3Enabled())
+            if (isCql3Enabled || isCql3Enabled())
             {
                 return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
                         org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
@@ -1907,7 +1907,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
          * @return
          */
         public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
-                CassandraDataHandler dataHandler)
+                CassandraDataHandler dataHandler, boolean isCql3Enabled)
         {
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
             CqlResult result = null;
@@ -1918,7 +1918,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     log.info("Executing query {}.",cqlQuery);
                 }
-                result = executeCQLQuery(cqlQuery);
+                result = executeCQLQuery(cqlQuery, isCql3Enabled);
                 if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
                 {
                     returnedEntities = new ArrayList<Object>(result.getRowsSize());
@@ -2027,7 +2027,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, "=");
             selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
                     selectQueryBuilder.length());
-            return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler);
+            return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler, true);
         }
     }
 

@@ -323,7 +323,6 @@ public class AbstractEntityReader
             }
             else
             {
-
                 relationalEntities = associatedClient.findByRelation(relation.getJoinColumnName(), entityId,
                         relation.getTargetEntity());
             }

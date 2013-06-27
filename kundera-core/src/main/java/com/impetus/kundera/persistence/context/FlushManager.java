@@ -222,12 +222,12 @@ public class FlushManager
                     node.setTraversed(true);
                     stackQueue.push(node);
                     logEvent(node, eventType);
-
-                    // Process child node Graph recursively
-                    Node childNode = children.get(nodeLink);
-
-                    addNodesToFlushStack(childNode, eventType);
                 }
+
+                // Process child node Graph recursively
+                Node childNode = children.get(nodeLink);
+
+                addNodesToFlushStack(childNode, eventType);
             }
 
             // Process Many-To-One children
