@@ -255,14 +255,7 @@ public class DeepEquals {
 						boolean isPersistentCollection = false;
 						if(dk._key1 != null)
 						{
-							isPersistentCollection = ProxyHelper.isProxyCollection(dk._key1);
-							/*isPersistentCollection = dk._key1.getClass()
-									.isAssignableFrom(PersistentSet.class)
-									|| dk._key1.getClass().isAssignableFrom(
-											PersistentList.class)
-											|| dk._key1.getClass().isAssignableFrom(
-													PersistentMap.class);*/
-							
+							isPersistentCollection = ProxyHelper.isProxyCollection(dk._key1);								
 						}
 					
 						if(isPersistentCollection)
@@ -270,7 +263,7 @@ public class DeepEquals {
 							dk._key1 = null;
 						}
 						
-						if (dk._key1 != null && !visited.contains(dk)) {
+						if (!isPersistentCollection && !visited.contains(dk)) {
 							stack.addFirst(dk);
 						}
 					}					
