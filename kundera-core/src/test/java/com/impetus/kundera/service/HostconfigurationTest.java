@@ -73,7 +73,7 @@ public class HostconfigurationTest
         Assert.assertNotNull(hostConfiguration.port);
         Assert.assertTrue(hostConfiguration.getHosts().isEmpty());
         Assert.assertEquals("localhost",hostConfiguration.hosts);
-        Assert.assertNotNull("9160",hostConfiguration.port);
+        Assert.assertEquals("9160",hostConfiguration.port);
         
     }
 
