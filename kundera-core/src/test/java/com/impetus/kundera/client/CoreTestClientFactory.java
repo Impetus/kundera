@@ -15,8 +15,10 @@
  */
 package com.impetus.kundera.client;
 
+import java.util.Currency;
 import java.util.Map;
 
+import com.impetus.kundera.configure.schema.api.CoreSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 
@@ -28,15 +30,20 @@ import com.impetus.kundera.loader.GenericClientFactory;
 public class CoreTestClientFactory extends GenericClientFactory
 {
 
+    private  SchemaManager schemaManager;
+    
     @Override
     public void destroy()
     {
+        schemaManager.dropSchema();
     }
 
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
-        return null;
+        if(schemaManager == null)
+        schemaManager =  new CoreSchemaManager("com.impetus.kundera.client.CoreTestClientFactory", puProperties);
+        return schemaManager;
     }
 
     @Override

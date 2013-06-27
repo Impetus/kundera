@@ -23,7 +23,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.schema.TableInfo;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -88,13 +87,6 @@ public abstract class AbstractSchemaManager
     protected void exportSchema(final String persistenceUnit,List<TableInfo> tables)
     {
 
-//        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        // Actually, start 1 pu.
-//        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
-//        Set<String> pus = puToSchemaCol.keySet();
-//        for (String pu : pus)
-//        {
             // Get persistence unit metadata
             PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
             String paramString = externalProperties != null ? (String) externalProperties
