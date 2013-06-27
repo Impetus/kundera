@@ -37,9 +37,9 @@ public class EmployeeInfo
     @GeneratedValue(generator = "id_gen", strategy = GenerationType.TABLE)
     private Long userid;
     
-    @Column(name="name")
-    
-    private String employeeName;
+//    @Column(name="name")
+//    
+//    private String employeeName;
     
     public EmployeeInfo()
     {
@@ -70,15 +70,15 @@ public class EmployeeInfo
         this.address = address;
     }
 
-    public String getEmployeeName()
-    {
-        return employeeName;
-    }
-
-    public void setEmployeeName(String employeeName)
-    {
-        this.employeeName = employeeName;
-    }
-    
+//    public String getEmployeeName()
+//    {
+//        return employeeName;
+//    }
+//
+//    public void setEmployeeName(String employeeName)
+//    {
+//        this.employeeName = employeeName;
+//    }
+//    
     
 }
