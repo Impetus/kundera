@@ -26,7 +26,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests@addCassandra")
+@Table(name = "ADDRESS", schema = "KunderaTests")
 @IndexCollection(columns = { @Index(name = "street") })
 public class HabitatBi1To1FK
 {
@@ -37,7 +37,7 @@ public class HabitatBi1To1FK
     @Column(name = "STREET")
     private String street;
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "address", fetch = FetchType.EAGER)
     private PersonnelBi1To1FK person;
 
     public String getAddressId()

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.cache.ehcache;
+package com.impetus.kundera.client;
 
+import java.util.Currency;
 import java.util.Map;
 
-import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.schema.api.CoreSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 
@@ -29,15 +30,20 @@ import com.impetus.kundera.loader.GenericClientFactory;
 public class CoreTestClientFactory extends GenericClientFactory
 {
 
+    private  SchemaManager schemaManager;
+    
     @Override
     public void destroy()
     {
+        schemaManager.dropSchema();
     }
 
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
-        return null;
+        if(schemaManager == null)
+        schemaManager =  new CoreSchemaManager("com.impetus.kundera.client.CoreTestClientFactory", puProperties);
+        return schemaManager;
     }
 
     @Override
@@ -49,8 +55,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new CoreTestClient();
-
+        return new CoreTestClient(indexManager, persistenceUnit);
     }
 
     @Override
@@ -70,19 +75,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     {
         return super.getConnectionPoolOrConnection();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.ClientFactory#load(java.lang.String,
-     * java.util.Map)
-     */
-    @Override
-    public void load(String persistenceUnit, Map<String, Object> puProperties)
-    {
-        // TODO Auto-generated method stub
-
-    }
+  
 
     /*
      * (non-Javadoc)

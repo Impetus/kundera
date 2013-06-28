@@ -307,7 +307,7 @@ public abstract class AssociationBase
 
             truncateMongo();
 
-            truncateRedis();
+            //truncateRedis();
         }
 
         for (String pu : ALL_PUs_UNDER_TEST)
@@ -461,6 +461,7 @@ public abstract class AssociationBase
             try
             {
                 cli.dropSchema(KEYSPACE);
+                cli.shutdown();
             }
             catch (Exception e)
             {

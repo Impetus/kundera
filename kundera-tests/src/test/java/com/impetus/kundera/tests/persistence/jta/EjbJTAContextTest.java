@@ -85,10 +85,10 @@ public class EjbJTAContextTest
 
         initialContext.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
 
-        emf = Persistence.createEntityManagerFactory("secIdxAddCassandraJTA,addMongoJTA");
-        em = emf.createEntityManager();
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaTests");
+        emf = Persistence.createEntityManagerFactory("secIdxAddCassandraJTA,addMongoJTA");
+        em = emf.createEntityManager();
         loadData();
     }
 

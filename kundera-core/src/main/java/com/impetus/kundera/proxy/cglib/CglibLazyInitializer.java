@@ -56,7 +56,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /** The target. */
     private Object owner;
-    
+
     /** The target. */
     private Object target;
 
@@ -121,7 +121,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * @throws PersistenceException
      *             the persistence exception
      */
-    public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, 
+    public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass,
             final Class<?>[] interfaces, final Method getIdentifierMethod, final Method setIdentifierMethod,
             final Object id, final PersistenceDelegator pd) throws PersistenceException
     {
@@ -257,18 +257,25 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                     return this;
                 }
             }
+
             Object target = getImplementation();
-            
+
             String[] strArr = entityName.split("#");
             String fieldName = strArr[1];
-            
-            if(owner != null)
+
+            if (owner != null)
             {
-            	EntityMetadata m = KunderaMetadataManager.getEntityMetadata(owner.getClass());
-            	Relation r = m.getRelation(fieldName);            
-            	PropertyAccessorHelper.set(owner, r.getProperty(), target);            	
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(owner.getClass());
+                Relation r = m.getRelation(fieldName);
+                PropertyAccessorHelper.set(owner, r.getProperty(), target);
+
+                if (r.getBiDirectionalField() != null && method.getReturnType().equals(m.getEntityClazz()))
+                {
+                    PropertyAccessorHelper.set(target, r.getBiDirectionalField(), owner);
+                }
+
             }
-            
+
             try
             {
                 final Object returnValue;
@@ -299,7 +306,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
         {
             // while constructor is running
             throw new LazyInitializationException("unexpected case hit, method=" + method.getName());
-        }        
+        }
 
     }
 
@@ -351,6 +358,15 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     public final boolean isUninitialized()
     {
         return !initialized;
+    }
+
+    /**
+     * @param initialized
+     *            the initialized to set
+     */
+    public void setInitialized(boolean initialized)
+    {
+        this.initialized = initialized;
     }
 
     /**
@@ -462,17 +478,18 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         this.persistenceDelegator = null;
     }
-	
-	@Override
-	public void setOwner(Object owner) throws PersistenceException {
-		if(! owner.getClass().equals(persistentClass))
-		this.owner = owner;		
-	}
 
-	@Override
-	public Object getOwner() throws PersistenceException {
-		return owner;
-	}     
+    @Override
+    public void setOwner(Object owner) throws PersistenceException
+    {
+        if (owner != null && !owner.getClass().equals(persistentClass))
+            this.owner = owner;
+    }
+
+    @Override
+    public Object getOwner() throws PersistenceException
+    {
+        return owner;
+    }
 
 }
-

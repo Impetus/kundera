@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
-import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;

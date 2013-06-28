@@ -64,13 +64,14 @@ public interface EntityReader
      *            entity meta data
      * @param persistenceDelegeator
      *            persistence delegator.
+     * @param lazily loaded. true if invoked over lazily fetched object.           
      * @return populate entity.
      * @throws Exception
      *             the exception
      */
 
     Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
-            PersistenceDelegator pd);
+            PersistenceDelegator pd, boolean lazilyLoaded);
 
     /**
      * Find by id.

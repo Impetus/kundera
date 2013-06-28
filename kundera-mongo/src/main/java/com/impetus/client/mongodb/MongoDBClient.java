@@ -133,6 +133,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             for (Object childId : values)
             {
                 DBObject dbObj = new BasicDBObject();
+                dbObj.put("_id", joinColumnValue.toString() + childId);
                 dbObj.put(joinColumnName, MongoDBUtils.populateValue(joinColumnValue, joinColumnValue.getClass()));
                 dbObj.put(invJoinColumnName, MongoDBUtils.populateValue(childId, childId.getClass()));
                 documents.add(dbObj);
@@ -668,7 +669,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
             }
             DBCollection dbCollection = mongoDb.getCollection(documentName);
-            dbCollection.findAndModify(query, document);
+            //dbCollection.findAndModify(query, document);
+            
+            DBObject obj = dbCollection.findOne(query);            
+            obj.putAll(document);
+            dbCollection.save(obj);            
         }
         else
         {
@@ -685,7 +690,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 dbStatements = new ArrayList<DBObject>();
                 dbStatements.add(document);
                 collections.put(documentName, dbStatements);
-
             }
         }
 

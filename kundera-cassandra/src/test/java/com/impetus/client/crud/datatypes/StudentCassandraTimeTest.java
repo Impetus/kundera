@@ -595,7 +595,7 @@ public class StudentCassandraTimeTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraTime";
             cfDef.keyspace = keyspace;
-            cfDef.setKey_validation_class("LongType");
+            cfDef.setKey_validation_class("DateType");
             cfDef.setComparator_type("UTF8Type");
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;

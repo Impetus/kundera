@@ -498,7 +498,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         StringBuilder queryBuilder = new StringBuilder();
 
         // for normal columns
-        onCompositeColumns(translator, columns, queryBuilder);
+        onCompositeColumns(translator, columns, queryBuilder,null);
 
         // ideally it will always be one as more super column families
         // are not allowed with compound/composite key.
@@ -507,7 +507,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         EmbeddableType compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
 
         // for composite columns
-        onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder);
+        onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns);
 
         // strip last ",".
         if (queryBuilder.length() > 0)
@@ -613,7 +613,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         // After successful schema operation, perform index creation.
 
-        createIndex(tableInfo);
+//        createIndex(tableInfo);
     }
 
     /**
@@ -847,14 +847,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param queryBuilder
      *            the query builder
      */
-    private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> columns, StringBuilder queryBuilder)
+    private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> compositeColumns, StringBuilder queryBuilder, List<ColumnInfo> columns)
     {
-        for (ColumnInfo colInfo : columns)
+        for (ColumnInfo colInfo : compositeColumns)
         {
-            String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
-            String cqlType = translator.getCQLType(dataType);
-            translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
-            queryBuilder.append(" ,");
+            if(columns == null || (columns != null && !columns.contains(colInfo)))
+            {
+                String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
+                String cqlType = translator.getCQLType(dataType);
+                translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
+                queryBuilder.append(" ,");
+            }
         }
     }
 

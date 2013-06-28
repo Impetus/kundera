@@ -104,6 +104,25 @@ public class EmbeddedRDBMSUserTest
 
         EntityManagerFactory emf = Persistence
                 .createEntityManagerFactory("rdbms,secIdxAddCassandra,piccandra,addMongo,picongo");
+        try
+        {
+            loadData();
+        }
+        catch (InvalidRequestException e)
+        {
+            
+            e.printStackTrace();
+        }
+        catch (TException e)
+        {
+            
+            e.printStackTrace();
+        }
+        catch (SchemaDisagreementException e)
+        {
+            
+            e.printStackTrace();
+        }
         EntityManager em = emf.createEntityManager();
         // em.getTransaction().begin();
         // em.setFlushMode(FlushModeType.COMMIT);
@@ -162,16 +181,9 @@ public class EmbeddedRDBMSUserTest
         tweet.setTweetId(tweetId);
         tweet.setBody(body);
         tweet.setTweetDate(tweetDate);
-        if (user.getTweets() == null)
-        {
-            Set<Tweets> tweets = new HashSet<Tweets>();
-            tweets.add(tweet);
-            user.setTweets(tweets);
-        }
-        else
-        {
-            user.getTweets().add(tweet);
-        }
+        
+        user.getTweets().add(tweet);
+        
 
     }
 
@@ -299,6 +311,7 @@ public class EmbeddedRDBMSUserTest
         {
             cli.update("DELETE FROM KUNDERATESTS.user");
             cli.update("DROP TABLE KUNDERATESTS.user");
+            cli.shutdown();
         }
         catch (Exception e)
         {

@@ -114,7 +114,7 @@ public class ResultIterator<E> implements Iterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator);
+                    persistenceDelegator,false);
         }
 
         return result;

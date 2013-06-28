@@ -456,7 +456,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 client.set_keyspace(metadata.getSchema());
                 insert_Query = createInsertQuery(metadata, entity, client, rlHolders, getTtlValues().get(metadata.getTableName()));
-                executeCQLQuery(insert_Query);
+                executeCQLQuery(insert_Query,true);
             }
             catch (InvalidRequestException e)
             {

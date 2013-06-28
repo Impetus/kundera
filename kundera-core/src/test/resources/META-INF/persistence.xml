@@ -8,7 +8,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<!-- <jar-file>/home/impetus/perf_n.jar</jar-file> <jar-file>/home/impetus/perf.jar</jar-file> -->
 		<class>com.impetus.kundera.entity.PersonnelDTO</class>
-		<class>com.impetus.kundera.entity.PersonnelListenerDTO</class>
+		<class>com.impetus.kundera.persistence.event.PersonEventDispatch</class>				
 		<class>com.impetus.kundera.graph.Store</class>
 		<class>com.impetus.kundera.graph.BillingCounter</class>
 		<!-- <class>com.impetus.kundera.configure.CoreEntityAddressUni1To1</class> 
@@ -70,7 +70,7 @@
 			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="rdbms" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -86,7 +86,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -102,7 +102,7 @@
 			<property name="kundera.keyspace" value="KunderaMetaDataTest" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -128,11 +128,49 @@
 			<property name="kundera.keyspace" value="KunderaTest" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
-				value="com.impetus.kundera.cache.ehcache.CoreTestClientFactory" />
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaTest.xml" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="patest">		
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.query.Person</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonU11FK</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressU11FK</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonB11FK</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressB11FK</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonU11PK</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressU11PK</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonB11PK</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressB11PK</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonU1M</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressU1M</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonB1M</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressB1M</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonUM1</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressUM1</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonBM1</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressBM1</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonUMM</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressUMM</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonBMM</class>
+		<class>com.impetus.kundera.polyglot.entities.AddressBMM</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>		
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTest" />
+			<property name="kundera.dialect" value="rdbms" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="index.home.dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 

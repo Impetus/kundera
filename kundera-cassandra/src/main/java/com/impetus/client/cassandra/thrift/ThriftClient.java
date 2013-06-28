@@ -426,53 +426,57 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
-    {
-        byte[] rowKey = pKeyColumnValue.toString().getBytes();
+    {        
+        byte[] rowKey = CassandraUtilities.toBytes(pKeyColumnValue);/*pKeyColumnValue.toString().getBytes()*/;
 
-        SlicePredicate predicate = new SlicePredicate();
-        SliceRange sliceRange = new SliceRange();
-        sliceRange.setStart(new byte[0]);
-        sliceRange.setFinish(new byte[0]);
-        predicate.setSlice_range(sliceRange);
+        if (rowKey != null)
+        {
+            SlicePredicate predicate = new SlicePredicate();
+            SliceRange sliceRange = new SliceRange();
+            sliceRange.setStart(new byte[0]);
+            sliceRange.setFinish(new byte[0]);
+            predicate.setSlice_range(sliceRange);
 
-        ColumnParent parent = new ColumnParent(tableName);
-        List<ColumnOrSuperColumn> results;
-        Connection conn = null;
-        try
-        {
-            conn = /* PelopsUtils.getCassandraConnection(pool) */getConection();
-            results = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
-            throw new EntityReaderException(e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
-            throw new EntityReaderException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
-            throw new EntityReaderException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
-            throw new EntityReaderException(e);
-        }
-        finally
-        {
-            // PelopsUtils.releaseConnection(pool, conn);
-            releaseConnection(conn);
-        }
+            ColumnParent parent = new ColumnParent(tableName);
+            List<ColumnOrSuperColumn> results;
+            Connection conn = null;
+            try
+            {
+                conn = /* PelopsUtils.getCassandraConnection(pool) */getConection();
+                results = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
+            }
+            catch (InvalidRequestException e)
+            {
+                log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
+                throw new EntityReaderException(e);
+            }
+            catch (UnavailableException e)
+            {
+                log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
+                throw new EntityReaderException(e);
+            }
+            catch (TimedOutException e)
+            {
+                log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
+                throw new EntityReaderException(e);
+            }
+            catch (TException e)
+            {
+                log.error("Error while getting columns for row Key {} , Caused by: .", pKeyColumnValue, e);
+                throw new EntityReaderException(e);
+            }
+            finally
+            {
+                // PelopsUtils.releaseConnection(pool, conn);
+                releaseConnection(conn);
+            }
 
-        List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN, null);
+            List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN, null);
 
-        List<Object> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns, columnJavaType);
-        return (List<E>) foreignKeys;
+            List<Object> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns, columnJavaType);
+            return (List<E>) foreignKeys;
+        }
+        return new ArrayList<E>();
     }
 
     /**
@@ -489,7 +493,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
 
-        String childIdStr = (String) columnValue;
+        String childIdStr = PropertyAccessorHelper.getString(columnValue);
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
                 columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
                 .fromUTF8(childIdStr).getBytes());

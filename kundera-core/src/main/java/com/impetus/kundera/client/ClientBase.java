@@ -106,7 +106,8 @@ public abstract class ClientBase
             for (NodeLink parentNodeLink : parents.keySet())
             {
                 String linkName = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                Object linkValue = parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                Object linkValue = parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE) != null ? parentNodeLink
+                        .getLinkProperty(LinkProperty.LINK_VALUE) : parents.get(parentNodeLink).getEntityId();
                 boolean isSharedByPrimaryKey = (Boolean) parentNodeLink
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = parentNodeLink.getMultiplicity();
@@ -126,7 +127,8 @@ public abstract class ClientBase
             for (NodeLink childNodeLink : children.keySet())
             {
                 String linkName = (String) childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                Object linkValue = childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                Object linkValue = childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE) != null ? childNodeLink
+                        .getLinkProperty(LinkProperty.LINK_VALUE) : children.get(childNodeLink).getEntityId();
                 boolean isSharedByPrimaryKey = (Boolean) childNodeLink
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();

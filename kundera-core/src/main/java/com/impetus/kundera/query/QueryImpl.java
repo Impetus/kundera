@@ -170,6 +170,14 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         if (kunderaQuery.isDeleteUpdate())
         {
             onDeleteOrUpdate(results);
+        }      
+        
+        if(results != null)
+        {
+            for(Object obj : results)
+            {
+                persistenceDelegeator.setProxyOwners(m, obj);
+            }
         }
         return results != null ? results : new ArrayList();
     }
@@ -218,7 +226,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 EnhanceEntity ee = (EnhanceEntity) e;
 
                 result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                        persistenceDelegeator));
+                        persistenceDelegeator,false));
             }
         }
 

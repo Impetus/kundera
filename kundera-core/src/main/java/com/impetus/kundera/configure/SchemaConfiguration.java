@@ -105,7 +105,9 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
             Map<String, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
-
+            
+            PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
+            
             // Iterate each entity metadata.
             for (EntityMetadata entityMetadata : entityMetadataMap.values())
             {
@@ -136,6 +138,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 }
 
                 List<Relation> relations = entityMetadata.getRelations();
+                
                 parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
 
                 if (!found)
@@ -156,11 +159,18 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         // Need to iterate, as in case of non unary relations 
         for(String persistenceUnit:persistenceUnits)
         {
+            PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
+            
+            if (externalPropertyMap != null
+                    && externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
+                    || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
+            {
             SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
 
             if (schemaManager != null)
             {
                 schemaManager.exportSchema(persistenceUnit, puToSchemaMetadata.get(persistenceUnit));
+            }
             }
         }
     }
@@ -297,6 +307,12 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                                 .getIdAttribute().getJavaType()));
                         joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, entityMetadata
                                 .getIdAttribute().getJavaType()));
+
+//                        // Do not delete above lines. Currently join table columns are of type string only.
+//                        // It needs to be fixed later.
+//                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, String.class));
+//                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, String.class));
+
                         tableInfos.add(joinTableInfo);
                     }
                 }

@@ -26,7 +26,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "ADDRESS", schema = "hibernatepoc@addCassandra")
+@Table(name = "ADDRESS", schema = "hibernatepoc")
 @IndexCollection(columns = { @Index(name = "street") })
 public class HabitatBi1To1PK
 {

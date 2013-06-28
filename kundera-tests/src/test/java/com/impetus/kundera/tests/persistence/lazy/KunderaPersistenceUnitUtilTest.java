@@ -60,7 +60,7 @@ public class KunderaPersistenceUnitUtilTest
         Photographer p = em.find(Photographer.class, 1);
         Album album2 = p.getAlbum();
         boolean isLoaded = util.isLoaded(album2, "albumName");
-        Assert.assertTrue(isLoaded);
+        Assert.assertFalse(isLoaded);
 
         album2.getAlbumName();
         isLoaded = util.isLoaded(p, "album");
@@ -84,7 +84,7 @@ public class KunderaPersistenceUnitUtilTest
         Photographer p = em.find(Photographer.class, 1);
         Album album2 = p.getAlbum();
         boolean isLoaded = util.isLoaded(album2);
-        Assert.assertTrue(isLoaded);
+        Assert.assertFalse(isLoaded);
 
         album2.getAlbumName();
         isLoaded = util.isLoaded(album2);

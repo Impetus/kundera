@@ -15,11 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy.collection;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Abstract class containing common methods for all interfaces extending
@@ -27,116 +32,150 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * 
  * @author amresh.singh
  */
-public abstract class AbstractProxyCollection extends AbstractProxyBase {
+public abstract class AbstractProxyCollection extends AbstractProxyBase
+{
 
-	/**
-	 * Default constructor
-	 */
-	public AbstractProxyCollection() {
-		super();
-	}
+    /**
+     * Default constructor
+     */
+    public AbstractProxyCollection()
+    {
+        super();
+    }
 
-	/**
-	 * @param delegator
-	 */
-	public AbstractProxyCollection(final PersistenceDelegator delegator,
-			final Relation relation) {
-		super(delegator, relation);
-	}
+    /**
+     * @param delegator
+     */
+    public AbstractProxyCollection(final PersistenceDelegator delegator, final Relation relation)
+    {
+        super(delegator, relation);
+    }
 
-	protected boolean add(final Object object) {
-		eagerlyLoadDataCollection();
+    protected boolean add(final Object object)
+    {
+        eagerlyLoadDataCollection();
 
-		boolean result = false;
-		if (dataCollection != null && !dataCollection.contains(object)
-				&& object != null) {
-			getPersistenceDelegator().persist(object);
-			dataCollection.add(object);
-			result = true;
-		}
-		return result;
-	}
+        boolean result = false;
 
-	protected boolean addAll(final Collection collection) {
-		eagerlyLoadDataCollection();
+        if (dataCollection == null)
+        {
+            Class<?> collectionClass = getRelation().getProperty().getType();
+            if (collectionClass.isAssignableFrom(Set.class))
+            {
+                dataCollection = new HashSet();
+            }
+            else if (collectionClass.isAssignableFrom(List.class))
+            {
+                dataCollection = new ArrayList();
+            }
+        }
 
-		boolean result = false;
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && !dataCollection.contains(object)
+                && object != null)
+        {
+            // getPersistenceDelegator().persist(object);
+            dataCollection.add(object);
+            PropertyAccessorHelper.set(getOwner(), getRelation().getProperty(), dataCollection);
+            result = true;
+        }
+        return result;
+    }
 
-		if (dataCollection != null && collection != null
-				&& !collection.isEmpty()) {
-			for (Object o : collection) {
-				if (!dataCollection.contains(o) && o != null) {
-					getPersistenceDelegator().persist(o);
-					dataCollection.add(o);
-				}
-			}
-			result = true;
-		}
-		return result;
-	}
+    protected boolean addAll(final Collection collection)
+    {
+        eagerlyLoadDataCollection();
 
-	protected boolean remove(final Object object) {
-		eagerlyLoadDataCollection();
+        boolean result = false;
 
-		boolean result = false;
-		if (dataCollection != null && object != null) {
-			getPersistenceDelegator().remove(object);
-			if (dataCollection.contains(object)) {
-				dataCollection.remove(object);
-			}
-			result = true;
-		}
-		return result;
-	}
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
+                && !collection.isEmpty())
+        {
+            for (Object o : collection)
+            {
+                if (!dataCollection.contains(o) && o != null)
+                {
+                    getPersistenceDelegator().persist(o);
+                    dataCollection.add(o);
+                }
+            }
+            result = true;
+        }
+        return result;
+    }
 
-	protected boolean removeAll(final Collection collection) {
-		eagerlyLoadDataCollection();
-		boolean result = false;
-		if (dataCollection != null && collection != null
-				&& !collection.isEmpty()) {
-			for (Object o : collection) {
-				if (o != null) {
-					getPersistenceDelegator().remove(o);
-				}
-			}
+    protected boolean remove(final Object object)
+    {
+        eagerlyLoadDataCollection();
 
-			dataCollection.removeAll(collection);
-			result = true;
-		}
-		return result;
-	}
+        boolean result = false;
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && object != null)
+        {
+            getPersistenceDelegator().remove(object);
+            if (dataCollection.contains(object))
+            {
+                dataCollection.remove(object);
+            }
+            result = true;
+        }
+        return result;
+    }
 
-	protected boolean retainAll(final Collection collection) {
-		boolean result = false;
-		eagerlyLoadDataCollection();
+    protected boolean removeAll(final Collection collection)
+    {
+        eagerlyLoadDataCollection();
+        boolean result = false;
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
+                && !collection.isEmpty())
+        {
+            for (Object o : collection)
+            {
+                if (o != null)
+                {
+                    getPersistenceDelegator().remove(o);
+                }
+            }
 
-		if (dataCollection != null && collection != null
-				&& !collection.isEmpty()) {
-			result = dataCollection.retainAll(collection);
-		}
+            dataCollection.removeAll(collection);
+            result = true;
+        }
+        return result;
+    }
 
-		return result;
-	}
+    protected boolean retainAll(final Collection collection)
+    {
+        boolean result = false;
+        eagerlyLoadDataCollection();
 
-	protected Iterator iterator() {
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
+                && !collection.isEmpty())
+        {
+            result = dataCollection.retainAll(collection);
+        }
 
-		Iterator result = null;
-		if (getDataCollection() != null) {
-			eagerlyLoadDataCollection();
-			result = getDataCollection().iterator();
-		}
-		return result;
-	}
+        return result;
+    }
 
-	protected Object[] toArray() {
-		eagerlyLoadDataCollection();
-		return dataCollection == null ? new Object[0] : dataCollection
-				.toArray();
-	}
+    protected Iterator iterator()
+    {
 
-	protected Object[] toArray(final Object[] arg0) {
-		eagerlyLoadDataCollection();
-		return dataCollection == null ? new Object[0] : dataCollection
-				.toArray(arg0);
-	}	
+        eagerlyLoadDataCollection();
+        Iterator result = null;
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = getDataCollection().iterator();
+        }
+        return result;
+    }
+
+    protected Object[] toArray()
+    {
+        eagerlyLoadDataCollection();
+        return dataCollection == null ? new Object[0] : dataCollection.toArray();
+    }
+
+    protected Object[] toArray(final Object[] arg0)
+    {
+        eagerlyLoadDataCollection();
+        return dataCollection == null ? new Object[0] : dataCollection.toArray(arg0);
+    }
 }

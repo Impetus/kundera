@@ -134,8 +134,9 @@ public final class PersistenceDelegator
         {
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
-        }
-
+        }  
+        
+        
         EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object.
@@ -269,25 +270,46 @@ public final class PersistenceDelegator
         }
         else
         {
-        	 E e =  (E) ObjectUtils.deepCopy(nodeData);            
+            E e =  (E) ObjectUtils.deepCopy(nodeData);            
              setProxyOwners(entityMetadata, e);
              return e;
         }
 
     }
 
-	/**
-	 * @param <E>
-	 * @param entityMetadata
-	 * @param e
-	 */
-	private <E> void setProxyOwners(EntityMetadata entityMetadata, E e) {
-		KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata()
-				.getLazyInitializerFactory().getProxy();
-		if (kunderaProxy != null) {
-			kunderaProxy.getKunderaLazyInitializer().setOwner(e);
-		}
-	}
+    /**
+     * @param <E>
+     * @param entityMetadata
+     * @param e
+     */
+    public <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
+    {
+       
+          /*KunderaProxy kunderaProxy =
+          KunderaMetadata.INSTANCE.getCoreMetadata()
+          .getLazyInitializerFactory().getProxy(); if (kunderaProxy != null) {
+          kunderaProxy.getKunderaLazyInitializer().setOwner(e); }*/
+         
+
+        Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
+        for (Relation r : entityMetadata.getRelations())
+        {
+            if(r.isUnary())
+            {
+                String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
+                + r.getProperty().getName();
+                
+                KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
+                .getProxy(entityName);
+                
+                if (kunderaProxy != null)
+                {
+                    kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                }                
+            }
+        }
+
+    }
 
     /**
      * Retrieves a {@link List} of Entities for given Primary Keys
@@ -310,7 +332,8 @@ public final class PersistenceDelegator
         Set pKeys = new HashSet(Arrays.asList(primaryKeys));
         for (Object primaryKey : pKeys)
         {
-            entities.add(find(entityClass, primaryKey));
+            E e = find(entityClass, primaryKey);
+            if(e != null) entities.add(e);
         }
         return entities;
     }
@@ -603,6 +626,8 @@ public final class PersistenceDelegator
             clientMap.clear();
             clientMap = null;
         }
+        
+        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.
@@ -615,6 +640,7 @@ public final class PersistenceDelegator
         // Move all nodes tied to this EM into detached state
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
+        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
     }
 
     /**

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.entity.album.AlbumBi_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_M;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_M_1;
@@ -38,6 +39,7 @@ import com.impetus.kundera.entity.album.AlbumUni_1_M_M_M;
 import com.impetus.kundera.entity.album.AlbumUni_M_1_1_M;
 import com.impetus.kundera.entity.album.AlbumUni_M_M_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_M_M_M_M;
+import com.impetus.kundera.entity.photo.PhotoBi_1_1_1_1;
 import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_1;
 import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_M;
 import com.impetus.kundera.entity.photo.PhotoUni_1_1_M_1;
@@ -46,6 +48,7 @@ import com.impetus.kundera.entity.photo.PhotoUni_1_M_M_M;
 import com.impetus.kundera.entity.photo.PhotoUni_M_1_1_M;
 import com.impetus.kundera.entity.photo.PhotoUni_M_M_1_1;
 import com.impetus.kundera.entity.photo.PhotoUni_M_M_M_M;
+import com.impetus.kundera.entity.photographer.PhotographerBi_1_1_1_1;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_1_1;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_M_1;
@@ -153,6 +156,33 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph, pc);
 
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class));
+
+        markAllNodeAsDirty();
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
+
+        Deque<Node> fs = flushManager.getFlushStack();
+        Assert.assertEquals(3, fs.size());
+    }
+
+    @Test
+    public void test_multi_1_1_1_1()
+    {
+        FlushManager flushManager = new FlushManager();
+
+        PhotographerBi_1_1_1_1 a = new PhotographerBi_1_1_1_1();
+        a.setPhotographerId(1);
+        
+        AlbumBi_1_1_1_1 b = new AlbumBi_1_1_1_1();
+        b.setAlbumId("b1");
+        
+        PhotoBi_1_1_1_1 c = new PhotoBi_1_1_1_1();
+        c.setPhotoId("c1");
+        
+        b.setPhotographer(a);
+        b.setPhoto(c);
+
+        ObjectGraph graph = graphBuilder.getObjectGraph(b, null);
+        pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
@@ -544,6 +574,9 @@ public class FlushStackManagerTest
         clazzToPu.put(PhotographerUni_M_M_M_M.class.getName(), pus);
         clazzToPu.put(AlbumUni_M_M_M_M.class.getName(), pus);
         clazzToPu.put(PhotoUni_M_M_M_M.class.getName(), pus);
+        clazzToPu.put(PhotographerBi_1_1_1_1.class.getName(), pus);
+        clazzToPu.put(AlbumBi_1_1_1_1.class.getName(), pus);
+        clazzToPu.put(PhotoBi_1_1_1_1.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
@@ -574,6 +607,10 @@ public class FlushStackManagerTest
         EntityMetadata m24 = new EntityMetadata(AlbumUni_M_M_M_M.class);
         EntityMetadata m25 = new EntityMetadata(PhotoUni_M_M_M_M.class);
 
+        EntityMetadata m26 = new EntityMetadata(PhotographerBi_1_1_1_1.class);
+        EntityMetadata m27 = new EntityMetadata(AlbumBi_1_1_1_1.class);
+        EntityMetadata m28 = new EntityMetadata(PhotoBi_1_1_1_1.class);
+
         TableProcessor processor = new TableProcessor(null);
         processor.process(Store.class, m);
         processor.process(BillingCounter.class, m1);
@@ -601,6 +638,10 @@ public class FlushStackManagerTest
         processor.process(PhotographerUni_M_M_M_M.class, m23);
         processor.process(AlbumUni_M_M_M_M.class, m24);
         processor.process(PhotoUni_M_M_M_M.class, m25);
+
+        processor.process(PhotographerBi_1_1_1_1.class, m26);
+        processor.process(AlbumBi_1_1_1_1.class, m27);
+        processor.process(PhotoBi_1_1_1_1.class, m28);
 
         m.setPersistenceUnit(_persistenceUnit);
 
@@ -631,6 +672,10 @@ public class FlushStackManagerTest
         metaModel.addEntityMetadata(PhotographerUni_M_M_M_M.class, m23);
         metaModel.addEntityMetadata(AlbumUni_M_M_M_M.class, m24);
         metaModel.addEntityMetadata(PhotoUni_M_M_M_M.class, m25);
+
+        metaModel.addEntityMetadata(PhotographerBi_1_1_1_1.class, m26);
+        metaModel.addEntityMetadata(AlbumBi_1_1_1_1.class, m27);
+        metaModel.addEntityMetadata(PhotoBi_1_1_1_1.class, m28);
 
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
