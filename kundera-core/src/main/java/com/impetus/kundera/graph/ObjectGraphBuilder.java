@@ -23,7 +23,6 @@ import java.util.Set;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
-import com.impetus.kundera.PersistenceUtilHelper;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;

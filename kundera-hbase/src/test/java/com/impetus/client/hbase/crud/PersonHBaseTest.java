@@ -113,7 +113,7 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNull(results.get(0).getPersonName());
 
         
-        query = "select p.personId from PersonHBase p";
+        query = "select p from PersonHBase p";
         com.impetus.kundera.query.Query<PersonHBase> queryObject = (com.impetus.kundera.query.Query<PersonHBase>) em.createQuery(query);
         queryObject.setFetchSize(1);
         
@@ -125,10 +125,10 @@ public class PersonHBaseTest extends BaseTest
             counter++;
             person = resultIterator.next();
             Assert.assertNotNull(person.getPersonId());
-            Assert.assertNull(person.getPersonName());
+            Assert.assertNotNull(person.getPersonName());
         }
         
-        Assert.assertEquals(3, counter);
+        Assert.assertEquals(1, counter);
 
         
         query = "Select p.personId from PersonHBase p where p.personName = vivek";

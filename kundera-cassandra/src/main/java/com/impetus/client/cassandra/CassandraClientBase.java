@@ -1047,9 +1047,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         clear();
         setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
-
-        // nodes.clear();
-        // nodes = null;
         closed = true;
         externalProperties = null;
     }
@@ -1362,7 +1359,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public int executeBatch()
     {
-        String persistenceUnit = null;
         Cassandra.Client conn = null;
         Object pooledConnection = null;
 

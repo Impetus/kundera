@@ -868,5 +868,4 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return clientFactory.getRowDeletor(pool);
     }
-
 }

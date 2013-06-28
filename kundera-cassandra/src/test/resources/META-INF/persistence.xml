@@ -311,7 +311,7 @@
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="load-balancing-test">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>

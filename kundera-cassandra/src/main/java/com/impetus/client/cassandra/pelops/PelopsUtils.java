@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
@@ -164,24 +168,38 @@ public class PelopsUtils
      */
     public static boolean verifyConnection(String host, int port)
     {
+        Socket socket = null;
         try
         {
-            TSocket socket = new TSocket(host, port);
-            TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
-            Cassandra.Client client = new Cassandra.Client(protocol);
-            socket.open();
-            return client.describe_cluster_name() != null;
+            socket = new Socket(host, port);
+            socket.setReuseAddress(true);
+            socket.setSoLinger(true, 0);
+            boolean isConnected = socket.isConnected();
+            return isConnected;
         }
-        catch (TTransportException e)
+        catch (UnknownHostException e)
         {
             logger.warn("{}:{} is still down", host, port);
             return false;
         }
-        catch (TException e)
+        catch (IOException e)
         {
             logger.warn("{}:{} is still down", host, port);
             return false;
+        }
+        finally
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    socket.close();
+                }
+            }
+            catch (IOException e)
+            {
+                logger.warn("{}:{} is still down", host, port);
+            }
         }
     }
 

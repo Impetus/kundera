@@ -79,41 +79,32 @@ public abstract class AbstractSchemaManager
         this.externalProperties = externalProperties;
     }
 
-//     @Override
     /**
      * Export schema handles the handleOperation method.
      * 
      * @param hbase
      */
-    protected void exportSchema(final String persistenceUnit,List<TableInfo> tables)
+    protected void exportSchema(final String persistenceUnit, List<TableInfo> tables)
     {
+        // Get persistence unit metadata
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String paramString = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+        if (clientFactory != null
+                && ((clientFactory.equalsIgnoreCase(puMetadata.getProperties().getProperty(
+                        PersistenceProperties.KUNDERA_CLIENT_FACTORY))) || (paramString != null && clientFactory
+                        .equalsIgnoreCase(paramString))))
+        {
+            readConfigProperties(puMetadata);
 
-//        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        // Actually, start 1 pu.
-//        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
-//        Set<String> pus = puToSchemaCol.keySet();
-//        for (String pu : pus)
-//        {
-            // Get persistence unit metadata
-            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
-            String paramString = externalProperties != null ? (String) externalProperties
-                    .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
-            if (clientFactory != null
-                    && ((clientFactory.equalsIgnoreCase(puMetadata.getProperties().getProperty(
-                            PersistenceProperties.KUNDERA_CLIENT_FACTORY))) || (paramString != null && clientFactory
-                            .equalsIgnoreCase(paramString))))
+            // invoke handle operation.
+            if (operation != null && initiateClient())
             {
-                readConfigProperties(puMetadata);
-
-                // invoke handle operation.
-                if (operation != null && initiateClient())
-                {
-                    tableInfos = tables;
-                    handleOperations(tables);
-                }
+                tableInfos = tables;
+                handleOperations(tables);
             }
-     //   }
+        }
     }
 
     /**
@@ -149,11 +140,9 @@ public abstract class AbstractSchemaManager
         {
             hosts[i] = hostArray[i].trim();
         }
-
         this.port = portName;
         this.databaseName = schemaName;
         this.operation = operationType;
-        // this.useSecondryIndex = isSecondryIndexEnabled;
     }
 
     /**

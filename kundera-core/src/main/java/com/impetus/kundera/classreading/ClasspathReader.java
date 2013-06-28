@@ -224,8 +224,7 @@ public class ClasspathReader extends Reader
      * @return list of class path included in the base package
      */
 
-    @Override
-    public final URL[] findResourcesByContextLoader()
+    private final URL[] findResourcesByContextLoader()
     {
         List<URL> list = new ArrayList<URL>();
         ClassLoader classLoader = this.getClass().getClassLoader();
@@ -282,5 +281,28 @@ public class ClasspathReader extends Reader
     public final void setFilter(Filter filter)
     {
         this.filter = filter;
+    }
+    
+    @Override
+    public InputStream[] findResourcesAsStream()
+    {
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        assert classLoader != null;
+
+        InputStream[] iStreams = null;
+        int counter = 0;
+        for (String fullyQualifiedClassName : classesToScan)
+        {
+            if (iStreams == null)
+            {
+                iStreams = new InputStream[classesToScan.size()];
+            }
+
+            String classRelativePath = fullyQualifiedClassName.replace(".", "/");
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream(classRelativePath + ".class");
+            iStreams[counter++] = is;
+        }
+        return iStreams;
+
     }
 }

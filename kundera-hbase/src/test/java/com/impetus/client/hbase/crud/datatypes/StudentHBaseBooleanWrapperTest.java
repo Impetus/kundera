@@ -244,7 +244,7 @@ public class StudentHBaseBooleanWrapperTest extends Base
         }
         catch (QueryHandlerException qhe)
         {
-            Assert.assertEquals("unsupported clause OR for Hbase", qhe.getMessage());
+            Assert.assertEquals("Unsupported clause OR for Hbase", qhe.getMessage());
         }
     }
 

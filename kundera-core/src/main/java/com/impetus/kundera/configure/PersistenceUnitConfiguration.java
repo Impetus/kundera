@@ -90,7 +90,6 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
                     throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit
                             + " provided");
                 }
-                // metadatas.get(persistenceUnit);
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);
@@ -100,7 +99,6 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
             log.error("Error occurred during persistence unit configuration, Caused by: .", icex);
             throw new PersistenceLoaderException(icex);
         }
-
     }
 
     /**
@@ -117,6 +115,11 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         try
         {
             xmls = this.getClass().getClassLoader().getResources("META-INF/persistence.xml");
+            
+            if (xmls == null || !xmls.hasMoreElements())
+            {
+                xmls = Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
+            }
         }
         catch (IOException ioex)
         {

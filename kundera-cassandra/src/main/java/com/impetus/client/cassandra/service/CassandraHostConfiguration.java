@@ -216,7 +216,6 @@ public class CassandraHostConfiguration extends HostConfiguration
         catch (NumberFormatException e)
         {
             logger.warn("Some Connection pool related property couldn't be parsed. Default pool policy would be used");
-            // cassandraHost = null;
         }
     }
 

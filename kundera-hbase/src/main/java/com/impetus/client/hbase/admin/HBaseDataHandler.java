@@ -44,6 +44,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +93,9 @@ public class HBaseDataHandler implements DataHandler
     /** The hbase writer. */
     private Writer hbaseWriter = new HBaseWriter();
 
-    private Filter filter;
+    private FilterList filter = null;
+
+    private Map<String, FilterList> filters = new ConcurrentHashMap<String, FilterList>();
 
     /**
      * Instantiates a new h base data handler.
@@ -221,7 +224,7 @@ public class HBaseDataHandler implements DataHandler
         hTable = gethTable(tableName);
 
         // Load raw data from HBase
-        List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, this.filter, columns);
+        List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, getFilter(tableName), columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -272,8 +275,8 @@ public class HBaseDataHandler implements DataHandler
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, this.filter, startRow, endRow, m.getTableName(), null,
-                columns);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, getFilter(tableName), startRow, endRow, m.getTableName(),
+                null, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -361,7 +364,7 @@ public class HBaseDataHandler implements DataHandler
         {
             hTable = gethTable(joinTableName);
 
-            List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, filter);
+            List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
 
             // assuming rowKey is not null.
             if (results != null)
@@ -721,7 +724,25 @@ public class HBaseDataHandler implements DataHandler
      */
     public void setFilter(Filter filter)
     {
-        this.filter = filter;
+        if (this.filter == null)
+        {
+            this.filter = new FilterList();
+        }
+
+        this.filter.addFilter(filter);
+        // this.filter = filter;
+    }
+
+    public void addFilter(final String columnFamily, Filter filter)
+    {
+        FilterList filterList = this.filters.get(columnFamily);
+        if (filterList == null)
+        {
+            filterList = new FilterList();
+        }
+        filterList.addFilter(filter);
+
+        this.filters.put(columnFamily, filterList);
     }
 
     /**
@@ -1077,4 +1098,25 @@ public class HBaseDataHandler implements DataHandler
         ((HBaseReader) hbaseReader).reset();
     }
 
+    public HBaseDataHandler getHandle()
+    {
+        HBaseDataHandler handler = new HBaseDataHandler(this.conf, this.hTablePool);
+        handler.filter = this.filter;
+        handler.filters = this.filters;
+        return handler;
+    }
+
+    private Filter getFilter(final String columnFamily)
+    {
+        FilterList filter = filters.get(columnFamily);
+        if (filter == null)
+        {
+            return this.filter;
+        }
+        if (this.filter != null)
+        {
+            filter.addFilter(this.filter);
+        }
+        return filter;
+    }
 }

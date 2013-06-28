@@ -122,13 +122,13 @@ public class AbstractEntityReader
 
         FetchType fetchType = relation.getFetchType();
 
-        if (fetchType.equals(FetchType.LAZY))
-        {
-            final Object entityId = PropertyAccessorHelper.getId(entity, m);
-            associationBuilder.setProxyRelationObject(entity, relationsMap, m, pd, entityId, relation);
-        }
-        else
-        {
+//        if (fetchType.equals(FetchType.LAZY))
+//        {
+//            final Object entityId = PropertyAccessorHelper.getId(entity, m);
+//            associationBuilder.setProxyRelationObject(entity, relationsMap, m, pd, entityId, relation);
+//        }
+//        else
+//        {
             if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
             {
                 // First, Save this entity to persistence cache
@@ -142,7 +142,7 @@ public class AbstractEntityReader
             {
                 onRelation(entity, relationsMap, relation, m, pd);
             }
-        }
+//        }
     }
 
     /**
@@ -168,7 +168,6 @@ public class AbstractEntityReader
         // a column value and relation.getJoinColumnName as column name.
 
         Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
-        // EntityMetadata targetEntityMetadata = null;
         EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
 
         List relationalEntities = fetchRelations(relation, metadata, pd, entityId, relationValue, targetEntityMetadata);
@@ -228,14 +227,14 @@ public class AbstractEntityReader
 
             FetchType fetchType = relation.getFetchType();
 
-            if (fetchType.equals(FetchType.LAZY))
-            {
-                final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
-                associationBuilder.setProxyRelationObject(relationEntity, relationsMap, metadata, pd, entityId,
-                        relation);
-            }
-            else
-            {
+//            if (fetchType.equals(FetchType.LAZY))
+//            {
+//                final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
+//                associationBuilder.setProxyRelationObject(relationEntity, relationsMap, metadata, pd, entityId,
+//                        relation);
+//            }
+//            else
+//            {
 
                 if (relation.isUnary() && relation.getTargetEntity().isAssignableFrom(originalEntity.getClass()))
                 {
@@ -293,7 +292,7 @@ public class AbstractEntityReader
                  */
 
                 }
-            }
+//            }
         }
 
     }

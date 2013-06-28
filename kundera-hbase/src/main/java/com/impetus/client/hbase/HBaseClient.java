@@ -257,7 +257,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         if (isFindKeyOnly(metadata, columns))
         {
             columns = null;
-            setFilter(new KeyOnlyFilter());
+            addFilter(tableName,new KeyOnlyFilter());
         }
 
         try
@@ -301,7 +301,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         if (isFindKeyOnly(metadata, columns))
         {
             columns = null;
-            setFilter(new KeyOnlyFilter());
+            addFilter(tableName,new KeyOnlyFilter());
         }
 
         try
@@ -373,6 +373,10 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         ((HBaseDataHandler) handler).setFilter(filter);
     }
 
+    public void addFilter(final String columnFamily, Filter filter)
+    {
+        ((HBaseDataHandler) handler).addFilter(columnFamily, filter);
+    }
     /**
      * Setter for filter.
      * 
@@ -800,5 +804,9 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         return ((HBaseDataHandler)handler).hasNext();
     }
 
+    public HBaseDataHandler getHandle()
+    {
+        return ((HBaseDataHandler)handler).getHandle();
+    }
 
 }

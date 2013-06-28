@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
+import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -546,18 +547,18 @@ public class HBaseQuery extends QueryImpl
     @Override
     public Iterator iterate()
     {
-        
-        if (log.isDebugEnabled())
-            log.info("On getResultList() executing query: " + query);
-        List results = new ArrayList();
-
         EntityMetadata m = getEntityMetadata();
-        Client client = persistenceDelegeator.getClient(m);
 
-        ((HBaseClient)client).setFetchSize(getFetchSize());
-        onQuery(m, client);
-      
+        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        {
+            throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
+        }
+        Client client = persistenceDelegeator.getClient(m);
+        QueryTranslator translator = new QueryTranslator();
+        translator.translate(getKunderaQuery(), m);
+        // start with 1 as first element is alias.
+        List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
         
-        return new ResultIterator((HBaseClient)client,m,persistenceDelegeator);
+        return new ResultIterator((HBaseClient)client,m,persistenceDelegeator,getFetchSize(),getKunderaQuery(),translator,columns);
     }
 }

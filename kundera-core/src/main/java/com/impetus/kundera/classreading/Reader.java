@@ -25,6 +25,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
+
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
@@ -159,7 +161,7 @@ public abstract class Reader
                 }
 
                 File f = new File(url.getPath());
-                if (f.isDirectory())
+                if (f.isDirectory() || url.getProtocol().toUpperCase().equals(AllowedProtocol.VFS.name()))
                 {
                     return new ClassFileIterator(f, filter);
                 }
@@ -240,12 +242,14 @@ public abstract class Reader
      */
     public abstract URL[] findResources();
 
+
     /**
-     * Find resources by context loader.
+     * Find resources.
      * 
      * @return the uR l[]
      */
-    public abstract URL[] findResourcesByContextLoader();
+    public abstract InputStream[] findResourcesAsStream();
+
 
     /**
      * Find resources by classpath.

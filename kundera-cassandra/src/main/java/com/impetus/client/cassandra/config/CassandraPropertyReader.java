@@ -266,7 +266,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                 if (ds.getConnection() != null)
                 {
                     properties = ds.getConnection().getProperties();
-                    return properties;
+                    return properties != null ? properties : new Properties();
                 }
                 if (logger.isWarnEnabled())
                 {

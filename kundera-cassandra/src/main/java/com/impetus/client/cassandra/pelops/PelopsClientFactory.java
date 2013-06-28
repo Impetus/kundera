@@ -223,7 +223,7 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (!hostPools.isEmpty())
         {
-            logger.info("Retruning pool using {} policy.", loadBalancingPolicy.getClass());
+            logger.info("Retruning pool using {} .", loadBalancingPolicy.getClass().getSimpleName());
             return (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
@@ -241,7 +241,19 @@ public class PelopsClientFactory extends GenericClientFactory
                 Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
                 int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
+                {
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return iThriftPool.getConnection();
+                    }
+                    removePool(iThriftPool);
+                }
+                else
                 {
                     logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return iThriftPool.getConnection();
@@ -266,12 +278,23 @@ public class PelopsClientFactory extends GenericClientFactory
                 Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
                 int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
+                {
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
+                }
+                else
                 {
                     logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(iThriftPool);
             }
             success = false;
             iThriftPool = getPoolUsingPolicy();
@@ -290,12 +313,23 @@ public class PelopsClientFactory extends GenericClientFactory
                 Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
                 int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
+                {
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
+                }
+                else
                 {
                     logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(iThriftPool);
             }
             success = false;
             iThriftPool = getPoolUsingPolicy();
@@ -314,12 +348,23 @@ public class PelopsClientFactory extends GenericClientFactory
                 Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
                 int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
                 {
-                    logger.info("Retruning rowDeletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
+                }
+                else
+                {
+                    logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
                 }
-                removePool(iThriftPool);
             }
             success = false;
             iThriftPool = getPoolUsingPolicy();
