@@ -34,17 +34,6 @@ public class QueryHandlerException extends RuntimeException
     public QueryHandlerException()
     {
         super();
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param paramString
-     * @param paramThrowable
-     */
-    public QueryHandlerException(String paramString, Throwable paramThrowable)
-    {
-        super(paramString, paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -53,7 +42,6 @@ public class QueryHandlerException extends RuntimeException
     public QueryHandlerException(String paramString)
     {
         super(paramString);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -62,7 +50,6 @@ public class QueryHandlerException extends RuntimeException
     public QueryHandlerException(Throwable paramThrowable)
     {
         super(paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 
 }
