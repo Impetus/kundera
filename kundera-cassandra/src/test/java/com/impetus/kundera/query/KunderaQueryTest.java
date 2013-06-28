@@ -1,10 +1,25 @@
-/**
- * 
- */
+/*******************************************************************************
+ *  * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.kundera.query;
+
+import java.util.Iterator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Parameter;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 
@@ -18,7 +33,7 @@ import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
- * @author impadmin
+ * @author kuldeep.mishra
  * 
  */
 public class KunderaQueryTest
@@ -153,4 +168,104 @@ public class KunderaQueryTest
             Assert.assertEquals("bad jpa query: p", e.getMessage());
         }
     }
+
+    @Test
+    public void testOnIndexParameter()
+    {
+        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter(1, "uuid1");
+        kunderaQuery.setParameter(2, "uuidname");
+        
+        Object value = kunderaQuery.getClauseValue("?1");
+        Assert.assertNotNull(value);
+        Assert.assertEquals("uuid1", value);
+        value = kunderaQuery.getClauseValue("?2");
+        Assert.assertNotNull(value);
+        Assert.assertEquals("uuidname", value);
+        Assert.assertEquals(2, kunderaQuery.getParameters().size());
+        
+        Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
+        
+        while(parameters.hasNext())
+        {
+            Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
+        }
+    }
+    
+    @Test
+    public void testOnNameParameter()
+    {
+        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("uuid", "uuid1");
+        kunderaQuery.setParameter("name", "uuidname");
+        
+        Assert.assertEquals(2, kunderaQuery.getParameters().size());
+        
+        Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
+        
+        while(parameters.hasNext())
+        {
+            Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
+        }
+
+        Object value = kunderaQuery.getClauseValue(":uuid");
+        Assert.assertNotNull(value);
+        Assert.assertEquals("uuid1", value);
+        value = kunderaQuery.getClauseValue(":name");
+        Assert.assertNotNull(value);
+        Assert.assertEquals("uuidname", value);
+        Assert.assertEquals(2, kunderaQuery.getParameters().size());
+
+    }
+
+    @Test
+    public void testInvalidIndexParameter()
+    {
+        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter(1, "uuid1");
+        kunderaQuery.setParameter(2, "uuidname");
+        
+        try
+        {
+            kunderaQuery.getClauseValue("?3");
+            Assert.fail("Should be catch block");
+        } catch(IllegalArgumentException iaex)
+        {
+            Assert.assertEquals("parameter is not a parameter of the query", iaex.getMessage());
+        }
+    }
+    
+    @Test
+    public void testInvalidNameParameter()
+    {
+        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("uuid", "uuid1");
+        kunderaQuery.setParameter("name", "uuidname");
+        
+        try
+        {
+            kunderaQuery.getClauseValue(":naame");
+            Assert.fail("Should be catch block");
+        } catch(IllegalArgumentException iaex)
+        {
+            Assert.assertEquals("parameter is not a parameter of the query", iaex.getMessage());
+        }
+    }
+
 }

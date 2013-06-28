@@ -300,7 +300,7 @@ public class KunderaQuery
                     }
                     else
                     {
-                        FilterClause clause = typedParameter.getParameters().get("?" + p.getName());
+                        FilterClause clause = typedParameter.getParameters().get("?" + p.getPosition());
                         if (clause != null)
                         {
                             return clause.getValue();
