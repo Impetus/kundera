@@ -269,6 +269,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
+        
+        logger.error("parameter{} is not a parameter of the query",paramString);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -304,6 +306,14 @@ public class KunderaQuery
                         if (clause != null)
                         {
                             return clause.getValue();
+                        } else
+                        {
+                            UpdateClause updateClause = typedParameter.getUpdateParameters().get("?" + p.getPosition());
+                            if(updateClause != null)
+                            {
+                                return updateClause.getValue();
+                            }
+                                    
                         }
                     }
                     break;
@@ -314,6 +324,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
+        
+        logger.error("parameter{} is not a parameter of the query",param);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -1053,6 +1065,7 @@ public class KunderaQuery
     {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
+        addTypedParameter(value.trim().startsWith("?")?Type.INDEXED:Type.NAMED, property, updateClause);
     }
 
     /**

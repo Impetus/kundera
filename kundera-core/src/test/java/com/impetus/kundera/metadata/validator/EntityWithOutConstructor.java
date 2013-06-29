@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,34 +15,29 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
-import com.impetus.kundera.KunderaException;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
- * @author amresh
- * 
+ * @author vivek.mishra
+ * Invalid entity definition without no-arg-constructor.
  */
-public class InvalidEntityDefinitionException extends KunderaException
+@Entity
+@Table
+public class EntityWithOutConstructor
 {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 944429642343486327L;
+    private String name;
 
-    /**
-     * 
-     */
-    public InvalidEntityDefinitionException()
+    public String getName()
     {
-
+        return name;
     }
 
-    /**
-     * @param paramString
-     */
-    public InvalidEntityDefinitionException(String paramString)
+    public void setName(String name)
     {
-        super(paramString);
+        this.name = name;
     }
-
+    
+    
 }

@@ -38,7 +38,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
@@ -170,13 +169,13 @@ public abstract class QueryImpl implements Query
             onDeleteOrUpdate(results);
         }      
         
-        if(results != null)
+        /*if(results != null)
         {
             for(Object obj : results)
             {
                 persistenceDelegeator.setProxyOwners(m, obj);
             }
-        }
+        }*/
         return results != null ? results : new ArrayList();
     }
 
@@ -638,7 +637,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Object getSingleResult()
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("getSingleResult is unsupported by Kundera");
     }
 
     /* @see javax.persistence.Query#setFirstResult(int) */
@@ -650,7 +649,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setFirstResult(int startPosition)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setFirstResult is unsupported by Kundera");
     }
 
     /*
@@ -666,7 +665,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setFlushMode(FlushModeType flushMode)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setFlushMode is unsupported by Kundera");
     }
 
     /**
@@ -737,7 +736,7 @@ public abstract class QueryImpl implements Query
     public Query setParameter(String name, Date value, TemporalType temporalType)
     {
         // Purpose of temporal type is to set value based on temporal type.
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -753,7 +752,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(String name, Calendar value, TemporalType temporalType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -769,7 +768,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(int position, Date value, TemporalType temporalType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -785,7 +784,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(int position, Calendar value, TemporalType temporalType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -807,7 +806,7 @@ public abstract class QueryImpl implements Query
     @Override
     public int getFirstResult()
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("getFirstResult is unsupported by Kundera");
     }
 
     /**
@@ -854,7 +853,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(Parameter<Calendar> paramParameter, Calendar paramCalendar, TemporalType paramTemporalType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -866,7 +865,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(Parameter<Date> paramParameter, Date paramDate, TemporalType paramTemporalType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setParameter is unsupported by Kundera");
     }
 
     /*
@@ -999,7 +998,7 @@ public abstract class QueryImpl implements Query
     @Override
     public FlushModeType getFlushMode()
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("getFlushMode is unsupported by Kundera");
     }
 
     /*
@@ -1010,7 +1009,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setLockMode(LockModeType paramLockModeType)
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("setLockMode is unsupported by Kundera");
     }
 
     /*
@@ -1021,7 +1020,7 @@ public abstract class QueryImpl implements Query
     @Override
     public LockModeType getLockMode()
     {
-        throw new NotImplementedException("TODO");
+        throw new UnsupportedOperationException("getLockMode is unsupported by Kundera");
     }
 
     /*

@@ -28,17 +28,6 @@ public class JPQLParseException extends QueryHandlerException
     public JPQLParseException()
     {
         super();
-        // TODO Auto-generated constructor stub
-    }
-
-    /**
-     * @param paramString
-     * @param paramThrowable
-     */
-    public JPQLParseException(String paramString, Throwable paramThrowable)
-    {
-        super(paramString, paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,7 +36,6 @@ public class JPQLParseException extends QueryHandlerException
     public JPQLParseException(Throwable paramThrowable)
     {
         super(paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 
     /**

@@ -67,17 +67,6 @@ public class LuceneQuery extends QueryImpl implements Query
         this.kunderaQuery = kunderaQuery;
     }
 
-    /**
-     * Sets the lucene query.
-     * 
-     * @param luceneQuery
-     *            the new lucene query
-     */
-    public void setLuceneQuery(String luceneQuery)
-    {
-        this.luceneQuery = luceneQuery;
-    }
-
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
     /*
      * (non-Javadoc)
@@ -140,13 +129,13 @@ public class LuceneQuery extends QueryImpl implements Query
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        throw new UnsupportedOperationException("Method not supported for default indexing");
+        throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
     @Override
     protected EntityReader getReader()
     {
-        throw new UnsupportedOperationException("Method not supported for default indexing");
+        throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
     @Override
