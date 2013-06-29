@@ -20,8 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.persistence.Query;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +161,7 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
+    private Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
             throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
             InstantiationException, IllegalAccessException, InvocationTargetException
     {

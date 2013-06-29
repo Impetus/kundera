@@ -134,9 +134,8 @@ public final class PersistenceDelegator
         {
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
-        }  
-        
-        
+        }
+
         EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object.
@@ -183,11 +182,14 @@ public final class PersistenceDelegator
             for (Relation relation : metadata.getRelations())
             {
                 Object relObj = PropertyAccessorHelper.getObject(e, relation.getProperty());
-                Node relNode = getPersistenceCache().getMainCache().getNodeFromCache(relObj);
-                if (relObj != null && relNode != null)
+                if (relObj != null)
                 {
-                    EntityMetadata relMetadata = getMetadata(relation.getTargetEntity());
-                    updateId(relObj, relMetadata, relNode);
+                    Node relNode = getPersistenceCache().getMainCache().getNodeFromCache(relObj);
+                    if (relNode != null)
+                    {
+                        EntityMetadata relMetadata = getMetadata(relation.getTargetEntity());
+                        updateId(relObj, relMetadata, relNode);
+                    }
                 }
             }
         }
@@ -270,9 +272,9 @@ public final class PersistenceDelegator
         }
         else
         {
-            E e =  (E) ObjectUtils.deepCopy(nodeData);            
-             setProxyOwners(entityMetadata, e);
-             return e;
+            E e = (E) ObjectUtils.deepCopy(nodeData);
+            setProxyOwners(entityMetadata, e);
+            return e;
         }
 
     }
@@ -284,31 +286,23 @@ public final class PersistenceDelegator
      */
     public <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
     {
-       
-          /*KunderaProxy kunderaProxy =
-          KunderaMetadata.INSTANCE.getCoreMetadata()
-          .getLazyInitializerFactory().getProxy(); if (kunderaProxy != null) {
-          kunderaProxy.getKunderaLazyInitializer().setOwner(e); }*/
-         
-
         Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
         for (Relation r : entityMetadata.getRelations())
         {
-            if(r.isUnary())
+            if (r.isUnary())
             {
                 String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
-                + r.getProperty().getName();
-                
+                        + r.getProperty().getName();
+
                 KunderaProxy kunderaProxy = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
-                .getProxy(entityName);
-                
+                        .getProxy(entityName);
+
                 if (kunderaProxy != null)
                 {
                     kunderaProxy.getKunderaLazyInitializer().setOwner(e);
-                }                
+                }
             }
         }
-
     }
 
     /**
@@ -333,7 +327,8 @@ public final class PersistenceDelegator
         for (Object primaryKey : pKeys)
         {
             E e = find(entityClass, primaryKey);
-            if(e != null) entities.add(e);
+            if (e != null)
+                entities.add(e);
         }
         return entities;
     }
@@ -626,7 +621,7 @@ public final class PersistenceDelegator
             clientMap.clear();
             clientMap = null;
         }
-        
+
         KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
@@ -957,4 +952,3 @@ public final class PersistenceDelegator
         }
     }
 }
-

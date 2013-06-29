@@ -18,7 +18,7 @@ package com.impetus.kundera;
 /**
  * The Interface DataWrapper.
  * 
- * @author impetus
+ * @author vivek.mishra
  */
 public interface DataWrapper
 {

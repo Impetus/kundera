@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,34 +15,32 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
-import com.impetus.kundera.KunderaException;
+import javax.persistence.Entity;
 
 /**
- * @author amresh
- * 
+ * @author vivek.mishra
+ * Invalid entity definition without @Table annotated field.
  */
-public class InvalidEntityDefinitionException extends KunderaException
+@Entity
+public class EntityWithOutTableAnnotation
 {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 944429642343486327L;
-
-    /**
-     * 
-     */
-    public InvalidEntityDefinitionException()
+    private String name;
+    
+    public EntityWithOutTableAnnotation()
     {
-
+        
     }
 
-    /**
-     * @param paramString
-     */
-    public InvalidEntityDefinitionException(String paramString)
+    public String getName()
     {
-        super(paramString);
+        return name;
     }
 
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+    
+    
 }

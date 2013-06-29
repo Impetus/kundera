@@ -37,6 +37,10 @@ import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQueryParser;
+import com.impetus.kundera.query.LuceneQuery;
+import com.impetus.kundera.query.QueryHandlerException;
 
 public class PersistenceDelegatorTest
 {
@@ -372,4 +376,19 @@ public class PersistenceDelegatorTest
             Assert.assertEquals("This is not a valid or managed entity, can't be refreshed", e.getMessage());
         }
     }
+
+    @Test
+    public void testCreateQueryWithNull()
+    {
+        PersistenceDelegator pd = ((EntityManagerImpl)em).getPersistenceDelegator();
+        try
+        {
+            pd.createQuery(null);
+            Assert.fail("Should have gone to catch block!");
+        }catch(QueryHandlerException qhex)
+        {
+            Assert.assertEquals("Query String should not be null ", qhex.getMessage());
+        }
+    }
+
 }

@@ -104,7 +104,19 @@ public class ObjectGraphBuilder
 
         if (initialNodeState != null && initialNodeState.getClass().equals(TransientState.class))
         {
-            idGenerator.generateAndSetId(entity, entityMetadata, pd);
+            Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
+            Node nodeInPersistenceCache = null;
+            if (id != null)
+            {
+                String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
+                nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
+            }
+            // if node not in persistence cache it means it came first time
+            // for persist, then generate id for it.
+            if (nodeInPersistenceCache == null)
+            {
+                idGenerator.generateAndSetId(entity, entityMetadata, pd);
+            }
         }
 
         if (!validator.isValidEntityObject(entity))
@@ -187,8 +199,7 @@ public class ObjectGraphBuilder
                     // node and add to graph
                     Collection childrenObjects = (Collection) childObject;
 
-                    if (childrenObjects != null
-                            && !ProxyHelper.isProxyCollection(childrenObjects))
+                    if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
 
                         for (Object childObj : childrenObjects)
                         {
@@ -201,8 +212,7 @@ public class ObjectGraphBuilder
                 else if (Map.class.isAssignableFrom(childObject.getClass()))
                 {
                     Map childrenObjects = (Map) childObject;
-                    if (childrenObjects != null
-                            && !ProxyHelper.isProxyCollection(childrenObjects))
+                    if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {
@@ -232,11 +242,11 @@ public class ObjectGraphBuilder
     private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject,
             NodeState initialNodeState)
     {
-        if(childObject instanceof KunderaProxy || childObject instanceof ProxyCollection)
+        if (childObject instanceof KunderaProxy || childObject instanceof ProxyCollection)
         {
-        	return;
+            return;
         }
-    	
+
         else if (childObject instanceof Map.Entry)
         {
             Map.Entry entry = (Map.Entry) childObject;

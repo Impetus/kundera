@@ -269,6 +269,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
+        
+        logger.error("parameter{} is not a parameter of the query",paramString);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -300,10 +302,18 @@ public class KunderaQuery
                     }
                     else
                     {
-                        FilterClause clause = typedParameter.getParameters().get("?" + p.getName());
+                        FilterClause clause = typedParameter.getParameters().get("?" + p.getPosition());
                         if (clause != null)
                         {
                             return clause.getValue();
+                        } else
+                        {
+                            UpdateClause updateClause = typedParameter.getUpdateParameters().get("?" + p.getPosition());
+                            if(updateClause != null)
+                            {
+                                return updateClause.getValue();
+                            }
+                                    
                         }
                     }
                     break;
@@ -314,6 +324,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
+        
+        logger.error("parameter{} is not a parameter of the query",param);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -582,18 +594,21 @@ public class KunderaQuery
      */
     private void addTypedParameter(Type type, String parameter, UpdateClause clause)
     {
-        if (typedParameter == null)
+        if (type != null)
         {
-            typedParameter = new TypedParameter(type);
-        }
+            if (typedParameter == null)
+            {
+                typedParameter = new TypedParameter(type);
+            }
 
-        if (typedParameter.getType().equals(type))
-        {
-            typedParameter.addParameters(parameter, clause);
-        }
-        else
-        {
-            logger.warn("Invalid type provided, it can either be name or indexes!");
+            if (typedParameter.getType().equals(type))
+            {
+                typedParameter.addParameters(parameter, clause);
+            }
+            else
+            {
+                logger.warn("Invalid type provided, it can either be name or indexes!");
+            }
         }
     }
 
@@ -1053,6 +1068,7 @@ public class KunderaQuery
     {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
+        addTypedParameter(value.trim().startsWith("?")?Type.INDEXED:value.trim().startsWith(":")?Type.NAMED:null, property, updateClause);
     }
 
     /**

@@ -44,7 +44,8 @@ public class PersistenceUtilHelper
 
     public static LoadState isLoadedWithReference(Object proxy, String property, MetadataCache cache)
     {
-        return isLoaded(get(proxy, property, cache));
+        
+        return proxy == null? LoadState.NOT_LOADED:isLoaded(get(proxy, property, cache));
     }
 
     public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)

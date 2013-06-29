@@ -1979,6 +1979,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             catch (Exception e)
             {
                 log.error("Error while executing native CQL query Caused by: .", e);
+                e.printStackTrace();
                 throw new PersistenceException(e);
             }
 

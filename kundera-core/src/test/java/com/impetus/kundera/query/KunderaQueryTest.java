@@ -28,16 +28,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.entity.CassandraUUIDEntity;
-import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
- * @author kuldeep.mishra
+ * @author vivek.mishra
+ *  Junit for Kundera query test.
  * 
  */
 public class KunderaQueryTest
 {
+
+    private static final String PU = "patest";
 
     private EntityManagerFactory emf;
 
@@ -49,10 +53,10 @@ public class KunderaQueryTest
     @Before
     public void setUp() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("UUIDCassandra");
-        emf = Persistence.createEntityManagerFactory("cass_pu");
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+        emf = Persistence.createEntityManagerFactory(PU);
         em = emf.createEntityManager();
+
     }
 
     /**
@@ -68,22 +72,22 @@ public class KunderaQueryTest
     @Test
     public void test()
     {
-        String query = "Select p from CassandraUUIDEntity p";
+        String query = "Select p from Person p";
         KunderaQuery kunderaQuery = new KunderaQuery();
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         Assert.assertNotNull(kunderaQuery.getEntityClass());
-        Assert.assertEquals(CassandraUUIDEntity.class, kunderaQuery.getEntityClass());
+        Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
         Assert.assertNotNull(kunderaQuery.getEntityMetadata());
-        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(CassandraUUIDEntity.class).equals(
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(Person.class).equals(
                 kunderaQuery.getEntityMetadata()));
         Assert.assertNull(kunderaQuery.getFilter());
         Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
         Assert.assertNotNull(kunderaQuery.getFrom());
         Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
         Assert.assertNotNull(kunderaQuery.getResult());
-        Assert.assertEquals("cass_pu", kunderaQuery.getPersistenceUnit());
+        Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
         Assert.assertNull(kunderaQuery.getOrdering());
         try
         {
@@ -102,7 +106,7 @@ public class KunderaQueryTest
         }
         try
         {
-            query = "Select p form CassandraUUIDEntity p";
+            query = "Select p form Person p";
             kunderaQuery = new KunderaQuery();
             queryParser = new KunderaQueryParser(kunderaQuery, query);
             queryParser.parse();
@@ -117,22 +121,22 @@ public class KunderaQueryTest
         }
         try
         {
-            query = "Selct p from CassandraUUIDEntity p";
+            query = "Selct p from Person p";
             kunderaQuery = new KunderaQuery();
             queryParser = new KunderaQueryParser(kunderaQuery, query);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.assertNotNull(kunderaQuery.getEntityClass());
-            Assert.assertEquals(CassandraUUIDEntity.class, kunderaQuery.getEntityClass());
+            Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
             Assert.assertNotNull(kunderaQuery.getEntityMetadata());
-            Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(CassandraUUIDEntity.class).equals(
+            Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(Person.class).equals(
                     kunderaQuery.getEntityMetadata()));
             Assert.assertNull(kunderaQuery.getFilter());
             Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
             Assert.assertNotNull(kunderaQuery.getFrom());
             Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
             Assert.assertNotNull(kunderaQuery.getResult());
-            Assert.assertEquals("cass_pu", kunderaQuery.getPersistenceUnit());
+            Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
             Assert.assertNull(kunderaQuery.getOrdering());
         }
         catch (JPQLParseException e)
@@ -141,7 +145,7 @@ public class KunderaQueryTest
         }
         try
         {
-            query = "Select p from CassandraUUIDEntity p where";
+            query = "Select p from Person p where";
             kunderaQuery = new KunderaQuery();
             queryParser = new KunderaQueryParser(kunderaQuery, query);
             queryParser.parse();
@@ -156,7 +160,7 @@ public class KunderaQueryTest
         }
         try
         {
-            query = "Select p from CassandraUUIDEntity p where p";
+            query = "Select p from Person p where p";
             kunderaQuery = new KunderaQuery();
             queryParser = new KunderaQueryParser(kunderaQuery, query);
             queryParser.parse();
@@ -167,26 +171,66 @@ public class KunderaQueryTest
         {
             Assert.assertEquals("bad jpa query: p", e.getMessage());
         }
+        
+        try
+        {
+            query = "Select p from invalidPerson p";
+                    kunderaQuery = new KunderaQuery();
+                    queryParser = new KunderaQueryParser(kunderaQuery, query);
+                    queryParser.parse();
+                    kunderaQuery.postParsingInit();
+        }catch (QueryHandlerException qhex) 
+        {
+            Assert.assertEquals("No entity found by the name: invalidPerson", qhex.getMessage());
+        }
     }
 
     @Test
     public void testOnIndexParameter()
     {
-        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
+        String query = "Select p from Person p where p.personName = ?1 and p.age= ?2";
         KunderaQuery kunderaQuery = new KunderaQuery();
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter(1, "uuid1");
-        kunderaQuery.setParameter(2, "uuidname");
+        kunderaQuery.setParameter(1, "pname");
+        kunderaQuery.setParameter(2, 32);
         
         Object value = kunderaQuery.getClauseValue("?1");
         Assert.assertNotNull(value);
-        Assert.assertEquals("uuid1", value);
+        Assert.assertEquals("pname", value);
         value = kunderaQuery.getClauseValue("?2");
         Assert.assertNotNull(value);
-        Assert.assertEquals("uuidname", value);
+        Assert.assertEquals(32, value);
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
+
+        
+        try
+        {
+            kunderaQuery.getClauseValue("invalidparam");
+            Assert.fail("Should have gone to catch block!");
+        }catch(IllegalArgumentException iaex)
+        {
+            Assert.assertEquals("parameter is not a parameter of the query", iaex.getMessage());
+        }
+        
+
+        Assert.assertNotNull(kunderaQuery.getFilterClauseQueue());
+        
+        for(Object clause : kunderaQuery.getFilterClauseQueue())
+        {
+            Assert.assertNotNull(clause);
+            Assert.assertNotNull(clause.toString());
+            if(clause.getClass().isAssignableFrom(FilterClause.class))
+            {
+                Assert.assertNotNull(((FilterClause)clause).getProperty());
+                Assert.assertNotNull(((FilterClause)clause).getValue());
+                Assert.assertNotNull(((FilterClause)clause).getCondition());
+            } else
+            {
+                Assert.assertEquals("AND", clause.toString());
+            }
+        }
         
         Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
         
@@ -194,18 +238,35 @@ public class KunderaQueryTest
         {
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
+
+        query = "Select p from Person p where p.age between ?1 and ?2 ";
+        kunderaQuery = new KunderaQuery();
+        queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter(1, 32);
+        kunderaQuery.setParameter(2, 35);
+
+        value = kunderaQuery.getClauseValue("?1");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(32, value);
+        value = kunderaQuery.getClauseValue("?2");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(35, value);
+        Assert.assertEquals(2, kunderaQuery.getParameters().size());
+
     }
     
     @Test
     public void testOnNameParameter()
     {
-        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
+        String query = "Select p from Person p where p.personName = :name and p.age= :age";
         KunderaQuery kunderaQuery = new KunderaQuery();
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter("uuid", "uuid1");
-        kunderaQuery.setParameter("name", "uuidname");
+        kunderaQuery.setParameter("name", "pname");
+        kunderaQuery.setParameter("age", 32);
         
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
         
@@ -216,12 +277,12 @@ public class KunderaQueryTest
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
 
-        Object value = kunderaQuery.getClauseValue(":uuid");
+        Object value = kunderaQuery.getClauseValue(":name");
         Assert.assertNotNull(value);
-        Assert.assertEquals("uuid1", value);
-        value = kunderaQuery.getClauseValue(":name");
+        Assert.assertEquals("pname", value);
+        value = kunderaQuery.getClauseValue(":age");
         Assert.assertNotNull(value);
-        Assert.assertEquals("uuidname", value);
+        Assert.assertEquals(32, value);
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
 
     }
@@ -229,13 +290,13 @@ public class KunderaQueryTest
     @Test
     public void testInvalidIndexParameter()
     {
-        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
+        String query = "Select p from Person p where p.personName = ?1 and p.age= ?2";
         KunderaQuery kunderaQuery = new KunderaQuery();
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter(1, "uuid1");
-        kunderaQuery.setParameter(2, "uuidname");
+        kunderaQuery.setParameter(1, "pname");
+        kunderaQuery.setParameter(2, 32);
         
         try
         {
@@ -250,13 +311,13 @@ public class KunderaQueryTest
     @Test
     public void testInvalidNameParameter()
     {
-        String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
+        String query = "Select p from Person p where p.personName = :name and p.age= :age";
         KunderaQuery kunderaQuery = new KunderaQuery();
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter("uuid", "uuid1");
-        kunderaQuery.setParameter("name", "uuidname");
+        kunderaQuery.setParameter("name", "pname");
+        kunderaQuery.setParameter("age", 32);
         
         try
         {
@@ -268,4 +329,86 @@ public class KunderaQueryTest
         }
     }
 
+
+    @Test
+    public void testUpdateClause()
+    {
+        String query = "Update Person p set p.age= ?1 where p.personName = ?2 and p.age = ?3";
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter(1, 33);
+        kunderaQuery.setParameter(2, "pname");
+        kunderaQuery.setParameter(3, 32);
+        
+        Assert.assertEquals(3,kunderaQuery.getParameters().size());
+        
+        
+        Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
+        
+        Assert.assertNotNull(kunderaQuery.getUpdateClauseQueue());
+        
+        for(UpdateClause clause : kunderaQuery.getUpdateClauseQueue())
+        {
+            Assert.assertNotNull(clause);
+            Assert.assertNotNull(clause.getProperty());
+            Assert.assertNotNull(clause.getValue());
+            Assert.assertNotNull(clause.getClass());
+            Assert.assertNotNull(clause.toString());
+        }
+        
+        while(parameters.hasNext())
+        {
+            Parameter parameter = parameters.next();
+            Assert.assertTrue(kunderaQuery.isBound(parameter));
+            Assert.assertNull(parameter.getName());
+            Assert.assertNotNull(parameter.getPosition());
+        }
+
+        try
+        {
+            kunderaQuery.getClauseValue(":naame");
+            Assert.fail("Should have gone to catch block!");
+        } catch(IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(kunderaQuery.toString());
+            Assert.assertEquals("parameter is not a parameter of the query", iaex.getMessage());
+        }
+
+        try
+        {
+            kunderaQuery.getClauseValue(new JPAParameter());
+            Assert.fail("Should have gone to catch block!");
+        } catch(IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(kunderaQuery.toString());
+            Assert.assertEquals("parameter is not a parameter of the query", iaex.getMessage());
+        }
+
+    }
+
+
+    private class JPAParameter implements Parameter<String>
+    {
+
+        @Override
+        public String getName()
+        {
+            return "jpa";
+        }
+
+        @Override
+        public Integer getPosition()
+        {
+            return 0;
+        }
+
+        @Override
+        public Class<String> getParameterType()
+        {
+            return String.class;
+        }
+        
+    }
 }
