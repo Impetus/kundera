@@ -41,9 +41,14 @@ public class LuceneCleanupUtilities
         if (puMetadata != null)
         {
             String luceneDir = puMetadata.getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+            cleanDir(luceneDir);
+        }
+    }
+
+    public static void cleanDir(final String luceneDir)
+    {
             if (luceneDir != null && luceneDir.length() > 0)
             {
-                log.debug("Cleaning up lucene folder " + luceneDir);
                 File directory = new File(luceneDir);
                 // Get all files in directory
                 File[] files = directory.listFiles();
@@ -54,12 +59,10 @@ public class LuceneCleanupUtilities
                         // Delete each file
                         if (!file.delete())
                         {
-                            // Failed to delete file
-                            log.info("Failed to delete " + file);
                         }
                     }
                 }
             }
         }
-    }
+
 }

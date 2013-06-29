@@ -53,7 +53,7 @@ public class PersistenceUtilHelperTest
     }
 
     @Test
-    public void testisLoadedWithReferenceAsUnknown()
+    public void testisLoadedWithReferenceAsLoaded()
     {
         Person p = new Person();
         p.setPersonName("Vivek");
@@ -63,7 +63,7 @@ public class PersistenceUtilHelperTest
         Assert.assertEquals(LoadState.UNKNOWN, state);
     }
 
-    // @Test
+//     @Test
     public void testisLoadedWithReferenceAsKunderaProxy() throws NoSuchMethodException, SecurityException
     {
         CglibLazyInitializerFactory factory = new CglibLazyInitializerFactory();
@@ -110,6 +110,8 @@ public class PersistenceUtilHelperTest
 
         Assert.assertNotNull(state);
         Assert.assertEquals(LoadState.NOT_LOADED, state);
+        
+//        factory.
     }
 
 }

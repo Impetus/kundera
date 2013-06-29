@@ -641,19 +641,19 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void index(Class entityClazz, Map<String, Object> values)
     {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Method not supported");
     }
 
     @Override
     public void unIndex(Class entityClazz, Object entity)
     {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Method not supported");
     }
 
     @Override
     public Map<String, Object> search(String luceneQuery, int start, int end)
     {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Method not supported");
     }
 
 }

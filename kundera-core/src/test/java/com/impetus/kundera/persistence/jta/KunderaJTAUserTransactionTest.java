@@ -21,6 +21,7 @@ import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
@@ -88,6 +89,7 @@ public class KunderaJTAUserTransactionTest
             Assert.assertNotNull(utx);
             Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
             utx.begin();
+            Assert.assertEquals(Status.STATUS_ACTIVE, utx.getStatus());
             // pass true, as transaction has already begun.
             assertOnCommit(utx, true);
         }
@@ -126,6 +128,7 @@ public class KunderaJTAUserTransactionTest
         try
         {
             utx.commit();
+            Assert.assertEquals(Status.STATUS_NO_TRANSACTION, utx.getStatus());
         }
         catch (KunderaException kex)
         {
@@ -161,11 +164,93 @@ public class KunderaJTAUserTransactionTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Method to test rollback
      */
-    @After
-    public void tearDown() throws Exception
+    @Test
+    public void testRollback()
     {
+        try
+        {
+            Assert.assertNotNull(utx);
+            Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
+
+            // Rollback without begin of transaction.
+            try
+            {
+                utx.rollback();
+                Assert.fail("Should have gone to catch block1");
+            }
+            catch (IllegalStateException isex)
+            {
+                Assert.assertEquals("Cannot locate a Transaction for rollback.", isex.getMessage());
+            }
+
+            utx.begin();
+            Assert.assertEquals(Status.STATUS_ACTIVE, utx.getStatus());
+
+            // rollback transaction.
+            utx.rollback();
+            Assert.assertEquals(Status.STATUS_NO_TRANSACTION, utx.getStatus());
+
+        }
+
+        catch (NotSupportedException nsuex)
+        {
+            Assert.fail(nsuex.getMessage());
+        }
+        catch (SystemException ex)
+        {
+            Assert.fail(ex.getMessage());
+        }
     }
 
+    @Test
+    public void testTransactionTimeOut() throws SystemException, NotSupportedException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException
+    {
+        Assert.assertNotNull(utx);
+        Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
+
+        // set timeout before running transaction.
+        utx.setTransactionTimeout(20);
+        Assert.assertEquals(20, ((KunderaJTAUserTransaction) utx).getTransactionTimeout());
+
+        utx.setTransactionTimeout(0);
+        // try after beginning transaction.
+        utx.begin();
+
+        utx.setTransactionTimeout(202);
+        Assert.assertEquals(0, ((KunderaJTAUserTransaction) utx).getTransactionTimeout());
+        
+        utx.commit();
+    }
+
+    @Test
+    public void testMarkedRollback() throws SystemException, NotSupportedException
+    {
+        Assert.assertNotNull(utx);
+        Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
+
+        try
+        {
+            utx.setRollbackOnly();
+            Assert.fail("Should have gone to catch block!");
+        }
+        catch (IllegalStateException iaex)
+        {
+            Assert.assertEquals("Cannot get Transaction for setRollbackOnly", iaex.getMessage());
+        }
+
+        // try after beginning transaction.
+        utx.begin();
+        utx.setRollbackOnly();
+        Assert.assertEquals(Status.STATUS_MARKED_ROLLBACK, utx.getStatus());
+        utx.rollback();
+    }
+
+    
+    @After
+    public void tearDown()
+    {
+        utx = null;
+    }
 }

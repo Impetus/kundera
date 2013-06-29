@@ -128,7 +128,7 @@ public class Person
         return day;
     }
 
-    enum Day
+    public enum Day
     {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }

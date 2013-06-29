@@ -75,7 +75,7 @@ public class EntityEventDispatcherTest
      * .
      */
     @Test
-    public void testFireEventListeners()
+    public void testExternalFireEventListeners()
     {
         PersonEventDispatch person = new PersonEventDispatch("1", "John", "Smith");
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(person.getClass());
@@ -85,6 +85,26 @@ public class EntityEventDispatcherTest
         eventDispatcher.fireEventListeners(m, person, PostPersist.class);
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Singh", person.getLastName());
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.persistence.event.EntityEventDispatcher#fireEventListeners(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Class)}
+     * .
+     */
+    @Test
+    public void testInternalFireEventListeners()
+    {
+        AddressEntity address = new AddressEntity();
+        address.setAddressId("addr1");
+        address.setStreet("street");
+        address.setCity("noida");
+        
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(address.getClass());
+        eventDispatcher.fireEventListeners(m, address, PrePersist.class);
+        Assert.assertEquals("addr1", address.getAddressId());
+        Assert.assertEquals("noida", address.getCity());
+        Assert.assertEquals("street,noida", address.getFullAddress());
     }
 
 }
