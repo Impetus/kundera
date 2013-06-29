@@ -594,18 +594,21 @@ public class KunderaQuery
      */
     private void addTypedParameter(Type type, String parameter, UpdateClause clause)
     {
-        if (typedParameter == null)
+        if (type != null)
         {
-            typedParameter = new TypedParameter(type);
-        }
+            if (typedParameter == null)
+            {
+                typedParameter = new TypedParameter(type);
+            }
 
-        if (typedParameter.getType().equals(type))
-        {
-            typedParameter.addParameters(parameter, clause);
-        }
-        else
-        {
-            logger.warn("Invalid type provided, it can either be name or indexes!");
+            if (typedParameter.getType().equals(type))
+            {
+                typedParameter.addParameters(parameter, clause);
+            }
+            else
+            {
+                logger.warn("Invalid type provided, it can either be name or indexes!");
+            }
         }
     }
 
@@ -1065,7 +1068,7 @@ public class KunderaQuery
     {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
-        addTypedParameter(value.trim().startsWith("?")?Type.INDEXED:Type.NAMED, property, updateClause);
+        addTypedParameter(value.trim().startsWith("?")?Type.INDEXED:value.trim().startsWith(":")?Type.NAMED:null, property, updateClause);
     }
 
     /**

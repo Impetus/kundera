@@ -169,13 +169,13 @@ public abstract class QueryImpl implements Query
             onDeleteOrUpdate(results);
         }      
         
-        /*if(results != null)
+        if(results != null)
         {
             for(Object obj : results)
             {
-                persistenceDelegeator.setProxyOwners(m, obj);
+                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(m, obj);
             }
-        }*/
+        }
         return results != null ? results : new ArrayList();
     }
 

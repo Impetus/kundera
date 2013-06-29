@@ -39,7 +39,7 @@ public class PersonnelBi1To1FK
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID")
     private HabitatBi1To1FK address;
 
