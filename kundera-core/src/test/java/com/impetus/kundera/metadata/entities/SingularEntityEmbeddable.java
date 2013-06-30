@@ -29,7 +29,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "table", schema = "testSchema@keyspace")
+@Table(name = "embeddable", schema = "KunderaMetaDataTest@patest")
 public class SingularEntityEmbeddable
 {
 

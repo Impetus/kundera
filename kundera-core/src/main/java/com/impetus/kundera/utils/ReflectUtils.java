@@ -113,11 +113,11 @@ public class ReflectUtils
         }
         boolean match = false;
         // stop if the superclass is Object
-        if (in.getSuperclass().equals(Object.class))
+        if (in.getSuperclass() != null && in.getSuperclass().equals(Object.class))
         {
             return match;
         }
-        match = hasSuperClass(has, in.getSuperclass());
+        match = in.getSuperclass() != null ? hasSuperClass(has, in.getSuperclass()): false;
         return match;
     }
 

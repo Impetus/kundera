@@ -21,8 +21,6 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,7 +197,7 @@ public class ElementCollectionCacheManager
                 catch (NumberFormatException e)
                 {
                     log.error("Invalid element collection Object name " + s);
-                    throw new PersistenceException("Invalid element collection Object name " + s);
+                    throw new CacheException("Invalid element collection Object name " + s,e);
                 }
                 if (elementCollectionCount > max)
                 {

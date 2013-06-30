@@ -17,7 +17,7 @@ public class KunderaCoreUtils
             String... persistenceUnits)
     {
         Map<String, Object> puProperty;
-        if (persistenceUnits.length > 1 && externalProperties != null)
+        if (persistenceUnits != null && persistenceUnits.length > 1 && externalProperties != null)
         {
             puProperty = (Map<String, Object>) externalProperties.get(pu);
 
