@@ -52,4 +52,12 @@ public class QueryHandlerException extends RuntimeException
         super(paramThrowable);
     }
 
+    /**
+     * @param paramThrowable
+     */
+    public QueryHandlerException(String paramString, Throwable paramThrowable)
+    {
+        super(paramString, paramThrowable);
+    }
+
 }
