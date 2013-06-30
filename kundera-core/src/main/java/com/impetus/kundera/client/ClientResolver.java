@@ -153,7 +153,7 @@ public final class ClientResolver
      */
     private static void onError(Exception e)
     {
-        logger.error("Error while initializing client factory, Caused by: ",e.getMessage());
+        logger.error("Error while initializing client factory, Caused by: .",e.getMessage());
         throw new ClientResolverException(e);
     }
 }

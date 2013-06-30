@@ -69,17 +69,6 @@ public class EnhanceEntity
     }
 
     /**
-     * Sets the entity.
-     * 
-     * @param entity
-     *            the entity to set
-     */
-    public void setEntity(Object entity)
-    {
-        this.entity = entity;
-    }
-
-    /**
      * Gets the entity id.
      * 
      * @return the entityId
@@ -90,17 +79,6 @@ public class EnhanceEntity
     }
 
     /**
-     * Sets the entity id.
-     * 
-     * @param entityId
-     *            the entityId to set
-     */
-    public void setEntityId(Object entityId)
-    {
-        this.entityId = entityId;
-    }
-
-    /**
      * Gets the relations.
      * 
      * @return the relations
@@ -108,17 +86,6 @@ public class EnhanceEntity
     public Map<String, Object> getRelations()
     {
         return relations != null ? Collections.unmodifiableMap(relations) : null;
-    }
-
-    /**
-     * Sets the relations.
-     * 
-     * @param relations
-     *            the relations to set
-     */
-    public void setRelations(Map<String, Object> relations)
-    {
-        this.relations = relations;
     }
 
 }

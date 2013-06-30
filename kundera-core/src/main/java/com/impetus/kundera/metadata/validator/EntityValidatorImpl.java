@@ -175,6 +175,7 @@ public class EntityValidatorImpl implements EntityValidator
                         || clazz.isAnnotationPresent(TableGenerator.class) || clazz
                         .isAnnotationPresent(SequenceGenerator.class)))
                 {
+                    log.error("Unknown Id.generator{}: for class{}",generatedValue.generator(),clazz);
                     throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
                 }
                 else

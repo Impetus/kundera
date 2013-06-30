@@ -34,7 +34,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.Entity;
+
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
@@ -54,13 +60,9 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
             Method setIdentifierMethod, Object id, PersistenceDelegator pd)
     {
-        /*
-         * KunderaProxy kp = proxies.get(entityName); if(kp == null) {
-         */
         KunderaProxy kunderaProxy = (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
                 new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, pd);
         proxies.put(entityName, kunderaProxy);
-        // }
 
         return kunderaProxy;
     }
@@ -81,5 +83,28 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
         }
         proxies.clear();
     }
+    
+ 
+    @Override
+    public <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
+    {
+        if (e != null && e.getClass().getAnnotation(Entity.class) != null && entityMetadata != null)
+        {
+            Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
+            for (Relation r : entityMetadata.getRelations())
+            {
+                if (r.isUnary())
+                {
+                    String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
+                            + r.getProperty().getName();
 
+                    KunderaProxy kunderaProxy = getProxy(entityName);
+                    if (kunderaProxy != null)
+                    {
+                        kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                    }
+                }
+            }
+        }
+    }
 }

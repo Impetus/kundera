@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 
 import javax.persistence.PersistenceException;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
@@ -65,5 +66,10 @@ public interface LazyInitializerFactory
      * Clears all proxy objects stored in this factory
      */
     void clearProxies();
+    
+    /**
+     * Sets the entity e as "owner" into proxy it holds.
+     */
+    <E> void setProxyOwners(EntityMetadata entityMetadata, E e);
 
 }

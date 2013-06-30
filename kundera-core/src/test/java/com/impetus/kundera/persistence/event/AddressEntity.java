@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,33 +13,50 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.tests.crossdatastore.useraddress.entities;
+package com.impetus.kundera.persistence.event;
 
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
+/**
+ * @author vivek.mishra
+ *  Address entity with internal call backs.
+ */
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests")
-@IndexCollection(columns = { @Index(name = "street") })
-public class HabitatBi1To1FK
+@Table(name = "ADDRESS", schema = "kunderatest@kunderatest")
+public class AddressEntity
 {
     @Id
-    @Column(name = "ADDRESS_ID")
     private String addressId;
-
-    @Column(name = "STREET")
+    
+    @Column
     private String street;
+    
+    @Column
+    private String city;
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-    private PersonnelBi1To1FK person;
-
+    @Column 
+    private String fullAddress;
+    
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    private Set<AddressEntity> subaddresses;
+    
+    
+    public AddressEntity()
+    {
+        
+    }
+    
     public String getAddressId()
     {
         return addressId;
@@ -60,14 +77,36 @@ public class HabitatBi1To1FK
         this.street = street;
     }
 
-    public PersonnelBi1To1FK getPerson()
+    public String getCity()
     {
-        return person;
+        return city;
     }
 
-    public void setPerson(PersonnelBi1To1FK person)
+    public void setCity(String city)
     {
-        this.person = person;
+        this.city = city;
+    }
+    
+    @PrePersist
+    public void  populateFullAddress()
+    {
+        this.fullAddress = street+","+city;
+    }
+    
+    public String getFullAddress()
+    {
+        return this.fullAddress;
     }
 
+    public Set<AddressEntity> getSubaddresses()
+    {
+        return subaddresses;
+    }
+
+    public void setSubaddresses(Set<AddressEntity> subaddresses)
+    {
+        this.subaddresses = subaddresses;
+    }
+
+ 
 }

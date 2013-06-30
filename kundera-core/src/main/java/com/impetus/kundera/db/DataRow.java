@@ -73,17 +73,6 @@ public class DataRow<TF>
     }
 
     /**
-     * Sets the id.
-     * 
-     * @param id
-     *            the key to set
-     */
-    public void setId(String id)
-    {
-        this.id = id;
-    }
-
-    /**
      * Gets the column family name.
      * 
      * @return the columnFamilyName
@@ -94,17 +83,6 @@ public class DataRow<TF>
     }
 
     /**
-     * Sets the column family name.
-     * 
-     * @param columnFamilyName
-     *            the columnFamilyName to set
-     */
-    public void setColumnFamilyName(String columnFamilyName)
-    {
-        this.columnFamilyName = columnFamilyName;
-    }
-
-    /**
      * Gets the columns.
      * 
      * @return the columns
@@ -112,17 +90,6 @@ public class DataRow<TF>
     public List<TF> getColumns()
     {
         return columns;
-    }
-
-    /**
-     * Sets the columns.
-     * 
-     * @param columns
-     *            the columns to set
-     */
-    public void setColumns(List<TF> columns)
-    {
-        this.columns = columns;
     }
 
     /**

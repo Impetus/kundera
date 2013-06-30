@@ -171,13 +171,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             onDeleteOrUpdate(results);
         }      
         
-        /*if(results != null)
+        if(results != null)
         {
             for(Object obj : results)
             {
-                persistenceDelegeator.setProxyOwners(m, obj);
+                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(m, obj);
             }
-        }*/
+        }
         return results != null ? results : new ArrayList();
     }
 
