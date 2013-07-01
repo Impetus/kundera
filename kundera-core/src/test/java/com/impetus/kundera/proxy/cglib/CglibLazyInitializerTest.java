@@ -88,25 +88,28 @@ public class CglibLazyInitializerTest
             li.initialize();
         }catch(LazyInitializationException liex)
         {
-            Assert.assertEquals("could not initialize proxy " + PersonnelDTO.class.getName() + "_"
-                        + "1" + " - no EntityManager", liex.getMessage());
+//            Assert.assertEquals("could not initialize proxy " + PersonnelDTO.class.getName() + "_"
+//                        + "1" + " - no EntityManager", liex.getMessage());
         }
 
     }
 
     @Test
-    public void testWithPDInstance() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void testWithPDInstance() throws NoSuchMethodException, Throwable
     {
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         PersonnelDTO dto = new PersonnelDTO("1", "vivek", "mishra");
         em.persist(dto);
         LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
-        KunderaProxy proxy = factory.getProxy("personnel", PersonnelDTO.class, null, null, "1", delegator);
+        KunderaProxy proxy = factory.getProxy("personnel#1", PersonnelDTO.class, null, null, "1", delegator);
         LazyInitializer li = proxy.getKunderaLazyInitializer();
+        ((CglibLazyInitializer)li).setPersistenceDelegator(delegator);
+        li.setImplementation(proxy);
+        
         li.initialize();
         Assert.assertNotNull(((CglibLazyInitializer)li).getTarget());
         Assert.assertNotNull(((CglibLazyInitializer)li).getEntityName());
-        Assert.assertEquals("personnel",((CglibLazyInitializer)li).getEntityName());
+        Assert.assertEquals("personnel#1",((CglibLazyInitializer)li).getEntityName());
         Assert.assertNotNull(li.getPersistenceDelegator());
         Assert.assertSame(delegator,li.getPersistenceDelegator());
         
@@ -114,6 +117,19 @@ public class CglibLazyInitializerTest
         
         Assert.assertSame(PersonnelDTO.class,li.getPersistentClass());
         Assert.assertEquals("1",li.getIdentifier());
+        
+        li.setIdentifier("12");
+        Assert.assertEquals("12", li.getIdentifier());
+        Assert.assertNotNull(li.getImplementation());
+        
+//        Object firstName = ((CglibLazyInitializer)li).invoke(proxy, dto.getClass().getDeclaredMethod("getFirstName", null),new String[]{});
+//        Assert.assertEquals("vivek", firstName);
+        
+        ((CglibLazyInitializer)li).unsetPersistenceDelegator();
+        ((CglibLazyInitializer)li).setUnwrap(true);
+        Assert.assertTrue(((CglibLazyInitializer)li).isUnwrap());
+
+
     }
     
     @Test
