@@ -318,18 +318,6 @@ public class MetadataUtils
         return null;
     }*/
 
-    public static boolean isParent(EntityMetadata m)
-    {
-        for (Relation relation : m.getRelations())
-        {
-            if (Relation.ForeignKey.ONE_TO_MANY.equals(relation.getType()))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Returns mapped relational name, in case of bi directional mapping, it
      * will return back pKey name of associated entity.
@@ -483,8 +471,11 @@ public class MetadataUtils
             }
             else
             {
-                columnNameToFieldMap.put(((AbstractAttribute) attribute).getJPAColumnName(),
-                        (Field) attribute.getJavaMember());
+                if(columnNameToFieldMap != null)
+                {
+                    columnNameToFieldMap.put(((AbstractAttribute) attribute).getJPAColumnName(),
+                            (Field) attribute.getJavaMember());
+                }
             }
         }
     }

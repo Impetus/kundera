@@ -26,7 +26,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * @author vivek.mishra
  * Test utility to serve geneic utility method required by various kundera-core junits.
  */
-public final class TestUtilities
+public final class CoreTestUtilities
 {
 
     /**
