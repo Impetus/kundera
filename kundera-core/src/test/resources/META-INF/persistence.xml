@@ -158,6 +158,7 @@
 		<class>com.impetus.kundera.polyglot.entities.PersonBM1</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressBM1</class>
 		<class>com.impetus.kundera.polyglot.entities.PersonUMM</class>
+		<class>com.impetus.kundera.polyglot.entities.PersonUMMByMap</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressUMM</class>
 		<class>com.impetus.kundera.polyglot.entities.PersonBMM</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressBMM</class>

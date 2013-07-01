@@ -79,11 +79,13 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         }
         else if (isJoinedByTable)
         {
+            throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
+/*
             JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
 
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
-        }
+*/        }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);

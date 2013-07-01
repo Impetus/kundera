@@ -30,6 +30,8 @@ import org.junit.Test;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.Person;
+import com.sun.jndi.cosnaming.IiopUrl.Address;
 
 /**
  * Test case for {@link EntityEventDispatcher}
@@ -73,9 +75,11 @@ public class EntityEventDispatcherTest
      * Test method for
      * {@link com.impetus.kundera.persistence.event.EntityEventDispatcher#fireEventListeners(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Class)}
      * .
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
      */
     @Test
-    public void testExternalFireEventListeners()
+    public void testExternalFireEventListeners() throws NoSuchMethodException, SecurityException
     {
         PersonEventDispatch person = new PersonEventDispatch("1", "John", "Smith");
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(person.getClass());
@@ -85,15 +89,31 @@ public class EntityEventDispatcherTest
         eventDispatcher.fireEventListeners(m, person, PostPersist.class);
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Singh", person.getLastName());
+        
+        try
+        {
+        ExternalCallbackMethod callback = new ExternalCallbackMethod(PersonEventDispatch.class,PersonEventDispatch.class.getDeclaredMethod("getFirstName",null));
+        AddressEntity address = new AddressEntity();
+        address.setAddressId("addr1");
+        address.setStreet("street");
+        address.setCity("noida");
+        callback.invoke(address);
+        Assert.fail("Should have gone to catch block!");
+        }catch(EventListenerException elex)
+        {
+            Assert.assertNotNull(elex);
+        }
     }
 
     /**
      * Test method for
      * {@link com.impetus.kundera.persistence.event.EntityEventDispatcher#fireEventListeners(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Class)}
      * .
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
      */
     @Test
-    public void testInternalFireEventListeners()
+    public void testInternalFireEventListeners() throws NoSuchMethodException, SecurityException
     {
         AddressEntity address = new AddressEntity();
         address.setAddressId("addr1");
@@ -105,6 +125,19 @@ public class EntityEventDispatcherTest
         Assert.assertEquals("addr1", address.getAddressId());
         Assert.assertEquals("noida", address.getCity());
         Assert.assertEquals("street,noida", address.getFullAddress());
+        
+        try
+        {
+            InternalCallbackMethod callback = new InternalCallbackMethod(m, AddressEntity.class.getDeclaredMethod(
+                    "getStreet", null));
+            PersonEventDispatch person = new PersonEventDispatch("1", "John", "Smith");
+            callback.invoke(person);
+            Assert.fail("Should have gone to catch block!");
+        }
+        catch (EventListenerException elex)
+        {
+            Assert.assertNotNull(elex);
+        }
     }
 
 }
