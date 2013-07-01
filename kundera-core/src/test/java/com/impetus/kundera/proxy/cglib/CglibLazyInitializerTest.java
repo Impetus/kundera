@@ -26,7 +26,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.TestUtilities;
+import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -97,7 +97,7 @@ public class CglibLazyInitializerTest
     @Test
     public void testWithPDInstance() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
     {
-        PersistenceDelegator delegator = TestUtilities.getDelegator(em);
+        PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         PersonnelDTO dto = new PersonnelDTO("1", "vivek", "mishra");
         em.persist(dto);
         LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
@@ -119,7 +119,7 @@ public class CglibLazyInitializerTest
     @Test
     public void testWithClosedPDInstance() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
     {
-        PersistenceDelegator delegator = TestUtilities.getDelegator(em);
+        PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         PersonnelDTO dto = new PersonnelDTO("1", "vivek", "mishra");
         em.persist(dto);
         em.close();

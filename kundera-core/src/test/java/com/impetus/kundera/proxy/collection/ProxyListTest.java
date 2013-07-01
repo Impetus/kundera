@@ -29,7 +29,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.TestUtilities;
+import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
@@ -77,7 +77,7 @@ public class ProxyListTest
 
         Relation relation = new Relation(AddressEntityWithList.class.getDeclaredField("subaddresses"), AddressEntityWithList.class,
                 List.class, FetchType.LAZY, null, false, null, ForeignKey.ONE_TO_MANY);
-        PersistenceDelegator delegator = TestUtilities.getDelegator(em);
+        PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         ProxyList proxyList = new ProxyList(delegator, relation);
 
         proxyList.setOwner(p);
