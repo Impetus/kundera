@@ -37,7 +37,6 @@ import java.util.Map;
 import javax.persistence.Entity;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -52,9 +51,7 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
 public class CglibLazyInitializerFactory implements LazyInitializerFactory
 {
 
-    static Map<String, KunderaProxy> proxies = new HashMap<String, KunderaProxy>();
-
-    // KunderaProxy kunderaProxy = null;
+    Map<String, KunderaProxy> proxies = new HashMap<String, KunderaProxy>();
 
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
