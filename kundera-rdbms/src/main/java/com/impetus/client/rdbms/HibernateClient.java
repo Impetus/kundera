@@ -17,6 +17,8 @@ package com.impetus.client.rdbms;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.ProxyHelper;
 
 /**
  * The Class HibernateClient.
@@ -209,7 +212,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
-        Transaction tx = null;
+        boolean proxyRemoved = removeKunderaProxies(metadata, entity, relationHolders);
+        
+        Transaction tx = null;     
 
         s = getSessionFactory().openStatelessSession();
         tx = s.beginTransaction();
@@ -220,29 +225,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 id = s.insert(entity);
 
                 // Update foreign Keys
-                for (RelationHolder rh : relationHolders)
-                {
-                    String linkName = rh.getRelationName();
-                    Object linkValue = rh.getRelationValue();
-                    if (linkName != null && linkValue != null)
-                    {
-
-                        String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
-                        String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
-                                + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id
-                                + "'";
-//                        if(log.isInfoEnabled())
-//                        {
-                         log.warn("Executing query {}",updateSql);
-//                        }
-                        s.createSQLQuery(updateSql).executeUpdate();
-                    }
-                }
+                updateForeignKeys(metadata, id, relationHolders);
                 tx.commit();
             }
             else
             {
-                s.update(entity);
+                s.update(entity);                
+                
+                if(proxyRemoved)
+                {
+                    updateForeignKeys(metadata, id, relationHolders);
+                }               
+                
                 tx.commit();
             }
         }
@@ -258,12 +252,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             log.error("Error while persisting object of {}", metadata.getEntityClazz(),e);
             throw new PersistenceException(e);
-        }
-        /*finally
-        {
-          // empty finally block.
-        }*/
+        } 
     }
+
+    
 
     /**
      * Inserts records into JoinTable
@@ -463,7 +455,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 }
             }
         }
-        
         s.getTransaction().commit();
         return q.list();
     }
@@ -609,5 +600,82 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     private SessionFactory getSessionFactory()
     {
         return sf;
+    }
+    
+    /**
+     * Updates foreign keys into master table
+     * @param metadata
+     * @param id
+     * @param relationHolders
+     */
+    private void updateForeignKeys(EntityMetadata metadata, Object id, List<RelationHolder> relationHolders)
+    {
+        for (RelationHolder rh : relationHolders)
+        {
+            String linkName = rh.getRelationName();
+            Object linkValue = rh.getRelationValue();
+            if (linkName != null && linkValue != null)
+            {
+
+                String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
+                String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
+                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id
+                        + "'";
+
+                 log.warn("Executing query {}",updateSql);          
+                s.createSQLQuery(updateSql).executeUpdate();
+            }
+        }
+    }
+
+    /**
+     * @param metadata
+     * @param entity
+     * @param relationHolders
+     */
+    private boolean removeKunderaProxies(EntityMetadata metadata, Object entity, List<RelationHolder> relationHolders)
+    {
+        boolean proxyRemoved = false;
+
+        for (Relation relation : metadata.getRelations())
+        {
+            if (relation.isUnary())
+            {
+                Object relationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
+                if (relationObject != null && ProxyHelper.isKunderaProxy(relationObject))
+                {
+                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+                    Method idAccessorMethod = relMetadata.getReadIdentifierMethod();
+                    Object foreignKey = null;
+                    try
+                    {
+                        foreignKey = idAccessorMethod.invoke(relationObject, new Object[] {});
+                    }
+                    catch (IllegalArgumentException e)
+                    {
+                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                    }
+                    catch (InvocationTargetException e)
+                    {
+                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                    }
+
+                    if (foreignKey != null)
+                    {
+                        relationObject = null;
+                        PropertyAccessorHelper.set(entity, relation.getProperty(), relationObject);
+                        relationHolders.add(new RelationHolder(relation.getJoinColumnName(), foreignKey));
+                        proxyRemoved = true;
+                    }
+                }
+            }
+
+        }
+        
+        return proxyRemoved;
     }
 }

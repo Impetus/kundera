@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.Date;
 
@@ -23,12 +27,11 @@ import javax.persistence.Column;
 import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 
 /**
@@ -114,6 +117,39 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
             }
         }
         return name;
+    }
+    
+    /**
+     * Populates @Id accesser methods like, getId and setId of clazz to
+     * metadata.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param clazz
+     *            the clazz
+     * @param f
+     *            the f
+     */
+    protected final void populateIdAccessorMethods(EntityMetadata metadata, Class<?> clazz, Field f)
+    {
+        try
+        {
+            BeanInfo info = Introspector.getBeanInfo(clazz);
+
+            for (PropertyDescriptor descriptor : info.getPropertyDescriptors())
+            {
+                if (descriptor.getName().equals(f.getName()))
+                {
+                    metadata.setReadIdentifierMethod(descriptor.getReadMethod());
+                    metadata.setWriteIdentifierMethod(descriptor.getWriteMethod());
+                    return;
+                }
+            }
+        }
+        catch (IntrospectionException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
 }

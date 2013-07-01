@@ -248,9 +248,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         Attribute attrib = entity.getAttribute(f.getName());
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
-            entityMetadata.setIdAttribute((SingularAttribute) attrib);
-
-            // populateIdAccessorMethods(entityMetadata, clazz, f);
+            entityMetadata.setIdAttribute((SingularAttribute) attrib);          
+            populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }
 

@@ -59,15 +59,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
 
         if (dataCollection == null)
         {
-            Class<?> collectionClass = getRelation().getProperty().getType();
-            if (collectionClass.isAssignableFrom(Set.class))
-            {
-                dataCollection = new HashSet();
-            }
-            else if (collectionClass.isAssignableFrom(List.class))
-            {
-                dataCollection = new ArrayList();
-            }
+            createEmptyDataCollection();
         }
 
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && !dataCollection.contains(object)
@@ -79,25 +71,23 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
             result = true;
         }
         return result;
-    }
+    }   
 
     protected boolean addAll(final Collection collection)
     {
         eagerlyLoadDataCollection();
 
         boolean result = false;
+        
+        if (dataCollection == null)
+        {
+            createEmptyDataCollection();
+        }
 
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
-        {
-            for (Object o : collection)
-            {
-                if (!dataCollection.contains(o) && o != null)
-                {
-                    getPersistenceDelegator().persist(o);
-                    dataCollection.add(o);
-                }
-            }
+        {            
+            dataCollection.addAll(collection);
             result = true;
         }
         return result;
@@ -108,13 +98,16 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         eagerlyLoadDataCollection();
 
         boolean result = false;
+        
+        if (dataCollection == null)
+        {
+            createEmptyDataCollection();
+        }
+        
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && object != null)
         {
-            getPersistenceDelegator().remove(object);
-            if (dataCollection.contains(object))
-            {
-                dataCollection.remove(object);
-            }
+            
+            dataCollection.remove(object);            
             result = true;
         }
         return result;
@@ -124,18 +117,16 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
     {
         eagerlyLoadDataCollection();
         boolean result = false;
+        
+        if (dataCollection == null)
+        {
+            createEmptyDataCollection();
+        }
+        
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
         {
-            for (Object o : collection)
-            {
-                if (o != null)
-                {
-                    getPersistenceDelegator().remove(o);
-                }
-            }
-
-            dataCollection.removeAll(collection);
+            dataCollection.removeAll(collection);           
             result = true;
         }
         return result;
@@ -146,6 +137,11 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         boolean result = false;
         eagerlyLoadDataCollection();
 
+        if (dataCollection == null)
+        {
+            createEmptyDataCollection();
+        }
+        
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
         {
@@ -177,5 +173,21 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
     {
         eagerlyLoadDataCollection();
         return dataCollection == null ? new Object[0] : dataCollection.toArray(arg0);
+    }
+    
+    /**
+     * Creates an a data collection which has no entity inside it
+     */
+    private void createEmptyDataCollection()
+    {
+        Class<?> collectionClass = getRelation().getProperty().getType();
+        if (collectionClass.isAssignableFrom(Set.class))
+        {
+            dataCollection = new HashSet();
+        }
+        else if (collectionClass.isAssignableFrom(List.class))
+        {
+            dataCollection = new ArrayList();
+        }
     }
 }

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy.collection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -140,10 +141,13 @@ public class ProxyList extends AbstractProxyCollection implements ProxyCollectio
         eagerlyLoadDataCollection();
 
         List dataList = (List) dataCollection;
-
-        if (dataList != null && !dataList.contains(arg1) && arg1 != null)
+        if(dataList == null)
         {
-            getPersistenceDelegator().persist(arg1);
+            dataList = new ArrayList();
+        }
+
+        if (arg1 != null && !dataList.contains(arg1))
+        {            
             dataList.add(arg0, arg1);
         }
     }
@@ -156,15 +160,18 @@ public class ProxyList extends AbstractProxyCollection implements ProxyCollectio
         boolean result = false;
 
         List dataList = (List) dataCollection;
-
-        if (dataList != null && collection != null && !collection.isEmpty())
+        if(dataList == null)
+        {
+            dataList = new ArrayList();
+        }
+        
+        if (collection != null && !collection.isEmpty())
         {
             int position = 0;
             for (Object o : collection)
             {
-                if (!dataList.contains(o) && o != null)
-                {
-                    getPersistenceDelegator().persist(o);
+                if (o != null && !dataList.contains(o))
+                {                    
                     dataList.add(index + position++, o);
                 }
             }
@@ -255,9 +262,9 @@ public class ProxyList extends AbstractProxyCollection implements ProxyCollectio
         Object result = null;
 
         List dataList = (List) dataCollection;
+                
         if (dataList != null && !dataList.isEmpty() && dataList.contains(arg0))
-        {
-            getPersistenceDelegator().remove(arg0);
+        {            
             result = dataList.remove(arg0);
         }
         return result;
