@@ -104,7 +104,6 @@ public class IMDBDaoImpl extends BaseDao
         Query query = em.createQuery("select a from Actor a where a.id = :id");
         query.setParameter("id", 2);
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -114,7 +113,6 @@ public class IMDBDaoImpl extends BaseDao
         Query query = em.createQuery("select a from Actor a where a.name=:name");
         query.setParameter("name", "Tom Cruise");
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -126,7 +124,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("id", 1);
         query.setParameter("name", "Tom Cruise");
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -137,7 +134,7 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("id", 2);
         query.setParameter("name", "Tom Cruise");
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
+        //closeEntityManager();
         return actors;
     }
 
@@ -147,7 +144,6 @@ public class IMDBDaoImpl extends BaseDao
         Query query = em.createQuery("select a from Actor a where a.name like :name");
         query.setParameter("name", "Emma");
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -159,7 +155,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("min", 1);
         query.setParameter("max", 2);
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -171,7 +166,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("start", 1990);
         query.setParameter("end", 2006);
         List<Movie> movies = query.getResultList();
-        closeEntityManager();
         return movies;
 
     }
@@ -184,7 +178,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("start", 2005);
         query.setParameter("end", 2010);
         List<Movie> movies = query.getResultList();
-        closeEntityManager();
         return movies;
     }
 
@@ -193,7 +186,6 @@ public class IMDBDaoImpl extends BaseDao
         em = getEntityManager(persistenceUnit);
         Query query = em.createQuery("select a.name from Actor a");
         List<Actor> actors = query.getResultList();
-        closeEntityManager();
         return actors;
     }
 
@@ -204,7 +196,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("movieId", "m1");
         query.setParameter("title", "Miss");
         List<Movie> movies = query.getResultList();
-        closeEntityManager();
         return movies;
     }
 
@@ -217,7 +208,6 @@ public class IMDBDaoImpl extends BaseDao
         query.setParameter("title", "Miss");
         query.setParameter("year", 2009);
         List<Movie> movies = query.getResultList();
-        closeEntityManager();
         return movies;
     }
 

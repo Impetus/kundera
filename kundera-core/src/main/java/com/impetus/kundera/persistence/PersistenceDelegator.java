@@ -531,7 +531,7 @@ public final class PersistenceDelegator
             throw new KunderaException("Entitymatadata should not be null");
         }
         String persistenceUnit = m.getPersistenceUnit();
-        //
+
         Client client = clientMap.get(persistenceUnit);
         if (client == null)
         {

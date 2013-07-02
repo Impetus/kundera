@@ -133,7 +133,12 @@ public class AbstractEntityReader
                 Field f = relation.getProperty();
                 Object object = PropertyAccessorHelper.getObject(entity, f);
                 final Object entityId = PropertyAccessorHelper.getId(entity, m);
-                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
+                
+                if(object != null && ! ProxyHelper.isProxyCollection(object))
+                {
+                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
+                }               
+                
                 associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
             }
             else

@@ -233,7 +233,7 @@ public final class AssociationBuilder
                                                                                    // into
                                                                                    // entity
 
-        if (relObject == null && relationsMap != null && !relationsMap.isEmpty())
+        if ((relObject == null || ProxyHelper.isProxyCollection(relObject) ) && relationsMap != null && !relationsMap.isEmpty())
         {
             for (String relationName : relationsMap.keySet())
             {
@@ -282,7 +282,7 @@ public final class AssociationBuilder
         PropertyAccessorHelper.set(entity, relation.getProperty(), relObject);
 
         // Add target entities into persistence cache
-        if (relObject != null)
+        if (relObject != null && ! ProxyHelper.isProxyCollection(relObject))
         {
             for (Object child : ((Map) relObject).values())
             {
@@ -316,7 +316,7 @@ public final class AssociationBuilder
 
             Field biDirectionalField = relation.getBiDirectionalField()/*getBiDirectionalField(entity.getClass(), relation.getTargetEntity())*/;
             boolean isBidirectionalRelation = (biDirectionalField != null);
-            if (isBidirectionalRelation && relationValue == null)
+            if (isBidirectionalRelation && (relationValue == null && !relation.isJoinedByPrimaryKey()))
             {
                 EntityMetadata parentEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
                         .getTargetEntity());
@@ -369,6 +369,21 @@ public final class AssociationBuilder
                         m.getWriteIdentifierMethod(), relationValue, pd);
                 PropertyAccessorHelper.set(entity, relation.getProperty(), proxy);
 
+            }
+            else if(relation.isJoinedByPrimaryKey())
+            {
+                if (log.isDebugEnabled())
+                {
+                    log.debug("Creating proxy for >> " + m.getEntityClazz().getName() + "#"
+                            + relation.getProperty().getName() + "_" + relationValue);
+                }
+
+                String entityName = m.getEntityClazz().getName() + "_" + entityId + "#"
+                        + relation.getProperty().getName();
+
+                Object proxy = getLazyEntity(entityName, relation.getTargetEntity(), m.getReadIdentifierMethod(),
+                        m.getWriteIdentifierMethod(), entityId, pd);
+                PropertyAccessorHelper.set(entity, relation.getProperty(), proxy);
             }
 
         }

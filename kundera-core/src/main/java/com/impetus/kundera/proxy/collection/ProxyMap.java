@@ -50,25 +50,43 @@ public class ProxyMap extends AbstractProxyBase implements ProxyCollection, Map
         proxyCollection.setRelationsMap(getRelationsMap());
         return proxyCollection;
     }
+    
+    @Override
+    public Object getDataCollection()
+    {
+        return dataCollection != null && ! ((Map) dataCollection).isEmpty() ? dataCollection : null;
+    }
 
     // ///////////////////////Methods from Collection interface ////////////////
 
     @Override
     public void clear()
     {
-        super.clear();
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            ((Map)getDataCollection()).clear();
+        }
     }
 
     @Override
     public boolean isEmpty()
     {
-        return super.isEmpty();
+        boolean result = true;
+
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = ((Map)getDataCollection()).isEmpty();
+        }
+        return result;
     }
 
     @Override
     public int size()
     {
-        return super.size();
+        eagerlyLoadDataCollection();
+        return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : ((Map) dataCollection).size();
     }
 
     // ///////////////////////Methods from Map interface ////////////////
