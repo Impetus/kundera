@@ -61,9 +61,9 @@ import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
- * The Class CassQuery.
- * 
  * @author vivek.mishra
+
+ * Query implementation for Cassandra.
  */
 public class CassQuery extends QueryImpl implements Query
 {
@@ -119,7 +119,8 @@ public class CassQuery extends QueryImpl implements Query
 
         if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            result = onQueryOverCQL3(m, client, metaModel, null);
+            result = ((CassandraClientBase) client).executeQuery(
+                    onQueryOverCQL3(m, client, metaModel, null), m.getEntityClazz(), null);
         }
         else
         {
@@ -189,7 +190,8 @@ public class CassQuery extends QueryImpl implements Query
         }
         else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = onQueryOverCQL3(m, client, metaModel, m.getRelationNames());
+            ls = ((CassandraClientBase) client).executeQuery(
+                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(), m.getRelationNames());
         }
         else
         {
@@ -243,7 +245,7 @@ public class CassQuery extends QueryImpl implements Query
      *            the results
      * @return the column list
      */
-    private List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
+    List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
     {
         List<String> columns = new ArrayList<String>();
         if (results != null && results.length > 0)
@@ -301,7 +303,7 @@ public class CassQuery extends QueryImpl implements Query
      *            the is query for inverted index
      * @return the map
      */
-    private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
+    Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
     {
         IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
@@ -529,7 +531,7 @@ public class CassQuery extends QueryImpl implements Query
      *            the meta model
      * @return the list
      */
-    private List onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
+    String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
     {
         List<Object> result = new ArrayList<Object>();
 
@@ -567,10 +569,11 @@ public class CassQuery extends QueryImpl implements Query
 
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
 
+        return builder.toString();
         // onLimit(builder);
 
-        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
-        return result;
+//        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
+//        return result;
     }
 
     /**
@@ -711,4 +714,5 @@ public class CassQuery extends QueryImpl implements Query
             builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         }
     }
+
 }
