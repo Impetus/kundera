@@ -68,7 +68,7 @@ public interface ProxyCollection
      * holds. Unless proxy collection is eagerly loaded, this values would
      * normally be null
      */
-    Collection getDataCollection();
+    Object getDataCollection();
 
     /**
      * Retrieves a copy of this proxy collection

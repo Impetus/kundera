@@ -51,6 +51,12 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         super(delegator, relation);
     }
 
+    @Override
+    public Object getDataCollection()
+    {
+        return dataCollection != null && ! ((Collection) dataCollection).isEmpty() ? dataCollection : null;
+    }
+    
     protected boolean add(final Object object)
     {
         eagerlyLoadDataCollection();
@@ -62,16 +68,56 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
             createEmptyDataCollection();
         }
 
-        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && !dataCollection.contains(object)
+        if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && ! ((Collection) dataCollection).contains(object)
                 && object != null)
         {
             // getPersistenceDelegator().persist(object);
-            dataCollection.add(object);
+            ((Collection) dataCollection).add(object);
             PropertyAccessorHelper.set(getOwner(), getRelation().getProperty(), dataCollection);
             result = true;
         }
         return result;
     }   
+    
+    protected void clear()
+    {
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            ((Collection)getDataCollection()).clear();
+        }
+    }
+    
+    protected boolean contains(Object arg0)
+    {
+
+        boolean result = false;
+
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = ((Collection)getDataCollection()).contains(arg0);
+        }
+        return result;
+    }
+    
+    protected boolean isEmpty()
+    {
+        boolean result = true;
+
+        eagerlyLoadDataCollection();
+        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
+        {
+            result = ((Collection)getDataCollection()).isEmpty();
+        }
+        return result;
+    }
+    
+    protected int size()
+    {
+        eagerlyLoadDataCollection();
+        return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : ((Collection) dataCollection).size();
+    }
 
     protected boolean addAll(final Collection collection)
     {
@@ -87,7 +133,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
         {            
-            dataCollection.addAll(collection);
+            ((Collection) dataCollection).addAll(collection);
             result = true;
         }
         return result;
@@ -107,7 +153,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && object != null)
         {
             
-            dataCollection.remove(object);            
+            ((Collection) dataCollection).remove(object);            
             result = true;
         }
         return result;
@@ -126,7 +172,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
         {
-            dataCollection.removeAll(collection);           
+            ((Collection) dataCollection).removeAll(collection);           
             result = true;
         }
         return result;
@@ -145,7 +191,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         if (dataCollection != null && !(dataCollection instanceof ProxyCollection) && collection != null
                 && !collection.isEmpty())
         {
-            result = dataCollection.retainAll(collection);
+            result = ((Collection) dataCollection).retainAll(collection);
         }
 
         return result;
@@ -158,7 +204,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         Iterator result = null;
         if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
         {
-            result = getDataCollection().iterator();
+            result = ((Collection) getDataCollection()).iterator();
         }
         return result;
     }
@@ -166,13 +212,13 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
     protected Object[] toArray()
     {
         eagerlyLoadDataCollection();
-        return dataCollection == null ? new Object[0] : dataCollection.toArray();
+        return dataCollection == null ? new Object[0] : ((Collection) dataCollection).toArray();
     }
 
     protected Object[] toArray(final Object[] arg0)
     {
         eagerlyLoadDataCollection();
-        return dataCollection == null ? new Object[0] : dataCollection.toArray(arg0);
+        return dataCollection == null ? new Object[0] : ((Collection) dataCollection).toArray(arg0);
     }
     
     /**

@@ -142,6 +142,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(1, actors.size());
         assertActor2(actors.get(0));
+        dao.closeEntityManager();
     }
 
     @Override
@@ -152,6 +153,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(1, actors.size());
         assertActor1(actors.get(0));
+        dao.closeEntityManager();
     }
 
     @Override
@@ -162,6 +164,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(1, actors.size());
         assertActor1(actors.get(0));
+        dao.closeEntityManager();
     }
 
     @Override
@@ -169,6 +172,7 @@ public class IMDBPolyglotTest extends TwinAssociation
     {
         List<Actor> actors = dao.findActorByIDAndNameNegative();
         Assert.assertTrue(actors == null || actors.isEmpty());
+        dao.closeEntityManager();
     }
 
     @Override
@@ -179,6 +183,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(1, actors.size());
         assertActor2(actors.get(0));
+        dao.closeEntityManager();
     }
 
     @Override
@@ -189,6 +194,7 @@ public class IMDBPolyglotTest extends TwinAssociation
         Assert.assertFalse(actors.isEmpty());
         Assert.assertEquals(2, actors.size());
         // assertActor2(actors.get(0));
+        dao.closeEntityManager();
     }
 
     @Override
@@ -205,6 +211,7 @@ public class IMDBPolyglotTest extends TwinAssociation
             Assert.assertNotNull(actor.getId());
             Assert.assertNotNull(actor.getName());
         }
+        dao.closeEntityManager();
     }
 
     /**

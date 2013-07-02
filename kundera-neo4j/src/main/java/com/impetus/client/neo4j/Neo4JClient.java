@@ -522,12 +522,6 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         // Populate all relationship entities that are in Neo4J
         for (Relation relation : m.getRelations())
         {
-
-            if (relation.getFetchType() != null && relation.getFetchType().equals(FetchType.LAZY))
-            {
-                continue;
-            }
-
             Class<?> targetEntityClass = relation.getTargetEntity();
             EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);
             Field property = relation.getProperty();
@@ -607,7 +601,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                 /**
                  * If relationship entity is stored in a database other than
                  * Neo4J foreign keys are stored in "Proxy Nodes", retrieve
-                 * these foreign keys and set set into EnhanceEntity
+                 * these foreign keys and set into EnhanceEntity
                  */
                 else
                 {

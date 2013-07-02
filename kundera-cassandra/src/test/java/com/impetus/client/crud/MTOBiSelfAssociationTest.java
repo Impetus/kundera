@@ -95,7 +95,7 @@ public class MTOBiSelfAssociationTest {
         Group child1 = em.find(Group.class, "ungrouped");
         Assert.assertNotNull(child1);
         Assert.assertEquals(child1.getParent().getResourceId(),"All");
-        Assert.assertNotNull(child1.getParent().getParent());
+        Assert.assertNull(child1.getParent().getParent());
         Assert.assertEquals(child1.getResourceId(), "ungrouped");
         Assert.assertEquals(2,child1.getParent().getChildren().size());
         Assert.assertSame(child1.getParent().getChildren().iterator().next().getParent(), child1.getParent()
@@ -105,7 +105,7 @@ public class MTOBiSelfAssociationTest {
         Group child2= em.find(Group.class, "grouped");
         Assert.assertNotNull(child2);
         Assert.assertEquals(child2.getParent().getResourceId(),"All");
-        Assert.assertNotNull(child2.getParent().getParent());
+        Assert.assertNull(child2.getParent().getParent());
         Assert.assertEquals(child2.getResourceId(), "grouped");
         Assert.assertEquals(2,child2.getParent().getChildren().size());
         Assert.assertSame(child2.getParent().getChildren().iterator().next().getParent(), child2.getParent()

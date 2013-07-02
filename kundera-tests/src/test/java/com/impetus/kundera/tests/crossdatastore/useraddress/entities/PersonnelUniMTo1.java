@@ -39,7 +39,7 @@ public class PersonnelUniMTo1
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID")
     private HabitatUniMTo1 address;
 
