@@ -24,39 +24,44 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
- * @author vivek.mishra
- * junit for {@link Polygon}
- *
+ * @author vivek.mishra junit for {@link Polygon}
+ * 
  */
 public class PolygonTest
 {
 
-//    @Test
+    // @Test
     public void test()
     {
-        Coordinate coordiates2d = new Coordinate(34.2d,34.4d);
-        Coordinate coordiates2d1 = new Coordinate(34.2d,34.4d);
+        Coordinate coordiates2d = new Coordinate(34.2d, 34.4d);
+        Coordinate coordiates2d1 = new Coordinate(34.2d, 34.4d);
 
         Coordinate[] coordinates = new Coordinate[2];
-        coordinates[0]=coordiates2d;
-        coordinates[1]=coordiates2d1;
-        
+        coordinates[0] = coordiates2d;
+        coordinates[1] = coordiates2d1;
 
-        com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Float floatSequence = new com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Float(coordinates, 1);
+        com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Float floatSequence = new com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Float(
+                coordinates, 1);
         GeometryFactory geoFactory = new GeometryFactory(new PrecisionModel(2));
 
-
-        com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Double doubleSequence = new com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Double(coordinates, 1);
+        com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Double doubleSequence = new com.vividsolutions.jts.geom.impl.PackedCoordinateSequence.Double(
+                coordinates, 1);
 
         LinearRing shell = new LinearRing(floatSequence, geoFactory);
-        
+
         LinearRing[] holes = new LinearRing[1];
-        
+
         holes[0] = new LinearRing(doubleSequence, geoFactory);
-        
+
         Polygon polygon = new Polygon(shell, holes, geoFactory);
-        
+
         Assert.assertNotNull(polygon.getCoordinates());
+    }
+
+    @Test
+    public void dummyTest()
+    {
+
     }
 
 }

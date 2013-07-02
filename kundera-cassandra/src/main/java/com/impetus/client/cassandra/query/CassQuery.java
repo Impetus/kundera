@@ -17,17 +17,12 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Parameter;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -235,7 +230,6 @@ public class CassQuery extends QueryImpl
             List result = getResultList();
             return result != null ? result.size() : 0;
         }
-
         return 0;
     }
 

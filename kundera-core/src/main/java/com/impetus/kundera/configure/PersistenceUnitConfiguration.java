@@ -116,10 +116,10 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         {
             xmls = this.getClass().getClassLoader().getResources("META-INF/persistence.xml");
             
-            if (xmls == null || !xmls.hasMoreElements())
-            {
-                xmls = Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
-            }
+//            if (xmls == null || !xmls.hasMoreElements())
+//            {
+//                xmls = Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
+//            }
         }
         catch (IOException ioex)
         {

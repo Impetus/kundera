@@ -605,15 +605,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                             Attribute attribute = entityType.getAttribute(columnName);
 
                             // TODO : catch column name.
-
-                            // Column column =
-                            // entityMetadata.getColumn(columnName);
-                            //
-                            // if (column != null)
-                            // {
                             PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue()
                                     .toString());
-                            // }
                             persistenceDelegeator.merge(result);
                         }
                         catch (IllegalArgumentException iax)
@@ -1171,10 +1164,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         return this.fetchSize;
     }
-
-//    public abstract E next();
-
-//    public abstract List<E> next(int size);
 
     public abstract void close();
     

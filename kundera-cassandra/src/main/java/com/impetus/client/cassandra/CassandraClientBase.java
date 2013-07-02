@@ -942,7 +942,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 insert_Query = insert_Query + " USING TTL " + ttl;
             }
-
         }
         return insert_Query;
     }
