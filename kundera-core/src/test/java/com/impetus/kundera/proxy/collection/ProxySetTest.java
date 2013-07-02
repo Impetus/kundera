@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy.collection;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -87,7 +88,7 @@ public class ProxySetTest
 
         proxySet.addAll(subaddresses);
         Assert.assertNotNull(proxySet.getDataCollection());
-        Assert.assertEquals(2,proxySet.getDataCollection().size());
+        Assert.assertEquals(2, ((Collection)proxySet.getDataCollection()).size());
         Assert.assertTrue(proxySet.contains(p));
         Assert.assertTrue(proxySet.containsAll(subaddresses));
 
@@ -101,7 +102,7 @@ public class ProxySetTest
 
         proxySet.retainAll(subaddresses);
         Assert.assertNotNull(proxySet.getDataCollection());
-        Assert.assertEquals(2,proxySet.getDataCollection().size());
+        Assert.assertEquals(2, ((Collection)proxySet.getDataCollection()).size());
         
         Iterator<AddressEntity> iter = proxySet.iterator();
         int counter=0;

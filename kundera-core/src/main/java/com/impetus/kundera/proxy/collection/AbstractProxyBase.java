@@ -24,6 +24,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.AssociationBuilder;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.LazyInitializationException;
 
 /**
  * Abstract class containing common methods for all interfaces extending
@@ -42,7 +43,7 @@ public abstract class AbstractProxyBase implements ProxyCollection
 
     private Relation relation;
 
-    protected Collection dataCollection;
+    protected Object dataCollection;
 
     public AbstractProxyBase()
     {
@@ -91,13 +92,7 @@ public abstract class AbstractProxyBase implements ProxyCollection
     public Relation getRelation()
     {
         return relation;
-    }
-
-    @Override
-    public Collection getDataCollection()
-    {
-        return dataCollection != null && !dataCollection.isEmpty() ? dataCollection : null;
-    }
+    }    
 
     /**
 	 * 
@@ -107,15 +102,25 @@ public abstract class AbstractProxyBase implements ProxyCollection
         if (getDataCollection() == null || getDataCollection() instanceof ProxyCollection)
         {
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(getOwner().getClass());
-            // Object entityId = PropertyAccessorHelper.getId(getOwner(), m);
 
+            if(! getPersistenceDelegator().isOpen())
+            {
+                throw new LazyInitializationException("Unable to load Proxy Collection." +
+                		" This happens when you access a lazily loaded proxy collection in an entity after entity manager has been closed.");
+            }
+            
             getPersistenceDelegator().getClient(m).getReader()
                     .recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(), true);
-            // new AssociationBuilder().setConcreteRelationObject(getOwner(),
-            // getRelationsMap(), m,
-            // getPersistenceDelegator(), entityId, getRelation());
-
-            dataCollection = (Collection) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
+            
+            if(getRelation().getProperty().getType().isAssignableFrom(Map.class))
+            {
+                dataCollection = (Map) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
+            }
+            else
+            {
+                dataCollection = (Collection) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
+            }
+            
             if (dataCollection instanceof ProxyCollection)
             {
                 dataCollection = null;
@@ -125,28 +130,7 @@ public abstract class AbstractProxyBase implements ProxyCollection
     }
 
     // ///////////////////Common collection
-    // implementation////////////////////////////
-    protected void clear()
-    {
-        eagerlyLoadDataCollection();
-        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
-        {
-            getDataCollection().clear();
-        }
-    }
-
-    protected boolean contains(Object arg0)
-    {
-
-        boolean result = false;
-
-        eagerlyLoadDataCollection();
-        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
-        {
-            result = getDataCollection().contains(arg0);
-        }
-        return result;
-    }
+    // implementation////////////////////////////   
 
     protected boolean containsAll(final Collection arg0)
     {
@@ -156,26 +140,8 @@ public abstract class AbstractProxyBase implements ProxyCollection
 
         if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
         {
-            result = getDataCollection().containsAll(arg0);
+            result = ((Collection)getDataCollection()).containsAll(arg0);
         }
         return result;
-    }
-
-    protected boolean isEmpty()
-    {
-        boolean result = true;
-
-        eagerlyLoadDataCollection();
-        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
-        {
-            result = getDataCollection().isEmpty();
-        }
-        return result;
-    }
-
-    protected int size()
-    {
-        eagerlyLoadDataCollection();
-        return dataCollection == null || dataCollection instanceof ProxyCollection ? 0 : dataCollection.size();
-    }
+    }   
 }

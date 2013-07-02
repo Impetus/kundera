@@ -16,6 +16,7 @@
 package com.impetus.kundera.proxy.collection;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -94,7 +95,7 @@ public class ProxyListTest
 
         proxyList.addAll(1,subaddresses);
         Assert.assertNotNull(proxyList.getDataCollection());
-        Assert.assertEquals(2,proxyList.getDataCollection().size());
+        Assert.assertEquals(2, ((Collection)proxyList.getDataCollection()).size());
         Assert.assertTrue(proxyList.contains(p));
         Assert.assertTrue(proxyList.containsAll(subaddresses));
 
@@ -109,7 +110,7 @@ public class ProxyListTest
 
         proxyList.retainAll(subaddresses);
         Assert.assertNotNull(proxyList.getDataCollection());
-        Assert.assertEquals(2,proxyList.getDataCollection().size());
+        Assert.assertEquals(2, ((Collection)proxyList.getDataCollection()).size());
         
         Assert.assertNotNull(proxyList.get(0));
         Assert.assertNotNull(proxyList.get(1));
