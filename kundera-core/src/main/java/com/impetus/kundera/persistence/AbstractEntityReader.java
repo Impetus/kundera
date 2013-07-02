@@ -106,7 +106,6 @@ public class AbstractEntityReader
 
             Object relationalObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            // TODO: Need to check if object is a collection instance but empty!
             if (relationalObject == null || ProxyHelper.isProxyOrCollection(relationalObject))
             {
                 onRelation(entity, relationsMap, m, pd, relation, relationType,lazilyloaded);
@@ -241,10 +240,12 @@ public class AbstractEntityReader
                     // relation.getProperty(), originalEntity);
 
                     Object associationObject = PropertyAccessorHelper.getObject(relationEntity, relation.getProperty());
-                    if (relation.getType().equals(ForeignKey.ONE_TO_ONE)
-                            || ((associationObject == null || ProxyHelper.isProxyOrCollection(associationObject))))
+                    if (relation.getType().equals(ForeignKey.ONE_TO_ONE))
                     {
-                        PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
+                        if ((associationObject == null || ProxyHelper.isProxyOrCollection(associationObject)))
+                        {
+                            PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
+                        }
                     }
                     else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName()))
                     {
