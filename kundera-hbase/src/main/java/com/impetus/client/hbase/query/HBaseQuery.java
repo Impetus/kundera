@@ -69,7 +69,7 @@ public class HBaseQuery extends QueryImpl
      * Holds reference to entity reader.
      */
     private EntityReader reader = new HBaseEntityReader();
-    
+
     /**
      * Constructor using fields.
      * 
@@ -95,7 +95,6 @@ public class HBaseQuery extends QueryImpl
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         List results = onQuery(m, client);
-        ((HBaseClient) client).setFilter(null);
         return results;
     }
 
@@ -112,7 +111,6 @@ public class HBaseQuery extends QueryImpl
     {
         // required in case of associated entities.
         List ls = onQuery(m, client);
-        ((HBaseClient) client).setFilter(null);
         return setRelationEntities(ls, client, m);
     }
 
@@ -175,7 +173,7 @@ public class HBaseQuery extends QueryImpl
         if (translator.isFindById && filter == null && columns != null)
         {
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                    columns.toArray(new String[columns.size()]));
+                    columns.toArray(new String[columns.size()]), null);
         }
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
@@ -186,26 +184,26 @@ public class HBaseQuery extends QueryImpl
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
                 }
                 else
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null,
-                            columns.toArray(new String[columns.size()]));
+                            columns.toArray(new String[columns.size()]), null);
                 }
             }
             else
             {
                 // means WHERE clause is present.
-
+                Filter f = null;
                 if (filter != null && filter.values() != null && !filter.values().isEmpty())
                 {
-                    ((HBaseClient) client).setFilter(filter.values().iterator().next());
+                    f = filter.values().iterator().next();
                 }
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), f);
                 }
                 else
                 {
@@ -214,7 +212,7 @@ public class HBaseQuery extends QueryImpl
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m,
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, f,
                             columns.toArray(new String[columns.size()]));
                 }
             }
@@ -483,12 +481,19 @@ public class HBaseQuery extends QueryImpl
             if (filterList == null)
             {
                 filterList = new ArrayList<Filter>();
-
             }
             filterList.add(f);
         }
     }
 
+    /**
+     * Returns bytes of value object.
+     * 
+     * @param jpaFieldName
+     * @param m
+     * @param value
+     * @return
+     */
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
         Attribute idCol = m.getIdAttribute();
@@ -535,12 +540,11 @@ public class HBaseQuery extends QueryImpl
         }
     }
 
-
     @Override
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -557,7 +561,7 @@ public class HBaseQuery extends QueryImpl
         translator.translate(getKunderaQuery(), m);
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
-        
-        return new ResultIterator((HBaseClient)client,m,persistenceDelegeator,getFetchSize(),getKunderaQuery(),translator,columns);
+
+        return new ResultIterator((HBaseClient) client, m, persistenceDelegeator, getFetchSize(), translator, columns);
     }
 }

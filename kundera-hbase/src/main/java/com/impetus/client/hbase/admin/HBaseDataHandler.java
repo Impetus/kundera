@@ -212,7 +212,7 @@ public class HBaseDataHandler implements DataHandler
      */
     @Override
     public List readData(final String tableName, Class clazz, EntityMetadata m, final Object rowKey,
-            List<String> relationNames, String... columns) throws IOException
+            List<String> relationNames, FilterList f, String... columns) throws IOException
     {
 
         List output = null;
@@ -223,8 +223,17 @@ public class HBaseDataHandler implements DataHandler
 
         hTable = gethTable(tableName);
 
+        if (getFilter(tableName) != null)
+        {
+            if (f == null)
+            {
+                f = new FilterList();
+            }
+            f.addFilter(getFilter(tableName));
+        }
+
         // Load raw data from HBase
-        List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, getFilter(tableName), columns);
+        List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, f, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -267,16 +276,24 @@ public class HBaseDataHandler implements DataHandler
      */
     @Override
     public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
-            String[] columns) throws IOException
+            String[] columns, FilterList f) throws IOException
     {
         List output = new ArrayList();
         HTableInterface hTable = null;
         Object entity = null;
         List<String> relationNames = m.getRelationNames();
+
+        if (getFilter(tableName) != null)
+        {
+            if (f == null)
+            {
+                f = new FilterList();
+            }
+            f.addFilter(getFilter(tableName));
+        }
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, getFilter(tableName), startRow, endRow, m.getTableName(),
-                null, columns);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, f, startRow, endRow, m.getTableName(), null, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -728,9 +745,10 @@ public class HBaseDataHandler implements DataHandler
         {
             this.filter = new FilterList();
         }
-
-        this.filter.addFilter(filter);
-        // this.filter = filter;
+        if (filter != null)
+        {
+            this.filter.addFilter(filter);
+        }
     }
 
     public void addFilter(final String columnFamily, Filter filter)
@@ -740,8 +758,10 @@ public class HBaseDataHandler implements DataHandler
         {
             filterList = new FilterList();
         }
-        filterList.addFilter(filter);
-
+        if (filter != null)
+        {
+            filterList.addFilter(filter);
+        }
         this.filters.put(columnFamily, filterList);
     }
 
@@ -1081,12 +1101,30 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            // TODOOOOO handle it
+            log.error("Error during finding next record, Caused by: .", e);
+            throw new KunderaException(e);
         }
 
         return output != null && !output.isEmpty() ? output.get(0) : output;
     }
+
+//    public List next(EntityMetadata m, final int chunkSize)
+//    {
+//        Object entity = null;
+//        List<HBaseData> results = ((HBaseReader) hbaseReader).next(chunkSize);
+//        List output = new ArrayList();
+//        try
+//        {
+//            output = onRead(m.getTableName(), m.getEntityClazz(), m, output, gethTable(m.getTableName()), entity,
+//                    m.getRelationNames(), results);
+//        }
+//        catch (IOException e)
+//        {
+//            log.error("Error during finding next record, Caused by: .", e);
+//            throw new KunderaException(e);
+//        }
+//        return output != null ? output : new ArrayList();
+//    }
 
     public boolean hasNext()
     {
@@ -1095,7 +1133,14 @@ public class HBaseDataHandler implements DataHandler
 
     public void reset()
     {
+        resetFilter();
         ((HBaseReader) hbaseReader).reset();
+    }
+
+    public void resetFilter()
+    {
+        filter = null;
+        filters = new ConcurrentHashMap<String, FilterList>();
     }
 
     public HBaseDataHandler getHandle()

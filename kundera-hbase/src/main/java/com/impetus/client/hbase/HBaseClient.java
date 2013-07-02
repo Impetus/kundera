@@ -141,8 +141,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 return null;
             }
-            results = handler
-                    .readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+                    relationNames, null);
             if (results != null)
             {
                 enhancedEntity = results.get(0);
@@ -205,7 +205,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 try
                 {
                     List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                            entityMetadata, entityId, null);
+                            entityMetadata, entityId, null, null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
@@ -245,7 +245,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            entity metadata.
      * @return list of entities.
      */
-    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, String... columns)
+    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, Filter f, String... columns)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
@@ -254,16 +254,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         String tableName = entityMetadata.getTableName();
         List results = null;
 
+        FilterList filter = new FilterList();
+        if (f != null)
+        {
+            filter.addFilter(f);
+        }
         if (isFindKeyOnly(metadata, columns))
         {
             columns = null;
-            addFilter(tableName,new KeyOnlyFilter());
+            filter.addFilter(new KeyOnlyFilter());
         }
 
         try
         {
             results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null, relationNames,
-                    columns);
+                    filter, columns);
         }
         catch (IOException ioex)
         {
@@ -289,7 +294,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @return collection holding results.
      */
     public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow,
-            String[] columns)
+            String[] columns, Filter f)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
@@ -298,15 +303,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         // Object enhancedEntity = null;
         List results = new ArrayList();
 
+        FilterList filter = new FilterList();
+        if (f != null)
+        {
+            filter.addFilter(f);
+        }
         if (isFindKeyOnly(metadata, columns))
         {
             columns = null;
-            addFilter(tableName,new KeyOnlyFilter());
+            filter.addFilter(new KeyOnlyFilter());
         }
 
         try
         {
-            results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns);
+            results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow, columns, filter);
+
         }
         catch (IOException ioex)
         {
@@ -377,6 +388,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     {
         ((HBaseDataHandler) handler).addFilter(columnFamily, filter);
     }
+
+    public void resetFilter()
+    {
+        ((HBaseDataHandler) handler).resetFilter();
+    }
+
     /**
      * Setter for filter.
      * 
@@ -791,22 +808,22 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     public void reset()
     {
-        ((HBaseDataHandler)handler).reset();
+        ((HBaseDataHandler) handler).reset();
     }
-    
+
     public Object next(EntityMetadata m)
     {
-        return ((HBaseDataHandler)handler).next(m);
+        return ((HBaseDataHandler) handler).next(m);
     }
-    
+
     public boolean hasNext()
     {
-        return ((HBaseDataHandler)handler).hasNext();
+        return ((HBaseDataHandler) handler).hasNext();
     }
 
     public HBaseDataHandler getHandle()
     {
-        return ((HBaseDataHandler)handler).getHandle();
+        return ((HBaseDataHandler) handler).getHandle();
     }
 
 }

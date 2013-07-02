@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 
 import com.impetus.kundera.db.RelationHolder;
@@ -56,6 +57,7 @@ public interface DataHandler
      *            the m
      * @param rowKey
      *            the row key
+     * @param f 
      * @param relationNames
      *            the relation names
      * @return the object
@@ -63,7 +65,7 @@ public interface DataHandler
      *             Signals that an I/O exception has occurred.
      */
     List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,
-            String... columns) throws IOException;
+            FilterList f, String... columns) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
@@ -93,10 +95,11 @@ public interface DataHandler
      * @param startRow
      * @param endRow
      * @param columns
+     * @param f 
      * @return
      */
     List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
-            String[] columns) throws IOException;
+            String[] columns, FilterList f) throws IOException;
 
     /**
      * Write data.

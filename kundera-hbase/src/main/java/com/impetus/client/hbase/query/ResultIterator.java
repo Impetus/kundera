@@ -1,6 +1,18 @@
-/**
- * 
- */
+/*******************************************************************************
+ * * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.hbase.query;
 
 import java.io.IOException;
@@ -9,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,23 +36,21 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
- * @author impadmin
+ * ResultIterator class, used to iterate over results.
+ * 
+ * @author Vivek.Mishra
  * 
  */
-public class ResultIterator<E> implements Iterator<E>
+class ResultIterator<E> implements Iterator<E>
 {
-
     private HBaseClient client;
 
     private EntityMetadata entityMetadata;
 
     private PersistenceDelegator persistenceDelegator;
-
-    private KunderaQuery query;
 
     private HBaseDataHandler handler;
 
@@ -51,7 +62,7 @@ public class ResultIterator<E> implements Iterator<E>
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
     public ResultIterator(HBaseClient client, EntityMetadata m, PersistenceDelegator pd, int fetchSize,
-            KunderaQuery kunderaQuery, QueryTranslator translator, List<String> columns)
+            QueryTranslator translator, List<String> columns)
     {
         this.entityMetadata = m;
         this.client = client;
@@ -60,7 +71,6 @@ public class ResultIterator<E> implements Iterator<E>
         this.handler.setFetchSize(fetchSize);
         this.translator = translator;
         this.columns = columns;
-        this.query = kunderaQuery;
         onQuery(m, client);
     }
 
@@ -114,7 +124,7 @@ public class ResultIterator<E> implements Iterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator,false);
+                    persistenceDelegator, false);
         }
 
         return result;
@@ -147,13 +157,13 @@ public class ResultIterator<E> implements Iterator<E>
             if (this.translator.isFindById() && (filter == null && columns == null))
             {
                 handler.readData(m.getTableName(), m.getEntityClazz(), entityMetadata, translator.rowKey,
-                        m.getRelationNames());
+                        m.getRelationNames(), null);
 
             }
             if (translator.isFindById() && filter == null && columns != null)
             {
                 handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                        columnAsArr);
+                        columnAsArr, null);
             }
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
@@ -165,25 +175,26 @@ public class ResultIterator<E> implements Iterator<E>
                     if (translator.isRangeScan())
                     {
                         handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.getStartRow(),
-                                translator.getEndRow(), columnAsArr);
+                                translator.getEndRow(), columnAsArr, null);
                     }
                     else
                     {
-                        handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, null, null, columnAsArr);
+                        handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, null, null, columnAsArr, null);
                     }
                 }
                 else
                 {
                     // means WHERE clause is present.
 
+                    FilterList f = new FilterList();
                     if (filter != null && filter.values() != null && !filter.values().isEmpty())
                     {
-                        ((HBaseDataHandler) handler).setFilter(filter.values().iterator().next());
+                        f.addFilter(filter.values().iterator().next());
                     }
                     if (translator.isRangeScan())
                     {
                         handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.getStartRow(),
-                                translator.getEndRow(), columnAsArr);
+                                translator.getEndRow(), columnAsArr, f);
                     }
                     else
                     {
@@ -192,7 +203,7 @@ public class ResultIterator<E> implements Iterator<E>
                         // scan method.
 
                         handler.readData(m.getTableName(), entityMetadata.getEntityClazz(), entityMetadata, null,
-                                m.getRelationNames(), columnAsArr);
+                                m.getRelationNames(), f, columnAsArr);
                     }
                 }
             }
@@ -243,5 +254,4 @@ public class ResultIterator<E> implements Iterator<E>
         }
         return false;
     }
-
 }

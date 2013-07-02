@@ -145,7 +145,7 @@ public class PersonHBaseTest extends BaseTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(2, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
