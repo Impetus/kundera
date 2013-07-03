@@ -61,7 +61,7 @@ public class UserPromoCodeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-//        loadData();
+        loadData();
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
         em = emf.createEntityManager();
     }
