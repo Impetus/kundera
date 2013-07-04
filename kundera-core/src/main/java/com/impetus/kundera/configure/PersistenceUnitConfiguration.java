@@ -61,7 +61,7 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      */
     public PersistenceUnitConfiguration(String... persistenceUnits)
     {
-        super(persistenceUnits,null);
+        super(persistenceUnits, null);
     }
 
     /*
@@ -90,17 +90,15 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
                     throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit
                             + " provided");
                 }
-                // metadatas.get(persistenceUnit);
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);
         }
         catch (InvalidConfigurationException icex)
         {
-            log.error("Error occurred during persistence unit configuration, Caused by:" + icex.getMessage());
+            log.error("Error occurred during persistence unit configuration, Caused by: .", icex);
             throw new PersistenceLoaderException(icex);
         }
-
     }
 
     /**
@@ -117,6 +115,11 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         try
         {
             xmls = this.getClass().getClassLoader().getResources("META-INF/persistence.xml");
+            
+//            if (xmls == null || !xmls.hasMoreElements())
+//            {
+//                xmls = Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
+//            }
         }
         catch (IOException ioex)
         {
@@ -125,9 +128,8 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
 
         if (xmls == null || !xmls.hasMoreElements())
         {
-            log.info("Could not find any META-INF/persistence.xml " + " file in the classpath");
-            throw new InvalidConfigurationException("Could not find any META-INF/persistence.xml "
-                    + " file in the classpath");
+            log.error("Could not find any META-INF/persistence.xml file in the classpath");
+            throw new InvalidConfigurationException("Could not find any META-INF/persistence.xml file in the classpath");
         }
 
         Set<String> persistenceUnitNames = new HashSet<String>();

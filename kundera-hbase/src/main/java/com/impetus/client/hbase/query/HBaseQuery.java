@@ -18,18 +18,16 @@ package com.impetus.client.hbase.query;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -61,7 +59,7 @@ import com.impetus.kundera.query.QueryImpl;
  * @author vivek.mishra
  * 
  */
-public class HBaseQuery extends QueryImpl implements Query
+public class HBaseQuery extends QueryImpl
 {
 
     /** the log used by this class. */
@@ -97,7 +95,6 @@ public class HBaseQuery extends QueryImpl implements Query
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         List results = onQuery(m, client);
-        ((HBaseClient) client).setFilter(null);
         return results;
     }
 
@@ -114,7 +111,6 @@ public class HBaseQuery extends QueryImpl implements Query
     {
         // required in case of associated entities.
         List ls = onQuery(m, client);
-        ((HBaseClient) client).setFilter(null);
         return setRelationEntities(ls, client, m);
     }
 
@@ -142,7 +138,6 @@ public class HBaseQuery extends QueryImpl implements Query
             List result = getResultList();
             return result != null ? result.size() : 0;
         }
-
         return 0;
     }
 
@@ -178,7 +173,7 @@ public class HBaseQuery extends QueryImpl implements Query
         if (translator.isFindById && filter == null && columns != null)
         {
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                    columns.toArray(new String[columns.size()]));
+                    columns.toArray(new String[columns.size()]), null);
         }
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
@@ -189,26 +184,26 @@ public class HBaseQuery extends QueryImpl implements Query
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
                 }
                 else
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null,
-                            columns.toArray(new String[columns.size()]));
+                            columns.toArray(new String[columns.size()]), null);
                 }
             }
             else
             {
                 // means WHERE clause is present.
-
+                Filter f = null;
                 if (filter != null && filter.values() != null && !filter.values().isEmpty())
                 {
-                    ((HBaseClient) client).setFilter(filter.values().iterator().next());
+                    f = filter.values().iterator().next();
                 }
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]));
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), f);
                 }
                 else
                 {
@@ -217,7 +212,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m,
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, f,
                             columns.toArray(new String[columns.size()]));
                 }
             }
@@ -227,7 +222,6 @@ public class HBaseQuery extends QueryImpl implements Query
             List results = null;
             return populateUsingLucene(m, client, results, null);
         }
-        // return null;
     }
 
     /**
@@ -244,7 +238,6 @@ public class HBaseQuery extends QueryImpl implements Query
                     m.getPersistenceUnit());
 
             EntityType entity = metaModel.entity(m.getEntityClazz());
-            int count = 0;
             for (int i = startWith; i < columns.length; i++)
             {
                 if (columns[i] != null)
@@ -266,7 +259,6 @@ public class HBaseQuery extends QueryImpl implements Query
                                                                                                  // type
                         Attribute attribute = embeddableType.getAttribute(embeddedFieldName);
                         translatedColumns.add(((AbstractAttribute) attribute).getJPAColumnName());
-
                     }
                     else
                     {
@@ -275,9 +267,7 @@ public class HBaseQuery extends QueryImpl implements Query
                         Attribute col = entity.getAttribute(fieldName);
                         onEmbeddable(translatedColumns, metaModel, col,
                                 metaModel.isEmbeddable(((AbstractAttribute) col).getBindableJavaType()));
-
                     }
-
                 }
             }
         }
@@ -292,7 +282,6 @@ public class HBaseQuery extends QueryImpl implements Query
     private void onEmbeddable(List<String> translatedColumns, MetamodelImpl metaModel, Attribute col,
             boolean isEmbeddable)
     {
-
         if (isEmbeddable)
         {
             EmbeddableType embeddableType = metaModel.embeddable(col.getJavaType());
@@ -365,19 +354,10 @@ public class HBaseQuery extends QueryImpl implements Query
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
                     Object value = ((FilterClause) obj).getValue();
-
-                    // StringTokenizer tokenizer = new StringTokenizer(name,
-                    // ".");
-                    // if (tokenizer.countTokens() > 1)
-                    // {
-                    // tokenizer.nextToken();
-                    // name = tokenizer.nextToken();
-                    // }
-                    if (/* (!isIdColumn) || */idColumn.equalsIgnoreCase(name))
+                    if (idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
                     }
-
                     onParseFilter(condition, name, value, isIdColumn, m);
                 }
                 else
@@ -387,10 +367,9 @@ public class HBaseQuery extends QueryImpl implements Query
                     if (opr.equalsIgnoreCase("or"))
                     {
                         log.error("Support for OR clause is not enabled with in Hbase");
-                        throw new QueryHandlerException("unsupported clause " + opr + " for Hbase");
+                        throw new QueryHandlerException("Unsupported clause " + opr + " for Hbase");
                     }
                 }
-
             }
         }
 
@@ -407,7 +386,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 queryClause.put(isIdColumn, new FilterList(filterList));
                 return queryClause;
             }
-
             return null;
         }
 
@@ -445,7 +423,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
                         valueInBytes);
                 addToFilter(f);
-
             }
             else
             {
@@ -460,8 +437,6 @@ public class HBaseQuery extends QueryImpl implements Query
                 else if (operator.equals(CompareOp.EQUAL))
                 {
                     rowKey = getBytes(m.getIdAttribute().getName(), m, value);
-                    // startRow = getBytes(m.getIdAttribute().getName(), m,
-                    // value);
                     endRow = null;
                     isFindById = true;
                 }
@@ -506,13 +481,19 @@ public class HBaseQuery extends QueryImpl implements Query
             if (filterList == null)
             {
                 filterList = new ArrayList<Filter>();
-
             }
             filterList.add(f);
-
         }
     }
 
+    /**
+     * Returns bytes of value object.
+     * 
+     * @param jpaFieldName
+     * @param m
+     * @param value
+     * @return
+     */
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
         Attribute idCol = m.getIdAttribute();
@@ -520,14 +501,11 @@ public class HBaseQuery extends QueryImpl implements Query
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());
-        // Field f = null;
         Class fieldClazz = null;
-        boolean isId = false;
         if (idCol.getName().equals(jpaFieldName))
         {
             Field f = (Field) idCol.getJavaMember();
             fieldClazz = f.getType();
-            isId = true;
         }
         else
         {
@@ -545,23 +523,45 @@ public class HBaseQuery extends QueryImpl implements Query
             }
             else
             {
-
                 String fieldName = m.getFieldName(jpaFieldName);
                 Attribute col = entity.getAttribute(fieldName);
-                // Column col = m.getColumn(jpaFieldName);
                 fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
-                // f = (Field) col.getJavaMember();
             }
         }
 
-        if (fieldClazz != null /* && f.getType() != null */)
+        if (fieldClazz != null)
         {
             return HBaseUtils.getBytes(value, fieldClazz);
         }
         else
         {
-            log.error("Error while handling data type for:" + jpaFieldName);
+            log.error("Error while handling data type for {} .", jpaFieldName);
             throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        EntityMetadata m = getEntityMetadata();
+
+        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        {
+            throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
+        }
+        Client client = persistenceDelegeator.getClient(m);
+        QueryTranslator translator = new QueryTranslator();
+        translator.translate(getKunderaQuery(), m);
+        // start with 1 as first element is alias.
+        List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
+
+        return new ResultIterator((HBaseClient) client, m, persistenceDelegeator, getFetchSize(), translator, columns);
     }
 }

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,25 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
 
+        
+        query = "select p from PersonHBase p";
+        com.impetus.kundera.query.Query<PersonHBase> queryObject = (com.impetus.kundera.query.Query<PersonHBase>) em.createQuery(query);
+        queryObject.setFetchSize(1);
+        
+        Iterator<PersonHBase> resultIterator = queryObject.iterate();
+        PersonHBase person =null;
+        int counter = 0;
+        while(resultIterator.hasNext())
+        {
+            counter++;
+            person = resultIterator.next();
+            Assert.assertNotNull(person.getPersonId());
+            Assert.assertNotNull(person.getPersonName());
+        }
+        
+        Assert.assertEquals(1, counter);
+
+        
         query = "Select p.personId from PersonHBase p where p.personName = vivek";
         // // find by name.
         q = em.createQuery(query);
@@ -125,7 +145,7 @@ public class PersonHBaseTest extends BaseTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(2, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());

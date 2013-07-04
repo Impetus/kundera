@@ -15,34 +15,29 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
-import java.util.Map;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
-import javax.persistence.PersistenceException;
-
-import net.dataforte.cassandra.pool.ConnectionPool;
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.TBinaryProtocol;
-import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
-import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.service.CassandraHost;
-import com.impetus.kundera.PersistenceProperties;
 
 /**
  * The Class PelopsUtils.
@@ -115,6 +110,7 @@ public class PelopsUtils
         boolean testOnConnect = cassandraHost.isTestOnConnect();
         boolean testOnReturn = cassandraHost.isTestOnReturn();
         int socketTimeOut = cassandraHost.getSocketTimeOut();
+        int maxWaitInMilli = cassandraHost.getMaxWait();
         HostFailoverPolicy paramHostFailoverPolicy = cassandraHost.getHostFailoverPolicy();
         if (maxActivePerNode > 0)
         {
@@ -139,6 +135,7 @@ public class PelopsUtils
         prop.setTestOnReturn(testOnReturn);
         prop.setTestWhileIdle(testWhileIdle);
         prop.setFailoverPolicy(paramHostFailoverPolicy);
+        prop.setMaxWait(maxWaitInMilli);
         return prop;
     }
 
@@ -163,29 +160,54 @@ public class PelopsUtils
         return authenticator;
     }
 
+    /**
+     * 
+     * @param host
+     * @param port
+     * @return
+     */
     public static boolean verifyConnection(String host, int port)
     {
+        Socket socket = null;
         try
         {
-            TSocket socket = new TSocket(host, port);
-            TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
-            Cassandra.Client client = new Cassandra.Client(protocol);
-            socket.open();
-            return client.describe_cluster_name() != null;
+            socket = new Socket(host, port);
+            socket.setReuseAddress(true);
+            socket.setSoLinger(true, 0);
+            boolean isConnected = socket.isConnected();
+            return isConnected;
         }
-        catch (TTransportException e)
+        catch (UnknownHostException e)
         {
             logger.warn("{}:{} is still down", host, port);
             return false;
         }
-        catch (TException e)
+        catch (IOException e)
         {
             logger.warn("{}:{} is still down", host, port);
             return false;
+        }
+        finally
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    socket.close();
+                }
+            }
+            catch (IOException e)
+            {
+                logger.warn("{}:{} is still down", host, port);
+            }
         }
     }
 
+    /**
+     * 
+     * @param pool
+     * @return
+     */
     public static String getPoolName(IThriftPool pool)
     {
         org.scale7.cassandra.pelops.Cluster.Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();

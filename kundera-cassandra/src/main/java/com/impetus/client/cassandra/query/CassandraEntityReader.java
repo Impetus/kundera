@@ -104,7 +104,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      */
 
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
         if(log.isInfoEnabled())
         {
@@ -165,7 +165,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         else
         {
             // List<Object> results = new ArrayList<Object>();
-            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null);
+            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null,maxResults);
             // ls = (List<EnhanceEntity>) results;
         }
         return ls;
@@ -188,7 +188,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @return the list
      */
     public List handleFindByRange(EntityMetadata m, Client client, List result,
-            Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery, List<String> columns)
+            Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery, List<String> columns, int maxResults)
     {
         List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
 
@@ -207,7 +207,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         {
 
             result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
-                    && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns, expressions);
+                    && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns, expressions, maxResults);
         }
         catch (Exception e)
         {
@@ -282,41 +282,43 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @param primaryKeyName
      * @return
      */
-    private Map<String, byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
+    Map<String, byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
     {
         Map<String, byte[]> rowKeys = new HashMap<String, byte[]>();
 
         List<IndexExpression> rowExpressions = new ArrayList<IndexExpression>();
 
-        for (IndexExpression e : expressions)
+        if (expressions != null)
         {
-
-            if (primaryKeyName.equals(new String(e.getColumn_name())))
+            for (IndexExpression e : expressions)
             {
-                IndexOperator operator = e.op;
-                if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
-                {
-                    rowKeys.put(MAX_, e.getValue());
-                    rowExpressions.add(e);
-                }
-                else if (operator.equals(IndexOperator.GTE) || operator.equals(IndexOperator.GT))
-                {
-                    rowKeys.put(MIN_, e.getValue());
-                    rowExpressions.add(e);
-                }
-                else if (operator.equals(IndexOperator.EQ))
-                {
 
-                    rowKeys.put(MAX_, e.getValue());
-                    rowKeys.put(MIN_, e.getValue());
-                    rowExpressions.add(e);
+                if (primaryKeyName.equals(new String(e.getColumn_name())))
+                {
+                    IndexOperator operator = e.op;
+                    if (operator.equals(IndexOperator.LTE) || operator.equals(IndexOperator.LT))
+                    {
+                        rowKeys.put(MAX_, e.getValue());
+                        rowExpressions.add(e);
+                    }
+                    else if (operator.equals(IndexOperator.GTE) || operator.equals(IndexOperator.GT))
+                    {
+                        rowKeys.put(MIN_, e.getValue());
+                        rowExpressions.add(e);
+                    }
+                    else if (operator.equals(IndexOperator.EQ))
+                    {
+
+                        rowKeys.put(MAX_, e.getValue());
+                        rowKeys.put(MIN_, e.getValue());
+                        rowExpressions.add(e);
+                    }
+
                 }
 
             }
-
+            expressions.removeAll(rowExpressions);
         }
-
-        expressions.removeAll(rowExpressions);
         return rowKeys;
 
     }

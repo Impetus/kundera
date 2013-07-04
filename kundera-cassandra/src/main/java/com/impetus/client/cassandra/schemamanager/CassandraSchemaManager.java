@@ -613,7 +613,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         // After successful schema operation, perform index creation.
 
-//        createIndex(tableInfo);
+        createIndex(tableInfo);
     }
 
     /**

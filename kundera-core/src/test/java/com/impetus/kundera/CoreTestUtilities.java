@@ -18,6 +18,8 @@ package com.impetus.kundera;
 
 import java.lang.reflect.Field;
 
+import javassist.Modifier;
+
 import javax.persistence.EntityManager;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -51,5 +53,19 @@ public final class CoreTestUtilities
         PersistenceDelegator delegator = (PersistenceDelegator) pdField.get(em);
         return delegator;
 
+    }
+
+    public static int countNonSyntheticFields(Class<?> clazz)
+    {
+        int count=0;
+        for(Field f : clazz.getDeclaredFields())
+        {
+            if(!f.isSynthetic())
+            {
+                count++;
+            }
+        }
+        
+        return count;
     }
 }

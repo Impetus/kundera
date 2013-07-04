@@ -1093,11 +1093,7 @@ public class KunderaQuery
      *            table name
      * @return tokens converted to "<=" and ">=" clause
      */
-    private List<String> parseFilterForBetweenClause(List<String> tokens/*
-                                                                         * ,
-                                                                         * String
-                                                                         * indexName
-                                                                         */)
+    private List<String> parseFilterForBetweenClause(List<String> tokens)
     {
         final String between = "BETWEEN";
 
@@ -1106,8 +1102,6 @@ public class KunderaQuery
             // change token set to parse and compile.
             int idxOfBetween = tokens.indexOf(between);
             String property = tokens.get(idxOfBetween - 1);
-            // property = property.substring((entityAlias + ".").length());
-            // property = indexName + "." + property;
             Matcher match = INTRA_CLAUSE_PATTERN.matcher(property);
             // in case any intra clause given along with column name.
             if (match.find())

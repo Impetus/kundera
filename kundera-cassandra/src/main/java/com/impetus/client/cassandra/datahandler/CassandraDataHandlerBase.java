@@ -1123,17 +1123,10 @@ public abstract class CassandraDataHandlerBase
     {
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
-            entity = initialize(m, entity, null);
             EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+            Object compoundKeyObject = null;
             try
             {
-                Object compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute()
-                        .getJavaMember());
-                if (compoundKeyObject == null)
-                {
-                    compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
-                }
-
                 // for()
                 Set<Attribute> attributes = compoundKey.getAttributes();
 
@@ -1141,6 +1134,10 @@ public abstract class CassandraDataHandlerBase
                 {
                     if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
                     {
+                        entity = initialize(m, entity, null);
+                        
+                        compoundKeyObject = compoundKeyObject == null ? getCompoundKey(m, entity) : compoundKeyObject;
+                        
                         setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
                         PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
                                 compoundKeyObject);
@@ -1170,6 +1167,22 @@ public abstract class CassandraDataHandlerBase
             }
         }
         return entity;
+    }
+
+    private Object getCompoundKey(EntityMetadata m, Object entity) throws InstantiationException,
+            IllegalAccessException
+    {
+        Object compoundKeyObject = null;
+        if (entity != null)
+        {
+            compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
+            if (compoundKeyObject == null)
+            {
+                compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
+            }
+        }
+
+        return compoundKeyObject;
     }
 
     private void setFieldValue(Object entity, Object thriftColumnValue, Attribute attribute)

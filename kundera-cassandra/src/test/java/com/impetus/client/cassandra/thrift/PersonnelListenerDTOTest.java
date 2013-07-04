@@ -3,6 +3,9 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -14,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * @author impadmin
@@ -32,7 +36,10 @@ public class PersonnelListenerDTOTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        CassandraCli.createKeySpace("KunderaExamples");
+        Map propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest", propertyMap);
         em = emf.createEntityManager();
     }
 

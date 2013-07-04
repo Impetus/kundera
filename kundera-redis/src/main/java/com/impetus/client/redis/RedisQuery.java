@@ -16,6 +16,7 @@
 package com.impetus.client.redis;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
@@ -246,6 +247,20 @@ public class RedisQuery extends QueryImpl
         }
 
         interpreter.setFieldName(columnName);
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

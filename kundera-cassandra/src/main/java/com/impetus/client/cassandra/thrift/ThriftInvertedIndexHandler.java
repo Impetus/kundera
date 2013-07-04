@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -46,6 +44,7 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory.Connection;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
@@ -85,7 +84,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
             List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(), entityMetadata,
                     indexColumnFamily);
-            Client conn = thriftClient.getConection(persistenceUnit);
+            Connection conn = thriftClient.getConection();
             try
             {
                 String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
@@ -126,7 +125,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                     mulationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);
 
                     // Write Mutation map to database
-                    ((Cassandra.Client) conn).batch_mutate(mulationMap, consistencyLevel);
+                    conn.getClient().batch_mutate(mulationMap, consistencyLevel);
                 }
             }
             catch (IllegalStateException e)
@@ -179,14 +178,13 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         sliceRange.setStart(start);
         sliceRange.setFinish(finish);
         colPredicate.setSlice_range(sliceRange);
-        Client conn = thriftClient.getConection(persistenceUnit);
+        Connection conn = thriftClient.getConection();
 
         List<ColumnOrSuperColumn> coscList = null;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-            coscList = ((Cassandra.Client) conn).get_slice(ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(
-                    columnFamilyName), colPredicate, consistencyLevel);
+            coscList = conn.getClient().get_slice(ByteBuffer.wrap(rowKey.getBytes()),
+                    new ColumnParent(columnFamilyName), colPredicate, consistencyLevel);
         }
         catch (InvalidRequestException e)
         {
@@ -234,11 +232,11 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnPath cp = new ColumnPath(columnFamilyName);
         cp.setSuper_column(superColumnName);
         ColumnOrSuperColumn cosc = null;
-        Client conn = thriftClient.getConection(persistenceUnit);
+        Connection conn = thriftClient.getConection();
 
         try
         {
-            cosc = ((Cassandra.Client) conn).get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
+            cosc = conn.getClient().get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
         }
         catch (InvalidRequestException e)
         {
@@ -287,13 +285,13 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     {
         ColumnPath cp = new ColumnPath(indexColumnFamily);
         cp.setSuper_column(superColumnName);
-        Client conn = thriftClient.getConection(persistenceUnit);
+        Connection conn = thriftClient.getConection();
         try
         {
             ColumnOrSuperColumn cosc;
             try
             {
-                cosc = ((Cassandra.Client) conn).get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
+                cosc = conn.getClient().get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
             }
             catch (NotFoundException e)
             {
@@ -307,7 +305,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             {
                 cp.setColumn(columnName);
             }
-            ((Cassandra.Client) conn).remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
+            conn.getClient().remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
                     consistencyLevel);
         }
         catch (InvalidRequestException e)

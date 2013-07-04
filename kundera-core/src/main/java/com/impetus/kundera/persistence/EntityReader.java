@@ -47,7 +47,7 @@ public interface EntityReader
      *            client instance
      * @return list of wrapped enhance entities.
      */
-    List<EnhanceEntity> populateRelation(EntityMetadata m, Client client);
+    List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults);
 
     /**
      * Returns populated entity along with all relational value.

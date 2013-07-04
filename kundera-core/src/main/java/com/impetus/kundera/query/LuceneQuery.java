@@ -15,13 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Parameter;
 import javax.persistence.Query;
+import javax.persistence.TemporalType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +40,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
  * 
  * @author animesh.kumar
  */
-public class LuceneQuery extends QueryImpl implements Query
+public class LuceneQuery extends QueryImpl
 {
 
     /** the log used by this class. */
@@ -159,5 +162,21 @@ public class LuceneQuery extends QueryImpl implements Query
         }
 
         return 0;
+    }
+
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+ 
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

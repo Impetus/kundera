@@ -41,9 +41,9 @@ public class OracleNoSQLEntityReader extends AbstractEntityReader implements Ent
     }
 
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
-        return null;
+        throw new UnsupportedOperationException("Method supported not required for Oracle NOSql");
     }
 
     @Override

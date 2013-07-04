@@ -113,6 +113,10 @@ public final class CQLTranslator
     public static final String COMMA_STR = ", ";
 
     public static final String INCR_COUNTER = "+";
+    
+    public static final String TOKEN="token(";
+    
+    public static final String CLOSE_BRACKET=")";
 
     public CQLTranslator()
     {

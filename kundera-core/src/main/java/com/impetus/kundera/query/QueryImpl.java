@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,8 +39,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +64,9 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
  * The Class QueryImpl.
  * 
  * @author vivek.mishra
+ * @param <E>
  */
-public abstract class QueryImpl implements Query
+public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Query<E>
 {
 
     /** The query. */
@@ -89,6 +89,8 @@ public abstract class QueryImpl implements Query
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
+
+    private Integer fetchSize;
 
     /**
      * Instantiates a new query impl.
@@ -603,15 +605,8 @@ public abstract class QueryImpl implements Query
                             Attribute attribute = entityType.getAttribute(columnName);
 
                             // TODO : catch column name.
-
-                            // Column column =
-                            // entityMetadata.getColumn(columnName);
-                            //
-                            // if (column != null)
-                            // {
                             PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue()
                                     .toString());
-                            // }
                             persistenceDelegeator.merge(result);
                         }
                         catch (IllegalArgumentException iax)
@@ -1160,4 +1155,17 @@ public abstract class QueryImpl implements Query
         return columnAsList.toArray(new String[] {});
     }
 
+    public void setFetchSize(Integer fetchsize)
+    {
+        this.fetchSize = fetchsize;
+    }
+
+    public Integer getFetchSize()
+    {
+        return this.fetchSize;
+    }
+
+    public abstract void close();
+    
+    public abstract Iterator<E> iterate();
 }

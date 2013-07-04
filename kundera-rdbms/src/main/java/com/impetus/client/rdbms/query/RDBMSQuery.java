@@ -16,12 +16,9 @@
 package com.impetus.client.rdbms.query;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import javax.persistence.Query;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +40,7 @@ import com.impetus.kundera.query.QueryImpl;
  * 
  * @author vivek.mishra
  */
-public class RDBMSQuery extends QueryImpl implements Query
+public class RDBMSQuery extends QueryImpl
 {
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(RDBMSQuery.class);
@@ -77,7 +74,7 @@ public class RDBMSQuery extends QueryImpl implements Query
             log.debug("On handleAssociation() retrieve associations ");
 
         initializeReader();
-        List<EnhanceEntity> ls = getReader().populateRelation(m, client);
+        List<EnhanceEntity> ls = getReader().populateRelation(m, client,this.maxResult);
 
         return setRelationEntities(ls, client, m);
     }
@@ -177,6 +174,20 @@ public class RDBMSQuery extends QueryImpl implements Query
 
             ((RDBMSEntityReader) getReader()).setFilter(getKunderaQuery().getFilter());
         }
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

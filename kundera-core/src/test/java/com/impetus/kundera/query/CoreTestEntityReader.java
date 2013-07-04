@@ -38,7 +38,7 @@ public class CoreTestEntityReader extends AbstractEntityReader implements Entity
     }
 
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
         return null;
     }

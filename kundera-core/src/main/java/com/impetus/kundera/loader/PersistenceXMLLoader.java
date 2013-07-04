@@ -532,6 +532,10 @@ public class PersistenceXMLLoader
 
         String f = url.getFile();
         f = parseFilePath(f);
+        
+        
+       String protocol =  url.getProtocol();
+        
         URL jarUrl = url;
         try
         {
@@ -589,7 +593,7 @@ public class PersistenceXMLLoader
      */
     public enum AllowedProtocol
     {
-        WSJAR, JAR, ZIP, FILE, VFSZIP;
+        WSJAR, JAR, ZIP, FILE, VFSZIP,VFS;
 
         /**
          * In case it is jar protocol

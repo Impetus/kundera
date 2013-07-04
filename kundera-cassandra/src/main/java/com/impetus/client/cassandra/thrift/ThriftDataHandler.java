@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -32,6 +31,7 @@ import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory.Connection;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -74,10 +74,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
 
         ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
-        Object conn = thriftClient.getConection();
+        Connection conn = thriftClient.getConection();
         try
         {
-            List<ColumnOrSuperColumn> columnOrSuperColumns = ((Cassandra.Client) conn).get_slice(key, new ColumnParent(
+            List<ColumnOrSuperColumn> columnOrSuperColumns = conn.getClient().get_slice(key, new ColumnParent(
                     m.getTableName()), predicate, consistencyLevel);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();

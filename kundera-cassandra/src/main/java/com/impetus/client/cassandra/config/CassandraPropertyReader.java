@@ -178,12 +178,11 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         break;
                     }
                 }
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Returning inverted indexing enabled value {}.", result);
+                }
             }
-
-            /*if (logger.isWarnEnabled())
-            {
-                logger.warn("Returning inverted indexing enabled value {}.", result);
-            }*/
             return result;
         }
 
@@ -267,7 +266,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                 if (ds.getConnection() != null)
                 {
                     properties = ds.getConnection().getProperties();
-                    return properties;
+                    return properties != null ? properties : new Properties();
                 }
                 if (logger.isWarnEnabled())
                 {

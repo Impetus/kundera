@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,49 +15,39 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-/**
- * The Class QueryHandlerException.
- * 
- * @author vivek.mishra
- * 
- *         Runtime exception handler for query interpretation
- */
-public class QueryHandlerException extends RuntimeException
-{
+import java.util.Iterator;
 
-    /** Default Serial Version UID. */
-    private static final long serialVersionUID = 1L;
+/**
+ * Query Interface, clients query class must implement these method in order to
+ * support pagination.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ * @param <E>
+ */
+public interface Query<E>
+{
+    /**
+     * To set fetch size for query.
+     */
+    void setFetchSize(Integer fetchsize);
 
     /**
      * 
+     * @return fetch size value.
      */
-    public QueryHandlerException()
-    {
-        super();
-    }
+    Integer getFetchSize();
 
     /**
-     * @param paramString
+     * Reinstate .
      */
-    public QueryHandlerException(String paramString)
-    {
-        super(paramString);
-    }
+    void close();
 
     /**
-     * @param paramThrowable
+     * Iterates over result.
+     * 
+     * @return
      */
-    public QueryHandlerException(Throwable paramThrowable)
-    {
-        super(paramThrowable);
-    }
-
-    /**
-     * @param paramThrowable
-     */
-    public QueryHandlerException(String paramString, Throwable paramThrowable)
-    {
-        super(paramString, paramThrowable);
-    }
+    Iterator<E> iterate();
 
 }

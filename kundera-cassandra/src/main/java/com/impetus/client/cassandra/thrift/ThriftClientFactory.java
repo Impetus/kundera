@@ -180,12 +180,11 @@ public class ThriftClientFactory extends GenericClientFactory
      */
     private ConnectionPool getPoolUsingPolicy()
     {
-        ConnectionPool pool = null;
         if (!hostPools.isEmpty())
         {
-            pool = (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
+            return (ConnectionPool) loadBalancingPolicy.getPool(hostPools.values());
         }
-        return pool;
+        throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     @Override
@@ -228,25 +227,26 @@ public class ThriftClientFactory extends GenericClientFactory
         loadBalancingPolicy = new RoundRobinBalancingPolicy();
     }
 
-    Cassandra.Client getConnection(ConnectionPool pool)
+    Connection getConnection(ConnectionPool pool)
     {
+        ConnectionPool connectionPool = pool;
         boolean success = false;
-        
-        Cassandra.Client connection = null;
         while (!success)
         {
             try
             {
                 success = true;
-                connection = pool.getConnection();
-                return connection;
+                Cassandra.Client client = connectionPool.getConnection();
+                logger.info("Retruning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
+                        .getPoolProperties().getPort());
+                return new Connection(client, connectionPool);
             }
             catch (TException te)
             {
                 success = false;
                 logger.warn("{} :{}  host appears to be down, trying for next ", pool.getPoolProperties().getHost(),
                         pool.getPoolProperties().getPort());
-                pool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
+                connectionPool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
             }
         }
         
@@ -341,6 +341,35 @@ public class ThriftClientFactory extends GenericClientFactory
 
                 return (props1.getMaxActive() - activeConnections1) - (props2.getMaxActive() - activeConnections2);
             }
+        }
+    }
+
+    /**
+     * Connection class holds client and related pool.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    public class Connection
+    {
+        private Cassandra.Client client;
+
+        private ConnectionPool pool;
+
+        public Connection(org.apache.cassandra.thrift.Cassandra.Client client, ConnectionPool pool)
+        {
+            this.client = client;
+            this.pool = pool;
+        }
+
+        public Cassandra.Client getClient()
+        {
+            return client;
+        }
+
+        public ConnectionPool getPool()
+        {
+            return pool;
         }
     }
 }

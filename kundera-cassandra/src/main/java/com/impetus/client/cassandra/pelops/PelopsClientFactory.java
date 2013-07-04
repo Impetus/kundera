@@ -221,100 +221,153 @@ public class PelopsClientFactory extends GenericClientFactory
      */
     private IThriftPool getPoolUsingPolicy()
     {
-        IThriftPool pool = null;
         if (!hostPools.isEmpty())
         {
-            pool = (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
+            logger.info("Retruning pool using {} .", loadBalancingPolicy.getClass().getSimpleName());
+            return (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
         }
-        return pool;
+        throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     IPooledConnection getConnection(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
             success = true;
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
                 {
-                    return pool.getConnection();
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return iThriftPool.getConnection();
+                    }
+                    removePool(iThriftPool);
                 }
-                removePool(pool);
+                else
+                {
+                    logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return iThriftPool.getConnection();
+                }
+                removePool(iThriftPool);
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     Mutator getMutator(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
             success = true;
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
                 {
-                    return Pelops.createMutator(PelopsUtils.getPoolName(pool));
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
                 }
-                removePool(pool);
+                else
+                {
+                    logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
+                }
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     Selector getSelector(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
                 {
-                    return Pelops.createSelector(PelopsUtils.getPoolName(pool));
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
                 }
-                removePool(pool);
+                else
+                {
+                    logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
+                }
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     RowDeletor getRowDeletor(IThriftPool pool)
     {
+        IThriftPool iThriftPool = pool;
         boolean success = false;
         while (!success)
         {
-            if (pool != null)
+            if (iThriftPool != null)
             {
-                Node[] nodes = ((CommonsBackedPool) pool).getCluster().getNodes();
+                Node[] nodes = ((CommonsBackedPool) iThriftPool).getCluster().getNodes();
                 String host = nodes[0].getAddress();
-                int thriftPort = ((CommonsBackedPool) pool).getCluster().getConnectionConfig().getThriftPort();
-                if (PelopsUtils.verifyConnection(host, thriftPort))
+                int thriftPort = ((CommonsBackedPool) iThriftPool).getCluster().getConnectionConfig().getThriftPort();
+                CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(
+                        nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster().getConnectionConfig()
+                                .getThriftPort());
+                if (cassandraHost.isTestOnBorrow())
                 {
-                    return Pelops.createRowDeletor(PelopsUtils.getPoolName(pool));
+                    if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
+                    {
+                        logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
+                    }
+                    removePool(iThriftPool);
                 }
-                removePool(pool);
+                else
+                {
+                    logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
+                }
             }
             success = false;
-            pool = getPoolUsingPolicy();
+            iThriftPool = getPoolUsingPolicy();
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
 

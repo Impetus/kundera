@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -181,11 +182,19 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             // resources = reader.findResourcesByContextLoader();
         }
 
-        URL[] managedClasses = reader.findResources();
-        if (managedClasses != null)
+        InputStream[] iStreams = null;
+        if (this.getClass().getClassLoader() instanceof URLClassLoader)
         {
-            List<URL> managedResources = Arrays.asList(managedClasses);
-            managedURLs.addAll(managedResources);
+            URL[] managedClasses = reader.findResources();
+            if (managedClasses != null)
+            {
+                List<URL> managedResources = Arrays.asList(managedClasses);
+                managedURLs.addAll(managedResources);
+            }
+        }
+        else
+        {
+            iStreams = reader.findResourcesAsStream();
         }
 
         if (managedURLs != null)
@@ -207,7 +216,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
         Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap = new HashMap<String, IdDiscriptor>();
         List<Class<?>> classes = new ArrayList<Class<?>>();
-        if (resources != null)
+        if (resources != null && resources.length > 0)
         {
             for (URL resource : resources)
             {
@@ -230,6 +239,34 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 }
             }
         }
+        else if (iStreams != null)
+        {
+            try
+            {
+                for (InputStream is : iStreams)
+                {
+                    try
+                    {
+                        classes.addAll(scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap,
+                                persistenceUnit, client, puToClazzMap, entityNameToKeyDiscriptorMap));
+                    }
+                    finally
+                    {
+                        if (is != null)
+                        {
+                            is.close();
+                        }
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                log.error("Error while retreiving and storing entity metadata. Details:", e);
+                throw new MetamodelLoaderException("Error while retreiving and storing entity metadata, Caused by : .",
+                        e);
+
+            }
+        }
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
@@ -242,7 +279,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
-//        validateEntityForClientSpecificProperty(classes, persistenceUnit);
+        // validateEntityForClientSpecificProperty(classes, persistenceUnit);
 
     }
 
@@ -323,10 +360,11 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
                 {
-//                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                    // Class<?> clazz =
+                    // Thread.currentThread().getContextClassLoader().loadClass(className);
 
                     Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
-                    
+
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName())
                             && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
                     {
@@ -334,7 +372,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()
                                 + ". Make sure no two entity classes with the same name "
                                 + " are specified for persistence unit " + persistenceUnit);
-                    } 
+                    }
 
                     entityNameToClassMap.put(clazz.getSimpleName(), clazz);
 
@@ -376,8 +414,14 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         }
         finally
         {
-            dstream.close();
-            bits.close();
+            if (dstream != null)
+            {
+                dstream.close();
+            }
+            if (bits != null)
+            {
+                bits.close();
+            }
         }
 
         return classes;
@@ -440,7 +484,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         String pu = getPersistenceUnitOfEntity(clazz);
         String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
                 .getClient();
-        if (pu != null && pu.equals(persistenceUnit) || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
+        if (pu != null && pu.equals(persistenceUnit)
+                || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
         {
             Field f = (Field) m.getIdAttribute().getJavaMember();
 

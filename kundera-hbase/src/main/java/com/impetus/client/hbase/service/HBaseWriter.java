@@ -116,9 +116,13 @@ public class HBaseWriter implements Writer
                 try
                 {
                     byte[] qualValInBytes = Bytes.toBytes(qualifier);
-                    p.add(htable.getTableName(), qualValInBytes, System.currentTimeMillis(), HBaseUtils
-                            .getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
-                    present = true;
+                    Object value = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+                    if (value != null)
+                    {
+                        p.add(htable.getTableName(), qualValInBytes, System.currentTimeMillis(),
+                                HBaseUtils.getBytes(value));
+                        present = true;
+                    }
                 }
                 catch (PropertyAccessException e1)
                 {

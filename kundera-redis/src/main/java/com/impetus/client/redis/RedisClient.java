@@ -69,6 +69,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Redis client implementation for REDIS.
@@ -1108,20 +1109,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         StringBuilder stringBuilder = new StringBuilder();
         for (Field f : fields)
         {
-            // Attribute compositeColumn = keyObject.getAttribute(f.getName());
-            try
+            if (!ReflectUtils.isTransientOrStatic(f))
             {
-                String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                                                                                       // value
-                stringBuilder.append(fieldValue);
-                stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
+                // Attribute compositeColumn =
+                // keyObject.getAttribute(f.getName());
+                try
+                {
+                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                                                                                           // value
+                    stringBuilder.append(fieldValue);
+                    stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    logger.error("Error during persist, Caused by:", e);
+                    throw new PersistenceException(e);
+                }
             }
-            catch (IllegalArgumentException e)
-            {
-                logger.error("Error during persist, Caused by:", e);
-                throw new PersistenceException(e);
-            }
-
         }
 
         if (stringBuilder.length() > 0)

@@ -19,10 +19,10 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -65,7 +65,7 @@ import com.impetus.kundera.utils.ReflectUtils;
 
  * Query implementation for Cassandra.
  */
-public class CassQuery extends QueryImpl implements Query
+public class CassQuery extends QueryImpl
 {
 
     /** the log used by this class. */
@@ -151,7 +151,7 @@ public class CassQuery extends QueryImpl implements Query
                         else
                         {
                             result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result,
-                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null));
+                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null),this.maxResult);
                         }
                     }
 
@@ -207,7 +207,7 @@ public class CassQuery extends QueryImpl implements Query
             else
             {
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
-                ls = reader.populateRelation(m, client);
+                ls = reader.populateRelation(m, client,this.maxResult);
             }
         }
         return setRelationEntities(ls, client, m);
@@ -232,7 +232,6 @@ public class CassQuery extends QueryImpl implements Query
             List result = getResultList();
             return result != null ? result.size() : 0;
         }
-
         return 0;
     }
 
@@ -286,8 +285,8 @@ public class CassQuery extends QueryImpl implements Query
             }
             return columns;
         }
-        
-        if(log.isInfoEnabled())
+
+        if (log.isInfoEnabled())
         {
             log.info("No record found, returning null.");
         }
@@ -313,8 +312,8 @@ public class CassQuery extends QueryImpl implements Query
         // check if id column are mixed with other columns or not?
         String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         boolean idPresent = false;
-        
-        if(log.isInfoEnabled())
+
+        if (log.isInfoEnabled())
         {
             log.info("Preparing index clause for query {}", getJPAQuery());
         }
@@ -423,7 +422,9 @@ public class CassQuery extends QueryImpl implements Query
     {
         if (reader == null)
         {
-            reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
+            reader = new CassandraEntityReader(
+                    !MetadataUtils.useSecondryIndex(getEntityMetadata().getPersistenceUnit()) ? getLuceneQueryFromJPAQuery()
+                            : null);
         }
 
         return reader;
@@ -440,7 +441,7 @@ public class CassQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
+    Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
         // Column idCol = m.getIdColumn();
         Attribute idCol = m.getIdAttribute();
@@ -654,7 +655,8 @@ public class CassQuery extends QueryImpl implements Query
                     ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName();
                     // compositeColumns.add(new
                     // BasicDBObject(compositeColumn,value));
-                    translator.buildWhereClause(builder,((AbstractAttribute) keyObj.getAttribute(fieldName)).getBindableJavaType(),
+                    translator.buildWhereClause(builder,
+                            ((AbstractAttribute) keyObj.getAttribute(fieldName)).getBindableJavaType(),
                             ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName(), value, condition);
                     if (partitionKey == null)
                     {
@@ -667,15 +669,17 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 else if (idColumn.equals(fieldName))
                 {
-                    translator.buildWhereClause(builder,((AbstractAttribute)m.getIdAttribute()).getBindableJavaType(), CassandraUtilities.getIdColumnName(m, externalProperties),
-                            value, condition);
+                    translator.buildWhereClause(builder,
+                            ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(),
+                            CassandraUtilities.getIdColumnName(m, externalProperties), value, condition);
                 }
                 else
                 {
                     Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
                     Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
                             m.getFieldName(fieldName));
-                    translator.buildWhereClause(builder, ((AbstractAttribute) attribute).getBindableJavaType(),fieldName, value, condition);
+                    translator.buildWhereClause(builder, ((AbstractAttribute) attribute).getBindableJavaType(),
+                            fieldName, value, condition);
                     allowFiltering = true;
                 }
             }
@@ -707,7 +711,7 @@ public class CassQuery extends QueryImpl implements Query
      * @param builder
      *            the builder
      */
-    private void addWhereClause(StringBuilder builder)
+    void addWhereClause(StringBuilder builder)
     {
         if (!getKunderaQuery().getFilterClauseQueue().isEmpty())
         {
@@ -715,4 +719,31 @@ public class CassQuery extends QueryImpl implements Query
         }
     }
 
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        EntityMetadata m = getEntityMetadata();
+        externalProperties = ((CassandraClientBase) persistenceDelegeator.getClient(m)).getExternalProperties();
+
+
+        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        {
+            throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
+        }
+
+        return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(), getFetchSize() !=null ? getFetchSize() : this.maxResult);
+    }
+
+
+    void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
+    {
+        super.setRelationEntities(enhanceEntities, client, m);
+    }
 }

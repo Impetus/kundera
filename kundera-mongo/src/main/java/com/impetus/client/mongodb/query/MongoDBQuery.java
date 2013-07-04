@@ -20,11 +20,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
+import javax.persistence.Parameter;
 import javax.persistence.Query;
+import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -459,6 +463,20 @@ public class MongoDBQuery extends QueryImpl
                 || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
                         || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
                         || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
+    }
+
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
