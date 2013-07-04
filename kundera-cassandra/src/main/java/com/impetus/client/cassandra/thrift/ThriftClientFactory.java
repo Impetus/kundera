@@ -156,7 +156,7 @@ public class ThriftClientFactory extends GenericClientFactory
             }
             catch (TException e)
             {
-                logger.warn("Node " + host.getHost() + " are down");
+                logger.warn("Node {} are down, Caused by {} .", host.getHost(), e.getMessage());
                 if (host.isRetryHost())
                 {
                     logger.warn("Scheduling node for future retry");
