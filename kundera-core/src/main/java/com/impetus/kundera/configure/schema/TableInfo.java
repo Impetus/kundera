@@ -40,7 +40,6 @@ public class TableInfo
     /** The table id name. */
     private String idColumnName;
 
-
     /** The type. */
     private String type;
 
@@ -64,8 +63,7 @@ public class TableInfo
      * @param idClassType
      *            the id class type
      */
-    public TableInfo(String tableName,String tableSchemaType, Class idClassType,
-            String idColumnName)
+    public TableInfo(String tableName, String tableSchemaType, Class idClassType, String idColumnName)
     {
         this.tableName = tableName;
         this.type = tableSchemaType;
@@ -246,6 +244,7 @@ public class TableInfo
 
     /**
      * Returns list of index information object.
+     * 
      * @return
      */
     public List<IndexInfo> getColumnsToBeIndexed()
@@ -266,9 +265,15 @@ public class TableInfo
 
     public void addToIndexedColumnList(IndexInfo indexInfo)
     {
-        if (!columnToBeIndexed.contains(indexInfo))
+        ColumnInfo columnInfo = new ColumnInfo();
+        columnInfo.setColumnName(indexInfo.getColumnName());
+        if (getEmbeddedColumnMetadatas().isEmpty()
+                || !getEmbeddedColumnMetadatas().get(0).getColumns().contains(columnInfo))
         {
-            columnToBeIndexed.add(indexInfo);
+            if (!columnToBeIndexed.contains(indexInfo))
+            {
+                columnToBeIndexed.add(indexInfo);
+            }
         }
     }
 }
