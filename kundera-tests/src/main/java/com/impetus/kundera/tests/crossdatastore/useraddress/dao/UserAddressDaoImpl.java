@@ -52,6 +52,7 @@ public class UserAddressDaoImpl extends BaseDao
 
     public Object findPerson(Class entityClass, Object personId)
     {
+        if(em != null) em.clear();
         em = getEntityManager(persistenceUnit);
         Object personnel = em.find(entityClass, personId);
         return personnel;

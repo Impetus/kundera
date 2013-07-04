@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,8 +32,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
@@ -47,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -159,8 +160,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         if (s == null)
         {
             s = getSessionFactory().openStatelessSession();
-//
-//            s.beginTransaction();
+            //
+            // s.beginTransaction();
         }
 
         Object result = null;
@@ -213,8 +214,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
         boolean proxyRemoved = removeKunderaProxies(metadata, entity, relationHolders);
-        
-        Transaction tx = null;     
+
+        Transaction tx = null;
 
         s = getSessionFactory().openStatelessSession();
         tx = s.beginTransaction();
@@ -230,13 +231,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             else
             {
-                s.update(entity);                
-                
-                if(proxyRemoved)
+                s.update(entity);
+
+                if (proxyRemoved)
                 {
                     updateForeignKeys(metadata, id, relationHolders);
-                }               
-                
+                }
+
                 tx.commit();
             }
         }
@@ -250,12 +251,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (HibernateException e)
         {
-            log.error("Error while persisting object of {}", metadata.getEntityClazz(),e);
+            log.error("Error while persisting object of {}", metadata.getEntityClazz(), e);
             throw new PersistenceException(e);
-        } 
+        }
     }
-
-    
 
     /**
      * Inserts records into JoinTable
@@ -465,18 +464,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#find(java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
-    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
+    public List findByRelation(String colName, Object colValue, Class entityClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String tableName = m.getTableName();
         String aliasName = "_" + tableName;
         StringBuilder queryBuilder = new StringBuilder("Select ");
-        //queryBuilder.append(aliasName);
+        // queryBuilder.append(aliasName);
         queryBuilder.append("* ");
         queryBuilder.append("From ");
         queryBuilder.append(getFromClause(m.getSchema(), tableName));
         queryBuilder.append(" ");
-        //queryBuilder.append(aliasName);
+        // queryBuilder.append(aliasName);
         queryBuilder.append(" Where ");
         queryBuilder.append(colName);
         queryBuilder.append(" = ");
@@ -485,9 +484,14 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         s = getSessionFactory().openStatelessSession();
         s.beginTransaction();
-        SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
-//        tx.commit();
-        return q.list();
+
+        List results = find(queryBuilder.toString(), m.getRelationNames(), m);
+        return populateEnhanceEntities(m, m.getRelationNames(), results);
+
+        // SQLQuery q =
+        // s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
+        // // tx.commit();
+        // return q.list();
     }
 
     /*
@@ -601,9 +605,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
         return sf;
     }
-    
+
     /**
      * Updates foreign keys into master table
+     * 
      * @param metadata
      * @param id
      * @param relationHolders
@@ -619,10 +624,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
                 String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
                 String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
-                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id
-                        + "'";
+                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
 
-                 log.warn("Executing query {}",updateSql);          
+                log.warn("Executing query {}", updateSql);
                 s.createSQLQuery(updateSql).executeUpdate();
             }
         }
@@ -675,7 +679,85 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
 
         }
-        
+
         return proxyRemoved;
     }
+
+    /**
+     * Populate enhance entities.
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param client
+     *            the client
+     * @param sqlQuery
+     *            the sql query
+     * @return the list
+     */
+    private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, List result)
+    {
+
+        List<EnhanceEntity> ls = null;
+        try
+        {
+            if (!result.isEmpty())
+            {
+                ls = new ArrayList<EnhanceEntity>(result.size());
+                for (Object o : result)
+                {
+                    Class clazz = m.getEntityClazz();
+                    Object entity = clazz.newInstance();
+                    boolean noRelationFound = true;
+                    if (!o.getClass().isAssignableFrom(clazz))
+                    {
+                        entity = ((Object[]) o)[0];
+                        noRelationFound = false;
+                    }
+                    else
+                    {
+                        entity = o;
+                    }
+                    Object id = PropertyAccessorHelper.getId(entity, m);
+                    EnhanceEntity e = new EnhanceEntity(entity, id, noRelationFound ? null : populateRelations(
+                            relationNames, (Object[]) o));
+                    ls.add(e);
+                }
+            }
+        }
+        catch (InstantiationException e)
+        {
+            log.error("Error during populating entities:" + e.getMessage());
+            throw new EntityReaderException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error("Error during populating entities:" + e.getMessage());
+            throw new EntityReaderException(e);
+        }
+        return ls;
+
+    }
+
+    /**
+     * Populate relations.
+     * 
+     * @param relations
+     *            the relations
+     * @param o
+     *            the o
+     * @return the map
+     */
+    private Map<String, Object> populateRelations(List<String> relations, Object[] o)
+    {
+        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
+        int counter = 1;
+        for (String r : relations)
+        {
+            relationVal.put(r, o[counter++]);
+        }
+        return relationVal;
+    }
+
 }
