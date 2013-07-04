@@ -121,28 +121,27 @@ public class AbstractEntityReader
 
         FetchType fetchType = relation.getFetchType();
 
-        // if (!lazilyloaded && fetchType.equals(FetchType.LAZY))
-        // {
-        // final Object entityId = PropertyAccessorHelper.getId(entity, m);
-        // associationBuilder.setProxyRelationObject(entity, relationsMap, m,
-        // pd, entityId, relation);
-        // }
-        // else
-        // {
-        if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
+        if (!lazilyloaded && fetchType.equals(FetchType.LAZY))
         {
-            // First, Save this entity to persistence cache
-            Field f = relation.getProperty();
-            Object object = PropertyAccessorHelper.getObject(entity, f);
             final Object entityId = PropertyAccessorHelper.getId(entity, m);
-            PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-            associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
+            associationBuilder.setProxyRelationObject(entity, relationsMap, m, pd, entityId, relation);
         }
         else
         {
-            onRelation(entity, relationsMap, relation, m, pd, lazilyloaded);
+            if (relation.getType().equals(ForeignKey.MANY_TO_MANY))
+            {
+                // First, Save this entity to persistence cache
+                Field f = relation.getProperty();
+                Object object = PropertyAccessorHelper.getObject(entity, f);
+                final Object entityId = PropertyAccessorHelper.getId(entity, m);
+                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
+                associationBuilder.populateRelationForM2M(entity, m, pd, relation, object, relationsMap);
+            }
+            else
+            {
+                onRelation(entity, relationsMap, relation, m, pd, lazilyloaded);
+            }
         }
-        // }
     }
 
     /**
@@ -229,70 +228,73 @@ public class AbstractEntityReader
 
             FetchType fetchType = relation.getFetchType();
 
-            // if (!lazilyloaded && fetchType.equals(FetchType.LAZY))
-            // {
-            // final Object entityId =
-            // PropertyAccessorHelper.getId(relationEntity, metadata);
-            // associationBuilder.setProxyRelationObject(relationEntity,
-            // relationsMap, metadata, pd, entityId,
-            // relation);
-            // }
-            // else
-            // {
-
-            if (relation.isUnary() && relation.getTargetEntity().isAssignableFrom(originalEntity.getClass()))
+            if (!lazilyloaded && fetchType.equals(FetchType.LAZY))
             {
-                // PropertyAccessorHelper.set(relationEntity,
-                // relation.getProperty(), originalEntity);
+                final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
+                associationBuilder.setProxyRelationObject(relationEntity, relationsMap, metadata, pd, entityId,
+                        relation);
+            }
+            else
+            {
 
-                Object associationObject = PropertyAccessorHelper.getObject(relationEntity, relation.getProperty());
-                if (relation.getType().equals(ForeignKey.ONE_TO_ONE)
-                       /* || ((associationObject == null || ProxyHelper.isProxyOrCollection(associationObject)))*/)
+                if (relation.isUnary() && relation.getTargetEntity().isAssignableFrom(originalEntity.getClass()))
                 {
                     // PropertyAccessorHelper.set(relationEntity,
                     // relation.getProperty(), originalEntity);
-                    if ((associationObject == null || ProxyHelper.isProxyOrCollection(associationObject)))
+
+                    Object associationObject = PropertyAccessorHelper.getObject(relationEntity, relation.getProperty());
+                    if (relation.getType().equals(ForeignKey.ONE_TO_ONE)
+                    /*
+                     * || ((associationObject == null ||
+                     * ProxyHelper.isProxyOrCollection(associationObject)))
+                     */
+                    )
+                    {
+                        // PropertyAccessorHelper.set(relationEntity,
+                        // relation.getProperty(), originalEntity);
+                        if ((associationObject == null || ProxyHelper.isProxyOrCollection(associationObject)))
+                        {
+                            PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
+                        }
+                    }
+                    else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName()))
                     {
                         PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
                     }
                 }
-                else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName()))
+                else
                 {
-                    PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
-                }
-            }
-            else
-            {
-                // Here
-                // onRelation(relationEntity, relationsMap, metadata, pd,
-                // relation, relationType);
-                final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
-                Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
-                final EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
-                        .getTargetEntity());
-                List immediateRelations = fetchRelations(relation, metadata, pd, entityId, relationValue,
-                        targetEntityMetadata);
-                // Here in case of one-to-many/many-to-one we should skip
-                // this
-                // relation as it
-                if (immediateRelations != null && !immediateRelations.isEmpty())
-                {
-                    // immediateRelations.remove(originalEntity); // As it
-                    // is
-                    // already
-                    // in process.
-
-                    for (Object immediateRelation : immediateRelations)
+                    // Here
+                    // onRelation(relationEntity, relationsMap, metadata, pd,
+                    // relation, relationType);
+                    final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
+                    Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
+                    final EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                            .getTargetEntity());
+                    List immediateRelations = fetchRelations(relation, metadata, pd, entityId, relationValue,
+                            targetEntityMetadata);
+                    // Here in case of one-to-many/many-to-one we should skip
+                    // this
+                    // relation as it
+                    if (immediateRelations != null && !immediateRelations.isEmpty())
                     {
-                        if (!compareTo(getEntity(immediateRelation), originalEntity))
+                        // immediateRelations.remove(originalEntity); // As it
+                        // is
+                        // already
+                        // in process.
+
+                        for (Object immediateRelation : immediateRelations)
                         {
-                            onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation, relation,
-                                    lazilyloaded);
+                            if (!compareTo(getEntity(immediateRelation), originalEntity))
+                            {
+                                onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation, relation,
+                                        lazilyloaded);
+                            }
                         }
+                        setRelationToEntity(relationEntity, originalEntity, relation);
+                        PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
+                                PropertyAccessorHelper.getId(relationEntity, metadata));
                     }
-                    setRelationToEntity(relationEntity, originalEntity, relation);
-                    PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
-                            PropertyAccessorHelper.getId(relationEntity, metadata));
                 }
             }
         }

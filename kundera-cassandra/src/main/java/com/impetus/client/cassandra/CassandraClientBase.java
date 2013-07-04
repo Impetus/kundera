@@ -2031,7 +2031,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, "=");
             selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
                     selectQueryBuilder.length());
-            return executeQuery(selectQueryBuilder.toString(), clazz, null, dataHandler, true);
+            return executeQuery(selectQueryBuilder.toString(), clazz, m.getRelationNames(), dataHandler, true);
         }
     }
 
