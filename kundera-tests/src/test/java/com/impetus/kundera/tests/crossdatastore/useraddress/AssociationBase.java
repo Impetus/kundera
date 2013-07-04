@@ -93,14 +93,16 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-//    private String persistenceUnits = "redis,rdbms,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
-//    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-//            "oracle_kvstore" , "addHbase"};
+    // private String persistenceUnits =
+    // "redis,rdbms,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
+    // protected static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // "addMongo", "rdbms", "redis", "addCassandra",
+    // "oracle_kvstore" , "addHbase"};
 
     private String persistenceUnits = "rdbms,redis,addMongo,oracle_kvstore,piccandra,secIdxAddCassandra,picongo,addCassandra";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-    "oracle_kvstore" /* , "addHbase" */};
+            "oracle_kvstore" /* , "addHbase" */};
 
     protected RDBMSCli cli;
 
@@ -117,6 +119,7 @@ public abstract class AssociationBase
             cli = new RDBMSCli(KEYSPACE);
             cli.createSchema(KEYSPACE);
             CassandraCli.cassandraSetUp();
+            CassandraCli.createKeySpace("Pickr");
         }
         catch (Exception e)
         {
@@ -208,7 +211,7 @@ public abstract class AssociationBase
                 // clazz, mAdd);
                 PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                         .getPersistenceUnitMetadata(pu);
-                
+
                 CoreMetadata coreMetadata = new CoreMetadata();
                 coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
                 KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
@@ -316,7 +319,7 @@ public abstract class AssociationBase
         }
 
         // HBaseCli.stopCluster();
-//        dao.closeEntityManagerFactory();
+        // dao.closeEntityManagerFactory();
     }
 
     /**

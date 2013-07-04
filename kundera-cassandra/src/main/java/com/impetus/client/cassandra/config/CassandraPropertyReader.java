@@ -247,11 +247,10 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                             return table;
                         }
                     }
-                }
-
-                if (logger.isWarnEnabled())
-                {
-                    logger.warn("No column family schema found, returning null.");
+                    if (logger.isWarnEnabled())
+                    {
+                        logger.warn("No column family schema found, returning null.");
+                    }
                 }
             }
             return null;

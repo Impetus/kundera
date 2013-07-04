@@ -1,8 +1,9 @@
 package com.impetus.client.cassandra.thrift;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +15,11 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
 import org.junit.After;
@@ -30,13 +34,13 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION
 
 public class ThriftClientTest
 {
-    String persistenceUnit = "thriftClientTest";
+    private String persistenceUnit = "thriftClientTest";
 
-    EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
-    EntityManager em;
+    private EntityManager em;
 
-    ThriftClient client;
+    private ThriftClient client;
 
     @Before
     public void setUp() throws Exception
@@ -139,13 +143,58 @@ public class ThriftClientTest
 
     private void createSchema() throws InvalidRequestException, SchemaDisagreementException, TException
     {
+        KsDef ksDef = null;
+        CfDef user_Def = new CfDef();
+        user_Def.name = "PERSON_ADDRESS";
+        user_Def.keyspace = "KunderaExamples";
+        user_Def.setComparator_type("UTF8Type");
+        user_Def.setDefault_validation_class("UTF8Type");
+        user_Def.setKey_validation_class("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef);
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
+        columnDef1.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef1);
+
         List<CfDef> cfDefs = new ArrayList<CfDef>();
-        CfDef cfDef = new CfDef("KunderaExamples", "PERSON_ADDRESS");
-        cfDefs.add(cfDef);
-        KsDef ks_def = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-        Map<String, String> strategy_options = new HashMap<String, String>();
-        strategy_options.put("replication_factor", "1");
-        ks_def.setStrategy_options(strategy_options);
-        CassandraCli.client.system_add_keyspace(ks_def);
+        cfDefs.add(user_Def);
+
+        try
+        {
+            ksDef = CassandraCli.client.describe_keyspace("KunderaExamples");
+            CassandraCli.client.set_keyspace("KunderaExamples");
+
+            List<CfDef> cfDefn = ksDef.getCf_defs();
+
+            for (CfDef cfDef1 : cfDefn)
+            {
+
+                if (cfDef1.getName().equalsIgnoreCase("PERSON"))
+                {
+
+                    CassandraCli.client.system_drop_column_family("PERSON");
+
+                }
+            }
+            CassandraCli.client.system_add_column_family(user_Def);
+
+        }
+        catch (NotFoundException e)
+        {
+
+            ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
+                ksDef.strategy_options = new LinkedHashMap<String, String>();
+            }
+            // Set replication factor, the value MUST be an integer
+            ksDef.strategy_options.put("replication_factor", "1");
+            CassandraCli.client.system_add_keyspace(ksDef);
+        }
+
+        CassandraCli.client.set_keyspace("KunderaExamples");
+
     }
 }

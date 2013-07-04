@@ -140,24 +140,29 @@ public final class CassandraValidationClassMapper
         return validatorsAndComparators;
     }
 
-    static void resetMapperForCQL3()
+    static void resetMapperForCQL3(boolean isCql3Enabled)
     {
-        validationClassMapper.put(java.lang.Integer.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(int.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(short.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(Short.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(Byte.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(byte.class, Int32Type.class.getSimpleName());
+        if (isCql3Enabled)
+        {
+            validationClassMapper.put(java.lang.Integer.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(int.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(short.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(Short.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(Byte.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(byte.class, Int32Type.class.getSimpleName());
+        }
     }
 
-    static void resetMapperForThrift()
+    static void resetMapperForThrift(boolean isCql3Enabled)
     {
-        validationClassMapper.put(java.lang.Integer.class, Int32Type.class.getSimpleName());
-        validationClassMapper.put(int.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(short.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(Short.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(Byte.class, BytesType.class.getSimpleName());
-        validationClassMapper.put(byte.class, BytesType.class.getSimpleName());
+        if (isCql3Enabled)
+        {
+            validationClassMapper.put(java.lang.Integer.class, Int32Type.class.getSimpleName());
+            validationClassMapper.put(int.class, IntegerType.class.getSimpleName());
+            validationClassMapper.put(short.class, IntegerType.class.getSimpleName());
+            validationClassMapper.put(Short.class, IntegerType.class.getSimpleName());
+            validationClassMapper.put(Byte.class, BytesType.class.getSimpleName());
+            validationClassMapper.put(byte.class, BytesType.class.getSimpleName());
+        }
     }
-
 }

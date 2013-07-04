@@ -108,9 +108,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private static final Logger log = LoggerFactory.getLogger(CassandraSchemaManager.class);
 
-    // private static Map<String, String> dataCentersMap = new HashMap<String,
-    // String>();
-
     /** The csmd. */
     private CassandraSchemaMetadata csmd = CassandraPropertyReader.csmd;
 
@@ -144,7 +141,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
                 : CassandraConstants.CQL_VERSION_3_0;
-        super.exportSchema(persistenceUnit,schemas);
+        super.exportSchema(persistenceUnit, schemas);
     }
 
     /**
@@ -255,7 +252,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         catch (NotFoundException nfex)
         {
             createKeyspaceAndTables(tableInfos);
-
         }
         catch (InvalidRequestException irex)
         {
@@ -430,10 +426,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
         {
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForCQL3();
-            }
+            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
+
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equals(tableInfo.getTableName()))
@@ -450,7 +444,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
                 {
                     throw new SchemaGenerationException(
-                            "Composite/Compound columns are yet supported over Super column family by Cassandra",
+                            "Composite/Compound columns are not yet supported over Super column family by Cassandra",
                             "cassandra", databaseName);
                 }
                 else
@@ -464,11 +458,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // Create Index Table if required
                 createInvertedIndexTable(tableInfo);
             }
-
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForThrift();
-            }
+            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
         }
     }
 
@@ -498,7 +488,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         StringBuilder queryBuilder = new StringBuilder();
 
         // for normal columns
-        onCompositeColumns(translator, columns, queryBuilder,null);
+        onCompositeColumns(translator, columns, queryBuilder, null);
 
         // ideally it will always be one as more super column families
         // are not allowed with compound/composite key.
@@ -628,6 +618,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         indexQueryBuilder.append("\"(\"$COLUMN_NAME\")");
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
         {
+            List<ColumnInfo> columnInfos = tableInfo.getEmbeddedColumnMetadatas().get(0).getColumns();
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumnName(indexInfo.getColumnName());
+            if (columnInfos.contains(columnInfo))
+            {
+                return;
+            }
             String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME",
                     indexInfo.getColumnName());
             try
@@ -671,18 +668,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * Drop table using cql3.
+     * Drops table using cql3.
      * 
      * @param tableInfo
      */
     private void dropTableUsingCQL(TableInfo tableInfo)
     {
         CQLTranslator translator = new CQLTranslator();
-        StringBuilder deleteQuery = new StringBuilder("drop table ");
-        translator.ensureCase(deleteQuery, tableInfo.getTableName());
+        StringBuilder dropQuery = new StringBuilder("drop table ");
+        translator.ensureCase(dropQuery, tableInfo.getTableName());
         try
         {
-            cassandra_client.execute_cql3_query(ByteBuffer.wrap(deleteQuery.toString().getBytes()), Compression.NONE,
+            cassandra_client.execute_cql3_query(ByteBuffer.wrap(dropQuery.toString().getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
         catch (InvalidRequestException ire)
@@ -718,7 +715,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * Adds column to table if not exists previously ie alter table.
+     * Adds column to table if not exists previously i.e. alter table.
      * 
      * @param tableInfo
      * @param translator
@@ -847,11 +844,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param queryBuilder
      *            the query builder
      */
-    private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> compositeColumns, StringBuilder queryBuilder, List<ColumnInfo> columns)
+    private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> compositeColumns,
+            StringBuilder queryBuilder, List<ColumnInfo> columns)
     {
         for (ColumnInfo colInfo : compositeColumns)
         {
-            if(columns == null || (columns != null && !columns.contains(colInfo)))
+            if (columns == null || (columns != null && !columns.contains(colInfo)))
             {
                 String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
                 String cqlType = translator.getCQLType(dataType);
@@ -902,11 +900,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cfDef.setName(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
             cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());
             return cfDef;
-        }
-
-        if (log.isInfoEnabled())
-        {
-            log.info("returning null as column family definition.");
         }
         return null;
     }
@@ -980,10 +973,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         for (TableInfo tableInfo : tableInfos)
         {
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForCQL3();
-            }
+            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
             boolean tablefound = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
@@ -1033,10 +1023,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         tableInfo.getTableName());
             }
 
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForThrift();
-            }
+            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
         }
     }
 
@@ -1082,10 +1069,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
         {
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForCQL3();
-            }
+            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
 
             boolean found = false;
             for (CfDef cfDef : ksDef.getCf_defs())
@@ -1132,10 +1116,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     createInvertedIndexTable(tableInfo);
                 }
             }
-            if (isCQL3Enabled(tableInfo))
-            {
-                CassandraValidationClassMapper.resetMapperForThrift();
-            }
+            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
         }
     }
 
@@ -1213,10 +1194,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             List<TableInfo> compoundColumnFamilies = new ArrayList<TableInfo>();
             for (TableInfo tableInfo : tableInfos)
             {
-                if (isCQL3Enabled(tableInfo))
-                {
-                    CassandraValidationClassMapper.resetMapperForCQL3();
-                }
+                CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
                 if ((tableInfo.getTableIdType() != null && !tableInfo.getTableIdType().isAnnotationPresent(
                         Embeddable.class))
                         || tableInfo.getTableIdType() == null)
@@ -1231,11 +1209,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     compoundColumnFamilies.add(tableInfo);
                 }
-
-                if (isCQL3Enabled(tableInfo))
-                {
-                    CassandraValidationClassMapper.resetMapperForThrift();
-                }
+                CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
             }
 
             ksDef.setCf_defs(cfDefs);
@@ -1243,16 +1217,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
             for (TableInfo tableInfo : compoundColumnFamilies)
             {
-                if (isCQL3Enabled(tableInfo))
-                {
-                    CassandraValidationClassMapper.resetMapperForCQL3();
-                }
+                CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
                 cassandra_client.set_keyspace(databaseName);
                 onCompoundKey(tableInfo);
-                if (isCQL3Enabled(tableInfo))
-                {
-                    CassandraValidationClassMapper.resetMapperForThrift();
-                }
+                CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
             }
 
             // Recreate Inverted Index Table if applicable
@@ -1908,7 +1876,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
-    private boolean isCQL3Enabled(TableInfo tableInfo)
+    private boolean isCql3Enabled(TableInfo tableInfo)
     {
         return tableInfo.getTableIdType() != null
                 && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class)
