@@ -17,6 +17,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -51,12 +52,15 @@ public class MongoDBUtils
         // To ensure order.
         for (Field f : fields)
         {
-            Attribute compositeColumn = compoundKey.getAttribute(f.getName());
+            if(!ReflectUtils.isTransientOrStatic(f))
+            {
+                Attribute compositeColumn = compoundKey.getAttribute(f.getName());
 
-            compoundKeyObj.put(
+                compoundKeyObj.put(
                     ((AbstractAttribute) compositeColumn).getJPAColumnName(),
                     populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()),
                             ((AbstractAttribute) compositeColumn).getBindableJavaType()));
+            }
         }
         return compoundKeyObj;
     }

@@ -9,8 +9,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
 @Table(name = "tokens", schema = "myapp@myapp_pu")
+@IndexCollection(columns={@Index(name="tokenName")})
 public class Token
 {
     @Id
@@ -20,6 +24,9 @@ public class Token
     @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
     private TokenClient client;
+    
+    @Column
+    private String tokenName;
 
     public String getId()
     {
@@ -41,4 +48,15 @@ public class Token
         this.client = client;
     }
 
+    public String getTokenName()
+    {
+        return tokenName;
+    }
+
+    public void setTokenName(String tokenName)
+    {
+        this.tokenName = tokenName;
+    }
+
+    
 }

@@ -61,9 +61,9 @@ import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
- * The Class CassQuery.
- * 
  * @author vivek.mishra
+
+ * Query implementation for Cassandra.
  */
 public class CassQuery extends QueryImpl
 {
@@ -119,7 +119,8 @@ public class CassQuery extends QueryImpl
 
         if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            result = onQueryOverCQL3(m, client, metaModel, null);
+            result = ((CassandraClientBase) client).executeQuery(
+                    onQueryOverCQL3(m, client, metaModel, null), m.getEntityClazz(), null);
         }
         else
         {
@@ -150,7 +151,7 @@ public class CassQuery extends QueryImpl
                         else
                         {
                             result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result,
-                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null));
+                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null),this.maxResult);
                         }
                     }
 
@@ -189,7 +190,8 @@ public class CassQuery extends QueryImpl
         }
         else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = onQueryOverCQL3(m, client, metaModel, m.getRelationNames());
+            ls = ((CassandraClientBase) client).executeQuery(
+                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(), m.getRelationNames());
         }
         else
         {
@@ -205,7 +207,7 @@ public class CassQuery extends QueryImpl
             else
             {
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
-                ls = reader.populateRelation(m, client);
+                ls = reader.populateRelation(m, client,this.maxResult);
             }
         }
         return setRelationEntities(ls, client, m);
@@ -242,7 +244,7 @@ public class CassQuery extends QueryImpl
      *            the results
      * @return the column list
      */
-    private List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
+    List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
     {
         List<String> columns = new ArrayList<String>();
         if (results != null && results.length > 0)
@@ -300,7 +302,7 @@ public class CassQuery extends QueryImpl
      *            the is query for inverted index
      * @return the map
      */
-    private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
+    Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
     {
         IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
@@ -420,7 +422,9 @@ public class CassQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
+            reader = new CassandraEntityReader(
+                    !MetadataUtils.useSecondryIndex(getEntityMetadata().getPersistenceUnit()) ? getLuceneQueryFromJPAQuery()
+                            : null);
         }
 
         return reader;
@@ -437,7 +441,7 @@ public class CassQuery extends QueryImpl
      *            value.
      * @return bytes value.
      */
-    private Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
+    Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
         // Column idCol = m.getIdColumn();
         Attribute idCol = m.getIdAttribute();
@@ -528,7 +532,7 @@ public class CassQuery extends QueryImpl
      *            the meta model
      * @return the list
      */
-    private List onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
+    String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
     {
         List<Object> result = new ArrayList<Object>();
 
@@ -566,10 +570,11 @@ public class CassQuery extends QueryImpl
 
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
 
+        return builder.toString();
         // onLimit(builder);
 
-        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
-        return result;
+//        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
+//        return result;
     }
 
     /**
@@ -706,7 +711,7 @@ public class CassQuery extends QueryImpl
      * @param builder
      *            the builder
      */
-    private void addWhereClause(StringBuilder builder)
+    void addWhereClause(StringBuilder builder)
     {
         if (!getKunderaQuery().getFilterClauseQueue().isEmpty())
         {
@@ -724,7 +729,21 @@ public class CassQuery extends QueryImpl
     @Override
     public Iterator iterate()
     {
-        // TODO Auto-generated method stub
-        return null;
+        EntityMetadata m = getEntityMetadata();
+        externalProperties = ((CassandraClientBase) persistenceDelegeator.getClient(m)).getExternalProperties();
+
+
+        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        {
+            throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
+        }
+
+        return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(), getFetchSize() !=null ? getFetchSize() : this.maxResult);
+    }
+
+
+    void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
+    {
+        super.setRelationEntities(enhanceEntities, client, m);
     }
 }

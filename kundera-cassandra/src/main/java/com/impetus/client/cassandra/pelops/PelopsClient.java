@@ -777,7 +777,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
-            List<String> columns, List<IndexExpression> conditions) throws Exception
+            List<String> columns, List<IndexExpression> conditions,int maxResults) throws Exception
     {
         Selector selector = clientFactory.getSelector(pool);
 
@@ -788,7 +788,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         KeyRange keyRange = selector.newKeyRange(minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
-                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000);
+                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), maxResults);
         if (conditions != null)
         {
             keyRange.setRow_filter(conditions);

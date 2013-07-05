@@ -1237,7 +1237,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *             the exception
      */
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
-            List<String> relations, List<String> columns, List<IndexExpression> conditions) throws Exception;
+            List<String> relations, List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception;
 
     /**
      * Search in inverted index.

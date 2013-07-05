@@ -108,8 +108,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
+        // TODO: maxresults to be taken care after work on pagination.
+        
         List<EnhanceEntity> ls = null;
         List<String> relationNames = m.getRelationNames();
         boolean isParent = m.isParent();

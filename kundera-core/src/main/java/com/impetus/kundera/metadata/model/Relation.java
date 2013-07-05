@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class Relation.
@@ -362,23 +363,26 @@ public final class Relation
         Class<?> clazzz = null;
         for (Field field : fields)
         {
-            clazzz = field.getType();
-            if (PropertyAccessorHelper.isCollection(clazzz))
+            if (!ReflectUtils.isTransientOrStatic(field))
             {
-                ParameterizedType type = (ParameterizedType) field.getGenericType();
-                Type[] types = type.getActualTypeArguments();
-                clazzz = (Class<?>) types[0];
-            }
-            else if (Map.class.isAssignableFrom(clazzz))
-            {
-                ParameterizedType type = (ParameterizedType) field.getGenericType();
-                Type[] types = type.getActualTypeArguments();
-                clazzz = (Class<?>) types[1];
-            }
-            if (clazzz.equals(referencedClass))
-            {
-                biDirectionalField = field;
-                break;
+                clazzz = field.getType();
+                if (PropertyAccessorHelper.isCollection(clazzz))
+                {
+                    ParameterizedType type = (ParameterizedType) field.getGenericType();
+                    Type[] types = type.getActualTypeArguments();
+                    clazzz = (Class<?>) types[0];
+                }
+                else if (Map.class.isAssignableFrom(clazzz))
+                {
+                    ParameterizedType type = (ParameterizedType) field.getGenericType();
+                    Type[] types = type.getActualTypeArguments();
+                    clazzz = (Class<?>) types[1];
+                }
+                if (clazzz.equals(referencedClass))
+                {
+                    biDirectionalField = field;
+                    break;
+                }
             }
         }
  

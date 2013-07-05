@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Responsible for converting Neo4J graph (nodes+relationships) into JPA
@@ -491,10 +492,13 @@ public final class GraphEntityMapper
 
         for (Field embeddedField : embeddableClass.getDeclaredFields())
         {
+            if(!ReflectUtils.isTransientOrStatic(embeddedField))
+            {
 
             Object value = PropertyAccessorHelper.getObject(id, embeddedField);
             if (value != null && !StringUtils.isEmpty(value.toString()))
                 idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
+            }
         }
 
         if (idUniqueValue.endsWith(COMPOSITE_KEY_SEPARATOR))
@@ -541,10 +545,13 @@ public final class GraphEntityMapper
         int count = 0;
         for (Field embeddedField : embeddableClass.getDeclaredFields())
         {
-            if (count < tokens.size())
+            if (!ReflectUtils.isTransientOrStatic(embeddedField))
             {
-                String value = tokens.get(count++);
-                PropertyAccessorHelper.set(embeddedObject, embeddedField, value);
+                if (count < tokens.size())
+                {
+                    String value = tokens.get(count++);
+                    PropertyAccessorHelper.set(embeddedObject, embeddedField, value);
+                }
             }
         }
         return embeddedObject;

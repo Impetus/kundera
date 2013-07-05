@@ -191,6 +191,8 @@ public class CassandraUtilities
             autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
+        
+        // check if id attribute is embeddable
         return autoDdlOption == null ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
                 : CassandraConstants.CQL_KEY;
     }

@@ -69,6 +69,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Redis client implementation for REDIS.
@@ -566,30 +567,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 resultKeys = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
             }
 
-            for (String hashKey : resultKeys)
-            {
-                List columnValues = null;
-                if (resource != null && resource.isActive())
-                {
-                    Response response = ((Transaction) connection).hmget(hashKey, columnName);
-                    ((Transaction) connection).exec();
-
-                    columnValues = (List) response.get();
-                }
-                else
-                {
-                    columnValues = ((Jedis) connection).hmget(hashKey, columnName);
-                }
-
-                if (columnValues != null && !columnValues.isEmpty())
-                {
-                    results.addAll(columnValues); // Currently returning list of
-                                                  // string as known issue
-                                                  // with
-                                                  // joint table concept!
-                }
-
-            }
+            results= fetchColumn(columnName, connection, results, resultKeys);
 
             // return connection.hmget(getEncodedBytes(redisKey),
             // getEncodedBytes(columnName));
@@ -599,6 +577,42 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             onCleanup(connection);
         }
+    }
+
+    /**
+     * @param columnName
+     * @param connection
+     * @param results
+     * @param resultKeys
+     */
+    private List fetchColumn(String columnName, Object connection, List results, Set<String> resultKeys)
+    {
+        for (String hashKey : resultKeys)
+        {
+            List columnValues = null;
+            if (resource != null && resource.isActive())
+            {
+                Response response = ((Transaction) connection).hmget(hashKey, columnName);
+                ((Transaction) connection).exec();
+
+                columnValues = (List) response.get();
+            }
+            else
+            {
+                columnValues = ((Jedis) connection).hmget(hashKey, columnName);
+            }
+
+            if (columnValues != null && !columnValues.isEmpty())
+            {
+                results.addAll(columnValues); // Currently returning list of
+                                              // string as known issue
+                                              // with
+                                              // joint table concept!
+            }
+
+        }
+        
+        return results;
     }
 
     @Override
@@ -628,9 +642,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         getDouble(valueAsStr));
 
             }
-            if (results != null)
+
+            List returnResults = new ArrayList();
+            returnResults = fetchColumn(pKeyName, connection, returnResults, results);
+            if (returnResults != null)
             {
-                return results.toArray(new Object[0]);
+
+                return returnResults.toArray(new Object[0]);
             }
 
         }
@@ -867,7 +885,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
-    public Object[] findIdsByColumn(String tableName, String columnName, Object columnValue)
+    private Object[] findIdsByColumn(String tableName, String columnName, Object columnValue)
     {
         Object connection = null;
 
@@ -1108,20 +1126,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         StringBuilder stringBuilder = new StringBuilder();
         for (Field f : fields)
         {
-            // Attribute compositeColumn = keyObject.getAttribute(f.getName());
-            try
+            if (!ReflectUtils.isTransientOrStatic(f))
             {
-                String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                                                                                       // value
-                stringBuilder.append(fieldValue);
-                stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
+                // Attribute compositeColumn =
+                // keyObject.getAttribute(f.getName());
+                try
+                {
+                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                                                                                           // value
+                    stringBuilder.append(fieldValue);
+                    stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    logger.error("Error during persist, Caused by:", e);
+                    throw new PersistenceException(e);
+                }
             }
-            catch (IllegalArgumentException e)
-            {
-                logger.error("Error during persist, Caused by:", e);
-                throw new PersistenceException(e);
-            }
-
         }
 
         if (stringBuilder.length() > 0)

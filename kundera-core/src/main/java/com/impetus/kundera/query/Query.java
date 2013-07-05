@@ -30,13 +30,13 @@ public interface Query<E>
     /**
      * To set fetch size for query.
      */
-    void setFetchSize(int fetchsize);
+    void setFetchSize(Integer fetchsize);
 
     /**
      * 
      * @return fetch size value.
      */
-    int getFetchSize();
+    Integer getFetchSize();
 
     /**
      * Reinstate .

@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,7 @@ import javax.persistence.TypedQuery;
  * @author vivek.mishra
  * 
  */
-public class KunderaTypedQuery<X> implements TypedQuery<X>
+public class KunderaTypedQuery<X> implements TypedQuery<X>, com.impetus.kundera.query.Query<X>
 {
     /**
      * Query instance.
@@ -443,6 +444,31 @@ public class KunderaTypedQuery<X> implements TypedQuery<X>
     {
         query.setParameter(arg0, arg1, arg2);
         return this;
+    }
+
+    @Override
+    public void setFetchSize(Integer fetchsize)
+    {
+        ((com.impetus.kundera.query.Query<X>)query).setFetchSize(fetchsize);
+    }
+
+    @Override
+    public Integer getFetchSize()
+    {
+        return ((com.impetus.kundera.query.Query<X>)query).getFetchSize();
+    }
+
+    @Override
+    public void close()
+    {
+        ((com.impetus.kundera.query.Query<X>)query).close();
+        
+    }
+
+    @Override
+    public Iterator<X> iterate()
+    {
+        return ((com.impetus.kundera.query.Query<X>)query).iterate();
     }
 
 }

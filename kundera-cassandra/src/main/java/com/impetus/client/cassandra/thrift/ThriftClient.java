@@ -970,7 +970,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
-            List<String> columns, List<IndexExpression> conditions) throws Exception
+            List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception
     {
         SlicePredicate slicePredicate = new SlicePredicate();
 
@@ -994,7 +994,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             slicePredicate.setSlice_range(sliceRange);
         }
 
-        KeyRange keyRange = new KeyRange(10000);
+        KeyRange keyRange = new KeyRange(maxResults);
         keyRange.setStart_key(minVal == null ? "".getBytes() : minVal);
         keyRange.setEnd_key(maxVal == null ? "".getBytes() : maxVal);
         ColumnParent cp = new ColumnParent(m.getTableName());

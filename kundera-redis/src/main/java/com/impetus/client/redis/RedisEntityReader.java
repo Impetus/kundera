@@ -41,10 +41,10 @@ public class RedisEntityReader extends AbstractEntityReader implements EntityRea
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
         // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Method supported not required for Redis");
     }
 
     /*

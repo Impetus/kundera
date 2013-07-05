@@ -90,7 +90,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     protected int maxResult = 100;
 
-    private int fetchSize;
+    private Integer fetchSize;
 
     /**
      * Instantiates a new query impl.
@@ -127,17 +127,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     public KunderaQuery getKunderaQuery()
     {
         return kunderaQuery;
-    }
-
-    /**
-     * Sets the kundera query.
-     * 
-     * @param kunderaQuery
-     *            the kunderaQuery to set
-     */
-    public void setKunderaQuery(KunderaQuery kunderaQuery)
-    {
-        this.kunderaQuery = kunderaQuery;
     }
 
     @Override
@@ -181,26 +170,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return results != null ? results : new ArrayList();
     }
 
-    /**
-     * Gets the persistence delegeator.
-     * 
-     * @return the persistenceDelegeator
-     */
-    public PersistenceDelegator getPersistenceDelegeator()
-    {
-        return persistenceDelegeator;
-    }
-
-    /**
-     * Sets the persistence delegeator.
-     * 
-     * @param persistenceDelegeator
-     *            the persistenceDelegeator to set
-     */
-    public void setPersistenceDelegeator(PersistenceDelegator persistenceDelegeator)
-    {
-        this.persistenceDelegeator = persistenceDelegeator;
-    }
 
     protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
@@ -1155,12 +1124,12 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return columnAsList.toArray(new String[] {});
     }
 
-    public void setFetchSize(int fetchsize)
+    public void setFetchSize(Integer fetchsize)
     {
         this.fetchSize = fetchsize;
     }
 
-    public int getFetchSize()
+    public Integer getFetchSize()
     {
         return this.fetchSize;
     }

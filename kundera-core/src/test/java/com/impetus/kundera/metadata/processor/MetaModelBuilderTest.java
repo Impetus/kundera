@@ -41,6 +41,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.metadata.entities.AssociationEntity;
 import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
@@ -332,9 +333,14 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToOOwnerEntity.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//                .size());
+
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType.getDeclaredAttributes()
                 .size());
+
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
         // asssert on association attribute.
@@ -350,10 +356,14 @@ public class MetaModelBuilderTest
         // Assertion on AssociationEntity.
         managedType = managedTypes.get(AssociationEntity.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-        Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
-        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-                .size());
+//        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
+//        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//                .size());
+      Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType.getAttributes().size());
+      Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
+      Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType.getDeclaredAttributes()
+              .size());
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
     }
 
@@ -394,9 +404,14 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToOOwnerBiEntity.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//                .size());
+
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType.getDeclaredAttributes()
                 .size());
+
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
         // asssert on association attribute.
@@ -412,10 +427,16 @@ public class MetaModelBuilderTest
         // Assertion on AssociationBiEntity.
         managedType = managedTypes.get(AssociationBiEntity.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
+//        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//                .size());
+
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType.getAttributes().size());
         Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
-        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType.getDeclaredAttributes()
                 .size());
+
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
 
         // assert on owner attribute
@@ -470,9 +491,14 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToMOwnerEntity.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+//        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
+//                .size());
+
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType.getDeclaredAttributes()
                 .size());
+
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
         // assert on getCollection.
@@ -816,7 +842,8 @@ public class MetaModelBuilderTest
     private <X> void assertOnEmbeddableType(Class entityClazz, Attribute<X, String> attribute,
             EmbeddableType<X> embeddableType, String attributeName, Class attributeClazz)
     {
-        Assert.assertEquals(entityClazz.getDeclaredFields().length, embeddableType.getAttributes().size());
+//        Assert.assertEquals(entityClazz.getDeclaredFields().length, embeddableType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(entityClazz), embeddableType.getAttributes().size());
         Assert.assertEquals(entityClazz, embeddableType.getJavaType());
         Attribute attributeTwo = (Attribute) embeddableType.getAttribute(attributeName);
         Assert.assertNotNull(attribute);
@@ -867,7 +894,8 @@ public class MetaModelBuilderTest
         Assert.assertEquals(BindableType.ENTITY_TYPE, ((EntityType<X>) managedType).getBindableType());
         Assert.assertEquals(PersistenceType.ENTITY, ((EntityType<X>) managedType).getPersistenceType());
         Assert.assertEquals(clazz.getSimpleName(), ((EntityType<X>) managedType).getName());
-        Assert.assertEquals(clazz.getDeclaredFields().length, managedType.getSingularAttributes().size());
+//        Assert.assertEquals(clazz.getDeclaredFields().length, managedType.getSingularAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(clazz), managedType.getSingularAttributes().size());
         return managedType;
     }
 

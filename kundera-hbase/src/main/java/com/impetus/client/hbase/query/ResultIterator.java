@@ -36,6 +36,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -44,7 +45,7 @@ import com.impetus.kundera.query.QueryHandlerException;
  * @author Vivek.Mishra
  * 
  */
-class ResultIterator<E> implements Iterator<E>
+class ResultIterator<E> implements IResultIterator<E>
 {
     private HBaseClient client;
 
@@ -253,5 +254,11 @@ class ResultIterator<E> implements Iterator<E>
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<E> next(int chunkSize)
+    {
+        throw new UnsupportedOperationException("Fetch in chunks is not yet supported over HBase!");
     }
 }

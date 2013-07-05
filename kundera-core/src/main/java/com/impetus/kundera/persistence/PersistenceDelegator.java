@@ -64,6 +64,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
 import com.impetus.kundera.query.QueryResolver;
 import com.impetus.kundera.utils.ObjectUtils;
 
@@ -313,7 +314,8 @@ public final class PersistenceDelegator
         else
         {
             E e = (E) ObjectUtils.deepCopy(nodeData);
-            KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(entityMetadata, e);
+            
+            onSetProxyOwners(entityMetadata,e);
             return e;
         }
 
@@ -647,7 +649,7 @@ public final class PersistenceDelegator
             clientMap = null;
         }
 
-        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
+        onClearProxy();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.
@@ -655,12 +657,40 @@ public final class PersistenceDelegator
         closed = true;
     }
 
+    private void onClearProxy()
+    {
+        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
+        {
+            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+                    .getLazyInitializerFactory();
+
+            if (lazyInitializerrFactory != null)
+            {
+                lazyInitializerrFactory.clearProxies();
+            }
+        }
+    }
+
+    private void onSetProxyOwners(final EntityMetadata m,Object e)
+    {
+        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
+        {
+            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+                    .getLazyInitializerFactory();
+
+            if (lazyInitializerrFactory != null)
+            {
+                lazyInitializerrFactory.setProxyOwners(m, e);
+            }
+        }
+    }
+
     void clear()
     {
         // Move all nodes tied to this EM into detached state
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
-        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
+        onClearProxy();
     }
 
     /**
