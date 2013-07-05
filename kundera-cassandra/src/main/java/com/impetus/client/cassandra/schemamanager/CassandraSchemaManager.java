@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
@@ -42,7 +41,6 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -96,6 +94,8 @@ import com.impetus.kundera.utils.ReflectUtils;
 public class CassandraSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
 
+    private static final String STANDARDCOLUMNFAMILY = "Standard";
+
     /**
      * Cassandra client variable holds the client.
      */
@@ -126,13 +126,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         super(clientFactory, puProperties);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#exportSchema
-     * ()
-     */
     @Override
     /**
      * Export schema handles the handleOperation method.
@@ -140,7 +133,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
         cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
-                : CassandraConstants.CQL_VERSION_3_0;
+                : CassandraConstants.CQL_VERSION_2_0;
         super.exportSchema(persistenceUnit, schemas);
     }
 
@@ -157,71 +150,36 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cassandra_client.set_keyspace(databaseName);
                 for (TableInfo tableInfo : tableInfos)
                 {
-                    if (tableInfo.getTableIdType() != null
-                            && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
-                    {
-                        dropTableUsingCQL(tableInfo);
-                    }
-                    else
-                    {
-                        cassandra_client.system_drop_column_family(tableInfo.getTableName());
-                    }
+                    dropColumnFamily(tableInfo);
                 }
             }
-            catch (InvalidRequestException e)
+            catch (Exception ex)
             {
-                log.error("Error during dropping schema in cassandra, Caused by: .", e);
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (TException e)
-            {
-                log.error("Error during dropping schema in cassandra, Caused by: .", e);
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (SchemaDisagreementException e)
-            {
-                log.error("Error during dropping schema in cassandra, Caused by: .", e);
-                throw new SchemaGenerationException(e, "Cassandra");
+                log.error("Error during dropping schema in cassandra, Caused by: .", ex);
+                throw new SchemaGenerationException(ex, "Cassandra");
             }
         }
         cassandra_client = null;
     }
 
     /**
-     * validates entity for CounterColumnType.
+     * Drops column family specified in table info.
      * 
-     * @param clazz
-     *            the clazz
-     * @return true, if successful
+     * @param tableInfo
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
      */
-    @Override
-    public boolean validateEntity(Class clazz)
+    private void dropColumnFamily(TableInfo tableInfo) throws Exception
     {
-        boolean isvalid = false;
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
-        String tableName = metadata.getTableName();
-        if (csmd.isCounterColumn(metadata.getSchema(), tableName))
+        if (containsCompositeKey(tableInfo))
         {
-            metadata.setCounterColumnType(true);
-            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
-            if (!embeddables.isEmpty())
-            {
-                isvalid = validateEmbeddedColumns(metadata, embeddables.values()) ? true : false;
-            }
-            else
-            {
-                EntityType entity = metaModel.entity(clazz);
-                isvalid = validateColumns(metadata, entity.getAttributes()) ? true : false;
-            }
-            isvalid = isvalid && validateRelations(metadata) ? true : false;
+            dropTableUsingCql(tableInfo);
         }
         else
         {
-            return true;
+            cassandra_client.system_drop_column_family(tableInfo.getTableName());
         }
-        return isvalid;
     }
 
     /**
@@ -245,44 +203,189 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         try
         {
-            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-
-            addTablesToKeyspace(tableInfos, ksDef);
+            createOrUpdate(tableInfos);
         }
-        catch (NotFoundException nfex)
+        catch (Exception ex)
         {
-            createKeyspaceAndTables(tableInfos);
+            throw new PropertyAccessException(ex);
+        }
+    }
+
+    /**
+     * Creates schema and table for the list of tableInfos.
+     * 
+     * @param tableInfos
+     *            list of TableInfos.
+     * @throws TimedOutException
+     * @throws UnavailableException
+     */
+    private void createOrUpdate(List<TableInfo> tableInfos) throws Exception
+    {
+        KsDef ksDef = onCreateKeyspace(); // create keyspace event
+        createColumnFamilies(tableInfos, ksDef); // create column family
+                                                 // event.
+    }
+
+    private KsDef onCreateKeyspace() throws Exception
+    {
+        try
+        {
+            createKeyspace();
         }
         catch (InvalidRequestException irex)
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, irex);
-            throw new SchemaGenerationException(irex);
+            // Ignore and add a log.debug
         }
-        catch (TException tex)
+        // keyspace already exists.
+        cassandra_client.set_keyspace(databaseName);
+        return cassandra_client.describe_keyspace(databaseName);
+    }
+
+    /**
+     * Creates keyspace.
+     * 
+     * @return
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     */
+    private KsDef createKeyspace() throws Exception
+    {
+        Map<String, String> strategy_options = new HashMap<String, String>();
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), cfDefs);
+        setProperties(ksDef, strategy_options);
+        ksDef.setStrategy_options(strategy_options);
+        cassandra_client.system_add_keyspace(ksDef);
+        return ksDef;
+    }
+
+    /**
+     * 
+     * @param tableInfos
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     * @throws UnsupportedEncodingException
+     * @throws NotFoundException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     */
+    private void createColumnFamilies(List<TableInfo> tableInfos, KsDef ksDef) throws Exception
+    {
+        for (TableInfo tableInfo : tableInfos)
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, tex);
-            throw new SchemaGenerationException(tex);
+            createOrUpdateColumnFamily(tableInfo, ksDef);
+
+            // Create Index Table if required
+            createInvertedIndexTable(tableInfo);
+
         }
-        catch (SchemaDisagreementException sdex)
+    }
+
+    /**
+     * 
+     * @param tableInfo
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     * @throws NotFoundException
+     * @throws UnsupportedEncodingException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     */
+    private void createOrUpdateColumnFamily(TableInfo tableInfo, KsDef ksDef) throws Exception
+    {
+        MetaDataHandler handler = new MetaDataHandler();
+        if (containsCompositeKey(tableInfo))
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, sdex);
-            throw new SchemaGenerationException(sdex);
+            validateCompoundKey(tableInfo);
+            onCompoundKey(tableInfo, ksDef);
+
+            // After successful schema operation, perform index creation.
+            createIndexUsingCql(tableInfo);
         }
-        catch (InterruptedException ie)
+        else
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, ie);
-            throw new SchemaGenerationException(ie);
+            CfDef cf_def = handler.getTableMetadata(tableInfo);
+            try
+            {
+                cassandra_client.system_add_column_family(cf_def);
+            }
+            catch (InvalidRequestException irex)
+            {
+                updateExistingColumnFamily(tableInfo, ksDef, irex);
+            }
         }
-        catch (UnavailableException ue)
+    }
+
+    private boolean containsCompositeKey(TableInfo tableInfo)
+    {
+        return tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class);
+    }
+
+    private void updateExistingColumnFamily(TableInfo tableInfo, KsDef ksDef, InvalidRequestException irex)
+            throws Exception
+    {
+        StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
+
+        if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, ue);
-            throw new SchemaGenerationException(ue);
+            SchemaOperationType operationType = SchemaOperationType.getInstance(operation);
+            switch (operationType)
+            {
+            case create:
+                handleCreate(tableInfo, ksDef);
+
+            case createdrop:
+                handleCreate(tableInfo, ksDef);
+                break;
+
+            case update:
+                if (isCql3Enabled(tableInfo))
+                {
+                    for (ColumnInfo column : tableInfo.getColumnMetadatas())
+                    {
+                        addColumnToTable(tableInfo, column);
+                    }
+                }
+                updateTable(ksDef, tableInfo);
+                break;
+
+            default:
+                break;
+            }
         }
-        catch (TimedOutException toe)
+        else
         {
-            log.error("Error occurred while creating {}, Caused by: .", databaseName, toe);
-            throw new SchemaGenerationException(toe);
+            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), irex);
+            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(),
+                    irex, "Cassandra", databaseName);
         }
+    }
+
+    private void handleCreate(TableInfo tableInfo, KsDef ksDef) throws Exception
+    {
+        if (containsCompositeKey(tableInfo))
+        {
+            validateCompoundKey(tableInfo);
+            // First drop existing column family.
+            dropTableUsingCql(tableInfo);
+
+            // And create new column family.
+            onCompoundKey(tableInfo, ksDef);
+        }
+        else
+        {
+            onDrop(tableInfo);
+            createOrUpdateColumnFamily(tableInfo, ksDef);
+        }
+    }
+
+    private void onDrop(TableInfo tableInfo) throws Exception
+    {
+        dropColumnFamily(tableInfo);
+        dropInvertedIndexTable(tableInfo);
     }
 
     /**
@@ -295,37 +398,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         try
         {
-            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-            updateTables(tableInfos, ksDef);
+            createOrUpdate(tableInfos);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            createKeyspaceAndTables(tableInfos);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error occurred while updating{}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
+            log.error("Error occurred while creating {}, Caused by: .", databaseName, ex);
+            throw new SchemaGenerationException(ex);
         }
     }
 
@@ -342,20 +420,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
             onValidateTables(tableInfos, ksDef);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException(e);
+            log.error("Error occurred while validating {}, Caused by: .", databaseName, ex);
+            throw new SchemaGenerationException(ex);
         }
     }
 
@@ -402,67 +470,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * add tables to given keyspace {@code ksDef}.
-     * 
-     * @param tableInfos
-     *            the table infos
-     * @param ksDef
-     *            the ks def
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws TException
-     *             the t exception
-     * @throws InterruptedException
-     *             the interrupted exception
-     * @throws TimedOutException
-     * @throws UnavailableException
-     */
-
-    private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
-            SchemaDisagreementException, TException, InterruptedException, UnavailableException, TimedOutException
-    {
-        cassandra_client.set_keyspace(databaseName);
-        for (TableInfo tableInfo : tableInfos)
-        {
-            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
-
-            for (CfDef cfDef : ksDef.getCf_defs())
-            {
-                if (cfDef.getName().equals(tableInfo.getTableName()))
-                {
-                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
-                    dropInvertedIndexTable(tableInfo);
-                    TimeUnit.SECONDS.sleep(2);
-                    break;
-                }
-            }
-
-            if (tableInfo.getTableIdType() != null && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
-            {
-                if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
-                {
-                    throw new SchemaGenerationException(
-                            "Composite/Compound columns are not yet supported over Super column family by Cassandra",
-                            "cassandra", databaseName);
-                }
-                else
-                {
-                    onCompoundKey(tableInfo);
-                }
-            }
-            else
-            {
-                cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
-                // Create Index Table if required
-                createInvertedIndexTable(tableInfo);
-            }
-            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
-        }
-    }
-
-    /**
      * On compound key.
      * 
      * @param tableInfo
@@ -476,7 +483,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      *             the schema disagreement exception
      */
-    private void onCompoundKey(TableInfo tableInfo)
+    private void onCompoundKey(TableInfo tableInfo, KsDef ksDef) throws Exception
     {
         CQLTranslator translator = new CQLTranslator();
         String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
@@ -499,14 +506,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // for composite columns
         onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns);
 
-        // strip last ",".
-        if (queryBuilder.length() > 0)
-        {
-            queryBuilder.deleteCharAt(queryBuilder.length() - 1);
-
-            columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMNS, queryBuilder.toString());
-            queryBuilder = new StringBuilder(columnFamilyQuery);
-        }
+        queryBuilder = stripLastChar(columnFamilyQuery, queryBuilder);
 
         // append primary key clause
 
@@ -517,15 +517,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         StringBuilder primaryKeyBuilder = new StringBuilder();
 
         // To ensure field ordering
-        for (Field f : fields)
-        {
-            if (!ReflectUtils.isTransientOrStatic(f))
-            {
-                Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
-                translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
-                primaryKeyBuilder.append(" ,");
-            }
-        }
+        appendPrimaryKey(translator, compoEmbeddableType, fields, primaryKeyBuilder);
 
         // should not be null.
         primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
@@ -545,65 +537,53 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
-        catch (UnsupportedEncodingException e)
+        catch (InvalidRequestException irex)
         {
-            log.error("Error occurred while creating table {}, Caused by: . ", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException(e);
+            updateExistingColumnFamily(tableInfo, ksDef, irex);
         }
-        catch (UnavailableException e)
+
+    }
+
+    private void appendPrimaryKey(CQLTranslator translator, EmbeddableType compoEmbeddableType, Field[] fields,
+            StringBuilder primaryKeyBuilder)
+    {
+        for (Field f : fields)
         {
-            log.error("Error occurred while creating table {}, Caused by: . ", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error occurred while creating table {}, Caused by: . ", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException(e);
-        }
-        catch (InvalidRequestException ire)
-        {
-            StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
-            // translator.ensureCase(builder, databaseName);
-            // builder.append(" to keyspace ");
-            // translator.ensureCase(builder, tableInfo.getTableName());
-            if (ire.getWhy() != null && ire.getWhy().contains(builder.toString())
-                    && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+            if (!ReflectUtils.isTransientOrStatic(f))
             {
-                for (ColumnInfo column : tableInfo.getColumnMetadatas())
+                Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
+                translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+                primaryKeyBuilder.append(" ,");
+            }
+        }
+    }
+
+    private StringBuilder stripLastChar(String columnFamilyQuery, StringBuilder queryBuilder)
+    {
+        // strip last ",".
+        if (queryBuilder.length() > 0)
+        {
+            queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+
+            columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMNS, queryBuilder.toString());
+            queryBuilder = new StringBuilder(columnFamilyQuery);
+        }
+        return queryBuilder;
+    }
+
+    private void createIndexUsingThrift(TableInfo tableInfo, CfDef cfDef) throws Exception
+    {
+        for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
+        {
+            for (ColumnDef columnDef : cfDef.getColumn_metadata())
+            {
+                if (new String(columnDef.getName(), Constants.ENCODING).equals(indexInfo.getColumnName()))
                 {
-                    addColumnToTable(tableInfo, translator, column);
+                    columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
                 }
             }
-            else if (ire.getWhy() != null && ire.getWhy().equals(builder.toString()))
-            {
-                // First drop existing column family.
-                dropTableUsingCQL(tableInfo);
-
-                // And create new column family.
-                onCompoundKey(tableInfo);
-            }
-            else
-            {
-                log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), ire);
-                throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(),
-                        ire, "Cassandra", databaseName);
-            }
         }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
-                    "Cassandra", databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(), e,
-                    "Cassandra", databaseName);
-        }
-        // After successful schema operation, perform index creation.
-
-        createIndex(tableInfo);
+        cassandra_client.system_update_column_family(cfDef);
     }
 
     /**
@@ -611,7 +591,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param tableInfo
      */
-    private void createIndex(TableInfo tableInfo)
+    private void createIndexUsingCql(TableInfo tableInfo) throws Exception
     {
         StringBuilder indexQueryBuilder = new StringBuilder("create index $COLUMN_NAME on \"");
         indexQueryBuilder.append(tableInfo.getTableName());
@@ -635,36 +615,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             catch (InvalidRequestException ire)
             {
                 if (ire.getWhy() != null && !ire.getWhy().equals("Index already exists")
-                        && operation.equalsIgnoreCase(ScheamOperationType.update.name()))
+                        && operation.equalsIgnoreCase(SchemaOperationType.update.name()))
                 {
-                    onLogException(tableInfo, indexInfo, ire);
+                    log.error("Error occurred while creating indexes on column{} of table {}, , Caused by: .",
+                            indexInfo.getColumnName(), tableInfo.getTableName(), ire);
+                    throw new SchemaGenerationException("Error occurred while creating indexes on column "
+                            + indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire, "Cassandra",
+                            databaseName);
                 }
             }
-            catch (UnavailableException uex)
-            {
-                onLogException(tableInfo, indexInfo, uex);
-            }
-            catch (TimedOutException toex)
-            {
-                onLogException(tableInfo, indexInfo, toex);
-            }
-            catch (SchemaDisagreementException sdex)
-            {
-                onLogException(tableInfo, indexInfo, sdex);
-            }
-            catch (TException tex)
-            {
-                onLogException(tableInfo, indexInfo, tex);
-            }
         }
-    }
-
-    private void onLogException(TableInfo tableInfo, IndexInfo indexInfo, Exception ire)
-    {
-        log.error("Error occurred while creating indexes on column{} of table {}, , Caused by: .",
-                indexInfo.getColumnName(), tableInfo.getTableName(), ire);
-        throw new SchemaGenerationException("Error occurred while creating indexes on column "
-                + indexInfo.getColumnName() + " of table " + tableInfo.getTableName(), ire, "Cassandra", databaseName);
     }
 
     /**
@@ -672,46 +632,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param tableInfo
      */
-    private void dropTableUsingCQL(TableInfo tableInfo)
+    private void dropTableUsingCql(TableInfo tableInfo) throws Exception
     {
         CQLTranslator translator = new CQLTranslator();
         StringBuilder dropQuery = new StringBuilder("drop table ");
         translator.ensureCase(dropQuery, tableInfo.getTableName());
-        try
-        {
-            cassandra_client.execute_cql3_query(ByteBuffer.wrap(dropQuery.toString().getBytes()), Compression.NONE,
-                    ConsistencyLevel.ONE);
-        }
-        catch (InvalidRequestException ire)
-        {
-            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), ire);
-            throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), ire,
-                    "Cassandra", databaseName);
-        }
-        catch (UnavailableException ue)
-        {
-            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), ue);
-            throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), ue,
-                    "Cassandra", databaseName);
-        }
-        catch (TimedOutException toe)
-        {
-            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), toe);
-            throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), toe,
-                    "Cassandra", databaseName);
-        }
-        catch (SchemaDisagreementException sde)
-        {
-            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), sde);
-            throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), sde,
-                    "Cassandra", databaseName);
-        }
-        catch (TException te)
-        {
-            log.error("Error occurred while droping table {}, Caused by: .", tableInfo.getTableName(), te);
-            throw new SchemaGenerationException("Error occurred while droping table " + tableInfo.getTableName(), te,
-                    "Cassandra", databaseName);
-        }
+        cassandra_client.execute_cql3_query(ByteBuffer.wrap(dropQuery.toString().getBytes()), Compression.NONE,
+                ConsistencyLevel.ONE);
     }
 
     /**
@@ -720,15 +647,22 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param tableInfo
      * @param translator
      * @param column
+     * @throws TException
+     * @throws SchemaDisagreementException
+     * @throws TimedOutException
+     * @throws UnavailableException
+     * @throws InvalidRequestException
      */
-    private void addColumnToTable(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column)
+    private void addColumnToTable(TableInfo tableInfo, ColumnInfo column) throws Exception
     {
+        CQLTranslator translator = new CQLTranslator();
         StringBuilder addColumnQuery = new StringBuilder("ALTER TABLE ");
         translator.ensureCase(addColumnQuery, tableInfo.getTableName());
         addColumnQuery.append(" ADD ");
         translator.ensureCase(addColumnQuery, column.getColumnName());
         addColumnQuery.append(" "
-                + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType())));
+                + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType(),
+                        isCql3Enabled(tableInfo))));
         try
         {
             cassandra_client.execute_cql3_query(ByteBuffer.wrap(addColumnQuery.toString().getBytes()),
@@ -750,31 +684,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         + tableInfo.getTableName(), ireforAddColumn, "Cassandra", databaseName);
             }
         }
-        catch (UnavailableException e)
-        {
-            log.error("Error occurred while altering column type of  table {}, Caused by: .", tableInfo.getTableName(),
-                    e);
-            throw new SchemaGenerationException("Error occurred while adding column into table "
-                    + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while adding column into table "
-                    + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while adding column into table "
-                    + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while adding column into table {}, Caused by: .", tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while adding column into table "
-                    + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
+
     }
 
     /**
@@ -783,55 +693,23 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param tableInfo
      * @param translator
      * @param column
+     * @throws TException
+     * @throws SchemaDisagreementException
+     * @throws TimedOutException
+     * @throws UnavailableException
+     * @throws InvalidRequestException
      */
-    private void alterColumnType(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column)
+    private void alterColumnType(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column) throws Exception
     {
         StringBuilder alterColumnTypeQuery = new StringBuilder("ALTER TABLE ");
         translator.ensureCase(alterColumnTypeQuery, tableInfo.getTableName());
         alterColumnTypeQuery.append(" ALTER ");
         translator.ensureCase(alterColumnTypeQuery, column.getColumnName());
         alterColumnTypeQuery.append(" TYPE "
-                + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType())));
-        try
-        {
-            cassandra_client.execute_cql3_query(ByteBuffer.wrap(alterColumnTypeQuery.toString().getBytes()),
-                    Compression.NONE, ConsistencyLevel.ONE);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
-                    column.getColumnName(), tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while altering column type of column "
-                    + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
-                    column.getColumnName(), tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while altering column type of column "
-                    + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
-                    column.getColumnName(), tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while altering column type of column "
-                    + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
-                    column.getColumnName(), tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while altering column type of column "
-                    + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while altering column type of column {} of table {}, Caused by: .",
-                    column.getColumnName(), tableInfo.getTableName(), e);
-            throw new SchemaGenerationException("Error occurred while altering column type of column "
-                    + column.getColumnName() + " of   table " + tableInfo.getTableName(), e, "Cassandra", databaseName);
-        }
+                + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType(),
+                        isCql3Enabled(tableInfo))));
+        cassandra_client.execute_cql3_query(ByteBuffer.wrap(alterColumnTypeQuery.toString().getBytes()),
+                Compression.NONE, ConsistencyLevel.ONE);
     }
 
     /**
@@ -851,7 +729,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             if (columns == null || (columns != null && !columns.contains(colInfo)))
             {
-                String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType());
+                String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType(), true);
                 String cqlType = translator.getCQLType(dataType);
                 translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
                 queryBuilder.append(" ,");
@@ -920,28 +798,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             {
                 cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
             }
-            catch (InvalidRequestException e)
+            catch (Exception ex)
             {
-                if (log.isInfoEnabled())
+                if (log.isWarnEnabled())
                 {
-                    log.info("Error while dropping inverted index table, Caused by: ", e);
+                    log.warn("Error while dropping inverted index table, Caused by: ", ex);
                 }
             }
-            catch (SchemaDisagreementException e)
-            {
-                if (log.isInfoEnabled())
-                {
-                    log.info("Error while dropping inverted index table, Caused by: ", e);
-                }
-            }
-            catch (TException e)
-            {
-                if (log.isInfoEnabled())
-                {
-                    log.info("Error while dropping inverted index table, Caused by: ", e);
-                }
-            }
-
         }
     }
 
@@ -952,78 +815,65 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            list of TableInfos and ksDef object of KsDef
      * @param ksDef
      *            the ks def
+     * @throws TException
+     * @throws InvalidRequestException
      */
-    private void onValidateTables(List<TableInfo> tableInfos, KsDef ksDef)
+    private void onValidateTables(List<TableInfo> tableInfos, KsDef ksDef) throws Exception
     {
-        try
-        {
-            cassandra_client.set_keyspace(ksDef.getName());
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while validating {}, Caused by: .", databaseName, e);
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
+        cassandra_client.set_keyspace(ksDef.getName());
         for (TableInfo tableInfo : tableInfos)
         {
-            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
-            boolean tablefound = false;
-            for (CfDef cfDef : ksDef.getCf_defs())
+            onValidateTable(ksDef, tableInfo);
+        }
+    }
+
+    private void onValidateTable(KsDef ksDef, TableInfo tableInfo) throws Exception
+    {
+        boolean tablefound = false;
+        for (CfDef cfDef : ksDef.getCf_defs())
+        {
+            if (cfDef.getName().equals(tableInfo.getTableName())
+                    && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name())))
             {
-                if (cfDef.getName().equals(tableInfo.getTableName())
-                        && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name())))
+                if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
                 {
-                    if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
+                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                     {
-                        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-                        {
-                            boolean columnfound = false;
-                            for (ColumnDef columnDef : cfDef.getColumn_metadata())
-                            {
-                                try
-                                {
-                                    if (isMetadataSame(columnDef, columnInfo))
-                                    {
-                                        columnfound = true;
-                                        break;
-                                    }
-                                }
-                                catch (UnsupportedEncodingException e)
-                                {
-                                    throw new PropertyAccessException(e);
-                                }
-                            }
-                            if (!columnfound)
-                            {
-                                throw new SchemaGenerationException("Column " + columnInfo.getColumnName()
-                                        + " does not exist in column family " + tableInfo.getTableName() + "",
-                                        "Cassandra", databaseName, tableInfo.getTableName());
-                            }
-                        }
-                        tablefound = true;
-                        break;
+                        onValidateColumn(tableInfo, cfDef, columnInfo);
                     }
-                    else if (cfDef.getColumn_type().equals(ColumnFamilyType.Super.name()))
-                    {
-                        tablefound = true;
-                    }
+                    tablefound = true;
+                    break;
+                }
+                else if (cfDef.getColumn_type().equals(ColumnFamilyType.Super.name()))
+                {
+                    tablefound = true;
                 }
             }
-            if (!tablefound)
-            {
-                throw new SchemaGenerationException("Column family " + tableInfo.getTableName()
-                        + " does not exist in keyspace " + databaseName + "", "Cassandra", databaseName,
-                        tableInfo.getTableName());
-            }
+        }
+        if (!tablefound)
+        {
+            throw new SchemaGenerationException("Column family " + tableInfo.getTableName()
+                    + " does not exist in keyspace " + databaseName + "", "Cassandra", databaseName,
+                    tableInfo.getTableName());
+        }
+    }
 
-            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
+    private void onValidateColumn(TableInfo tableInfo, CfDef cfDef, ColumnInfo columnInfo) throws Exception
+    {
+        boolean columnfound = false;
+        for (ColumnDef columnDef : cfDef.getColumn_metadata())
+        {
+            if (isMetadataSame(columnDef, columnInfo, isCql3Enabled(tableInfo)))
+            {
+                columnfound = true;
+                break;
+            }
+        }
+        if (!columnfound)
+        {
+            throw new SchemaGenerationException("Column " + columnInfo.getColumnName()
+                    + " does not exist in column family " + tableInfo.getTableName() + "", "Cassandra", databaseName,
+                    tableInfo.getTableName());
         }
     }
 
@@ -1039,85 +889,73 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws UnsupportedEncodingException
      *             the unsupported encoding exception
      */
-    private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo) throws UnsupportedEncodingException
+    private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo, boolean isCql3Enabled) throws Exception
     {
-        return (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()))
-                && (columnDef.isSetIndex_type() == columnInfo.isIndexable() || (columnDef.isSetIndex_type())) ? (columnDef
-                .getValidation_class()
-                .endsWith(CassandraValidationClassMapper.getValidationClass(columnInfo.getType()))) : false;
+        return isIndexPresent(columnInfo, columnDef, isCql3Enabled);
     }
 
     /**
-     * add tables to Keyspace method add the table to given keyspace.
      * 
-     * @param tableInfos
-     *            list of TableInfos and ksDef object of KsDef.
      * @param ksDef
-     *            the ks def
+     * @param tableInfo
      * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws TException
-     *             the t exception
      * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws TimedOutException
-     * @throws UnavailableException
+     * @throws TException
+     * @throws UnsupportedEncodingException
      */
-    private void updateTables(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException, TException,
-            SchemaDisagreementException, UnavailableException, TimedOutException
+    private void updateTable(KsDef ksDef, TableInfo tableInfo) throws Exception
     {
-        cassandra_client.set_keyspace(databaseName);
-        for (TableInfo tableInfo : tableInfos)
+        for (CfDef cfDef : ksDef.getCf_defs())
         {
-            CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
-
-            boolean found = false;
-            for (CfDef cfDef : ksDef.getCf_defs())
+            if (cfDef.getName().equals(tableInfo.getTableName())
+                    && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
             {
-                if (cfDef.getName().equals(tableInfo.getTableName())
-                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
+                boolean toUpdate = false;
+                if (cfDef.getColumn_type().equals(STANDARDCOLUMNFAMILY))
                 {
-                    if (cfDef.getColumn_type().equalsIgnoreCase("Standard"))
+                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                     {
-
-                        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-                        {
-                            if (!isIndexesPresent(columnInfo, cfDef))
-                            {
-                                cfDef.addToColumn_metadata(getColumnMetadata(columnInfo));
-                            }
-                        }
+                        toUpdate = isCfDefUpdated(columnInfo, cfDef, isCql3Enabled(tableInfo), tableInfo) ? true
+                                : toUpdate;
                     }
+                }
+                if (toUpdate)
+                {
                     cassandra_client.system_update_column_family(cfDef);
-                    found = true;
-                    break;
+                    createIndexUsingThrift(tableInfo, cfDef);
                 }
+                break;
             }
-            if (!found)
-            {
-                if (tableInfo.getTableIdType() != null
-                        && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
-                {
-                    if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
-                    {
-                        throw new SchemaGenerationException(
-                                "Composite/Compound columns are yet supported over Super column family by Cassandra",
-                                "cassandra", databaseName);
-                    }
-                    else
-                    {
-                        onCompoundKey(tableInfo);
-                    }
-                }
-                else
-                {
-                    cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
-                    // Create Index Table if required
-                    createInvertedIndexTable(tableInfo);
-                }
-            }
-            CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
         }
+    }
+
+    private boolean isCfDefUpdated(ColumnInfo columnInfo, CfDef cfDef, boolean isCql3Enabled, TableInfo tableInfo)
+            throws Exception
+    {
+        boolean columnPresent = false;
+        boolean isUpdated = false;
+        for (ColumnDef columnDef : cfDef.getColumn_metadata())
+        {
+            if (isColumnPresent(columnInfo, columnDef, isCql3Enabled))
+            {
+                if (!isValidationClassSame(columnInfo, columnDef, isCql3Enabled))
+                {
+                    columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
+                            columnInfo.getType(), isCql3Enabled));
+                    columnDef.setIndex_typeIsSet(false);
+                    columnDef.setIndex_nameIsSet(false);
+                    isUpdated = true;
+                }
+                columnPresent = true;
+                break;
+            }
+        }
+        if (!columnPresent)
+        {
+            cfDef.addToColumn_metadata(getColumnMetadata(columnInfo, tableInfo));
+            isUpdated = true;
+        }
+        return isUpdated;
     }
 
     /**
@@ -1129,27 +967,46 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param cfDef
      *            the cf def
      * @return true, if is indexes present
+     * @throws UnsupportedEncodingException
      */
-    private boolean isIndexesPresent(ColumnInfo columnInfo, CfDef cfDef)
+    private boolean isColumnPresent(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled) throws Exception
     {
-        for (ColumnDef columnDef : cfDef.getColumn_metadata())
-        {
-            try
-            {
-                if (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()))
-                {
-                    if (columnDef.getIndex_type() != null)
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (UnsupportedEncodingException ueex)
-            {
-                throw new PropertyAccessException(ueex);
-            }
-        }
-        return false;
+        return (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()));
+    }
+
+    /**
+     * isInedexesPresent method return whether indexes present or not on
+     * particular column.
+     * 
+     * @param columnInfo
+     *            the column info
+     * @param cfDef
+     *            the cf def
+     * @return true, if is indexes present
+     * @throws UnsupportedEncodingException
+     */
+    private boolean isValidationClassSame(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled)
+            throws Exception
+    {
+        return (isColumnPresent(columnInfo, columnDef, isCql3Enabled) && columnDef.getValidation_class().endsWith(
+                CassandraValidationClassMapper.getValidationClass(columnInfo.getType(), isCql3Enabled)));
+    }
+
+    /**
+     * isInedexesPresent method return whether indexes present or not on
+     * particular column.
+     * 
+     * @param columnInfo
+     *            the column info
+     * @param cfDef
+     *            the cf def
+     * @return true, if is indexes present
+     * @throws UnsupportedEncodingException
+     */
+    private boolean isIndexPresent(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled) throws Exception
+    {
+        return (isValidationClassSame(columnInfo, columnDef, isCql3Enabled) && (columnDef.isSetIndex_type() == columnInfo
+                .isIndexable() || (columnDef.isSetIndex_type())));
     }
 
     /**
@@ -1160,87 +1017,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the column info
      * @return the column metadata
      */
-    private ColumnDef getColumnMetadata(ColumnInfo columnInfo)
+    private ColumnDef getColumnMetadata(ColumnInfo columnInfo, TableInfo tableInfo)
     {
         ColumnDef columnDef = new ColumnDef();
         columnDef.setName(columnInfo.getColumnName().getBytes());
-        columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo.getType()));
+        columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo.getType(),
+                isCql3Enabled(tableInfo)));
+
         if (columnInfo.isIndexable())
         {
-            columnDef.setIndex_type(IndexType.KEYS);
+            IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
         }
         return columnDef;
-    }
-
-    /**
-     * create keyspace and table method create keyspace and table for the list
-     * of tableInfos.
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
-     * @throws SchemaDisagreementException
-     * @throws TException
-     * @throws InvalidRequestException
-     */
-    private void createKeyspaceAndTables(List<TableInfo> tableInfos)
-    {
-        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), null);
-        Map<String, String> strategy_options = new HashMap<String, String>();
-        setProperties(ksDef, strategy_options);
-        try
-        {
-            ksDef.setStrategy_options(strategy_options);
-            List<CfDef> cfDefs = new ArrayList<CfDef>();
-            List<TableInfo> compoundColumnFamilies = new ArrayList<TableInfo>();
-            for (TableInfo tableInfo : tableInfos)
-            {
-                CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
-                if ((tableInfo.getTableIdType() != null && !tableInfo.getTableIdType().isAnnotationPresent(
-                        Embeddable.class))
-                        || tableInfo.getTableIdType() == null)
-                {
-                    cfDefs.add(getTableMetadata(tableInfo));
-                    CfDef cfDef = getInvertedIndexCF(tableInfo);
-                    if (cfDef != null)
-                        cfDefs.add(getInvertedIndexCF(tableInfo));
-                }
-                else if (tableInfo.getTableIdType() != null
-                        && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
-                {
-                    compoundColumnFamilies.add(tableInfo);
-                }
-                CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
-            }
-
-            ksDef.setCf_defs(cfDefs);
-            createKeyspace(ksDef);
-
-            for (TableInfo tableInfo : compoundColumnFamilies)
-            {
-                CassandraValidationClassMapper.resetMapperForCQL3(isCql3Enabled(tableInfo));
-                cassandra_client.set_keyspace(databaseName);
-                onCompoundKey(tableInfo);
-                CassandraValidationClassMapper.resetMapperForThrift(isCql3Enabled(tableInfo));
-            }
-
-            // Recreate Inverted Index Table if applicable
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while creating schema in cassandra, Caused by: .", e);
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error while creating schema in cassandra, Caused by: .", e);
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error while creating schema in cassandra, Caused by: .", e);
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
-        }
-
     }
 
     /**
@@ -1318,130 +1107,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * create keyspace method create keyspace for given ksDef.
-     * 
-     * @param ksDef
-     *            a Object of KsDef.
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws TException
-     *             the t exception
-     */
-    private void createKeyspace(KsDef ksDef) throws InvalidRequestException, SchemaDisagreementException, TException
-    {
-        cassandra_client.system_add_keyspace(ksDef);
-    }
-
-    /**
-     * get Table metadata method returns the metadata of table for given
-     * tableInfo.
-     * 
-     * @param tableInfo
-     *            the table info
-     * @return the table metadata
-     */
-    /**
-     * @param tableInfo
-     * @return CfDef object
-     */
-    private CfDef getTableMetadata(TableInfo tableInfo)
-    {
-        CfDef cfDef = new CfDef();
-        cfDef.setKeyspace(databaseName);
-        cfDef.setName(tableInfo.getTableName());
-        cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType()));
-
-        Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
-        tables = schema != null ? schema.getTables() : null;
-
-        Properties cFProperties = getColumnFamilyProperties(tableInfo);
-        String defaultValidationClass = null;
-        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
-        {
-            if (isCounterColumnType(tableInfo, defaultValidationClass))
-            {
-                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
-            }
-            cfDef.setColumn_type("Super");
-            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
-            cfDef.setSubcomparator_type(UTF8Type.class.getSimpleName());
-        }
-        else if (tableInfo.getType() != null)
-        {
-            defaultValidationClass = cFProperties != null ? cFProperties
-                    .getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS) : null;
-            cfDef.setColumn_type("Standard");
-            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
-            if (isCounterColumnType(tableInfo, defaultValidationClass))
-            {
-                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
-                List<ColumnDef> counterColumnDefs = new ArrayList<ColumnDef>();
-                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
-                if (columnInfos != null)
-                {
-                    for (ColumnInfo columnInfo : columnInfos)
-                    {
-                        ColumnDef columnDef = new ColumnDef();
-                        if (columnInfo.isIndexable())
-                        {
-                            IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
-                            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-                        }
-                        columnDef.setName(columnInfo.getColumnName().getBytes());
-                        columnDef.setValidation_class(CounterColumnType.class.getName());
-                        counterColumnDefs.add(columnDef);
-                    }
-                }
-                cfDef.setColumn_metadata(counterColumnDefs);
-            }
-            else
-            {
-                List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
-                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
-                if (columnInfos != null)
-                {
-                    for (ColumnInfo columnInfo : columnInfos)
-                    {
-                        ColumnDef columnDef = new ColumnDef();
-                        if (columnInfo.isIndexable())
-                        {
-                            IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
-                            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-                        }
-                        columnDef.setName(columnInfo.getColumnName().getBytes());
-                        columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
-                                .getType()));
-                        columnDefs.add(columnDef);
-                    }
-                }
-                cfDef.setColumn_metadata(columnDefs);
-            }
-        }
-        setColumnFamilyProperties(cfDef, cFProperties, null);
-        return cfDef;
-    }
-
-    /**
-     * Checks if is counter column type.
-     * 
-     * @param tableInfo
-     *            the table info
-     * @param defaultValidationClass
-     *            the default validation class
-     * @return true, if is counter column type
-     */
-    private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
-    {
-        return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
-                || (defaultValidationClass != null
-                        && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getSimpleName()) || defaultValidationClass
-                                .equalsIgnoreCase(CounterColumnType.class.getName())) || (tableInfo.getType()
-                        .equals(CounterColumnType.class.getSimpleName())));
-    }
-
-    /**
      * Gets the column family properties.
      * 
      * @param tableInfo
@@ -1498,100 +1163,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * validates entity relations if any present.
-     * 
-     * @param metadata
-     *            the metadata
-     * @return true, if successful
-     */
-    private boolean validateRelations(EntityMetadata metadata)
-    {
-        boolean isValid = true;
-        for (Relation relation : metadata.getRelations())
-        {
-            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-            if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
-                    .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
-            {
-                // validate Id column of target entity
-                validateColumn(targetEntityMetadata.getIdAttribute().getJavaType());
-            }
-            else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
-            {
-                // if target entity is also counter column the validate source
-                // IdColumn
-                String targetTableName = targetEntityMetadata.getTableName();
-                if (csmd.isCounterColumn(targetEntityMetadata.getSchema(), targetTableName))
-                {
-                    isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
-                }
-            }
-        }
-        return isValid;
-    }
-
-    /**
-     * validate embedded column .
-     * 
-     * @param metadata
-     * 
-     * @param embeddedColumns
-     *            the embedded columns
-     * @return true, if successful
-     */
-    private boolean validateEmbeddedColumns(EntityMetadata metadata, Collection<EmbeddableType> embeddedColumns)
-    {
-        boolean isValid = false;
-        Iterator<EmbeddableType> iter = embeddedColumns.iterator();
-        while (iter.hasNext())
-        {
-            isValid = validateColumns(metadata, iter.next().getAttributes()) ? true : false;
-        }
-        return isValid;
-    }
-
-    /**
-     * validate columns.
-     * 
-     * @param metadata
-     * 
-     * @param attributes
-     *            the attributes
-     * @return true, if successful
-     */
-    private boolean validateColumns(EntityMetadata metadata, Set<Attribute> attributes)
-    {
-        boolean isValid = true;
-        for (Attribute column : attributes)
-        {
-            if (!metadata.getIdAttribute().equals(column) && !validateColumn(column.getJavaType()))
-            {
-                isValid = false;
-                break;
-            }
-        }
-        return isValid;
-    }
-
-    /**
-     * validate a single column.
+     * validates entity for CounterColumnType.
      * 
      * @param clazz
      *            the clazz
      * @return true, if successful
      */
-    private boolean validateColumn(Class clazz)
+    @Override
+    public boolean validateEntity(Class clazz)
     {
-        boolean isValid = true;
-        if (!(clazz.equals(Integer.class) || clazz.equals(int.class) || clazz.equals(Long.class) || clazz
-                .equals(long.class)))
-        {
-            log.warn(
-                    "Default valdation class :{}, For counter column type, fields of Entity should be either long type or integer type.",
-                    CounterColumnType.class.getSimpleName());
-            return isValid = false;
-        }
-        return isValid;
+        EntityValidatorAgainstCounterColumn entityValidatorAgainstSchema = new EntityValidatorAgainstCounterColumn();
+        return entityValidatorAgainstSchema.validateEntity(clazz);
     }
 
     /**
@@ -1608,264 +1190,33 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             if (builder != null)
             {
-
                 builder.append(CQLTranslator.WITH_CLAUSE);
             }
-            String keyValidationClass = cFProperties.getProperty(CassandraConstants.KEY_VALIDATION_CLASS);
-            if (keyValidationClass != null)
-            {
-                if (builder != null)
-                {
-                    // nothing available.
-                }
-                else
-                {
-                    cfDef.setKey_validation_class(keyValidationClass);
-                }
-            }
+            onSetKeyValidation(cfDef, cFProperties, builder);
 
-            String compactionStrategy = cFProperties.getProperty(CassandraConstants.COMPACTION_STRATEGY);
-            if (compactionStrategy != null)
-            {
-                if (builder != null)
-                {
-                    String strategy_class = CQLTranslator.getKeyword(CassandraConstants.COMPACTION_STRATEGY);
-                    builder.append(strategy_class);
-                    builder.append(CQLTranslator.EQ_CLAUSE);
-                    builder.append(CQLTranslator.QUOTE_STR);
-                    builder.append(compactionStrategy);
-                    builder.append(CQLTranslator.QUOTE_STR);
-                    builder.append(CQLTranslator.AND_CLAUSE);
-                }
-                else
-                {
-                    cfDef.setCompaction_strategy(compactionStrategy);
+            onSetCompactionStrategy(cfDef, cFProperties, builder);
 
-                }
-            }
+            onSetComparatorType(cfDef, cFProperties, builder);
 
-            String comparatorType = cFProperties.getProperty(CassandraConstants.COMPARATOR_TYPE);
-            if (comparatorType != null)
-            {
-                if (builder != null)
-                {
-                    // TODO:::nothing available.
-                }
-                else
-                {
-                    cfDef.setComparator_type(comparatorType);
+            onSetSubComparator(cfDef, cFProperties, builder);
 
-                }
-            }
+            onSetReplicateOnWrite(cfDef, cFProperties, builder);
 
-            String subComparatorType = cFProperties.getProperty(CassandraConstants.SUBCOMPARATOR_TYPE);
-            if (subComparatorType != null && ColumnFamilyType.valueOf(cfDef.getColumn_type()) == ColumnFamilyType.Super)
-            {
-                if (builder != null)
-                {
-                    // super column are not supported for composite key as of
-                    // now, leaving blank place holder..
-                }
-                else
-                {
-                    cfDef.setSubcomparator_type(subComparatorType);
-                }
-            }
-            String replicateOnWrite = cFProperties.getProperty(CassandraConstants.REPLICATE_ON_WRITE);
-            if (builder != null)
-            {
-                appendPropertyToBuilder(builder, replicateOnWrite, CassandraConstants.REPLICATE_ON_WRITE);
-            }
-            else
-            {
-                cfDef.setReplicate_on_write(Boolean.parseBoolean(replicateOnWrite));
-            }
-            String maxCompactionThreshold = cFProperties.getProperty(CassandraConstants.MAX_COMPACTION_THRESHOLD);
-            if (maxCompactionThreshold != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        // Somehow these are not working for cassandra 1.1
-                        // though they claim it should work.
-                        // appendPropertyToBuilder(builder,
-                        // maxCompactionThreshold,
-                        // CassandraConstants.MAX_COMPACTION_THRESHOLD);
-                    }
-                    else
-                    {
-                        cfDef.setMax_compaction_threshold(Integer.parseInt(maxCompactionThreshold));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("Max_Compaction_Threshold should be numeric type, Caused by: .", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
-            String minCompactionThreshold = cFProperties.getProperty(CassandraConstants.MIN_COMPACTION_THRESHOLD);
-            if (minCompactionThreshold != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        // Somehow these are not working for cassandra 1.1
-                        // though they claim it should work.
-                        // appendPropertyToBuilder(builder,
-                        // minCompactionThreshold,
-                        // CassandraConstants.MIN_COMPACTION_THRESHOLD);
-                    }
-                    else
-                    {
-                        cfDef.setMin_compaction_threshold(Integer.parseInt(minCompactionThreshold));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("Min_Compaction_Threshold should be numeric type, Caused by: . ", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
+            onSetCompactionThreshold(cfDef, cFProperties, builder);
 
-            String comment = cFProperties.getProperty(CassandraConstants.COMMENT);
-            if (comment != null)
-            {
-                if (builder != null)
-                {
-                    String comment_Str = CQLTranslator.getKeyword(CassandraConstants.COMMENT);
-                    builder.append(comment_Str);
-                    builder.append(CQLTranslator.EQ_CLAUSE);
-                    builder.append(CQLTranslator.QUOTE_STR);
-                    builder.append(comment);
-                    builder.append(CQLTranslator.QUOTE_STR);
-                    builder.append(CQLTranslator.AND_CLAUSE);
+            onSetComment(cfDef, cFProperties, builder);
 
-                }
-                else
-                {
-                    cfDef.setComment(comment);
-                }
-            }
+            onSetTableId(cfDef, cFProperties, builder);
 
-            String id = cFProperties.getProperty(CassandraConstants.ID);
-            if (id != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        // TODO::::not available with composite key?
-                    }
-                    else
-                    {
-                        cfDef.setId(Integer.parseInt(id));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("Id should be numeric type, Caused by: ", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
+            onSetGcGrace(cfDef, cFProperties, builder);
 
-            String gcGraceSeconds = cFProperties.getProperty(CassandraConstants.GC_GRACE_SECONDS);
-            if (gcGraceSeconds != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        appendPropertyToBuilder(builder, gcGraceSeconds, CassandraConstants.GC_GRACE_SECONDS);
-                    }
-                    else
-                    {
-                        cfDef.setGc_grace_seconds(Integer.parseInt(gcGraceSeconds));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("GC_GRACE_SECONDS should be numeric type, Caused by: .", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
+            onSetCaching(cfDef, cFProperties, builder);
 
-            String caching = cFProperties.getProperty(CassandraConstants.CACHING);
-            if (caching != null)
-            {
-                if (builder != null)
-                {
-                    appendPropertyToBuilder(builder, caching, CassandraConstants.CACHING);
-                }
-                else
-                {
-                    cfDef.setCaching(caching);
-                }
-            }
+            onSetBloomFilter(cfDef, cFProperties, builder);
 
-            String bloomFilterFpChance = cFProperties.getProperty(CassandraConstants.BLOOM_FILTER_FP_CHANCE);
-            if (bloomFilterFpChance != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        appendPropertyToBuilder(builder, bloomFilterFpChance, CassandraConstants.BLOOM_FILTER_FP_CHANCE);
-                    }
-                    else
-                    {
-                        cfDef.setBloom_filter_fp_chance(Double.parseDouble(bloomFilterFpChance));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: .", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
-            String readRepairChance = cFProperties.getProperty(CassandraConstants.READ_REPAIR_CHANCE);
-            if (readRepairChance != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        appendPropertyToBuilder(builder, readRepairChance, CassandraConstants.READ_REPAIR_CHANCE);
-                    }
-                    else
-                    {
-                        cfDef.setRead_repair_chance(Double.parseDouble(readRepairChance));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("READ_REPAIR_CHANCE should be double type, Caused by: .", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
-            String dclocalReadRepairChance = cFProperties.getProperty(CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
-            if (dclocalReadRepairChance != null)
-            {
-                try
-                {
-                    if (builder != null)
-                    {
-                        appendPropertyToBuilder(builder, dclocalReadRepairChance,
-                                CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
+            onSetRepairChance(cfDef, cFProperties, builder);
 
-                    }
-                    else
-                    {
-                        cfDef.setDclocal_read_repair_chance(Double.parseDouble(dclocalReadRepairChance));
-                    }
-                }
-                catch (NumberFormatException nfe)
-                {
-                    log.error("READ_REPAIR_CHANCE should be double type, Caused by: .", nfe);
-                    throw new SchemaGenerationException(nfe);
-                }
-            }
+            onSetReadRepairChance(cfDef, cFProperties, builder);
 
             // Strip last AND clause.
             if (builder != null && StringUtils.contains(builder.toString(), CQLTranslator.AND_CLAUSE))
@@ -1876,10 +1227,306 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
+    private void onSetReadRepairChance(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String dclocalReadRepairChance = cFProperties.getProperty(CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
+        if (dclocalReadRepairChance != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    appendPropertyToBuilder(builder, dclocalReadRepairChance,
+                            CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
+
+                }
+                else
+                {
+                    cfDef.setDclocal_read_repair_chance(Double.parseDouble(dclocalReadRepairChance));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("READ_REPAIR_CHANCE should be double type, Caused by: .", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetRepairChance(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String readRepairChance = cFProperties.getProperty(CassandraConstants.READ_REPAIR_CHANCE);
+        if (readRepairChance != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    appendPropertyToBuilder(builder, readRepairChance, CassandraConstants.READ_REPAIR_CHANCE);
+                }
+                else
+                {
+                    cfDef.setRead_repair_chance(Double.parseDouble(readRepairChance));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("READ_REPAIR_CHANCE should be double type, Caused by: .", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetBloomFilter(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String bloomFilterFpChance = cFProperties.getProperty(CassandraConstants.BLOOM_FILTER_FP_CHANCE);
+        if (bloomFilterFpChance != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    appendPropertyToBuilder(builder, bloomFilterFpChance, CassandraConstants.BLOOM_FILTER_FP_CHANCE);
+                }
+                else
+                {
+                    cfDef.setBloom_filter_fp_chance(Double.parseDouble(bloomFilterFpChance));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("BLOOM_FILTER_FP_CHANCE should be double type, Caused by: .", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetCaching(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String caching = cFProperties.getProperty(CassandraConstants.CACHING);
+        if (caching != null)
+        {
+            if (builder != null)
+            {
+                appendPropertyToBuilder(builder, caching, CassandraConstants.CACHING);
+            }
+            else
+            {
+                cfDef.setCaching(caching);
+            }
+        }
+    }
+
+    private void onSetGcGrace(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String gcGraceSeconds = cFProperties.getProperty(CassandraConstants.GC_GRACE_SECONDS);
+        if (gcGraceSeconds != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    appendPropertyToBuilder(builder, gcGraceSeconds, CassandraConstants.GC_GRACE_SECONDS);
+                }
+                else
+                {
+                    cfDef.setGc_grace_seconds(Integer.parseInt(gcGraceSeconds));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("GC_GRACE_SECONDS should be numeric type, Caused by: .", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetTableId(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String id = cFProperties.getProperty(CassandraConstants.ID);
+        if (id != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    // TODO::::not available with composite key?
+                }
+                else
+                {
+                    cfDef.setId(Integer.parseInt(id));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("Id should be numeric type, Caused by: ", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetComment(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String comment = cFProperties.getProperty(CassandraConstants.COMMENT);
+        if (comment != null)
+        {
+            if (builder != null)
+            {
+                String comment_Str = CQLTranslator.getKeyword(CassandraConstants.COMMENT);
+                builder.append(comment_Str);
+                builder.append(CQLTranslator.EQ_CLAUSE);
+                builder.append(CQLTranslator.QUOTE_STR);
+                builder.append(comment);
+                builder.append(CQLTranslator.QUOTE_STR);
+                builder.append(CQLTranslator.AND_CLAUSE);
+
+            }
+            else
+            {
+                cfDef.setComment(comment);
+            }
+        }
+    }
+
+    private void onSetReplicateOnWrite(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String replicateOnWrite = cFProperties.getProperty(CassandraConstants.REPLICATE_ON_WRITE);
+        if (builder != null)
+        {
+            appendPropertyToBuilder(builder, replicateOnWrite, CassandraConstants.REPLICATE_ON_WRITE);
+        }
+        else
+        {
+            cfDef.setReplicate_on_write(Boolean.parseBoolean(replicateOnWrite));
+        }
+    }
+
+    private void onSetCompactionThreshold(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String maxCompactionThreshold = cFProperties.getProperty(CassandraConstants.MAX_COMPACTION_THRESHOLD);
+        if (maxCompactionThreshold != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    // Somehow these are not working for cassandra 1.1
+                    // though they claim it should work.
+                    // appendPropertyToBuilder(builder,
+                    // maxCompactionThreshold,
+                    // CassandraConstants.MAX_COMPACTION_THRESHOLD);
+                }
+                else
+                {
+                    cfDef.setMax_compaction_threshold(Integer.parseInt(maxCompactionThreshold));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("Max_Compaction_Threshold should be numeric type, Caused by: .", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+        String minCompactionThreshold = cFProperties.getProperty(CassandraConstants.MIN_COMPACTION_THRESHOLD);
+        if (minCompactionThreshold != null)
+        {
+            try
+            {
+                if (builder != null)
+                {
+                    // Somehow these are not working for cassandra 1.1
+                    // though they claim it should work.
+                    // appendPropertyToBuilder(builder,
+                    // minCompactionThreshold,
+                    // CassandraConstants.MIN_COMPACTION_THRESHOLD);
+                }
+                else
+                {
+                    cfDef.setMin_compaction_threshold(Integer.parseInt(minCompactionThreshold));
+                }
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.error("Min_Compaction_Threshold should be numeric type, Caused by: . ", nfe);
+                throw new SchemaGenerationException(nfe);
+            }
+        }
+    }
+
+    private void onSetSubComparator(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String subComparatorType = cFProperties.getProperty(CassandraConstants.SUBCOMPARATOR_TYPE);
+        if (subComparatorType != null && ColumnFamilyType.valueOf(cfDef.getColumn_type()) == ColumnFamilyType.Super)
+        {
+            if (builder != null)
+            {
+                // super column are not supported for composite key as of
+                // now, leaving blank place holder..
+            }
+            else
+            {
+                cfDef.setSubcomparator_type(subComparatorType);
+            }
+        }
+    }
+
+    private void onSetComparatorType(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String comparatorType = cFProperties.getProperty(CassandraConstants.COMPARATOR_TYPE);
+        if (comparatorType != null)
+        {
+            if (builder != null)
+            {
+                // TODO:::nothing available.
+            }
+            else
+            {
+                cfDef.setComparator_type(comparatorType);
+            }
+        }
+    }
+
+    private void onSetCompactionStrategy(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String compactionStrategy = cFProperties.getProperty(CassandraConstants.COMPACTION_STRATEGY);
+        if (compactionStrategy != null)
+        {
+            if (builder != null)
+            {
+                String strategy_class = CQLTranslator.getKeyword(CassandraConstants.COMPACTION_STRATEGY);
+                builder.append(strategy_class);
+                builder.append(CQLTranslator.EQ_CLAUSE);
+                builder.append(CQLTranslator.QUOTE_STR);
+                builder.append(compactionStrategy);
+                builder.append(CQLTranslator.QUOTE_STR);
+                builder.append(CQLTranslator.AND_CLAUSE);
+            }
+            else
+            {
+                cfDef.setCompaction_strategy(compactionStrategy);
+            }
+        }
+    }
+
+    private void onSetKeyValidation(CfDef cfDef, Properties cFProperties, StringBuilder builder)
+    {
+        String keyValidationClass = cFProperties.getProperty(CassandraConstants.KEY_VALIDATION_CLASS);
+        if (keyValidationClass != null)
+        {
+            if (builder != null)
+            {
+                // nothing available.
+            }
+            else
+            {
+                cfDef.setKey_validation_class(keyValidationClass);
+            }
+        }
+    }
+
     private boolean isCql3Enabled(TableInfo tableInfo)
     {
-        return tableInfo.getTableIdType() != null
-                && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class)
+        return containsCompositeKey(tableInfo)
                 || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && !tableInfo
                         .getType().equals(Type.SUPER_COLUMN_FAMILY.name()));
     }
@@ -1896,5 +1543,311 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         builder.append(CQLTranslator.EQ_CLAUSE);
         builder.append(replicateOnWrite);
         builder.append(CQLTranslator.AND_CLAUSE);
+    }
+
+    /**
+     * MetaDataHandler responsible for creating column family matadata for
+     * tableInfos.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    private class MetaDataHandler
+    {
+        /**
+         * get Table metadata method returns the metadata of table for given
+         * tableInfo.
+         * 
+         * @param tableInfo
+         *            the table info
+         * @return the table metadata
+         */
+        /**
+         * @param tableInfo
+         * @return CfDef object
+         */
+        private CfDef getTableMetadata(TableInfo tableInfo)
+        {
+            CfDef cfDef = new CfDef();
+            cfDef.setKeyspace(databaseName);
+            cfDef.setName(tableInfo.getTableName());
+            cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType(),
+                    isCql3Enabled(tableInfo)));
+
+            Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
+            tables = schema != null ? schema.getTables() : null;
+
+            Properties cFProperties = getColumnFamilyProperties(tableInfo);
+            String defaultValidationClass = null;
+            if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+            {
+                getSuperColumnFamilyMetadata(tableInfo, cfDef, defaultValidationClass);
+            }
+            else if (tableInfo.getType() != null)
+            {
+                getColumnFamilyMetadata(tableInfo, cfDef, cFProperties);
+            }
+            setColumnFamilyProperties(cfDef, cFProperties, null);
+            return cfDef;
+        }
+
+        /**
+         * 
+         * @param tableInfo
+         * @param cfDef
+         * @param defaultValidationClass
+         */
+        private void getSuperColumnFamilyMetadata(TableInfo tableInfo, CfDef cfDef, String defaultValidationClass)
+        {
+            if (isCounterColumnType(tableInfo, defaultValidationClass))
+            {
+                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
+            }
+            cfDef.setColumn_type("Super");
+            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
+            cfDef.setSubcomparator_type(UTF8Type.class.getSimpleName());
+        }
+
+        /**
+         * 
+         * @param tableInfo
+         * @param cfDef
+         * @param cFProperties
+         */
+        private void getColumnFamilyMetadata(TableInfo tableInfo, CfDef cfDef, Properties cFProperties)
+        {
+            String defaultValidationClass;
+            defaultValidationClass = cFProperties != null ? cFProperties
+                    .getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS) : null;
+            cfDef.setColumn_type(STANDARDCOLUMNFAMILY);
+            cfDef.setComparator_type(UTF8Type.class.getSimpleName());
+            if (isCounterColumnType(tableInfo, defaultValidationClass))
+            {
+                getCounterColumnFamilyMetadata(tableInfo, cfDef);
+            }
+            else
+            {
+                List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
+                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+                if (columnInfos != null)
+                {
+                    for (ColumnInfo columnInfo : columnInfos)
+                    {
+                        ColumnDef columnDef = new ColumnDef();
+                        if (columnInfo.isIndexable())
+                        {
+                            IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+                            columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                        }
+                        columnDef.setName(columnInfo.getColumnName().getBytes());
+                        columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
+                                columnInfo.getType(), isCql3Enabled(tableInfo)));
+                        columnDefs.add(columnDef);
+                    }
+                }
+                cfDef.setColumn_metadata(columnDefs);
+            }
+        }
+
+        /**
+         * 
+         * @param tableInfo
+         * @param cfDef
+         */
+        private void getCounterColumnFamilyMetadata(TableInfo tableInfo, CfDef cfDef)
+        {
+            cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
+            List<ColumnDef> counterColumnDefs = new ArrayList<ColumnDef>();
+            List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+            if (columnInfos != null)
+            {
+                for (ColumnInfo columnInfo : columnInfos)
+                {
+                    ColumnDef columnDef = new ColumnDef();
+                    if (columnInfo.isIndexable())
+                    {
+                        IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+                        columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                    }
+                    columnDef.setName(columnInfo.getColumnName().getBytes());
+                    columnDef.setValidation_class(CounterColumnType.class.getName());
+                    counterColumnDefs.add(columnDef);
+                }
+            }
+            cfDef.setColumn_metadata(counterColumnDefs);
+        }
+
+        /**
+         * Checks if is counter column type.
+         * 
+         * @param tableInfo
+         *            the table info
+         * @param defaultValidationClass
+         *            the default validation class
+         * @return true, if is counter column type
+         */
+        private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
+        {
+            return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
+                    || (defaultValidationClass != null
+                            && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getSimpleName()) || defaultValidationClass
+                                    .equalsIgnoreCase(CounterColumnType.class.getName())) || (tableInfo.getType()
+                            .equals(CounterColumnType.class.getSimpleName())));
+        }
+    }
+
+    /**
+     * EntityValidatorAgainstCounterColumn class responsible for validating
+     * classes against counter column family.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    private class EntityValidatorAgainstCounterColumn
+    {
+        /**
+         * validates entity for CounterColumnType.
+         * 
+         * @param clazz
+         *            the clazz
+         * @return true, if successful
+         */
+        private boolean validateEntity(Class clazz)
+        {
+            boolean isvalid = false;
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            String tableName = metadata.getTableName();
+            if (csmd.isCounterColumn(metadata.getSchema(), tableName))
+            {
+                metadata.setCounterColumnType(true);
+                Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
+                if (!embeddables.isEmpty())
+                {
+                    isvalid = validateEmbeddedColumns(metadata, embeddables.values()) ? true : false;
+                }
+                else
+                {
+                    EntityType entity = metaModel.entity(clazz);
+                    isvalid = validateColumns(metadata, entity.getAttributes()) ? true : false;
+                }
+                isvalid = isvalid && validateRelations(metadata) ? true : false;
+            }
+            else
+            {
+                return true;
+            }
+            return isvalid;
+        }
+
+        /**
+         * validates entity relations if any present.
+         * 
+         * @param metadata
+         *            the metadata
+         * @return true, if successful
+         */
+        private boolean validateRelations(EntityMetadata metadata)
+        {
+            boolean isValid = true;
+            for (Relation relation : metadata.getRelations())
+            {
+                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                        .getTargetEntity());
+                if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
+                        .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
+                {
+                    // validate Id column of target entity
+                    validateColumn(targetEntityMetadata.getIdAttribute().getJavaType());
+                }
+                else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
+                {
+                    // if target entity is also counter column the validate
+                    // source
+                    // IdColumn
+                    String targetTableName = targetEntityMetadata.getTableName();
+                    if (csmd.isCounterColumn(targetEntityMetadata.getSchema(), targetTableName))
+                    {
+                        isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
+                    }
+                }
+            }
+            return isValid;
+        }
+
+        /**
+         * validate embedded column .
+         * 
+         * @param metadata
+         * 
+         * @param embeddedColumns
+         *            the embedded columns
+         * @return true, if successful
+         */
+        private boolean validateEmbeddedColumns(EntityMetadata metadata, Collection<EmbeddableType> embeddedColumns)
+        {
+            boolean isValid = false;
+            Iterator<EmbeddableType> iter = embeddedColumns.iterator();
+            while (iter.hasNext())
+            {
+                isValid = validateColumns(metadata, iter.next().getAttributes()) ? true : false;
+            }
+            return isValid;
+        }
+
+        /**
+         * validate columns.
+         * 
+         * @param metadata
+         * 
+         * @param attributes
+         *            the attributes
+         * @return true, if successful
+         */
+        private boolean validateColumns(EntityMetadata metadata, Set<Attribute> attributes)
+        {
+            boolean isValid = true;
+            for (Attribute column : attributes)
+            {
+                if (!metadata.getIdAttribute().equals(column) && !validateColumn(column.getJavaType()))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            return isValid;
+        }
+
+        /**
+         * validate a single column.
+         * 
+         * @param clazz
+         *            the clazz
+         * @return true, if successful
+         */
+        private boolean validateColumn(Class clazz)
+        {
+            boolean isValid = true;
+            if (!(clazz.equals(Integer.class) || clazz.equals(int.class) || clazz.equals(Long.class) || clazz
+                    .equals(long.class)))
+            {
+                log.warn(
+                        "Default valdation class :{}, For counter column type, fields of Entity should be either long type or integer type.",
+                        CounterColumnType.class.getSimpleName());
+                return isValid = false;
+            }
+            return isValid;
+        }
+    }
+
+    private void validateCompoundKey(TableInfo tableInfo)
+    {
+        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+        {
+            throw new SchemaGenerationException(
+                    "Composite/Compound columns are not yet supported over Super column family by Cassandra",
+                    "cassandra", databaseName);
+        }
     }
 }

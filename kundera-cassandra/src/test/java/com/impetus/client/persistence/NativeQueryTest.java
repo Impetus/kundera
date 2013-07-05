@@ -31,12 +31,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.pelops.PelopsClient;
-import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.CoreMetadata;

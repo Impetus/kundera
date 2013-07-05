@@ -22,9 +22,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity

@@ -24,6 +24,8 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
@@ -37,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
-import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.kundera.Constants;
@@ -142,8 +143,8 @@ public class CassandraSchemaOperationTest
             UnsupportedEncodingException
     {
         getEntityManagerFactory("create-drop");
-//         schemaManager = new
-//         CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
+        // schemaManager = new
+        // CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
         // schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -178,7 +179,8 @@ public class CassandraSchemaOperationTest
             }
         }
 
-        PelopsClientFactory clientFactory = (PelopsClientFactory) ClientResolver.getClientFactory("CassandraSchemaOperationTest");
+        PelopsClientFactory clientFactory = (PelopsClientFactory) ClientResolver
+                .getClientFactory("CassandraSchemaOperationTest");
         clientFactory.getSchemaManager(null).dropSchema();
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
         Assert.assertFalse(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
@@ -216,16 +218,26 @@ public class CassandraSchemaOperationTest
 
             Assert.assertEquals("Standard", cfDef.getColumn_type());
 
-            List<String> columns = new ArrayList<String>();
-            columns.add("AGE");
-            columns.add("PERSON_NAME");
-
+            int counter = 0;
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertTrue(columnDef.isSetIndex_type());
-                Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNotNull(columnDef.index_name);
+                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertNotNull(columnDef.index_name);
+                    Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+                    counter++;
+                }
+                else
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
+                    Assert.assertNotNull(columnDef.index_name);
+                    Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
+                    counter++;
+                }
             }
+            Assert.assertEquals(2, counter);
         }
     }
 
@@ -275,16 +287,26 @@ public class CassandraSchemaOperationTest
 
             Assert.assertEquals("Standard", cfDef.getColumn_type());
 
-            List<String> columns = new ArrayList<String>();
-            columns.add("AGE");
-            columns.add("PERSON_NAME");
-
+            int counter = 0;
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertTrue(columnDef.isSetIndex_type());
-                Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNotNull(columnDef.index_name);
+                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertNotNull(columnDef.index_name);
+                    Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+                    counter++;
+                }
+                else
+                {
+                    Assert.assertTrue(columnDef.isSetIndex_type());
+                    Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
+                    Assert.assertNotNull(columnDef.index_name);
+                    Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
+                    counter++;
+                }
             }
+            Assert.assertEquals(2, counter);
         }
     }
 
@@ -331,8 +353,8 @@ public class CassandraSchemaOperationTest
         catch (SchemaGenerationException e)
         {
             List<String> errors = new ArrayList<String>();
-            errors.add("Column AGE does not exist in column family CassandraEntitySimple");
-            errors.add("Column PERSON_NAME does not exist in column family CassandraEntitySimple");
+            errors.add("com.impetus.kundera.configure.schema.SchemaGenerationException: Column AGE does not exist in column family CassandraEntitySimple");
+            errors.add("com.impetus.kundera.configure.schema.SchemaGenerationException: Column PERSON_NAME does not exist in column family CassandraEntitySimple");
             // errors.add("column family " + "CassandraEntitySimple " +
             // " does not exist in keyspace "
             // + "KunderaCassandraExamples" + "");
@@ -425,9 +447,9 @@ public class CassandraSchemaOperationTest
         catch (SchemaGenerationException sgex)
         {
             List<String> errors = new ArrayList<String>();
-            errors.add("Column AGE does not exist in column family CassandraEntitySimple");
-            errors.add("Column PERSON_NAME does not exist in column family CassandraEntitySimple");
-            errors.add("column family CassandraEntitySimple does not exist in keyspace KunderaCoreExmples");
+            errors.add("com.impetus.kundera.configure.schema.SchemaGenerationException: Column AGE does not exist in column family CassandraEntitySimple");
+            errors.add("com.impetus.kundera.configure.schema.SchemaGenerationException: Column PERSON_NAME does not exist in column family CassandraEntitySimple");
+            errors.add("com.impetus.kundera.configure.schema.SchemaGenerationException: column family CassandraEntitySimple does not exist in keyspace KunderaCoreExmples");
             Assert.assertTrue(errors.contains(sgex.getMessage().trim()));
         }
     }

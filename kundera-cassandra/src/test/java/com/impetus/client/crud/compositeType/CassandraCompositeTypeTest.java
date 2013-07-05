@@ -31,8 +31,6 @@ import junit.framework.Assert;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;

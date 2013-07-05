@@ -520,7 +520,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ColumnDef columnDef = new ColumnDef();
 
                 columnDef.setName(column.getName());
-                columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnType));
+                columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnType,
+                        isCql3Enabled(m)));
                 columnDef.setIndex_type(IndexType.KEYS);
 
                 // Add secondary index only if it's not already created
@@ -538,7 +539,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (isUpdatable)
             {
                 columnFamilyDefToUpdate.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(m
-                        .getIdAttribute().getJavaType()));
+                        .getIdAttribute().getJavaType(), isCql3Enabled(m)));
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }
 
@@ -761,7 +762,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             log.info("Executing cql query {}.", cqlQuery);
         }
-        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler,false);
+        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler, false);
     }
 
     public Map<String, Object> getExternalProperties()
@@ -1453,7 +1454,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (!nodes.isEmpty() && isCql3Enabled)
             {
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
-                executeCQLQuery(batchQueryBuilder.toString(),false);
+                executeCQLQuery(batchQueryBuilder.toString(), false);
             }
         }
         catch (InvalidRequestException e)
@@ -1751,8 +1752,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    protected CqlResult executeCQLQuery(String cqlQuery,boolean isCql3Enabled) throws InvalidRequestException, UnavailableException,
-            TimedOutException, SchemaDisagreementException, TException
+    protected CqlResult executeCQLQuery(String cqlQuery, boolean isCql3Enabled) throws InvalidRequestException,
+            UnavailableException, TimedOutException, SchemaDisagreementException, TException
     {
         Cassandra.Client conn = null;
         Object pooledConnection = null;

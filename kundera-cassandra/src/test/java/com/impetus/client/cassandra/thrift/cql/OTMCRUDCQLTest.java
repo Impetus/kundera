@@ -3,13 +3,10 @@
  */
 package com.impetus.client.cassandra.thrift.cql;
 
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.OTMCRUDTest;
