@@ -159,7 +159,6 @@ public abstract class TwinAssociation extends AssociationBase
         catch (Exception e)
         {
             log.error("Error while switching persistence units",e);
-            Assert.fail("Failure caused by:" + e);
             throw new RuntimeException(e);
         }
     }
