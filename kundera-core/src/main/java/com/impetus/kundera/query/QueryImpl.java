@@ -129,17 +129,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return kunderaQuery;
     }
 
-    /**
-     * Sets the kundera query.
-     * 
-     * @param kunderaQuery
-     *            the kunderaQuery to set
-     */
-    public void setKunderaQuery(KunderaQuery kunderaQuery)
-    {
-        this.kunderaQuery = kunderaQuery;
-    }
-
     @Override
     public int executeUpdate()
     {
@@ -181,26 +170,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return results != null ? results : new ArrayList();
     }
 
-    /**
-     * Gets the persistence delegeator.
-     * 
-     * @return the persistenceDelegeator
-     */
-    public PersistenceDelegator getPersistenceDelegeator()
-    {
-        return persistenceDelegeator;
-    }
-
-    /**
-     * Sets the persistence delegeator.
-     * 
-     * @param persistenceDelegeator
-     *            the persistenceDelegeator to set
-     */
-    public void setPersistenceDelegeator(PersistenceDelegator persistenceDelegeator)
-    {
-        this.persistenceDelegeator = persistenceDelegeator;
-    }
 
     protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {

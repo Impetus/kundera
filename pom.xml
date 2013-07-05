@@ -69,7 +69,6 @@
       <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
   </distributionManagement>
--->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -77,6 +76,7 @@
     <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.language>java</sonar.language>
   </properties>
+-->
 
 
   <repositories>
@@ -319,7 +319,7 @@
             </goals>
           </execution>
         </executions>
-     </plugin> -->
+     </plugin> 
 	 <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
@@ -346,7 +346,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
   </plugins>
   </build>
 
