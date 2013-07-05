@@ -658,11 +658,15 @@ public final class PersistenceDelegator
 
     private void onCleayProxy()
     {
-        LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
-        
-        if(lazyInitializerrFactory != null)
+        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
         {
-            lazyInitializerrFactory.clearProxies();
+            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+                    .getLazyInitializerFactory();
+
+            if (lazyInitializerrFactory != null)
+            {
+                lazyInitializerrFactory.clearProxies();
+            }
         }
     }
 
