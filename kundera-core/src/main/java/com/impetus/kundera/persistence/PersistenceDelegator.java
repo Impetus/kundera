@@ -648,12 +648,7 @@ public final class PersistenceDelegator
             clientMap = null;
         }
 
-        LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
-        
-        if(lazyInitializerrFactory != null)
-        {
-            lazyInitializerrFactory.clearProxies();
-        }
+        onCleayProxy();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.
@@ -661,12 +656,22 @@ public final class PersistenceDelegator
         closed = true;
     }
 
+    private void onCleayProxy()
+    {
+        LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        
+        if(lazyInitializerrFactory != null)
+        {
+            lazyInitializerrFactory.clearProxies();
+        }
+    }
+
     void clear()
     {
         // Move all nodes tied to this EM into detached state
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
-        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
+        onCleayProxy();
     }
 
     /**
