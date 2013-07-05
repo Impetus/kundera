@@ -18,6 +18,7 @@ package com.impetus.kundera.query;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -75,6 +76,18 @@ public class CoreQuery<E> extends QueryImpl<E>
         return results;
     }
 
+    public String getLuceneQuery()
+    {
+        return getLuceneQueryFromJPAQuery();
+    }
+    
+    public Set<String> fetchByLuceneQuery()
+    {
+        return fetchDataFromLucene(persistenceDelegeator.getClient(getEntityMetadata()));
+    }
+    
+    
+    
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
