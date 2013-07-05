@@ -64,6 +64,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
 import com.impetus.kundera.query.QueryResolver;
 import com.impetus.kundera.utils.ObjectUtils;
 
@@ -647,7 +648,12 @@ public final class PersistenceDelegator
             clientMap = null;
         }
 
-        KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().clearProxies();
+        LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        
+        if(lazyInitializerrFactory != null)
+        {
+            lazyInitializerrFactory.clearProxies();
+        }
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.

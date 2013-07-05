@@ -56,6 +56,8 @@ public class IMDBPolyglotTest extends TwinAssociation
         clazzz.add(Actor.class);
         clazzz.add(Movie.class);
         CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("Pickr"); 
+        CassandraCli.createKeySpace("imdb");
         init(clazzz, ALL_PUs_UNDER_TEST);
     }
 

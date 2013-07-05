@@ -69,6 +69,7 @@ import com.impetus.kundera.persistence.TransactionResource;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Implementation of {@link Client} using Neo4J Native Java driver (see Embedded
@@ -583,13 +584,17 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         Class<?> relationshipClass = relation.getMapKeyJoinClass();
                         for (Field f : relationshipClass.getDeclaredFields())
                         {
-                            if (f.getType().equals(m.getEntityClazz()))
+                            if (!ReflectUtils.isTransientOrStatic(f))
                             {
-                                PropertyAccessorHelper.set(relationshipEntity, f, entity);
-                            }
-                            else if (f.getType().equals(targetEntityClass))
-                            {
-                                PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
+
+                                if (f.getType().equals(m.getEntityClazz()))
+                                {
+                                    PropertyAccessorHelper.set(relationshipEntity, f, entity);
+                                }
+                                else if (f.getType().equals(targetEntityClass))
+                                {
+                                    PropertyAccessorHelper.set(relationshipEntity, f, targetEntity);
+                                }
                             }
                         }
                         targetEntitiesMap.put(relationshipEntity, targetEntity);
