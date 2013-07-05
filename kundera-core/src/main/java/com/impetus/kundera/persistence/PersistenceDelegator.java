@@ -314,7 +314,8 @@ public final class PersistenceDelegator
         else
         {
             E e = (E) ObjectUtils.deepCopy(nodeData);
-            KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(entityMetadata, e);
+            
+            onSetProxyOwners(entityMetadata,e);
             return e;
         }
 
@@ -648,7 +649,7 @@ public final class PersistenceDelegator
             clientMap = null;
         }
 
-        onCleayProxy();
+        onClearProxy();
 
         // TODO: Move all nodes tied to this EM into detached state, need to
         // discuss with Amresh.
@@ -656,7 +657,7 @@ public final class PersistenceDelegator
         closed = true;
     }
 
-    private void onCleayProxy()
+    private void onClearProxy()
     {
         if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
         {
@@ -670,12 +671,26 @@ public final class PersistenceDelegator
         }
     }
 
+    private void onSetProxyOwners(final EntityMetadata m,Object e)
+    {
+        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
+        {
+            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+                    .getLazyInitializerFactory();
+
+            if (lazyInitializerrFactory != null)
+            {
+                lazyInitializerrFactory.setProxyOwners(m, e);
+            }
+        }
+    }
+
     void clear()
     {
         // Move all nodes tied to this EM into detached state
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
-        onCleayProxy();
+        onClearProxy();
     }
 
     /**
