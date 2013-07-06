@@ -96,7 +96,7 @@ public class AbstractEntityReader
      * @param pd
      * @return
      */
-    public Object handleAssociation(final Object entity, final Map<String, Object> relationsMap,
+    private Object handleAssociation(final Object entity, final Map<String, Object> relationsMap,
             final EntityMetadata m, final PersistenceDelegator pd, boolean lazilyloaded)
     {
 

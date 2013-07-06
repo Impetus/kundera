@@ -373,32 +373,6 @@ public final class PersistenceDelegator
     }
 
     /**
-     * Finds {@link List} of child entities who contain given
-     * <code>entityId</code> as <code>joinColumnName</code>
-     * 
-     * @param childClass
-     *            Class of child entity
-     * @param entityId
-     *            Entity ID of parent entity
-     * @param joinColumnName
-     *            Join Column Name
-     * @return
-     */
-    List<?> find(Class<?> childClass, Object entityId, String joinColumnName)
-    {
-        EntityMetadata childMetadata = getMetadata(childClass);
-        List<?> entities = new ArrayList();
-        Client childClient = getClient(childMetadata);
-
-        entities = childClient.findByRelation(joinColumnName, entityId, childClass);
-
-        if (entities == null)
-            return null;
-
-        return entities;
-    }
-
-    /**
      * Removes an entity object from persistence cache.
      * 
      */
@@ -973,22 +947,13 @@ public final class PersistenceDelegator
                     coordinator.addResource(new DefaultTransactionResource(clientMap.get(pu)), pu);
                 }
             }
-        }
-        catch (InstantiationException e)
+        } catch(Exception e)
         {
             log.error("Error while initializing Transaction Resource:", e);
             throw new KunderaTransactionException(e);
+            
         }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while initializing Transaction Resource:", e);
-            throw new KunderaTransactionException(e);
-        }
-        catch (ClassNotFoundException e)
-        {
-            log.error("Error while initializing Transaction Resource:", e);
-            throw new KunderaTransactionException(e);
-        }
+
         return coordinator;
     }
 

@@ -19,12 +19,15 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.impetus.kundera.persistence.EntityReaderException;
+import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.proxy.LazyInitializationException;
 
 /**
- * @author vivek.mishra
- * junit for {@link QueryHandlerException} & {@link JPQLParseException}.
- * Somehow coverage is not getting count. So this junit is purly from coverage purpose only.
+ * @author vivek.mishra junit for {@link QueryHandlerException},
+ *         {@link JPQLParseException}, {@link EntityReaderException}. Somehow
+ *         coverage is not getting count. So this junit is purly from coverage
+ *         purpose only.
  */
 public class QueryExceptionTest
 {
@@ -61,6 +64,30 @@ public class QueryExceptionTest
         LazyInitializationException exception = new LazyInitializationException("Error with string");
         Assert.assertNotNull(exception);
         exception = new LazyInitializationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testEntityReaderException()
+    {
+        EntityReaderException exception = new EntityReaderException();
+        Assert.assertNotNull(exception);
+
+        exception = new EntityReaderException("Error with string");
+        Assert.assertNotNull(exception);
+        exception = new EntityReaderException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testKunderaTransactionException()
+    {
+        KunderaTransactionException exception = new KunderaTransactionException();
+        Assert.assertNotNull(exception);
+
+        exception = new KunderaTransactionException("Error with string");
+        Assert.assertNotNull(exception);
+        exception = new KunderaTransactionException(new RuntimeException());
         Assert.assertNotNull(exception);
     }
 

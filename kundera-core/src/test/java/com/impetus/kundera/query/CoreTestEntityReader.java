@@ -25,7 +25,8 @@ import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * @author amresh.singh
- *
+ *  
+ *  
  */
 public class CoreTestEntityReader extends AbstractEntityReader implements EntityReader
 {
