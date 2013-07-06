@@ -34,17 +34,20 @@ public class ShortAccessorTest
     @After
     public void tearDown() throws Exception
     {
+        accessor = null;
     }
 
-    /**
-     * Test method for
-     * {@link com.impetus.kundera.property.accessor.ShortAccessor#fromBytes(java.lang.Class, byte[])}
-     * .
-     */
-    // @Test
+    @Test
     public void testFromBytes()
     {
-        fail("Not yet implemented");
+        Assert.assertEquals(new Short((short)0), accessor.fromBytes(Short.class, null));
+        
+        Short d1 = new Short((short)4);
+        byte[] b = accessor.toBytes(d1);
+        
+        Short d2 = accessor.fromBytes(Short.class, b);
+        
+        Assert.assertEquals(d1, d2);
     }
 
     /**
@@ -66,10 +69,17 @@ public class ShortAccessorTest
      * {@link com.impetus.kundera.property.accessor.ShortAccessor#toString(java.lang.Object)}
      * .
      */
-    // @Test
+     @Test
     public void testToStringObject()
     {
-        fail("Not yet implemented");
+         Assert.assertNull(accessor.toString(null));
+
+         Short d1 = new Short((short)4);
+         String s1 = d1.toString();
+         
+         String s2 = accessor.toString(d1);
+         
+         Assert.assertTrue(s1.equals(s2));  
     }
 
     /**
@@ -77,10 +87,31 @@ public class ShortAccessorTest
      * {@link com.impetus.kundera.property.accessor.ShortAccessor#fromString(java.lang.Class, java.lang.String)}
      * .
      */
-    // @Test
+     @Test
     public void testFromString()
     {
-        fail("Not yet implemented");
+         Assert.assertNull(accessor.fromString(Short.class, null));
+         Short d1 = new Short((short)4);
+         String s = d1.toString();
+         
+         Short d2 = accessor.fromString(Short.class, s);
+         Assert.assertEquals(d1, d2);
     }
+     
+     @Test
+     public void testGetCopy()
+     {
+         Short d1 = new Short((short)4);
+         Short d2 = accessor.getCopy(d1);
+         Assert.assertEquals(d1, d2);
+     }
+
+
+     @Test
+     public void testGetInstance()
+     {
+         Object o = accessor.getInstance(Short.class);
+         Assert.assertNotNull(o);        
+     }
 
 }
