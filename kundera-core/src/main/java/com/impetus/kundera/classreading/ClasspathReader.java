@@ -291,16 +291,19 @@ public class ClasspathReader extends Reader
 
         InputStream[] iStreams = null;
         int counter = 0;
-        for (String fullyQualifiedClassName : classesToScan)
+        if(classesToScan != null)
         {
-            if (iStreams == null)
+            for (String fullyQualifiedClassName : classesToScan)
             {
-                iStreams = new InputStream[classesToScan.size()];
-            }
+                if (iStreams == null)
+                {
+                    iStreams = new InputStream[classesToScan.size()];
+                }
 
-            String classRelativePath = fullyQualifiedClassName.replace(".", "/");
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(classRelativePath + ".class");
-            iStreams[counter++] = is;
+                String classRelativePath = fullyQualifiedClassName.replace(".", "/");
+                InputStream is = this.getClass().getClassLoader().getResourceAsStream(classRelativePath + ".class");
+                iStreams[counter++] = is;
+            }
         }
         return iStreams;
 

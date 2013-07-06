@@ -75,7 +75,6 @@ public final class AssociationBuilder
      */
     List getAssociatedEntitiesFromIndex(Class owningClazz, Object entityId, Class<?> childClass, Client childClient)
     {
-
         List associatedEntities;
         IndexManager indexManager = childClient.getIndexManager();
 
