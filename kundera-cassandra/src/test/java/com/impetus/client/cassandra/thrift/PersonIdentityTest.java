@@ -3,8 +3,6 @@
  */
 package com.impetus.client.cassandra.thrift;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

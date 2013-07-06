@@ -25,7 +25,6 @@ import java.util.Properties;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;

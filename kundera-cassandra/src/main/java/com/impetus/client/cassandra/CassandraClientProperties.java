@@ -30,15 +30,13 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
  */
 class CassandraClientProperties
 {
+    private static final String TTL_VALUES = "ttl.values";
 
-	/**
-	 * 
-	 */
-	private static final String TTL_VALUES = "ttl.values";
-	private static final String TTL_PER_REQUEST = "ttl.per.request";
-	private static final String TTL_PER_SESSION = "ttl.per.session";
+    private static final String TTL_PER_REQUEST = "ttl.per.request";
 
-	private static final String CONSISTENCY_LEVEL = "consistency.level";
+    private static final String TTL_PER_SESSION = "ttl.per.session";
+
+    private static final String CONSISTENCY_LEVEL = "consistency.level";
 
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
 
@@ -59,17 +57,26 @@ class CassandraClientProperties
                 {
                     cassandraClientBase.setCqlVersion((String) value);
                 }
-                else if(key.equals(TTL_PER_SESSION) && value instanceof Boolean)
+                else if (key.equals(TTL_PER_SESSION) && value instanceof Boolean)
                 {
-                	cassandraClientBase.setTtlPerSession((Boolean)value);
+                    if(((Boolean) value).booleanValue())
+                    {
+                        cassandraClientBase.setTtlPerRequest(false);
+                    }                    
+                    cassandraClientBase.setTtlPerSession((Boolean) value);
+                    
                 }
-                else if(key.equals(TTL_PER_REQUEST) && value instanceof Boolean)
+                else if (key.equals(TTL_PER_REQUEST) && value instanceof Boolean)
                 {
-                	cassandraClientBase.setTtlPerRequest((Boolean)value);
+                    if(((Boolean) value).booleanValue())
+                    {
+                        cassandraClientBase.setTtlPerSession(false);
+                    }  
+                    cassandraClientBase.setTtlPerRequest((Boolean) value);
                 }
-                else if(key.equals(TTL_VALUES) && value instanceof Map)
+                else if (key.equals(TTL_VALUES) && value instanceof Map)
                 {
-                	cassandraClientBase.setTtlValues((Map)value);
+                    cassandraClientBase.setTtlValues((Map) value);
                 }
 
                 // Add more properties as needed

@@ -311,22 +311,22 @@ public class HBaseReader implements Reader
         return data;
     }
 
-//    public List<HBaseData> next(final int chunkSize)
-//    {
-//        List<HBaseData> results = new ArrayList<HBaseData>();
-//        for (int i = 1; i <= chunkSize; i++)
-//        {
-//            HBaseData data = next();
-//            if (data == null)
-//            {
-//                counter++;
-//                resultsIter = null;
-//                break;
-//            }
-//            results.add(data);
-//        }
-//        return results;
-//    }
+    // public List<HBaseData> next(final int chunkSize)
+    // {
+    // List<HBaseData> results = new ArrayList<HBaseData>();
+    // for (int i = 1; i <= chunkSize; i++)
+    // {
+    // HBaseData data = next();
+    // if (data == null)
+    // {
+    // counter++;
+    // resultsIter = null;
+    // break;
+    // }
+    // results.add(data);
+    // }
+    // return results;
+    // }
 
     public boolean hasNext()
     {

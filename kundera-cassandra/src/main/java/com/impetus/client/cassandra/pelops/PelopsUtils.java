@@ -22,14 +22,6 @@ import java.net.UnknownHostException;
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.TBinaryProtocol;
-import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;

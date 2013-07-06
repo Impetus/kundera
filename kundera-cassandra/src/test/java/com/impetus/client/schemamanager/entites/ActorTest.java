@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
-import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;

@@ -75,6 +75,11 @@ public class CharAccessor implements PropertyAccessor<Character>
     @Override
     public String toString(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
+        
         return object.toString();
     }
 

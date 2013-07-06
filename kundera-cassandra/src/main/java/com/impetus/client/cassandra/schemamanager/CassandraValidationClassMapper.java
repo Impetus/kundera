@@ -116,14 +116,16 @@ public final class CassandraValidationClassMapper
      *            the data type
      * @return the validation class
      */
-    public static String getValidationClass(Class<?> dataType)
+    public static String getValidationClass(Class<?> dataType, boolean isCql3Enabled)
     {
+        resetMapperForCQL3(isCql3Enabled);
         String validation_class;
         validation_class = validationClassMapper.get(dataType);
         if (!(validation_class != null))
         {
             validation_class = BytesType.class.getSimpleName();
         }
+        resetMapperForThrift(isCql3Enabled);
         return validation_class;
     }
 
@@ -140,7 +142,7 @@ public final class CassandraValidationClassMapper
         return validatorsAndComparators;
     }
 
-    static void resetMapperForCQL3(boolean isCql3Enabled)
+    private static void resetMapperForCQL3(boolean isCql3Enabled)
     {
         if (isCql3Enabled)
         {
@@ -153,7 +155,7 @@ public final class CassandraValidationClassMapper
         }
     }
 
-    static void resetMapperForThrift(boolean isCql3Enabled)
+    private static void resetMapperForThrift(boolean isCql3Enabled)
     {
         if (isCql3Enabled)
         {

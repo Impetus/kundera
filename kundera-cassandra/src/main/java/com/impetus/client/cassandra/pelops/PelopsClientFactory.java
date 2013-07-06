@@ -74,7 +74,7 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         reader = new CassandraEntityReader();
         initializePropertyReader();
-        setExternalProperties(externalProperty);
+//        setExternalProperties(externalProperty);
         String loadBalancingPolicyName = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
                 .getConnectionProperties().getProperty(Constants.LOADBALANCING_POLICY) : null;
         initializeLoadBalancer(loadBalancingPolicyName);

@@ -194,7 +194,7 @@ public abstract class AbstractSchemaManager
     /**
      * The Enum ScheamOperationType.
      */
-    public enum ScheamOperationType
+    public enum SchemaOperationType
     {
 
         /** The createdrop. */
@@ -213,13 +213,13 @@ public abstract class AbstractSchemaManager
          *            the operation
          * @return single instance of ScheamOperationType
          */
-        private static ScheamOperationType getInstance(String operation)
+        public static SchemaOperationType getInstance(String operation)
         {
             if (operation.equalsIgnoreCase("create-drop"))
             {
-                return ScheamOperationType.createdrop;
+                return SchemaOperationType.createdrop;
             }
-            return ScheamOperationType.valueOf(ScheamOperationType.class, operation);
+            return SchemaOperationType.valueOf(SchemaOperationType.class, operation);
         }
     }
 
@@ -231,7 +231,7 @@ public abstract class AbstractSchemaManager
      */
     private void handleOperations(List<TableInfo> tableInfos)
     {
-        ScheamOperationType operationType = ScheamOperationType.getInstance(operation);
+        SchemaOperationType operationType = SchemaOperationType.getInstance(operation);
 
         switch (operationType)
         {

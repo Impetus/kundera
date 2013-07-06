@@ -11,8 +11,6 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.EndpointDetails;
-import org.apache.cassandra.thrift.TokenRange;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

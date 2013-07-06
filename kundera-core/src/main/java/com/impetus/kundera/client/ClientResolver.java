@@ -44,7 +44,6 @@ public final class ClientResolver
     /** logger instance. */
     private static final Logger logger = LoggerFactory.getLogger(ClientResolver.class);
 
-
     /**
      * Gets the client factory.
      * 
@@ -98,6 +97,13 @@ public final class ClientResolver
 
             m.invoke(clientFactory, persistenceUnit);
 
+            m = GenericClientFactory.class.getDeclaredMethod("setExternalProperties", Map.class);
+            if (!m.isAccessible())
+            {
+                m.setAccessible(true);
+            }
+
+            m.invoke(clientFactory, puProperties);
         }
         catch (InstantiationException e)
         {
@@ -153,7 +159,7 @@ public final class ClientResolver
      */
     private static void onError(Exception e)
     {
-        logger.error("Error while initializing client factory, Caused by: .",e.getMessage());
+        logger.error("Error while initializing client factory, Caused by: .", e.getMessage());
         throw new ClientResolverException(e);
     }
 }

@@ -562,6 +562,7 @@ public class HBaseQuery extends QueryImpl
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
 
-        return new ResultIterator((HBaseClient) client, m, persistenceDelegeator, getFetchSize(), translator, columns);
+        return new ResultIterator((HBaseClient) client, m, persistenceDelegeator,
+                getFetchSize() != null ? getFetchSize() : this.maxResult, translator, columns);
     }
 }

@@ -60,7 +60,6 @@ public class HBaseCli
     {
         HBaseCli cli = new HBaseCli();
         cli.startCluster();
-        ;
     }
 
     public void startCluster()

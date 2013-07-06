@@ -16,9 +16,9 @@
 package com.impetus.client.hbase.query;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -59,6 +59,12 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private List<String> columns;
 
+    private int fetchSize;
+
+    private int count;
+
+    private boolean scrollComplete;
+
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
@@ -70,6 +76,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.persistenceDelegator = pd;
         this.handler = ((HBaseClient) client).getHandle();
         this.handler.setFetchSize(fetchSize);
+        this.fetchSize = fetchSize;
         this.translator = translator;
         this.columns = columns;
         onQuery(m, client);
@@ -78,18 +85,25 @@ class ResultIterator<E> implements IResultIterator<E>
     @Override
     public boolean hasNext()
     {
-        boolean available = handler.hasNext();
-        if (!available)
-        {
-            handler.reset();
-        }
 
+        boolean available = handler.hasNext();
+        if (!available || fetchSize == 0)
+        {
+            scrollComplete = true;
+            handler.reset();
+            return false;
+        }
         return available;
     }
 
     @Override
     public E next()
     {
+        if (!checkOnFetchSize() || scrollComplete)
+        {
+            throw new NoSuchElementException("Nothing to scroll further for:" + entityMetadata.getEntityClazz());
+        }
+
         E result = (E) handler.next(entityMetadata);
         if (!entityMetadata.isRelationViaJoinTable()
                 && (entityMetadata.getRelationNames() == null || (entityMetadata.getRelationNames().isEmpty())))
@@ -260,5 +274,22 @@ class ResultIterator<E> implements IResultIterator<E>
     public List<E> next(int chunkSize)
     {
         throw new UnsupportedOperationException("Fetch in chunks is not yet supported over HBase!");
+    }
+
+    /**
+     * Check on fetch size. returns true, if count on fetched rows is less than
+     * fetch size.
+     * 
+     * @return
+     */
+    private boolean checkOnFetchSize()
+    {
+        if (count++ < fetchSize)
+        {
+            return true;
+        }
+        count = 0;
+        scrollComplete = true;
+        return false;
     }
 }

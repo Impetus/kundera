@@ -60,9 +60,9 @@ public abstract class AbstractPropertyReader
     final public void read(String pu)
     {
         String propertyFileName = externalProperties != null ? (String)externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) :null;
+        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         if (propertyFileName == null)
         {
-            puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
             propertyFileName = puMetadata != null ? puMetadata
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
         }

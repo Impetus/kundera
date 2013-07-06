@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
