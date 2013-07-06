@@ -374,26 +374,10 @@ public class PropertyAccessorHelper
             }
 
         }
-        catch (SecurityException e)
+        catch (Exception e)
         {
             throw new PropertyAccessException(e);
-        }
-        catch (NoSuchFieldException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-        catch (InstantiationException e)
-        {
-            throw new PropertyAccessException(e);
-        }
+        }        
     }
 
     /**
