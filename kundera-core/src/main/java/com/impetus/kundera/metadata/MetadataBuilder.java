@@ -22,8 +22,6 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,10 +51,6 @@ public class MetadataBuilder
 
     /** The Validator. */
     private EntityValidator validator;
-
-    // set after build is called?
-    /** The instantiated. */
-    private boolean instantiated = false;
 
     /** persistence unit */
     private String persistenceUnit;

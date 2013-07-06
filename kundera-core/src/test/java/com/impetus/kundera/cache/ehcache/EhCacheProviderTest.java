@@ -15,7 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.cache.ehcache;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Cache;
+
+import org.junit.Assert;
 
 import junit.framework.TestCase;
 
@@ -129,8 +134,78 @@ public class EhCacheProviderTest extends TestCase
         ehCache.evict(PersonnelDTO.class, PersonnelDTO.class + "_" + person1.getPersonId());
         assertEquals(1, ehCache.size());
 
+        cache = cacheProvider.getCache(cacheName);
+        Assert.assertNotNull(cache);
+
         // Clear cache
         cacheProvider.clearAll();
         assertEquals(0, ehCache.size());
+
+        // trying when manager is not null.
+
+        Assert.assertNotNull(cacheProvider.getCacheManager());
+        try
+        {
+            Map map = new HashMap();
+            cacheProvider.init(map);
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
+
+        // Shutting down.
+        cacheProvider.shutdown();
+
+        try
+        {
+            cache = cacheProvider.getCache(cacheName);
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("CacheFactory was not initialized. Call init() before creating a cache.",
+                    e.getMessage());
+        }
+        Assert.assertNotNull(cache);
+        Assert.assertNull(cacheProvider.getCacheManager());
+        // trying after manager is null.
+        try
+        {
+            Map map = new HashMap();
+            cacheProvider.init(map);
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
+
+        // Shutting down.
+        cacheProvider.shutdown();
+        try
+        {
+            Map map = new HashMap();
+            map.put("net.sf.ehcache.configurationResourceName", "Kundera");
+            cacheProvider.init(map);
+            Assert.assertNotNull(cacheProvider.getCacheManager());
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
+
+        // Shutting down.
+        cacheProvider.shutdown();
+
+        try
+        {
+            Map map = new HashMap();
+            map.put("net.sf.ehcache.configurationResourceName", null);
+            cacheProvider.init(map);
+            Assert.assertNotNull(cacheProvider.getCacheManager());
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
     }
 }

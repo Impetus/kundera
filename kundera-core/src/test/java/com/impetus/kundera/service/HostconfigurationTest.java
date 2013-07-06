@@ -45,8 +45,8 @@ import com.impetus.kundera.metadata.processor.TableProcessor;
 /**
  * @author vivek.mishra
  * 
- * junit test case for HostConfiguration.
- *
+ *         junit test case for HostConfiguration.
+ * 
  */
 public class HostconfigurationTest
 {
@@ -63,7 +63,7 @@ public class HostconfigurationTest
     }
 
     /**
-     *  test method.
+     * test method.
      */
     @Test
     public void test()
@@ -72,9 +72,18 @@ public class HostconfigurationTest
         Assert.assertNotNull(hostConfiguration.hosts);
         Assert.assertNotNull(hostConfiguration.port);
         Assert.assertTrue(hostConfiguration.getHosts().isEmpty());
-        Assert.assertEquals("localhost",hostConfiguration.hosts);
-        Assert.assertEquals("9160",hostConfiguration.port);
-        
+        Assert.assertEquals("localhost", hostConfiguration.hosts);
+        Assert.assertEquals("9160", hostConfiguration.port);
+
+        try
+        {
+            hostConfiguration.onValidation(null, null);
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(iaex.getMessage());
+        }
+
     }
 
     /**
@@ -149,5 +158,4 @@ public class HostconfigurationTest
         new SchemaConfiguration(null, persistenceUnits).configure();
     }
 
-    
 }

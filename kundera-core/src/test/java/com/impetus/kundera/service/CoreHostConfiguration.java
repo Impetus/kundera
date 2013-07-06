@@ -66,5 +66,9 @@ public class CoreHostConfiguration extends HostConfiguration
         // do nothing
 
     }
-
+    
+    public void onValidation(final String host, final String port)
+    {
+        super.onValidation(host, port);
+    }
 }

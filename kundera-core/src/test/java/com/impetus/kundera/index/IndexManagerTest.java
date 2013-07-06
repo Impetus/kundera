@@ -2,6 +2,8 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -13,6 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.entities.EmbeddableEntity;
+import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
+import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
@@ -22,11 +27,15 @@ public class IndexManagerTest
 {
 
     private static final String LUCENE_DIR_PATH = "./lucene";
+    
+    private EntityManagerFactory emf;
+    private EntityManager em;
 
     @Before
     public void setup()
     {
-        Persistence.createEntityManagerFactory("patest");
+        emf = Persistence.createEntityManagerFactory("patest");
+        em = emf.createEntityManager();
     }
 
     @Test
@@ -90,6 +99,39 @@ public class IndexManagerTest
         }
     }
 
+
+    @Test
+    public void testEmbeddable()
+    {
+        LuceneIndexer indexer = LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), LUCENE_DIR_PATH);
+        IndexManager ixManager = new IndexManager(indexer);
+
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
+        entity.setKey(1);
+        entity.setName("entity");
+        entity.setField("name");
+        
+        EmbeddableEntity embed1 = new EmbeddableEntity();
+        embed1.setField("embeddedField1");
+        
+        EmbeddableEntityTwo embed2 = new EmbeddableEntityTwo();
+        embed1.setField("embeddedField2");
+
+        entity.setEmbeddableEntity(embed1);
+        entity.setEmbeddableEntityTwo(embed2);
+        
+        em.persist(entity);
+        
+        //TODO:: search over  super columns with a field in where clause is not working
+        String luceneQuery = "+entity.class:com.impetus.kundera.metadata.entities.SingularEntityEmbeddable";
+        
+        Map<String, Object> results = ixManager.search(luceneQuery, 0, 10, false);
+        
+        Assert.assertFalse(results.isEmpty());
+        
+    }
+    
     @After
     public void tearDown()
     {

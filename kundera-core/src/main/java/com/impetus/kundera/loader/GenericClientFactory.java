@@ -46,7 +46,7 @@ import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
  * Abstract class to hold generic definitions for client factory
  * implementations.
  * 
- * @vivek.mishra
+ * @author vivek.mishra
  */
 public abstract class GenericClientFactory implements ClientFactory, ClientLifeCycleManager
 {
@@ -151,20 +151,10 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                 indexManager = new IndexManager(indexer);
                 clientMetadata.setIndexImplementor(indexerClass);
             }
-            catch (ClassNotFoundException cnfex)
+            catch (Exception cnfex)
             {
                 logger.error("Error while initialzing indexer:" + indexerClass, cnfex);
                 throw new KunderaException(cnfex);
-            }
-            catch (InstantiationException iex)
-            {
-                logger.error("Error while initialzing indexer:" + indexerClass, iex);
-                throw new KunderaException(iex);
-            }
-            catch (IllegalAccessException iaex)
-            {
-                logger.error("Error while initialzing indexer:" + indexerClass, iaex);
-                throw new KunderaException(iaex);
             }
         }
         else

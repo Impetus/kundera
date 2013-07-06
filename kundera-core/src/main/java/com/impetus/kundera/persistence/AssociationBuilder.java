@@ -169,30 +169,48 @@ public final class AssociationBuilder
                 entityId, columnJavaType);
 
         List childrenEntities = new ArrayList();
-        for (Object foreignKey : foreignKeys)
+        
+        if (foreignKeys != null)
         {
-            EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
-
-            Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-            Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
-
-            // If child has any bidirectional relationship, process them here
-            Field biDirectionalField = relation.getBiDirectionalField()/*getBiDirectionalField(entity.getClass(), relation.getTargetEntity())*/;
-            boolean isBidirectionalRelation = (biDirectionalField != null);
-
-            if (isBidirectionalRelation && obj != null)
+            for (Object foreignKey : foreignKeys)
             {
-                Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
-                Object[] pKeys = pClient.findIdsByColumn(entityMetadata.getSchema(), joinTableName, joinColumnName,
-                        inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());
-                List parents = delegator.find(entity.getClass(), pKeys);
-                PropertyAccessorHelper.set(obj, biDirectionalField,
-                        ObjectUtils.getFieldInstance(parents, biDirectionalField));
+                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+
+                Object child = delegator.find(relation.getTargetEntity(), foreignKey);
+                Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity()
+                        : child;
+
+                // If child has any bidirectional relationship, process them
+                // here
+                Field biDirectionalField = relation.getBiDirectionalField()/*
+                                                                            * getBiDirectionalField
+                                                                            * (
+                                                                            * entity
+                                                                            * .
+                                                                            * getClass
+                                                                            * (
+                                                                            * ),
+                                                                            * relation
+                                                                            * .
+                                                                            * getTargetEntity
+                                                                            * (
+                                                                            * ))
+                                                                            */;
+                boolean isBidirectionalRelation = (biDirectionalField != null);
+
+                if (isBidirectionalRelation && obj != null)
+                {
+                    Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
+                    Object[] pKeys = pClient.findIdsByColumn(entityMetadata.getSchema(), joinTableName, joinColumnName,
+                            inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());
+                    List parents = delegator.find(entity.getClass(), pKeys);
+                    PropertyAccessorHelper.set(obj, biDirectionalField,
+                            ObjectUtils.getFieldInstance(parents, biDirectionalField));
+                }
+
+                childrenEntities.add(obj);
             }
-
-            childrenEntities.add(obj);
         }
-
         Field childField = relation.getProperty();
 
         try

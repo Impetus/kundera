@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.client;
 
-import java.util.Currency;
 import java.util.Map;
 
 import com.impetus.kundera.configure.schema.api.CoreSchemaManager;
@@ -36,6 +35,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     public void destroy()
     {
         schemaManager.dropSchema();
+        super.unload();
     }
 
     @Override
@@ -55,6 +55,8 @@ public class CoreTestClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
+        setConnectionPoolOrConnection(null);
+        
         return new CoreTestClient(indexManager, persistenceUnit);
     }
 
@@ -64,18 +66,21 @@ public class CoreTestClientFactory extends GenericClientFactory
         return false;
     }
 
-    @Override
-    protected String getPersistenceUnit()
+    public String getPersistenceUnit()
     {
         return super.getPersistenceUnit();
     }
 
-    @Override
-    protected Object getConnectionPoolOrConnection()
+    public Object getConnectionPoolOrConnection()
     {
+        
         return super.getConnectionPoolOrConnection();
     }
   
+    public void onValidation(final String host, final String port)
+    {
+        super.onValidation(host, port);
+    }
 
     /*
      * (non-Javadoc)
@@ -90,6 +95,10 @@ public class CoreTestClientFactory extends GenericClientFactory
 
     }
 
+    public LoadBalancer getLoadBalancePolicy(final String  policy)
+    {
+        return LoadBalancer.getValue(policy);
+    }
     /*
      * (non-Javadoc)
      * 

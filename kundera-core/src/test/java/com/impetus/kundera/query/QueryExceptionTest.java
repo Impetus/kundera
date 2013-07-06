@@ -19,13 +19,21 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.impetus.kundera.classreading.ResourceReadingException;
+import com.impetus.kundera.configure.schema.SchemaGenerationException;
+import com.impetus.kundera.index.IndexingException;
+import com.impetus.kundera.index.LuceneIndexingException;
+import com.impetus.kundera.loader.ClientLoaderException;
+import com.impetus.kundera.loader.KunderaAuthenticationException;
+import com.impetus.kundera.loader.MetamodelLoaderException;
+import com.impetus.kundera.loader.PersistenceLoaderException;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.proxy.LazyInitializationException;
 
 /**
  * @author vivek.mishra junit for {@link QueryHandlerException},
- *         {@link JPQLParseException}, {@link EntityReaderException}. Somehow
+ *         {@link JPQLParseException}, {@link EntityReaderException} etc. Somehow
  *         coverage is not getting count. So this junit is purly from coverage
  *         purpose only.
  */
@@ -91,4 +99,148 @@ public class QueryExceptionTest
         Assert.assertNotNull(exception);
     }
 
+    @Test
+    public void testMetaModelLoaderException()
+    {
+        MetamodelLoaderException exception = new MetamodelLoaderException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new MetamodelLoaderException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new MetamodelLoaderException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new MetamodelLoaderException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testClientLoaderException()
+    {
+        ClientLoaderException exception = new ClientLoaderException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new ClientLoaderException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new ClientLoaderException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new ClientLoaderException();
+        Assert.assertNotNull(exception);
+    }
+
+
+    @Test
+    public void testPersistenceLoaderException()
+    {
+        PersistenceLoaderException exception = new PersistenceLoaderException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new PersistenceLoaderException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new PersistenceLoaderException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new PersistenceLoaderException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testKunderaAuthenticationException()
+    {
+        KunderaAuthenticationException exception = new KunderaAuthenticationException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new KunderaAuthenticationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new KunderaAuthenticationException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new KunderaAuthenticationException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testLuceneIndexingException()
+    {
+        LuceneIndexingException exception = new LuceneIndexingException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new LuceneIndexingException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new LuceneIndexingException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new LuceneIndexingException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testIndexingException()
+    {
+        IndexingException exception = new IndexingException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new IndexingException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new IndexingException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new IndexingException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testResourceReadingException()
+    {
+        ResourceReadingException exception = new com.impetus.kundera.classreading.ResourceReadingException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new ResourceReadingException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    
+        exception = new ResourceReadingException("KunderaTests",new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new ResourceReadingException();
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testSchemaGenerationException()
+    {
+
+        SchemaGenerationException exception = new SchemaGenerationException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new SchemaGenerationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+
+    
+        exception = new SchemaGenerationException(new RuntimeException(),"KunderaTests");
+        Assert.assertNotNull(exception);
+
+        exception = new SchemaGenerationException(new RuntimeException(),"KunderaTests","test");
+        Assert.assertNotNull(exception);
+
+        exception = new SchemaGenerationException(new RuntimeException(),"KunderaTests","test");
+        Assert.assertNotNull(exception);
+
+        exception = new SchemaGenerationException("error with string ",new RuntimeException(),"KunderaTests","test");
+        Assert.assertNotNull(exception);
+
+        exception = new SchemaGenerationException("error with string ","KunderaTests","test");
+        Assert.assertNotNull(exception);
+
+        exception = new SchemaGenerationException("error with string ",new RuntimeException(),"KunderaTests");
+        Assert.assertNotNull(exception);
+
+    }
+    
 }

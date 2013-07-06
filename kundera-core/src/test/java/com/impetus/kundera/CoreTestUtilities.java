@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * @author vivek.mishra
@@ -59,7 +60,7 @@ public final class CoreTestUtilities
         int count=0;
         for(Field f : clazz.getDeclaredFields())
         {
-            if(!f.isSynthetic())
+            if(!f.isSynthetic() || !ReflectUtils.isTransientOrStatic(f))
             {
                 count++;
             }

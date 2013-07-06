@@ -232,9 +232,6 @@ public class EhCacheProvider implements CacheProvider
                         {
                             backingCache.getCacheEventNotificationService().registerListener(listener);
                         }
-                        /*
-                         * else { }
-                         */
                     }
                 }
             }
@@ -279,6 +276,7 @@ public class EhCacheProvider implements CacheProvider
             manager.shutdown();
             manager = null;
         }
+        cache = null;
     }
 
     /**
