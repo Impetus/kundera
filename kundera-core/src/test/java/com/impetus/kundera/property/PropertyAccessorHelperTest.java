@@ -16,6 +16,10 @@
 package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -401,7 +405,9 @@ public class PropertyAccessorHelperTest
     @Test
     public void testGetObjectClassOfQ()
     {
- 
+        Object o = PropertyAccessorHelper.getObject(PhotographerUni_1_M_1_M.class);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof PhotographerUni_1_M_1_M);
     }
 
     /**
@@ -410,7 +416,20 @@ public class PropertyAccessorHelperTest
     @Test
     public void testToBytesObjectField()
     {
- 
+        PersonnelDTO person = new PersonnelDTO("1", "Amresh", "Singh");        
+        try
+        {
+            byte[] b = PropertyAccessorHelper.toBytes("1" , person.getClass().getDeclaredField("personId"));           
+            Assert.assertEquals("1", new StringAccessor().fromBytes(String.class, b));            
+        }
+        catch (SecurityException e)
+        {            
+            Assert.fail(e.getMessage());
+        }     
+        catch (NoSuchFieldException e)
+        {            
+            Assert.fail(e.getMessage());
+        }
     }
 
     /**
@@ -418,8 +437,16 @@ public class PropertyAccessorHelperTest
      */
     @Test
     public void testToBytesObjectClass()
-    {
- 
+    {                
+        try
+        {
+            byte[] b = PropertyAccessorHelper.toBytes("1" , String.class);           
+            Assert.assertEquals("1", new StringAccessor().fromBytes(String.class, b));            
+        }
+        catch (SecurityException e)
+        {            
+            Assert.fail(e.getMessage());
+        }       
     }
 
     /**
@@ -428,7 +455,15 @@ public class PropertyAccessorHelperTest
     @Test
     public void testFromSourceToTargetClass()
     {
-     
+        try
+        {
+            Object o = PropertyAccessorHelper.fromSourceToTargetClass(String.class, String.class, "1");
+            Assert.assertEquals("1", o);            
+        }
+        catch (SecurityException e)
+        {            
+            Assert.fail(e.getMessage());
+        }    
     }
 
     /**
@@ -437,35 +472,9 @@ public class PropertyAccessorHelperTest
     @Test
     public void testFromDate()
     {
-     
-    }
-
-    /**
-     * Test method for {@link com.impetus.kundera.property.PropertyAccessorHelper#getBytes(java.lang.Object)}.
-     */
-    @Test
-    public void testGetBytes()
-    {
-  
-    }
-
-    /**
-     * Test method for {@link com.impetus.kundera.property.PropertyAccessorHelper#getString(java.lang.Object)}.
-     */
-    @Test
-    public void testGetStringObject()
-    {
-  
-    }
-
-    /**
-     * Test method for {@link com.impetus.kundera.property.PropertyAccessorHelper#getObject(java.lang.Class, byte[])}.
-     */
-    @Test
-    public void testGetObjectClassByteArray()
-    {
-     
-    }
+        Object o = PropertyAccessorHelper.fromDate(String.class, Date.class, new Date(System.currentTimeMillis()));
+        Assert.assertNotNull(o);
+    }   
 
     /**
      * Test method for {@link com.impetus.kundera.property.PropertyAccessorHelper#getCollectionInstance(java.lang.reflect.Field)}.
@@ -473,7 +482,26 @@ public class PropertyAccessorHelperTest
     @Test
     public void testGetCollectionInstance()
     {
-   
+        try
+        {
+            Collection c = PropertyAccessorHelper.getCollectionInstance(PhotographerUni_1_M_1_M.class.getDeclaredField("albums"));
+            Assert.assertNotNull(c);
+            Assert.assertTrue(c instanceof ArrayList);
+            
+            c = PropertyAccessorHelper.getCollectionInstance(CacheBase.class.getDeclaredField("headNodes"));
+            Assert.assertNotNull(c);
+            Assert.assertTrue(c instanceof HashSet);
+        }
+        catch (SecurityException e)
+        {
+            
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            
+            Assert.fail(e.getMessage());
+        }
     }
 
 }
