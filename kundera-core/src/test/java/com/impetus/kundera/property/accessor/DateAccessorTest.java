@@ -80,6 +80,63 @@ public class DateAccessorTest
     @After
     public void tearDown() throws Exception
     {
+        accessor = null;
+    }
+
+    @Test
+    public void testFromBytes()
+    {
+        Assert.assertNull(accessor.fromBytes(Date.class, null));
+
+        Date d1 = new Date(4);
+        byte[] b = accessor.toBytes(d1);
+
+        Date d2 = accessor.fromBytes(Date.class, b);
+
+        Assert.assertEquals(d1, d2);
+    }
+
+    @Test
+    public void testToBytes()
+    {
+        Assert.assertNull(accessor.toBytes(null));
+
+        Date d1 = new Date(4);
+
+        byte[] b = accessor.toBytes(d1);
+
+        Date d2 = accessor.fromBytes(Date.class, b);
+
+        Assert.assertEquals(d1, d2);
+
+    }
+
+    @Test
+    public void testToStringObject()
+    {
+        Assert.assertNull(accessor.toString(null));
+
+        Date d1 = new Date();
+        String s1 = d1.getTime() + "";
+
+        String s2 = accessor.toString(d1);
+
+        Assert.assertTrue(s1.equals(s2));
+    }
+
+    @Test
+    public void testGetCopy()
+    {
+        Date d1 = new Date();
+        Date d2 = accessor.getCopy(d1);
+        Assert.assertEquals(d1, d2);
+    }
+
+    @Test
+    public void testGetInstance()
+    {
+        Object o = accessor.getInstance(Date.class);
+        Assert.assertNotNull(o);
     }
 
 }

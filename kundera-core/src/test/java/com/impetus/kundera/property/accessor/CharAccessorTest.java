@@ -60,5 +60,49 @@ public class CharAccessorTest
         char c = accessor.fromString(Character.class, a);
         Assert.assertEquals('A',c);
     }
+    
+    @Test
+    public void testToBytes()
+    {
+        Assert.assertNull(accessor.toBytes(null));
+
+        Character d1 = new Character('c');
+        
+        byte[] b = accessor.toBytes(d1);
+        
+        Character d2 = accessor.fromBytes(Character.class, b);
+        
+        Assert.assertEquals(d1, d2);
+
+    }
+
+    @Test
+    public void testToStringObject()
+    {
+        Assert.assertNull(accessor.toString(null));
+
+        Character d1 = new Character('c');
+        String s1 = d1.toString();
+        
+        String s2 = accessor.toString(d1);
+        
+        Assert.assertTrue(s1.equals(s2));   
+    }
+    
+    @Test
+    public void testGetCopy()
+    {
+        Character d1 = new Character('c');
+        Character d2 = accessor.getCopy(d1);
+        Assert.assertEquals(d1, d2);
+    }
+
+ 
+    @Test
+    public void testGetInstance()
+    {
+        Object o = accessor.getInstance(Character.class);
+        Assert.assertNotNull(o);        
+    }
 
 }
