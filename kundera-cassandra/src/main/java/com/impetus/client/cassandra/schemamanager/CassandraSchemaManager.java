@@ -83,6 +83,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -131,7 +132,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * Export schema handles the handleOperation method.
      */
     public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
-    {
+    {        
         cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION)
                 : CassandraConstants.CQL_VERSION_2_0;
         super.exportSchema(persistenceUnit, schemas);
@@ -371,15 +372,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             validateCompoundKey(tableInfo);
             // First drop existing column family.
             dropTableUsingCql(tableInfo);
-
-            // And create new column family.
-            onCompoundKey(tableInfo, ksDef);
         }
         else
         {
             onDrop(tableInfo);
-            createOrUpdateColumnFamily(tableInfo, ksDef);
         }
+        createOrUpdateColumnFamily(tableInfo, ksDef);
     }
 
     private void onDrop(TableInfo tableInfo) throws Exception
@@ -1524,6 +1522,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
+    /**
+     * 
+     * @param tableInfo
+     * @return
+     */
     private boolean isCql3Enabled(TableInfo tableInfo)
     {
         return containsCompositeKey(tableInfo)
@@ -1543,6 +1546,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         builder.append(CQLTranslator.EQ_CLAUSE);
         builder.append(replicateOnWrite);
         builder.append(CQLTranslator.AND_CLAUSE);
+    }
+
+    /**
+     * 
+     * @param tableInfo
+     */
+    private void validateCompoundKey(TableInfo tableInfo)
+    {
+        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+        {
+            throw new SchemaGenerationException(
+                    "Composite/Compound columns are not yet supported over Super column family by Cassandra",
+                    "cassandra", databaseName);
+        }
     }
 
     /**
@@ -1838,16 +1855,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 return isValid = false;
             }
             return isValid;
-        }
-    }
-
-    private void validateCompoundKey(TableInfo tableInfo)
-    {
-        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
-        {
-            throw new SchemaGenerationException(
-                    "Composite/Compound columns are not yet supported over Super column family by Cassandra",
-                    "cassandra", databaseName);
         }
     }
 }
