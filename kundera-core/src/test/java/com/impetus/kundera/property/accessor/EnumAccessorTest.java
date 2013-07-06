@@ -72,6 +72,11 @@ public class EnumAccessorTest
             Day dd = (Day) accessor.fromBytes(Day.class, b);
 
             Assert.assertEquals(day1, dd);
+
+            Object o = accessor.fromBytes(Day.class, null);
+
+            Assert.assertNull(o);
+
         }
         catch (UnsupportedEncodingException e)
         {
@@ -97,6 +102,10 @@ public class EnumAccessorTest
             String s = new String(b, Constants.ENCODING);
             Assert.assertEquals(day1.MONDAY.name(), s);
 
+            b = accessor.toBytes(null);
+
+            Assert.assertNull(b);
+
         }
         catch (PropertyAccessException e)
         {
@@ -119,6 +128,8 @@ public class EnumAccessorTest
         String s = accessor.toString(day1);
         Assert.assertEquals(Day.MONDAY.name(), s);
 
+        s = accessor.toString(null);
+        Assert.assertNull(s);
     }
 
     /**
@@ -137,6 +148,14 @@ public class EnumAccessorTest
             Day day22 = (Day) accessor.fromString(Day.class, day2.name());
             Assert.assertEquals(day2, day22);
 
+            Day day = (Day) accessor.fromString(Day.class, null);
+            Assert.assertNull(day);
+
+            day = (Day) accessor.fromString(null, day1.name());
+            Assert.assertNull(day);
+
+            day = (Day) accessor.fromString(null, null);
+            Assert.assertNull(day);
         }
         catch (PropertyAccessException e)
         {
@@ -144,4 +163,47 @@ public class EnumAccessorTest
         }
     }
 
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.EnumAccessor#fromString(java.lang.String)}
+     * .
+     */
+    @Test
+    public void testGetCopy()
+    {
+        try
+        {
+            Day day = Day.MONDAY;
+            Day d = (Day) accessor.getCopy(day);
+            Assert.assertNotNull(d);
+            Assert.assertTrue(day.equals(d));
+
+            d = (Day) accessor.getCopy(null);
+            Assert.assertNull(d);
+        }
+        catch (PropertyAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.property.accessor.EnumAccessor#fromString(java.lang.String)}
+     * .
+     */
+    @Test
+    public void testGetInstance()
+    {
+        try
+        {
+            Day d = (Day) accessor.getInstance(Day.class);
+            Assert.assertNull(d);
+
+        }
+        catch (PropertyAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+    }
 }
