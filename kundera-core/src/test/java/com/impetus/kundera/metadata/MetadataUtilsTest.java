@@ -92,8 +92,8 @@ public class MetadataUtilsTest
         }
 
         
-        EntityMetadata invalidMetadata = KunderaMetadataManager.getEntityMetadata(AddressEntity.class);
-        Assert.assertNull(invalidMetadata);
+//        EntityMetadata invalidMetadata = KunderaMetadataManager.getEntityMetadata(AddressEntity.class);
+//        Assert.assertNull(invalidMetadata);
 
     }
 
