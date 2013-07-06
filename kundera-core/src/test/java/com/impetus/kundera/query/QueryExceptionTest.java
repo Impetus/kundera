@@ -19,6 +19,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.impetus.kundera.proxy.LazyInitializationException;
+
 /**
  * @author vivek.mishra
  * junit for {@link QueryHandlerException} & {@link JPQLParseException}.
@@ -52,4 +54,14 @@ public class QueryExceptionTest
         exception = new JPQLParseException(new RuntimeException());
         Assert.assertNotNull(exception);
     }
+
+    @Test
+    public void testLazyInitializationException()
+    {
+        LazyInitializationException exception = new LazyInitializationException("Error with string");
+        Assert.assertNotNull(exception);
+        exception = new LazyInitializationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    }
+
 }
