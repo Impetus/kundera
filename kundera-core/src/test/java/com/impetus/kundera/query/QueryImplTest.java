@@ -380,8 +380,6 @@ public class QueryImplTest
             Assert.assertEquals("getFlushMode is unsupported by Kundera", usex.getMessage());
         }
 
-       
-
     }
 
 }
