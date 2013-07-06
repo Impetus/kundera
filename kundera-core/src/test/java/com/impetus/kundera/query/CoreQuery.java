@@ -86,6 +86,10 @@ public class CoreQuery<E> extends QueryImpl<E>
         return fetchDataFromLucene(persistenceDelegeator.getClient(getEntityMetadata()));
     }
     
+    public List<Object> populateUsingLucene()
+    {
+        return populateUsingLucene(getEntityMetadata(),persistenceDelegeator.getClient(getEntityMetadata()),new ArrayList(),new String[]{});
+    }
     
     
     @Override

@@ -99,7 +99,8 @@ public class QueryImplTest
         List<Person> results = queryObj.getResultList();
         
         Assert.assertEquals(1,results.size());
-
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); //assert on lucene query transformation.
+        Assert.assertNotNull(queryObj.populateUsingLucene()); //assert on lucene query transformation.
         
         final String deleteQuery = "Delete from Person p where p.personId = ?1";
 
@@ -165,6 +166,10 @@ public class QueryImplTest
 
         Assert.assertNotNull(queryObj.getHints());
         
+        queryObj.setFetchSize(100);
+
+        Assert.assertEquals(new Integer(100),queryObj.getFetchSize());
+        
         
         query = "Select p from Person p where p.personId = ?1";
 
@@ -174,8 +179,7 @@ public class QueryImplTest
         
         Assert.assertEquals(0,results.size());
         
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); //assert on lucene query transformation.
-        
+
         Set luceneResults = queryObj.fetchByLuceneQuery();
         Assert.assertNotNull(luceneResults);            // assert of lucene index search result.
         Assert.assertEquals(1,luceneResults.size());
@@ -218,13 +222,13 @@ public class QueryImplTest
         }
         
         
-        try
+        /*try
         {
-            queryObj.unwrap(Integer.class);
+            queryObj.unwrap(Client.class);
         } catch(ClassCastException usex)
         {
             Assert.assertEquals("Provider does not support the call for class type:[" + Integer.class + "]", usex.getMessage());
-        }
+        }*/
         
         try
         {
