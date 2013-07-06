@@ -15,18 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
 
 import junit.framework.Assert;
 
@@ -39,11 +33,11 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.entities.SampleEntity;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.KunderaTypedQuery;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * @author vivek.mishra
- * 
+ * junit for {@link EntityManagerImpl}
  */
 public class EntityManagerImplTest
 {
@@ -195,110 +189,7 @@ public class EntityManagerImplTest
         Assert.assertTrue(KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeQuery));
     }
     
-    @Test
-    public void testTypedQuery()
-    {
-        final String namedQuery = "Select s from SampleEntity s";
-        
-        TypedQuery<SampleEntity> query = em.createNamedQuery(namedQuery, SampleEntity.class);
 
-        Assert.assertTrue(query.getClass().isAssignableFrom(KunderaTypedQuery.class));
-        
-        query.setMaxResults(100);
-        Assert.assertEquals(100, query.getMaxResults());
-        
-        assertOnUnsupportedMethod(query);
-        Assert.assertEquals(FlushModeType.AUTO, FlushModeType.AUTO);
-        
-        
-    }
-
-    /**
-     * @param query
-     */
-    private void assertOnUnsupportedMethod(TypedQuery<SampleEntity> query)
-    {
-        try
-        {
-            query.setFlushMode(FlushModeType.AUTO);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setFlushMode is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setFirstResult(1);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setFirstResult is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.getSingleResult();
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("getSingleResult is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.getFirstResult();
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("getFirstResult is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setLockMode(LockModeType.NONE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setLockMode is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.getLockMode();
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("getLockMode is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setParameter(0,new Date(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
-        }
-
-        try
-        {
-            query.setParameter("param",new Date(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setParameter(0,Calendar.getInstance(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setParameter("param",Calendar.getInstance(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
-        }
-
-    }
     /**
      * @param found
      */

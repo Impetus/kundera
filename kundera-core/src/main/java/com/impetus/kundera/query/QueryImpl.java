@@ -362,51 +362,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return sb.toString();
     }
 
-    /**
-     * Returns lucene based query.
-     * 
-     * @param clazzFieldName
-     *            lucene field name for class
-     * @param clazzName
-     *            class name
-     * @param idFieldName
-     *            lucene id field name
-     * @param idFieldValue
-     *            lucene id field value
-     * @return query lucene query.
-     */
-    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
-    {
-        StringBuffer sb = new StringBuffer("+");
-        sb.append(clazzFieldName);
-        sb.append(":");
-        sb.append(clazzName);
-        sb.append(" AND ");
-        sb.append("+");
-        sb.append(idFieldName);
-        sb.append(":");
-        sb.append(idFieldValue);
-        return sb.toString();
-    }
-
-    /**
-     * Transform.
-     * 
-     * @param m
-     *            the m
-     * @param ls
-     *            the ls
-     * @param resultList
-     *            the result list
-     */
-    protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
-    {
-        for (Object r : resultList)
-        {
-            EnhanceEntity e = new EnhanceEntity(r, PropertyAccessorHelper.getId(r, m), null);
-            ls.add(e);
-        }
-    }
 
     /**
      * Fetch data from lucene.
@@ -426,24 +381,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return rSet;
     }
 
-    /**
-     * On association using lucene.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param ls
-     *            the ls
-     */
-    protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
-    {
-        Set<String> rSet = fetchDataFromLucene(client);
-
-        List resultList = client.findAll(m.getEntityClazz(), null, rSet.toArray(new String[] {}));
-        transform(m, ls, resultList);
-
-    }
 
     /**
      * Append range.
@@ -1015,11 +952,14 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     private Parameter getParameterByName(String name)
     {
-        for (Parameter p : parameters)
+        if (getParameters() != null)
         {
-            if (name.equals(p.getName()))
+            for (Parameter p : parameters)
             {
-                return p;
+                if (name.equals(p.getName()))
+                {
+                    return p;
+                }
             }
         }
 
@@ -1074,7 +1014,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     private <T> Parameter<T> onTypeCheck(Class<T> paramClass, Parameter<T> parameter)
     {
-        if (parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
+        if (parameter != null && parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
         {
             return parameter;
         }

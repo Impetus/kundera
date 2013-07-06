@@ -1,5 +1,6 @@
 package com.impetus.kundera.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -78,8 +79,16 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
-
-        return null;
+        List results = new ArrayList();
+        for(Object key : keys)
+        {
+            Object result = find(entityClass,key);
+            if(result != null)
+            {
+                results.add(result);
+            }
+        }
+        return results;
     }
 
     @Override

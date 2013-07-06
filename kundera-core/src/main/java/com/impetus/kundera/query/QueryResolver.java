@@ -96,37 +96,7 @@ public class QueryResolver
         {
             query = getQuery(jpaQuery, persistenceDelegator, m);
         }
-        catch (SecurityException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (IllegalArgumentException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (ClassNotFoundException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (NoSuchMethodException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (InstantiationException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error(e.getMessage());
-            throw new QueryHandlerException(e);
-        }
-        catch (InvocationTargetException e)
+        catch (Exception e)
         {
             log.error(e.getMessage());
             throw new QueryHandlerException(e);

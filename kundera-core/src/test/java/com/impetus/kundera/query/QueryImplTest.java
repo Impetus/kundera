@@ -15,11 +15,17 @@
  */
 package com.impetus.kundera.query;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
 import javax.persistence.Persistence;
+import javax.persistence.TemporalType;
 
 import junit.framework.Assert;
 
@@ -29,9 +35,11 @@ import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.client.DummyDatabase;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.Person.Day;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * @author vivek.mishra
@@ -78,7 +86,7 @@ public class QueryImplTest
         
         em.persist(p2);
         
-        final String query = "Select p from Person p where p.personId = '1'";
+        String query = "Select p from Person p where p.personId = :personId";
         
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         
@@ -87,15 +95,39 @@ public class QueryImplTest
 
         CoreQuery queryObj = new CoreQuery(query, kunderaQuery, delegator);
         
+        queryObj.setParameter("personId", "1");
         List<Person> results = queryObj.getResultList();
         
         Assert.assertEquals(1,results.size());
-
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); //assert on lucene query transformation.
+        Assert.assertNotNull(queryObj.populateUsingLucene()); //assert on lucene query transformation.
         
-        final String deleteQuery = "Delete from Person p where p.personId = '1'";
+        final String deleteQuery = "Delete from Person p where p.personId = ?1";
 
         kunderaQuery = parseQuery(deleteQuery);
+        
+        
         queryObj = new CoreQuery(query, kunderaQuery, delegator);
+        
+        try
+        {
+            Assert.assertNull(queryObj.getParameter("personId", String.class));
+        }catch(IllegalArgumentException iaex)
+        {
+            Assert.assertEquals("The parameter of the specified name does not exist or is not assignable to the type", iaex.getMessage());
+        }
+        Assert.assertNotNull(queryObj.getParameter(1, String.class));
+        Assert.assertNotNull(queryObj.getParameterValue(1));
+
+        try
+        {
+            queryObj.getParameterValue(1);
+        } catch(IllegalStateException usex)
+        {
+            Assert.assertEquals("parameter has not been bound" + 1, usex.getMessage());
+        }
+
+        queryObj.setParameter(1, "1");
         
         queryObj.executeUpdate();
         
@@ -103,9 +135,109 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);
         
+        try
+        {
+            queryObj.setParameter(CoreTestUtilities.getParameter(), "test");
+            Assert.fail("Should have gone to catch block!");
+        }catch(IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(iaex);
+        }
+        
+        try
+        {
+            queryObj.setParameter(CoreTestUtilities.getParameter("personId","1"), "1");
+            Assert.fail("Should have gone to catch block!");
+        }catch(IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(iaex);
+        }
+        
+        queryObj.setParameter(queryObj.getParameter("personId"),"1");
+        
         results = queryObj.getResultList();
         
         Assert.assertEquals(0,results.size());
+        
+        queryObj.setHint("test", "test");
+        
+        queryObj.setMaxResults(100);
+        Assert.assertEquals(100, queryObj.getMaxResults());
+
+        Assert.assertNotNull(queryObj.getHints());
+        
+        queryObj.setFetchSize(100);
+
+        Assert.assertEquals(new Integer(100),queryObj.getFetchSize());
+        
+        
+        query = "Select p from Person p where p.personId = ?1";
+
+        queryObj.setParameter(queryObj.getParameter("personId"),"1");
+        
+        results = queryObj.getResultList();
+        
+        Assert.assertEquals(0,results.size());
+        
+
+        Set luceneResults = queryObj.fetchByLuceneQuery();
+        Assert.assertNotNull(luceneResults);            // assert of lucene index search result.
+        Assert.assertEquals(1,luceneResults.size());
+        
+        Assert.assertNotNull(queryObj.getParameter("personId", String.class));
+        
+        Assert.assertTrue(queryObj.isBound(queryObj.getParameter("personId", String.class)));
+        
+        Assert.assertNotNull(queryObj.getParameterValue(queryObj.getParameter("personId", String.class)));
+        Assert.assertNotNull(queryObj.getParameterValue("personId"));
+        
+        try
+        {
+            Assert.assertNull(queryObj.getParameter(1, String.class));
+            Assert.fail("Should have gone to catch block!");
+        }catch(IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(iaex);
+        }
+       
+        try
+        {
+            queryObj.getParameter(1);
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            Assert.assertNotNull(iaex);
+        }
+        //assert on native query.
+        try
+        {
+            ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+            appMetadata.addQueryToCollection(query, query, true, null);
+            queryObj = new CoreQuery(query, kunderaQuery, delegator);
+            Assert.assertNull(queryObj.getParameter(1, String.class));
+            Assert.fail("Should have gone to catch block!");
+        }catch(IllegalStateException iaex)
+        {
+            Assert.assertEquals("invoked on a native query when the implementation does not support this use", iaex.getMessage());
+        }
+        
+        
+        /*try
+        {
+            queryObj.unwrap(Client.class);
+        } catch(ClassCastException usex)
+        {
+            Assert.assertEquals("Provider does not support the call for class type:[" + Integer.class + "]", usex.getMessage());
+        }*/
+        
+        try
+        {
+            queryObj.getParameterValue("invalidParameter");
+        } catch(IllegalArgumentException usex)
+        {
+            Assert.assertEquals("parameter is not a parameter of the query", usex.getMessage());
+        }
+        
     }
 
     private KunderaQuery parseQuery(final String query)
@@ -122,5 +254,134 @@ public class QueryImplTest
     public void tearDown()
     {
         DummyDatabase.INSTANCE.dropDatabase();
+        LuceneCleanupUtilities.cleanLuceneDirectory(PU);
     }
+
+    /**
+     * @param query
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     * @throws SecurityException 
+     * @throws NoSuchFieldException 
+     */
+    @Test
+    public void assertOnUnsupportedMethod() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    {
+        String queryStr = "Select p from Person p where p.personId = :personId";
+        
+        PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
+        
+        KunderaQueryParser queryParser;
+        KunderaQuery kunderaQuery = parseQuery(queryStr);
+
+        CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+
+        try
+        {
+            query.setFlushMode(FlushModeType.AUTO);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setFlushMode is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.setFirstResult(1);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setFirstResult is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.getSingleResult();
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("getSingleResult is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.getFirstResult();
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("getFirstResult is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.setLockMode(LockModeType.NONE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setLockMode is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.getLockMode();
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("getLockMode is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.setParameter(0,new Date(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.setParameter("param",new Date(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.setParameter(0,Calendar.getInstance(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+        
+        try
+        {
+            query.setParameter("param",Calendar.getInstance(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.setParameter(CoreTestUtilities.getParameter(),Calendar.getInstance(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.setParameter(CoreTestUtilities.getParameter(),new Date(),TemporalType.DATE);
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.getFlushMode();
+        } catch(UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("getFlushMode is unsupported by Kundera", usex.getMessage());
+        }
+
+       
+
+    }
+
 }
