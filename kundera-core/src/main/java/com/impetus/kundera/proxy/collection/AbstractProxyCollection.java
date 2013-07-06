@@ -177,6 +177,24 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
         }
         return result;
     }
+    
+    protected boolean containsAll(final Collection arg0)
+    {
+        eagerlyLoadDataCollection();
+
+        boolean result = false;
+        
+        if(dataCollection == null)
+        {
+            createEmptyDataCollection();
+        }
+
+        if (getDataCollection() != null && !(dataCollection instanceof ProxyCollection) && arg0 != null && ! arg0.isEmpty())
+        {
+            result = ((Collection)getDataCollection()).containsAll(arg0);
+        }
+        return result;
+    }
 
     protected boolean retainAll(final Collection collection)
     {

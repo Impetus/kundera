@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.query;
 
+import javax.management.RuntimeErrorException;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -27,9 +29,11 @@ import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.loader.PersistenceLoaderException;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.proxy.LazyInitializationException;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * @author vivek.mishra junit for {@link QueryHandlerException},
@@ -196,6 +200,31 @@ public class QueryExceptionTest
         Assert.assertNotNull(exception);
     }
 
+    @Test
+    public void testInvalidEntityDefintionException()
+    {
+        InvalidEntityDefinitionException exception = new InvalidEntityDefinitionException("Error with string");
+        Assert.assertNotNull(exception);
+    
+        exception = new InvalidEntityDefinitionException();
+        Assert.assertNotNull(exception);
+    }
+    
+    @Test
+    public void testInvalidConfigurationException()
+    {
+        InvalidConfigurationException exception = new InvalidConfigurationException("Error with string");
+        Assert.assertNotNull(exception);
+    
+
+        exception = new InvalidConfigurationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        
+        exception = new InvalidConfigurationException("Error with string", new RuntimeException());
+        Assert.assertNotNull(exception);
+    }
+    
     @Test
     public void testResourceReadingException()
     {

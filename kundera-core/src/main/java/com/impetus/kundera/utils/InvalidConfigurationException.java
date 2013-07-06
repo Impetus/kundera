@@ -53,6 +53,7 @@ public class InvalidConfigurationException extends KunderaException
      */
     public InvalidConfigurationException(String paramString, Throwable paramThrowable)
     {
+        super(paramString, paramThrowable);
     }
 
 }

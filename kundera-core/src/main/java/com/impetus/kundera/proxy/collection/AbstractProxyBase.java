@@ -132,16 +132,5 @@ public abstract class AbstractProxyBase implements ProxyCollection
     // ///////////////////Common collection
     // implementation////////////////////////////   
 
-    protected boolean containsAll(final Collection arg0)
-    {
-        eagerlyLoadDataCollection();
-
-        boolean result = false;
-
-        if (getDataCollection() != null && !(getDataCollection() instanceof ProxyCollection))
-        {
-            result = ((Collection)getDataCollection()).containsAll(arg0);
-        }
-        return result;
-    }   
+       
 }

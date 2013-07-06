@@ -174,7 +174,7 @@ public class ProxyMap extends AbstractProxyBase implements ProxyCollection, Map
 
         Object result = null;
 
-        if (dataMap != null && !dataMap.isEmpty())
+        if (dataMap != null)
         {
             result = dataMap.put(arg0, arg1);
         }
@@ -187,7 +187,7 @@ public class ProxyMap extends AbstractProxyBase implements ProxyCollection, Map
         eagerlyLoadDataCollection();
         Map dataMap = (Map) dataCollection;
 
-        if (dataMap != null && dataMap.isEmpty())
+        if (dataMap != null)
         {
             dataMap.putAll(arg0);
         }
@@ -222,6 +222,6 @@ public class ProxyMap extends AbstractProxyBase implements ProxyCollection, Map
             result = dataMap.values();
         }
         return result;
-    }
+    } 
 
 }
