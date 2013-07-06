@@ -30,7 +30,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class LongAccessorTest
 {
 
-    private PropertyAccessor<Long> longAccessor;
+    private PropertyAccessor<Long> accessor;
 
     /**
      * @throws java.lang.Exception
@@ -38,7 +38,7 @@ public class LongAccessorTest
     @Before
     public void setUp() throws Exception
     {
-        longAccessor = new LongAccessor();
+        accessor = new LongAccessor();
     }
 
     /**
@@ -53,14 +53,69 @@ public class LongAccessorTest
     public void testFromBytes()
     {
         byte[] bytes = new byte[] {};
-        Assert.assertNull(longAccessor.fromBytes(LongAccessor.class, bytes));
+        Assert.assertNull(accessor.fromBytes(LongAccessor.class, bytes));
         Long l = 49L;
-        bytes = longAccessor.toBytes(l);
-        Assert.assertEquals(l, longAccessor.fromBytes(LongAccessor.class, bytes));
+        bytes = accessor.toBytes(l);
+        Assert.assertEquals(l, accessor.fromBytes(LongAccessor.class, bytes));
 
         l = 12l;
-        bytes = longAccessor.toBytes(l);
-        Assert.assertEquals(l, (Long) longAccessor.fromBytes(LongAccessor.class, bytes));
+        bytes = accessor.toBytes(l);
+        Assert.assertEquals(l, (Long) accessor.fromBytes(LongAccessor.class, bytes));
 
     }
+
+    @Test
+    public void testToBytes()
+    {
+        Assert.assertNull(accessor.toBytes(null));
+
+        Long d1 = new Long(4);
+
+        byte[] b = accessor.toBytes(d1);
+
+        Long d2 = accessor.fromBytes(Long.class, b);
+
+        Assert.assertEquals(d1, d2);
+
+    }
+
+    @Test
+    public void testToStringObject()
+    {
+        Assert.assertNull(accessor.toString(null));
+
+        Long d1 = new Long(4);
+        String s1 = d1.toString();
+
+        String s2 = accessor.toString(d1);
+
+        Assert.assertTrue(s1.equals(s2));
+    }
+
+    @Test
+    public void testFromString()
+    {
+        Assert.assertNull(accessor.fromString(Long.class, null));
+        Long d1 = new Long(4);
+        String s = d1.toString();
+
+        Long d2 = accessor.fromString(Long.class, s);
+        Assert.assertEquals(d1, d2);
+    }
+
+    @Test
+    public void testGetCopy()
+    {
+        Long d1 = new Long(4);
+        Long d2 = accessor.getCopy(d1);
+        Assert.assertEquals(d1, d2);
+    }
+
+    @Test
+    public void testGetInstance()
+    {
+        Object o = accessor.getInstance(Long.class);
+        Assert.assertNotNull(o);
+    }
+
 }
