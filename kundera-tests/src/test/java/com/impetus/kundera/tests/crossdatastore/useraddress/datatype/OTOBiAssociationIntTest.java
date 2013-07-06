@@ -46,7 +46,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOBiAssociationIntTest extends TwinAssociation
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] {"rdbms", "addCassandra", "addMongo", /*"oracle_kvstore" */};
 
     private static final BigDecimal ADDRESS_ID = new BigDecimal("123456");
 
@@ -350,17 +350,19 @@ public class OTOBiAssociationIntTest extends TwinAssociation
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
-     * createSchemaForPERSONNEL()
-     */
     @Override
     protected void createSchemaForPERSONNEL() throws SQLException
     {
-        // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID DECIMAL)");
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID INTEGER)");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID INTEGER)");
+        }
     }
 
     /*
@@ -373,7 +375,15 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @Override
     protected void createSchemaForHABITAT() throws SQLException
     {
-        // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID DECIMAL PRIMARY KEY, STREET VARCHAR(256)");
-
+        try
+        {
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID INTEGER PRIMARY KEY, STREET VARCHAR(256))");
+        }
+        catch (Exception e)
+        {
+            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID INTEGER PRIMARY KEY, STREET VARCHAR(256))");
+        }
     }
 }

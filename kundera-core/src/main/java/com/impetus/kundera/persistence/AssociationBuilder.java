@@ -189,6 +189,7 @@ public final class AssociationBuilder
                 List parents = delegator.find(entity.getClass(), pKeys);
                 PropertyAccessorHelper.set(obj, biDirectionalField,
                         ObjectUtils.getFieldInstance(parents, biDirectionalField));
+                System.out.println();
             }
 
             childrenEntities.add(obj);

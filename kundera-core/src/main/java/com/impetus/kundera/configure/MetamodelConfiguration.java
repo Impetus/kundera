@@ -361,7 +361,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 if (annotations.contains(validAnn))
                 {
                     // Class<?> clazz =
-                    // Thread.currentThread().getContextClassLoader().loadClass(className);
+                    Class<?> clazz2 = Thread.currentThread().getContextClassLoader().loadClass(className);
 
                     Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
 
@@ -411,6 +411,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         catch (ClassNotFoundException e)
         {
             log.error("Class " + className + " not found, it won't be loaded as entity");
+            e.printStackTrace();
         }
         finally
         {

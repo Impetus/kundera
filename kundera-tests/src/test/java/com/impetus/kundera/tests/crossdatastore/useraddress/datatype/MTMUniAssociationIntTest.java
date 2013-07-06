@@ -57,7 +57,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 
     private BigInteger addressID3 = new BigInteger("1234567");
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] {"rdbms",  "addCassandra", "addMongo", /*"oracle_kvstore" */};
 
     /**
      * Inits the.
