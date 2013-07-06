@@ -76,6 +76,7 @@ public class EmbeddedRDBMSUserTest
         {
             CassandraCli.cassandraSetUp();
             CassandraCli.initClient();
+            CassandraCli.createKeySpace("Pickr");
             loadData();
             cli = new RDBMSCli(KEYSPACE);
             cli.createSchema(KEYSPACE);
@@ -110,17 +111,17 @@ public class EmbeddedRDBMSUserTest
         }
         catch (InvalidRequestException e)
         {
-            
+
             e.printStackTrace();
         }
         catch (TException e)
         {
-            
+
             e.printStackTrace();
         }
         catch (SchemaDisagreementException e)
         {
-            
+
             e.printStackTrace();
         }
         EntityManager em = emf.createEntityManager();
@@ -181,9 +182,8 @@ public class EmbeddedRDBMSUserTest
         tweet.setTweetId(tweetId);
         tweet.setBody(body);
         tweet.setTweetDate(tweetDate);
-        
+
         user.getTweets().add(tweet);
-        
 
     }
 

@@ -520,8 +520,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 ColumnDef columnDef = new ColumnDef();
 
                 columnDef.setName(column.getName());
-                columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnType,
-                        isCql3Enabled(m)));
+                columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnType, false));
                 columnDef.setIndex_type(IndexType.KEYS);
 
                 // Add secondary index only if it's not already created
@@ -1237,7 +1236,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *             the exception
      */
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
-            List<String> relations, List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception;
+            List<String> relations, List<String> columns, List<IndexExpression> conditions, int maxResults)
+            throws Exception;
 
     /**
      * Search in inverted index.
