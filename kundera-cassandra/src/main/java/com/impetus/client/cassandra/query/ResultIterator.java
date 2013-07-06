@@ -93,6 +93,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Constructor with parameters
+     * 
      * @param query
      * @param m
      * @param client
@@ -121,14 +122,13 @@ class ResultIterator<E> implements IResultIterator<E>
             {
                 scrollComplete = true;
                 return false;
-            } 
-            
+            }
+
             return true;
         }
 
         return false;
     }
-
 
     @Override
     public E next()
@@ -144,7 +144,7 @@ class ResultIterator<E> implements IResultIterator<E>
         }
 
         E lastFetchedEntity = getEntity(results.get(results.size() - 1));
-        start =  lastFetchedEntity != null ? idValueInByteArr() : null;
+        start = lastFetchedEntity != null ? idValueInByteArr() : null;
         current = getEntity(results.get(results.size() - 1));
 
         return current;
@@ -163,9 +163,10 @@ class ResultIterator<E> implements IResultIterator<E>
         throw new UnsupportedOperationException("fetch in chunks is not yet supported");
     }
 
-
     /**
-     * Check on fetch size. returns true, if count on fetched rows is less than fetch size.
+     * Check on fetch size. returns true, if count on fetched rows is less than
+     * fetch size.
+     * 
      * @return
      */
     private boolean checkOnFetchSize()
@@ -174,13 +175,14 @@ class ResultIterator<E> implements IResultIterator<E>
         {
             return true;
         }
-
+        count = 0;
         scrollComplete = true;
         return false;
     }
 
     /**
-     *  on check relation event, invokes populate entities and set relational entities, in case relations are present.
+     * on check relation event, invokes populate entities and set relational
+     * entities, in case relations are present.
      */
     private void onCheckRelation()
     {
@@ -202,15 +204,18 @@ class ResultIterator<E> implements IResultIterator<E>
     }
 
     /**
-     * Method parse provided JPQL query into:
-     * 1. CQL3 query, in case cql3 is enabled or is a native query.
-     * 2. list of index clause, if cql2 is enabled.
-     * Then executes query for given min & max values for scrolling over results.
-     *  
-     * @param m                 entity metadata
-     * @param client            client 
-     * @return                  list of database values wrapped into entities.  
-     * @throws Exception        throws exception, in case of run time error.
+     * Method parse provided JPQL query into: 1. CQL3 query, in case cql3 is
+     * enabled or is a native query. 2. list of index clause, if cql2 is
+     * enabled. Then executes query for given min & max values for scrolling
+     * over results.
+     * 
+     * @param m
+     *            entity metadata
+     * @param client
+     *            client
+     * @return list of database values wrapped into entities.
+     * @throws Exception
+     *             throws exception, in case of run time error.
      */
     private List<E> populateEntities(EntityMetadata m, Client client) throws Exception
     {
@@ -234,7 +239,8 @@ class ResultIterator<E> implements IResultIterator<E>
             String parsedQuery = query.onQueryOverCQL3(m, client, metaModel, null);
 
             parsedQuery = appendWhereClauseWithScroll(parsedQuery);
-            results = parsedQuery != null ?((CassandraClientBase) client).executeQuery(parsedQuery, m.getEntityClazz(), m.getRelationNames()):null;
+            results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(parsedQuery,
+                    m.getEntityClazz(), m.getRelationNames()) : null;
 
         }
         else
@@ -242,7 +248,8 @@ class ResultIterator<E> implements IResultIterator<E>
             if (appMetadata.isNative(((QueryImpl) query).getJPAQuery()))
             {
                 final String nativeQuery = appendWhereClauseWithScroll(((QueryImpl) query).getJPAQuery());
-                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(nativeQuery, m.getEntityClazz(), null):null;
+                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(nativeQuery,
+                        m.getEntityClazz(), null) : null;
             }
             else
             {
@@ -277,24 +284,27 @@ class ResultIterator<E> implements IResultIterator<E>
                     }
                     else if (maxResult > 1 && checkOnEmptyResult() && maxResult != results.size())
                     {
-                        // means iterating over last record only, so need for database trip anymore!.
-                        results=null;
+                        // means iterating over last record only, so need for
+                        // database trip anymore!.
+                        results = null;
                     }
 
                 }
 
             }
         }
-        
+
         return results;
     }
 
     /**
-     * Appends where claues and prepare for next fetch. Method to be called in case cql3 enabled.
+     * Appends where claues and prepare for next fetch. Method to be called in
+     * case cql3 enabled.
      * 
-     * @param parsedQuery parsed query.
+     * @param parsedQuery
+     *            parsed query.
      * 
-     * @return   cql3 query to be executed.
+     * @return cql3 query to be executed.
      */
     private String appendWhereClauseWithScroll(String parsedQuery)
     {
@@ -303,11 +313,11 @@ class ResultIterator<E> implements IResultIterator<E>
 
         CQLTranslator translator = new CQLTranslator();
 
-        final String tokenCondition = prepareNext(translator,queryWithoutLimit);
+        final String tokenCondition = prepareNext(translator, queryWithoutLimit);
 
         boolean tokenPresent = queryWithoutLimit.indexOf(CQLTranslator.TOKEN) > -1;
-        
-        StringBuilder builder = new StringBuilder(tokenPresent ? tokenCondition:queryWithoutLimit);
+
+        StringBuilder builder = new StringBuilder(tokenPresent ? tokenCondition : queryWithoutLimit);
 
         if (!tokenPresent && tokenCondition != null)
         {
@@ -322,22 +332,22 @@ class ResultIterator<E> implements IResultIterator<E>
             builder.append(tokenCondition);
         }
 
-        
         String replaceQuery = replaceAndAppendLimit(builder.toString());
         builder.replace(0, builder.toString().length(), replaceQuery);
         translator.buildFilteringClause(builder);
 
-        
-        // in case of fetch by ID, token condition will be null and results will not be empty.
-        return checkOnEmptyResult() && tokenCondition == null ? null: builder.toString();
+        // in case of fetch by ID, token condition will be null and results will
+        // not be empty.
+        return checkOnEmptyResult() && tokenCondition == null ? null : builder.toString();
     }
 
     /**
      * Replace and append limit.
      * 
-     * @param parsedQuery  parsed cql3 query.
+     * @param parsedQuery
+     *            parsed cql3 query.
      * 
-     * @return   cql3 query appended with limit clause.
+     * @return cql3 query appended with limit clause.
      */
     private String replaceAndAppendLimit(String parsedQuery)
     {
@@ -353,7 +363,8 @@ class ResultIterator<E> implements IResultIterator<E>
     /**
      * Append limit to sql3 query.
      * 
-     * @param builder  builder instance.
+     * @param builder
+     *            builder instance.
      */
     private void onLimit(StringBuilder builder)
     {
@@ -364,9 +375,10 @@ class ResultIterator<E> implements IResultIterator<E>
     /**
      * Parse and append cql3 token function for iter.next() call.
      * 
-     * @param translator  cql translator.
+     * @param translator
+     *            cql translator.
      * 
-     * @return  parsed/append cql3 query.
+     * @return parsed/append cql3 query.
      */
     private String prepareNext(CQLTranslator translator, String query)
     {
@@ -374,25 +386,29 @@ class ResultIterator<E> implements IResultIterator<E>
         {
             String idName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
             Map<Boolean, String> filterOnId = getConditionOnIdColumn(idName);
-            
-            if(filterOnId.get(true) != null)
+
+            if (filterOnId.get(true) != null)
             {
                 String condition = filterOnId.get(true);
                 // means id clause present in query.
-                // now if id attribute is embeddable then fetch partition key for token
-                // if condition is with equals then no need to go for another fetch.
-                
-                if(condition.equals("="))
+                // now if id attribute is embeddable then fetch partition key
+                // for token
+                // if condition is with equals then no need to go for another
+                // fetch.
+
+                if (condition.equals("="))
                 {
-                    // no need to fetch another record, as there will be only one
+                    // no need to fetch another record, as there will be only
+                    // one
                     return null;
-                } else if(condition.endsWith(">")|| condition.equals(">="))
+                }
+                else if (condition.endsWith(">") || condition.equals(">="))
                 {
                     query = replaceAppliedToken(query);
                     return query;
                 }
             }
-            
+
             // Means there is an previous entity.
             Object entity = results.get(results.size() - 1);
             Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
@@ -409,23 +425,22 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         return null;
     }
-    
-    
-    private Map<Boolean,String> getConditionOnIdColumn(String idColumn)
+
+    private Map<Boolean, String> getConditionOnIdColumn(String idColumn)
     {
-     
+
         Map<Boolean, String> filterIdResult = new HashMap<Boolean, String>();
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
-        EmbeddableType keyObj =null;
-        if(metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        EmbeddableType keyObj = null;
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
             keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
         }
-        
-        boolean isPresent=false;
+
+        boolean isPresent = false;
         for (Object o : query.getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -434,7 +449,7 @@ class ResultIterator<E> implements IResultIterator<E>
                 String fieldName = clause.getProperty();
                 String condition = clause.getCondition();
                 Object value = clause.getValue();
-            
+
                 if (keyObj != null && fieldName.equals(idColumn)
                         || (keyObj != null && StringUtils.contains(fieldName, '.')) || (idColumn.equals(fieldName)))
                 {
@@ -443,14 +458,14 @@ class ResultIterator<E> implements IResultIterator<E>
                 }
             }
         }
-        
+
         return filterIdResult;
     }
 
     /**
      * id attribute's value in byte[]
      * 
-     * @return  id attribute's value in byte[]
+     * @return id attribute's value in byte[]
      */
     private byte[] idValueInByteArr()
     {
@@ -465,7 +480,8 @@ class ResultIterator<E> implements IResultIterator<E>
     }
 
     /**
-     * check if result list is null or empty. Returns true, if it is not empty or null.
+     * check if result list is null or empty. Returns true, if it is not empty
+     * or null.
      * 
      * @return boolean value (true/false).
      * 
@@ -478,41 +494,45 @@ class ResultIterator<E> implements IResultIterator<E>
     /**
      * Extract wrapped entity object from enhanced entity.
      * 
-     * @param entity enhanced entity.
+     * @param entity
+     *            enhanced entity.
      * 
-     * @return  returns extracted instance of E.
+     * @return returns extracted instance of E.
      */
     private E getEntity(Object entity)
     {
-        return (E) (entity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) entity)
-                .getEntity() : entity);
+        return (E) (entity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) entity).getEntity()
+                : entity);
     }
 
     private String replaceAppliedToken(String query)
     {
-        final String tokenRegex="\\btoken\\(";
-        final String pattern="#TOKENKUNDERA#";  // need to replace with this as pattern matcher was returning false.
+        final String tokenRegex = "\\btoken\\(";
+        final String pattern = "#TOKENKUNDERA#"; // need to replace with this as
+                                                 // pattern matcher was
+                                                 // returning false.
         query = query.replaceAll(tokenRegex, pattern);
-        
-        if(query.indexOf(pattern) > -1)  // Means token( has been present and replaced.
+
+        if (query.indexOf(pattern) > -1) // Means token( has been present and
+                                         // replaced.
         {
             CQLTranslator translator = new CQLTranslator();
-            
+
             int closingIndex = query.indexOf(CQLTranslator.CLOSE_BRACKET, query.lastIndexOf(pattern));
-            
+
             String object = query.substring(query.lastIndexOf(pattern) + pattern.length(), closingIndex);
-            
+
             Object entity = results.get(results.size() - 1);
             Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
             Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
             StringBuilder builder = new StringBuilder();
-            
+
             translator.appendValue(builder, idClazz, id, false);
-            
-            query = query.replaceAll(pattern+object, pattern+builder.toString());
+
+            query = query.replaceAll(pattern + object, pattern + builder.toString());
             query = query.replaceAll(pattern, CQLTranslator.TOKEN);
         }
-        
+
         return query;
     }
 }
