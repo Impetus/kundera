@@ -112,7 +112,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         PersonnelBiMTo1 p1 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_1");
         assertPerson1(p1);
 
-        // Find Person 2             
+        // Find Person 2
         PersonnelBiMTo1 p2 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_2");
         assertPerson2(p2);
 

@@ -71,9 +71,8 @@ public abstract class TwinAssociation extends AssociationBase {
 		// list of PUS with class.
 		Map<Class, String> puClazzMapper = null;
 
-		for (String pu : persistenceUnits) {			
-                    
-                    for (String p : persistenceUnits) {                                
+		for (String pu : persistenceUnits) {
+			for (String p : persistenceUnits) {
 				puClazzMapper = new HashMap<Class, String>();
 				puClazzMapper.put(classes.get(0), pu);
 

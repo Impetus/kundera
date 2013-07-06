@@ -75,7 +75,6 @@ public final class AssociationBuilder
      */
     List getAssociatedEntitiesFromIndex(Class owningClazz, Object entityId, Class<?> childClass, Client childClient)
     {
-
         List associatedEntities;
         IndexManager indexManager = childClient.getIndexManager();
 
@@ -189,7 +188,6 @@ public final class AssociationBuilder
                 List parents = delegator.find(entity.getClass(), pKeys);
                 PropertyAccessorHelper.set(obj, biDirectionalField,
                         ObjectUtils.getFieldInstance(parents, biDirectionalField));
-                System.out.println();
             }
 
             childrenEntities.add(obj);
