@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.HBaseClient;
+import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
 
 /**
@@ -46,9 +47,12 @@ public class CitySimilarityTest
 
     private EntityManager em;
 
+    private HBaseCli cli = new HBaseCli();
+
     @Before
     public void setUp() throws Exception
     {
+        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         BookInfo info1 = new BookInfo();
@@ -81,6 +85,7 @@ public class CitySimilarityTest
         em.remove(em.find(CitySimilarity.class, "100_2"));
         em.close();
         emf.close();
+        cli.stopCluster(null);
     }
 
     @Test

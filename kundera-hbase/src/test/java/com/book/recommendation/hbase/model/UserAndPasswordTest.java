@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.HBaseClient;
+import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
 
 /**
@@ -46,12 +47,12 @@ public class UserAndPasswordTest
 
     private EntityManager em;
 
-    /**
-     * @throws java.lang.Exception
-     */
+    private HBaseCli cli = new HBaseCli();
+
     @Before
     public void setUp() throws Exception
     {
+        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         for (int i = 1; i < 10; i++)
@@ -79,6 +80,7 @@ public class UserAndPasswordTest
         }
         em.close();
         emf.close();
+        cli.stopCluster(null);
     }
 
     @Test
@@ -145,27 +147,31 @@ public class UserAndPasswordTest
                 Assert.assertEquals("5", user.getId());
             }
 
-//            query = "select u from UserAndPassword u";
-//            q = (com.impetus.kundera.query.Query<UserAndPassword>) em.createQuery(query);
-//
-//            Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-//            HBaseClient client = (HBaseClient) clients.get("hbaseTest");
-//
-//            Filter filter = new PrefixFilter(Bytes.toBytes("KK"));
-//
-//            client.setFilter(new KeyOnlyFilter());
-//            client.addFilter("city_similarity", filter);
-//
-//            q.setFetchSize(4);
-//            results = q.iterate();
-//            while (results.hasNext())
-//            {
-//                List<UserAndPassword> users = ((com.impetus.client.hbase.query.ResultIterator<UserAndPassword>) results)
-//                        .next(2);
-//                Assert.assertNotNull(users);
-//                Assert.assertEquals(2, users.size());
-//            }
-//            em.close();
+            // query = "select u from UserAndPassword u";
+            // q = (com.impetus.kundera.query.Query<UserAndPassword>)
+            // em.createQuery(query);
+            //
+            // Map<String, Client> clients = (Map<String, Client>)
+            // em.getDelegate();
+            // HBaseClient client = (HBaseClient) clients.get("hbaseTest");
+            //
+            // Filter filter = new PrefixFilter(Bytes.toBytes("KK"));
+            //
+            // client.setFilter(new KeyOnlyFilter());
+            // client.addFilter("city_similarity", filter);
+            //
+            // q.setFetchSize(4);
+            // results = q.iterate();
+            // while (results.hasNext())
+            // {
+            // List<UserAndPassword> users =
+            // ((com.impetus.client.hbase.query.ResultIterator<UserAndPassword>)
+            // results)
+            // .next(2);
+            // Assert.assertNotNull(users);
+            // Assert.assertEquals(2, users.size());
+            // }
+            // em.close();
 
             em = emf.createEntityManager();
             query = "select u from UserAndPassword u where u.userName=KK6";
