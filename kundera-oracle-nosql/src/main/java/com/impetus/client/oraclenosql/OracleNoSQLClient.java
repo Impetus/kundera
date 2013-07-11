@@ -49,8 +49,6 @@ import oracle.kv.OperationExecutionException;
 import oracle.kv.Value;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,6 +204,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                             }
 
                             EmbeddableType embeddableType = metamodel.embeddable(embeddableClass);
+                            
                             Attribute columnAttribute = embeddableType.getAttribute(minorKeySecondPart);
                             Field columnField = (Field) columnAttribute.getJavaMember();
 
@@ -252,7 +251,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         catch (Exception e)
         {
-            log.error("Error while finding data for Key " + key + ", Caused By :" + e + ".");
+            log.error("Error while finding data for Key " + key + ", Caused By :" + e + ".");            
             throw new PersistenceException(e);
         }
 
@@ -445,8 +444,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                     {
                                         List<String> minorKeyComponents = new ArrayList<String>();
                                         minorKeyComponents.add(embeddedColumnName);
-                                        minorKeyComponents.add(((AbstractAttribute) embeddableAttribute)
-                                                .getJPAColumnName() + OracleNOSQLConstants.LOB_SUFFIX);
+                                        /*minorKeyComponents.add(((AbstractAttribute) embeddableAttribute)
+                                                .getJPAColumnName() + OracleNOSQLConstants.LOB_SUFFIX);*/
+                                        minorKeyComponents.add(embeddableAttribute.getName() + OracleNOSQLConstants.LOB_SUFFIX);
 
                                         // Key
                                         Key key = Key.createKey(majorKeyComponent, minorKeyComponents);
@@ -458,8 +458,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                                         List<String> minorKeyComponents = new ArrayList<String>();
                                         minorKeyComponents.add(embeddedColumnName);
-                                        minorKeyComponents.add(((AbstractAttribute) embeddableAttribute)
-                                                .getJPAColumnName());
+                                        /*minorKeyComponents.add(((AbstractAttribute) embeddableAttribute)
+                                                .getJPAColumnName());*/
+                                        minorKeyComponents.add(embeddableAttribute.getName());
 
                                         // Key
                                         Key key = Key.createKey(majorKeyComponent, minorKeyComponents);

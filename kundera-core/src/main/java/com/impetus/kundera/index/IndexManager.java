@@ -147,7 +147,7 @@ public class IndexManager
                     indexCollection.put(((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName(),
                             parentId);
 
-                onEmbeddable(entity, clazz, metaModel, indexCollection);
+                onEmbeddable(entity, metadata.getEntityClazz(), metaModel, indexCollection);
                 indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
