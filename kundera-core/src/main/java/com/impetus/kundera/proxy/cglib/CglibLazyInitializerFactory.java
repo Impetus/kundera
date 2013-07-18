@@ -87,9 +87,9 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
     {
         if (e != null && e.getClass().getAnnotation(Entity.class) != null && entityMetadata != null)
         {
-            Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
             for (Relation r : entityMetadata.getRelations())
             {
+                Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
                 if (r.isUnary())
                 {
                     String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
