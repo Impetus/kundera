@@ -757,10 +757,12 @@ public final class PersistenceDelegator
 
     void commit()
     {
+        enableFlush = true;
         execute();
         flushManager.commit();
         flushManager.clearFlushStack();
         isTransactionInProgress = false;
+        enableFlush = false;
     }
 
     /**
@@ -855,7 +857,8 @@ public final class PersistenceDelegator
             {
                 if (client instanceof Batcher)
                 {
-                    if (((Batcher) client).executeBatch() > 0)
+                    // if no batch operation performed{may be running in transaction?}
+                    if (((Batcher) client).getBatchSize() == 0 || ((Batcher) client).executeBatch() > 0)
                     {
                         flushJoinTableData();
                     }
