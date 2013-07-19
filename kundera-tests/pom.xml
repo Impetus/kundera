@@ -543,7 +543,7 @@
 					</filesets>
 				</configuration>
 			</plugin>
-			<plugin>
+<!-- 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
@@ -555,14 +555,14 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
- 			<plugin>
+ --> 			<!-- <plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<!-- The destination file for the code coverage report has to be set 
+					The destination file for the code coverage report has to be set 
 						to the same value in the parent pom and in each module pom. Then JaCoCo will 
 						add up information in the same report, so that, it will give the cross-module 
-						code coverage.  -->
+						code coverage. 
 					<destFile>${project.basedir}/../target/jacoco-it.exec</destFile>
 				</configuration>
 				<executions>
@@ -573,7 +573,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
  		</plugins>
 	</build>
 
