@@ -116,15 +116,15 @@ public class IndexManagerTest
         embed1.setField("embeddedField1");
         
         EmbeddableEntityTwo embed2 = new EmbeddableEntityTwo();
-        embed1.setField("embeddedField2");
+        embed2.setField(1f);
+        embed2.setName("name");
 
         entity.setEmbeddableEntity(embed1);
         entity.setEmbeddableEntityTwo(embed2);
         
         em.persist(entity);
         
-        //TODO:: search over  super columns with a field in where clause is not working
-        String luceneQuery = "+entity.class:com.impetus.kundera.metadata.entities.SingularEntityEmbeddable";
+        String luceneQuery = "+entity.class:com.impetus.kundera.metadata.entities.SingularEntityEmbeddable AND +SingularEntityEmbeddable.embeddedField:embeddedField1";
         
         Map<String, Object> results = ixManager.search(luceneQuery, 0, 10, false);
         

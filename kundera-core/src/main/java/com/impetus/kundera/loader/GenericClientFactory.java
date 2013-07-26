@@ -122,9 +122,15 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         String luceneDirectoryPath = puProperties != null ? (String) puProperties
                 .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
 
-        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit).getProperties()
-                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        String indexerClass = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_INDEXER_CLASS) : null;
+
+        if (indexerClass == null)
+        {
+            indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperties()
+                    .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        }
 
         if (luceneDirectoryPath == null)
         {
@@ -133,7 +139,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                     .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
         }
 
-        if (luceneDirectoryPath != null)
+        // in case set empty via external property, means want to avoid lucene directory set up.
+        if (luceneDirectoryPath != null && !StringUtils.isEmpty(luceneDirectoryPath))
         {
             // Add client metadata
             clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
