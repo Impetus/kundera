@@ -18,8 +18,6 @@ package com.impetus.kundera.configure;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +36,7 @@ import com.thoughtworks.xstream.XStream;
 public abstract class AbstractPropertyReader
 {
     /** The log instance. */
-    private Logger log = LoggerFactory.getLogger(AbstractPropertyReader.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractPropertyReader.class);
 
     /** The xStream instance */
     private XStream xStream;
@@ -57,7 +55,7 @@ public abstract class AbstractPropertyReader
      * 
      * @param pu
      */
-    final public void read(String pu)
+    public void read(String pu)
     {
         String propertyFileName = externalProperties != null ? (String)externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) :null;
         puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
@@ -66,7 +64,7 @@ public abstract class AbstractPropertyReader
             propertyFileName = puMetadata != null ? puMetadata
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
         }
-        if (propertyFileName != null && PropertyType.value(propertyFileName).equals(PropertyType.xml))
+        if (propertyFileName != null && PropertyType.value(propertyFileName) != null && PropertyType.value(propertyFileName).equals(PropertyType.xml))
         {
             onXml(onParseXML(propertyFileName, puMetadata));
         }
@@ -122,7 +120,7 @@ public abstract class AbstractPropertyReader
      * @author Kuldeep Mishra
      * 
      */
-    private enum PropertyType
+    protected enum PropertyType
     {
         xml, properties;
 
@@ -134,13 +132,27 @@ public abstract class AbstractPropertyReader
          * @param propertyFileName
          * @return
          */
-        static PropertyType value(String propertyFileName)
+        public static PropertyType value(String propertyFileName)
         {
-            if (isXml(propertyFileName))
+            PropertyType type = null;
+            if (isValid(propertyFileName, PropertyType.xml))
             {
-                return xml;
+                type = xml;
             }
-            throw new IllegalArgumentException("unsupported property provided format: " + propertyFileName);
+            else if (isValid(propertyFileName, PropertyType.properties))
+            {
+                if (log.isWarnEnabled())
+                {
+                    log.warn("Support for .properties have been deprecated and no longer supported by Kundera");
+                }
+                type = properties;
+            }
+            else
+            {
+                log.warn("Invalid file format {} provided, returning null", propertyFileName);
+            }
+
+            return type;
         }
 
         /**
@@ -149,9 +161,9 @@ public abstract class AbstractPropertyReader
          * @param propertyFileName
          * @return
          */
-        private static boolean isXml(String propertyFileName)
+        private static boolean isValid(String propertyFileName, PropertyType type)
         {
-            return propertyFileName.endsWith(DELIMETER + xml);
+            return propertyFileName.endsWith(DELIMETER + type);
         }
     }
 

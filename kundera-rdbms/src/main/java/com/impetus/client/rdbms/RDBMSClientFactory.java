@@ -77,7 +77,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     protected Object createPoolOrConnection()
     {
 
-        conf = new Configuration().addProperties(HibernateUtils.getProperties(getPersistenceUnit()));
+        getConfigurationObject();
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 getPersistenceUnit())).getEntityNameToClassMap().values();
         // to keep hibernate happy! As in our case all scanned classes are not
@@ -106,6 +106,7 @@ public class RDBMSClientFactory extends GenericClientFactory
         return sf;
     }
 
+
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
@@ -130,4 +131,15 @@ public class RDBMSClientFactory extends GenericClientFactory
         throw new UnsupportedOperationException("Load balancing feature is not supported in "
                 + this.getClass().getSimpleName());
     }
+
+
+    /**
+     * Returns configuration object.
+     */
+    private void getConfigurationObject()
+    {
+       RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties);
+       this.conf = reader.load(getPersistenceUnit());
+    }
+
 }

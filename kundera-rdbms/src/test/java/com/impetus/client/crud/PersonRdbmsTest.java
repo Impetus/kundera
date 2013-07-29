@@ -61,6 +61,7 @@ public class PersonRdbmsTest extends BaseTest {
 			cli.createSchema("testdb");
 			cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
 		} catch (Exception e) {
+                        e.printStackTrace();
 			cli.update("DELETE FROM TESTDB.PERSON");
 			cli.update("DROP TABLE TESTDB.PERSON");
 			cli.update("DROP SCHEMA TESTDB");
