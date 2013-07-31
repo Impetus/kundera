@@ -252,6 +252,8 @@ public class CassQuery extends QueryImpl
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
+            
+            String keyFieldName = CassandraUtilities.getIdColumnName(m, externalProperties);
             for (int i = 1; i < results.length; i++)
             {
                 if (results[i] != null)
@@ -275,7 +277,7 @@ public class CassQuery extends QueryImpl
                     }
                     else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
                     {
-                        columns.add(CassandraUtilities.getIdColumnName(m, externalProperties));
+                        columns.add(keyFieldName);
                     }
                     else
                     {
@@ -554,10 +556,10 @@ public class CassQuery extends QueryImpl
         StringBuilder builder = new StringBuilder();
 
         boolean isPresent = false;
-        List<String> columns = getColumnList(m, getKunderaQuery().getResult(), compoundKey);
-
+        List<String> columns = getColumnList(m, getKunderaQuery().getResult(), compoundKey);        
         String selectQuery = columns != null && !columns.isEmpty() ? CQLTranslator.SELECT_QUERY
                 : CQLTranslator.SELECTALL_QUERY;
+        
 
         CQLTranslator translator = new CQLTranslator();
 

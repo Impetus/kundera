@@ -31,6 +31,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.Type.PersistenceType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
@@ -43,6 +44,8 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.ProxyHelper;
@@ -127,7 +130,8 @@ public class ObjectUtils
                         || attrib.getPersistentAttributeType().equals(PersistentAttributeType.ELEMENT_COLLECTION))
                 {
                     EmbeddableType embeddedColumn = metaModel.embeddable(((AbstractAttribute) attrib)
-                            .getBindableJavaType());
+                            .getBindableJavaType());                   
+                    
 
                     Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, columnField);
                     if (sourceEmbeddedObj != null)
@@ -153,33 +157,50 @@ public class ObjectUtils
                         }
                         else if (columnField.getAnnotation(ElementCollection.class) != null)
                         {
-                            // Copy element collections
+                            Class<?> ecDeclaredClass = columnField.getType();
+                            Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
+                            
+                            Object targetCollectionObject;                                
+                            targetCollectionObject = actualEcObjectClass.newInstance();
+                            
+                            // Copy element collections for List and Set
                             if (sourceEmbeddedObj instanceof Collection)
                             {
-                                Class<?> ecDeclaredClass = columnField.getType();
-                                Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
-                                Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
-
-                                Object targetCollectionObject = actualEcObjectClass.newInstance();
+                                
+                                Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);                              
 
                                 for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
                                 {
-                                    Object targetEcObj = genericClass.newInstance();
-                                    for (Field f : genericClass.getDeclaredFields())
+                                    Object targetEcObj = null;                                    
+                                    if(PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
                                     {
-                                        if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(sourceEcObj.getClass());
+                                        if(accessor != null)
                                         {
-                                            PropertyAccessorHelper.set(targetEcObj, f,
-                                                    PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                            targetEcObj = accessor.getCopy(sourceEcObj);
                                         }
-
                                     }
-
+                                    
+                                    else if (PersistenceType.EMBEDDABLE.equals(embeddedColumn.getPersistenceType()))
+                                    {
+                                        targetEcObj = genericClass.newInstance();
+                                        
+                                        for (Field f : genericClass.getDeclaredFields())
+                                        {
+                                            if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                            {
+                                                PropertyAccessorHelper.set(targetEcObj, f,
+                                                        PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                            }                                            
+                                        }      
+                                        
+                                    }    
+                                    
                                     if (List.class.isAssignableFrom(ecDeclaredClass))
                                     {
                                         Method m = actualEcObjectClass.getMethod("add", Object.class);
                                         m.invoke(targetCollectionObject, targetEcObj);
-
+                                        
                                     }
                                     else if (Set.class.isAssignableFrom(ecDeclaredClass))
                                     {
@@ -188,9 +209,45 @@ public class ObjectUtils
                                     }
 
                                 }
-                                PropertyAccessorHelper.set(target, columnField, targetCollectionObject);
+                                
                             }
-
+                            
+                            //Copy element collection for Map
+                            else if(sourceEmbeddedObj instanceof Map)
+                            {                               
+                                
+                                for (Object sourceKey : ((Map) sourceEmbeddedObj).keySet())
+                                {
+                                    Object targetKey = null;  
+                                    Object targetValue = null; 
+                                    if(PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
+                                    {
+                                        //Create copy of map key
+                                        PropertyAccessor keyAccessor = PropertyAccessorFactory.getPropertyAccessor(sourceKey.getClass());
+                                        if(keyAccessor != null)
+                                        {
+                                            targetKey = keyAccessor.getCopy(sourceKey);
+                                        }
+                                        
+                                        //Create copy of map value
+                                        Object sourceValue = ((Map) sourceEmbeddedObj).get(sourceKey);
+                                        PropertyAccessor valueAccessor = PropertyAccessorFactory.getPropertyAccessor(sourceValue.getClass());
+                                        if(valueAccessor != null)
+                                        {
+                                            targetValue = valueAccessor.getCopy(sourceValue);
+                                        }
+                                        
+                                        if (Map.class.isAssignableFrom(ecDeclaredClass))
+                                        {
+                                            Method m = actualEcObjectClass.getMethod("put", new Class[]{Object.class, Object.class});
+                                            m.invoke(targetCollectionObject, new Object[]{targetKey, targetValue});
+                                        }
+                                    }
+                                }                                                            
+                            }
+                            
+                            PropertyAccessorHelper.set(target, columnField, targetCollectionObject);
+                            
                         }
                         else if (columnField.getAnnotation(javax.persistence.Column.class) != null)
                         {

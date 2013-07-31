@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.configure.schema.CollectionColumnInfo;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.IndexInfo;
@@ -41,6 +44,7 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
@@ -56,6 +60,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -400,9 +405,18 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                         tableInfo.addColumnInfo(columnInfo);
                     }
                 }
+                else if(attr.isCollection() && MetadataUtils.isBasicElementCollectionField((Field)attr.getJavaMember()))
+                {            
+                    CollectionColumnInfo cci = new CollectionColumnInfo();
+                    cci.setCollectionColumnName(((AbstractAttribute) attr).getJPAColumnName());
+                    cci.setType(attr.getJavaType());
+                    cci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field)attr.getJavaMember()));          
+                    
+                    tableInfo.addCollectionColumnMetadata(cci);                    
+                }
             }
         }
-    }
+    }  
 
     /**
      * Returns list of configured table/column families.

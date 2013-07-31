@@ -17,9 +17,11 @@ package com.impetus.client.cassandra.datahandler;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,10 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
 
+import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.ListType;
+import org.apache.cassandra.db.marshal.MapType;
+import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
@@ -43,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
@@ -1210,10 +1217,15 @@ public abstract class CassandraDataHandlerBase
     private void setFieldValueViaCQL(Object entity, Object thriftColumnValue, Attribute attribute)
     {
         if (attribute != null)
-        {
+        {      
+            
             try
-            {
-                if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(String.class)
+            {                
+                if(attribute.isCollection())
+                {
+                    setCollectionValue(entity, thriftColumnValue, attribute);
+                }
+                else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(String.class)
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(char.class)
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Character.class))
                 {
@@ -1251,7 +1263,85 @@ public abstract class CassandraDataHandlerBase
             catch (PropertyAccessException pae)
             {
                 log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
+            }            
+        }
+    }
+
+    /**
+     * Populates collection field(s) into entity
+     * @param entity
+     * @param thriftColumnValue
+     * @param attribute
+     */
+    private void setCollectionValue(Object entity, Object thriftColumnValue, Attribute attribute)
+    {
+        try
+        {
+            if (Collection.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
+            {
+
+                Collection outputCollection = null;
+                ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
+                Class<?> genericClass = PropertyAccessorHelper.getGenericClass((Field) attribute.getJavaMember());
+                Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(genericClass,
+                        true);
+                Object valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
+
+                if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(List.class))
+                {
+                    ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
+                    outputCollection = new ArrayList();
+                    outputCollection.addAll(listType.compose(valueByteBuffer));
+                }
+
+                else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Set.class))
+                {
+                    SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
+                    outputCollection = new HashSet();
+                    outputCollection.addAll(setType.compose(valueByteBuffer));
+                }
+
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), outputCollection);
             }
+
+            else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Map.class))
+            {
+                ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
+                List<Class<?>> mapGenericClasses = PropertyAccessorHelper.getGenericClasses((Field) attribute
+                        .getJavaMember());
+
+                Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0),
+                        true);
+                Class valueClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(1),
+                        true);
+
+                Object keyClassInstance = keyClass.getDeclaredField("instance").get(null);
+                Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
+
+                MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
+                        (AbstractType) valueClassInstance);
+
+                Map outputMap = new HashMap();
+                outputMap.putAll(mapType.compose(valueByteBuffer));
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), outputMap);
+
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
+        }
+        catch (SecurityException e)
+        {
+            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
+        }
+        catch (NoSuchFieldException e)
+        {
+            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
         }
     }
 
@@ -1491,7 +1581,7 @@ public abstract class CassandraDataHandlerBase
         Column column = new Column();
         column.setName(name);
         column.setValue(value);
-        column.setTimestamp(timestamp);    
+        column.setTimestamp(timestamp);        
         if(ttl != 0) column.setTtl(ttl);        
         return column;
     }
