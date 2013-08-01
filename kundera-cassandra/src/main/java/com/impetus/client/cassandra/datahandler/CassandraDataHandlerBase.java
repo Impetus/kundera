@@ -773,16 +773,12 @@ public abstract class CassandraDataHandlerBase
             }
 
         }
-        catch (InstantiationException iex)
+        catch (Exception e)
         {
-            log.error("Eror while retrieving data, Caused by: .", iex);
-            throw new PersistenceException(iex);
+            log.error("Eror while retrieving data, Caused by: .", e);
+            throw new PersistenceException(e);
         }
-        catch (IllegalAccessException iaex)
-        {
-            log.error("Eror while retrieving data, Caused by: .", iaex);
-            throw new PersistenceException(iaex);
-        }
+        
 
         if (entity != null && tr.getId() != null)
         {
@@ -1161,17 +1157,11 @@ public abstract class CassandraDataHandlerBase
                 // No
                 // need for any logger message
             }
-            catch (InstantiationException iex)
+            catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                log.error("Error while retrieving data, Caused by: .", iex);
-                throw new PersistenceException(iex);
-            }
-            catch (IllegalAccessException iaex)
-            {
-                log.error("Error while retrieving data, Caused by: .", iaex);
-                throw new PersistenceException(iaex);
-            }
+                log.error("Error while retrieving data, Caused by: .", e);
+                throw new PersistenceException(e);
+            }            
         }
         return entity;
     }
@@ -1327,22 +1317,11 @@ public abstract class CassandraDataHandlerBase
 
             }
         }
-        catch (IllegalArgumentException e)
+        catch (Exception e)
         {
             log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
-        }
-        catch (SecurityException e)
-        {
-            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
-        }
-        catch (NoSuchFieldException e)
-        {
-            log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
-        }
+            throw new PersistenceException(e);
+        }        
     }
 
     private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)

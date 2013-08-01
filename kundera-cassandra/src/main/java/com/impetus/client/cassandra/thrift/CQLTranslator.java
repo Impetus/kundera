@@ -416,17 +416,17 @@ public final class CQLTranslator
     {
         if (value != null)
         {            
-            if (fieldClazz.isAssignableFrom(List.class))
+            if (List.class.isAssignableFrom(fieldClazz))
             {
                 isPresent = appendList(builder, value);
             }
             
-            else if (fieldClazz.isAssignableFrom(Set.class))
+            else if (Set.class.isAssignableFrom(fieldClazz))
             {
                 isPresent = appendSet(builder, value);
             }
             
-            else if (fieldClazz.isAssignableFrom(Map.class))
+            else if (Map.class.isAssignableFrom(fieldClazz))
             {
                 isPresent = appendMap(builder, value);
             }
