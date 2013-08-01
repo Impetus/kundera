@@ -51,6 +51,7 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -96,7 +97,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            SessionFactory sf, Map<String, Object> puProperties)
+            SessionFactory sf, Map<String, Object> puProperties, final ClientMetadata clientMetadata)
     {
 
         this.sf = sf;
@@ -106,6 +107,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.indexManager = indexManager;
         this.reader = reader;
         this.puProperties = puProperties;
+        this.clientMetadata = clientMetadata;
     }
 
     /*
@@ -140,7 +142,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         tx.commit();
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+        if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
         }

@@ -41,6 +41,7 @@ import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
@@ -57,9 +58,10 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     /**
      * @param externalProperties
      */
-    public PelopsInvertedIndexHandler(final PelopsClient pelopsClient)
+    public PelopsInvertedIndexHandler(final PelopsClient pelopsClient, final boolean useSecondryIndex)
     {
         this.pelopsClient = pelopsClient;
+        this.useSecondryIndex = useSecondryIndex;
     }
 
     @Override
@@ -67,7 +69,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
     {
         // Index in Inverted Index table if applicable
-        boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata);
+        boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata,useSecondryIndex);
 
         if (invertedIndexingApplicable)
         {

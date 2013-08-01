@@ -287,6 +287,7 @@ public class MetadataUtils
         }
     }
 
+
     /**
      * Returns true, if use of secondry index is available, else false.
      * 
@@ -294,12 +295,12 @@ public class MetadataUtils
      *            persistence unit name
      * @return true, if usage is true in pu. else false.
      */
-    public static boolean useSecondryIndex(String persistenceUnit)
+    public static boolean useSecondryIndex(ClientMetadata clientMetadata)
     {
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
         return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
     }
 
+    
    /* *//**
      * Returns lucene indexing directory.
      * 

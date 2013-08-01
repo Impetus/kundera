@@ -64,9 +64,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     private final ThriftClient thriftClient;
 
-    public ThriftInvertedIndexHandler(final ThriftClient thriftClient)
+    public ThriftInvertedIndexHandler(final ThriftClient thriftClient, final boolean useSecondryIndex)
     {
         this.thriftClient = thriftClient;
+        this.useSecondryIndex = useSecondryIndex;
     }
 
     @Override
@@ -74,7 +75,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
     {
         // Write to Inverted Index table if applicable
-        boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata);
+        boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata, useSecondryIndex);
 
         if (invertedIndexingApplicable)
         {

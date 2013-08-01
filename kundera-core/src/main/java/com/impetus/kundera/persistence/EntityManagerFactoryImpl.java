@@ -175,7 +175,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             for (String pu : persistenceUnits)
             {
                 ((ClientLifeCycleManager) clientFactories.get(pu)).destroy();
-                KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
+//                KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
             }
             this.persistenceUnits = null;
             this.properties = null;

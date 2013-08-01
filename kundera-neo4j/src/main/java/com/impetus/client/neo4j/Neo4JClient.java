@@ -103,6 +103,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         indexer = new Neo4JIndexManager();
         mapper = new GraphEntityMapper(indexer);
         populateBatchSize(persistenceUnit, puProperties);
+        this.clientMetadata = factory.getClientMetadata();
 
     }
 

@@ -82,8 +82,7 @@ public class IndexManager
         if (indexer != null)
         {
 
-            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit())
-                    && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+            if (indexer.getClass().isAssignableFrom(LuceneIndexer.class))
             {
                 ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
             }
@@ -107,48 +106,50 @@ public class IndexManager
 
         try
         {
-            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()) && indexer != null
-                    && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+            if (indexer != null)
             {
-                Object id = PropertyAccessorHelper.getId(entity, metadata);
-
-                boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                        .entityExistsInIndex(entity.getClass());
-                if (documentExists)
+                if (indexer.getClass().isAssignableFrom(LuceneIndexer.class))
                 {
-                    ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
-                    ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
-                }
-                ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
-                        parentId != null ? parentId.toString() : null, clazz);
-            }
-            else
-            {
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getMetamodel(metadata.getPersistenceUnit());
+                    Object id = PropertyAccessorHelper.getId(entity, metadata);
 
-                Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
-                Map<String, Object> indexCollection = new HashMap<String, Object>();
-                Object id = PropertyAccessorHelper.getId(entity, metadata);
-                for (String columnName : indexProperties.keySet())
+                    boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                            .entityExistsInIndex(entity.getClass());
+                    if (documentExists)
+                    {
+                        ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
+                        ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
+                    }
+                    ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
+                            parentId != null ? parentId.toString() : null, clazz);
+                }
+                else
                 {
-                    PropertyIndex index = indexProperties.get(columnName);
-                    java.lang.reflect.Field property = index.getProperty();
-                    // String propertyName = index.getName();
-                    Object obj = PropertyAccessorHelper.getObject(entity, property);
-                    indexCollection.put(columnName, obj);
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(metadata.getPersistenceUnit());
 
+                    Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
+                    Map<String, Object> indexCollection = new HashMap<String, Object>();
+                    Object id = PropertyAccessorHelper.getId(entity, metadata);
+                    for (String columnName : indexProperties.keySet())
+                    {
+                        PropertyIndex index = indexProperties.get(columnName);
+                        java.lang.reflect.Field property = index.getProperty();
+                        // String propertyName = index.getName();
+                        Object obj = PropertyAccessorHelper.getObject(entity, property);
+                        indexCollection.put(columnName, obj);
+
+                    }
+
+                    indexCollection.put(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), id);
+
+                    EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                    if (parentId != null)
+                        indexCollection.put(((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName(),
+                                parentId);
+
+                    onEmbeddable(entity, metadata.getEntityClazz(), metaModel, indexCollection);
+                    indexer.index(metadata.getEntityClazz(), indexCollection);
                 }
-
-                indexCollection.put(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), id);
-
-                EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-                if (parentId != null)
-                    indexCollection.put(((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName(),
-                            parentId);
-
-                onEmbeddable(entity, metadata.getEntityClazz(), metaModel, indexCollection);
-                indexer.index(metadata.getEntityClazz(), indexCollection);
             }
         }
         catch (PropertyAccessException e)
@@ -212,7 +213,7 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity)
     {
-        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        if (indexer != null)
         {
             ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity);
         }
@@ -232,7 +233,7 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
-        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        if (indexer != null)
         {
 
             ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity, parentId, clazz);
@@ -324,15 +325,19 @@ public class IndexManager
      */
     public final Map<String, Object> search(String query, int start, int count)
     {
-        if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+        if (indexer != null)
         {
-            return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start, count,
-                    false) : null;
+            if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+            {
+                return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start,
+                        count, false) : null;
+            }
+            else
+            {
+                return indexer.search(query, start, count);
+            }
         }
-        else
-        {
-            return indexer.search(query, start, count);
-        }
+        return new HashMap<String, Object>();
     }
 
     /**
@@ -350,15 +355,19 @@ public class IndexManager
      */
     public final Map<String, Object> search(String query, int start, int count, boolean fetchRelation)
     {
-        if (indexer != null && indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+        if (indexer != null)
         {
-            return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start, count,
-                    fetchRelation) : null;
+            if (indexer.getClass().isAssignableFrom(LuceneIndexer.class))
+            {
+                return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start,
+                        count, fetchRelation) : null;
+            }
+            else
+            {
+                return indexer.search(query, start, count);
+            }
         }
-        else
-        {
-            return indexer.search(query, start, count);
-        }
+        return new HashMap<String, Object>();
     }
 
     /**

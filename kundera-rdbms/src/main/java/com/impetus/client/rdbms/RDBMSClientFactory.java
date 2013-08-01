@@ -110,7 +110,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, sf, externalProperties);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, sf, externalProperties, clientMetadata);
     }
 
     @Override

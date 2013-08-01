@@ -166,7 +166,7 @@ public class SchemaManagerTest
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
-        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
+//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();

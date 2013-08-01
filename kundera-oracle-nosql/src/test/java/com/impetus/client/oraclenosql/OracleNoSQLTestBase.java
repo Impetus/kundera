@@ -25,8 +25,10 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+
 
 /**
  * Base class for all test cases
@@ -155,7 +157,11 @@ public class OracleNoSQLTestBase
     {
         if (emf != null)
         {
-            ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(PERSISTENCE_UNIT);
+           Map<String,Client> clients = (Map<String, Client>) em.getDelegate();
+           
+           OracleNoSQLClient client = (OracleNoSQLClient) clients.get(PERSISTENCE_UNIT);
+           
+           ClientMetadata clientMetadata = ((ClientBase)client).getClientMetadata() ;
             String luceneDirectory = clientMetadata.getLuceneIndexDir();
             if (!StringUtils.isEmpty(luceneDirectory))
             {

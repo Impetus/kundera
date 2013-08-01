@@ -37,7 +37,9 @@ import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -254,7 +256,8 @@ class ResultIterator<E> implements IResultIterator<E>
             else
             {
                 // Index in Inverted Index table if applicable
-                boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
+                boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
+                        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
                 Map<Boolean, List<IndexClause>> ixClause = query.prepareIndexClause(m, useInvertedIndex);
                 if (useInvertedIndex && !((QueryImpl) query).getKunderaQuery().getFilterClauseQueue().isEmpty())
                 {

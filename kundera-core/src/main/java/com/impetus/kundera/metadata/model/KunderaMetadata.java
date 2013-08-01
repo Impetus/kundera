@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The Class KunderaMetadata.
@@ -33,9 +31,6 @@ public class KunderaMetadata
     /** The application metadata. */
     private ApplicationMetadata applicationMetadata;
 
-    /* Client specific persistence unit specific metadata */
-    /** The client metadata. */
-    private Map<String, ClientMetadata> clientMetadata = new HashMap<String, ClientMetadata>();
 
     /** The Constant INSTANCE. */
     public static final KunderaMetadata INSTANCE = new KunderaMetadata();
@@ -98,47 +93,4 @@ public class KunderaMetadata
         this.coreMetadata = coreMetadata;
     }
 
-    /**
-     * Gets the client metadata.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @return the client metadata
-     */
-    public ClientMetadata getClientMetadata(String persistenceUnit)
-    {
-        return clientMetadata.get(persistenceUnit);
-    }
-
-    /**
-     * Adds the client metadata.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @param clientMetadata
-     *            the client metadata
-     */
-    public void addClientMetadata(String persistenceUnit, ClientMetadata clientMetadata)
-    {
-        this.clientMetadata.put(persistenceUnit, clientMetadata);
-    }
-
-    /**
-     * Unloads client metadata for given pu.
-     * 
-     * @param pu
-     */
-    public void unloadKunderaMetadata(final String pu)
-    {
-        ClientMetadata clientMetadata = getClientMetadata(pu);
-        if (clientMetadata != null)
-        {
-            this.clientMetadata.remove(pu);
-            clientMetadata.setClientImplementor(null);
-            clientMetadata.setIndexImplementor(null);
-            clientMetadata.setLuceneIndexDir(null);
-            clientMetadata = null;
-            addClientMetadata(pu, null);
-        }
-    }
 }

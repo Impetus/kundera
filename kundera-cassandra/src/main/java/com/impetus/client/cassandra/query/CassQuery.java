@@ -43,6 +43,7 @@ import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -62,8 +63,8 @@ import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * @author vivek.mishra
-
- * Query implementation for Cassandra.
+ * 
+ *         Query implementation for Cassandra.
  */
 public class CassQuery extends QueryImpl
 {
@@ -75,6 +76,8 @@ public class CassQuery extends QueryImpl
     private EntityReader reader;
 
     private Map<String, Object> externalProperties;
+
+    private boolean isSingleResult = false;
 
     /**
      * Instantiates a new cass query.
@@ -119,8 +122,8 @@ public class CassQuery extends QueryImpl
 
         if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            result = ((CassandraClientBase) client).executeQuery(
-                    onQueryOverCQL3(m, client, metaModel, null), m.getEntityClazz(), null);
+            result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
+                    m.getEntityClazz(), null);
         }
         else
         {
@@ -131,10 +134,11 @@ public class CassQuery extends QueryImpl
             }
             else
             {
-                if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+                if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
                     // Index in Inverted Index table if applicable
-                    boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
+                    boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
+                            MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
                     Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m, useInvertedIndex);
                     if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
                     {
@@ -146,12 +150,14 @@ public class CassQuery extends QueryImpl
                         if (!isRowKeyQuery)
                         {
                             result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null,
-                                    maxResult, getColumnList(m, getKunderaQuery().getResult(), null));
+                                    isSingleResult ? 1 : this.maxResult,
+                                    getColumnList(m, getKunderaQuery().getResult(), null));
                         }
                         else
                         {
                             result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result,
-                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null),this.maxResult);
+                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null),
+                                    isSingleResult ? 1 : this.maxResult);
                         }
                     }
 
@@ -191,13 +197,15 @@ public class CassQuery extends QueryImpl
         else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             ls = ((CassandraClientBase) client).executeQuery(
-                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(), m.getRelationNames());
+                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(),
+                    m.getRelationNames());
         }
         else
         {
             // Index in Inverted Index table if applicable
-            boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
-            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(
+            boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
+                    MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
+            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()) ? prepareIndexClause(
                     m, useInvertedIndex) : null;
 
             if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
@@ -207,7 +215,7 @@ public class CassQuery extends QueryImpl
             else
             {
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
-                ls = reader.populateRelation(m, client,this.maxResult);
+                ls = reader.populateRelation(m, client, isSingleResult ? 1 : this.maxResult);
             }
         }
         return setRelationEntities(ls, client, m);
@@ -422,9 +430,7 @@ public class CassQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new CassandraEntityReader(
-                    !MetadataUtils.useSecondryIndex(getEntityMetadata().getPersistenceUnit()) ? getLuceneQueryFromJPAQuery()
-                            : null);
+            reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
         }
 
         return reader;
@@ -573,8 +579,10 @@ public class CassQuery extends QueryImpl
         return builder.toString();
         // onLimit(builder);
 
-//        result = ((CassandraClientBase) client).executeQuery(builder.toString(), m.getEntityClazz(), relations);
-//        return result;
+        // result = ((CassandraClientBase)
+        // client).executeQuery(builder.toString(), m.getEntityClazz(),
+        // relations);
+        // return result;
     }
 
     /**
@@ -586,7 +594,7 @@ public class CassQuery extends QueryImpl
     private void onLimit(StringBuilder builder)
     {
         builder.append(CQLTranslator.LIMIT);
-        builder.append(this.maxResult);
+        builder.append(isSingleResult ? 1 : this.maxResult);
     }
 
     /**
@@ -730,20 +738,31 @@ public class CassQuery extends QueryImpl
     public Iterator iterate()
     {
         EntityMetadata m = getEntityMetadata();
-        externalProperties = ((CassandraClientBase) persistenceDelegeator.getClient(m)).getExternalProperties();
-
-
-        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        Client client = persistenceDelegeator.getClient(m);
+        externalProperties = ((CassandraClientBase) client).getExternalProperties();
+        
+        if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
         }
 
-        return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(), getFetchSize() !=null ? getFetchSize() : this.maxResult);
+        return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(),
+                getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
-
 
     void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         super.setRelationEntities(enhanceEntities, client, m);
     }
+
+    @Override
+    public Object getSingleResult()
+    {
+        // to fetch a single result form database.
+        isSingleResult = true;
+        List results = getResultList();
+        isSingleResult=false;
+        return results.isEmpty() ? results : results.get(0);
+    }
+
 }
