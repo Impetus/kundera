@@ -45,6 +45,9 @@ public class TableInfo
 
     /** The embedded column metadatas. */
     private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
+    
+    /** The collection column metadatas. */
+    private List<CollectionColumnInfo> collectionColumnMetadatas;
 
     /**
      * 
@@ -220,6 +223,34 @@ public class TableInfo
             this.embeddedColumnMetadatas = new ArrayList<EmbeddedColumnInfo>();
         }
         return embeddedColumnMetadatas;
+    }   
+
+    /**
+     * @return the collectionColumnMetadatas
+     */
+    public List<CollectionColumnInfo> getCollectionColumnMetadatas()
+    {
+        if(this.collectionColumnMetadatas == null)
+        {
+            this.collectionColumnMetadatas = new ArrayList<CollectionColumnInfo>();
+        }
+        return collectionColumnMetadatas;
+    }
+
+    /**
+     * @param collectionColumnMetadatas the collectionColumnMetadatas to set
+     */
+    public void addCollectionColumnMetadata(CollectionColumnInfo collectionColumnMetadata)
+    {
+        if(this.collectionColumnMetadatas == null)
+        {
+            this.collectionColumnMetadatas = new ArrayList<CollectionColumnInfo>();
+        }
+        
+        if(! collectionColumnMetadatas.contains(collectionColumnMetadata))
+        {
+            collectionColumnMetadatas.add(collectionColumnMetadata);
+        }         
     }
 
     /**

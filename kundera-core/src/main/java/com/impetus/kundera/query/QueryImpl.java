@@ -511,8 +511,15 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                             Attribute attribute = entityType.getAttribute(columnName);
 
                             // TODO : catch column name.
-                            PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue()
-                                    .toString());
+                            
+                            if(c.getValue() instanceof String)
+                            {
+                                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue().toString());                                
+                            }
+                            else
+                            {
+                                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue());
+                            }
                             persistenceDelegeator.merge(result);
                         }
                         catch (IllegalArgumentException iax)

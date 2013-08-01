@@ -19,10 +19,12 @@ import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
@@ -37,9 +39,14 @@ import org.apache.cassandra.db.marshal.DoubleType;
 import org.apache.cassandra.db.marshal.FloatType;
 import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.MapType;
+import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+
+import antlr.collections.List;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -408,42 +415,154 @@ public final class CQLTranslator
     public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
     {
         if (value != null)
-        {
-            isPresent = true;
-            // CQL can take string or date within single quotes.
-
-            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
-                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    || value instanceof Enum)
+        {            
+            if (List.class.isAssignableFrom(fieldClazz))
             {
-                if (fieldClazz.isAssignableFrom(String.class))
+                isPresent = appendList(builder, value);
+            }
+            
+            else if (Set.class.isAssignableFrom(fieldClazz))
+            {
+                isPresent = appendSet(builder, value);
+            }
+            
+            else if (Map.class.isAssignableFrom(fieldClazz))
+            {
+                isPresent = appendMap(builder, value);
+            }
+            else   
+            {                
+                isPresent = true;
+                appendValue(builder, fieldClazz, value);
+            }
+        }
+        return isPresent;
+    }
+    
+    /**
+     * Appends a object of type {@link java.util.List}
+     * @param builder
+     * @param value
+     * @return
+     */
+    private boolean appendList(StringBuilder builder, Object value)
+    {
+        boolean isPresent;
+        isPresent = true;
+        Collection collection = ((Collection) value);
+        if(! collection.isEmpty())
+        {
+            builder.append("[");
+            for(Object o : collection)
+            {
+                if(o != null)
                 {
-                    // To allow escape character
-                    value = ((String) value).replaceAll("'", "''");
+                    appendValue(builder, o.getClass(), o);
                 }
-                builder.append("'");
+                builder.append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append("]");
+        }
+        return isPresent;
+    }
+    
+    /**
+     * Appends a object of type {@link java.util.Map}
+     * @param builder
+     * @param value
+     * @return
+     */
+    private boolean appendSet(StringBuilder builder, Object value)
+    {
+        boolean isPresent;
+        isPresent = true;
+        Collection collection = ((Collection) value);
+        if(! collection.isEmpty())
+        {
+            builder.append("{");
+            for(Object o : collection)
+            {
+                if(o != null)
+                {
+                    appendValue(builder, o.getClass(), o);
+                }
+                builder.append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append("}");
+        }
+        return isPresent;
+    }
 
-                if (isDate(fieldClazz)) // For CQL, date has to
-                                        // be in date.getTime()
+    /**
+     * Appends a object of type {@link java.util.List}
+     * @param builder
+     * @param value
+     * @return
+     */
+    private boolean appendMap(StringBuilder builder, Object value)
+    {
+        boolean isPresent;
+        isPresent = true;
+        Map map = ((Map) value);
+        if(! map.isEmpty())
+        {
+            builder.append("{");
+            for(Object mapKey : map.keySet())
+            {
+                Object mapValue = map.get(mapKey);
+                if(mapKey != null && mapValue != null)
                 {
-                    builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
+                    appendValue(builder, mapKey.getClass(), mapKey);
+                    builder.append(":");
+                    appendValue(builder, mapValue.getClass(), mapValue);
                 }
-                else if (value instanceof Enum)
-                {
-                    builder.append(((Enum) value).name());
-                }
-                else
-                {
-                    builder.append(value);
-                }
-                builder.append("'");
+                builder.append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append("}");
+        }
+        return isPresent;
+    }   
+
+    /**
+     * @param builder
+     * @param fieldClazz
+     * @param value
+     */
+    private void appendValue(StringBuilder builder, Class fieldClazz, Object value)
+    {
+        if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz) || fieldClazz.isAssignableFrom(char.class)
+                || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum)
+        {
+
+            if (fieldClazz.isAssignableFrom(String.class))
+            {
+                // To allow escape character
+                value = ((String) value).replaceAll("'", "''");
+            }
+            builder.append("'");
+
+            if (isDate(fieldClazz)) // For CQL, date has to
+                                    // be in date.getTime()
+            {
+                builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
+            }
+            else if (value instanceof Enum)
+            {
+                builder.append(((Enum) value).name());
             }
             else
             {
                 builder.append(value);
             }
+            builder.append("'");
         }
-        return isPresent;
+        else
+        {
+            builder.append(value);
+        }
     }
 
     /**
@@ -532,6 +651,11 @@ public final class CQLTranslator
             validationClassMapper.put(UUIDType.class.getSimpleName(), "uuid");
 
             validationClassMapper.put(DateType.class.getSimpleName(), "timestamp");
+            
+            //collection types
+            validationClassMapper.put(ListType.class.getSimpleName(), "list");
+            validationClassMapper.put(SetType.class.getSimpleName(), "set");
+            validationClassMapper.put(MapType.class.getSimpleName(), "map");
 
             mapper = Collections.synchronizedMap(validationClassMapper);
         }

@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.persistence.CassandraCli;
@@ -77,6 +78,22 @@ public class CQLTranslatorTest
                         TranslationType.VALUE);
         String columnAsCsv = "'mevivs',1," + timeLineId + ",'my first tweet','" + currentDate.getTime() + "'";
         Assert.assertEquals(columnAsCsv, translatedSql);
+    }
+    
+    @Test
+    public void testGetKeyword()
+    {
+        CQLTranslator translator = new CQLTranslator();
+        Assert.assertEquals("read_repair_chance", translator.getKeyword(CassandraConstants.READ_REPAIR_CHANCE));
+        Assert.assertEquals("dclocal_read_repair_chance", translator.getKeyword(CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE));
+        Assert.assertEquals("bloom_filter_fp_chance", translator.getKeyword(CassandraConstants.BLOOM_FILTER_FP_CHANCE));
+        Assert.assertEquals("compaction_strategy_class", translator.getKeyword(CassandraConstants.COMPACTION_STRATEGY));
+        Assert.assertEquals("bloom_filter_fp_chance", translator.getKeyword(CassandraConstants.BLOOM_FILTER_FP_CHANCE));
+        Assert.assertEquals("replicate_on_write", translator.getKeyword(CassandraConstants.REPLICATE_ON_WRITE));
+        Assert.assertEquals("caching", translator.getKeyword(CassandraConstants.CACHING));
+        Assert.assertEquals("comment", translator.getKeyword(CassandraConstants.COMMENT));
+        Assert.assertEquals("gc_grace_seconds", translator.getKeyword(CassandraConstants.GC_GRACE_SECONDS));    
+        
     }
 
     @After

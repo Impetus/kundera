@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb.schemamanager;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -29,8 +30,11 @@ import org.junit.Test;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBClientFactory;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.configure.schema.SchemaGenerationException;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -59,10 +63,7 @@ public class MongoDBSchemaManagerTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(persistenceUnit);
-        em = emf.createEntityManager();
-        em.getDelegate();
-        getDB();
+        
     }
 
     /**
@@ -73,6 +74,74 @@ public class MongoDBSchemaManagerTest
     {
         truncateMongo();
     }
+    
+    
+    @Test
+    public void testValidate()
+    {
+       
+        try
+        {
+            Map props = new HashMap();
+            props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");        
+            emf = Persistence.createEntityManagerFactory(persistenceUnit, props); 
+            Assert.fail("Schema generation exception should have been thrown since schema doesn't exist");            
+        }
+        catch (Exception e)
+        {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    @Test
+    public void testUpdate()
+    {
+       
+            Map props = new HashMap();
+            props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");  
+            KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+            emf = Persistence.createEntityManagerFactory(persistenceUnit, props);
+            em = emf.createEntityManager();
+            
+            getDB();
+            
+            DBCollection collection = db.getCollection("MongoDBEntitySimple");
+            Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
+            Assert.assertNotNull(collection.getIndexInfo());
+            Assert.assertEquals(4, collection.getIndexInfo().size());
+            int count = 0;
+            for (DBObject dbObject : collection.getIndexInfo())
+            {
+
+                if (dbObject.get("name").equals("_id_"))
+                {
+                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("_id", 1)));
+                    count++;
+                }
+                else if (dbObject.get("name").equals("PERSON_NAME_1"))
+                {
+                    Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
+                    Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
+                    count++;
+                }
+                else if (dbObject.get("name").equals("AGE_-1"))
+                {
+                    Assert.assertEquals(new Integer(100), dbObject.get("min"));
+                    Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
+                    count++;
+                }
+                else
+                {
+                    Assert.assertEquals(new Integer(-100), dbObject.get("min"));
+                    Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                    Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", "2d")));
+                    count++;
+                }
+            }
+            Assert.assertEquals(4, count);
+    }    
 
     /**
      * Test method for
@@ -82,6 +151,10 @@ public class MongoDBSchemaManagerTest
     @Test
     public void testCreate()
     {
+        emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        em = emf.createEntityManager();
+        getDB();
+        
         DBCollection collection = db.getCollection("MongoDBEntitySimple");
         Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
@@ -128,7 +201,10 @@ public class MongoDBSchemaManagerTest
      @Test
     public void testDropSchema()
     {
-//         testCreate();
+         emf = Persistence.createEntityManagerFactory(persistenceUnit);
+         em = emf.createEntityManager();
+         getDB();
+         
          MongoDBClientFactory clientFactory = (MongoDBClientFactory) ClientResolver.getClientFactory(persistenceUnit);
          clientFactory.getSchemaManager(null).dropSchema();
          DBCollection collection = db.getCollection("MongoDBEntitySimple");

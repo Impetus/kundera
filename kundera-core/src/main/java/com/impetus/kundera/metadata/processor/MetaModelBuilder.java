@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
@@ -207,7 +208,14 @@ public final class MetaModelBuilder<X, T>
                             .getActualTypeArguments();
 
                     return processOnEmbeddables(getTypedClass(argument[0]));
-                }
+                }                
+                else if(attribute != null && Map.class.isAssignableFrom(attribType))
+                {
+                    java.lang.reflect.Type[] argument = ((ParameterizedType) attribute.getGenericType())
+                    .getActualTypeArguments();
+                    processOnEmbeddables(getTypedClass(argument[0]));
+                    return processOnEmbeddables(getTypedClass(argument[1]));
+                }                
                 else
                 {
                     LOG.warn("Cannot process for : " + attribute
@@ -265,9 +273,17 @@ public final class MetaModelBuilder<X, T>
             // Check if this embeddable type is already present in
             // collection of MetaModelBuider.
             AbstractManagedType<T> embeddableType = null;
+            
+            PersistenceType persistenceType = PersistenceType.BASIC;
+            Annotation embeddableAnnotation = attribType.getAnnotation(Embeddable.class);
+            if(embeddableAnnotation != null)
+            {
+                persistenceType = PersistenceType.EMBEDDABLE;
+            }
+            
             if (!embeddables.containsKey(attribType))
             {
-                embeddableType = new DefaultEmbeddableType<T>(attribType, PersistenceType.EMBEDDABLE, null);
+                embeddableType = new DefaultEmbeddableType<T>(attribType, persistenceType, null);
 
                 if (attribute != null)
                 {

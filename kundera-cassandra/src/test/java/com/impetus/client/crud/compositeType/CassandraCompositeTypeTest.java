@@ -43,6 +43,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -79,6 +80,8 @@ public class CassandraCompositeTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
+        
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test
