@@ -89,7 +89,8 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException;
+    void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity,
+            String columnFamilyName) throws IOException;
 
     /**
      * Write relations.
@@ -106,7 +107,7 @@ public interface Writer
      *             Signals that an I/O exception has occurred.
      */
     void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
-            List<RelationHolder> relations) throws IOException;
+            List<RelationHolder> relations, String columnFamilyName) throws IOException;
 
     /**
      * Writes foreign keys along with a database table. They are stored into a
@@ -139,7 +140,8 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns) throws IOException;
+    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
+            throws IOException;
 
     /**
      * Delete.

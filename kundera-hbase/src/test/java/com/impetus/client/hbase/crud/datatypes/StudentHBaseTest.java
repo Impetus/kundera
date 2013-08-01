@@ -455,17 +455,13 @@ public class StudentHBaseTest extends StudentBase<StudentHBase>
     @Override
     void createSchema()
     {
-        cli.createTable("STUDENT");
+        cli.createTable("KunderaExamples", "STUDENT");
     }
 
     @Override
     void deleteSchema()
     {
-        cli.dropTable("NETSTAT_DTL_SMRY");
-        cli.dropTable("STUDENT");
-        cli.dropTable("PERSON_HBASE");
-        cli.dropTable("PERSON");
-        cli.dropTable("Address");
+        cli.dropTable("KunderaExamples");
     }
 
 }

@@ -224,7 +224,8 @@ public class StudentHBaseBooleanWrapperTest extends Base
         List<StudentHBaseBooleanWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBooleanWrapper s where s.name = Kuldeep or s.age > " + getPartialValue(short.class);
+        query = "Select s From StudentHBaseBooleanWrapper s where s.name = Kuldeep or s.age > "
+                + getPartialValue(short.class);
         try
         {
             q = em.createQuery(query);
@@ -388,8 +389,8 @@ public class StudentHBaseBooleanWrapperTest extends Base
         Query q;
         List<StudentHBaseBooleanWrapper> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBooleanWrapper s where s.name = Amresh and s.age > " + getPartialValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseBooleanWrapper s where s.name = Amresh and s.age > "
+                + getPartialValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -542,13 +543,13 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     public void createSchema()
     {
-        cli.createTable(table);
+        cli.createTable(keyspace, table);
 
     }
 
     public void dropSchema()
     {
-        cli.dropTable(table);
+        cli.dropTable(keyspace);
     }
 
 }

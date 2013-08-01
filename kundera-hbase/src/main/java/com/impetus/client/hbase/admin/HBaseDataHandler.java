@@ -223,17 +223,17 @@ public class HBaseDataHandler implements DataHandler
 
         hTable = gethTable(tableName);
 
-        if (getFilter(tableName) != null)
+        if (getFilter(m.getTableName()) != null)
         {
             if (f == null)
             {
                 f = new FilterList();
             }
-            f.addFilter(getFilter(tableName));
+            f.addFilter(getFilter(m.getTableName()));
         }
 
         // Load raw data from HBase
-        List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, f, columns);
+        List<HBaseData> results = hbaseReader.LoadData(hTable, m.getTableName(), rowKey, f, columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -260,7 +260,7 @@ public class HBaseDataHandler implements DataHandler
         hTable = gethTable(tableName);
 
         // Load raw data from HBase
-        List<HBaseData> results = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, tableName, columns);
+        List<HBaseData> results = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, m.getTableName(), columns);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
@@ -283,13 +283,13 @@ public class HBaseDataHandler implements DataHandler
         Object entity = null;
         List<String> relationNames = m.getRelationNames();
 
-        if (getFilter(tableName) != null)
+        if (getFilter(m.getTableName()) != null)
         {
             if (f == null)
             {
                 f = new FilterList();
             }
-            f.addFilter(getFilter(tableName));
+            f.addFilter(getFilter(m.getTableName()));
         }
         // Load raw data from HBase
         hTable = gethTable(tableName);
@@ -323,9 +323,11 @@ public class HBaseDataHandler implements DataHandler
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashSet<Attribute>(), entity, null);
         List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
 
-        preparePersistentData(tableName, entity, rowId, metaModel, attributes, columnWrapper, persistentData);
+        preparePersistentData(tableName, m.getTableName(), entity, rowId, metaModel, attributes, columnWrapper,
+                persistentData);
 
-        hbaseWriter.writeColumns(hTable, columnWrapper.getRowKey(), columnWrapper.getColumns(), entity);
+        hbaseWriter.writeColumns(hTable, columnWrapper.getRowKey(), columnWrapper.getColumns(), entity,
+                m.getTableName());
 
         for (HBaseDataWrapper wrapper : persistentData)
         {
@@ -339,7 +341,7 @@ public class HBaseDataHandler implements DataHandler
 
         if (relations != null && !relations.isEmpty())
         {
-            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations);
+            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations, m.getTableName());
         }
         puthTable(hTable);
     }
@@ -352,11 +354,12 @@ public class HBaseDataHandler implements DataHandler
      * .String, java.lang.String, java.util.Map)
      */
     @Override
-    public void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns) throws IOException
+    public void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String joinTableName)
+            throws IOException
     {
         HTableInterface hTable = gethTable(tableName);
 
-        hbaseWriter.writeColumns(hTable, rowId, columns);
+        hbaseWriter.writeColumns(hTable, rowId, columns, joinTableName);
 
         puthTable(hTable);
 
@@ -721,9 +724,9 @@ public class HBaseDataHandler implements DataHandler
      * com.impetus.client.hbase.admin.DataHandler#deleteRow(java.lang.String,
      * java.lang.String)
      */
-    public void deleteRow(Object rowKey, String tableName) throws IOException
+    public void deleteRow(Object rowKey, String tableName, String columnFamilyName) throws IOException
     {
-        hbaseWriter.delete(gethTable(tableName), rowKey, tableName);
+        hbaseWriter.delete(gethTable(tableName), rowKey, columnFamilyName);
     }
 
     @Override
@@ -838,7 +841,7 @@ public class HBaseDataHandler implements DataHandler
      */
     public static class HBaseDataWrapper
     {
-        Object rowKey;
+        private Object rowKey;
 
         private Set<Attribute> columns;
 
@@ -978,9 +981,9 @@ public class HBaseDataHandler implements DataHandler
      * @return
      * @throws IOException
      */
-    public void preparePersistentData(String tableName, Object entity, Object rowId, MetamodelImpl metaModel,
-            Set<Attribute> attributes, HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> persistentData)
-            throws IOException
+    public void preparePersistentData(String tableName, String columnFamily, Object entity, Object rowId,
+            MetamodelImpl metaModel, Set<Attribute> attributes, HBaseDataWrapper columnWrapper,
+            List<HBaseDataWrapper> persistentData) throws IOException
     {
         for (Attribute column : attributes)
         {
@@ -1018,9 +1021,12 @@ public class HBaseDataHandler implements DataHandler
                             for (Object obj : (Collection) columnFamilyObject)
                             {
                                 dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-                                addColumnFamilyToTable(tableName, dynamicCFName);
 
-                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
+                                addColumnFamilyToTable(tableName, dynamicCFName);
+                                // prepare column name for @ElementCollection
+                                // columns.
+
+                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, columnFamily));
                                 count++;
                             }
                         }
@@ -1045,7 +1051,7 @@ public class HBaseDataHandler implements DataHandler
 
                                 }
                                 addColumnFamilyToTable(tableName, dynamicCFName);
-                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
+                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, columnFamily));
                             }
                             // Clear embedded collection cache for GC
                             ecCacheHandler.clearCache();
@@ -1057,11 +1063,12 @@ public class HBaseDataHandler implements DataHandler
                         // entity
                         if (columnFamilyField.isAnnotationPresent(Embedded.class))
                         {
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, tableName));
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, columnFamily));
                         }
                         else
                         {
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, tableName));
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject,
+                                    columnFamily));
                         }
                     }
                 }
@@ -1096,7 +1103,7 @@ public class HBaseDataHandler implements DataHandler
         results.add(result);
         try
         {
-            output = onRead(m.getTableName(), m.getEntityClazz(), m, output, gethTable(m.getTableName()), entity,
+            output = onRead(m.getSchema(), m.getEntityClazz(), m, output, gethTable(m.getSchema()), entity,
                     m.getRelationNames(), results);
         }
         catch (IOException e)
@@ -1108,23 +1115,24 @@ public class HBaseDataHandler implements DataHandler
         return output != null && !output.isEmpty() ? output.get(0) : output;
     }
 
-//    public List next(EntityMetadata m, final int chunkSize)
-//    {
-//        Object entity = null;
-//        List<HBaseData> results = ((HBaseReader) hbaseReader).next(chunkSize);
-//        List output = new ArrayList();
-//        try
-//        {
-//            output = onRead(m.getTableName(), m.getEntityClazz(), m, output, gethTable(m.getTableName()), entity,
-//                    m.getRelationNames(), results);
-//        }
-//        catch (IOException e)
-//        {
-//            log.error("Error during finding next record, Caused by: .", e);
-//            throw new KunderaException(e);
-//        }
-//        return output != null ? output : new ArrayList();
-//    }
+    // public List next(EntityMetadata m, final int chunkSize)
+    // {
+    // Object entity = null;
+    // List<HBaseData> results = ((HBaseReader) hbaseReader).next(chunkSize);
+    // List output = new ArrayList();
+    // try
+    // {
+    // output = onRead(m.getTableName(), m.getEntityClazz(), m, output,
+    // gethTable(m.getTableName()), entity,
+    // m.getRelationNames(), results);
+    // }
+    // catch (IOException e)
+    // {
+    // log.error("Error during finding next record, Caused by: .", e);
+    // throw new KunderaException(e);
+    // }
+    // return output != null ? output : new ArrayList();
+    // }
 
     public boolean hasNext()
     {

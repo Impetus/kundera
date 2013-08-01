@@ -26,8 +26,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
@@ -102,7 +100,7 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity)
+    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity, String columnFamilyName)
             throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -119,7 +117,7 @@ public class HBaseWriter implements Writer
                     Object value = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
                     if (value != null)
                     {
-                        p.add(htable.getTableName(), qualValInBytes, System.currentTimeMillis(),
+                        p.add(columnFamilyName.getBytes(), qualValInBytes, System.currentTimeMillis(),
                                 HBaseUtils.getBytes(value));
                         present = true;
                     }
@@ -144,7 +142,7 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Map)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns) throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns,String columnFamilyName) throws IOException
     {
 
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -152,9 +150,8 @@ public class HBaseWriter implements Writer
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.add(htable.getTableName(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
+            p.add(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
             isPresent = true;
-            // /* .getBytes() */);
         }
 
         if (isPresent)
@@ -172,7 +169,7 @@ public class HBaseWriter implements Writer
      */
     @Override
     public void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
-            List<RelationHolder> relations) throws IOException
+            List<RelationHolder> relations, String columnFamilyName ) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
@@ -189,14 +186,10 @@ public class HBaseWriter implements Writer
                 }
                 else
                 {
-                    p.add(htable.getTableName(), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
+                    p.add(columnFamilyName.getBytes(), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
                             PropertyAccessorHelper.getBytes(r.getRelationValue()));
-                    // p.add(Bytes.toBytes(r.getRelationName()),
-                    // System.currentTimeMillis(),
-                    // Bytes.toBytes(r.getRelationValue()));
                     isPresent = true;
                 }
-
             }
         }
 
@@ -250,9 +243,7 @@ public class HBaseWriter implements Writer
                         Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
                 isPresent = true;
             }
-
         }
-
         if (isPresent)
         {
             hTable.put(p);
@@ -311,7 +302,6 @@ public class HBaseWriter implements Writer
             hTable.put(dataSet);
             dataSet.clear();
         }
-
     }
 
     /**
@@ -334,7 +324,6 @@ public class HBaseWriter implements Writer
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
         for (Attribute column : columns)
-        // for (Column column : columns)
         {
             if (!column.isCollection() && !((SingularAttribute) column).isId())
             {

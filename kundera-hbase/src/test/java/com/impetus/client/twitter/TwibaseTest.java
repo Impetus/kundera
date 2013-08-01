@@ -89,8 +89,6 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Override
     void deleteSchema()
     {
-        cli.dropTable("EXTERNAL_LINK");
-        cli.dropTable("PREFERENCE");
-        cli.dropTable("USER_HBASE");        
+        cli.dropTable("KunderaExamples");
     }
 }

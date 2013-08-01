@@ -57,7 +57,7 @@ public interface DataHandler
      *            the m
      * @param rowKey
      *            the row key
-     * @param f 
+     * @param f
      * @param relationNames
      *            the relation names
      * @return the object
@@ -95,7 +95,7 @@ public interface DataHandler
      * @param startRow
      * @param endRow
      * @param columns
-     * @param f 
+     * @param f
      * @return
      */
     List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
@@ -132,7 +132,8 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns) throws IOException;
+    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String joinTableName)
+            throws IOException;
 
     /**
      * Retrieves a list of foreign keys from the join table for a given row key.
@@ -178,7 +179,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void deleteRow(Object rowKey, String tableName) throws IOException;
+    void deleteRow(Object rowKey, String tableName, String columnFamilyName) throws IOException;
 
     Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
             Class rowKeyClazz) throws IOException;

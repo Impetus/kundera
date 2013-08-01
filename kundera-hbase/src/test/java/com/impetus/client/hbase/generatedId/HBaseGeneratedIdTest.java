@@ -34,6 +34,7 @@ public class HBaseGeneratedIdTest
 
     private HBaseCli cli;
 
+    private static final String table = "kundera";
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -56,17 +57,7 @@ public class HBaseGeneratedIdTest
     public void tearDown() throws Exception
     {
         emf.close();
-        cli.dropTable("HBaseGeneratedIdDefault");
-        cli.dropTable("HBaseGeneratedIdStrategyAuto");
-        cli.dropTable("HBaseGeneratedIdStrategyIdentity");
-        cli.dropTable("HBaseGeneratedIdStrategySequence");
-        cli.dropTable("HBaseGeneratedIdStrategyTable");
-        cli.dropTable("HBaseGeneratedIdWithOutSequenceGenerator");
-        cli.dropTable("HBaseGeneratedIdWithOutTableGenerator");
-        cli.dropTable("HBaseGeneratedIdWithSequenceGenerator");
-        cli.dropTable("HBaseGeneratedIdWithTableGenerator");
-        cli.dropTable("kunderahbase");
-        cli.dropTable("kundera_sequences");
+        cli.dropTable("kundera");
     }
 
     @Test

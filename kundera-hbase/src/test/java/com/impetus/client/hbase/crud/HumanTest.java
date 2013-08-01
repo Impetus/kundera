@@ -76,8 +76,7 @@ public class HumanTest
         emf.close();
         if (cli != null)
         {
-            cli.dropTable("Humans");
-            cli.dropTable("HumansPrivatePhoto");
+            cli.dropTable("KunderaExamples");
         }
     }
 }

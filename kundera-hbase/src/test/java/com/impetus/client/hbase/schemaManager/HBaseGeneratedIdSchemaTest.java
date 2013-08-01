@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -17,6 +18,8 @@ import com.impetus.client.hbase.junits.HBaseCli;
 
 public class HBaseGeneratedIdSchemaTest
 {
+    private static final String table = "kundera";
+
     private EntityManagerFactory emf;
 
     private HBaseCli cli;
@@ -43,17 +46,7 @@ public class HBaseGeneratedIdSchemaTest
     public void tearDown() throws Exception
     {
         emf.close();
-        cli.dropTable("HBaseGeneratedIdDefault");
-        cli.dropTable("HBaseGeneratedIdStrategyAuto");
-        cli.dropTable("HBaseGeneratedIdStrategyIdentity");
-        cli.dropTable("HBaseGeneratedIdStrategySequence");
-        cli.dropTable("HBaseGeneratedIdStrategyTable");
-        cli.dropTable("HBaseGeneratedIdWithOutSequenceGenerator");
-        cli.dropTable("HBaseGeneratedIdWithOutTableGenerator");
-        cli.dropTable("HBaseGeneratedIdWithSequenceGenerator");
-        cli.dropTable("HBaseGeneratedIdWithTableGenerator");
-        cli.dropTable("kunderahbase");
-        cli.dropTable("kundera_sequences");
+        cli.dropTable("kundera");
     }
 
     @Test
@@ -62,17 +55,19 @@ public class HBaseGeneratedIdSchemaTest
         try
         {
             HBaseAdmin admin = HBaseCli.utility.getHBaseAdmin();
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdDefault".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdStrategyAuto".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdStrategyIdentity".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdStrategySequence".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdStrategyTable".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdWithOutSequenceGenerator".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdWithOutTableGenerator".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdWithSequenceGenerator".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("HBaseGeneratedIdWithTableGenerator".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("kunderahbase".getBytes()));
-            Assert.assertTrue(admin.isTableAvailable("kundera_sequences".getBytes()));
+            Assert.assertTrue(admin.isTableAvailable(table.getBytes()));
+            HTableDescriptor descriptor = admin.getTableDescriptor(table.getBytes());
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdDefault".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdStrategyAuto".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdStrategyIdentity".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdStrategySequence".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdStrategyTable".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdWithOutSequenceGenerator".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdWithOutTableGenerator".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdWithSequenceGenerator".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("HBaseGeneratedIdWithTableGenerator".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("kunderahbase".getBytes()));
+            Assert.assertNotNull(descriptor.getFamily("kundera_sequences".getBytes()));
         }
         catch (IOException e)
         {

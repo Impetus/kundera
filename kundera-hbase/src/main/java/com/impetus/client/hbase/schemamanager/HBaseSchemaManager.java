@@ -83,7 +83,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
-        super.exportSchema(persistenceUnit,schemas);
+        super.exportSchema(persistenceUnit, schemas);
     }
 
     /**
@@ -94,58 +94,22 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected void update(List<TableInfo> tableInfos)
     {
-        for (TableInfo tableInfo : tableInfos)
+        try
         {
-            if (tableInfo != null && tableInfo.getTableName() != null)
+            if (admin.isTableAvailable(databaseName))
             {
-                HTableDescriptor hTableDescriptor = getTableMetaData(tableInfo);
-                try
-                {
-                    HTableDescriptor descriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
-                    if (descriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
-                    {
-                        if (admin.isTableEnabled(tableInfo.getTableName().getBytes()))
-                        {
-                            admin.disableTable(tableInfo.getTableName().getBytes());
-                        }
-                        HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
-                        if (tableInfo.getColumnMetadatas() != null)
-                        {
-                            boolean found = false;
-                            HColumnDescriptor columnDescriptor = new HColumnDescriptor(tableInfo.getTableName());
-                            for (HColumnDescriptor hColumnDescriptor : descriptors)
-                            {
-                                if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                admin.addColumn(tableInfo.getTableName(), columnDescriptor);
-                            }
-                        }
-                        if (admin.isTableDisabled(tableInfo.getTableName().getBytes()))
-                        {
-                            admin.enableTable(tableInfo.getTableName().getBytes());
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    try
-                    {
-                        admin.createTable(hTableDescriptor);
-                    }
-                    catch (IOException ioe)
-                    {
-                        logger.error("Check for network connection, Caused by:", ioe);
-                        throw new SchemaGenerationException(ioe, "Hbase");
-                    }
-
-                }
+                HTableDescriptor hTableDescriptor = admin.getTableDescriptor(databaseName.getBytes());
+                addColumnFamilies(tableInfos, hTableDescriptor, true);
             }
+            else
+            {
+                createTable(tableInfos);
+            }
+        }
+        catch (IOException ioe)
+        {
+            logger.error("Either check for network connection or table isn't in enabled state, Caused by:", ioe);
+            throw new SchemaGenerationException(ioe, "Hbase");
         }
     }
 
@@ -157,16 +121,16 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected void validate(List<TableInfo> tableInfos)
     {
-        for (TableInfo tableInfo : tableInfos)
+        try
         {
-            HTableDescriptor hTableDescriptor;
-            try
+            HTableDescriptor hTableDescriptor = admin.getTableDescriptor(databaseName.getBytes());
+            HColumnDescriptor[] columnFamilies = hTableDescriptor.getColumnFamilies();
+            for (TableInfo tableInfo : tableInfos)
             {
-                hTableDescriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
-                if (tableInfo.getColumnMetadatas() != null)
+                if (tableInfo != null)
                 {
                     boolean isColumnFound = false;
-                    for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
+                    for (HColumnDescriptor columnDescriptor : columnFamilies)
                     {
                         if (columnDescriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                         {
@@ -177,21 +141,20 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                     if (!isColumnFound)
                     {
                         throw new SchemaGenerationException("column " + tableInfo.getTableName()
-                                + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
-                                tableInfo.getTableName(), tableInfo.getTableName());
+                                + " does not exist in table " + databaseName + "", "Hbase", databaseName,
+                                tableInfo.getTableName());
                     }
                 }
             }
-            catch (TableNotFoundException tnfex)
-            {
-                throw new SchemaGenerationException("table " + tableInfo.getTableName() + " does not exist ", tnfex,
-                        "Hbase");
-            }
-            catch (IOException ioe)
-            {
-                logger.error("Either check for network connection or table isn't in enabled state, Caused by:", ioe);
-                throw new SchemaGenerationException(ioe, "Hbase");
-            }
+        }
+        catch (TableNotFoundException tnfex)
+        {
+            throw new SchemaGenerationException("table " + databaseName + " does not exist ", tnfex, "Hbase");
+        }
+        catch (IOException ioe)
+        {
+            logger.error("Either check for network connection or table isn't in enabled state, Caused by:", ioe);
+            throw new SchemaGenerationException(ioe, "Hbase");
         }
     }
 
@@ -214,46 +177,65 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected void create(List<TableInfo> tableInfos)
     {
-        for (TableInfo tableInfo : tableInfos)
+        try
         {
-            if (tableInfo != null && tableInfo.getTableName() != null)
+            if (admin.isTableAvailable(databaseName))
             {
-                try
-                {
-                    if (admin.isTableAvailable(tableInfo.getTableName()))
-                    {
-                        if (admin.isTableEnabled(tableInfo.getTableName()))
-                        {
-                            admin.disableTable(tableInfo.getTableName());
-                        }
-                        admin.deleteTable(tableInfo.getTableName());
-                    }
-                }
-                catch (TableNotFoundException e)
-                {
-                    logger.info("creating table " + tableInfo.getTableName());
-                }
-                catch (IOException ioex)
-                {
-                    logger.error("Either table isn't in enabled state or some network problem, Caused by: ", ioex);
-                    throw new SchemaGenerationException(ioex, "Hbase");
-                }
-                HTableDescriptor hTableDescriptor = getTableMetaData(tableInfo);
-                try
-                {
-                    admin.createTable(hTableDescriptor);
-                    if (admin.isTableDisabled(tableInfo.getTableName()))
-                    {
-                        admin.enableTable(tableInfo.getTableName());
-                    }
-                }
-                catch (IOException ioe)
-                {
-                    logger.error("Error while creating table, Caused by:", ioe);
-                    throw new SchemaGenerationException(ioe, "Hbase");
-                }
+                addColumnFamilies(tableInfos, admin.getTableDescriptor(databaseName.getBytes()), false);
+            }
+            else
+            {
+                createTable(tableInfos);
+            }
+            if (admin.isTableDisabled(databaseName))
+            {
+                admin.enableTable(databaseName);
             }
         }
+        catch (TableNotFoundException e)
+        {
+            logger.info("creating table " + databaseName);
+        }
+        catch (IOException ioex)
+        {
+            logger.error("Either table isn't in enabled state or some network problem, Caused by: ", ioex);
+            throw new SchemaGenerationException(ioex, "Hbase");
+        }
+    }
+
+    private void addColumnFamilies(List<TableInfo> tableInfos, HTableDescriptor hTableDescriptor, boolean isUpdate)
+            throws IOException
+    {
+        if (admin.isTableEnabled(databaseName))
+        {
+            admin.disableTable(databaseName);
+        }
+        for (TableInfo tableInfo : tableInfos)
+        {
+            HColumnDescriptor columnDescriptor = hTableDescriptor.getFamily(tableInfo.getTableName().getBytes());
+            if (columnDescriptor != null && !isUpdate)
+            {
+                admin.deleteColumn(databaseName, tableInfo.getTableName());
+                addColumn(tableInfo);
+            }
+            else if (columnDescriptor == null)
+            {
+                addColumn(tableInfo);
+            }
+        }
+    }
+
+    private void addColumn(TableInfo tableInfo) throws IOException
+    {
+        HColumnDescriptor columnDescriptor;
+        columnDescriptor = getColumnDescriptor(tableInfo);
+        admin.addColumn(databaseName, columnDescriptor);
+    }
+
+    private void createTable(List<TableInfo> tableInfos) throws IOException
+    {
+        HTableDescriptor hTableDescriptor = getTableMetaData(tableInfos);
+        admin.createTable(hTableDescriptor);
     }
 
     /**
@@ -263,31 +245,46 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         if (operation != null && operation.equalsIgnoreCase("create-drop"))
         {
-            for (TableInfo tableInfo : tableInfos)
+            try
             {
-                if (tableInfo != null && tableInfo.getTableName() != null)
+                HTableDescriptor hTableDescriptor = null;
+                if (admin.isTableAvailable(databaseName))
                 {
-                    try
+                    if (admin.isTableEnabled(databaseName))
                     {
-                        if (admin.isTableAvailable(tableInfo.getTableName()))
+                        hTableDescriptor = admin.getTableDescriptor(databaseName.getBytes());
+                        admin.disableTable(databaseName);
+                    }
+                    for (TableInfo tableInfo : tableInfos)
+                    {
+                        if (tableInfo != null && tableInfo.getTableName() != null
+                                && hTableDescriptor.getFamily(tableInfo.getTableName().getBytes()) != null)
                         {
-                            if (admin.isTableEnabled(tableInfo.getTableName()))
-                            {
-                                admin.disableTable(tableInfo.getTableName());
-                            }
-                            admin.deleteTable(tableInfo.getTableName());
+                            admin.deleteColumn(databaseName, tableInfo.getTableName());
                         }
                     }
-                    catch (TableNotFoundException tnfe)
-                    {
-                        logger.error("Table doesn't exist, Caused by ", tnfe);
-                        throw new SchemaGenerationException(tnfe, "Hbase");
-                    }
-                    catch (IOException ioe)
-                    {
-                        logger.error("Table isn't in enabled state, Caused by", ioe);
-                        throw new SchemaGenerationException(ioe, "Hbase");
-                    }
+                }
+            }
+            catch (TableNotFoundException tnfe)
+            {
+                logger.error("Table doesn't exist, Caused by ", tnfe);
+                throw new SchemaGenerationException(tnfe, "Hbase");
+            }
+            catch (IOException ioe)
+            {
+                logger.error("Table isn't in enabled state, Caused by", ioe);
+                throw new SchemaGenerationException(ioe, "Hbase");
+            }
+            finally
+            {
+                try
+                {
+                    admin.enableTable(databaseName);
+                }
+                catch (IOException ioe)
+                {
+                    logger.error("Table isn't in enabled state, Caused by", ioe);
+                    throw new SchemaGenerationException(ioe, "Hbase");
                 }
             }
         }
@@ -367,9 +364,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      * 
      * @return HHTableDescriptor object for tableInfo
      */
-    private HTableDescriptor getTableMetaData(TableInfo tableInfo)
+    private HTableDescriptor getTableMetaData(List<TableInfo> tableInfos)
     {
-        HTableDescriptor tableDescriptor = new HTableDescriptor(tableInfo.getTableName());
+        HTableDescriptor tableDescriptor = new HTableDescriptor(databaseName);
         Properties tableProperties = null;
         schemas = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
                 .getSchemas() : null;
@@ -377,18 +374,20 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         {
             for (Schema s : schemas)
             {
-                if (s.getName() != null && s.getName().equalsIgnoreCase(tableInfo.getTableName()))
+                if (s.getName() != null && s.getName().equalsIgnoreCase(databaseName))
                 {
                     tableProperties = s.getSchemaProperties();
                     tables = s.getTables();
                 }
             }
         }
-        if (tableInfo.getColumnMetadatas() != null)
+        for (TableInfo tableInfo : tableInfos)
         {
-            HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(tableInfo.getTableName());
-            setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
-            tableDescriptor.addFamily(hColumnDescriptor);
+            if (tableInfo != null)
+            {
+                HColumnDescriptor hColumnDescriptor = getColumnDescriptor(tableInfo);
+                tableDescriptor.addFamily(hColumnDescriptor);
+            }
         }
         if (tableProperties != null)
         {
@@ -400,8 +399,27 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         return tableDescriptor;
     }
 
-    private void setColumnFamilyProperties(HColumnDescriptor columnDescriptor, String tableName)
+    private HColumnDescriptor getColumnDescriptor(TableInfo tableInfo)
     {
+        HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(tableInfo.getTableName());
+        setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
+        return hColumnDescriptor;
+    }
+
+    private void setColumnFamilyProperties(HColumnDescriptor columnDescriptor, String columnName)
+    {
+        schemas = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                .getSchemas() : null;
+        if (schemas != null && !schemas.isEmpty())
+        {
+            for (Schema s : schemas)
+            {
+                if (s.getName() != null && s.getName().equalsIgnoreCase(databaseName))
+                {
+                    tables = s.getTables();
+                }
+            }
+        }
         dataStore = HBasePropertyReader.hsmd.getDataStore();
         if (dataStore != null)
         {

@@ -21,6 +21,8 @@ public class StudentHBaseBigDecimalTest extends Base
 {
     private static final String table = "StudentHBaseBigDecimal";
 
+    private static final String keyspace = "KunderaHbaseDataType";
+
     private HBaseCli cli;
 
     private EntityManagerFactory emf;
@@ -560,13 +562,13 @@ public class StudentHBaseBigDecimalTest extends Base
 
     public void createSchema()
     {
-        cli.createTable(table);
+        cli.createTable(keyspace, table);
 
     }
 
     public void dropSchema()
     {
-        cli.dropTable(table);
+        cli.dropTable(keyspace);
     }
 
 }

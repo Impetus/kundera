@@ -31,6 +31,8 @@ import com.impetus.client.hbase.junits.HBaseCli;
 public class HBaseUserTest
 {
 
+    private static final String TABLE = "KunderaHbaseXmlTest";
+
     private EntityManagerFactory emf;
 
     private HBaseCli cli;
@@ -66,7 +68,7 @@ public class HBaseUserTest
         try
         {
             HTableDescriptor hTableDescriptor = HBaseCli.utility.getHBaseAdmin().getTableDescriptor(
-                    "HBASEUSERXYZ".getBytes());
+                    TABLE.getBytes());
             int count = 0;
             for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
             {
@@ -93,8 +95,8 @@ public class HBaseUserTest
         finally
         {
             emf.close();
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
-            cli.dropTable("HBASEUSERXYZ");
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable(TABLE));
+            cli.dropTable(TABLE);
         }
     }
 
@@ -107,7 +109,7 @@ public class HBaseUserTest
         emf = Persistence.createEntityManagerFactory("XmlPropertyTest", puProperties);
         try
         {
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("KunderaHbaseKeyspace"));
         }
         catch (TableNotFoundException tnfe)
         {
@@ -120,9 +122,9 @@ public class HBaseUserTest
         finally
         {
             emf.close();
-            if (HBaseCli.utility.getHBaseAdmin().isTableAvailable("HBASEUSERXYZ"))
+            if (HBaseCli.utility.getHBaseAdmin().isTableAvailable("KunderaHbaseKeyspace"))
             {
-                cli.dropTable("HBASEUSERXYZ");
+                cli.dropTable("KunderaHbaseKeyspace");
             }
         }
     }

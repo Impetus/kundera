@@ -171,13 +171,13 @@ class ResultIterator<E> implements IResultIterator<E>
 
             if (this.translator.isFindById() && (filter == null && columns == null))
             {
-                handler.readData(m.getTableName(), m.getEntityClazz(), entityMetadata, translator.rowKey,
+                handler.readData(m.getSchema(), m.getEntityClazz(), entityMetadata, translator.rowKey,
                         m.getRelationNames(), null);
 
             }
             if (translator.isFindById() && filter == null && columns != null)
             {
-                handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
+                handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
                         columnAsArr, null);
             }
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
@@ -189,12 +189,12 @@ class ResultIterator<E> implements IResultIterator<E>
                     // findAll.
                     if (translator.isRangeScan())
                     {
-                        handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.getStartRow(),
+                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
                                 translator.getEndRow(), columnAsArr, null);
                     }
                     else
                     {
-                        handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, null, null, columnAsArr, null);
+                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, null, null, columnAsArr, null);
                     }
                 }
                 else
@@ -208,7 +208,7 @@ class ResultIterator<E> implements IResultIterator<E>
                     }
                     if (translator.isRangeScan())
                     {
-                        handler.readDataByRange(m.getTableName(), m.getEntityClazz(), m, translator.getStartRow(),
+                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
                                 translator.getEndRow(), columnAsArr, f);
                     }
                     else
@@ -217,7 +217,7 @@ class ResultIterator<E> implements IResultIterator<E>
                         // range
                         // scan method.
 
-                        handler.readData(m.getTableName(), entityMetadata.getEntityClazz(), entityMetadata, null,
+                        handler.readData(m.getSchema(), entityMetadata.getEntityClazz(), entityMetadata, null,
                                 m.getRelationNames(), f, columnAsArr);
                     }
                 }

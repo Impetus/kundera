@@ -23,6 +23,8 @@ public class StudentHBaseCalendarTest extends Base
 
     private static final String table = "StudentHBaseCalendar";
 
+    private static final String keyspace = "KunderaHbaseDataType";
+    
     private EntityManagerFactory emf;
 
     private HBaseCli cli;
@@ -504,13 +506,13 @@ public class StudentHBaseCalendarTest extends Base
 
     public void createSchema()
     {
-        cli.createTable(table);
+        cli.createTable(keyspace, table);
 
     }
 
     public void dropSchema()
     {
-        cli.dropTable(table);
+        cli.dropTable(keyspace);
     }
 
 }

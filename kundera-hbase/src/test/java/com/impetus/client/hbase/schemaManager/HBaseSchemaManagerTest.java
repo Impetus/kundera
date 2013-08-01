@@ -71,6 +71,8 @@ public class HBaseSchemaManagerTest
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManagerTest.class);
 
+    private static final String TABLE = "KunderaHbaseExamples";
+
     /**
      * Sets the up.
      * 
@@ -102,36 +104,37 @@ public class HBaseSchemaManagerTest
     public void tearDown() throws Exception
     {
         // if (HBaseCli.isStarted)
-//        cli.dropTable("HbaseEntitySimple");
+        // cli.dropTable("HbaseEntitySimple");
         cli.stopCluster();
         appMetadata = null;
     }
 
-    @Test
-    public void testDu()
-    {
-
-    }
+//    @Test
+//    public void testDu()
+//    {
+//
+//    }
 
     /**
      * Test schema operation.
      */
-    // @Test
+     @Test
     public void testSchemaOperation()
     {
         try
         {
             getEntityManagerFactory("create");
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUniMTo1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1ToM"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1ToM"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUniMto1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1PK"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1PK"));
+            Assert.assertTrue(admin.isTableAvailable(TABLE));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntitySuper"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityAddressUniMTo1"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityAddressUni1ToM"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityPersonUni1ToM"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityPersonUni1To1"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityPersonUniMto1"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityAddressUni1To1PK"));
+            Assert.assertFalse(admin.isTableAvailable("HbaseEntityPersonUni1To1PK"));
         }
         catch (IOException e)
         {
@@ -186,7 +189,6 @@ public class HBaseSchemaManagerTest
 
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
-        clazzToPu.put(HBaseEntitySimple.class.getName(), pus);
         clazzToPu.put(HBaseEntitySuper.class.getName(), pus);
         clazzToPu.put(HBaseEntityAddressUni1To1.class.getName(), pus);
         clazzToPu.put(HBaseEntityAddressUni1ToM.class.getName(), pus);
@@ -199,7 +201,6 @@ public class HBaseSchemaManagerTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(HBaseEntitySimple.class);
         EntityMetadata m1 = new EntityMetadata(HBaseEntitySuper.class);
         EntityMetadata m2 = new EntityMetadata(HBaseEntityAddressUni1To1.class);
         EntityMetadata m3 = new EntityMetadata(HBaseEntityAddressUni1ToM.class);
@@ -211,7 +212,6 @@ public class HBaseSchemaManagerTest
         EntityMetadata m9 = new EntityMetadata(HBaseEntityAddressUni1To1PK.class);
 
         TableProcessor processor = new TableProcessor(null);
-        processor.process(HBaseEntitySimple.class, m);
         processor.process(HBaseEntitySuper.class, m1);
         processor.process(HBaseEntityAddressUni1To1.class, m2);
         processor.process(HBaseEntityAddressUni1ToM.class, m3);
@@ -222,7 +222,6 @@ public class HBaseSchemaManagerTest
         processor.process(HBaseEntityPersonUni1To1PK.class, m8);
         processor.process(HBaseEntityAddressUni1To1PK.class, m9);
 
-        m.setPersistenceUnit(persistenceUnit);
         m1.setPersistenceUnit(persistenceUnit);
         m2.setPersistenceUnit(persistenceUnit);
         m3.setPersistenceUnit(persistenceUnit);
@@ -234,7 +233,6 @@ public class HBaseSchemaManagerTest
         m9.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(HBaseEntitySimple.class, m);
         metaModel.addEntityMetadata(HBaseEntitySuper.class, m1);
         metaModel.addEntityMetadata(HBaseEntityAddressUni1To1.class, m2);
         metaModel.addEntityMetadata(HBaseEntityAddressUni1ToM.class, m3);

@@ -85,10 +85,6 @@ public class HbaseAssociationTest
     @After
     public void tearDown()
     {
-        cli.dropTable("NETSTAT_DTL_SMRY");
-        cli.dropTable("STUDENT");
-        cli.dropTable("PERSON_HBASE");
-        cli.dropTable("PERSON");
-        cli.dropTable("Address");
+        cli.dropTable("KunderaExamples");
     }
 }

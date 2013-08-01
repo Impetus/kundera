@@ -132,8 +132,8 @@ public class HBaseBatchProcessorTest
 
         if (cli != null )
         {
-            cli.dropTable("PERSON_BATCH");
-            cli.stopCluster("PERSON_BATCH");
+            cli.dropTable("KunderaHbaseDataType");
+            cli.stopCluster("KunderaHbaseDataType");
         }
 
     }

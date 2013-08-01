@@ -571,12 +571,12 @@ public class StudentHBaseLongPrimitiveTest extends Base
 
     public void createSchema()
     {
-        cli.createTable(table);
+        cli.createTable(keyspace, table);
 
     }
 
     public void dropSchema()
     {
-        cli.dropTable(table);
+        cli.dropTable(keyspace);
     }
 }

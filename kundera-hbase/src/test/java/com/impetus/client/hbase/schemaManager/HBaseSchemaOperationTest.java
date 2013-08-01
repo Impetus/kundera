@@ -58,6 +58,8 @@ public class HBaseSchemaOperationTest
 {
     private static final String HBASE_ENTITY_SIMPLE = "HbaseEntitySimple";
 
+    private static final String TABLE = "KunderaHbaseTests";
+
     /** The configuration. */
     private static SchemaConfiguration configuration;
 
@@ -102,7 +104,7 @@ public class HBaseSchemaOperationTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        cli.dropTable(HBASE_ENTITY_SIMPLE);
+        cli.dropTable(TABLE);
         HBaseCli.stopCluster();
 
         // admin = null;
@@ -123,9 +125,9 @@ public class HBaseSchemaOperationTest
     public void testCreate() throws IOException
     {
         getEntityManagerFactory("create");
-        Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
 
-        HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+        HTableDescriptor descriptor = admin.getTableDescriptor(TABLE.getBytes());
         Assert.assertNotNull(descriptor.getFamilies());
         Assert.assertEquals(1, descriptor.getFamilies().size());
         for (HColumnDescriptor columnDescriptor : descriptor.getFamilies())
@@ -135,20 +137,21 @@ public class HBaseSchemaOperationTest
             Assert.assertEquals(HBASE_ENTITY_SIMPLE, columnDescriptor.getNameAsString());
         }
 
-        admin.disableTable(HBASE_ENTITY_SIMPLE);
-        admin.deleteTable(HBASE_ENTITY_SIMPLE);
-        Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        admin.disableTable(TABLE);
+        admin.deleteTable(TABLE);
+        Assert.assertFalse(admin.isTableAvailable(TABLE));
     }
 
     @Test
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
-//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-//        schemaManager.exportSchema();
-        Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        // schemaManager = new
+        // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+        // schemaManager.exportSchema();
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
 
-        HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+        HTableDescriptor descriptor = admin.getTableDescriptor(TABLE.getBytes());
         Assert.assertNotNull(descriptor.getFamilies());
         Assert.assertEquals(1, descriptor.getFamilies().size());
         for (HColumnDescriptor columnDescriptor : descriptor.getFamilies())
@@ -160,23 +163,24 @@ public class HBaseSchemaOperationTest
 
         HBaseClientFactory clientFactory = (HBaseClientFactory) ClientResolver.getClientFactory(persistenceUnit);
         clientFactory.getSchemaManager(null).dropSchema();
-        Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
+        Assert.assertNull(admin.getTableDescriptor(TABLE.getBytes()).getFamily(HBASE_ENTITY_SIMPLE.getBytes()));
     }
 
     @Test
     public void testUpdate() throws IOException
     {
-        HTableDescriptor descriptor1 = new HTableDescriptor(HBASE_ENTITY_SIMPLE);
+        HTableDescriptor descriptor1 = new HTableDescriptor(TABLE);
         HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("PERSON_NAME");
         descriptor1.addFamily(columnDescriptor1);
-        if (admin.isTableAvailable(HBASE_ENTITY_SIMPLE))
+        if (admin.isTableAvailable(TABLE))
         {
-            admin.disableTable(HBASE_ENTITY_SIMPLE);
-            admin.deleteTable(HBASE_ENTITY_SIMPLE);
+            admin.disableTable(TABLE);
+            admin.deleteTable(TABLE);
         }
         admin.createTable(descriptor1);
-        Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
-        HTableDescriptor descriptor2 = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
+        HTableDescriptor descriptor2 = admin.getTableDescriptor(TABLE.getBytes());
         Assert.assertNotNull(descriptor2.getFamilies());
         Assert.assertEquals(1, descriptor2.getFamilies().size());
         for (HColumnDescriptor columnDescriptor : descriptor2.getFamilies())
@@ -187,12 +191,13 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("update");
-//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-//        schemaManager.exportSchema();
+        // schemaManager = new
+        // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+        // schemaManager.exportSchema();
 
-        Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
 
-        HTableDescriptor descriptor = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+        HTableDescriptor descriptor = admin.getTableDescriptor(TABLE.getBytes());
         Assert.assertNotNull(descriptor.getFamilies());
         Assert.assertEquals(2, descriptor.getFamilies().size());
         List<String> columns = new ArrayList<String>();
@@ -205,30 +210,30 @@ public class HBaseSchemaOperationTest
             Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
         }
 
-        if (!admin.isTableDisabled(HBASE_ENTITY_SIMPLE))
+        if (!admin.isTableDisabled(TABLE))
         {
-            admin.disableTable(HBASE_ENTITY_SIMPLE);
+            admin.disableTable(TABLE);
         }
 
-        admin.deleteTable(HBASE_ENTITY_SIMPLE);
-        Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        admin.deleteTable(TABLE);
+        Assert.assertFalse(admin.isTableAvailable(TABLE));
     }
 
     @Test
     public void testValidate() throws IOException
     {
-        HTableDescriptor descriptor1 = new HTableDescriptor(HBASE_ENTITY_SIMPLE);
+        HTableDescriptor descriptor1 = new HTableDescriptor(TABLE);
         HColumnDescriptor columnDescriptor1 = new HColumnDescriptor(HBASE_ENTITY_SIMPLE);
         descriptor1.addFamily(columnDescriptor1);
-        if (admin.isTableAvailable(HBASE_ENTITY_SIMPLE))
+        if (admin.isTableAvailable(TABLE))
         {
-            admin.disableTable(HBASE_ENTITY_SIMPLE);
-            admin.deleteTable(HBASE_ENTITY_SIMPLE);
+            admin.disableTable(TABLE);
+            admin.deleteTable(TABLE);
         }
         admin.createTable(descriptor1);
 
-        Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
-        HTableDescriptor descriptor2 = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+        Assert.assertTrue(admin.isTableAvailable(TABLE));
+        HTableDescriptor descriptor2 = admin.getTableDescriptor(TABLE.getBytes());
         Assert.assertNotNull(descriptor2.getFamilies());
         Assert.assertEquals(1, descriptor2.getFamilies().size());
         List<String> columns = new ArrayList<String>();
@@ -241,14 +246,15 @@ public class HBaseSchemaOperationTest
         }
 
         getEntityManagerFactory("validate");
-//        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-//        schemaManager.exportSchema();
-        if (!admin.isTableDisabled(HBASE_ENTITY_SIMPLE))
+        // schemaManager = new
+        // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+        // schemaManager.exportSchema();
+        if (!admin.isTableDisabled(TABLE))
         {
-            admin.disableTable(HBASE_ENTITY_SIMPLE);
+            admin.disableTable(TABLE);
         }
-        admin.deleteTable(HBASE_ENTITY_SIMPLE);
-        Assert.assertFalse(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
+        admin.deleteTable(TABLE);
+        Assert.assertFalse(admin.isTableAvailable(TABLE));
     }
 
     @Test
@@ -256,17 +262,17 @@ public class HBaseSchemaOperationTest
     {
         try
         {
-            HTableDescriptor descriptor1 = new HTableDescriptor(HBASE_ENTITY_SIMPLE);
+            HTableDescriptor descriptor1 = new HTableDescriptor(TABLE);
             HColumnDescriptor columnDescriptor1 = new HColumnDescriptor(HBASE_ENTITY_SIMPLE);
             descriptor1.addFamily(columnDescriptor1);
-            if (admin.isTableAvailable(HBASE_ENTITY_SIMPLE))
+            if (admin.isTableAvailable(TABLE))
             {
-                admin.disableTable(HBASE_ENTITY_SIMPLE);
-                admin.deleteTable(HBASE_ENTITY_SIMPLE);
+                admin.disableTable(TABLE);
+                admin.deleteTable(TABLE);
             }
             admin.createTable(descriptor1);
-            Assert.assertTrue(admin.isTableAvailable(HBASE_ENTITY_SIMPLE));
-            HTableDescriptor descriptor2 = admin.getTableDescriptor(HBASE_ENTITY_SIMPLE.getBytes());
+            Assert.assertTrue(admin.isTableAvailable(TABLE));
+            HTableDescriptor descriptor2 = admin.getTableDescriptor(TABLE.getBytes());
             Assert.assertNotNull(descriptor2.getFamilies());
             Assert.assertEquals(1, descriptor2.getFamilies().size());
             for (HColumnDescriptor columnDescriptor : descriptor2.getFamilies())
@@ -277,14 +283,15 @@ public class HBaseSchemaOperationTest
             }
 
             getEntityManagerFactory("validate");
-//            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
-//            schemaManager.exportSchema();
+            // schemaManager = new
+            // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
+            // schemaManager.exportSchema();
         }
         catch (SchemaGenerationException sgex)
         {
             List<String> errors = new ArrayList<String>();
-            errors.add("column " + "AGE" + " does not exist in table " + HBASE_ENTITY_SIMPLE + "");
-            errors.add("column " + "PERSON_NAME" + " does not exist in table " + HBASE_ENTITY_SIMPLE + "");
+            errors.add("column " + "AGE" + " does not exist in table " + TABLE + "");
+            errors.add("column " + "PERSON_NAME" + " does not exist in table " + TABLE + "");
             Assert.assertTrue(errors.contains(sgex.getMessage()));
 
         }

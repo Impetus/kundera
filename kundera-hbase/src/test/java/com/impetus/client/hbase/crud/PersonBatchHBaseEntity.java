@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON_BATCH", schema = "KunderaMongoDataType@HbaseBatchTest")
+@Table(name = "PERSON_BATCH", schema = "KunderaHbaseDataType@HbaseBatchTest")
 // @Index(index = true, columns = { "PERSON_NAME", "AGE" })
 public class PersonBatchHBaseEntity
 {

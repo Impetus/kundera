@@ -146,13 +146,13 @@ public class HBaseCli
      * @param tableName
      *            the table name
      */
-    public void createTable(String tableName)
+    public void createTable(String tableName, String columnFamily)
     {
         try
         {
             if (!utility.getHBaseAdmin().tableExists(tableName))
             {
-                utility.createTable(tableName.getBytes(), tableName.getBytes());
+                utility.createTable(tableName.getBytes(), columnFamily.getBytes());
                 if (utility.getHBaseAdmin().isTableDisabled(tableName))
                 {
                     utility.getHBaseAdmin().enableTable(tableName);
@@ -167,6 +167,7 @@ public class HBaseCli
         {
             logger.error(e.getMessage());
         }
+
     }
 
     public void createTable(byte[] tableName, byte[][] families)

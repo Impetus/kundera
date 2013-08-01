@@ -228,12 +228,8 @@ public class PersonHBaseTest extends BaseTest
         emf.close();
         if (cli != null )
         {
-            cli.dropTable("NETSTAT_DTL_SMRY");
-            cli.dropTable("STUDENT");
-            cli.dropTable("PERSON_HBASE");
-            cli.dropTable("PERSON");
-            cli.dropTable("Address");
-            cli.stopCluster("PERSON_HBASE");
+            cli.dropTable("KunderaExamples");
+            cli.stopCluster("KunderaExamples");
         }
         LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
