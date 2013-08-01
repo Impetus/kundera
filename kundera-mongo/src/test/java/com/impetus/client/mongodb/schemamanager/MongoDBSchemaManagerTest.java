@@ -50,8 +50,6 @@ public class MongoDBSchemaManagerTest
     private EntityManagerFactory emf;
 
     private EntityManager em;
-    
-    
 
     /**
      * @throws java.lang.Exception
@@ -120,20 +118,68 @@ public class MongoDBSchemaManagerTest
         Assert.assertEquals(4, count);
     }
 
+    @Test
+    public void testCreateIndexesOnEmbedded()
+    {
+        DBCollection collection = db.getCollection("MongoDBEmbeddedEntity");
+        Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
+        Assert.assertNotNull(collection.getIndexInfo());
+        Assert.assertEquals(5, collection.getIndexInfo().size());
+        int count = 0;
+        for (DBObject dbObject : collection.getIndexInfo())
+        {
+
+            if (dbObject.get("name").equals("_id_"))
+            {
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("_id", 1)));
+                count++;
+            }
+            else if (dbObject.get("name").equals("PERSON_NAME_1"))
+            {
+                Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
+                Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
+                count++;
+            }
+            else if (dbObject.get("name").equals("AGE_-1"))
+            {
+                Assert.assertEquals(new Integer(100), dbObject.get("min"));
+                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
+                count++;
+            }
+            else if (dbObject.get("name").equals("location.CURRENT_LOCATION_2d"))
+            {
+                Assert.assertEquals(new Integer(-100), dbObject.get("min"));
+                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("location.CURRENT_LOCATION", "2d")));
+                count++;
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(100), dbObject.get("min"));
+                Assert.assertEquals(new Integer(400), dbObject.get("max"));
+                Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("location.PREVIOUS_LOCATION", "2d")));
+                count++;
+            }
+        }
+        Assert.assertEquals(5, count);
+    }
+
     /**
      * Test method for
      * {@link com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager#dropSchema()}
      * .
      */
-     @Test
+    @Test
     public void testDropSchema()
     {
-//         testCreate();
-         MongoDBClientFactory clientFactory = (MongoDBClientFactory) ClientResolver.getClientFactory(persistenceUnit);
-         clientFactory.getSchemaManager(null).dropSchema();
-         DBCollection collection = db.getCollection("MongoDBEntitySimple");
-         Assert.assertTrue(collection.getIndexInfo().isEmpty());
-         Assert.assertEquals(0,collection.getCount());
+        // testCreate();
+        MongoDBClientFactory clientFactory = (MongoDBClientFactory) ClientResolver.getClientFactory(persistenceUnit);
+        clientFactory.getSchemaManager(null).dropSchema();
+        DBCollection collection = db.getCollection("MongoDBEntitySimple");
+        Assert.assertTrue(collection.getIndexInfo().isEmpty());
+        Assert.assertEquals(0, collection.getCount());
     }
 
     /**
@@ -169,22 +215,18 @@ public class MongoDBSchemaManagerTest
 
             catch (SecurityException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (NoSuchFieldException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (IllegalArgumentException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (IllegalAccessException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.index.IndexType;
+import com.impetus.kundera.configure.schema.ColumnInfo;
+import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.IndexInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
@@ -71,7 +73,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
     {
-        super.exportSchema(persistenceUnit,schemas);
+        super.exportSchema(persistenceUnit, schemas);
     }
 
     /**
@@ -253,21 +255,60 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     private void createIndexes(TableInfo tableInfo, DBCollection collection)
     {
-        for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
+        // index normal column
+        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
         {
-            DBObject keys = new BasicDBObject();
-            getIndexType(indexInfo.getIndexType(), keys, indexInfo.getColumnName());
-            DBObject options = new BasicDBObject();
-            if (indexInfo.getMinValue() != null)
+            if (columnInfo.isIndexable())
             {
-                options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
+                IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+                indexColumn(indexInfo, collection);
             }
-            if (indexInfo.getMaxValue() != null)
-            {
-                options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
-            }
-            collection.ensureIndex(keys, options);
         }
+
+        // index embedded column.
+        for (EmbeddedColumnInfo info : tableInfo.getEmbeddedColumnMetadatas())
+        {
+            for (ColumnInfo columnInfo : info.getColumns())
+            {
+                if (columnInfo.isIndexable())
+                {
+                    IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+                    indexEmbeddedColumn(indexInfo, info.getEmbeddedColumnName(), collection);
+                }
+            }
+        }
+    }
+
+    private void indexColumn(IndexInfo indexInfo, DBCollection collection)
+    {
+        DBObject keys = new BasicDBObject();
+        getIndexType(indexInfo.getIndexType(), keys, indexInfo.getColumnName());
+        DBObject options = new BasicDBObject();
+        if (indexInfo.getMinValue() != null)
+        {
+            options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
+        }
+        if (indexInfo.getMaxValue() != null)
+        {
+            options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
+        }
+        collection.ensureIndex(keys, options);
+    }
+
+    private void indexEmbeddedColumn(IndexInfo indexInfo, String embeddedColumnName, DBCollection collection)
+    {
+        DBObject keys = new BasicDBObject();
+        getIndexType(indexInfo.getIndexType(), keys, embeddedColumnName + "." + indexInfo.getColumnName());
+        DBObject options = new BasicDBObject();
+        if (indexInfo.getMinValue() != null)
+        {
+            options.put(MongoDBConstants.MIN, indexInfo.getMinValue());
+        }
+        if (indexInfo.getMaxValue() != null)
+        {
+            options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
+        }
+        collection.ensureIndex(keys, options);
     }
 
     /**
