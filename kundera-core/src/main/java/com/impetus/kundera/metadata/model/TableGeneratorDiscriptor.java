@@ -64,7 +64,7 @@ public class TableGeneratorDiscriptor
                 .valueColumnName();
         this.pkColumnValue = tableGenerator.pkColumnValue().isEmpty() ? defaultPkColumnValue : tableGenerator
                 .pkColumnValue();
-        this.initialValue = tableGenerator.initialValue();
+        this.initialValue = tableGenerator.initialValue() != 0 ? tableGenerator.initialValue() : default_initial_value;
         this.allocationSize = tableGenerator.allocationSize();
     }
 
