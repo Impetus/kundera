@@ -269,8 +269,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
-        
-        logger.error("parameter{} is not a parameter of the query",paramString);
+
+        logger.error("parameter{} is not a parameter of the query", paramString);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -306,14 +306,15 @@ public class KunderaQuery
                         if (clause != null)
                         {
                             return clause.getValue();
-                        } else
+                        }
+                        else
                         {
                             UpdateClause updateClause = typedParameter.getUpdateParameters().get("?" + p.getPosition());
-                            if(updateClause != null)
+                            if (updateClause != null)
                             {
                                 return updateClause.getValue();
                             }
-                                    
+
                         }
                     }
                     break;
@@ -324,8 +325,8 @@ public class KunderaQuery
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
-        
-        logger.error("parameter{} is not a parameter of the query",param);
+
+        logger.error("parameter{} is not a parameter of the query", param);
         throw new IllegalArgumentException("parameter is not a parameter of the query");
     }
 
@@ -449,8 +450,10 @@ public class KunderaQuery
 
                 // strip alias from property name
                 String property = tokens.get(0);
-                property = property.substring((entityAlias + ".").length());
-
+                if (property.indexOf(".") > 0)
+                {
+                    property = property.substring((entityAlias + ".").length());
+                }
                 // String columnName = getColumnNameFromFieldName(metadata,
                 // property);
                 String columnName = null;
@@ -1068,7 +1071,8 @@ public class KunderaQuery
     {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
-        addTypedParameter(value.trim().startsWith("?")?Type.INDEXED:value.trim().startsWith(":")?Type.NAMED:null, property, updateClause);
+        addTypedParameter(value.trim().startsWith("?") ? Type.INDEXED : value.trim().startsWith(":") ? Type.NAMED
+                : null, property, updateClause);
     }
 
     /**
