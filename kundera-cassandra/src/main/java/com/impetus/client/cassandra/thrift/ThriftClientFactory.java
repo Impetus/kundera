@@ -237,7 +237,7 @@ public class ThriftClientFactory extends GenericClientFactory
             {
                 success = true;
                 Cassandra.Client client = connectionPool.getConnection();
-                logger.info("Retruning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
+                logger.info("Returning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
                         .getPoolProperties().getPort());
                 return new Connection(client, connectionPool);
             }

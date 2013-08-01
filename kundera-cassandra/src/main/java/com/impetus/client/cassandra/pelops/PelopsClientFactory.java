@@ -223,7 +223,7 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (!hostPools.isEmpty())
         {
-            logger.info("Retruning pool using {} .", loadBalancingPolicy.getClass().getSimpleName());
+            logger.info("Returning pool using {} .", loadBalancingPolicy.getClass().getSimpleName());
             return (IThriftPool) loadBalancingPolicy.getPool(hostPools.values());
         }
         throw new KunderaException("All hosts are down. please check servers manully.");
@@ -248,14 +248,14 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-                        logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        logger.info("Returning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
                         return iThriftPool.getConnection();
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-                    logger.info("Retruning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    logger.info("Returning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return iThriftPool.getConnection();
                 }
                 removePool(iThriftPool);
@@ -285,14 +285,14 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-                        logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        logger.info("Returning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
                         return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-                    logger.info("Retruning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    logger.info("Returning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
@@ -320,14 +320,14 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-                        logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        logger.info("Returning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
                         return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-                    logger.info("Retruning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    logger.info("Returning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
@@ -355,14 +355,14 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-                        logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        logger.info("Returning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
                         return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-                    logger.info("Retruning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    logger.info("Returning row deletor of {} :{} .", nodes[0].getAddress(), thriftPort);
                     return Pelops.createRowDeletor(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
