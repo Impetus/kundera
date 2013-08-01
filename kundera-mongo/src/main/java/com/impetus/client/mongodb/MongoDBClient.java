@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -669,11 +667,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
             }
             DBCollection dbCollection = mongoDb.getCollection(documentName);
-            //dbCollection.findAndModify(query, document);
-            
-            DBObject obj = dbCollection.findOne(query);            
+            // dbCollection.findAndModify(query, document);
+
+            DBObject obj = dbCollection.findOne(query);
             obj.putAll(document);
-            dbCollection.save(obj);            
+            dbCollection.save(obj);
         }
         else
         {
@@ -816,7 +814,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         // return auto generated id used by mongodb.
         return new ObjectId();
-    }
+    }  
 
     /**
      * Method to execute mongo jscripts.
@@ -828,6 +826,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     public Object executeScript(String script)
     {
-        return mongoDb.eval(script);
+        Object result = mongoDb.eval(script);
+        return result;
     }
 }

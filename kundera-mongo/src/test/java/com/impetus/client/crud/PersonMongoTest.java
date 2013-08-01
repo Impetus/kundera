@@ -290,6 +290,22 @@ public class PersonMongoTest extends BaseTest
         String findOneJScript = "db.PERSON.findOne()";
         result = ((MongoDBClient) client).executeScript(findOneJScript);
         Assert.assertNotNull(result);
-    }
 
+        String findAllJScript = "db.PERSON.find( { \"PERSON_NAME\" : \"vivek\" } )";
+        result = ((MongoDBClient) client).executeScript(findAllJScript);
+        Assert.assertNotNull(result);
+
+        try
+        {
+            em.createNativeQuery(findAllJScript, PersonMongo.class).getResultList();
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(
+                    "java.lang.UnsupportedOperationException: Native query support is not enabled in mongoDB",
+                    e.getMessage());
+        }
+
+    }
 }
