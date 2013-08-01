@@ -120,7 +120,7 @@
 			</connection>
 			<schemas>
 				<schema>
-					<name>HBASEUSERXYZ</name>
+					<name>KunderaHbaseXmlTest</name>
 					<tables>
 						<table>
 							<name>HBASEUSERXYZ</name>

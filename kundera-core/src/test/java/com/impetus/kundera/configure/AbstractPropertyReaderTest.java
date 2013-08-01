@@ -78,7 +78,7 @@ public class AbstractPropertyReaderTest
             {
                 Assert.assertNotNull(store.getSchemas());
                 Assert.assertEquals(2, store.getSchemas().size());
-                Assert.assertEquals("HBASEUSERXYZ", store.getSchemas().get(0).getName());
+                Assert.assertEquals("KunderaHbaseXmlTest", store.getSchemas().get(0).getName());
                 Assert.assertNotNull(store.getSchemas().get(0).getTables());
                 Assert.assertEquals(1, store.getSchemas().get(0).getTables().size());
                 Assert.assertEquals("HBASEUSERXYZ", store.getSchemas().get(0).getTables().get(0).getName());
