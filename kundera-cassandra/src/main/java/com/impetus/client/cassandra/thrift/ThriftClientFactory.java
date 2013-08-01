@@ -106,6 +106,14 @@ public class ThriftClientFactory extends GenericClientFactory
         }
         schemaManager = null;
         externalProperties = null;
+
+        for (Object connectionPool : hostPools.values())
+        {
+            if (connectionPool != null && connectionPool.getClass().isAssignableFrom(ConnectionPool.class))
+            {
+                ((ConnectionPool) connectionPool).close(true);
+            }
+        }
         ((CassandraRetryService) hostRetryService).shutdown();
     }
 
