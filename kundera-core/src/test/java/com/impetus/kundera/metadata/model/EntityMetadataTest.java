@@ -197,4 +197,30 @@ public class EntityMetadataTest
         em.close();
         emf.close();
     }
+    
+    @Test
+    public void testColumn()
+    {
+        try
+        {
+            Column column = new Column("EMP_NAME", Employe.class.getDeclaredField("empName"));
+            column.setIndexable(true);
+            Assert.assertTrue(column.isIndexable());
+            Assert.assertEquals("empName", column.getField().getName());
+            Assert.assertEquals("EMP_NAME", column.getName());
+            
+            column = new Column("AGE", Employe.class.getDeclaredField("age"), true);            
+            Assert.assertTrue(column.isIndexable());
+            Assert.assertEquals("age", column.getField().getName());
+            Assert.assertEquals("AGE", column.getName());
+        }
+        catch (SecurityException e)
+        {            
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {            
+            Assert.fail(e.getMessage());
+        }
+    }
 }
