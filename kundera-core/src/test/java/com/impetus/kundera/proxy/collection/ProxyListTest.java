@@ -119,7 +119,9 @@ public class ProxyListTest
         Assert.assertEquals(0,proxyList.indexOf(p));
         Assert.assertEquals(1,proxyList.lastIndexOf(subaddress));
         
-        Iterator<AddressEntityWithList> iter = proxyList.listIterator();
+        Assert.assertNotNull(proxyList.toArray());
+        Assert.assertEquals(2,proxyList.size());
+        Iterator<AddressEntityWithList> iter = proxyList.iterator();
         int counter = 0;
         while(iter.hasNext())
         {
@@ -131,6 +133,26 @@ public class ProxyListTest
         
         Assert.assertNotNull(proxyList.subList(0, 1));
         Assert.assertEquals(2, proxyList.subList(0, 2).size());
+
+        proxyList.removeAll(new ArrayList());
+        Assert.assertEquals(2,proxyList.size());
+        
+        List lst = new ArrayList();
+        lst.add("vivek");
+        proxyList.addAll(lst);
+        Assert.assertEquals(3,proxyList.size());
+        
+        proxyList.add("vivek1");
+        Assert.assertEquals(4,proxyList.size());
+        
+        Assert.assertFalse(proxyList.isEmpty());
+        
+        proxyList.remove("vivek");
+        Assert.assertEquals(3,proxyList.size());
+        
+
+        proxyList.clear();
+        Assert.assertTrue(proxyList.isEmpty());
 
     }
 

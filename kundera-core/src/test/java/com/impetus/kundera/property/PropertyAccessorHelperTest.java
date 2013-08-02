@@ -362,7 +362,7 @@ public class PropertyAccessorHelperTest
         {
             Field[] fields = PropertyAccessorHelper.getDeclaredFields(PhotographerUni_1_M_1_M.class.getDeclaredField("albums"));
             Assert.assertNotNull(fields);
-            Assert.assertEquals(5, CoreTestUtilities.countNonSyntheticFields(PhotographerUni_1_M_1_M.class));            
+            Assert.assertEquals(8, CoreTestUtilities.countNonSyntheticFields(PhotographerUni_1_M_1_M.class));            
         }
         catch (SecurityException e)
         {
