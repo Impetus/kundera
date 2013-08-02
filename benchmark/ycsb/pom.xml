@@ -1,0 +1,185 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.impetus.kundera.ycsb</groupId>
+	<artifactId>kundera-benchmarks</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0</version>
+	<name>kundera-benchmarks</name>
+	<url>http://maven.apache.org</url>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>com.yahoo.ycsb</groupId>
+			<artifactId>core</artifactId>
+			<version>0.1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.jexcelapi</groupId>
+			<artifactId>jxl</artifactId>
+			<version>2.6</version>
+		</dependency>
+
+		<!-- for mail -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>3.0.5.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<!-- kundera dependencies -->
+
+		<dependency>
+			<groupId>com.impetus.core</groupId>
+			<artifactId>kundera-core</artifactId>
+			<version>2.7-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-cassandra</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-rdbms</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-redis</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-neo4j</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-mongo</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-hbase</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-oracle-nosql</artifactId>
+			<version>2.7-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- apache commons -->
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.9</version>
+		</dependency>
+
+		<!-- mysql connector -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+
+		<!-- hector dependency -->
+		<dependency>
+			<groupId>me.prettyprint</groupId>
+			<artifactId>hector-core</artifactId>
+			<version>1.0-5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.cassandra</groupId>
+					<artifactId>cassandra-thrift</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- redis client -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.0.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Unit Testing libraries -->
+		<dependency>
+			<groupId>com.sun.jersey.jersey-test-framework</groupId>
+			<artifactId>jersey-test-framework-grizzly</artifactId>
+			<version>1.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.grizzly</groupId>
+			<artifactId>grizzly-servlet-webserver</artifactId>
+			<version>1.9.8</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- NOTE: We don't need a groupId specification because the group is 
+					org.apache.maven.plugins ...which is assumed by default. -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<argLine>-Xms512M -Xmx2048M -XX:+UseConcMarkSweepGC
+						-XX:+UseParNewGC</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
