@@ -124,5 +124,10 @@ public class CoreQuery<E> extends QueryImpl<E>
     {
         return null;
     }
+    
+    protected String[] getColumns(final String[] columns, final EntityMetadata m)
+    {
+        return super.getColumns(columns, m);
+    }
 
 }
