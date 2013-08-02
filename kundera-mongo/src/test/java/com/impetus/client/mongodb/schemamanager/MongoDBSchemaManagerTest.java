@@ -193,6 +193,10 @@ public class MongoDBSchemaManagerTest
     @Test
     public void testCreateIndexesOnEmbedded()
     {
+        emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        em = emf.createEntityManager();
+        getDB();
+
         DBCollection collection = db.getCollection("MongoDBEmbeddedEntity");
         Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
