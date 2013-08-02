@@ -36,7 +36,7 @@
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
-			<!-- <property name="kundera.ddl.auto.prepare" value="create"/> -->
+			<property name="kundera.ddl.auto.prepare" value="create"/>
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
@@ -48,7 +48,7 @@
 			<property name="kundera.port" value="60000" />
 			<property name="kundera.keyspace" value="KunderaHbaseDataType" />
 			<property name="kundera.dialect" value="hbase" />
-			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />

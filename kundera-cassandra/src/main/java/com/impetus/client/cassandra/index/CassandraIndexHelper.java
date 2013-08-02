@@ -47,9 +47,9 @@ public class CassandraIndexHelper
      * @param m
      * @return
      */
-    public static boolean isInvertedIndexingApplicable(EntityMetadata m)
+    public static boolean isInvertedIndexingApplicable(EntityMetadata m, boolean useSecondryIndex)
     {
-        boolean invertedIndexingApplicable = MetadataUtils.useSecondryIndex(m.getPersistenceUnit())
+        boolean invertedIndexingApplicable = useSecondryIndex
                 && CassandraPropertyReader.csmd.isInvertedIndexingEnabled(m.getSchema())
                 && m.getType().isSuperColumnFamilyMetadata() && !m.isCounterColumnType();
 

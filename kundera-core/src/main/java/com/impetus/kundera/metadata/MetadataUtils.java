@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.persistence.Embeddable;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -287,6 +288,7 @@ public class MetadataUtils
         }
     }
 
+
     /**
      * Returns true, if use of secondry index is available, else false.
      * 
@@ -294,12 +296,12 @@ public class MetadataUtils
      *            persistence unit name
      * @return true, if usage is true in pu. else false.
      */
-    public static boolean useSecondryIndex(String persistenceUnit)
+    public static boolean useSecondryIndex(ClientMetadata clientMetadata)
     {
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
         return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
     }
 
+    
    /* *//**
      * Returns lucene indexing directory.
      * 
@@ -585,5 +587,51 @@ public class MetadataUtils
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         return !(Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName) || Constants.RDBMS_CLIENT_FACTORY
                 .equalsIgnoreCase(clientFactoryName));
+    }
+    
+    /**
+     * Checks whether a given field is Element collection field of BASIC type
+     * @param collectionField
+     * @return
+     */
+    public static boolean isBasicElementCollectionField(Field collectionField)
+    {
+        if(! Collection.class.isAssignableFrom(collectionField.getType()) && ! Map.class.isAssignableFrom(collectionField.getType()))
+        {
+            return false;
+        }
+        
+        List<Class<?>> genericClasses = PropertyAccessorHelper.getGenericClasses(collectionField);
+        for(Class genericClass : genericClasses)
+        {
+            if(genericClass.getAnnotation(Embeddable.class) != null)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Checks whether an entity with given metadata contains a collection field
+     * @param m
+     * @return
+     */
+    public static boolean containsBasicElementCollectionField(EntityMetadata m)
+    {
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());        
+        Iterator<Attribute> iter = entityType.getAttributes().iterator();        
+        while (iter.hasNext())
+        {
+            Attribute attr = iter.next();
+            
+            if (attr.isCollection() && ! attr.isAssociation() && isBasicElementCollectionField((Field) attr.getJavaMember()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

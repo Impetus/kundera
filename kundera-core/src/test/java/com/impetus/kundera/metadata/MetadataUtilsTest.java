@@ -16,6 +16,7 @@
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.metadata.entities.Article;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -37,6 +39,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.event.AddressEntity;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author vivek.mishra
@@ -130,7 +133,109 @@ public class MetadataUtilsTest
         }catch(KunderaException kex)
         {
             Assert.assertNotNull(kex);
-        }
+        }        
+    }
+    
+    @Test
+    public void testIsEmbeddedAttributeIndexable()
+    {
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        Assert.assertNotNull(m);
         
+        try
+        {
+            Assert.assertTrue(MetadataUtils.isEmbeddedAtributeIndexable(m.getEntityClazz().getDeclaredField("embeddableEntity")));
+            Assert.assertTrue(MetadataUtils.isEmbeddedAtributeIndexable(m.getEntityClazz().getDeclaredField("embeddableEntityTwo")));
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }  
+        
+    }
+    
+    @Test
+    public void testPopulateColumnAndSuperColumnMaps()
+    {
+        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+        
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        
+        Assert.assertNotNull(columnNameToFieldMap);
+        Assert.assertNotNull(superColumnNameToFieldMap);
+        Assert.assertFalse(columnNameToFieldMap.isEmpty());
+        Assert.assertFalse(superColumnNameToFieldMap.isEmpty());
+    }
+    
+    @Test
+    public void testIsColumnInEmbeddableIndexable()
+    {
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        Assert.assertNotNull(m);
+        
+        try
+        {
+            Assert.assertTrue(MetadataUtils.isColumnInEmbeddableIndexable(m.getEntityClazz().getDeclaredField("embeddableEntityTwo"), "field"));
+            Assert.assertFalse(MetadataUtils.isColumnInEmbeddableIndexable(m.getEntityClazz().getDeclaredField("embeddableEntityTwo"), "name"));
+            
+            Assert.assertTrue(MetadataUtils.isColumnInEmbeddableIndexable(m.getEntityClazz().getDeclaredField("embeddableEntity"), "field"));            
+        }
+        catch (SecurityException e)
+        {
+           Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testContainsBasicElementCollectionField()
+    {
+        EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Article.class);
+        Assert.assertNotNull(m1);
+        Assert.assertTrue(MetadataUtils.containsBasicElementCollectionField(m1));
+        
+        EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        Assert.assertNotNull(m2);
+        Assert.assertFalse(MetadataUtils.containsBasicElementCollectionField(m2));
+    }
+    
+    @Test
+    public void testIsBasicElementCollectionField()
+    {       
+        
+        try
+        {                       
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Article.class);
+            
+            Field f = Article.class.getDeclaredField("body");
+            Assert.assertFalse(MetadataUtils.isBasicElementCollectionField(f));
+            
+            Field f1 = Article.class.getDeclaredField("comments");
+            Assert.assertTrue(MetadataUtils.isBasicElementCollectionField(f1));
+            
+            Field f2 = Article.class.getDeclaredField("tags");
+            Assert.assertTrue(MetadataUtils.isBasicElementCollectionField(f2));
+            
+            Field f3 = Article.class.getDeclaredField("likedBy");
+            Assert.assertTrue(MetadataUtils.isBasicElementCollectionField(f3));
+            
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
     }
 }

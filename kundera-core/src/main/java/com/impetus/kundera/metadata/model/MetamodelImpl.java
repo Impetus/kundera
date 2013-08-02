@@ -28,6 +28,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.StaticMetamodel;
+import javax.persistence.metamodel.Type.PersistenceType;
 
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
@@ -345,7 +346,8 @@ public class MetamodelImpl implements Metamodel
      */
     public boolean isEmbeddable(Class embeddableClazz)
     {
-        return embeddables != null ? embeddables.containsKey(embeddableClazz) : false;
+        return embeddables != null ? embeddables.containsKey(embeddableClazz)
+                && embeddables.get(embeddableClazz).getPersistenceType().equals(PersistenceType.EMBEDDABLE) : false;
     }
 
     /**

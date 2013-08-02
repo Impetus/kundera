@@ -22,9 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
@@ -65,9 +73,10 @@ public class HBaseWriter implements Writer
      * java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+    public void writeColumns(HTableInterface htable, String columnFamily, Object rowKey,
+            Map<String, Attribute> columns,
 
-    Object columnFamilyObj) throws IOException
+            Object columnFamilyObj) throws IOException
     {
         Put p = preparePut(columnFamily, rowKey, columns, columnFamilyObj);
         htable.put(p);
@@ -100,17 +109,18 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity, String columnFamilyName)
-            throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Attribute> columns, Object entity,
+            String columnFamilyName) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         boolean present = false;
-        for (Attribute column : columns)
+        for (String columnName : columns.keySet())
         {
+            Attribute column = columns.get(columnName);
             if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                String qualifier = ((AbstractAttribute) column).getJPAColumnName();
+                String qualifier = columnName;
                 try
                 {
                     byte[] qualValInBytes = Bytes.toBytes(qualifier);
@@ -142,7 +152,8 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Map)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns,String columnFamilyName) throws IOException
+    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
+            throws IOException
     {
 
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -169,7 +180,7 @@ public class HBaseWriter implements Writer
      */
     @Override
     public void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
-            List<RelationHolder> relations, String columnFamilyName ) throws IOException
+            List<RelationHolder> relations, String columnFamilyName) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
@@ -319,15 +330,16 @@ public class HBaseWriter implements Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private Put preparePut(String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
+    private Put preparePut(String columnFamily, Object rowKey, Map<String, Attribute> columns, Object columnFamilyObj)
             throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-        for (Attribute column : columns)
+        for (String columnName : columns.keySet())
         {
+            Attribute column = columns.get(columnName);
             if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                String qualifier = ((AbstractAttribute) column).getJPAColumnName();
+                String qualifier = columnName;
                 try
                 {
                     Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
@@ -345,5 +357,4 @@ public class HBaseWriter implements Writer
         }
         return p;
     }
-
 }

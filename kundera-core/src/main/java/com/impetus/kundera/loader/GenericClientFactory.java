@@ -86,6 +86,11 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** Holds one pool instance per host */
     protected ConcurrentMap<Host, Object> hostPools = new ConcurrentHashMap<Host, Object>();
+    
+    /**
+     * Holds reference to client metadata.
+     */
+    protected ClientMetadata clientMetadata;
 
     /**
      * Load.
@@ -118,13 +123,19 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      */
     protected void loadClientMetadata(Map<String, Object> puProperties)
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
+        clientMetadata = new ClientMetadata();
         String luceneDirectoryPath = puProperties != null ? (String) puProperties
                 .get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR) : null;
 
-        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit).getProperties()
-                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        String indexerClass = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_INDEXER_CLASS) : null;
+
+        if (indexerClass == null)
+        {
+            indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperties()
+                    .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        }
 
         if (luceneDirectoryPath == null)
         {
@@ -133,7 +144,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                     .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
         }
 
-        if (luceneDirectoryPath != null)
+        // in case set empty via external property, means want to avoid lucene directory set up.
+        if (luceneDirectoryPath != null && !StringUtils.isEmpty(luceneDirectoryPath))
         {
             // Add client metadata
             clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
@@ -161,10 +173,10 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         {
             indexManager = new IndexManager(null);
         }
-        if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
-        {
-            KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-        }
+//        if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
+//        {
+//            KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
+//        }
     }
 
     /**
@@ -297,6 +309,11 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     }
 
     protected abstract void initializeLoadBalancer(String loadBalancingPolicyName);
+    
+    public ClientMetadata getClientMetadata()
+    {
+        return this.clientMetadata;
+    }
 
     protected enum LoadBalancer
     {

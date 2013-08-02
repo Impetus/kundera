@@ -26,9 +26,11 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -193,7 +195,8 @@ public class CassandraUtilities
         }
         
         // check if id attribute is embeddable
-        return autoDdlOption == null ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
+        boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m);
+        return autoDdlOption == null || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
                 : CassandraConstants.CQL_KEY;
     }
 }

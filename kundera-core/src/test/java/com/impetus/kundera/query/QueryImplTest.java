@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,10 @@ import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.polyglot.entities.AddressB1M;
+import com.impetus.kundera.polyglot.entities.AddressBM1;
+import com.impetus.kundera.polyglot.entities.PersonB1M;
+import com.impetus.kundera.polyglot.entities.PersonBM1;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
@@ -238,6 +243,118 @@ public class QueryImplTest
             Assert.assertEquals("parameter is not a parameter of the query", usex.getMessage());
         }
         
+        onassertBi1MAssociation(delegator);
+        onassertBiM1Association(delegator);
+
+}
+
+    private void onassertBi1MAssociation(PersistenceDelegator delegator)
+    {
+        KunderaQuery kunderaQuery;
+        CoreQuery queryObj;
+        PersonB1M personBi1M = new PersonB1M();
+        
+        personBi1M.setPersonId("personBi1M1");
+        personBi1M.setPersonName("impetus-opensource");
+        
+        AddressB1M addressBi1M = new AddressB1M();
+        addressBi1M.setAddressId("addrBi1M1");
+        addressBi1M.setStreet("meri gali");
+        Set<AddressB1M> addresses = new HashSet<AddressB1M>();
+        addresses.add(addressBi1M);
+//        personBi1M.setAddresses(addresses);
+        
+        AddressB1M addressBi1M_copy = new AddressB1M();
+        addressBi1M_copy.setAddressId("addrBi1M2");
+        addressBi1M_copy.setStreet("meri gali");
+        addresses.add(addressBi1M_copy);
+        personBi1M.setAddresses(addresses);
+
+        em.persist(personBi1M);
+        
+        em.clear();
+        
+        String selectAssociationQuery = "Select p from PersonB1M p where p.personId = 'personBi1M1'";
+
+        kunderaQuery = parseQuery(selectAssociationQuery);
+        
+        
+        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        
+        List<PersonB1M> associationResults = queryObj.getResultList();
+        
+        Assert.assertTrue(!associationResults.isEmpty());
+        
+        Assert.assertNotNull(associationResults.get(0).getAddresses());
+        
+        Assert.assertEquals(2,associationResults.get(0).getAddresses().size());
+        
+        
+        selectAssociationQuery = "Select p from PersonB1M p where p.personId = 'invalid'";
+
+        kunderaQuery = parseQuery(selectAssociationQuery);
+        
+        
+        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        
+        associationResults = queryObj.getResultList();
+
+        Assert.assertTrue(associationResults.isEmpty());
+
+    }
+
+    private void onassertBiM1Association(PersistenceDelegator delegator)
+    {
+        KunderaQuery kunderaQuery;
+        CoreQuery queryObj;
+        
+        PersonBM1 personBiM11 = new PersonBM1();
+        personBiM11.setPersonId("personBiM11");
+        personBiM11.setPersonName("impetus-opensource");
+        
+
+        PersonBM1 personBiM12 = new PersonBM1();
+        personBiM12.setPersonId("personBiM12");
+        personBiM12.setPersonName("impetus-opensource");
+
+        AddressBM1 addressBiM1 = new AddressBM1();
+        addressBiM1.setAddressId("addrBiM11");
+        addressBiM1.setStreet("meri gali");
+
+        
+        personBiM11.setAddress(addressBiM1);
+        personBiM12.setAddress(addressBiM1);
+
+        em.persist(personBiM11);
+        em.persist(personBiM12);
+        
+        em.clear();
+        
+        String selectAssociationQuery = "Select p from PersonBM1 p";
+
+        kunderaQuery = parseQuery(selectAssociationQuery);
+        
+        
+        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        
+        List<PersonBM1> associationResults = queryObj.getResultList();
+        
+        Assert.assertTrue(!associationResults.isEmpty());
+        
+        Assert.assertNotNull(associationResults.get(0).getAddress());
+        
+        
+        selectAssociationQuery = "Select p from PersonBM1 p where p.personId = 'invalid'";
+
+        kunderaQuery = parseQuery(selectAssociationQuery);
+        
+        
+        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        
+        associationResults = queryObj.getResultList();
+
+        Assert.assertTrue(associationResults.isEmpty());
+
     }
 
     private KunderaQuery parseQuery(final String query)

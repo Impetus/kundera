@@ -426,26 +426,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
                     path, consistencyLevel);
 
-        }
-        catch (InvalidRequestException ire)
+        }        
+        catch (Exception e)
         {
-            log.error("Error during executing delete, Caused by: .", ire);
-            throw new PersistenceException(ire);
-        }
-        catch (UnavailableException ue)
-        {
-            log.error("Error during executing delete, Caused by: .", ue);
-            throw new PersistenceException(ue);
-        }
-        catch (TimedOutException toe)
-        {
-            log.error("Error during executing delete, Caused by: .", toe);
-            throw new PersistenceException(toe);
-        }
-        catch (TException te)
-        {
-            log.error("Error during executing delete, Caused by: .", te);
-            throw new PersistenceException(te);
+            log.error("Error during executing delete, Caused by: .", e);
+            throw new PersistenceException(e);
         }
         finally
         {
@@ -542,28 +527,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }
 
-        }
-        catch (InvalidRequestException e)
-        {
-            log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
-
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
-
-        }
-        catch (TException e)
-        {
-            log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
-
-        }
-        catch (NotFoundException e)
-        {
-            log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
-
-        }
-        catch (PropertyAccessException e)
+        }        
+        catch (Exception e)
         {
             log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
 
@@ -1456,28 +1421,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
                 executeCQLQuery(batchQueryBuilder.toString(), false);
             }
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while persisting record. Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while persisting record. Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while persisting record. Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while persisting record. Caused by: ." + e);
-            throw new KunderaException(e);
-        }
-        catch (SchemaDisagreementException e)
+        }        
+        catch (Exception e)
         {
             log.error("Error while persisting record. Caused by: .", e);
             throw new KunderaException(e);
@@ -1655,16 +1600,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             client.set_cql_version(getCqlVersion());
-        }
-        catch (InvalidRequestException irex)
+        }        
+        catch (Exception e)
         {
-            log.error("Error during borrowing a connection for persistence unit {}, Caused by: .", irex);
-            throw new KunderaException(irex);
-        }
-        catch (TException tex)
-        {
-            log.error("Error during borrowing a connection for persistence unit {}, Caused by: .", persistenceUnit, tex);
-            throw new KunderaException(tex);
+            log.error("Error during borrowing a connection for persistence unit {}, Caused by: .", persistenceUnit, e);
+            throw new KunderaException(e);
         }
         finally
         {
@@ -1718,17 +1658,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 return (latestCount + 1) * descriptor.getAllocationSize();
             }
         }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while using keyspace, Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while using keyspace. Caused by: .", e);
-            throw new KunderaException(e);
-        }
-
         catch (UnavailableException e)
         {
             log.error("Error while reading counter value from table{}, Caused by: .", descriptor.getTable(), e);
@@ -1737,6 +1666,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         catch (TimedOutException e)
         {
             log.error("Error while reading counter value from table{}, Caused by: .", descriptor.getTable(), e);
+            throw new KunderaException(e);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while using keyspace. Caused by: .", e);
             throw new KunderaException(e);
         }
     }
@@ -1950,32 +1884,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         }
                     }
                 }
-            }
-            catch (InvalidRequestException e)
-            {
-                log.error("Error while executing native CQL query Caused by: .", e);
-                throw new PersistenceException(e);
-            }
-            catch (UnavailableException e)
-            {
-                log.error("Error while executing native CQL query Caused by: .", e);
-                throw new PersistenceException(e);
-            }
-            catch (TimedOutException e)
-            {
-                log.error("Error while executing native CQL query Caused by: .", e);
-                throw new PersistenceException(e);
-            }
-            catch (SchemaDisagreementException e)
-            {
-                log.error("Error while executing native CQL query Caused by: .", e);
-                throw new PersistenceException(e);
-            }
-            catch (TException e)
-            {
-                log.error("Error while executing native CQL query Caused by: .", e);
-                throw new PersistenceException(e);
-            }
+            }            
             catch (Exception e)
             {
                 log.error("Error while executing native CQL query Caused by: .", e);

@@ -18,6 +18,8 @@ package com.impetus.kundera.metadata.entities;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import com.impetus.kundera.annotations.Index;
+
 /**
  * Entity with singular attributes for meta model processing.
  * 
@@ -26,6 +28,7 @@ import javax.persistence.Embeddable;
  */
 
 @Embeddable
+@Index(index=true, columns="field")
 public class EmbeddableEntity
 {
     @Column(name = "field")

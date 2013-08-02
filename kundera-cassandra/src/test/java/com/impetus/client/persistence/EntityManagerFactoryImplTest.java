@@ -128,7 +128,7 @@ public class EntityManagerFactoryImplTest
         Assert.assertFalse(emf.isOpen());
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(_PU1));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(_PU1));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(_PU1));
+//        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(_PU1));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(_PU1));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(_PU1));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(_PU1));
@@ -147,7 +147,7 @@ public class EntityManagerFactoryImplTest
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu));
         Assert.assertFalse(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().isEmpty());
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(pu));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getClientMetadata(pu));
+//        Assert.assertNotNull(KunderaMetadata.INSTANCE.getClientMetadata(pu));
         Assert.assertFalse(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().isEmpty());
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(pu));
         Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu));
@@ -155,7 +155,7 @@ public class EntityManagerFactoryImplTest
         // TODO: Devise better way.
 //        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getSchemaMetadata()
 //                .getPuToSchemaMetadata().get(pu));
-        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(pu).getLuceneIndexDir());
+//        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(pu).getLuceneIndexDir());
     }
 
     private class OnConcurrentEMF implements Runnable

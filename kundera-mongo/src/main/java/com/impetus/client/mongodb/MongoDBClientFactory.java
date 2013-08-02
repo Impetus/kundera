@@ -78,7 +78,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata);
     }
 
     /**

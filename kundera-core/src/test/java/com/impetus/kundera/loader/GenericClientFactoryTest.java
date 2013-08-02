@@ -16,6 +16,7 @@
 package com.impetus.kundera.loader;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -25,8 +26,10 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * @author vivek.mishra
@@ -37,7 +40,7 @@ public class GenericClientFactoryTest
 {
     private static final String PU = "patest";
 
-    private EntityManagerFactory emf;
+//    private EntityManagerFactory emf;
 
     /**
      * @throws java.lang.Exception
@@ -46,14 +49,18 @@ public class GenericClientFactoryTest
     public void setUp() throws Exception
     {
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
-        emf = Persistence.createEntityManagerFactory(PU);
-        emf.createEntityManager();
+//        emf = Persistence.createEntityManagerFactory(PU);
+//        emf.createEntityManager();
 
     }
 
     @Test
     public void test()
     {
+        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
+        Map<String, PersistenceUnitMetadata> puMetadataMap = new HashMap<String, PersistenceUnitMetadata>();
+        puMetadataMap.put(PU, puMetadata);
+        KunderaMetadata.INSTANCE.getApplicationMetadata().addPersistenceUnitMetadata(puMetadataMap);
         CoreTestClientFactory clientFactory = new CoreTestClientFactory();
         clientFactory.load(PU, null);
         
@@ -81,4 +88,17 @@ public class GenericClientFactoryTest
         clientFactory.destroy();
     }
 
+    @Test
+    public void testIndexerClass()
+    {
+//        KunderaMetadata.INSTANCE.addClientMetadata(PU, null);
+        Map<String, Object> propertyMap = new HashMap<String, Object>();
+        propertyMap.put(PersistenceProperties.KUNDERA_INDEXER_CLASS, "com.impetus.kundera.query.CoreIndexer");
+        propertyMap.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "");
+        
+        CoreTestClientFactory clientFactory = new CoreTestClientFactory();
+        clientFactory.load(PU, propertyMap);
+        
+        Assert.assertNotNull(clientFactory.getClientMetadata());
+    }
 }

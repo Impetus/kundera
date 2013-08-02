@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -123,7 +124,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             if (!isParent)
             {
                 // In case need to use secondary indexes.
-                if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+                if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
 
                     ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100,
@@ -148,7 +149,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             }
             else
             {
-                if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+                if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
                     // in case need to search on secondry columns and it is not
                     // set

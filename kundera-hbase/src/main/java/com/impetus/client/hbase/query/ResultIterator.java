@@ -30,6 +30,7 @@ import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.query.HBaseQuery.QueryTranslator;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -180,7 +181,7 @@ class ResultIterator<E> implements IResultIterator<E>
                 handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
                         columnAsArr, null);
             }
-            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 if (filter == null && !translator.isFindById())
                 {

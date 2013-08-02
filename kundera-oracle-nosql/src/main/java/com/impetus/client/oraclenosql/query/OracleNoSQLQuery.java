@@ -30,9 +30,15 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.client.oraclenosql.OracleNoSQLEntityReader;
+import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -85,7 +91,11 @@ public class OracleNoSQLQuery extends QueryImpl
             }
         }
 
-        if (client.getIndexManager().getIndexer().getClass().equals(LuceneIndexer.class))
+        ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
+
+        if (!MetadataUtils.useSecondryIndex(clientMetadata)
+                && !(clientMetadata.getIndexImplementor() != null && clientMetadata.getIndexImplementor().equals(
+                        OracleNoSQLInvertedIndexer.class.getName())))
         {
             results.addAll(populateUsingLucene(m, client, null, interpreter.getSelectColumns()));
         }
@@ -177,7 +187,7 @@ public class OracleNoSQLQuery extends QueryImpl
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override

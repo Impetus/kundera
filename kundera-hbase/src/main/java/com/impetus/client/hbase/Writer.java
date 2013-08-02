@@ -71,7 +71,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Map<String, Attribute> columns,
             Object columnFamilyObj) throws IOException;
 
     /**
@@ -89,7 +89,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, Object rowKey, Set<Attribute> columns, Object entity,
+    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Attribute> columns, Object entity,
             String columnFamilyName) throws IOException;
 
     /**

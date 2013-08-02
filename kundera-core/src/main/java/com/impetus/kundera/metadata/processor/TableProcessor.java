@@ -16,11 +16,13 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 import javassist.Modifier;
 
 import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
@@ -33,9 +35,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
-import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Metadata processor class for persistent entities.
@@ -267,7 +266,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
         if (entityMetadata.getType() == null || !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
-            if (f.isAnnotationPresent(Embedded.class) || f.isAnnotationPresent(ElementCollection.class))
+            if ((f.isAnnotationPresent(Embedded.class) && f.getType().getAnnotation(Embeddable.class) != null))
+            {                
+                entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
+            }
+            else if (f.isAnnotationPresent(ElementCollection.class) && !MetadataUtils.isBasicElementCollectionField(f))
             {
                 entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
             }

@@ -132,7 +132,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties);
+        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties, clientMetadata);
     }
 
     @Override

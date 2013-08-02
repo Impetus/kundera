@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -373,7 +374,8 @@ public class AbstractEntityReader
             // Now these entities may be enhance entities and may not be as
             // well.
             Client associatedClient = pd.getClient(targetEntityMetadata);
-            if (!MetadataUtils.useSecondryIndex(targetEntityMetadata.getPersistenceUnit()))
+            
+            if (!MetadataUtils.useSecondryIndex(((ClientBase) associatedClient).getClientMetadata()))
             {
 
                 relationalEntities = getAssociationBuilder().getAssociatedEntitiesFromIndex(

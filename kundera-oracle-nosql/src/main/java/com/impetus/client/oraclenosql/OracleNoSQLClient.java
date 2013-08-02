@@ -130,6 +130,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         this.handler = new OracleNoSQLDataHandler(this, kvStore, persistenceUnit);
         this.reader = reader;
         this.indexManager = indexManager;
+        this.clientMetadata = factory.getClientMetadata();
         setBatchSize(persistenceUnit, puProperties);
     }
 

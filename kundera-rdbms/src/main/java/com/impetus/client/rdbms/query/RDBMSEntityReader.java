@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -119,7 +120,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             // if it is not a parent.
             String sqlQuery = null;
-            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 sqlQuery = getSqlQueryFromJPA(m, relationNames, null);
             }
@@ -140,7 +141,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         else
         {
-            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 try
                 {

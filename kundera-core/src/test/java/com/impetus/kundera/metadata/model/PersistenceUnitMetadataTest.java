@@ -16,6 +16,7 @@
 package com.impetus.kundera.metadata.model;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class PersistenceUnitMetadataTest
         Assert.assertNotNull(metadatas);
         Assert.assertFalse(metadatas.isEmpty());
         Assert.assertNotNull(metadatas.get(0));
+        Assert.assertNotNull(metadatas.get(0).toString());
         Assert.assertEquals("kunderatest", metadatas.get(0).getPersistenceUnitName());
     }
 
@@ -89,4 +91,65 @@ public class PersistenceUnitMetadataTest
         Assert.assertNotNull(metadatas.get(0));
         Assert.assertNotNull(metadatas.get(0).getClassLoader());
     }
+    
+    @Test
+    public void testAddJarFile()
+    {
+        Assert.assertNotNull(metadatas);
+        Assert.assertFalse(metadatas.isEmpty());
+        Assert.assertNotNull(metadatas.get(0));
+        PersistenceUnitMetadata puMetadata = metadatas.get(0);
+        puMetadata.addJarFile("myJarFile.jar");
+        Assert.assertNotNull(puMetadata.getJarFiles());
+        Assert.assertFalse(puMetadata.getJarFiles().isEmpty());
+        Assert.assertNotNull(puMetadata.getJarFileUrls());
+        Assert.assertFalse(puMetadata.getJarFileUrls().isEmpty());        
+    }
+    
+    @Test
+    public void testGetFields()
+    {
+        Assert.assertNotNull(metadatas);
+        Assert.assertFalse(metadatas.isEmpty());
+        Assert.assertNotNull(metadatas.get(0));
+        PersistenceUnitMetadata puMetadata = metadatas.get(0);
+        
+        Assert.assertFalse(puMetadata.getClasses().isEmpty());
+        Assert.assertTrue(puMetadata.getPackages().isEmpty());
+        List<String> classes = new ArrayList<String>(); classes.add("MyClass");
+        List<String> packages = new ArrayList<String>(); packages.add("com.impetus.my.package");
+        
+        puMetadata.setClasses(classes);
+        puMetadata.setPackages(packages);
+        
+        Assert.assertFalse(puMetadata.getClasses().isEmpty());
+        Assert.assertFalse(puMetadata.getPackages().isEmpty());
+        
+        Assert.assertNull(puMetadata.getJtaDataSource());
+        Assert.assertNull(puMetadata.getNonJtaDataSource());
+        Assert.assertNull(puMetadata.getMappingFileNames());
+        Assert.assertNull(puMetadata.getSharedCacheMode());
+        Assert.assertNull(puMetadata.getValidationMode());
+        Assert.assertNull(puMetadata.getNewTempClassLoader());
+        Assert.assertNotNull(puMetadata.getMappedUrl());
+        Assert.assertNotNull(puMetadata.getProperties());
+        Assert.assertTrue(puMetadata.getExcludeUnlistedClasses());
+        Assert.assertTrue(puMetadata.excludeUnlistedClasses());
+        Assert.assertEquals(0, puMetadata.getBatchSize());     
+        
+        for(PersistenceUnitMetadata pmd : metadatas)
+        {
+            try
+            {
+                pmd.getBatchSize();
+            }
+            catch (Exception e)
+            {                
+                Assert.fail(e.getMessage());
+             }
+            
+        }
+        
+    }  
+    
 }

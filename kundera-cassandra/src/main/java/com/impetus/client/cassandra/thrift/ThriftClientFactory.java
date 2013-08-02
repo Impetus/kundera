@@ -75,7 +75,7 @@ public class ThriftClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-//            setExternalProperties(externalProperty);
+            // setExternalProperties(externalProperty);
             schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName(), externalProperties);
         }
         return schemaManager;
@@ -106,6 +106,14 @@ public class ThriftClientFactory extends GenericClientFactory
         }
         schemaManager = null;
         externalProperties = null;
+
+        for (Object connectionPool : hostPools.values())
+        {
+            if (connectionPool != null && connectionPool.getClass().isAssignableFrom(ConnectionPool.class))
+            {
+                ((ConnectionPool) connectionPool).close(true);
+            }
+        }
         ((CassandraRetryService) hostRetryService).shutdown();
     }
 
@@ -237,8 +245,13 @@ public class ThriftClientFactory extends GenericClientFactory
             {
                 success = true;
                 Cassandra.Client client = connectionPool.getConnection();
-                logger.info("Returning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
-                        .getPoolProperties().getPort());
+
+                if (logger.isInfoEnabled())
+                {
+                    logger.info("Returning connection of {} :{} .", pool.getPoolProperties().getHost(), pool
+                            .getPoolProperties().getPort());
+                }
+
                 return new Connection(client, connectionPool);
             }
             catch (TException te)
@@ -249,8 +262,8 @@ public class ThriftClientFactory extends GenericClientFactory
                 connectionPool = getNewPool(pool.getPoolProperties().getHost(), pool.getPoolProperties().getPort());
             }
         }
-        
-      throw new KunderaException("All hosts are down. please check servers manully.");
+
+        throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
     void releaseConnection(ConnectionPool pool, Cassandra.Client conn)

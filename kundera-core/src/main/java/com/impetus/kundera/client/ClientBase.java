@@ -27,6 +27,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
@@ -49,6 +50,8 @@ public abstract class ClientBase
     protected String persistenceUnit;
 
     protected boolean isUpdate;
+    
+    protected ClientMetadata clientMetadata;
 
     /*
      * (non-Javadoc)
@@ -163,7 +166,7 @@ public abstract class ClientBase
     {
         if (indexManager != null)
         {
-            if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+            if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
             {
                 Map<NodeLink, Node> parents = node.getParents();
                 if (parents != null)
@@ -217,5 +220,16 @@ public abstract class ClientBase
      */
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
+
+
+    public ClientMetadata getClientMetadata()
+    {
+        return this.clientMetadata;
+    }
+
+    public boolean useSecondryIndex()
+    {
+        return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
+    }
 
 }

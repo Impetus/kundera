@@ -58,6 +58,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -108,13 +109,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @param puProperties
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
-            String persistenceUnit, Map<String, Object> puProperties)
+            String persistenceUnit, Map<String, Object> puProperties, ClientMetadata clientMetadata)
     {
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
         this.puProperties = puProperties;
+        
+        this.clientMetadata = clientMetadata;
 
         getBatchSize(persistenceUnit, this.puProperties);
     }

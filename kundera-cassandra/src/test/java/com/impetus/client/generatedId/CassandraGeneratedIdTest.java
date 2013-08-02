@@ -25,9 +25,7 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.thrift.ThriftClient;
@@ -45,17 +43,7 @@ import com.impetus.kundera.KunderaException;
 
 public class CassandraGeneratedIdTest
 {
-    EntityManagerFactory emf;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception
-    {
-    }
-
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception
-    {
-    }
+    private EntityManagerFactory emf;
 
     @Before
     public void setUp() throws Exception

@@ -95,7 +95,9 @@ public class CoreQuery<E> extends QueryImpl<E>
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        return null;
+//        setRelationEntities(enhanceEntities, client, m)
+        List results = populateUsingLucene(m,client,new ArrayList(),new String[]{});
+        return setRelationEntities(results, client, m);
     }
 
     @Override

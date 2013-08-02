@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -54,6 +55,8 @@ public abstract class InvertedIndexHandlerBase
 {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(InvertedIndexHandlerBase.class);
+    
+    protected boolean useSecondryIndex;
 
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -219,7 +222,7 @@ public abstract class InvertedIndexHandlerBase
     {
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
-        if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
+        if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata, useSecondryIndex))
         {
 
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
