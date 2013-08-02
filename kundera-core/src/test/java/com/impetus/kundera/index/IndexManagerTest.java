@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
@@ -130,6 +132,42 @@ public class IndexManagerTest
         
         Assert.assertFalse(results.isEmpty());
         
+    }
+    
+    @Test
+    public void testEmbeddableCustomIndexer()
+    {
+        try
+        {
+            CoreTestIndexer indexer = new CoreTestIndexer();
+            IndexManager ixManager = new IndexManager(indexer);
+            
+            Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+            CoreTestClient client = (CoreTestClient)clients.get("patest");
+            client.setIndexManager(ixManager);
+
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+            SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
+            entity.setKey(1);
+            entity.setName("entity");
+            entity.setField("name");
+            
+            EmbeddableEntity embed1 = new EmbeddableEntity();
+            embed1.setField("embeddedField1");
+            
+            EmbeddableEntityTwo embed2 = new EmbeddableEntityTwo();
+            embed2.setField(1f);
+            embed2.setName("name");
+
+            entity.setEmbeddableEntity(embed1);
+            entity.setEmbeddableEntityTwo(embed2);
+            
+            em.persist(entity);
+        }
+        catch (Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }       
     }
     
     @After
