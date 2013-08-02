@@ -20,7 +20,9 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
+import com.impetus.kundera.metadata.model.Employe;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
@@ -168,6 +170,28 @@ public class IndexManagerTest
         {
             Assert.fail(e.getMessage());
         }       
+    }
+    
+    @Test 
+    public void testPropertyIndex()
+    {
+        try
+        {
+            PropertyIndex pi = new PropertyIndex(Employe.class.getDeclaredField("empName"), "EMP_NAME", "ASC");
+            pi.setBoost(1.2f);
+            
+            Assert.assertEquals(1.2f, pi.getBoost());
+            Assert.assertEquals("ASC", pi.getIndexType());            
+        }
+        catch (SecurityException e)
+        {
+            
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
     }
     
     @After
