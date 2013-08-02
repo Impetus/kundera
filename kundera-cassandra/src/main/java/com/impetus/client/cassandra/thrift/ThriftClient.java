@@ -71,6 +71,7 @@ import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -116,9 +117,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new ThriftDataHandler(this);
-        this.invertedIndexHandler = new ThriftInvertedIndexHandler(this);
         this.reader = reader;
-        this.clientFactory = clientFactory;
+        this.clientMetadata = clientFactory.getClientMetadata();
+        this.invertedIndexHandler = new ThriftInvertedIndexHandler(this,MetadataUtils.useSecondryIndex(clientMetadata));
         this.pool = pool;
     }
 

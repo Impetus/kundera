@@ -109,6 +109,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         reader = new RedisEntityReader();
         this.indexManager = factory.getIndexManager();
         this.persistenceUnit = persistenceUnit;
+        this.clientMetadata = factory.getClientMetadata();
         setBatchSize(persistenceUnit, factory.getOverridenProperties());
     }
 

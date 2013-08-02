@@ -91,7 +91,7 @@ public class GenericClientFactoryTest
     @Test
     public void testIndexerClass()
     {
-        KunderaMetadata.INSTANCE.addClientMetadata(PU, null);
+//        KunderaMetadata.INSTANCE.addClientMetadata(PU, null);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PersistenceProperties.KUNDERA_INDEXER_CLASS, "com.impetus.kundera.query.CoreIndexer");
         propertyMap.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "");
@@ -99,6 +99,6 @@ public class GenericClientFactoryTest
         CoreTestClientFactory clientFactory = new CoreTestClientFactory();
         clientFactory.load(PU, propertyMap);
         
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getClientMetadata(PU).getIndexImplementor());
+        Assert.assertNotNull(clientFactory.getClientMetadata());
     }
 }

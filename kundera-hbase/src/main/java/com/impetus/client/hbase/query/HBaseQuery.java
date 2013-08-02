@@ -40,6 +40,7 @@ import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -175,7 +176,9 @@ public class HBaseQuery extends QueryImpl
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
                     columns.toArray(new String[columns.size()]), null);
         }
-        if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        
+//        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+        if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             if (filter == null && !translator.isFindById)
             {
@@ -551,12 +554,13 @@ public class HBaseQuery extends QueryImpl
     public Iterator iterate()
     {
         EntityMetadata m = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(m);
 
-        if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+//        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+        if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
         }
-        Client client = persistenceDelegeator.getClient(m);
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
         // start with 1 as first element is alias.

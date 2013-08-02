@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +39,7 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -99,7 +98,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param puProperties
      */
     public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit,
-            Map<String, Object> puProperties)
+            Map<String, Object> puProperties, ClientMetadata clientMetadata)
     {
         // TODO: This could be a constly call, see how connection pooling is
         // relevant here
@@ -109,7 +108,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.persistenceUnit = persistenceUnit;
         this.puProperties = puProperties;
         handler = new MongoDBDataHandler();
-
+        this.clientMetadata = clientMetadata;
+        
         populateBatchSize(persistenceUnit, this.puProperties);
 
     }

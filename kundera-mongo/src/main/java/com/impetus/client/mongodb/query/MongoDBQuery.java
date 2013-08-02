@@ -71,6 +71,7 @@ public class MongoDBQuery extends QueryImpl
 {
     /** The log used by this class. */
     private static Logger log = LoggerFactory.getLogger(MongoDBQuery.class);
+    private boolean isSingleResult;
 
     /**
      * Instantiates a new mongo db query.
@@ -127,7 +128,7 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, maxResult, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
+                    null, orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
                             .getResult());
         }
         catch (Exception e)
@@ -135,6 +136,16 @@ public class MongoDBQuery extends QueryImpl
             log.error("Error during executing query, Caused by:", e);
             throw new QueryHandlerException(e);
         }
+    }
+
+    @Override
+    public Object getSingleResult()
+    {
+        // to fetch a single result form database.
+        isSingleResult = true;
+        List results = getResultList();
+        isSingleResult=false;
+        return results.isEmpty() ? results : results.get(0);
     }
 
     @Override
@@ -148,7 +159,7 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    m.getRelationNames(), orderByClause, maxResult, getKeys(m, getKunderaQuery().getResult()),
+                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()),
                     getKunderaQuery().getResult());
         }
         catch (Exception e)
