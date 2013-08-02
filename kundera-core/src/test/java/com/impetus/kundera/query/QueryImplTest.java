@@ -35,8 +35,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DummyDatabase;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.polyglot.entities.AddressB1M;
@@ -123,6 +126,8 @@ public class QueryImplTest
         }
         Assert.assertNotNull(queryObj.getParameter(1, String.class));
         Assert.assertNotNull(queryObj.getParameterValue(1));
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene()); 
 
         try
         {
@@ -183,6 +188,8 @@ public class QueryImplTest
         results = queryObj.getResultList();
         
         Assert.assertEquals(0,results.size());
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene()); 
         
 
         Set luceneResults = queryObj.fetchByLuceneQuery();
@@ -225,15 +232,30 @@ public class QueryImplTest
         {
             Assert.assertEquals("invoked on a native query when the implementation does not support this use", iaex.getMessage());
         }
+
         
+        try
+        {
+            final String updateQuery = "Update Person p set p.personName=Amresh where p.personId = 1";
+            kunderaQuery = parseQuery(updateQuery);       
+            queryObj = new CoreQuery(updateQuery, kunderaQuery, delegator);
+            queryObj.executeUpdate();
+            Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+            Assert.assertNotNull(queryObj.populateUsingLucene()); 
+        }
+        catch (Exception e)
+        {
+            
+            Assert.fail(e.getMessage());
+        }        
         
-        /*try
+        try
         {
             queryObj.unwrap(Client.class);
         } catch(ClassCastException usex)
         {
             Assert.assertEquals("Provider does not support the call for class type:[" + Integer.class + "]", usex.getMessage());
-        }*/
+        }
         
         try
         {
@@ -274,12 +296,12 @@ public class QueryImplTest
         
         em.clear();
         
-        String selectAssociationQuery = "Select p from PersonB1M p where p.personId = 'personBi1M1'";
+        String query = "Select p from PersonB1M p where p.personId = 'personBi1M1'";
 
-        kunderaQuery = parseQuery(selectAssociationQuery);
+        kunderaQuery = parseQuery(query);
         
         
-        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);
         
         List<PersonB1M> associationResults = queryObj.getResultList();
         
@@ -290,12 +312,12 @@ public class QueryImplTest
         Assert.assertEquals(2,associationResults.get(0).getAddresses().size());
         
         
-        selectAssociationQuery = "Select p from PersonB1M p where p.personId = 'invalid'";
+        query = "Select p from PersonB1M p where p.personId = 'invalid'";
 
-        kunderaQuery = parseQuery(selectAssociationQuery);
+        kunderaQuery = parseQuery(query);
         
         
-        queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);
         
         associationResults = queryObj.getResultList();
 
@@ -346,8 +368,7 @@ public class QueryImplTest
         
         selectAssociationQuery = "Select p from PersonBM1 p where p.personId = 'invalid'";
 
-        kunderaQuery = parseQuery(selectAssociationQuery);
-        
+        kunderaQuery = parseQuery(selectAssociationQuery);        
         
         queryObj = new CoreQuery(selectAssociationQuery, kunderaQuery, delegator);
         
@@ -498,5 +519,71 @@ public class QueryImplTest
         }
 
     }
+    
+    @Test
+    public void testGetColumns()
+    {
+        try
+        {
+            String queryStr = "Select p from Person p where p.personId = :personId";
+            
+            PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
+            
+            KunderaQueryParser queryParser;
+            KunderaQuery kunderaQuery = parseQuery(queryStr);
 
+            CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+            
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);            
+            String[] columns = query.getColumns(new String[]{"personName", "age"}, m);
+            Assert.assertNotNull(columns);
+            Assert.assertTrue(columns.length > 0);
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testGroupByAndOrderBy()
+    {
+        try
+        {
+            String queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId";
+            KunderaQuery kunderaQuery = new KunderaQuery();
+            KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            queryParser.parse();        
+            kunderaQuery.postParsingInit();
+            
+            queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId HAVING 1";
+            kunderaQuery = new KunderaQuery();
+            queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            queryParser.parse();
+            kunderaQuery.postParsingInit();
+            
+            queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId ORDER BY personName";
+            kunderaQuery = new KunderaQuery();
+            queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            queryParser.parse();
+            kunderaQuery.postParsingInit();
+        }
+        catch (Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }       
+        
+    }
 }
