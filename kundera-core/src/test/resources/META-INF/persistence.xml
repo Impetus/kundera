@@ -10,7 +10,7 @@
 		<class>com.impetus.kundera.entity.PersonnelDTO</class>
 		<class>com.impetus.kundera.persistence.event.PersonEventDispatch</class>
 		<class>com.impetus.kundera.persistence.event.AddressEntity</class>
-		<class>com.impetus.kundera.persistence.event.AddressEntityWithList</class>				
+		<class>com.impetus.kundera.persistence.event.AddressEntityWithList</class>
 		<class>com.impetus.kundera.graph.Store</class>
 		<class>com.impetus.kundera.graph.BillingCounter</class>
 		<!-- <class>com.impetus.kundera.configure.CoreEntityAddressUni1To1</class> 
@@ -123,6 +123,8 @@
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithTableGenerator</class>
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutSequenceGenerator</class>
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutTableGenerator</class>
+		<!-- <class>com.impetus.kundera.metadata.validator.FTEmployee</class>
+		<class>com.impetus.kundera.metadata.validator.PartTimeEmployee</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -137,8 +139,8 @@
 			<property name="kundera.client.property" value="kunderaTest.xml" />
 		</properties>
 	</persistence-unit>
-	
-	<persistence-unit name="patest">		
+
+	<persistence-unit name="patest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.query.Person</class>
 		<class>com.impetus.kundera.polyglot.entities.PersonU11FK</class>
@@ -163,7 +165,7 @@
 		<class>com.impetus.kundera.polyglot.entities.PersonBMM</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressBMM</class>
 		<class>com.impetus.kundera.metadata.entities.SingularEntityEmbeddable</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>		
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />

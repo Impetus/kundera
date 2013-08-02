@@ -732,12 +732,10 @@ public class CassQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         externalProperties = ((CassandraClientBase) persistenceDelegeator.getClient(m)).getExternalProperties();
 
-
         if (!MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
         }
-
         return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(), getFetchSize() !=null ? getFetchSize() : this.maxResult);
     }
 

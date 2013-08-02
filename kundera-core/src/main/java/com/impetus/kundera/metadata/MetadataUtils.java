@@ -196,7 +196,7 @@ public class MetadataUtils
     public static String getEmbeddedCollectionPostfix(String embeddedCollectionName)
     {
         return embeddedCollectionName.substring(
-                embeddedCollectionName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) + 1,
+                embeddedCollectionName.lastIndexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) + 1,
                 embeddedCollectionName.length());
     }
 

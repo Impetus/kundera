@@ -675,7 +675,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
 
                         HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
-                                new java.util.HashSet<Attribute>(), entity, metadata.getTableName());
+                                new java.util.HashMap<String, Attribute>(), entity, metadata.getTableName());
 
                         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
                                 .getMetamodel(metadata.getPersistenceUnit());

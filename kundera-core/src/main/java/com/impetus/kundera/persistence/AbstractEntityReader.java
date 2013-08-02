@@ -188,16 +188,20 @@ public class AbstractEntityReader
         {
             for (Object relationEntity : relationalEntities)
             {
-                onParseRelation(entity, pd, targetEntityMetadata, relationEntity, relation, lazilyloaded);
-                PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
-                        PropertyAccessorHelper.getId(relationEntity, targetEntityMetadata));
+                if (relationEntity != null)
+                {
+                    onParseRelation(entity, pd, targetEntityMetadata, relationEntity, relation, lazilyloaded);
+                    PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
+                            PropertyAccessorHelper.getId(relationEntity, targetEntityMetadata));
+                }
             }
         }
 
     }
 
     /**
-     * Invokes parseRelations for relation entity and set relational entity within entity
+     * Invokes parseRelations for relation entity and set relational entity
+     * within entity
      * 
      * @param entity
      * @param pd
@@ -217,7 +221,8 @@ public class AbstractEntityReader
     }
 
     /**
-     * After successfully parsing set relational entity object within entity object.
+     * After successfully parsing set relational entity object within entity
+     * object.
      * 
      * @param entity
      * @param relationEntity
@@ -330,16 +335,23 @@ public class AbstractEntityReader
 
     /**
      * 
-     * Based on relation type, method invokes database to fetch relation entities.
+     * Based on relation type, method invokes database to fetch relation
+     * entities.
      * 
-     * @param relation             relation 
-     * @param metadata             entity metadata
-     * @param pd                   persistence delegator
-     * @param entityId             entity id
-     * @param relationValue        relational value
-     * @param targetEntityMetadata relational entity's metadata.
-     *  
-     * @return                     list of fetched relations.
+     * @param relation
+     *            relation
+     * @param metadata
+     *            entity metadata
+     * @param pd
+     *            persistence delegator
+     * @param entityId
+     *            entity id
+     * @param relationValue
+     *            relational value
+     * @param targetEntityMetadata
+     *            relational entity's metadata.
+     * 
+     * @return list of fetched relations.
      */
     private List fetchRelations(final Relation relation, final EntityMetadata metadata, final PersistenceDelegator pd,
             final Object entityId, Object relationValue, EntityMetadata targetEntityMetadata)
@@ -364,8 +376,9 @@ public class AbstractEntityReader
             if (!MetadataUtils.useSecondryIndex(targetEntityMetadata.getPersistenceUnit()))
             {
 
-                relationalEntities = getAssociationBuilder().getAssociatedEntitiesFromIndex(relation.getProperty()
-                        .getDeclaringClass(), entityId, targetEntityMetadata.getEntityClazz(), associatedClient);
+                relationalEntities = getAssociationBuilder().getAssociatedEntitiesFromIndex(
+                        relation.getProperty().getDeclaringClass(), entityId, targetEntityMetadata.getEntityClazz(),
+                        associatedClient);
             }
             else
             {
@@ -413,7 +426,7 @@ public class AbstractEntityReader
      */
     private Object getEntity(Object relationEntity)
     {
-        return relationEntity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) relationEntity)
+        return relationEntity != null && relationEntity.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) relationEntity)
                 .getEntity() : relationEntity;
     }
 
@@ -531,11 +544,11 @@ public class AbstractEntityReader
      */
     private AssociationBuilder getAssociationBuilder()
     {
-        if(this.associationBuilder == null)
+        if (this.associationBuilder == null)
         {
             this.associationBuilder = new AssociationBuilder();
         }
-        
+
         return this.associationBuilder;
 
     }
