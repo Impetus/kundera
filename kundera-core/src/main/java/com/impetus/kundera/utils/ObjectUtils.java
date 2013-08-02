@@ -359,19 +359,7 @@ public class ObjectUtils
                     + e.getMessage());
             return null;
         }
-        catch (IllegalAccessException e)
-        {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
-            return null;
-        }
-
-        catch (InvocationTargetException e)
-        {
-            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
-            return null;
-        }
-
-        catch (NoSuchMethodException e)
+        catch (Exception e)
         {
             log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;

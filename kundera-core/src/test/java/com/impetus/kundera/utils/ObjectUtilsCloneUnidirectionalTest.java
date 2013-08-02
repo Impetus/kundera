@@ -138,6 +138,17 @@ public class ObjectUtilsCloneUnidirectionalTest
         a1.addTweet(new Tweet("My First Tweet", "Web"));
         a1.addTweet(new Tweet("My Second Tweet", "Android"));
         a1.addTweet(new Tweet("My Third Tweet", "iPad"));
+        
+        a1.addTag("nosql");
+        a1.addTag("kundera");
+        a1.addTag("mongo");
+
+        a1.addLikedBy(111);
+        a1.addLikedBy(222);
+
+        a1.addComment(111, "What a post!");
+        a1.addComment(222, "I am getting NPE on line no. 145");
+        a1.addComment(333, "My hobby is to spam blogs");
 
         AlbumUni_1_M_1_M b11 = new AlbumUni_1_M_1_M("b1", "Album 1", "This is album 1");
         AlbumUni_1_M_1_M b12 = new AlbumUni_1_M_1_M("b2", "Album 2", "This is album 2");
@@ -224,7 +235,36 @@ public class ObjectUtilsCloneUnidirectionalTest
 
         Assert.assertFalse(t3.getTweetId().equals("t3"));
         Assert.assertTrue(t3.getBody().equals("My Third Tweet"));
-        Assert.assertTrue(t3.getDevice().equals("iPad"));
+        Assert.assertTrue(t3.getDevice().equals("iPad"));       
+        
+        Assert.assertNotNull(p.getTags());
+        Assert.assertFalse(p.getTags().isEmpty());
+        Assert.assertEquals(3, p.getTags().size());
+        for (String tag : p.getTags())
+        {
+            Assert.assertTrue(tag.equals("nosql") || tag.equals("kundera") || tag.equals("mongo"));
+        }
+
+        Assert.assertNotNull(p.getLikedBy());
+        Assert.assertFalse(p.getLikedBy().isEmpty());
+        Assert.assertEquals(2, p.getLikedBy().size());
+        for (int likedUserId : p.getLikedBy())
+        {
+            Assert.assertTrue(likedUserId == 111 || likedUserId == 222);
+        }
+
+        Assert.assertNotNull(p.getComments());
+        Assert.assertFalse(p.getComments().isEmpty());
+        Assert.assertEquals(3, p.getComments().size());
+        for (int commentedBy : p.getComments().keySet())
+        {
+            String commentText = p.getComments().get(commentedBy);
+            Assert.assertTrue(commentedBy == 111 || commentedBy == 222 || commentedBy == 333);
+            Assert.assertTrue(commentText.equals("What a post!")
+                    || commentText.equals("I am getting NPE on line no. 145")
+                    || commentText.equals("My hobby is to spam blogs"));
+        }
+        
 
         for (AlbumUni_1_M_1_M album : p.getAlbums())
         {

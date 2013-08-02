@@ -16,7 +16,11 @@
 package com.impetus.kundera.entity.photographer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -58,7 +62,19 @@ public class PhotographerUni_1_M_1_M
     // Element collection, will persist co-located
     @ElementCollection
     @CollectionTable(name = "tweeted")
-    private List<Tweet> tweets;
+    private List<Tweet> tweets;    
+    
+    @ElementCollection
+    @Column(name="tags")
+    private Set<String> tags;  
+    
+    @ElementCollection
+    @Column(name="liked_by")
+    private List<Integer> likedBy;   
+    
+    @ElementCollection
+    @Column(name="comments")
+    private Map<Integer, String> comments; 
 
     // One to many, will be persisted separately
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -175,5 +191,79 @@ public class PhotographerUni_1_M_1_M
     {
         this.albums = albums;
     }
+    
+    /**
+     * @return the tags
+     */
+    public Set<String> getTags()
+    {
+        return tags;
+    }
 
-}
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(Set<String> tags)
+    {
+        this.tags = tags;
+    }
+
+    /**
+     * @return the likedBy
+     */
+    public List<Integer> getLikedBy()
+    {
+        return likedBy;
+    }
+
+    /**
+     * @param likedBy the likedBy to set
+     */
+    public void setLikedBy(List<Integer> likedBy)
+    {
+        this.likedBy = likedBy;
+    }
+
+    /**
+     * @return the comments
+     */
+    public Map<Integer, String> getComments()
+    {
+        return comments;
+    }
+
+    /**
+     * @param comments the comments to set
+     */
+    public void setComments(Map<Integer, String> comments)
+    {
+        this.comments = comments;
+    }
+    
+    public void addTag(String tag)
+    {
+        if(tags == null)
+        {
+            tags = new HashSet<String>();
+        }
+        tags.add(tag);
+    }
+    
+    public void addLikedBy(int likedByUserId)
+    {
+        if(likedBy == null)
+        {
+            likedBy = new ArrayList<Integer>();
+        }
+        likedBy.add(likedByUserId);
+    }
+    
+    public void addComment(int userId, String comment)
+    {
+        if(comments == null)
+        {
+            comments = new HashMap<Integer, String>();
+        }
+        comments.put(userId, comment);
+    }
+ }
