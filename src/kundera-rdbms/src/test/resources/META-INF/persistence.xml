@@ -1,0 +1,53 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
+	version="2.0">
+
+	<persistence-unit name="testHibernate">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.Player</class>
+		<class>com.impetus.client.onetoone.OTONPerson</class>
+		<class>com.impetus.client.onetoone.OTONSPerson</class>
+		<class>com.impetus.client.onetomany.OTMNPerson</class>
+		<class>com.impetus.client.onetomany.bi.OTMBNPerson</class>
+		<class>com.impetus.client.manytoone.MTONPerson</class>
+		<class>com.impetus.client.manytomany.MTMNPerson</class>
+		<class>com.impetus.client.onetoone.OTOAddress</class>
+		<class>com.impetus.client.onetoone.OTOSAddress</class>
+		<class>com.impetus.client.onetomany.OTMAddress</class>
+		<class>com.impetus.client.onetomany.bi.OTMBAddress</class>
+		<class>com.impetus.client.manytoone.MTOAddress</class>
+		<class>com.impetus.client.manytomany.MTMAddress</class>
+<!-- 		<class>com.impetus.client.crud.PersonRDBMS</class>
+		<class>com.impetus.client.crud.datatypes.StudentRdbms</class>
+ 		<exclude-unlisted-classes>true</exclude-unlisted-classes> -->
+		<properties>
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<!--  DO NOT delete these -->
+			<!-- 	<property name="current_session_context_class" value="thread" /> -->
+			<!-- <property name="hibernate.show_sql" value="true" /> -->
+<!--    			<property name="hibernate.format_sql" value="true" />
+ 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:TESTDB" />
+ 			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+		<property name="hibernate.connection.pool_size" value="10" />
+			<property name="hibernate.connection.autocommit" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" /> -->
+   			<!-- <property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="hibernate.hbm2ddl.auto" value="create" />
+			<property name="hibernate.max_fetch_depth" value="0" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testdb" />
+			<property name="hibernate.connection.username" value="root" />
+			<property name="hibernate.connection.password" value="impetus" />	 -->
+ 			<property name="kundera.client.property" value="hibernate.properties" />
+		</properties>
+	</persistence-unit>
+
+</persistence>

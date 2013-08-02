@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>redis</name>
+			<connection>
+				<properties>
+					<property name="port" value="6379"></property>
+					<property name="host" value="localhost"></property>
+					<!-- <property name="timeout" value="300"></property> -->
+					<property name="dbfilename" value="kunderadump.rdb"></property>
+					<property name="requirepass" value="Kundera@123"></property>
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>
