@@ -21,16 +21,8 @@ package com.impetus.kundera;
  * @author animesh.kumar
  * @since 0.1
  */
-public final class Constants
+public interface Constants
 {
-
-    /**
-     * Instantiates a new constants.
-     */
-    private Constants()
-    {
-
-    }
 
     /** The Constant ENCODING. */
     public static final String ENCODING = "utf-8";

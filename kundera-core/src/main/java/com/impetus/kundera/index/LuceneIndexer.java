@@ -127,16 +127,9 @@ public class LuceneIndexer extends DocumentIndexer
             w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
-        catch (CorruptIndexException e)
+        catch (Exception e)
         {
-            throw new LuceneIndexingException(e);
-        }
-        catch (LockObtainFailedException e)
-        {
-            throw new LuceneIndexingException(e);
-        }
-        catch (IOException e)
-        {
+             log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
             throw new LuceneIndexingException(e);
         }
     }
@@ -192,12 +185,9 @@ public class LuceneIndexer extends DocumentIndexer
                 }
                 reader = IndexReader.open(index, true);
             }
-            catch (CorruptIndexException e)
+            catch (Exception e)
             {
-                throw new LuceneIndexingException(e);
-            }
-            catch (IOException e)
-            {
+                 log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
                 throw new LuceneIndexingException(e);
             }
         }
@@ -264,16 +254,9 @@ public class LuceneIndexer extends DocumentIndexer
             w.getConfig().setRAMBufferSizeMB(32);
             // flushInternal();
         }
-        catch (CorruptIndexException e)
+        catch (Exception e)
         {
-            throw new LuceneIndexingException(e);
-        }
-        catch (IOException e)
-        {
-            throw new LuceneIndexingException(e);
-        }
-        catch (ParseException e)
-        {
+             log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
             throw new LuceneIndexingException(e);
         }
     }
@@ -329,12 +312,9 @@ public class LuceneIndexer extends DocumentIndexer
                 indexCol.put(superCol + "|" + entityId, entityId);
             }
         }
-        catch (ParseException e)
+        catch (Exception e)
         {
-            throw new LuceneIndexingException("Error while parsing Lucene Query " + luceneQuery, e);
-        }
-        catch (IOException e)
-        {
+             log.error("Error while parsing Lucene Query {} ", luceneQuery,e);   
             throw new LuceneIndexingException(e);
         }
 
@@ -364,12 +344,7 @@ public class LuceneIndexer extends DocumentIndexer
             // w.commit();
             // w.close();
         }
-        catch (CorruptIndexException e)
-        {
-            log.error("Error while indexing document " + document + " into Lucene, Caused by: ", e);
-            throw new LuceneIndexingException("Error while indexing document " + document + " into Lucene.", e);
-        }
-        catch (IOException e)
+        catch (Exception e)
         {
             log.error("Error while indexing document " + document + " into Lucene, Caused by: ", e);
             throw new LuceneIndexingException("Error while indexing document " + document + " into Lucene.", e);
@@ -394,14 +369,9 @@ public class LuceneIndexer extends DocumentIndexer
             }
         }
 
-        catch (CorruptIndexException e)
+        catch (Exception e)
         {
             log.error("Error while Flushing Lucene Indexes, Caused by: ", e);
-            throw new LuceneIndexingException("Error while Flushing Lucene Indexes", e);
-        }
-        catch (IOException e)
-        {
-            log.error("Error while Flushing Lucene Indexes" + e.getMessage());
             throw new LuceneIndexingException("Error while Flushing Lucene Indexes", e);
         }
     }
@@ -420,12 +390,7 @@ public class LuceneIndexer extends DocumentIndexer
             }
         }
 
-        catch (CorruptIndexException e)
-        {
-            log.error("Error while closing lucene indexes, Caused by: ", e);
-            throw new LuceneIndexingException("Error while closing lucene indexes.", e);
-        }
-        catch (IOException e)
+        catch (Exception e)
         {
             log.error("Error while closing lucene indexes, Caused by: ", e);
             throw new LuceneIndexingException("Error while closing lucene indexes.", e);

@@ -16,14 +16,19 @@
 package com.impetus.kundera;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.LockModeType;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +39,8 @@ import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.entities.SampleEntity;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityManagerImpl;
+import com.impetus.kundera.polyglot.entities.PersonBMM;
+import com.impetus.kundera.query.Person;
 
 /**
  * @author vivek.mishra
@@ -190,6 +197,104 @@ public class EntityManagerImplTest
     }
     
 
+    @Test 
+    public void testUnsupportedMethod()
+    {
+        
+        try
+        {
+            // find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
+            em.find(PersonBMM.class, null, LockModeType.NONE);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        
+        try
+        {
+            // find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
+            em.find(PersonBMM.class, null, LockModeType.NONE, null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        
+        try
+        {
+            // createNativeQuery(String sqlString)
+            em.createNativeQuery("Query without class is not supported");
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+//            createNativeQuery(String sqlString, String resultSetMapping)
+            em.createNativeQuery("Query without class is not supported", "noreuslt");
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+            //getReference(Class<T> entityClass, Object primaryKey)
+            em.getReference(Person.class, null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+//            lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+            em.lock(null, LockModeType.NONE, null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+//            refresh(Object paramObject, LockModeType paramLockModeType)
+            em.refresh(null, LockModeType.NONE);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+//            refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+            em.refresh(null, LockModeType.NONE, null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+//            getLockMode(Object paramObject)
+            em.getLockMode(null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        try
+        {
+            //unwrap(Class<T> paramClass)
+            em.unwrap(null);
+            Assert.fail("Should have gone to catch block!");
+        } catch(NotImplementedException niex)
+        {
+            Assert.assertNotNull(niex);
+        }
+        
+    }
     /**
      * @param found
      */
