@@ -163,6 +163,7 @@
 		<class>com.impetus.kundera.polyglot.entities.PersonBMM</class>
 		<class>com.impetus.kundera.polyglot.entities.AddressBMM</class>
 		<class>com.impetus.kundera.metadata.entities.SingularEntityEmbeddable</class>
+		<class>com.impetus.kundera.metadata.entities.Article</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>		
 		<properties>
 			<property name="kundera.nodes" value="localhost" />

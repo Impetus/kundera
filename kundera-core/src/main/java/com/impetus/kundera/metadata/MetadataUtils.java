@@ -595,6 +595,11 @@ public class MetadataUtils
      */
     public static boolean isBasicElementCollectionField(Field collectionField)
     {
+        if(! Collection.class.isAssignableFrom(collectionField.getType()) && ! Map.class.isAssignableFrom(collectionField.getType()))
+        {
+            return false;
+        }
+        
         List<Class<?>> genericClasses = PropertyAccessorHelper.getGenericClasses(collectionField);
         for(Class genericClass : genericClasses)
         {
