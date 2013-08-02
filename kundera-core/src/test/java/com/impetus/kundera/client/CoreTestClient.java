@@ -1,10 +1,8 @@
 package com.impetus.kundera.client;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.AutoGenerator;
@@ -22,7 +20,7 @@ import com.impetus.kundera.query.CoreTestEntityReader;
 import com.impetus.kundera.query.LuceneQuery;
 
 public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, AutoGenerator, TableGenerator,
-        SequenceGenerator, IdentityGenerator
+        SequenceGenerator, IdentityGenerator, ClientPropertiesSetter
 {
 
     private static int idCount;
@@ -205,5 +203,39 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
     {
         return ++idCount;
     }
+    
+    String coreTestProperty;
+
+    /**
+     * @return the coreTestProperty
+     */
+    public String getCoreTestProperty()
+    {
+        return coreTestProperty;
+    }
+
+    /**
+     * @param coreTestProperty the coreTestProperty to set
+     */
+    public void setCoreTestProperty(String coreTestProperty)
+    {
+        this.coreTestProperty = coreTestProperty;
+    }
+
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        if (properties != null)
+        {
+            for (String key : properties.keySet())
+            {
+                Object value = properties.get(key);
+                if (key.equals("core.test.property") && value instanceof String)
+                {
+                    setCoreTestProperty((String) value);
+                }               
+            }
+        }        
+    }  
 
 }

@@ -478,44 +478,7 @@ public class KunderaQueryParser
                 }
             }
             return content;
-        }
-
-        /**
-         * Parse the next token looking for a keyword. The cursor position is
-         * skipped in one tick if a keyword is found
-         * 
-         * @param keyword
-         *            the searched keyword
-         * 
-         * @return true if the keyword
-         */
-        public boolean parseKeyword(String keyword)
-        {
-            if (pos < tokens.length - 1)
-            {
-                pos++;
-                if (keywords[pos] != null)
-                {
-                    if (keywords[pos].equals(keyword))
-                    {
-                        return true;
-                    }
-                    if (keyword.indexOf(' ') > -1)
-                    {
-                        if (pos < keywords.length - 1)
-                        {
-                            if ((keywords[pos] + ' ' + keywords[pos + 1]).equals(keyword))
-                            {
-                                pos++;
-                                return true;
-                            }
-                        }
-                    }
-                }
-                pos--;
-            }
-            return false;
-        }
+        }     
 
         /**
          * Parse the next token looking for a keyword. The cursor position is

@@ -15,13 +15,14 @@
  */
 package com.impetus.kundera.query;
 
-import javax.management.RuntimeErrorException;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.classreading.ResourceReadingException;
+import com.impetus.kundera.client.ClientResolverException;
+import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.index.LuceneIndexingException;
@@ -29,9 +30,12 @@ import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.loader.PersistenceLoaderException;
+import com.impetus.kundera.metadata.model.ApplicationLoaderException;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.KunderaTransactionException;
+import com.impetus.kundera.persistence.event.EventListenerException;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.utils.InvalidConfigurationException;
 
@@ -100,6 +104,12 @@ public class QueryExceptionTest
         exception = new KunderaTransactionException("Error with string");
         Assert.assertNotNull(exception);
         exception = new KunderaTransactionException(new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new KunderaTransactionException("Error with string", new RuntimeException());
+        Assert.assertNotNull(exception);
+        
+        exception = new KunderaTransactionException("Error with string", new RuntimeException());
         Assert.assertNotNull(exception);
     }
 
@@ -220,6 +230,8 @@ public class QueryExceptionTest
         exception = new InvalidConfigurationException(new RuntimeException());
         Assert.assertNotNull(exception);
         
+        exception = new InvalidConfigurationException();
+        Assert.assertNotNull(exception);        
         
         exception = new InvalidConfigurationException("Error with string", new RuntimeException());
         Assert.assertNotNull(exception);
@@ -263,13 +275,112 @@ public class QueryExceptionTest
 
         exception = new SchemaGenerationException("error with string ",new RuntimeException(),"KunderaTests","test");
         Assert.assertNotNull(exception);
+        
+        exception = new SchemaGenerationException("error with string ", "cassandra", "KunderaTests","test");
+        Assert.assertNotNull(exception);
 
         exception = new SchemaGenerationException("error with string ","KunderaTests","test");
         Assert.assertNotNull(exception);
 
         exception = new SchemaGenerationException("error with string ",new RuntimeException(),"KunderaTests");
         Assert.assertNotNull(exception);
-
     }
+
+    @Test
+    public void testPersistenceUnitConfigurationException()
+    {
+        PersistenceUnitConfigurationException exception = new PersistenceUnitConfigurationException("Error with string");
+        Assert.assertNotNull(exception);
+        
+        exception = new PersistenceUnitConfigurationException(new RuntimeException());
+        Assert.assertNotNull(exception);   
+
+        exception = new PersistenceUnitConfigurationException();
+        Assert.assertNotNull(exception);
+
+        exception = new PersistenceUnitConfigurationException("KunderaTests", new RuntimeException());
+        Assert.assertNotNull(exception);
+
+        exception = new PersistenceUnitConfigurationException("error with string ");
+        Assert.assertNotNull(exception);
+
+        exception = new PersistenceUnitConfigurationException(new RuntimeException());
+        Assert.assertNotNull(exception);
+    }
+
+    @Test
+    public void testApplicationLoaderException()
+    {
+        ApplicationLoaderException exception = new ApplicationLoaderException("Error with string");
+        Assert.assertNotNull(exception);        
+    }
+    
+    @Test
+    public void testPropertyAccessException()
+    {
+        PropertyAccessException exception = new PropertyAccessException("Error with string");
+        Assert.assertNotNull(exception); 
+        
+        exception = new PropertyAccessException();
+        Assert.assertNotNull(exception);   
+        
+        exception = new PropertyAccessException(new RuntimeException());
+        Assert.assertNotNull(exception);   
+    }
+    
+    @Test
+    public void testEventListenerException()
+    {
+        EventListenerException exception = new EventListenerException("Error with string");
+        Assert.assertNotNull(exception); 
+        
+        exception = new EventListenerException("Error with string", new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+        exception = new EventListenerException(new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+        exception = new EventListenerException();
+        Assert.assertNotNull(exception);      
+       
+    }
+    
+    @Test
+    public void testCacheException()
+    {
+        CacheException exception = new CacheException("Error with string");
+        Assert.assertNotNull(exception); 
+        
+        exception = new CacheException("Error with string", new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+        exception = new CacheException(new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+       
+    }
+    
+    @Test
+    public void testClientResolverException()
+    {
+        ClientResolverException exception = new ClientResolverException("Error with string");
+        Assert.assertNotNull(exception); 
+        
+        exception = new ClientResolverException("Error with string", new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+        exception = new ClientResolverException(new RuntimeException());
+        Assert.assertNotNull(exception); 
+        
+        exception = new ClientResolverException();
+        Assert.assertNotNull(exception); 
+    }
+        
+       
+        
+       
+    
+    
+    
     
 }

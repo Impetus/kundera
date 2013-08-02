@@ -182,7 +182,34 @@ public class KunderaQueryTest
         }catch (QueryHandlerException qhex) 
         {
             Assert.assertEquals("No entity found by the name: invalidPerson", qhex.getMessage());
+        }        
+        
+        try
+        {
+            query = "Select p.ABC from Person p";
+            kunderaQuery = new KunderaQuery();
+            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            queryParser.parse();
+            kunderaQuery.postParsingInit();
         }
+        catch (JPQLParseException e)
+        {
+            Assert.assertEquals("invalid column nameABC", e.getMessage());            
+        }
+        
+        try
+        {
+            query = "Select p from Person p order by p.personName ASCENDING";
+            kunderaQuery = new KunderaQuery();
+            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            queryParser.parse();
+            kunderaQuery.postParsingInit();
+        }
+        catch (JPQLParseException e)
+        {            
+            Assert.assertTrue(e.getMessage().startsWith("Invalid sort order provided:ASCENDING"));         
+        }
+        
     }
 
     @Test
@@ -364,6 +391,7 @@ public class KunderaQueryTest
             Assert.assertTrue(kunderaQuery.isBound(parameter));
             Assert.assertNull(parameter.getName());
             Assert.assertNotNull(parameter.getPosition());
+            Assert.assertNotNull(parameter.toString());
         }
 
         try

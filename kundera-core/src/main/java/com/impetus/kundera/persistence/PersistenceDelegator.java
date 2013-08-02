@@ -18,7 +18,6 @@ package com.impetus.kundera.persistence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +28,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
-import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +47,8 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
@@ -63,7 +58,6 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 import com.impetus.kundera.query.QueryResolver;
 import com.impetus.kundera.utils.ObjectUtils;
@@ -175,60 +169,7 @@ public final class PersistenceDelegator
         {
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
-    }
-
-    /**
-     * Updates id of user entity object.
-     * 
-     * @param e
-     * @param metadata
-     * @param node
-     */
-    private void updateId(Object e, EntityMetadata metadata, Node node)
-    {
-        Metamodel metamodel = KunderaMetadataManager.getMetamodel(metadata.getPersistenceUnit());
-        IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
-        if (keyValue != null)
-        {
-
-            PropertyAccessorHelper.setId(e, metadata, node.getEntityId());
-            for (Relation relation : metadata.getRelations())
-            {
-                Object relObj = PropertyAccessorHelper.getObject(e, relation.getProperty());
-                if (node.getEntityId().getClass().isAssignableFrom(int.class)
-                        && e.hashCode() != (Integer) node.getEntityId())
-                {
-                    if (relation.isUnary())
-                    {
-                        updateRecursively(relation, relObj);
-                    }
-                    else if (relation.isCollection())
-                    {
-                        Collection col = (Collection) relObj;
-                        for (Object obj : col)
-                        {
-                            updateRecursively(relation, obj);
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    private void updateRecursively(Relation relation, Object obj)
-    {
-        if (obj != null)
-        {
-
-            Node relNode = getPersistenceCache().getMainCache().getNodeFromCache(obj);
-            if (relNode != null)
-            {
-                EntityMetadata relMetadata = getMetadata(relation.getTargetEntity());
-                updateId(obj, relMetadata, relNode);
-            }
-        }
-    }
+    }    
 
     /**
      * Find object based on primary key either form persistence cache or from

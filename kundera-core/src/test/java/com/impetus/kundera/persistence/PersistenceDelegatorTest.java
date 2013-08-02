@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -37,9 +39,6 @@ import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQueryParser;
-import com.impetus.kundera.query.LuceneQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 
 public class PersistenceDelegatorTest
@@ -389,6 +388,22 @@ public class PersistenceDelegatorTest
         {
             Assert.assertEquals("Query String should not be null ", qhex.getMessage());
         }
+    }
+    
+    @Test
+    public void testPopulateClientProperties()
+    {
+        Map props = new HashMap();
+        props.put("core.test.property", "core-test-property-value");
+        
+        PersistenceDelegator pd = ((EntityManagerImpl)em).getPersistenceDelegator();
+        pd.populateClientProperties(props);
+        
+        Map map = em.getProperties();
+        Map<String, Client> clients = (Map<String, Client>)em.getDelegate();
+        CoreTestClient client = (CoreTestClient) clients.get("kunderatest");
+        Assert.assertEquals("core-test-property-value", client.getCoreTestProperty());
+        
     }
 
 }

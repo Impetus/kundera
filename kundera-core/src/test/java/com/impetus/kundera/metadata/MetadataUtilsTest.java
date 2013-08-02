@@ -36,10 +36,9 @@ import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.KunderaUser;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
-import com.impetus.kundera.persistence.event.AddressEntity;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author vivek.mishra
@@ -202,10 +201,12 @@ public class MetadataUtilsTest
         EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Article.class);
         Assert.assertNotNull(m1);
         Assert.assertTrue(MetadataUtils.containsBasicElementCollectionField(m1));
+        Assert.assertNotNull(m1.toString());
         
         EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
         Assert.assertNotNull(m2);
         Assert.assertFalse(MetadataUtils.containsBasicElementCollectionField(m2));
+        Assert.assertNotNull(m2.toString());
     }
     
     @Test
@@ -215,6 +216,7 @@ public class MetadataUtilsTest
         try
         {                       
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Article.class);
+            Assert.assertNotNull(m.toString());
             
             Field f = Article.class.getDeclaredField("body");
             Assert.assertFalse(MetadataUtils.isBasicElementCollectionField(f));
@@ -237,5 +239,6 @@ public class MetadataUtilsTest
         {
             Assert.fail(e.getMessage());
         }
-    }
+    }  
+    
 }

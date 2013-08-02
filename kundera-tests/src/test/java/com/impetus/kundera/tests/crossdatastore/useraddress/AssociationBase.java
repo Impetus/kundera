@@ -99,7 +99,7 @@ public abstract class AssociationBase
     // "addMongo", "rdbms", "redis", "addCassandra",
     // "oracle_kvstore" , "addHbase"};
 
-    private String persistenceUnits = "rdbms,redis,addMongo,oracle_kvstore,addCassandra,piccandra,secIdxAddCassandra,picongo";
+    private String persistenceUnits = "rdbms,addMongo,oracle_kvstore,addCassandra,piccandra,secIdxAddCassandra,picongo";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
             "oracle_kvstore" /* , "addHbase" */};
