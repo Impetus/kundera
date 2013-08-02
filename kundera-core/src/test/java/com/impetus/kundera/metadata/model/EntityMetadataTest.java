@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,6 +39,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.event.PersonEventDispatch;
 
 /**
  * @author Kuldeep Mishra
@@ -73,6 +78,7 @@ public class EntityMetadataTest
         Assert.assertNotNull(entityMetadata.getIndexProperties().get("AGE"));
         Assert.assertNotNull(entityMetadata.getIndexProperties().get("EMP_NAME"));
         Assert.assertNull(entityMetadata.getIndexProperties().get("departmentData"));
+        Assert.assertNotNull(entityMetadata.toString());
 
         Map<String, PropertyIndex> indexes = IndexProcessor.getIndexesOnEmbeddable(Department.class);
         Assert.assertNotNull(indexes);
@@ -87,7 +93,8 @@ public class EntityMetadataTest
         Assert.assertNotNull(indexes.get("location"));
         Assert.assertEquals("GEO2D", indexes.get("location").getIndexType());
         Assert.assertEquals(new Integer(200), indexes.get("location").getMax());
-        Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());
+        Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());     
+        
     }
 
     @Test
@@ -97,6 +104,10 @@ public class EntityMetadataTest
         Assert.assertNotNull(entityMetadata);
         Assert.assertTrue(entityMetadata.getIndexProperties().isEmpty());
         Assert.assertEquals(EntityMetadata.Type.SUPER_COLUMN_FAMILY, entityMetadata.getType());
+        Assert.assertNotNull(entityMetadata.toString());
+        
+        entityMetadata.setCounterColumnType(false);
+        Assert.assertFalse(entityMetadata.isCounterColumnType());       
     }
 
     /**
@@ -140,7 +151,7 @@ public class EntityMetadataTest
         appMetadata.setClazzToPuMap(clazzToPu);
 
         EntityMetadata m = new EntityMetadata(Employe.class);
-        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);
+        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);       
 
         TableProcessor processor = new TableProcessor(null);
         processor.process(Employe.class, m);
@@ -148,7 +159,8 @@ public class EntityMetadataTest
 
         IndexProcessor indexProcessor = new IndexProcessor();
         indexProcessor.process(Employe.class, m);
-        indexProcessor.process(KunderaUser.class, m1);
+        indexProcessor.process(KunderaUser.class, m1);        
+        Assert.assertNotNull(m1.toString());
 
         m.setPersistenceUnit(persistenceUnit);
 
@@ -171,5 +183,18 @@ public class EntityMetadataTest
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;
+    }
+    
+    @Test
+    public void testCallbackMethods()
+    {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest");
+        EntityManager em = emf.createEntityManager();   
+        
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonEventDispatch.class);
+        Assert.assertNotNull(m.toString());
+        
+        em.close();
+        emf.close();
     }
 }
