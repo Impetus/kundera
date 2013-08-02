@@ -66,13 +66,14 @@ public interface Writer
      *            Row Key
      * @param columns
      *            Columns for a given column family
+     * @param values TODO
      * @param columnFamilyObj
      *            the column family obj
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
     void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Map<String, Attribute> columns,
-            Object columnFamilyObj) throws IOException;
+            Map<String, Object> values, Object columnFamilyObj) throws IOException;
 
     /**
      * Writes Columns <code>columns</code> into a given table. Each columns is
