@@ -132,7 +132,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String joinTableName)
+    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String columnFamilyName)
             throws IOException;
 
     /**

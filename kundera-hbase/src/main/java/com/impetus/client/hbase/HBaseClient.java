@@ -116,7 +116,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
         this.puProperties = puProperties;
-        
+
         this.clientMetadata = clientMetadata;
 
         getBatchSize(persistenceUnit, this.puProperties);
@@ -459,8 +459,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 try
                 {
-                    handler.createTableIfDoesNotExist(joinTableName, joinTableName);
-                    handler.writeJoinTableData(joinTableName, joinColumnValue, columns, joinTableName);
+                    handler.createTableIfDoesNotExist(joinTableData.getSchemaName(), joinTableName);
+                    handler.writeJoinTableData(joinTableData.getSchemaName(), joinColumnValue, columns, joinTableName);
                 }
                 catch (IOException e)
                 {

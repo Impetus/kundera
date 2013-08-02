@@ -76,9 +76,9 @@ public class HBaseWriter implements Writer
     public void writeColumns(HTableInterface htable, String columnFamily, Object rowKey,
             Map<String, Attribute> columns,
 
-            Object columnFamilyObj) throws IOException
+            Map<String, Object> values, Object columnFamilyObj) throws IOException
     {
-        Put p = preparePut(columnFamily, rowKey, columns, columnFamilyObj);
+        Put p = preparePut(columnFamily, rowKey, columns, values);
         htable.put(p);
     }
 
@@ -308,7 +308,7 @@ public class HBaseWriter implements Writer
             List<HBaseDataWrapper> row = rows.get(hTable);
             for (HBaseDataWrapper data : row)
             {
-                dataSet.add(preparePut(data.getColumnFamily(), data.getRowKey(), data.getColumns(), data.getEntity()));
+                dataSet.add(preparePut(data.getColumnFamily(), data.getRowKey(), data.getColumns(), data.getValues()));
             }
             hTable.put(dataSet);
             dataSet.clear();
@@ -324,13 +324,14 @@ public class HBaseWriter implements Writer
      *            the row key
      * @param columns
      *            the columns
+     * @param values TODO
      * @param columnFamilyObj
      *            the column family obj
      * @return the put
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private Put preparePut(String columnFamily, Object rowKey, Map<String, Attribute> columns, Object columnFamilyObj)
+    private Put preparePut(String columnFamily, Object rowKey, Map<String, Attribute> columns, Map<String, Object> values)
             throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
@@ -342,7 +343,8 @@ public class HBaseWriter implements Writer
                 String qualifier = columnName;
                 try
                 {
-                    Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
+                    //Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
+                    Object o = values.get(columnName);
                     byte[] value = HBaseUtils.getBytes(o);
                     if (value != null && columnFamily != null)
                     {

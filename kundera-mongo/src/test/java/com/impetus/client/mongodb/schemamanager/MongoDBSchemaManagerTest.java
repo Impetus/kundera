@@ -290,19 +290,19 @@ public class MongoDBSchemaManagerTest
 
             catch (SecurityException e)
             {
-                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
             catch (NoSuchFieldException e)
             {
-                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
             catch (IllegalArgumentException e)
             {
-                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
             catch (IllegalAccessException e)
             {
-                e.printStackTrace();
+                Assert.fail(e.getMessage());
             }
         }
     }
