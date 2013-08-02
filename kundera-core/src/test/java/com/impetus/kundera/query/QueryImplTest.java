@@ -265,6 +265,47 @@ public class QueryImplTest
             Assert.assertEquals("parameter is not a parameter of the query", usex.getMessage());
         }
         
+        
+        query = "Select p from Person p where p.age >:age";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("age", new Integer(32));       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene());
+        
+        query = "Select p from Person p where p.age >=:age";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("age", new Integer(32));       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene());
+        
+        query = "Select p from Person p where p.age <:age";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("age", new Integer(32));       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene());
+        
+        query = "Select p from Person p where p.age <=:age";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("age", new Integer(32));       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene());
+        
+        query = "Select p from Person p where p.personName like :personName";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("personName", "Amresh");       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene()); 
+        
         onassertBi1MAssociation(delegator);
         onassertBiM1Association(delegator);
 
