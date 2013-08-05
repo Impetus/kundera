@@ -41,7 +41,6 @@ import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
@@ -102,7 +101,6 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                                 Bytes.fromByteArray(sc.getName()), sc.getColumns());
                     }
                 }
-
             }
             mutator.execute(consistencyLevel);
             indexThriftyRows = null;
@@ -188,12 +186,12 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
         catch (NotFoundException e)
         {
-            log.error("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
+            log.warn("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
             return null;
         }
         catch (PelopsException e)
         {
-            log.error("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
+            log.warn("Error while fetching super column for Row {} , Caused by: .",rowKey, e);
             return null;
         }
         return thriftSuperColumn;
