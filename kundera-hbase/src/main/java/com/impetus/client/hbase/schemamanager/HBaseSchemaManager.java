@@ -223,6 +223,11 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 addColumn(tableInfo);
             }
         }
+
+        if (admin.isTableDisabled(databaseName))
+        {
+            admin.enableTable(databaseName);
+        }
     }
 
     private void addColumn(TableInfo tableInfo) throws IOException
