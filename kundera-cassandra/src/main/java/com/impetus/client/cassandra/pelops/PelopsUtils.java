@@ -121,6 +121,12 @@ public class PelopsUtils
         {
             prop.setMaxActive(maxTotal);
         }
+        if (cassandraHost.getUser() != null)
+        {
+            prop.setUsername(cassandraHost.getUser());
+            prop.setPassword(cassandraHost.getPassword());
+        }
+
         prop.setSocketTimeout(socketTimeOut);
         prop.setTestOnBorrow(testOnBorrow);
         prop.setTestOnConnect(testOnConnect);

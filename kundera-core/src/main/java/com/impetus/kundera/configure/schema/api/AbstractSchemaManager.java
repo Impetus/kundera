@@ -65,6 +65,10 @@ public abstract class AbstractSchemaManager
 
     protected Map<String, Object> externalProperties;
 
+    protected String userName = null;
+
+    protected String password = null;
+
     /**
      * Initialise with configured client factory.
      * 
@@ -119,6 +123,8 @@ public abstract class AbstractSchemaManager
         {
             portName = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
             hostName = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
             schemaName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
             // get type of schema of operation.
             operationType = (String) externalProperties.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
@@ -132,7 +138,11 @@ public abstract class AbstractSchemaManager
         // get type of schema of operation.
         if (operationType == null)
             operationType = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
-
+        if (userName == null)
+        {
+            userName = puMetadata.getProperty(PersistenceProperties.KUNDERA_USERNAME);
+            password = puMetadata.getProperty(PersistenceProperties.KUNDERA_PASSWORD);
+        }
         String[] hostArray = hostName.split(",");
         hosts = new String[hostArray.length];
         for (int i = 0; i < hostArray.length; i++)
