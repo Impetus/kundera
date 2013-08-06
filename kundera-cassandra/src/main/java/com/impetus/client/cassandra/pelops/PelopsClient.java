@@ -534,7 +534,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 {
                     if (log.isInfoEnabled())
                     {
-                        log.info("Persisting column family record for row key {}", tf.getId());
+//                        log.info("Persisting column family record for row key {}", tf.getId());
                     }
 
                     // Bytes.from
