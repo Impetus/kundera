@@ -1,0 +1,108 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="timelineTemplate.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        DataKeeper :: Home
+    </ui:define>
+
+	<ui:define name="content">
+		<p:panel header="Your Timeline">
+			<table width="100%">
+				<tr>
+					<td><h:form enctype="multipart/form-data">
+							<p:fileUpload
+								fileUploadListener="#{documentUploadBean.handleFileUpload}"
+								mode="advanced" update="messages" sizeLimit="10000000"
+								allowTypes="/(\.|\/)(pdf|xls|xlsx|doc|docx|txt|text|avi)$/" />
+							<p:growl id="messages" showDetail="true" />
+						</h:form></td>
+				</tr>
+				<tr>
+					<td><h:form>
+							<strong><h:outputText value="SearchEmployee:-  " /> </strong>
+							<h:inputText value="#{subordinateSearchBean.noOfYears}" />
+							<h:commandButton value="Search"
+								action="#{subordinateSearchBean.searchEmployeeByYearOfComplition}" />
+						</h:form></td>
+					<td><h:form>
+							<h:commandButton value="Subordinates"
+								action="#{subordinateSearchBean.searchSubordinates}">
+								<f:param name="managerId"
+									value="#{sessionScope.employee.employeeId}" />
+							</h:commandButton>
+						</h:form></td>
+				</tr>
+				<tr>
+					<td><h:form>
+							<strong><h:outputText value="SearchEmployee:-  " /> </strong>
+							<h:selectOneMenu value="#{subordinateSearchBean.searchBy}">
+								<f:selectItem itemValue="0" itemLabel="EmployeeName" />
+								<f:selectItem itemValue="1" itemLabel="EmployeeId" />
+							</h:selectOneMenu>
+							<h:inputText value="#{subordinateSearchBean.searchText}" />
+							<h:commandButton value="Search"
+								action="#{subordinateSearchBean.searchEmployee}" />
+						</h:form></td>
+				</tr>
+				<tr>
+					<td><h:form>
+							<strong><h:outputText value="Search Document:-  " /> </strong>
+							<h:selectOneMenu value="#{documentSearchBean.searchBy}">
+								<f:selectItem itemValue="0" itemLabel="EmployeeName" />
+								<f:selectItem itemValue="1" itemLabel="EmployeeId" />
+							</h:selectOneMenu>
+							<h:inputText value="#{documentSearchBean.searchText}" />
+							<h:commandButton value="Search"
+								action="#{documentSearchBean.search}" />
+						</h:form></td>
+				</tr>
+				<tr>
+					<!-- <table width="100%"> -->
+					<!-- <tr> -->
+					<td style="align: center;"><h:form>
+							<p:dataTable id="dataTable" var="documentInfo"
+								value="#{documentSearchBean.documents}">
+
+								<p:column id="nameColumn" headerText="Document Name"
+									style="width:200px;align:center;">
+									<h:outputText value="#{documentInfo.documentName}" />
+								</p:column>
+
+								<p:column id="ownerColumn" headerText="Uploaded By"
+									style="width:200px;align:center;">
+									<h:outputText value="#{documentInfo.ownerName}" />
+								</p:column>
+
+								<p:column id="dateColumn" headerText="Uploaded Date"
+									style="width:200px;align:center;">
+									<h:outputText value="#{documentInfo.uplodedDate}" />
+								</p:column>
+
+								<p:column id="sizeColumn" headerText="Size"
+									style="width:200px;align:center;">
+									<h:outputText value="#{documentInfo.size}" />
+								</p:column>
+
+								<p:column id="downloadColumn" headerText="Download"
+									style="width:200px;align:center;">
+									<p:commandButton id="downloadLink" value="Download"
+										ajax="false" onclick="PrimeFaces.monitorDownload(start, stop)"
+										icon="ui-icon-arrowthichk-s">
+										<p:fileDownload value="#{documentInfo.file}" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+						</h:form></td>
+					<!-- </tr> -->
+					<!-- </table> -->
+				</tr>
+
+			</table>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="uploadDocumentTemplate.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        DataKeeper :: Upload
+    </ui:define>
+	<ui:define name="content">
+		<h:form enctype="multipart/form-data">
+
+			<p:messages showDetail="true" />
+
+			<p:fileUpload value="#{documentUploadBean.file}" mode="simple"
+				allowTypes="/(\.|\/)(pdf|xls?x|doc?x|avi)$/" />
+
+			<p:commandButton value="Submit" ajax="false"
+				actionListener="#{documentUploadBean.handleFileUpload}" />
+
+		</h:form>
+		<h:form enctype="multipart/form-data">
+			<p:fileUpload
+				fileUploadListener="#{documentUploadBean.handleFileUpload}"
+				mode="advanced" update="messages" sizeLimit="100000000"
+				allowTypes="/(\.|\/)(pdf|xls?x|doc?x|avi)$/" />
+			<p:growl id="messages" showDetail="true" />
+		</h:form>
+
+	</ui:define>
+</ui:composition>

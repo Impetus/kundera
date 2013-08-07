@@ -1,0 +1,60 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="timelineTemplate.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        DataKeeper :: Employees Information
+    </ui:define>
+
+	<ui:define name="content">
+		<p:panel header="Employess">
+			<table width="100%">
+				<tr>
+					<!-- <table width="100%"> -->
+					<!-- <tr> -->
+					<td style="align: center;"><h:form>
+							<p:dataTable id="dataTable" var="subordinate"
+								value="#{subordinateSearchBean.subordinates}">
+
+								<p:column id="idColumn" headerText="Employee Id"
+									style="width:200px;align:center;">
+									<h:outputText value="#{subordinate.employeeId}" />
+								</p:column>
+
+								<p:column id="nameColumn" headerText="Employee Name"
+									style="width:200px;align:center;">
+									<h:commandLink id="employeeNameColumn"
+										value="#{subordinate.employeeName}"
+										action="#{subordinateSearchBean.searchSubordinates}">
+										<f:param name="managerId" value="#{subordinate.employeeId}" />
+									</h:commandLink>
+								</p:column>
+
+								<p:column id="managerColumn" headerText="Manager Name"
+									style="width:200px;align:center;">
+									<h:outputText value="#{subordinate.manager.employeeName}" />
+								</p:column>
+
+								<p:column id="designationColumn" headerText="Designation"
+									style="width:200px;align:center;">
+									<h:outputText value="#{subordinate.designation}" />
+								</p:column>
+
+								<p:column id="projectColumn" headerText="Current Project"
+									style="width:200px;align:center;">
+									<h:outputText value="#{subordinate.currentProject}" />
+								</p:column>
+
+							</p:dataTable>
+						</h:form></td>
+					<!-- </tr> -->
+					<!-- </table> -->
+				</tr>
+
+			</table>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>

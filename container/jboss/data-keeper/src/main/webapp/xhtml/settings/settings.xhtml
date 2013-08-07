@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="settingsTemplate.xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        Kwitter :: Settings
+    </ui:define>
+
+	<ui:define name="content">		
+		<p:panel header="Your Settings">
+			<table width="100%">
+				<tr><td><h:outputText value="Click below to permanently delete your account" /></td></tr>
+				<tr><td><h:outputText value="Warning: This action can't be reverted back!" style="color:red;"/></td></tr>
+				<tr>
+					<h:form>						
+						<td><h:commandButton value="Delete My Account"
+							action="#{loginBean.deleteAccount}" /></td>
+					</h:form>
+				</tr>				
+
+			</table>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>
