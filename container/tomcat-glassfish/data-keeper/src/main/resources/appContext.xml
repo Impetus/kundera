@@ -38,6 +38,8 @@
 		</property>
 	</bean>
 
+        <!-- emf-p1 and emf-p2 are required only in case of polyglot persistence
+        (i.e. using multiple cross data store persistence unit --> 
 	<bean id="emf-p1"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 	<property name="persistenceUnitName" value="cassandra-pu" />
