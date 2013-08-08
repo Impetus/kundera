@@ -92,7 +92,7 @@ public class CitySimilarityTest
     public void testIterator()
     {
         String query2 = "select u from CitySimilarity u";
-        com.impetus.kundera.query.Query<CitySimilarity> queryObject = (com.impetus.kundera.query.Query<CitySimilarity>) em
+        com.impetus.kundera.query.Query queryObject = (com.impetus.kundera.query.Query) em
                 .createQuery(query2);
 
         queryObject.setFetchSize(10);
@@ -125,7 +125,7 @@ public class CitySimilarityTest
         client.addFilter("city_similarity", filter);
 
         String query2 = "select u from CitySimilarity u";
-        com.impetus.kundera.query.Query<CitySimilarity> queryObject = (com.impetus.kundera.query.Query<CitySimilarity>) em
+        com.impetus.kundera.query.Query queryObject = (com.impetus.kundera.query.Query) em
                 .createQuery(query2);
 
         queryObject.setFetchSize(10);
@@ -157,7 +157,7 @@ public class CitySimilarityTest
         client.addFilter("bookinfo", new KeyOnlyFilter());
 
         String query2 = "select u from CitySimilarity u";
-        com.impetus.kundera.query.Query<CitySimilarity> queryObject = (com.impetus.kundera.query.Query<CitySimilarity>) em
+        com.impetus.kundera.query.Query queryObject = (com.impetus.kundera.query.Query) em
                 .createQuery(query2);
 
         queryObject.setFetchSize(10);

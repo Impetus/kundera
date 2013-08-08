@@ -89,7 +89,7 @@ public class UserAndPasswordTest
         try
         {
             String query = "select u from UserAndPassword u where u.userName=KK5";
-            com.impetus.kundera.query.Query<UserAndPassword> q = (com.impetus.kundera.query.Query<UserAndPassword>) em
+            com.impetus.kundera.query.Query q = (com.impetus.kundera.query.Query) em
                     .createQuery(query);
             q.setFetchSize(1);
             Iterator<UserAndPassword> results = q.iterate();
@@ -105,7 +105,7 @@ public class UserAndPasswordTest
             }
 
             query = "select u from UserAndPassword u where u.userName=KK6";
-            q = (com.impetus.kundera.query.Query<UserAndPassword>) em.createQuery(query);
+            q = (com.impetus.kundera.query.Query) em.createQuery(query);
             q.setFetchSize(1);
             results = q.iterate();
             while (results.hasNext())
@@ -132,7 +132,7 @@ public class UserAndPasswordTest
         try
         {
             String query = "select u from UserAndPassword u where u.userName=KK5";
-            com.impetus.kundera.query.Query<UserAndPassword> q = (com.impetus.kundera.query.Query<UserAndPassword>) em
+            com.impetus.kundera.query.Query q = (com.impetus.kundera.query.Query) em
                     .createQuery(query);
             q.setFetchSize(1);
             Iterator<UserAndPassword> results = q.iterate();
@@ -175,7 +175,7 @@ public class UserAndPasswordTest
 
             em = emf.createEntityManager();
             query = "select u from UserAndPassword u where u.userName=KK6";
-            q = (com.impetus.kundera.query.Query<UserAndPassword>) em.createQuery(query);
+            q = (com.impetus.kundera.query.Query) em.createQuery(query);
             q.setFetchSize(1);
             results = q.iterate();
             while (results.hasNext())

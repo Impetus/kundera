@@ -22,10 +22,8 @@ import java.util.Iterator;
  * support pagination.
  * 
  * @author Kuldeep.Mishra
- * 
- * @param <E>
  */
-public interface Query<E>
+public interface Query
 {
     /**
      * To set fetch size for query.
@@ -48,6 +46,6 @@ public interface Query<E>
      * 
      * @return
      */
-    Iterator<E> iterate();
+    <E> Iterator<E> iterate();
 
 }

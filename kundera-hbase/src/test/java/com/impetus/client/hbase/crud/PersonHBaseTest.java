@@ -114,7 +114,7 @@ public class PersonHBaseTest extends BaseTest
 
         
         query = "select p from PersonHBase p";
-        com.impetus.kundera.query.Query<PersonHBase> queryObject = (com.impetus.kundera.query.Query<PersonHBase>) em.createQuery(query);
+        com.impetus.kundera.query.Query queryObject = (com.impetus.kundera.query.Query) em.createQuery(query);
         queryObject.setFetchSize(1);
         
         Iterator<PersonHBase> resultIterator = queryObject.iterate();

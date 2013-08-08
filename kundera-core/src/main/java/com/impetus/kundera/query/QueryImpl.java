@@ -66,7 +66,7 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
  * @author vivek.mishra
  * @param <E>
  */
-public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Query<E>
+public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Query
 {
 
     /** The query. */
@@ -1083,5 +1083,5 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     public abstract void close();
     
-    public abstract Iterator<E> iterate();
+    public abstract <E> Iterator<E> iterate();
 }

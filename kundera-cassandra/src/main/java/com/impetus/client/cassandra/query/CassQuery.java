@@ -66,6 +66,7 @@ import com.impetus.kundera.utils.ReflectUtils;
  * 
  *         Query implementation for Cassandra.
  */
+@SuppressWarnings("unchecked")
 public class CassQuery extends QueryImpl
 {
 

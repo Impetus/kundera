@@ -139,6 +139,7 @@ public class ThriftClientFactory extends GenericClientFactory
 
         Properties props = persistenceUnitMetadata.getProperties();
         String keyspace = null;
+
         if (externalProperties != null)
         {
             keyspace = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);

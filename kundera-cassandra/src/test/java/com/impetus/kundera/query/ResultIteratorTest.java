@@ -137,7 +137,7 @@ public class ResultIteratorTest extends BaseTest
 
     private void assertOnTokenScroll(String queryClause, int expected)
     {
-        Query<Token> query = (Query<Token>) em.createQuery(queryClause,
+        Query query = (Query) em.createQuery(queryClause,
                 Token.class);
         
         int count=0;
@@ -201,7 +201,7 @@ public class ResultIteratorTest extends BaseTest
 
     private void assertOnScroll(final String queryWithoutClause, int expectedCount)
     {
-        Query<PersonCassandra> query = (Query<PersonCassandra>) em.createQuery(queryWithoutClause,
+        Query query = (Query) em.createQuery(queryWithoutClause,
                 PersonCassandra.class);
         
         assertOnFetch(query, 0, expectedCount);
@@ -214,7 +214,7 @@ public class ResultIteratorTest extends BaseTest
         
     }
 
-    private void assertOnFetch(Query<PersonCassandra> query, Integer fetchSize, int available)
+    private void assertOnFetch(Query query, Integer fetchSize, int available)
     {
         query.setFetchSize(fetchSize);
         int counter=0;
