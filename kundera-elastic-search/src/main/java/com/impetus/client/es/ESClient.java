@@ -15,28 +15,48 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
+import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * @author vivek.mishra
- * Elastic search client implementation on {@link Client}
- *
+ * @author vivek.mishra Elastic search client implementation on {@link Client}
+ * 
  */
 public class ESClient extends ClientBase implements Client<ESQuery>
 {
-    
+
     private ESClientFactory factory;
+
     private TransportClient txClient;
+
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(ESClient.class);
 
     ESClient(final ESClientFactory factory, final TransportClient client)
     {
@@ -47,19 +67,98 @@ public class ESClient extends ClientBase implements Client<ESQuery>
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
+        ObjectMapper mapper = new ObjectMapper();
+        String json = null;
+        try
+        {
+            json = mapper.writeValueAsString(entity);
+        }
+        catch (JsonProcessingException jpex)
+        {
+            log.error("Error while persisting record of {}, Caused by :.", entityMetadata.getEntityClazz()
+                    .getSimpleName(), jpex);
+            throw new PersistenceException(jpex);
+        }
 
+        IndexResponse response = txClient
+                .prepareIndex(entityMetadata.getSchema().toLowerCase(),
+                        entityMetadata.getEntityClazz().getSimpleName(), id.toString()).setSource(json).execute()
+                .actionGet();
+
+        assert response.getId() != null;
     }
 
     @Override
     public Object find(Class entityClass, Object key)
     {
-        return null;
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        // GetRequestBuilder getRequestBuilder =
+        // txClient.prepareGet(metadata.getSchema().toLowerCase(),
+        // metadata.getEntityClazz().getSimpleName(), key.toString());
+        GetResponse get = null;
+        try
+        {
+            get = txClient
+                    .prepareGet(metadata.getSchema().toLowerCase(), metadata.getEntityClazz().getSimpleName(),
+                            key.toString()).setOperationThreaded(false).execute().get();
+        }
+        catch (InterruptedException iex)
+        {
+            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
+            throw new PersistenceException(iex);
+        }
+        catch (ExecutionException eex)
+        {
+            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), eex);
+            throw new PersistenceException(eex);
+        }
+
+        Map<String, Object> results = get.getSource();
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityClass);
+
+        Object result = null;
+
+        if (get.isExists())
+        {
+            try
+            {
+                result = entityClass.newInstance();
+            }
+            catch (InstantiationException iex)
+            {
+                // TODO Auto-generated catch block
+                log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
+                throw new PersistenceException(iex);
+            }
+            catch (IllegalAccessException iaex)
+            {
+                // TODO Auto-generated catch block
+                log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iaex);
+                throw new PersistenceException(iaex);
+            }
+
+            Set<Attribute> attributes = entityType.getAttributes();
+            for (Attribute attribute : attributes)
+            {
+                if (!((Field) attribute.getJavaMember()).getType().isEnum())
+                {
+                    Object fieldValue = results.get(attribute.getName());
+                    PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), fieldValue);
+                }
+            }
+
+        }
+
+        return result;
     }
 
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -74,21 +173,43 @@ public class ESClient extends ClientBase implements Client<ESQuery>
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void delete(Object entity, Object pKey)
     {
-        // TODO Auto-generated method stub
-        
+        if (entity != null)
+        {
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+
+            // metadata.getSchema().toLowerCase(),
+            // metadata.getEntityClazz().getSimpleName(), key.toString())
+            // .setOperationThreaded(false).execute().get()
+            try
+            {
+                txClient.prepareDelete(metadata.getSchema().toLowerCase(), metadata.getEntityClazz().getSimpleName(),
+                        pKey.toString()/* index, type, id */).setOperationThreaded(false).execute().get();
+            }
+            catch (InterruptedException iex)
+            {
+                log.error("Error while deleting record of {}, Caused by :.", pKey, iex);
+                throw new PersistenceException(iex);
+            }
+            catch (ExecutionException eex)
+            {
+                log.error("Error while deleting record of {}, Caused by :.", pKey, eex);
+                throw new PersistenceException(eex);
+            }
+        }
+
     }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -111,7 +232,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
