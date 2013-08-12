@@ -370,8 +370,8 @@ public class PersonCassandraTTLTest extends BaseTest
                 personNameFound = true;
             }
             else if (columnName.equals("AGE"))
-            {
-                Assert.assertEquals(10, column.getTtl());
+            {                
+                Assert.assertEquals(0, column.getTtl());   //TTL for AGE would be reset to zero due to above UPDATE query
                 ageFound = true;
             }
         }
@@ -390,10 +390,10 @@ public class PersonCassandraTTLTest extends BaseTest
             {
                 Assert.fail("PERSON_NAME column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
             }
-            else if (columnName.equals("AGE"))
+            /*else if (columnName.equals("AGE"))
             {
                 Assert.fail("Age column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }
+            }*/
         }
 
         // TTL per session.
@@ -509,6 +509,6 @@ public class PersonCassandraTTLTest extends BaseTest
 
         String deleteQuery = "DELETE from PersonCassandra";
         q = em.createQuery(deleteQuery);
-        Assert.assertEquals(0, q.executeUpdate());
+        Assert.assertEquals(1, q.executeUpdate());
     }
 }

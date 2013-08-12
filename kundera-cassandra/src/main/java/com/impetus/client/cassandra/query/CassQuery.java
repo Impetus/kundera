@@ -17,6 +17,7 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -236,12 +237,60 @@ public class CassQuery extends QueryImpl
             ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(KunderaMetadata.INSTANCE
                     .getApplicationMetadata().getQuery(getJPAQuery()), m.getEntityClazz(), null);
         }
-        else if (kunderaQuery.isDeleteUpdate())
-        {
-            List result = getResultList();
-            return result != null ? result.size() : 0;
+        else if (kunderaQuery.isDeleteUpdate() )
+        {       
+            //If query is not convertible to CQL, fetch and merge records usual way, otherwise 
+            // convert to CQL and execute
+            if(! isQueryConvertibleToCQL(kunderaQuery))
+            {
+                List result = getResultList();
+                return result != null ? result.size() : 0;
+            }
+            else
+            {
+                String query = null;
+                if(kunderaQuery.isUpdateClause())
+                {
+                    query = ((CassandraClientBase) persistenceDelegeator.getClient(m)).createUpdateQuery(kunderaQuery);                             
+                }
+                else
+                {
+                    query = ((CassandraClientBase) persistenceDelegeator.getClient(m)).createDeleteQuery(kunderaQuery);
+                }
+                return ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeUpdateDeleteQuery(query);
+            }            
+            
         }
         return 0;
+    }
+
+    /**
+     * Checks whether a given JPA DML query is convertible to CQL
+     * @param m
+     * @return
+     */
+    private boolean isQueryConvertibleToCQL(KunderaQuery kunderaQuery)
+    {        
+        EntityMetadata m = kunderaQuery.getEntityMetadata();
+        if(kunderaQuery.isUpdateClause() && m.isCounterColumnType()) return false;
+        
+        List<String> opsNotAllowed = Arrays.asList(new String[]{">", "<", ">=", "<="});
+        boolean result = false;            
+        if(! kunderaQuery.getFilterClauseQueue().isEmpty())
+        {
+            String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+            for(Object o : kunderaQuery.getFilterClauseQueue())
+            {
+                FilterClause filterClause = (FilterClause) o;
+                if(! idColumn.equals(filterClause.getProperty()) || opsNotAllowed.contains(filterClause.getCondition()))
+                {
+                    result = false;
+                    break;                        
+                }
+                result = true;
+            }                               
+        }
+        return result;
     }
 
     /**

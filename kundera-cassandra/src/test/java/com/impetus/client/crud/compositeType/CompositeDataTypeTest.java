@@ -361,6 +361,7 @@ public class CompositeDataTypeTest
         q.setParameter("beforeUpdate", key);
         q.executeUpdate();
 
+        em.clear();
         PrimeUserDataType result = em.find(PrimeUserDataType.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("after merge", result.getTweetBody());
