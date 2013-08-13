@@ -198,7 +198,8 @@ public class PersonCassandraTest extends BaseTest
         String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
         q = em.createQuery(updateQuery);
         q.executeUpdate();
-
+        
+        em.clear();
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("'KK MISHRA'", p.getPersonName());
