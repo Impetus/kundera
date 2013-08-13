@@ -305,7 +305,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         if (containsCompositeKey(tableInfo))
         {
             validateCompoundKey(tableInfo);
-            onCompoundKey(tableInfo, ksDef);
+            createOrUpdateUsingCQL3(tableInfo, ksDef);
 
             // After successful schema operation, perform index creation.
             createIndexUsingCql(tableInfo);
@@ -329,87 +329,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
-    /**
-     * Creates (or updates) a column family definition using CQL 3 Should
-     * replace onCompoundKey
-     * 
-     * @param tableInfo
-     * @param ksDef
-     * @throws Exception
-     */
-    private void createOrUpdateUsingCQL3(TableInfo tableInfo, KsDef ksDef) throws Exception
-    {
-        CQLTranslator translator = new CQLTranslator();
-        String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
-        columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), tableInfo.getTableName()).toString());
-
-        List<ColumnInfo> columns = tableInfo.getColumnMetadatas();
-
-        StringBuilder queryBuilder = new StringBuilder();
-
-        // For normal columns
-        onCompositeColumns(translator, columns, queryBuilder, null);
-        onCollectionColumns(translator, tableInfo.getCollectionColumnMetadatas(), queryBuilder);
-
-        // ideally it will always be one as more super column families
-        // are not allowed with compound/composite key.
-        List<EmbeddedColumnInfo> compositeColumns = tableInfo.getEmbeddedColumnMetadatas();
-        EmbeddableType compoEmbeddableType = null;
-        if (!compositeColumns.isEmpty())
-        {
-            compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
-            onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns);
-        }
-        else
-        {
-            String dataType = CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType(), true);
-            String cqlType = translator.getCQLType(dataType);
-            translator.appendColumnName(queryBuilder, tableInfo.getIdColumnName(), cqlType);
-            queryBuilder.append(" ,");
-        }
-
-        queryBuilder = stripLastChar(columnFamilyQuery, queryBuilder);
-
-        // append primary key clause
-        queryBuilder.append(translator.ADD_PRIMARYKEY_CLAUSE);
-
-        Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
-
-        // To ensure field ordering
-        if (compoEmbeddableType != null)
-        {
-            StringBuilder primaryKeyBuilder = new StringBuilder();
-            appendPrimaryKey(translator, compoEmbeddableType, fields, primaryKeyBuilder);
-            // should not be null.
-            primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
-            queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
-                    primaryKeyBuilder.toString()));
-        }
-        else
-        {
-            queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
-                    tableInfo.getIdColumnName()));
-        }
-
-        // set column family properties defined in configuration property/xml
-        // files.
-        setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
-
-        try
-        {
-            cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
-            cassandra_client.set_keyspace(databaseName);
-            cassandra_client.execute_cql3_query(
-                    ByteBuffer.wrap(queryBuilder.toString().getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
-                    ConsistencyLevel.ONE);
-        }
-        catch (InvalidRequestException irex)
-        {
-            updateExistingColumnFamily(tableInfo, ksDef, irex);
-        }
-
-    }
+    
 
     private boolean containsCollectionColumns(TableInfo tableInfo)
     {
@@ -569,23 +489,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
         }
         throw new SchemaGenerationException("Error while opening socket, Caused by: .", message, "Cassandra");
-    }
-
+    }   
+    
     /**
-     * On compound key.
+     * Creates (or updates) a column family definition using CQL 3 Should
+     * replace onCompoundKey
      * 
      * @param tableInfo
-     *            the table infos
-     * @throws TimedOutException
-     * @throws UnavailableException
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws TException
-     *             the t exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
+     * @param ksDef
+     * @throws Exception
      */
-    private void onCompoundKey(TableInfo tableInfo, KsDef ksDef) throws Exception
+    private void createOrUpdateUsingCQL3(TableInfo tableInfo, KsDef ksDef) throws Exception
     {
         CQLTranslator translator = new CQLTranslator();
         String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
@@ -596,36 +510,49 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         StringBuilder queryBuilder = new StringBuilder();
 
-        // for normal columns
+        // For normal columns
         onCompositeColumns(translator, columns, queryBuilder, null);
+        onCollectionColumns(translator, tableInfo.getCollectionColumnMetadatas(), queryBuilder);
 
         // ideally it will always be one as more super column families
         // are not allowed with compound/composite key.
-
         List<EmbeddedColumnInfo> compositeColumns = tableInfo.getEmbeddedColumnMetadatas();
-        EmbeddableType compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
-
-        // for composite columns
-        onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns);
+        EmbeddableType compoEmbeddableType = null;
+        if (!compositeColumns.isEmpty())
+        {
+            compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
+            onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns);
+        }
+        else
+        {
+            String dataType = CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType(), true);
+            String cqlType = translator.getCQLType(dataType);
+            translator.appendColumnName(queryBuilder, tableInfo.getIdColumnName(), cqlType);
+            queryBuilder.append(" ,");
+        }
 
         queryBuilder = stripLastChar(columnFamilyQuery, queryBuilder);
 
         // append primary key clause
-
         queryBuilder.append(translator.ADD_PRIMARYKEY_CLAUSE);
 
         Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
 
-        StringBuilder primaryKeyBuilder = new StringBuilder();
-
         // To ensure field ordering
-        appendPrimaryKey(translator, compoEmbeddableType, fields, primaryKeyBuilder);
-
-        // should not be null.
-        primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
-
-        queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
-                primaryKeyBuilder.toString()));
+        if (compoEmbeddableType != null)
+        {
+            StringBuilder primaryKeyBuilder = new StringBuilder();
+            appendPrimaryKey(translator, compoEmbeddableType, fields, primaryKeyBuilder);
+            // should not be null.
+            primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
+            queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
+                    primaryKeyBuilder.toString()));
+        }
+        else
+        {
+            queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
+                    tableInfo.getIdColumnName()));
+        }
 
         // set column family properties defined in configuration property/xml
         // files.
