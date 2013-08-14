@@ -33,6 +33,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.cql3.CQL3Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -100,6 +101,9 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -707,7 +711,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Executes Query.
+     * Executes Select CQL Query.
      * 
      * @param cqlQuery
      *            the cql query
@@ -719,7 +723,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the data handler
      * @return the list
      */
-    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
+    public List executeSelectQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
     {
         if (log.isInfoEnabled())
@@ -727,6 +731,31 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             log.info("Executing cql query {}.", cqlQuery);
         }
         return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler, false);
+    }
+    
+    /**
+     * Executes Update/ Delete CQL query
+     * @param cqlQuery
+     * @return
+     */
+    public int executeUpdateDeleteQuery(String cqlQuery)
+    {
+        if (log.isInfoEnabled())
+        {
+            log.info("Executing cql query {}.", cqlQuery);
+        }
+        try
+        {
+            CqlResult result =  executeCQLQuery(cqlQuery, true);
+            return result.getNum();
+        }
+        catch (Exception e)
+        {            
+            log.error("Error while executing updated query: {}, Caused by: . ",
+                    cqlQuery, e);
+            return 0;
+        }        
+        
     }
 
     public Map<String, Object> getExternalProperties()
@@ -910,6 +939,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         return insert_Query;
     }
+    
+    
+
+
+    
 
     /**
      * Return update query string for given entity intended for counter column

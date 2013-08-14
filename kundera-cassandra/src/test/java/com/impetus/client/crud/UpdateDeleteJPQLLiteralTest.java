@@ -112,6 +112,7 @@ public class UpdateDeleteJPQLLiteralTest
         query.setParameter("url", "secondUpdate");
         query.executeUpdate();
 
+        em.clear();
         found = em.find(MyTestEntity.class, key);
 
         Assert.assertNotNull(found);
@@ -197,6 +198,7 @@ public class UpdateDeleteJPQLLiteralTest
         query.setParameter("key", key);
         query.executeUpdate();
 
+        em.clear();
         found = em.find(MyTestEntity.class, key);
 
         Assert.assertNotNull(found);
@@ -207,6 +209,7 @@ public class UpdateDeleteJPQLLiteralTest
         query.setParameter("key", key);
         query.executeUpdate();
 
+        em.clear();
         found = em.find(MyTestEntity.class, key);
         Assert.assertEquals("enclosedUrl's", found.getUrl());
 
