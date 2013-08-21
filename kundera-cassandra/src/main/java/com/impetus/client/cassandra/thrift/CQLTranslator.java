@@ -447,11 +447,11 @@ public final class CQLTranslator
      */
     private boolean appendList(StringBuilder builder, Object value)
     {
-        boolean isPresent;
-        isPresent = true;
+        boolean isPresent = false;
         Collection collection = ((Collection) value);
         if(! collection.isEmpty())
         {
+            isPresent = true;
             builder.append("[");
             for(Object o : collection)
             {
@@ -475,11 +475,11 @@ public final class CQLTranslator
      */
     private boolean appendSet(StringBuilder builder, Object value)
     {
-        boolean isPresent;
-        isPresent = true;
+        boolean isPresent = false;
         Collection collection = ((Collection) value);
         if(! collection.isEmpty())
         {
+            isPresent = true;
             builder.append("{");
             for(Object o : collection)
             {
@@ -503,11 +503,11 @@ public final class CQLTranslator
      */
     private boolean appendMap(StringBuilder builder, Object value)
     {
-        boolean isPresent;
-        isPresent = true;
+        boolean isPresent = false;
         Map map = ((Map) value);
         if(! map.isEmpty())
         {
+            isPresent = true;
             builder.append("{");
             for(Object mapKey : map.keySet())
             {
