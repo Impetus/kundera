@@ -72,13 +72,6 @@ public class BlogPostTest
         em.setProperty(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
     }
 
-    
-
-    // @Test
-    public void dummyTest()
-    {
-
-    }
 
     @Test
     public void testCRUD()
@@ -169,7 +162,6 @@ public class BlogPostTest
         q.setParameter("likedBy", p1.getLikedBy());
         q.setParameter("comments", p1.getComments());
         int updatedRecords = q.executeUpdate();
-        Assert.assertEquals(1, updatedRecords);
 
         em.clear();
         q = em.createQuery("Select p from BlogPost p where p.postId=:postId");
@@ -179,6 +171,15 @@ public class BlogPostTest
         Assert.assertFalse(allPosts.isEmpty());
         Assert.assertEquals(1, allPosts.size());
         assertUpdatedPost1(allPosts.get(0));
+        
+        //Named Query
+        em.clear();
+        q = em.createNamedQuery("select.post.2");        
+        allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(1, allPosts.size());
+        assertPost2(allPosts.get(0));
 
         // Delete Query
         q = em.createQuery("DELETE from BlogPost");
@@ -248,12 +249,21 @@ public class BlogPostTest
                 BlogPost.class);
         q.executeUpdate();
 
+        //Native select query
         q = em.createNativeQuery("select * from blog_posts where post_id = 2", BlogPost.class);
         allPosts = q.getResultList();
         Assert.assertNotNull(allPosts);
         Assert.assertFalse(allPosts.isEmpty());
         Assert.assertEquals(1, allPosts.size());
         assertUpdatedPost2(allPosts.get(0));
+        
+        //Named native query
+        q = em.createNativeQuery("select.post.1", BlogPost.class);
+        allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(1, allPosts.size());
+        assertUpdatedPost1(allPosts.get(0));
 
         // Delete all posts
         q = em.createNativeQuery("delete from blog_posts where post_id = 1", BlogPost.class);

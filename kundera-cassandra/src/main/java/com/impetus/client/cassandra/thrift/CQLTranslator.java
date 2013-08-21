@@ -315,6 +315,32 @@ public final class CQLTranslator
         appendValue(builder, value.getClass(), value, false);
         builder.append(COMMA_STR);
     }
+    
+    /**
+     * Builds set clause for a given field.
+     * 
+     * @param builder
+     * @param property
+     * @param value
+     */
+    public void buildSetClause(EntityMetadata m, StringBuilder builder, String property, Object value)
+    {
+        builder = ensureCase(builder, property);
+        builder.append(EQ_CLAUSE);
+        
+        if(m.isCounterColumnType())
+        {
+            builder = ensureCase(builder, property);
+            builder.append(INCR_COUNTER);
+            builder.append(value);
+        }
+        else
+        {
+            appendValue(builder, value.getClass(), value, false);
+        }
+        
+        builder.append(COMMA_STR);
+    }
 
     /**
      * Ensures case for corresponding column name.

@@ -413,7 +413,7 @@ public class CountersTest
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
 
-        Counters counter2 = new Counters();
+        Counters counter2 = new Counters();        
         counter2 = em.find(Counters.class, id1);
         Assert.assertNull(counter2);
 

@@ -26,6 +26,8 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -37,6 +39,8 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name="blog_posts", schema="KunderaExamples@secIdxCassandraTest")
+@NamedNativeQuery(name="select.post.1", query="select * from blog_posts where post_id = 1")
+@NamedQuery(name="select.post.2", query="Select p from BlogPost p where p.postId=2")
 @IndexCollection(columns = { @Index(name = "body")})
 public class BlogPost
 {    

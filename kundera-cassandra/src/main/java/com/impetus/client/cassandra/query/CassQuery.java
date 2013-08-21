@@ -17,12 +17,16 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javassist.Modifier;
+
+import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -57,6 +61,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -236,12 +241,60 @@ public class CassQuery extends QueryImpl
             ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(KunderaMetadata.INSTANCE
                     .getApplicationMetadata().getQuery(getJPAQuery()), m.getEntityClazz(), null);
         }
-        else if (kunderaQuery.isDeleteUpdate())
-        {
-            List result = getResultList();
-            return result != null ? result.size() : 0;
+        else if (kunderaQuery.isDeleteUpdate() )
+        {       
+            //If query is not convertible to CQL, fetch and merge records usual way, otherwise 
+            // convert to CQL and execute
+            if(! isQueryConvertibleToCQL(kunderaQuery))
+            {
+                List result = getResultList();
+                return result != null ? result.size() : 0;
+            }
+            else
+            {
+                String query = null;
+                if(kunderaQuery.isUpdateClause())
+                {
+                    query = createUpdateQuery(kunderaQuery);                             
+                }
+                else
+                {
+                    query = createDeleteQuery(kunderaQuery);
+                }
+                return ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeUpdateDeleteQuery(query);
+            }            
+            
         }
         return 0;
+    }
+
+    /**
+     * Checks whether a given JPA DML query is convertible to CQL
+     * @param m
+     * @return
+     */
+    private boolean isQueryConvertibleToCQL(KunderaQuery kunderaQuery)
+    {        
+        EntityMetadata m = kunderaQuery.getEntityMetadata();
+        if(kunderaQuery.isUpdateClause() && m.isCounterColumnType()) return false;
+        
+        List<String> opsNotAllowed = Arrays.asList(new String[]{">", "<", ">=", "<="});
+        boolean result = false;            
+        if(! kunderaQuery.getFilterClauseQueue().isEmpty())
+        {
+            String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+            for(Object o : kunderaQuery.getFilterClauseQueue())
+            {
+                FilterClause filterClause = (FilterClause) o;
+                if(! idColumn.equals(filterClause.getProperty()) || opsNotAllowed.contains(filterClause.getCondition()))
+                {
+                    result = false;
+                    break;                        
+                }
+                result = true;
+            }                               
+        }
+        return result;
     }
 
     /**
@@ -765,6 +818,148 @@ public class CassQuery extends QueryImpl
         List results = getResultList();
         isSingleResult = false;
         return results.isEmpty() ? results : results.get(0);
+    }
+    
+    /**
+     * Create Update CQL query from a given JPA query.
+     * @param kunderaQuery
+     * @return
+     */
+    public String createUpdateQuery(KunderaQuery kunderaQuery)
+    {        
+        EntityMetadata metadata = kunderaQuery.getEntityMetadata();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit()); 
+               
+        CQLTranslator translator = new CQLTranslator();
+        String update_Query = translator.UPDATE_QUERY;
+        
+        String tableName = metadata.getTableName();        
+        update_Query = StringUtils.replace(update_Query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), tableName).toString());
+        
+        StringBuilder builder = new StringBuilder(update_Query);
+        
+        Object ttlColumns = ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getTtlValues().get(metadata.getTableName());
+        if (ttlColumns != null && ttlColumns instanceof Integer)
+        {
+            int ttl = ((Integer) ttlColumns).intValue();
+            if (ttl != 0)
+            {
+                builder.append(" USING TTL ");
+                builder.append(ttl);
+            }
+        }
+        
+        builder.append(CQLTranslator.ADD_SET_CLAUSE);
+        
+        for(UpdateClause updateClause : kunderaQuery.getUpdateClauseQueue())
+        {
+            
+            String property = updateClause.getProperty();
+            
+            String jpaColumnName = getColumnName(metadata, property);         
+            
+            Object value = updateClause.getValue();            
+            
+            translator.buildSetClause(metadata, builder, jpaColumnName, value);
+        }
+        builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
+        builder.append(CQLTranslator.ADD_WHERE_CLAUSE);        
+        buildWhereClause(kunderaQuery, metadata, metaModel, translator, builder);  
+        
+        
+        
+        return builder.toString();
+    }
+    
+    /**
+     * Create Delete query from a given JPA query
+     * @param kunderaQuery
+     * @return
+     */
+    public String createDeleteQuery(KunderaQuery kunderaQuery)
+    {
+        EntityMetadata metadata = kunderaQuery.getEntityMetadata();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit()); 
+        CQLTranslator translator = new CQLTranslator();
+        String delete_query = translator.DELETE_QUERY;
+        
+        String tableName = kunderaQuery.getEntityMetadata().getTableName();        
+        delete_query = StringUtils.replace(delete_query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), tableName).toString());
+        
+        StringBuilder builder = new StringBuilder(delete_query);        
+        builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+        buildWhereClause(kunderaQuery, metadata, metaModel, translator, builder);       
+        return builder.toString();
+    }
+    
+    /**
+     * Builds where Clause 
+     * @param kunderaQuery
+     * @param metadata
+     * @param metaModel
+     * @param translator
+     * @param builder
+     */
+    private void buildWhereClause(KunderaQuery kunderaQuery, EntityMetadata metadata, MetamodelImpl metaModel,
+            CQLTranslator translator, StringBuilder builder)
+    {
+        for(Object clause : kunderaQuery.getFilterClauseQueue()) 
+        {
+            FilterClause filterClause = (FilterClause) clause;             
+            Field f = (Field) metaModel.entity(metadata.getEntityClazz()).getAttribute(metadata.getFieldName(filterClause.getProperty())).getJavaMember();
+            String jpaColumnName = getColumnName(metadata, filterClause.getProperty());
+            
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            {
+                Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+                EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+                for (Field field : fields)
+                {
+                    if (field != null && !Modifier.isStatic(field.getModifiers())
+                            && !Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class))
+                    {
+                        Attribute attribute = compoundKey.getAttribute(field.getName());
+                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                        Object value = PropertyAccessorHelper.getObject(filterClause.getValue(), field);
+                        translator.buildWhereClause(builder, field.getType(), columnName, value, filterClause.getCondition());
+                    }
+                }
+            }
+            else
+            {
+                translator.buildWhereClause(builder, f.getType(), jpaColumnName, filterClause.getValue(), filterClause.getCondition());
+            }         
+            
+        }
+        builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
+    }
+    
+    /**
+     * Gets column name for a given field name
+     * @param metadata
+     * @param metaModel
+     * @param property
+     * @return
+     */
+    private String getColumnName(EntityMetadata metadata, String property)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit()); 
+        String jpaColumnName = null;        
+        
+        if(property.equals(((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName()))
+        {
+            jpaColumnName = CassandraUtilities.getIdColumnName(metadata, ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties());
+        }
+        else
+        {
+            jpaColumnName = ((AbstractAttribute) metaModel.getEntityAttribute(metadata.getEntityClazz(), property)).getJPAColumnName();
+        }
+        return jpaColumnName;
     }
 
 }

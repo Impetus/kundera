@@ -16,6 +16,7 @@
 package com.impetus.client.es;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,11 @@ import javax.persistence.metamodel.EntityType;
 
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,34 +129,77 @@ public class ESClient extends ClientBase implements Client<ESQuery>
 
         if (get.isExists())
         {
-            try
-            {
-                result = entityClass.newInstance();
-            }
-            catch (InstantiationException iex)
-            {
-                // TODO Auto-generated catch block
-                log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
-                throw new PersistenceException(iex);
-            }
-            catch (IllegalAccessException iaex)
-            {
-                // TODO Auto-generated catch block
-                log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iaex);
-                throw new PersistenceException(iaex);
-            }
+            result = getInstance(entityClass, result);
+            result = wrap(results, entityType, result);
+        }
+
+        return result;
+    }
+
+    private Object getInstance(Class entityClass, Object result)
+    {
+        try
+        {
+            result = entityClass.newInstance();
+        }
+        catch (InstantiationException iex)
+        {
+            // TODO Auto-generated catch block
+            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
+            throw new PersistenceException(iex);
+        }
+        catch (IllegalAccessException iaex)
+        {
+            // TODO Auto-generated catch block
+            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iaex);
+            throw new PersistenceException(iaex);
+        }
+        return result;
+    }
+
+    
+    List executeQuery(FilterBuilder filter, final EntityMetadata entityMetadata)
+    {
+
+        Class clazz = entityMetadata.getEntityClazz();
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(clazz);
+
+        List results = new ArrayList();
+        
+        SearchResponse response = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setFilter(filter).execute().actionGet();
+        SearchHits hits = response.getHits();
+        
+        Object entity = null;
+
+        for(SearchHit hit : hits.getHits())
+        {
+            entity = getInstance(clazz, entity);
+            Map<String, Object> hitResult = hit.sourceAsMap();
+            results.add(wrap(hitResult, entityType, entity));
+        }
+        
+        return results;
+    }
+    
+    private Object wrap(Map<String, Object> results, EntityType entityType,
+            Object result)
+    {
 
             Set<Attribute> attributes = entityType.getAttributes();
             for (Attribute attribute : attributes)
             {
+                
+                // TODOOOO : Enum handling is needed.
                 if (!((Field) attribute.getJavaMember()).getType().isEnum())
                 {
                     Object fieldValue = results.get(attribute.getName());
                     PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), fieldValue);
                 }
             }
-
-        }
 
         return result;
     }
