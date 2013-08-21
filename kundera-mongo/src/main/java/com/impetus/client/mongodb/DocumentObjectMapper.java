@@ -150,7 +150,12 @@ public class DocumentObjectMapper
      */
     static void setFieldValue(DBObject document, Object entityObject, Attribute column)
     {
-        Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
+        Object value = null;
+        
+        if (document != null)
+        {
+            value = document.get(((AbstractAttribute) column).getJPAColumnName());
+        }
         if (value != null)
         {
             Class javaType = column.getJavaType();
