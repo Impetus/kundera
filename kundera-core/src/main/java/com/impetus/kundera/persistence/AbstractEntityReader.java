@@ -109,7 +109,7 @@ public class AbstractEntityReader
             Object relationalObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
             // TODO: Need to check if object is a collection instance but empty!
-            if (KunderaCoreUtils.isEmptyOrNull(relationalObject) || ProxyHelper.isProxyOrCollection(relationalObject))
+            if (/*KunderaCoreUtils.isEmptyOrNull(*/relationalObject == null/*)*/ || ProxyHelper.isProxyOrCollection(relationalObject))
             {
                 onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded);
             }
