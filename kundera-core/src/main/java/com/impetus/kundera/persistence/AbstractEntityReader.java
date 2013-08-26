@@ -109,7 +109,7 @@ public class AbstractEntityReader
             Object relationalObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
             // TODO: Need to check if object is a collection instance but empty!
-            if (KunderaCoreUtils.isEmptyOrNull(relationalObject) || ProxyHelper.isProxyOrCollection(relationalObject))
+            if (/*KunderaCoreUtils.isEmptyOrNull(*/relationalObject == null/*)*/ || ProxyHelper.isProxyOrCollection(relationalObject))
             {
                 onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded);
             }
@@ -446,7 +446,7 @@ public class AbstractEntityReader
      */
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
-        Set<String> rSet = fetchDataFromLucene(m.getEntityClazz(), client);
+        Set<String> rSet = fetchDataFromLucene(client);
         List resultList = client.findAll(m.getEntityClazz(), null, rSet.toArray(new String[] {}));
         return m.getRelationNames() != null && !m.getRelationNames().isEmpty() ? resultList : transform(m, ls,
                 resultList);
@@ -484,7 +484,7 @@ public class AbstractEntityReader
      *            the client
      * @return the sets the
      */
-    protected Set<String> fetchDataFromLucene(Class<?> clazz, Client client)
+    protected Set<String> fetchDataFromLucene(Client client)
     {
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
