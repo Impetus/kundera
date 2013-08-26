@@ -18,11 +18,14 @@ package com.impetus.client.cassandra.thrift;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,8 +48,6 @@ import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
-
-import antlr.collections.List;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -120,10 +121,10 @@ public final class CQLTranslator
     public static final String COMMA_STR = ", ";
 
     public static final String INCR_COUNTER = "+";
-    
-    public static final String TOKEN="token(";
-    
-    public static final String CLOSE_BRACKET=")";
+
+    public static final String TOKEN = "token(";
+
+    public static final String CLOSE_BRACKET = ")";
 
     public CQLTranslator()
     {
@@ -315,7 +316,7 @@ public final class CQLTranslator
         appendValue(builder, value.getClass(), value, false);
         builder.append(COMMA_STR);
     }
-    
+
     /**
      * Builds set clause for a given field.
      * 
@@ -327,8 +328,8 @@ public final class CQLTranslator
     {
         builder = ensureCase(builder, property);
         builder.append(EQ_CLAUSE);
-        
-        if(m.isCounterColumnType())
+
+        if (m.isCounterColumnType())
         {
             builder = ensureCase(builder, property);
             builder.append(INCR_COUNTER);
@@ -338,7 +339,7 @@ public final class CQLTranslator
         {
             appendValue(builder, value.getClass(), value, false);
         }
-        
+
         builder.append(COMMA_STR);
     }
 
@@ -440,33 +441,31 @@ public final class CQLTranslator
      */
     public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
     {
-        if (value != null)
-        {            
-            if (List.class.isAssignableFrom(fieldClazz))
-            {
-                isPresent = appendList(builder, value);
-            }
-            
-            else if (Set.class.isAssignableFrom(fieldClazz))
-            {
-                isPresent = appendSet(builder, value);
-            }
-            
-            else if (Map.class.isAssignableFrom(fieldClazz))
-            {
-                isPresent = appendMap(builder, value);
-            }
-            else   
-            {                
-                isPresent = true;
-                appendValue(builder, fieldClazz, value);
-            }
+        if (List.class.isAssignableFrom(fieldClazz))
+        {
+            isPresent = appendList(builder, value != null ? value : new ArrayList());
+        }
+
+        else if (Set.class.isAssignableFrom(fieldClazz))
+        {
+            isPresent = appendSet(builder, value != null ? value : new HashSet());
+        }
+
+        else if (Map.class.isAssignableFrom(fieldClazz))
+        {
+            isPresent = appendMap(builder, value != null ? value : new HashMap());
+        }
+        else if (value != null)
+        {
+            isPresent = true;
+            appendValue(builder, fieldClazz, value);
         }
         return isPresent;
     }
-    
+
     /**
      * Appends a object of type {@link java.util.List}
+     * 
      * @param builder
      * @param value
      * @return
@@ -475,26 +474,27 @@ public final class CQLTranslator
     {
         boolean isPresent = false;
         Collection collection = ((Collection) value);
-        if(! collection.isEmpty())
+        isPresent = true;
+        builder.append("[");
+        for (Object o : collection)
         {
-            isPresent = true;
-            builder.append("[");
-            for(Object o : collection)
+            if (o != null)
             {
-                if(o != null)
-                {
-                    appendValue(builder, o.getClass(), o);
-                }
-                builder.append(",");
+                appendValue(builder, o.getClass(), o);
             }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append("]");
+            builder.append(",");
         }
+        if (!collection.isEmpty())
+        {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        builder.append("]");
         return isPresent;
     }
-    
+
     /**
      * Appends a object of type {@link java.util.Map}
+     * 
      * @param builder
      * @param value
      * @return
@@ -503,26 +503,27 @@ public final class CQLTranslator
     {
         boolean isPresent = false;
         Collection collection = ((Collection) value);
-        if(! collection.isEmpty())
+        isPresent = true;
+        builder.append("{");
+        for (Object o : collection)
         {
-            isPresent = true;
-            builder.append("{");
-            for(Object o : collection)
+            if (o != null)
             {
-                if(o != null)
-                {
-                    appendValue(builder, o.getClass(), o);
-                }
-                builder.append(",");
+                appendValue(builder, o.getClass(), o);
             }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append("}");
+            builder.append(",");
         }
+        if (!collection.isEmpty())
+        {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        builder.append("}");
         return isPresent;
     }
 
     /**
      * Appends a object of type {@link java.util.List}
+     * 
      * @param builder
      * @param value
      * @return
@@ -531,26 +532,26 @@ public final class CQLTranslator
     {
         boolean isPresent = false;
         Map map = ((Map) value);
-        if(! map.isEmpty())
+        isPresent = true;
+        builder.append("{");
+        for (Object mapKey : map.keySet())
         {
-            isPresent = true;
-            builder.append("{");
-            for(Object mapKey : map.keySet())
+            Object mapValue = map.get(mapKey);
+            if (mapKey != null && mapValue != null)
             {
-                Object mapValue = map.get(mapKey);
-                if(mapKey != null && mapValue != null)
-                {
-                    appendValue(builder, mapKey.getClass(), mapKey);
-                    builder.append(":");
-                    appendValue(builder, mapValue.getClass(), mapValue);
-                }
-                builder.append(",");
+                appendValue(builder, mapKey.getClass(), mapKey);
+                builder.append(":");
+                appendValue(builder, mapValue.getClass(), mapValue);
             }
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append("}");
+            builder.append(",");
         }
+        if (!map.isEmpty())
+        {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        builder.append("}");
         return isPresent;
-    }   
+    }
 
     /**
      * @param builder
@@ -677,8 +678,8 @@ public final class CQLTranslator
             validationClassMapper.put(UUIDType.class.getSimpleName(), "uuid");
 
             validationClassMapper.put(DateType.class.getSimpleName(), "timestamp");
-            
-            //collection types
+
+            // collection types
             validationClassMapper.put(ListType.class.getSimpleName(), "list");
             validationClassMapper.put(SetType.class.getSimpleName(), "set");
             validationClassMapper.put(MapType.class.getSimpleName(), "map");
