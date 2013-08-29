@@ -15,17 +15,22 @@
  */
 package com.impetus.kundera.graph;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.MapKeyJoinColumn;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.lifecycle.states.DetachedState;
+import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -102,7 +107,7 @@ public class ObjectGraphBuilder
 
         // Generate and set Id if @GeneratedValue present.
 
-        if (initialNodeState != null && initialNodeState.getClass().equals(TransientState.class))
+        if (((Field) entityMetadata.getIdAttribute().getJavaMember()).isAnnotationPresent(GeneratedValue.class))
         {
             Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
             Node nodeInPersistenceCache = null;
@@ -113,7 +118,8 @@ public class ObjectGraphBuilder
             }
             // if node not in persistence cache it means it came first time
             // for persist, then generate id for it.
-            if (nodeInPersistenceCache == null)
+            if (nodeInPersistenceCache == null
+                    || !nodeInPersistenceCache.getCurrentNodeState().equals(ManagedState.class))
             {
                 idGenerator.generateAndSetId(entity, entityMetadata, pd);
             }

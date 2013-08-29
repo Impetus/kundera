@@ -109,7 +109,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.puProperties = puProperties;
         handler = new MongoDBDataHandler();
         this.clientMetadata = clientMetadata;
-        
         populateBatchSize(persistenceUnit, this.puProperties);
 
     }
@@ -672,8 +671,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             // dbCollection.findAndModify(query, document);
 
             DBObject obj = dbCollection.findOne(query);
-            obj.putAll(document);
-            dbCollection.save(obj);
+            if (obj != null)
+            {
+                obj.putAll(document);
+
+                dbCollection.save(obj);
+            }
+            else
+            {
+                dbCollection.save(document);
+            }
         }
         else
         {
@@ -816,7 +823,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         // return auto generated id used by mongodb.
         return new ObjectId();
-    }  
+    }
 
     /**
      * Method to execute mongo jscripts.
