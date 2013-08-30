@@ -119,7 +119,7 @@ public class ObjectGraphBuilder
             // if node not in persistence cache it means it came first time
             // for persist, then generate id for it.
             if (nodeInPersistenceCache == null
-                    || !nodeInPersistenceCache.getCurrentNodeState().equals(ManagedState.class))
+                    || !nodeInPersistenceCache.getCurrentNodeState().getClass().isAssignableFrom(ManagedState.class))
             {
                 idGenerator.generateAndSetId(entity, entityMetadata, pd);
             }
