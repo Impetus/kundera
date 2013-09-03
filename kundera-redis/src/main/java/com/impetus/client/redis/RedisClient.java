@@ -69,6 +69,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -220,7 +221,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         String rowKey = null;
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            rowKey = prepareCompositeKey(entityMetadata, metaModel, key);
+            rowKey = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, key);
         }
         else
         {
@@ -1106,7 +1107,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
-    /**
+/*    *//**
      * Prepares composite key as a redis key.
      * 
      * @param m
@@ -1116,7 +1117,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @param compositeKey
      *            composite key instance
      * @return redis key
-     */
+     *//*
     private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
     {
         // EmbeddableType keyObject =
@@ -1152,7 +1153,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         return stringBuilder.toString();
     }
-
+*/
     /**
      * Wraps entity attributes into byte[] and return instance of attribute
      * wrapper.
@@ -1739,7 +1740,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         String rowKey = null;
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            rowKey = prepareCompositeKey(entityMetadata, metaModel, id);
+            rowKey = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, id);
         }
         else
         {
@@ -1809,7 +1810,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            rowKey = prepareCompositeKey(entityMetadata, metaModel, pKey);
+            rowKey = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, pKey);
         }
         else
         {

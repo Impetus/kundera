@@ -58,7 +58,14 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        // TODO Auto-generated method stub
+        this.externalProperties = null;
+        Object connection = getConnectionPoolOrConnection();
+        
+        if(connection != null)
+        {
+            ((TransportClient) connection).close();
+            
+        }
 
     }
 
@@ -124,7 +131,6 @@ public class ESClientFactory extends GenericClientFactory
             ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(h, new Integer(port)));
         }
         
-//        return new TransportClient().addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
         return client;
     }
 
@@ -138,7 +144,7 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()));
+        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties);
     }
 
     /*

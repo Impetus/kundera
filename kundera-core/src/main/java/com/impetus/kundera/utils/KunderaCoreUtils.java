@@ -1,13 +1,28 @@
 package com.impetus.kundera.utils;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 public class KunderaCoreUtils
 {
+
+    private static final String COMPOSITE_KEY_SEPERATOR = "\001";
+
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(KunderaCoreUtils.class);
+
     /**
      * Retrun map of external properties for given pu;
      * 
@@ -76,4 +91,56 @@ public class KunderaCoreUtils
         }
         return false;
     }
+
+    /**
+     * Prepares composite key as a redis key.
+     * 
+     * @param m
+     *            entity metadata
+     * @param metaModel
+     *            meta model.
+     * @param compositeKey
+     *            composite key instance
+     * @return redis key
+     */
+    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
+    {
+        // EmbeddableType keyObject =
+        // metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+
+        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+        
+//        Arrays.sort(fields);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Field f : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                // Attribute compositeColumn =
+                // keyObject.getAttribute(f.getName());
+                try
+                {
+                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                                                                                           // value
+                    
+                    // what if field value is null????
+                    stringBuilder.append(fieldValue);
+                    stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    logger.error("Error during persist, Caused by:", e);
+                    throw new PersistenceException(e);
+                }
+            }
+        }
+
+        if (stringBuilder.length() > 0)
+        {
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(COMPOSITE_KEY_SEPERATOR));
+        }
+        return stringBuilder.toString();
+    }
+
 }

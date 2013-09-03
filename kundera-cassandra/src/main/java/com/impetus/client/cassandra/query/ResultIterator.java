@@ -243,6 +243,7 @@ class ResultIterator<E> implements IResultIterator<E>
             parsedQuery = appendWhereClauseWithScroll(parsedQuery);
             results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(parsedQuery,
                     m.getEntityClazz(), m.getRelationNames()) : null;
+//            appMetadata.removeNativeQuery()
 
         }
         else

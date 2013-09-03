@@ -172,30 +172,30 @@ public class ESQuery<E> extends QueryImpl
         Object value = clause.getValue();
         String name = clause.getProperty();
         
-        String fieldName = metadata.getFieldName(name);
+//        String fieldName = metadata.getFieldName(name);
+//        String fieldName = metadata.getFieldName(name);
         
-        Attribute attribute  = entityType.getAttribute(fieldName);
 
         FilterBuilder filterBuilder = null;
         if (condition.equals("="))
         {
-            filterBuilder = new TermFilterBuilder(fieldName,value);
+            filterBuilder = new TermFilterBuilder(name,value);
         }
         else if (condition.equals(">"))
         {
-            filterBuilder = new RangeFilterBuilder(fieldName).gt(value);
+            filterBuilder = new RangeFilterBuilder(name).gt(value);
         }
         else if (condition.equals("<"))
         {
-            filterBuilder = new RangeFilterBuilder(fieldName).lt(value);
+            filterBuilder = new RangeFilterBuilder(name).lt(value);
         }
         else if (condition.equals(">="))
         {
-            filterBuilder = new RangeFilterBuilder(fieldName).gte(value);
+            filterBuilder = new RangeFilterBuilder(name).gte(value);
         }
         else if (condition.equals("<="))
         {
-            filterBuilder = new RangeFilterBuilder(fieldName).lte(value);
+            filterBuilder = new RangeFilterBuilder(name).lte(value);
         }
     
         return filterBuilder;
