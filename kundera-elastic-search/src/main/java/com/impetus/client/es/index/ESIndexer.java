@@ -145,11 +145,12 @@ public class ESIndexer implements Indexer
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object key)
+    public void unIndex(Class entityClazz, Object entity)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        Object id = PropertyAccessorHelper.getId(entity, metadata);
         DeleteResponse response = client
-                .prepareDelete(metadata.getSchema().toLowerCase(), entityClazz.getSimpleName(), key.toString())
+                .prepareDelete(metadata.getSchema().toLowerCase(), entityClazz.getSimpleName(), id.toString())
                 .execute().actionGet();
     }
 
