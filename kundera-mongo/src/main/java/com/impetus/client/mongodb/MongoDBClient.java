@@ -219,10 +219,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
-        if (log.isDebugEnabled())
-        {
-            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
-        }
+//        if (log.isDebugEnabled())
+//        {
+//            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
+//        }
 
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 

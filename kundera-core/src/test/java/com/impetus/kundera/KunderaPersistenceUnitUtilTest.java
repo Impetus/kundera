@@ -49,6 +49,20 @@ public class KunderaPersistenceUnitUtilTest
         Assert.assertNotNull(utils);
         Assert.assertFalse(utils.isLoaded(null));
     }
+    
+    @Test
+    public void testIsLoadedWithoutReference()
+    {
+        PersistenceUnitUtil utils = emf.getPersistenceUnitUtil();
+        
+        Person p = new Person();
+        p.setAge(32);
+        p.setPersonId("1");
+      
+        Assert.assertNotNull(utils);
+        Assert.assertTrue(utils.isLoaded(p, "personId"));
+        Assert.assertFalse(utils.isLoaded(null, "personName"));
+    }
 
     @Test
     public void testGetIdentifier()
