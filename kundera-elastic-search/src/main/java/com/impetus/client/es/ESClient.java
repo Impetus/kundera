@@ -18,6 +18,7 @@ package com.impetus.client.es;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,18 +29,30 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.FilteredQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.lucene.search.TermFilter;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +101,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private int batchSize;
 
     private Map clientProperties;
+    
+    private static final String KEY_SEPERATOR = "\001";
+
 
     ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties)
     {
@@ -232,8 +248,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         List results = new ArrayList();
 
-        SearchResponse response = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setFilter(filter)
-                .execute().actionGet();
+        SearchResponse response = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase())
+                .setTypes(entityMetadata.getEntityClazz().getSimpleName()).setFilter(filter).execute().actionGet();
         SearchHits hits = response.getHits();
 
         Object entity = null;
@@ -293,16 +309,14 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void close()
     {
-
-        // TODO Auto-generated method stub
-
+        clear();
+        reader = null;
     }
 
     @Override
@@ -341,7 +355,68 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        // TODO Auto-generated method stub
+        String tableName = joinTableData.getJoinTableName();
+        
+        String inverseJoinColumn = joinTableData.getInverseJoinColumnName();
+        
+        String joinColumn = joinTableData.getJoinColumnName();
+
+        String schemaName = joinTableData.getSchemaName();
+        
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+
+        Set<Object> joinKeys = joinTableRecords.keySet();
+
+        BulkRequestBuilder bulkRequest = txClient.prepareBulk();
+
+        /**
+         * 1_p => 1_a1,1_a2
+         * 1_a1=> 1_p,1_p1
+         * 
+         * Example: join table : PERSON_ADDRESS 
+         * join column : PERSON_ID (1_p)
+         * inverse join column : ADDRESS_ID (1_a)
+         * store in ES:
+         * schema name: PERSON_ADDRESS
+         * type: PERSON
+         * id: 1_p\0011_a
+         * 
+         * PERSON_ADDRESS:1_p_1_a PERSON_ID 1_p ADDRESS_ID 1_a
+         * 
+         * source: 
+         * (PERSON_ID, 1_p)
+         * (ADDRESS_ID, 1_a)
+         * 
+         * embeddable keys over many to many does not work.
+        */
+        
+        boolean found=false;
+        for(Object key : joinKeys)
+        {
+            Set<Object> inversejoinTableRecords = joinTableRecords.get(key);
+            Map<String,Object> source = new HashMap<String, Object>();
+            
+            for(Object inverseObj : inversejoinTableRecords)
+            {
+                source = new HashMap<String, Object>();
+                source.put(joinTableData.getJoinColumnName(), key);
+                source.put(joinTableData.getInverseJoinColumnName(), inverseObj);
+                
+                String joinKeyAsStr = PropertyAccessorHelper.getString(key);
+                String inverseKeyAsStr = PropertyAccessorHelper.getString(inverseObj);
+                
+                String keyAsString = joinKeyAsStr+KEY_SEPERATOR+inverseKeyAsStr;
+                IndexRequest request = new IndexRequest(schemaName.toLowerCase(), tableName, keyAsString).source(source);
+                found=true;
+                bulkRequest.add(request);
+            }
+        }
+
+        // check made, as bulk request throws an error, in case no request is present.
+        if(found)
+        {
+            bulkRequest.execute().actionGet();
+        }
 
     }
 
@@ -349,29 +424,64 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
     {
-        // TODO Auto-generated method stub
-        return null;
+        // fetch list ADDRESS_ID for given PERSON_ID
+        FilterBuilder filterBuilder = new TermFilterBuilder(pKeyColumnName,pKeyColumnValue);
+
+        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName).setFilter(filterBuilder).addField(columnName)
+                .execute().actionGet();
+        
+        SearchHits hits = response.getHits();
+        
+        List columns = new ArrayList();
+        for (SearchHit hit : hits.getHits())
+        {
+            Map<String,SearchHitField> fields = hit.getFields();
+            columns.add(fields.get(columnName).getValue());
+        }
+        
+        return columns;
     }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        // TODO Auto-generated method stub
-        return null;
+        
+        TermFilterBuilder filter = FilterBuilders.termFilter(columnName, columnValue);
+        
+        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase())
+                .setTypes(tableName).addField(pKeyName).setFilter(filter).execute().actionGet();
+        
+        SearchHits hits = response.getHits();
+
+        Long length = hits.getTotalHits();
+        int absoluteLength = length.intValue();
+        Object[] ids = new Object[absoluteLength];
+        
+        int counter=0;
+        for (SearchHit hit : hits.getHits())
+        {
+            Map<String,SearchHitField> fields = hit.getFields();
+            ids[counter++]= fields.get(pKeyName).getValue();
+        }
+
+        return ids;
     }
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
-
+        Map<String,Object> querySource = new HashMap<String, Object>();
+        querySource.put(columnName, columnValue);
+        
+        DeleteByQueryRequestBuilder deleteQueryBuilder = txClient.prepareDeleteByQuery(schemaName.toLowerCase()).setQuery(querySource).setTypes(tableName);
+        
+        deleteQueryBuilder.execute().actionGet();
     }
 
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        // TODO find address by person id.
         GetResponse get = null;
 
         List results = new ArrayList();

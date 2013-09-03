@@ -54,7 +54,7 @@ public class ESClientPropertyReader extends AbstractPropertyReader implements Pr
 
     public Properties getConnectionProperties()
     {
-        return esmd.getConnectionProperties();
+        return esmd != null? esmd.getConnectionProperties():null;
     }
     
     
@@ -65,14 +65,17 @@ public class ESClientPropertyReader extends AbstractPropertyReader implements Pr
         public Properties getConnectionProperties()
         {
             DataStore  ds = getDataStore("elasticsearch");
-            Connection connection = ds.getConnection();
-            if(connection != null)
+            
+            if (ds != null)
             {
-                Properties properties = connection.getProperties();
-                
-                return properties;
-            }
-                    
+                Connection connection = ds.getConnection();
+                if (connection != null)
+                {
+                    Properties properties = connection.getProperties();
+
+                    return properties;
+                }
+            }       
             return null;
         }
     }

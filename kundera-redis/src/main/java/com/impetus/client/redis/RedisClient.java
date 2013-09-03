@@ -470,6 +470,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 pipeline = ((Jedis) connection).pipelined();
             }
             Set<Object> joinKeys = joinTableRecords.keySet();
+
             for (Object joinKey : joinKeys)
             {
                 String joinKeyAsStr = PropertyAccessorHelper.getString(joinKey);

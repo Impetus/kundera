@@ -128,7 +128,9 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        return null;
+        List result = populateEntities(m, client);
+        return setRelationEntities(result, client, m);
+//        return null;
     }
 
     /*
@@ -139,7 +141,7 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return null;
+        return new ESEntityReader();
     }
 
     /*
@@ -156,7 +158,6 @@ public class ESQuery<E> extends QueryImpl
     @Override
     public void close()
     {
-        // TODO Auto-generated method stub
 
     }
 
@@ -172,10 +173,6 @@ public class ESQuery<E> extends QueryImpl
         Object value = clause.getValue();
         String name = clause.getProperty();
         
-//        String fieldName = metadata.getFieldName(name);
-//        String fieldName = metadata.getFieldName(name);
-        
-
         FilterBuilder filterBuilder = null;
         if (condition.equals("="))
         {
