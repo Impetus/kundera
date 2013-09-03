@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,32 +13,46 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.persistence.event;
+package com.impetus.client.es;
 
-import javax.persistence.PostPersist;
-import javax.persistence.PrePersist;
-import javax.persistence.PostLoad;
-/*import javax.persistence.PostUpdate;
-import javax.persistence.PreUpdate;*/
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-public class PersonHandler
+
+/**
+ * @author vivek.mishra
+ * 
+ * WebTraffic entity class.
+ *
+ */
+@Entity
+@Table(name="web_traffic",schema="esSchema@es-pu")
+public class WebTraffic
 {
 
-    @PrePersist
-    public void handledPrePersist(PersonEventDispatch user)
+    @EmbeddedId
+    private WebTrafficCompositeKey key;
+    
+    private String country;
+
+    public WebTrafficCompositeKey getKey()
     {
-        user.setFirstName("Amresh");
+        return key;
     }
 
-    @PostPersist
-    public void handledPostPersist(PersonEventDispatch user)
+    public void setKey(WebTrafficCompositeKey key)
     {
-        user.setLastName("Singh");
+        this.key = key;
     }
-    
-    @PostLoad
-    public void handledPostLoad(PersonEventDispatch user)
+
+    public String getCountry()
     {
-        user.setLastName("Post Load");
+        return country;
+    }
+
+    public void setCountry(String country)
+    {
+        this.country = country;
     }
 }

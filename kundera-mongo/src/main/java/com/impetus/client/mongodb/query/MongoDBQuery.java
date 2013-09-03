@@ -67,6 +67,7 @@ public class MongoDBQuery extends QueryImpl
 {
     /** The log used by this class. */
     private static Logger log = LoggerFactory.getLogger(MongoDBQuery.class);
+
     private boolean isSingleResult;
 
     /**
@@ -129,8 +130,8 @@ public class MongoDBQuery extends QueryImpl
             }
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()), getKunderaQuery()
-                            .getResult());
+                    null, orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()),
+                    getKunderaQuery().getResult());
         }
         catch (Exception e)
         {
@@ -145,7 +146,7 @@ public class MongoDBQuery extends QueryImpl
         // to fetch a single result form database.
         isSingleResult = true;
         List results = getResultList();
-        isSingleResult=false;
+        isSingleResult = false;
         return results.isEmpty() ? results : results.get(0);
     }
 
@@ -165,8 +166,8 @@ public class MongoDBQuery extends QueryImpl
             }
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()),
-                    getKunderaQuery().getResult());
+                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult,
+                    getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)
         {
@@ -492,8 +493,10 @@ public class MongoDBQuery extends QueryImpl
     @Override
     public Iterator iterate()
     {
-        // TODO Auto-generated method stub
-        return null;
+        EntityMetadata m = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(m);
+        return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
+                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),persistenceDelegeator,
+                getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
-
 }

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.thoughtworks.xstream.XStream;
@@ -173,4 +174,49 @@ public abstract class AbstractPropertyReader
      * @param cp
      */
     protected abstract void onXml(ClientProperties cp);
+
+    protected class AbstractSchemaMetadata
+    {
+        private ClientProperties clientProperties;
+
+        /**
+         * @param parseXML
+         */
+        public void setClientProperties(ClientProperties clientProperties)
+        {
+            this.clientProperties = clientProperties;
+        }
+
+        /**
+         * @return the clientProperties
+         */
+        public ClientProperties getClientProperties()
+        {
+            return clientProperties;
+        }
+
+        protected DataStore getDataStore(final String dataStoreName)
+        {
+            if (getClientProperties() != null)
+            {
+                if (getClientProperties().getDatastores() != null)
+                {
+                    for (DataStore dataStore : getClientProperties().getDatastores())
+                    {
+                        if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase(dataStoreName))
+                        {
+                            return dataStore;
+                        }
+                    }
+                }
+
+                if (log.isWarnEnabled())
+                {
+                    log.warn("No data store configuration found, returning null.");
+                }
+            }
+            return null;
+        }
+
+    }
 }

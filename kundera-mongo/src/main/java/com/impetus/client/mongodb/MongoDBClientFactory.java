@@ -203,7 +203,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
         // setting server property.
 
-        if (!StringUtils.isEmpty(poolSize))
+        if (mo.getConnectionsPerHost() <= 0 && !StringUtils.isEmpty(poolSize))
         {
             mo.connectionsPerHost = Integer.parseInt(poolSize);
         }
@@ -344,6 +344,12 @@ public class MongoDBClientFactory extends GenericClientFactory
                 try
                 {
                     if (props.get(MongoDBConstants.CONNECTION_PER_HOST) != null)
+                    {
+                        mo.setConnectionsPerHost(Integer.parseInt((String) props
+                                .get(MongoDBConstants.CONNECTION_PER_HOST)));
+                    }
+
+                    if (props.get(MongoDBConstants.CONNECT_TIME_OUT) != null)
                     {
                         mo.setConnectTimeout(Integer.parseInt((String) props.get(MongoDBConstants.CONNECT_TIME_OUT)));
                     }

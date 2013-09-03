@@ -109,7 +109,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.puProperties = puProperties;
         handler = new MongoDBDataHandler();
         this.clientMetadata = clientMetadata;
-        
+
         populateBatchSize(persistenceUnit, this.puProperties);
 
     }
@@ -219,10 +219,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
-        if (log.isDebugEnabled())
-        {
-            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
-        }
+//        if (log.isDebugEnabled())
+//        {
+//            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
+//        }
 
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
@@ -319,11 +319,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         String documentName = entityMetadata.getTableName();
         Class clazz = entityMetadata.getEntityClazz();
 
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
         List entities = new ArrayList<E>();
+
+        DBCursor cursor = getDBCursorInstance(mongoQuery, orderBy, maxResult, keys, documentName);
 
         if (results != null && results.length > 0)
         {
+            DBCollection dbCollection = mongoDb.getCollection(documentName);
             for (int i = 1; i < results.length; i++)
             {
                 String result = results[i];
@@ -344,8 +346,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys).limit(maxResult);
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
@@ -353,6 +353,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             entities.add(entity);
         }
         return entities;
+    }
+
+    public DBCursor getDBCursorInstance(BasicDBObject mongoQuery, BasicDBObject orderBy, int maxResult,
+            BasicDBObject keys, String documentName)
+    {
+        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
+                mongoQuery, keys).limit(maxResult);
+        return cursor;
     }
 
     /*
@@ -672,8 +681,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             // dbCollection.findAndModify(query, document);
 
             DBObject obj = dbCollection.findOne(query);
-            obj.putAll(document);
-            dbCollection.save(obj);
+            if (obj != null)
+            {
+                obj.putAll(document);
+
+                dbCollection.save(obj);
+            }
+            else
+            {
+                dbCollection.save(document);
+            }
         }
         else
         {
@@ -816,7 +833,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         // return auto generated id used by mongodb.
         return new ObjectId();
-    }  
+    }
 
     /**
      * Method to execute mongo jscripts.

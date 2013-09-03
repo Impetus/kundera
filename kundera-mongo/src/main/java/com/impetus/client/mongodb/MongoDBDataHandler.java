@@ -54,7 +54,7 @@ import com.mongodb.DBObject;
  * 
  * @author amresh.singh
  */
-final class MongoDBDataHandler
+public final class MongoDBDataHandler
 {
 
     /** The log. */
@@ -73,7 +73,7 @@ final class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
     {
         // Entity object
         Object entity = null;

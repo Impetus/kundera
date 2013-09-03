@@ -103,7 +103,8 @@ public class MongoAuthenticationTest extends BaseTest
         }
         catch (KunderaAuthenticationException e)
         {
-            Assert.assertNull(emf);
+            // Moved authentication at client level.
+//            Assert.assertNull(emf);
             Assert.assertNull(em);
         }
 

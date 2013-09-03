@@ -41,6 +41,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.api.Batcher;
 
 public class ESClientTest
 {
@@ -83,7 +84,7 @@ public class ESClientTest
         PersonES result = (PersonES) client.find(PersonES.class, "1");
         Assert.assertNotNull(result);
 
-        PersonES invalidResult = (PersonES) client.find(PersonES.class, "2");
+        PersonES invalidResult = (PersonES) client.find(PersonES.class, "2_p");
         Assert.assertNull(invalidResult);
 
         client.delete(result, "1");
@@ -154,5 +155,6 @@ public class ESClientTest
       new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
+    
 
 }

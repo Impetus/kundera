@@ -17,6 +17,7 @@ package com.impetus.client.rdbms.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +113,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
         // TODO: maxresults to be taken care after work on pagination.
-        
+
         List<EnhanceEntity> ls = null;
         List<String> relationNames = m.getRelationNames();
         boolean isParent = m.isParent();
@@ -255,8 +256,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
         Set<Attribute> attributes = entityType.getAttributes();
         for (Attribute field : attributes)
-        //
-        // for (String column : entityMetadata.getColumnFieldNames())
         {
             if (!field.isAssociation()
                     && !field.isCollection()
@@ -365,9 +364,16 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                         queryBuilder.append("%");
                     }
                     queryBuilder.append(" ");
-                    appendStringPrefix(queryBuilder, isString);
-                    queryBuilder.append(clause.getValue());
-                    appendStringPrefix(queryBuilder, isString);
+                    if (clause.getCondition().equalsIgnoreCase("IN"))
+                    {
+                        buildINClause(queryBuilder, clause, isString);
+                    }
+                    else
+                    {
+                        appendStringPrefix(queryBuilder, isString);
+                        queryBuilder.append(clause.getValue());
+                        appendStringPrefix(queryBuilder, isString);
+                    }
                 }
                 else
                 {
@@ -375,12 +381,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     queryBuilder.append(o);
                     queryBuilder.append(" ");
                 }
-
             }
         }
         else
         {
-
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
             queryBuilder.append(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName());
@@ -406,6 +410,38 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
         }
         return queryBuilder.toString();
+    }
+
+    private void buildINClause(StringBuilder queryBuilder, FilterClause clause, boolean isString)
+    {
+        Object value = clause.getValue();
+        if (List.class.isAssignableFrom(value.getClass()) || Set.class.isAssignableFrom(value.getClass()))
+        {
+            queryBuilder.append(" (");
+            Collection collection = ((Collection) value);
+            for (Object obj : collection)
+            {
+                if (isString)
+                {
+                    appendStringPrefix(queryBuilder, isString);
+                }
+                queryBuilder.append(obj.toString());
+                if (isString)
+                {
+                    appendStringPrefix(queryBuilder, isString);
+                }
+                queryBuilder.append(",");
+            }
+            if (!collection.isEmpty())
+            {
+                queryBuilder.deleteCharAt(queryBuilder.lastIndexOf(","));
+            }
+            queryBuilder.append(")");
+        }
+        else
+        {
+            queryBuilder.append(value.toString());
+        }
     }
 
     /**

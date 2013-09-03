@@ -240,9 +240,10 @@ public class ApplicationMetadata
      */
     public void addQueryToCollection(String queryName, String query, boolean isNativeQuery, Class clazz)
     {
+        
         if (namedNativeQueries == null)
         {
-            namedNativeQueries = new HashMap<String, QueryWrapper>();
+            namedNativeQueries = new ConcurrentHashMap<String, QueryWrapper>();
         }
         if (!namedNativeQueries.containsKey(queryName))
         {
@@ -290,6 +291,7 @@ public class ApplicationMetadata
         return wrapper != null ? wrapper.getMappedClazz() : null;
     }
 
+    
     /**
      * Handler error and log statements.
      * 

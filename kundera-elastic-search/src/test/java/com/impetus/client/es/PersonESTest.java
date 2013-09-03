@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * @author vivek.mishra
@@ -49,9 +52,114 @@ public class PersonESTest
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
     }
-    
+
     @Test
-    public void testFindJPQL()
+    public void testWithBatch() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException
+    {
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+        props.put(PersistenceProperties.KUNDERA_PORT, "9300");
+        props.put(PersistenceProperties.KUNDERA_BATCH_SIZE, 10);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("es-pu",props);
+        EntityManager em = emf.createEntityManager();
+        
+        PersonES person = new PersonES();
+        
+        for(int i = 1 ; i <=25 ;i++)
+        {
+            person.setAge(i);
+            person.setDay(Day.FRIDAY);
+            person.setPersonId(i+"");
+            person.setPersonName("vivek"+i);
+            em.persist(person);
+            
+            if(i%10==0)
+            {
+                em.clear();
+                for(int i1 = 1;i1<=10;i1++)
+                {
+                    PersonES p = em.find(PersonES.class, i1+"");
+                    Assert.assertNotNull(p);
+                    Assert.assertEquals("vivek"+i1, p.getPersonName());
+                }
+            }
+        
+        }
+        
+        em.flush();
+        em.clear();
+        em.close();
+        emf.close();
+
+        
+        // A scenario to mix and match with 
+        
+        // 5 inserts, 5 updates and 5 deletes
+        
+        props.put(PersistenceProperties.KUNDERA_BATCH_SIZE, 50);
+        emf = Persistence.createEntityManagerFactory("es-pu",props);
+        em = emf.createEntityManager();
+
+        
+        for(int i = 21; i <=25;i++)
+        {
+            person.setAge(i);
+            person.setDay(Day.FRIDAY);
+            person.setPersonId(i+"");
+            person.setPersonName("vivek"+i);
+            em.persist(person);
+        }
+        
+        for(int i=10;i<=20;i++)
+        {
+            PersonES p = em.find(PersonES.class, i+"");
+            
+            if(i > 15)
+            {
+                em.remove(p);
+            } else
+            {
+                p.setPersonName("updatedName" + i);
+                em.merge(p);
+            }
+            
+        }
+        
+        em.flush();  // explicit flush
+        em.clear();
+        
+        // Assert after explicit flush
+        
+        for(int i = 10 ; i <=15 ;i++)
+        {
+            if(i > 15)
+            {
+                Assert.assertNull(em.find(PersonES.class, i+""));  // assert on removed
+            } else
+            {
+                PersonES found = em.find(PersonES.class, i+"");
+                Assert.assertNotNull(found);
+                Assert.assertEquals("updatedName"+i, found.getPersonName());
+            }
+        }
+        
+        for(int i = 1 ; i <= 25 ; i++)
+        {
+            PersonES found = em.find(PersonES.class, i+"");
+            if(found != null)  // as some of record are already removed.
+            em.remove(found);
+        }
+   
+        // TODO: Update/delete by JPA query.
+//        String deleteQuery = "Delete p from PersonES p";
+        
+        
+        em.close();
+        emf.close();
+    }
+
+    @Test
+    public void testFindJPQL() throws InterruptedException
     {
         PersonES person = new PersonES();
         person.setAge(32);
@@ -68,7 +176,7 @@ public class PersonESTest
         person.setPersonName("kuldeep");
         em.persist(person);
         
-        
+        waitThread();
         String queryWithOutAndClause = "Select p from PersonES p where p.personName = 'vivek'";
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
         
@@ -118,6 +226,10 @@ public class PersonESTest
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
 
+        em.remove(em.find(PersonES.class, "1"));
+        em.remove(em.find(PersonES.class, "2"));
+        waitThread();
+        //TODO: >,<,>=,<=
     }
 
     @After
@@ -126,4 +238,12 @@ public class PersonESTest
         em.close();
         emf.close();
     }
+    
+    
+    private void waitThread() throws InterruptedException
+    {
+        Thread.sleep(2000);
+    }
+    
+  
 }

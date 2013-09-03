@@ -32,7 +32,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * @author vivek.mishra
- * 
+ *  Client factory implementation for elastic search. 
  */
 public class ESClientFactory extends GenericClientFactory
 {
@@ -58,7 +58,14 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        // TODO Auto-generated method stub
+        this.externalProperties = null;
+        Object connection = getConnectionPoolOrConnection();
+        
+        if(connection != null)
+        {
+            ((TransportClient) connection).close();
+            
+        }
 
     }
 
@@ -72,6 +79,10 @@ public class ESClientFactory extends GenericClientFactory
     public void initialize(Map<String, Object> puProperties)
     {
         this.externalProperties = puProperties;
+        
+        this.propertyReader = new ESClientPropertyReader(externalProperties);
+        propertyReader.read(getPersistenceUnit());
+        
     }
 
     /*
@@ -105,18 +116,19 @@ public class ESClientFactory extends GenericClientFactory
 
         String[] hosts = getHosts(host);
 
-        Settings settings = ImmutableSettings.settingsBuilder() 
-//                .put("cluster.name", "elasticsearch") 
-                .put("client.transport.sniff", true) 
-//                .put("discovery.zen.ping.multicast.enabled", false) 
-//                .put("discovery.zen.ping.unicast.enabled", true) 
-//                /*.put("discovery.zen.ping.unicast.hosts", 
-//    "server1:9300,server2:9300")*/ 
-//                .put("discovery.zen.multicast.enabled", false) 
-//                .put("discovery.zen.unicast.enabled", true) 
-                /*.put("discovery.zen.unicast.hosts", 
-    "server1:9300,server2:9300")*/.build(); 
+        Properties properties = ((ESClientPropertyReader)propertyReader).getConnectionProperties();
         
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        
+        if(properties != null)
+        {
+            builder.put(properties);
+        }
+        
+        builder.put("client.transport.sniff", true);
+        
+        Settings settings = builder.build();
+       
         org.elasticsearch.client.Client client = new TransportClient(settings);
 
         for (String h : hosts)
@@ -124,7 +136,6 @@ public class ESClientFactory extends GenericClientFactory
             ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(h, new Integer(port)));
         }
         
-//        return new TransportClient().addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
         return client;
     }
 
@@ -138,7 +149,7 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()));
+        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties);
     }
 
     /*
@@ -168,7 +179,6 @@ public class ESClientFactory extends GenericClientFactory
     private String[] getHosts(final String host)
     {
         return host.split(",");
-
     }
 
 }
