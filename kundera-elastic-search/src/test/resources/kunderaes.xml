@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>elasticsearch</name>
+			<connection>
+				<properties>
+					<property name="client.transport.sniff" value="true"></property>
+					<property name="discovery.zen.ping.multicast.enabled"
+						value="false"></property>
+					<property name="discovery.zen.ping.unicast.enabled" value="true"></property>
+					<property name="discovery.zen.multicast.enabled" value="false"></property>
+					<property name="discovery.zen.unicast.enabled" value="true"></property>
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>
