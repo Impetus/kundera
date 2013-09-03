@@ -218,7 +218,6 @@
       </activation>
       <modules>
         <module>kundera-core</module>
-<module>kundera-elastic-search</module>
         <module>kundera-cassandra</module>
       </modules>
     </profile>
