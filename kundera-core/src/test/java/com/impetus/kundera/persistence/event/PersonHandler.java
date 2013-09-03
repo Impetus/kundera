@@ -17,6 +17,9 @@ package com.impetus.kundera.persistence.event;
 
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
+import javax.persistence.PostLoad;
+/*import javax.persistence.PostUpdate;
+import javax.persistence.PreUpdate;*/
 
 public class PersonHandler
 {
@@ -31,5 +34,11 @@ public class PersonHandler
     public void handledPostPersist(PersonEventDispatch user)
     {
         user.setLastName("Singh");
+    }
+    
+    @PostLoad
+    public void handledPostLoad(PersonEventDispatch user)
+    {
+        user.setLastName("Post Load");
     }
 }
