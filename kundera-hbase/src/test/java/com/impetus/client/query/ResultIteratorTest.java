@@ -91,16 +91,16 @@ public class ResultIteratorTest extends BaseTest
         em.persist(token1);
         em.persist(token2);
 
-        String queryWithoutClause = "Select t from Token t";
+        String queryWithoutClause = "Select t from HbaseToken t";
         assertOnTokenScroll(queryWithoutClause, 2);
 
-        String queryWithClause = "Select t from Token t where t.tokenName='tokenName1'";
+        String queryWithClause = "Select t from HbaseToken t where t.tokenName='tokenName1'";
 
         assertOnTokenScroll(queryWithClause, 1);
 
         // TODO:: Need to discuss with KK, this should be working with token
         // support. Special scenario.
-        String queryWithIdClause = "Select t from Token t where t.id = 'tokenId1'";
+        String queryWithIdClause = "Select t from HbaseToken t where t.id = 'tokenId1'";
         //
         assertOnTokenScroll(queryWithIdClause, 1);
 
