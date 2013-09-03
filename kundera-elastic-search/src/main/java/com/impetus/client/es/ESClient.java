@@ -211,7 +211,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             result = getInstance(entityClass, result);
             PropertyAccessorHelper.setId(result, metadata, key);
-            result = wrap(results, entityType, result);
+            result = wrap(results, entityType, result, metadata, true);
         }
 
         return result;
@@ -258,13 +258,13 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             entity = getInstance(clazz, entity);
             Map<String, Object> hitResult = hit.sourceAsMap();
-            results.add(wrap(hitResult, entityType, entity));
+            results.add(wrap(hitResult, entityType, entity,entityMetadata, false));
         }
 
         return results;
     }
 
-    private Object wrap(Map<String, Object> results, EntityType entityType, Object result)
+    private Object wrap(Map<String, Object> results, EntityType entityType, Object result, EntityMetadata metadata, boolean isIdSet)
     {
 
         Map<String, Object> relations = new HashMap<String, Object>();
@@ -275,12 +275,16 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
             String fieldName = ((AbstractAttribute) attribute).getJPAColumnName();
 
-            // TODOOOO : Enum handling is needed.
             if (!attribute.isAssociation())
             {
                 Object fieldValue = results.get(fieldName);
 
                 key = onId(key, attribute, fieldValue);
+                
+                if(!isIdSet)
+                {
+                    PropertyAccessorHelper.setId(result, metadata, key);
+                }
 
                 fieldValue = onEnum(attribute, fieldValue);
 
@@ -510,7 +514,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 // hit
                 Object result = null;
                 result = getInstance(entityClazz, result);
-                result = wrap(searchResults, entityType, result);
+                result = wrap(searchResults, entityType, result,metadata,false);
                 if (result != null)
                 {
                     results.add(result);

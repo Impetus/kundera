@@ -171,7 +171,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     }
 
 
-    protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
+    public List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
@@ -218,7 +218,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             String[] columnsToSelect)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, Object> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
+        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ, Constants.INVALID,
                 Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
@@ -370,13 +370,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      *            the client
      * @return the sets the
      */
-    protected Set<String> fetchDataFromLucene(Client client)
+    protected Set<String> fetchDataFromLucene(Class<?> clazz, Client client)
     {
         String luceneQuery = getLuceneQueryFromJPAQuery();
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
-        Map<String, Object> results = client.getIndexManager().search(luceneQuery);
+        Map<String, Object> results = client.getIndexManager().search(clazz, luceneQuery);
         Set rSet = new HashSet(results.values());
         return rSet;
     }

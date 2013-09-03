@@ -81,14 +81,13 @@ public class IndexManager
     {
         if (indexer != null)
         {
-
             if (indexer.getClass().isAssignableFrom(LuceneIndexer.class))
             {
                 ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
             }
             else
             {
-                indexer.unIndex(metadata.getEntityClazz(), entity);
+                indexer.unIndex(metadata.getEntityClazz(), key);
             }
         }
     }
@@ -103,7 +102,6 @@ public class IndexManager
      */
     public final void update(EntityMetadata metadata, Object entity, Object parentId, Class<?> clazz)
     {
-
         try
         {
             if (indexer != null)
@@ -133,11 +131,10 @@ public class IndexManager
                     for (String columnName : indexProperties.keySet())
                     {
                         PropertyIndex index = indexProperties.get(columnName);
-                        java.lang.reflect.Field property = index.getProperty();
+                        Field property = index.getProperty();
                         // String propertyName = index.getName();
                         Object obj = PropertyAccessorHelper.getObject(entity, property);
                         indexCollection.put(columnName, obj);
-
                     }
 
                     indexCollection.put(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), id);
@@ -148,7 +145,7 @@ public class IndexManager
                                 parentId);
 
                     onEmbeddable(entity, metadata.getEntityClazz(), metaModel, indexCollection);
-                    indexer.index(metadata.getEntityClazz(), indexCollection);
+                    indexer.index(metadata.getEntityClazz(), indexCollection, parentId, clazz);
                 }
             }
         }
@@ -252,10 +249,10 @@ public class IndexManager
     // TODO: All lucene specific code (methods that accept lucene query as
     // parameter) from this class should go away
     // and should be moved to LuceneIndexer instead
-    public final Map<String, Object> search(String query)
+    public final Map<String, Object> search(Class<?> clazz, String query)
     {
 
-        return search(query, Constants.INVALID, Constants.INVALID, false);
+        return search(clazz, query, Constants.INVALID, Constants.INVALID, false);
     }
 
     public final Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId)
@@ -277,9 +274,12 @@ public class IndexManager
         }
         else
         {
+            String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, parentClass.getCanonicalName()
+                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, entityId, childClass.getCanonicalName()
+                    .toLowerCase());
             // If an alternate indexer implementation class is provided by user,
             // search into that
-            return indexer.search(parentClass, childClass, entityId, Constants.INVALID, Constants.INVALID);
+            return indexer.search(query, parentClass, childClass, entityId, Constants.INVALID, Constants.INVALID);
         }
 
     }
@@ -292,10 +292,10 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, Object> fetchRelation(String query)
+    public final Map<String, Object> fetchRelation(Class<?> clazz, String query)
     {
         // TODO: need to return list.
-        return search(query, Constants.INVALID, Constants.INVALID, true);
+        return search(clazz, query, Constants.INVALID, Constants.INVALID, true);
     }
 
     /**
@@ -307,9 +307,9 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, Object> search(String query, int count)
+    public final Map<String, Object> search(Class<?> clazz, String query, int count)
     {
-        return search(query, Constants.INVALID, count, false);
+        return search(clazz, query, Constants.INVALID, count, false);
     }
 
     /**
@@ -323,7 +323,7 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, Object> search(String query, int start, int count)
+    public final Map<String, Object> search(Class<?> clazz, String query, int start, int count)
     {
         if (indexer != null)
         {
@@ -334,7 +334,7 @@ public class IndexManager
             }
             else
             {
-                return indexer.search(query, start, count);
+                return indexer.search(clazz, query, start, count);
             }
         }
         return new HashMap<String, Object>();
@@ -353,7 +353,7 @@ public class IndexManager
      *            the fetch relation
      * @return the list
      */
-    public final Map<String, Object> search(String query, int start, int count, boolean fetchRelation)
+    public final Map<String, Object> search(Class<?> clazz, String query, int start, int count, boolean fetchRelation)
     {
         if (indexer != null)
         {
@@ -364,7 +364,7 @@ public class IndexManager
             }
             else
             {
-                return indexer.search(query, start, count);
+                return indexer.search(clazz, query, start, count);
             }
         }
         return new HashMap<String, Object>();
@@ -377,7 +377,7 @@ public class IndexManager
     {
         if (indexer != null)
         {
-            ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
+//            ((Indexer) indexer).close();
         }
     }
 

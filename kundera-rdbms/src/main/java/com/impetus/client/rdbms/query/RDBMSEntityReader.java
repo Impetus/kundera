@@ -128,7 +128,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             else
             {
                 // prepare lucene query and find.
-                Set<String> rSet = fetchDataFromLucene(client);
+                Set<String> rSet = fetchDataFromLucene(m.getEntityClazz(), client);
                 if (rSet != null && !rSet.isEmpty())
                 {
                     filter = "WHERE";

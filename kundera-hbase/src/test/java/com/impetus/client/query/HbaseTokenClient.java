@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "client", schema = "KunderaExamples@hbaseTest")
-public class TokenClient
+public class HbaseTokenClient
 {
 
     @Id
@@ -22,7 +22,7 @@ public class TokenClient
     private String clientName;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
-    private Set<Token> tokens;
+    private Set<HbaseToken> tokens;
 
     public String getId()
     {
@@ -44,12 +44,12 @@ public class TokenClient
         this.clientName = clientName;
     }
 
-    public Set<Token> getTokens()
+    public Set<HbaseToken> getTokens()
     {
         return tokens;
     }
 
-    public void setTokens(Set<Token> tokens)
+    public void setTokens(Set<HbaseToken> tokens)
     {
         this.tokens = tokens;
     }
