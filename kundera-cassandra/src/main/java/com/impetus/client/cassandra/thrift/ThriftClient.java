@@ -492,7 +492,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         SlicePredicate slicePredicate = new SlicePredicate();
 
-        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
+        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, Integer.MAX_VALUE));
 
         String childIdStr = PropertyAccessorHelper.getString(columnValue);
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
@@ -571,7 +571,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         else
         {
             SlicePredicate slicePredicate = new SlicePredicate();
-            slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, 1000));
+            slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false, Integer.MAX_VALUE));
 
             IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
                     ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
