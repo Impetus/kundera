@@ -83,7 +83,7 @@ public class CoreQuery<E> extends QueryImpl<E>
     
     public Set<String> fetchByLuceneQuery()
     {
-        return fetchDataFromLucene(persistenceDelegeator.getClient(getEntityMetadata()));
+        return fetchDataFromLucene(getEntityMetadata().getEntityClazz(), persistenceDelegeator.getClient(getEntityMetadata()));
     }
     
     public List<Object> populateUsingLucene()

@@ -139,7 +139,7 @@ public class LuceneIndexerTest
         Indexer indexer = LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), LUCENE_DIR_PATH);
         try
         {
-            indexer.index(Person.class, null);
+            indexer.index(Person.class, null, null, null);
             Assert.fail("Should have gone to catch block!");
         }
         catch (UnsupportedOperationException uoex)
@@ -149,7 +149,8 @@ public class LuceneIndexerTest
         
         try
         {
-            indexer.search(luceneQuery, 0, 100);
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);
+            indexer.search(m.getEntityClazz(),luceneQuery, 0, 100);
             Assert.fail("Should have gone to catch block!");
         }catch(UnsupportedOperationException uoex)
         {

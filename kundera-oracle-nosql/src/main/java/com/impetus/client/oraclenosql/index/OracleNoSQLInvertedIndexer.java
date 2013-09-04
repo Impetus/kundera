@@ -60,7 +60,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     private OracleNoSQLDataHandler handler;
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values)
+    public void index(Class entityClazz, Map<String, Object> values, Object entityId, final Class parentClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
@@ -85,13 +85,14 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     }
 
     @Override
-    public Map<String, Object> search(String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
     {
         throw new UnsupportedOperationException("This method is not supported for OracleNoSQL.");
     }
 
     @Override
-    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
+            int start, int count)
     {
         EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(parentClass);
         EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
@@ -345,5 +346,4 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     {
         return entityMetadata.getIndexName() + OracleNOSQLConstants.SECONDARY_INDEX_SUFFIX;
     }
-
 }

@@ -63,7 +63,7 @@ public class IndexManagerTest
 
         try
         {
-            Map<String, Object> results = ixManager.search(luceneQuery, 0, 10, false);
+            Map<String, Object> results = ixManager.search(metadata.getEntityClazz(), luceneQuery, 0, 10, false);
             Assert.assertTrue(!results.isEmpty());
         }
         catch (LuceneIndexingException liex)
@@ -79,7 +79,7 @@ public class IndexManagerTest
         
         try
         {
-            Map<String, Object> results = ixManager.search(luceneQuery,1);
+            Map<String, Object> results = ixManager.search(metadata.getEntityClazz(), luceneQuery,1);
             Assert.assertTrue(!results.isEmpty());
         }
         catch (LuceneIndexingException liex)
@@ -94,7 +94,7 @@ public class IndexManagerTest
         
         try
         {
-            Map<String, Object> results = ixManager.search(luceneQuery, 0, 10, false);
+            Map<String, Object> results = ixManager.search(metadata.getEntityClazz(), luceneQuery, 0, 10, false);
             Assert.assertTrue(results.isEmpty());
         }
         catch (LuceneIndexingException liex)
@@ -130,7 +130,7 @@ public class IndexManagerTest
         
         String luceneQuery = "+entity.class:com.impetus.kundera.metadata.entities.SingularEntityEmbeddable AND +SingularEntityEmbeddable.embeddedField:embeddedField1";
         
-        Map<String, Object> results = ixManager.search(luceneQuery, 0, 10, false);
+        Map<String, Object> results = ixManager.search(metadata.getEntityClazz(), luceneQuery, 0, 10, false);
         
         Assert.assertFalse(results.isEmpty());
         

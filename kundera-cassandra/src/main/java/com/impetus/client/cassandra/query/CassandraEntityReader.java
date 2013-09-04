@@ -133,7 +133,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 else
                 {
                     // prepare lucene query and find.
-                    Set<String> rSet = fetchDataFromLucene(client);
+                    Set<String> rSet = fetchDataFromLucene(m.getEntityClazz(), client);
 
                     try
                     {

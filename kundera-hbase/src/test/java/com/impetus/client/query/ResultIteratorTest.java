@@ -76,31 +76,31 @@ public class ResultIteratorTest extends BaseTest
 
     private void assertOnTokenScroll()
     {
-        Token token1 = new Token();
+        HbaseToken token1 = new HbaseToken();
         token1.setId("tokenId1");
         token1.setTokenName("tokenName1");
-        TokenClient client = new TokenClient();
+        HbaseTokenClient client = new HbaseTokenClient();
         client.setClientName("tokenClient1");
         client.setId("tokenClientId");
         token1.setClient(client);
 
-        Token token2 = new Token();
+        HbaseToken token2 = new HbaseToken();
         token2.setId("tokenId2");
         token2.setTokenName("tokenName2");
         token2.setClient(client);
         em.persist(token1);
         em.persist(token2);
 
-        String queryWithoutClause = "Select t from Token t";
+        String queryWithoutClause = "Select t from HbaseToken t";
         assertOnTokenScroll(queryWithoutClause, 2);
 
-        String queryWithClause = "Select t from Token t where t.tokenName='tokenName1'";
+        String queryWithClause = "Select t from HbaseToken t where t.tokenName='tokenName1'";
 
         assertOnTokenScroll(queryWithClause, 1);
 
         // TODO:: Need to discuss with KK, this should be working with token
         // support. Special scenario.
-        String queryWithIdClause = "Select t from Token t where t.id = 'tokenId1'";
+        String queryWithIdClause = "Select t from HbaseToken t where t.id = 'tokenId1'";
         //
         assertOnTokenScroll(queryWithIdClause, 1);
 
@@ -108,13 +108,13 @@ public class ResultIteratorTest extends BaseTest
 
     private void assertOnTokenScroll(String queryClause, int expected)
     {
-        Query query = (Query) em.createQuery(queryClause, Token.class);
+        Query query = (Query) em.createQuery(queryClause, HbaseToken.class);
 
         int count = 0;
-        Iterator<Token> tokens = query.iterate();
+        Iterator<HbaseToken> tokens = query.iterate();
         while (tokens.hasNext())
         {
-            Token token = tokens.next();
+            HbaseToken token = tokens.next();
             Assert.assertNotNull(token);
             Assert.assertNotNull(token.getClient());
             Assert.assertEquals(2, token.getClient().getTokens().size());

@@ -14,7 +14,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "tokens", schema = "KunderaExamples@hbaseTest")
-public class Token
+public class HbaseToken
 {
     @Id
     @Column(name = "token_id")
@@ -22,7 +22,7 @@ public class Token
 
     @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
-    private TokenClient client;
+    private HbaseTokenClient client;
     
     @Column
     private String tokenName;
@@ -37,12 +37,12 @@ public class Token
         this.id = id;
     }
 
-    public TokenClient getClient()
+    public HbaseTokenClient getClient()
     {
         return client;
     }
 
-    public void setClient(TokenClient client)
+    public void setClient(HbaseTokenClient client)
     {
         this.client = client;
     }

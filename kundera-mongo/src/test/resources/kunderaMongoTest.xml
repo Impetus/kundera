@@ -8,6 +8,13 @@
 					<property name="read.preference" value="primary"></property>
 					<property name="socket.timeout" value="100000"></property>
 				</properties>
+				<servers>
+					<server>
+						<host>localhost
+						</host>
+						<port>27017</port>
+					</server>
+				</servers>
 			</connection>
 			<schemas>
 				<schema>

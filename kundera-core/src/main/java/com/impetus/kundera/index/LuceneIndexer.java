@@ -129,7 +129,7 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (Exception e)
         {
-             log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
+            log.error("Error while instantiating LuceneIndexer, Caused by :.", e);
             throw new LuceneIndexingException(e);
         }
     }
@@ -187,7 +187,7 @@ public class LuceneIndexer extends DocumentIndexer
             }
             catch (Exception e)
             {
-                 log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
+                log.error("Error while instantiating LuceneIndexer, Caused by :.", e);
                 throw new LuceneIndexingException(e);
             }
         }
@@ -256,7 +256,7 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (Exception e)
         {
-             log.error("Error while instantiating LuceneIndexer, Caused by :.",e);   
+            log.error("Error while instantiating LuceneIndexer, Caused by :.", e);
             throw new LuceneIndexingException(e);
         }
     }
@@ -314,7 +314,7 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (Exception e)
         {
-             log.error("Error while parsing Lucene Query {} ", luceneQuery,e);   
+            log.error("Error while parsing Lucene Query {} ", luceneQuery, e);
             throw new LuceneIndexingException(e);
         }
 
@@ -604,7 +604,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values)
+    public void index(Class entityClazz, Map<String, Object> values, Object parentId, final Class parentClazz)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
@@ -616,9 +616,8 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public Map<String, Object> search(String luceneQuery, int start, int end)
+    public Map<String, Object> search(Class<?> clazz, String luceneQuery, int start, int end)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
-
 }

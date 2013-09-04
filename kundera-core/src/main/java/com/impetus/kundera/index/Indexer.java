@@ -24,14 +24,13 @@ import java.util.Map;
  * delegate index related requests to configure indexer interface implementation
  * but will keep functioning for any database specific requests. For example,
  * developer may rely upon custom index implementation for inverted indexes(e.g. @Id
- * attributes) but entity data population will be handled by Kundera
+ * attributes) but entity data population will be handled by Kundera.
  * 
  * @author vivek.mishra
  * 
  */
 public interface Indexer
 {
-
     /**
      * Index a document for given entity class and collection of values.
      * 
@@ -41,7 +40,7 @@ public interface Indexer
      * @param values
      *            map of values containing field name as key and it's value.
      */
-    void index(final Class entityClazz, final Map<String, Object> values);
+    void index(final Class entityClazz, Map<String, Object> values, final Object parentId, final Class parentClazz);
 
     /**
      * Executes lucene query and returns inverted indices as output. TODO:
@@ -57,14 +56,15 @@ public interface Indexer
      * @return collection containing stored index value.
      */
     @Deprecated
-    Map<String, Object> search(final String queryString, int start, int count);
+    Map<String, Object> search(final Class<?> clazz, final String queryString, int start, int count);
 
     /**
      * Searches into a secondary index
      * 
      * @return
      */
-    Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count);
+    Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start,
+            int count);
 
     /**
      * Deletes index for given entity class.
@@ -77,5 +77,8 @@ public interface Indexer
      */
     void unIndex(final Class entityClazz, final Object entity);
 
+    /**
+     * Close indexer instance.
+     */
     void close();
 }

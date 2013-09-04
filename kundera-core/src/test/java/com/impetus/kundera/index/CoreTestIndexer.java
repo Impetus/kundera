@@ -25,19 +25,19 @@ public class CoreTestIndexer implements Indexer
 {
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values)
+    public void index(Class entityClazz, Map<String, Object> values, Object parentId, final Class parentClazz)
     {
     }
 
     @Override
-    public Map<String, Object> search(String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
     {
 
         return null;
     }
 
     @Override
-    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
     {
         
         return null;

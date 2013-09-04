@@ -32,7 +32,7 @@ public class CoreIndexer implements Indexer
      * @see com.impetus.kundera.index.Indexer#index(java.lang.Class, java.util.Map)
      */
     @Override
-    public void index(Class entityClazz, Map<String, Object> values)
+    public void index(Class entityClazz, Map<String, Object> values, Object parentId, Class clazz)
     {
         // TODO Auto-generated method stub
 
@@ -42,7 +42,7 @@ public class CoreIndexer implements Indexer
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @Override
-    public Map<String, Object> search(String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
     {
         // TODO Auto-generated method stub
         return null;
@@ -52,7 +52,7 @@ public class CoreIndexer implements Indexer
      * @see com.impetus.kundera.index.Indexer#search(java.lang.Class, java.lang.Class, java.lang.Object, int, int)
      */
     @Override
-    public Map<String, Object> search(Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
     {
         // TODO Auto-generated method stub
         return null;
