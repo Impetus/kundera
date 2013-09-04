@@ -504,7 +504,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         IndexClause ix = new IndexClause();
         ix.setStart_key(Bytes.EMPTY.toByteArray());
-        ix.setCount(1000);
+        ix.setCount(Integer.MAX_VALUE);
         ix.setExpressions(expressions);
 
         ColumnParent columnParent = new ColumnParent(tableName);
@@ -580,7 +580,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             IndexClause ix = new IndexClause();
             ix.setStart_key(Bytes.EMPTY.toByteArray());
-            ix.setCount(1000);
+            ix.setCount(Integer.MAX_VALUE);
             ix.setExpressions(expressions);
             ColumnParent columnParent = new ColumnParent(m.getTableName());
 
@@ -877,6 +877,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 SliceRange sliceRange = new SliceRange();
                 sliceRange.setStart(Bytes.EMPTY.getBytes());
                 sliceRange.setFinish(Bytes.EMPTY.getBytes());
+                sliceRange.setCount(maxResult);
                 slicePredicate.setSlice_range(sliceRange);
             }
             conn = /* PelopsUtils.getCassandraConnection(pool) */getConection();
