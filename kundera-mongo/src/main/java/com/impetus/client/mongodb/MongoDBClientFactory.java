@@ -71,14 +71,14 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-//        mongoDB = getConnection();
-        return null;
+        mongoDB = getConnection();
+        return mongoDB;
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(getConnection()/*mongoDB*/, indexManager, reader, persistenceUnit, externalProperties, clientMetadata);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata);
     }
 
     /**
@@ -224,16 +224,16 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             schemaManager.dropSchema();
         }
-//        if (mongoDB != null)
-//        {
-//            logger.info("Closing connection to mongodb.");
-//            mongoDB.getMongo().close();
-//            logger.info("Closed connection to mongodb.");
-//        }
-//        else
-//        {
-//            logger.warn("Can't close connection to MONGODB, it was already disconnected");
-//        }
+        if (mongoDB != null)
+        {
+            logger.info("Closing connection to mongodb.");
+            mongoDB.getMongo().close();
+            logger.info("Closed connection to mongodb.");
+        }
+        else
+        {
+            logger.warn("Can't close connection to MONGODB, it was already disconnected");
+        }
         externalProperties = null;
         schemaManager = null;
     }
@@ -345,10 +345,11 @@ public class MongoDBClientFactory extends GenericClientFactory
                 {
                     if (props.get(MongoDBConstants.CONNECTION_PER_HOST) != null)
                     {
-                        mo.setConnectionsPerHost(Integer.parseInt((String) props.get(MongoDBConstants.CONNECTION_PER_HOST)));
+                        mo.setConnectionsPerHost(Integer.parseInt((String) props
+                                .get(MongoDBConstants.CONNECTION_PER_HOST)));
                     }
-                    
-                    if(props.get(MongoDBConstants.CONNECT_TIME_OUT) != null)
+
+                    if (props.get(MongoDBConstants.CONNECT_TIME_OUT) != null)
                     {
                         mo.setConnectTimeout(Integer.parseInt((String) props.get(MongoDBConstants.CONNECT_TIME_OUT)));
                     }
