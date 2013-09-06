@@ -32,6 +32,8 @@ import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.SetAttribute;
+import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
 
@@ -375,7 +377,7 @@ public class MetaModelBuilderTest
               .size());
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
         
-      //assertOnSetAttribute(managedType, id);
+      
         
     }
 
@@ -529,9 +531,8 @@ public class MetaModelBuilderTest
                 .getDeclaredCollection("association");
         Assert.assertNotNull(declaredCollectionAttributeParam);
         
-        /*SetAttribute<? super X, ?> rowSetId = (SetAttribute<? super X, ?>) managedType
-        .getDeclaredSet("association");
-System.out.println(rowSetId);*/
+        
+        
 
         // assert with invalid collection type class.
         try
@@ -628,8 +629,15 @@ System.out.println(rowSetId);*/
                 Collection.class);
         assertOnOwnerTypeAttributes(managedType, "mapAssociation", MapTypeAssociationEntity.class, Map.class);
         
+        // Assert on set attribute class.
+        assertOnSetAttribute(managedType, "setAssocition", SetTypeAssociationEntity.class, Set.class);
+        // Assert on list  attribute class.
+        assertOnListAttribute(managedType, "listAssociation", ListTypeAssociationEntity.class, List.class);
+        // Assert on map  attribute class.
+        assertOnMapAttribute(managedType, "mapAssociation", Integer.class, MapTypeAssociationEntity.class);
         
-
+    
+    
     }
 
     /**
@@ -660,6 +668,7 @@ System.out.println(rowSetId);*/
         Assert.assertEquals(2, managedType.getAttributes().size());
         Attribute idAttribute = managedType.getAttribute("id");
 
+        
         SingularAttribute idAttrib = null;
         try
         {
@@ -795,6 +804,9 @@ System.out.println(rowSetId);*/
         Assert.assertNotNull(((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember());
         Assert.assertNotNull(fieldName, ((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember()
                 .getName());
+        
+        
+
         
         
     }
@@ -996,36 +1008,130 @@ System.out.println(rowSetId);*/
     }
     
     /**
-     * Assert on collection attribute.
+     * Assert on set attributes.
      * 
-     * @param <X>
-     *            the generic type
      * @param managedType
      *            the managed type
-     * @param id
-     *            the id
-     * @param otherAttribute
-     *            the other attribute
-     * @param clazz
-     *            the clazz
+     * @param fieldName
+     *            the field name
+     * @param fieldClazz
+     *            the field clazz
+     * @param javaClazz
+     *            the java clazz
      */
-    private <X> void assertOnSetAttribute(AbstractManagedType<? super X> managedType, String id)
+    private <X> void assertOnSetAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
+            Class javaClazz)
     {
-        
-        SetAttribute<? super X, String> rowId = (SetAttribute<? super X, String>) managedType
-                .getSet(id);
-        System.out.println(rowId);
-        Assert.assertNotNull(rowId);
-       // Assert.assertTrue(rowId.isId());
-      //  Assert.assertEquals(String.class, rowId.getBindableJavaType());
-        // other attribute
-        SetAttribute<? super X, String> rowDeclaredId = (SetAttribute<? super X, String>) managedType
-        .getDeclaredSet(id);
+    	SetAttribute<? super X, ?> rowSetId = (SetAttribute<? super X, ?>) managedType
+        .getSet(fieldName);
+        Assert.assertNotNull(rowSetId);
+        Assert.assertEquals(rowSetId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowSetId.getJavaType());
+     
+        SetAttribute<? super X, ?> rowDeclaredId = (SetAttribute<? super X, ?>) managedType
+        .getDeclaredSet(fieldName);
         Assert.assertNotNull(rowDeclaredId);
-     //   Assert.assertFalse(rowDeclaredId.isId());
+        Assert.assertEquals(rowDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowDeclaredId.getJavaType());
+        
+        SetAttribute<? super X, ?> rowClassSetId = (SetAttribute<? super X, ?>) managedType
+        .getSet(fieldName,fieldClazz);
+        Assert.assertNotNull(rowClassSetId);
+        Assert.assertEquals(rowClassSetId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowClassSetId.getJavaType());
+        
+    
+        SetAttribute<? super X, ?> rowClassDeclaredId = (SetAttribute<? super X, ?>) managedType
+        .getDeclaredSet(fieldName, fieldClazz);
+        Assert.assertNotNull(rowClassSetId);
+        Assert.assertEquals(rowClassDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowClassDeclaredId.getJavaType());
        
 
     }
+    
+    /**
+     * Assert on List attributes.
+     * 
+     * @param managedType
+     *            the managed type
+     * @param fieldName
+     *            the field name
+     * @param fieldClazz
+     *            the field clazz
+     * @param javaClazz
+     *            the java clazz
+     */
+    private <X> void assertOnListAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
+            Class javaClazz)
+    {
+    	ListAttribute<? super X, ?> rowListId = (ListAttribute<? super X, ?>) managedType
+        .getList(fieldName);
+        Assert.assertNotNull(rowListId);
+        Assert.assertEquals(rowListId.getName(), fieldName);
+        Assert.assertEquals(List.class, rowListId.getJavaType());
+     
+        ListAttribute<? super X, ?> listDeclaredId = (ListAttribute<? super X, ?>) managedType
+        .getDeclaredList(fieldName);
+        Assert.assertNotNull(listDeclaredId);
+        Assert.assertEquals(listDeclaredId.getName(), fieldName);
+        Assert.assertEquals(List.class, listDeclaredId.getJavaType());
+        
+        ListAttribute<? super X, ?> listClassSetId = (ListAttribute<? super X, ?>) managedType
+        .getList(fieldName,fieldClazz);
+        Assert.assertNotNull(listClassSetId);
+        Assert.assertEquals(listClassSetId.getName(), fieldName);
+        Assert.assertEquals(List.class, listClassSetId.getJavaType());
+        
+    
+        ListAttribute<? super X, ?> listClassDeclaredId = (ListAttribute<? super X, ?>) managedType
+        .getDeclaredList(fieldName, fieldClazz);
+        Assert.assertNotNull(listClassDeclaredId);
+        Assert.assertEquals(listClassDeclaredId.getName(), fieldName);
+        Assert.assertEquals(List.class, listClassDeclaredId.getJavaType());
+       
+
+    }
+    
+    /**
+     * Assert on Map attributes.
+     * 
+     * @param managedType
+     *            the managed type
+     * @param fieldName
+     *            the field name
+     * @param fieldClazz
+     *            the field clazz
+     * @param javaClazz
+     *            the java clazz
+     */
+    private <X> void assertOnMapAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
+            Class javaClazz)
+    {
+    	MapAttribute<? super X, ?, ?>  mapSetId = (MapAttribute<? super X, ?, ?>) managedType
+        .getMap(fieldName);
+        Assert.assertNotNull(mapSetId);
+        Assert.assertEquals(mapSetId.getName(), fieldName);
+        Assert.assertEquals(Map.class, mapSetId.getJavaType());
+     
+        MapAttribute<? super X, ?, ?>  mapDeclaredId = (MapAttribute<? super X, ?, ?>) managedType
+        .getDeclaredMap(fieldName);
+        Assert.assertNotNull(mapDeclaredId);
+        Assert.assertEquals(mapDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Map.class, mapDeclaredId.getJavaType());
+        
+        /*MapAttribute<? super X, ?, ?>  rowClassSetId = (MapAttribute<? super X, ?, ?>) managedType
+        .getMap(fieldName,int.class,String.class);
+        Assert.assertNotNull(rowClassSetId);
+        
+    
+        MapAttribute<? super X, ?, ?>  rowClassDeclaredId = (MapAttribute<? super X, ?, ?> ) managedType
+        .getDeclaredMap(fieldName, fieldClazz, javaClazz);
+        Assert.assertNotNull(rowClassSetId);*/
+       
+
+    }
+
 
     /**
      * Gets the managed types.
