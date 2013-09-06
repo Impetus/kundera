@@ -1024,22 +1024,28 @@ public class MetaModelBuilderTest
     {
     	SetAttribute<? super X, ?> rowSetId = (SetAttribute<? super X, ?>) managedType
         .getSet(fieldName);
-       // System.out.println(rowSetId);
-        
         Assert.assertNotNull(rowSetId);
+        Assert.assertEquals(rowSetId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowSetId.getJavaType());
      
         SetAttribute<? super X, ?> rowDeclaredId = (SetAttribute<? super X, ?>) managedType
         .getDeclaredSet(fieldName);
         Assert.assertNotNull(rowDeclaredId);
+        Assert.assertEquals(rowDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowDeclaredId.getJavaType());
         
         SetAttribute<? super X, ?> rowClassSetId = (SetAttribute<? super X, ?>) managedType
         .getSet(fieldName,fieldClazz);
         Assert.assertNotNull(rowClassSetId);
+        Assert.assertEquals(rowClassSetId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowClassSetId.getJavaType());
         
     
         SetAttribute<? super X, ?> rowClassDeclaredId = (SetAttribute<? super X, ?>) managedType
         .getDeclaredSet(fieldName, fieldClazz);
         Assert.assertNotNull(rowClassSetId);
+        Assert.assertEquals(rowClassDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Set.class, rowClassDeclaredId.getJavaType());
        
 
     }
@@ -1059,24 +1065,30 @@ public class MetaModelBuilderTest
     private <X> void assertOnListAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
             Class javaClazz)
     {
-    	ListAttribute<? super X, ?> rowSetId = (ListAttribute<? super X, ?>) managedType
+    	ListAttribute<? super X, ?> rowListId = (ListAttribute<? super X, ?>) managedType
         .getList(fieldName);
-       // System.out.println(rowSetId);
-        
-        Assert.assertNotNull(rowSetId);
+        Assert.assertNotNull(rowListId);
+        Assert.assertEquals(rowListId.getName(), fieldName);
+        Assert.assertEquals(List.class, rowListId.getJavaType());
      
-        ListAttribute<? super X, ?> rowDeclaredId = (ListAttribute<? super X, ?>) managedType
+        ListAttribute<? super X, ?> listDeclaredId = (ListAttribute<? super X, ?>) managedType
         .getDeclaredList(fieldName);
-        Assert.assertNotNull(rowDeclaredId);
+        Assert.assertNotNull(listDeclaredId);
+        Assert.assertEquals(listDeclaredId.getName(), fieldName);
+        Assert.assertEquals(List.class, listDeclaredId.getJavaType());
         
-        ListAttribute<? super X, ?> rowClassSetId = (ListAttribute<? super X, ?>) managedType
+        ListAttribute<? super X, ?> listClassSetId = (ListAttribute<? super X, ?>) managedType
         .getList(fieldName,fieldClazz);
-        Assert.assertNotNull(rowClassSetId);
+        Assert.assertNotNull(listClassSetId);
+        Assert.assertEquals(listClassSetId.getName(), fieldName);
+        Assert.assertEquals(List.class, listClassSetId.getJavaType());
         
     
-        ListAttribute<? super X, ?> rowClassDeclaredId = (ListAttribute<? super X, ?>) managedType
+        ListAttribute<? super X, ?> listClassDeclaredId = (ListAttribute<? super X, ?>) managedType
         .getDeclaredList(fieldName, fieldClazz);
-        Assert.assertNotNull(rowClassSetId);
+        Assert.assertNotNull(listClassDeclaredId);
+        Assert.assertEquals(listClassDeclaredId.getName(), fieldName);
+        Assert.assertEquals(List.class, listClassDeclaredId.getJavaType());
        
 
     }
@@ -1096,15 +1108,17 @@ public class MetaModelBuilderTest
     private <X> void assertOnMapAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
             Class javaClazz)
     {
-    	MapAttribute<? super X, ?, ?>  rowSetId = (MapAttribute<? super X, ?, ?>) managedType
+    	MapAttribute<? super X, ?, ?>  mapSetId = (MapAttribute<? super X, ?, ?>) managedType
         .getMap(fieldName);
-        //System.out.println(rowSetId);
-        
-        Assert.assertNotNull(rowSetId);
+        Assert.assertNotNull(mapSetId);
+        Assert.assertEquals(mapSetId.getName(), fieldName);
+        Assert.assertEquals(Map.class, mapSetId.getJavaType());
      
-        MapAttribute<? super X, ?, ?>  rowDeclaredId = (MapAttribute<? super X, ?, ?>) managedType
+        MapAttribute<? super X, ?, ?>  mapDeclaredId = (MapAttribute<? super X, ?, ?>) managedType
         .getDeclaredMap(fieldName);
-        Assert.assertNotNull(rowDeclaredId);
+        Assert.assertNotNull(mapDeclaredId);
+        Assert.assertEquals(mapDeclaredId.getName(), fieldName);
+        Assert.assertEquals(Map.class, mapDeclaredId.getJavaType());
         
         /*MapAttribute<? super X, ?, ?>  rowClassSetId = (MapAttribute<? super X, ?, ?>) managedType
         .getMap(fieldName,int.class,String.class);
