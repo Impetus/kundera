@@ -18,6 +18,7 @@ package com.impetus.kundera.proxy.collection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -84,6 +85,8 @@ public class ProxyListTest
         proxyList.setOwner(p);
         proxyList.add(0,p);
         
+        
+        
         Assert.assertTrue(proxyList.contains(p));
         Assert.assertEquals(p, proxyList.getOwner());
         Assert.assertNotNull(proxyList.getDataCollection());
@@ -133,16 +136,49 @@ public class ProxyListTest
         
         Assert.assertNotNull(proxyList.subList(0, 1));
         Assert.assertEquals(2, proxyList.subList(0, 2).size());
-
+        
+       
+        
+        ListIterator<AddressEntityWithList> iterList = proxyList.listIterator();
+        int counterList = 0;
+        while(iterList.hasNext())
+        {
+            Assert.assertNotNull(iterList.next());
+            ++counterList;
+            
+        }
+        
+        ListIterator<AddressEntityWithList> iterListWithArg = proxyList.listIterator(1);
+        int counterListArg = 0;
+        
+        while(iterListWithArg.hasNext())
+        {
+        	
+            Assert.assertNotNull(iterListWithArg.next());
+            ++counterListArg;
+            
+        }
+        
+        proxyList.remove(1);
+        Assert.assertEquals(2,proxyList.size());
+        
+        proxyList.set(1,p);
+        
         proxyList.removeAll(new ArrayList());
         Assert.assertEquals(2,proxyList.size());
+        
+        proxyList.add("vivek1");
+        Assert.assertEquals(3,proxyList.size());
+        
         
         List lst = new ArrayList();
         lst.add("vivek");
         proxyList.addAll(lst);
-        Assert.assertEquals(3,proxyList.size());
+        
+        Assert.assertEquals(4,proxyList.size());
         
         proxyList.add("vivek1");
+        
         Assert.assertEquals(4,proxyList.size());
         
         Assert.assertFalse(proxyList.isEmpty());
@@ -150,6 +186,7 @@ public class ProxyListTest
         proxyList.remove("vivek");
         Assert.assertEquals(3,proxyList.size());
         
+      
 
         proxyList.clear();
         Assert.assertTrue(proxyList.isEmpty());

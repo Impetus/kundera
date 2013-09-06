@@ -116,6 +116,21 @@ public class ProxySetTest
         
         Assert.assertNotNull(proxySet.toArray());
         Assert.assertEquals(2, proxySet.toArray().length);
+        Assert.assertEquals(2, proxySet.size());
+        
+        
+       proxySet.remove(p);
+       Assert.assertNotNull(proxySet.getDataCollection());
+       Assert.assertEquals(1,proxySet.size());
+
+       proxySet.removeAll(subaddresses);
+       Assert.assertNull(proxySet.getDataCollection());
+      
+        
+        proxySet.clear();
+        Assert.assertTrue(proxySet.isEmpty());
+        
+        
     }
 
 }
