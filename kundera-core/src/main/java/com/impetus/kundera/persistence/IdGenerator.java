@@ -46,11 +46,11 @@ public class IdGenerator
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(IdGenerator.class);
 
-    public void generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd)
+    public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd)
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
-        
+
         if (keyValue != null)
         {
             Client<?> client = pd.getClient(m);
@@ -66,14 +66,11 @@ public class IdGenerator
                     switch (type)
                     {
                     case TABLE:
-                        onTableGenerator(m, client, keyValue, e);
-                        break;
+                        return onTableGenerator(m, client, keyValue, e);
                     case SEQUENCE:
-                        onSequenceGenerator(m, client, keyValue, e);
-                        break;
+                        return onSequenceGenerator(m, client, keyValue, e);
                     case AUTO:
-                        onAutoGenerator(m, client, e);
-                        break;
+                        return onAutoGenerator(m, client, e);
                     case IDENTITY:
                         throw new UnsupportedOperationException(GenerationType.class.getSimpleName() + "." + type
                                 + " Strategy not supported by this client :" + client.getClass().getName());
@@ -86,8 +83,11 @@ public class IdGenerator
                 Object generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
                         Integer.class, new Integer(hashCode));
                 PropertyAccessorHelper.setId(e, m, generatedId);
+                return generatedId;
             }
         }
+        
+        return null;
     }
 
     /**
@@ -97,7 +97,7 @@ public class IdGenerator
      * @param client
      * @param e
      */
-    private void onAutoGenerator(EntityMetadata m, Client<?> client, Object e)
+    private Object onAutoGenerator(EntityMetadata m, Client<?> client, Object e)
     {
         if (client instanceof AutoGenerator)
         {
@@ -107,7 +107,7 @@ public class IdGenerator
                 generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
                         generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
-                return;
+                return generatedId;
             }
             catch (IllegalArgumentException iae)
             {
@@ -127,7 +127,7 @@ public class IdGenerator
      * @param keyValue
      * @param e
      */
-    private void onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
+    private Object onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof SequenceGenerator)
         {
@@ -137,7 +137,7 @@ public class IdGenerator
                 generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
                         generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
-                return;
+                return generatedId;
             }
             catch (IllegalArgumentException iae)
             {
@@ -158,7 +158,7 @@ public class IdGenerator
      * @param keyValue
      * @param e
      */
-    private void onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
+    private Object onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
         if (client instanceof TableGenerator)
         {
@@ -168,7 +168,7 @@ public class IdGenerator
                 generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
                         generatedId.getClass(), generatedId);
                 PropertyAccessorHelper.setId(e, m, generatedId);
-                return;
+                return generatedId;
             }
             catch (IllegalArgumentException iae)
             {

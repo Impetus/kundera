@@ -105,23 +105,13 @@ public class ObjectGraphBuilder
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
 
+        Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
         // Generate and set Id if @GeneratedValue present.
-
         if (((Field) entityMetadata.getIdAttribute().getJavaMember()).isAnnotationPresent(GeneratedValue.class))
         {
-            Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-            Node nodeInPersistenceCache = null;
-            if (id != null)
+            if (!isIdSet(id))
             {
-                String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
-                nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
-            }
-            // if node not in persistence cache it means it came first time
-            // for persist, then generate id for it.
-            if (nodeInPersistenceCache == null
-                    || !nodeInPersistenceCache.getCurrentNodeState().getClass().isAssignableFrom(ManagedState.class))
-            {
-                idGenerator.generateAndSetId(entity, entityMetadata, pd);
+                id = idGenerator.generateAndSetId(entity, entityMetadata, pd);
             }
         }
 
@@ -131,7 +121,7 @@ public class ObjectGraphBuilder
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
 
-        Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
+        // id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
         String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
         Node node = graph.getNode(nodeId);
@@ -332,5 +322,23 @@ public class ObjectGraphBuilder
 
         // TODO: Add more link properties as required
         return linkProperties;
+    }
+
+    private boolean isIdSet(Object id)
+    {
+        if (id == null)
+        {
+            return false;
+        }
+        else if (id.getClass().isPrimitive() || id instanceof Number)
+        {
+            // Check for default value of integer/short/long/byte,float/double
+            // and char.
+            if (id.toString().equals("0") || id.toString().equals("0.0") || id.toString().equals(""))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
