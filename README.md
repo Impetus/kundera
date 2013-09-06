@@ -35,7 +35,14 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.6 is released tag.
+####Please Note: trunk is current development branch. kundera-2.7 is released tag.
+
+#### 03-September-2013 - Kundera 2.7 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.6:
+
+* Support for pagination over Mongodb. 
+* Added elastic search as datastore and fallback indexing mechanism. 
+
 
 #### 06-July-2013 - Kundera 2.6 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.5:
