@@ -51,6 +51,7 @@ public class ClassFileIterator implements ResourceIterator
         init(files, file, filter);
     }
 
+    
     /**
      * Instantiates a new class file iterator.
      * 
@@ -62,6 +63,7 @@ public class ClassFileIterator implements ResourceIterator
         files = new ArrayList<File>();
         files.add(fileToAdd);
     }
+
 
     /**
      * Creates the.
@@ -94,7 +96,23 @@ public class ClassFileIterator implements ResourceIterator
             }
         }
     }
-
+    
+    /**
+     * Returns the Integer
+     * 
+     * @return count of files in classpath
+     */
+    public int getSize()
+    {
+       return files.size();
+    }
+    
+    
+    /**
+     * Returns the InputStream
+     * 
+      * @return FileInputStream .
+     */
     public final InputStream next()
     {
         if (index >= files.size())
@@ -112,5 +130,6 @@ public class ClassFileIterator implements ResourceIterator
 
     public void close()
     {
+    	
     }
 }
