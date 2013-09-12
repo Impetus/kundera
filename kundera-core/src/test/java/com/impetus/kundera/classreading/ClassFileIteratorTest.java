@@ -17,8 +17,7 @@ package com.impetus.kundera.classreading;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
+
 
 
 import junit.framework.Assert;
@@ -46,7 +45,7 @@ public class ClassFileIteratorTest {
     @Before
     public void setUp() throws Exception
     {
-    	iterator = new ClassFileIterator(file);  
+    	
         filter = new FilterImpl();
     }
 
@@ -65,40 +64,64 @@ public class ClassFileIteratorTest {
      * Test method for {@link com.impetus.kundera.classreading.ClassFileIterator#next()}.
      */
     @Test
-    public void testaddFilesToIterate()
+    public void testIterateWithFilter()
     {
-      try
-       {
-    	File file = new File(".");
+    	file = new File(".");
+    	
+    	//ClassFilterIterator with filter
     	iterator = new ClassFileIterator(file, filter);  
-    	int c ;
-       	int count = 0;
-    	int countFiles = 0;
-    	InputStream fis;
-    	while ((fis = iterator.next()) != null){
-    		countFiles ++;
-    		/*while((c = fis.read()) != -1){
-        		count++;
-              	 
-        	}*/
-    		Assert.assertNotNull(fis);
-    		Assert.assertNotNull(fis.available());
-        	Assert.assertNotNull(count);
-        	Assert.assertEquals(fis.getClass(),FileInputStream.class);
-        	
-        	fis.close();
-    	}
+    	Assert.assertEquals(iterator.next().getClass(),FileInputStream.class);
+    	Assert.assertNotNull(iterator.next());
+      }
+      
+      /**
+       * Test method for {@link com.impetus.kundera.classreading.ClassFileIterator#next()}.
+       */
+      @Test
+      public void testIterateWithoutFilter()
+      {
+      	
+        try {
+      	
+      	   file = new File(".");
+      	   //ClassFilterIterator without filter
+      	   iterator = new ClassFileIterator(file);  
+      	   Assert.assertEquals(iterator.next().getClass(),FileInputStream.class);
+      	   Assert.assertNotNull(iterator.next());
+      	
+      }
+        catch (ResourceReadingException e)
+        {
+      	  
+      	  Assert.assertEquals("Couldn't read file .",e.getMessage());
+         }
+         
+      }
+      
+      
+      /**
+       * Test method for {@link com.impetus.kundera.classreading.ClassFileIterator#next()}.
+       */
+      @Test
+      public void testNoClassIterate()
+      {
+      	
+        try {
+      	     	    	
+      	  //ClassFilterIterator no file found
+      	   file = new File("/com/impetus/kundera/");
+      	   iterator = new ClassFileIterator(file);
+      	}
+        catch (ResourceReadingException e)
+        {
+          Assert.assertNull(iterator.next());
+      	  Assert.assertEquals("Couldn't read file /com/impetus/kundera",e.getMessage());
+         }
+         
+      }
+       
     	
-    	Assert.assertEquals(countFiles,iterator.getSize());
-    	
-    	
-       }
-       catch(IOException ioe)
-       {
-    	   Assert.fail(ioe.getMessage());
-       }
-    	
-    }
+    
 
     
 }
