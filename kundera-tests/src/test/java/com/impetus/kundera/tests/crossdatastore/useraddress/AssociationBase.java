@@ -197,6 +197,11 @@ public abstract class AssociationBase
                         break;
                     }
                 }
+                
+                
+                // for a particular persistence unit, change keyspace.
+                
+                
                 mAdd.setPersistenceUnit(pu);
                 Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>(1);
                 List<String> pus = new ArrayList<String>(1);

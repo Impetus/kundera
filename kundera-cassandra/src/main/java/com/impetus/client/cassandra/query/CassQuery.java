@@ -126,16 +126,20 @@ public class CassQuery extends QueryImpl
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
+        
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+        
+        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
                     m.getEntityClazz(), null);
         }
         else
         {
-            if (appMetadata.isNative(getJPAQuery()))
+            if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
+                result = ((CassandraClientBase) client).executeQuery(query != null ? query:getJPAQuery(),
                         m.getEntityClazz(), null);
             }
             else
@@ -195,12 +199,17 @@ public class CassQuery extends QueryImpl
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        if (appMetadata.isNative(getJPAQuery()))
+
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.
+*/;        
+
+        if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(appMetadata.getQuery(getJPAQuery()),
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(query != null ? query:getJPAQuery(),
                     m.getEntityClazz(), null);
         }
-        else if (!appMetadata.isNative(getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
+        else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             ls = ((CassandraClientBase) client).executeQuery(
                     onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(),
@@ -236,10 +245,17 @@ public class CassQuery extends QueryImpl
     protected int onExecuteUpdate()
     {
         EntityMetadata m = getEntityMetadata();
-        if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
+        
+        ApplicationMetadata  appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        
+        String query = appMetadata.getQuery(getJPAQuery());
+        
+        
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+
+        if (isNative)
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(KunderaMetadata.INSTANCE
-                    .getApplicationMetadata().getQuery(getJPAQuery()), m.getEntityClazz(), null);
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(query != null?query : getJPAQuery(), m.getEntityClazz(), null);
         }
         else if (kunderaQuery.isDeleteUpdate() )
         {       
@@ -252,7 +268,7 @@ public class CassQuery extends QueryImpl
             }
             else
             {
-                String query = null;
+                query = null;
                 if(kunderaQuery.isUpdateClause())
                 {
                     query = createUpdateQuery(kunderaQuery);                             
@@ -962,4 +978,9 @@ public class CassQuery extends QueryImpl
         return jpaColumnName;
     }
 
+    
+    boolean isNative()
+    {
+        return kunderaQuery.isNative();
+    }
 }

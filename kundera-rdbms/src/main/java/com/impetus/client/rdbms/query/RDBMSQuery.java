@@ -138,7 +138,7 @@ public class RDBMSQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new RDBMSEntityReader(getLuceneQueryFromJPAQuery(), getJPAQuery());
+            reader = new RDBMSEntityReader(getLuceneQueryFromJPAQuery(), getJPAQuery(),kunderaQuery);
         }
         return reader;
     }
@@ -169,7 +169,10 @@ public class RDBMSQuery extends QueryImpl
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
-        if (!appMetadata.isNative(getJPAQuery()))
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+        
+        if (!isNative)
         {
             ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
 

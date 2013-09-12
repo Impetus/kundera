@@ -442,12 +442,12 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         // Add to meta data first.
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
-        if (appMetadata.getQuery(sqlString) == null)
-        {
-            appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
-        }
+//        if (appMetadata.getQuery(sqlString) == null)
+//        {
+//            appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
+//        }
 
-        return getPersistenceDelegator().createQuery(sqlString);
+        return getPersistenceDelegator().createNativeQuery(sqlString, resultClass);
 
     }
 

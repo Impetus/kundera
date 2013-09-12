@@ -124,7 +124,10 @@ public class MongoDBQuery extends QueryImpl
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         try
         {
-            if (appMetadata.isNative(getJPAQuery()))
+            String query = appMetadata.getQuery(getJPAQuery());
+            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+            
+            if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
@@ -160,10 +163,14 @@ public class MongoDBQuery extends QueryImpl
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         try
         {
-            if (appMetadata.isNative(getJPAQuery()))
+            String query = appMetadata.getQuery(getJPAQuery());
+            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+            
+            if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
+            
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
                     m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult,

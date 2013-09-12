@@ -57,6 +57,7 @@ import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -79,6 +80,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     /** The jpa query. */
     private String jpaQuery;
 
+    private KunderaQuery kunderaQuery;
+
     /**
      * Instantiates a new rDBMS entity reader.
      * 
@@ -87,10 +90,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      * @param query
      *            the query
      */
-    public RDBMSEntityReader(String luceneQuery, String query)
+    public RDBMSEntityReader(String luceneQuery, String query, KunderaQuery kunderaQuery)
     {
         this.luceneQueryFromJPAQuery = luceneQuery;
         this.jpaQuery = query;
+        this.kunderaQuery = kunderaQuery;
     }
 
     /**
@@ -240,9 +244,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
-        if (appMetadata.isNative(jpaQuery))
+        
+        String query = appMetadata.getQuery(jpaQuery);
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(jpaQuery)*/;        
+
+        if (isNative)
         {
-            return appMetadata.getQuery(jpaQuery);
+            return query != null ? query : jpaQuery;
         }
 
         String aliasName = "_" + entityMetadata.getTableName();

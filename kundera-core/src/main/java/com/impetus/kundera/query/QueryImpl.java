@@ -460,9 +460,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         EntityMetadata m = null;
-        if (appMetadata.isNative(getJPAQuery()))
+        
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+        
+        if (isNative)
         {
-            Class clazz = appMetadata.getMappedClass(getJPAQuery());
+            Class clazz = kunderaQuery.getEntityClass()/*appMetadata.getMappedClass(getJPAQuery())*/;
             m = KunderaMetadataManager.getEntityMetadata(clazz);
         }
         else
