@@ -246,7 +246,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
         
         String query = appMetadata.getQuery(jpaQuery);
-        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(jpaQuery)*/;        
+        boolean isNative = kunderaQuery != null ? kunderaQuery.isNative():false/*query == null ? true : appMetadata.isNative(jpaQuery)*/;        
 
         if (isNative)
         {
