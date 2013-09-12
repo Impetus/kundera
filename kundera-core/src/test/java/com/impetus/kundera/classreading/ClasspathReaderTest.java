@@ -91,6 +91,7 @@ public class ClasspathReaderTest
         classesToScan.add("com.impetus.kundera.query.Person");
         reader = new ClasspathReader(classesToScan);
         streams = reader.findResourcesAsStream();
+       reader.read();
         Assert.assertNotNull(streams);
         Assert.assertTrue(streams.length > 0); 
     }
