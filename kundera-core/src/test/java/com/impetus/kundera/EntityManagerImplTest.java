@@ -16,6 +16,7 @@
 package com.impetus.kundera;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -57,6 +58,8 @@ public class EntityManagerImplTest
     public void setUp()
     {
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
+        
         emf = Persistence.createEntityManagerFactory("kunderatest");
 
         em = emf.createEntityManager();

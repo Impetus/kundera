@@ -24,6 +24,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -128,6 +129,7 @@ public class EntityMetadataTest
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
+//        props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "lucene");
         clientMetadata.setLuceneIndexDir(null);
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -188,14 +190,46 @@ public class EntityMetadataTest
     @Test
     public void testCallbackMethods()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest");
+        Map<String, Object> props = new HashMap<String, Object>();
+      props.put("index.home.dir","lucene");
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest", props);
         EntityManager em = emf.createEntityManager();   
         
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonEventDispatch.class);
         Assert.assertNotNull(m.toString());
         
+        PersonEventDispatch person = new PersonEventDispatch();
+        person.setFirstName("vivek");
+        person.setLastName("mishra");
+        person.setPersonId("1_p");
+        
+        em.persist(person);
+        
+        em.clear();
+        
+        PersonEventDispatch result = em.find(PersonEventDispatch.class, "1_p");
+        Assert.assertEquals(result.getLastName(), "Post Load");
+        
+        onFindCallBack(em);
+
+        
         em.close();
         emf.close();
+    }
+
+    
+    private void onFindCallBack(EntityManager em)
+    {
+        String query = "Selcet p from PersonEventDispatch p";
+        
+        Query q = em.createQuery(query);
+        
+        List<PersonEventDispatch> results = q.getResultList();
+        
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
     }
     
     @Test
