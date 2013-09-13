@@ -212,7 +212,10 @@ public class EntityMetadataTest
         Assert.assertEquals(result.getLastName(), "Post Load");
         
         onFindCallBack(em);
-
+        em.refresh(result);
+        
+        Assert.assertEquals(result.getLastName(), "Post Load");
+        
         
         em.close();
         emf.close();
