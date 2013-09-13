@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.ProxyHelper;
 
 public class KunderaCoreUtils
 {
@@ -73,20 +74,24 @@ public class KunderaCoreUtils
         {
             return true;
         }
-        if (PropertyAccessorHelper.isCollection(o.getClass()))
+        
+        if (!ProxyHelper.isProxyOrCollection(o))
         {
-            Collection c = (Collection) o;
-            if (c.isEmpty())
+            if (PropertyAccessorHelper.isCollection(o.getClass()))
             {
-                return true;
+                Collection c = (Collection) o;
+                if (c.isEmpty())
+                {
+                    return true;
+                }
             }
-        }
-        else if (Map.class.isAssignableFrom(o.getClass()))
-        {
-            Map m = (Map) o;
-            if (m.isEmpty())
+            else if (Map.class.isAssignableFrom(o.getClass()))
             {
-                return true;
+                Map m = (Map) o;
+                if (m.isEmpty())
+                {
+                    return true;
+                }
             }
         }
         return false;
