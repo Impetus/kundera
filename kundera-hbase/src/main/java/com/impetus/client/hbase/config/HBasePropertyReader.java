@@ -122,7 +122,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
                 Connection conn = ds.getConnection();
                 if (conn.getProperties() != null && !conn.getProperties().isEmpty())
                 {
-                    zookeeperPort = conn.getProperties().getProperty(HBaseConstants.ZOOKEEPER_PORT);
+                    zookeeperPort = conn.getProperties().getProperty(HBaseConstants.ZOOKEEPER_PORT).trim();
                 }
             }
             return zookeeperPort;
@@ -139,7 +139,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
                 Connection conn = ds.getConnection();
                 if (conn.getProperties() != null && !conn.getProperties().isEmpty())
                 {
-                    zookeeperHost = conn.getProperties().getProperty(HBaseConstants.ZOOKEEPER_HOST);
+                    zookeeperHost = conn.getProperties().getProperty(HBaseConstants.ZOOKEEPER_HOST.trim());
                 }
             }
             return zookeeperHost;
@@ -151,7 +151,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
             {
                 for (DataStore dataStore : getClientProperties().getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("hbase"))
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase("hbase"))
                     {
                         return dataStore;
                     }

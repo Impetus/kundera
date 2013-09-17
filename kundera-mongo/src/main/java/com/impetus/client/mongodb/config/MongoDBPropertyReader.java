@@ -18,8 +18,6 @@ package com.impetus.client.mongodb.config;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +91,7 @@ public class MongoDBPropertyReader extends AbstractPropertyReader implements
 				for (DataStore dataStore : getClientProperties()
 						.getDatastores()) {
 					if (dataStore.getName() != null
-							&& dataStore.getName().equalsIgnoreCase("mongo")) {
+							&& dataStore.getName().trim().equalsIgnoreCase("mongo")) {
 						return dataStore;
 					}
 				}

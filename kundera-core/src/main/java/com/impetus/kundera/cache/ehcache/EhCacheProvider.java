@@ -27,8 +27,6 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.event.CacheEventListener;
 import net.sf.ehcache.util.ClassLoaderUtil;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

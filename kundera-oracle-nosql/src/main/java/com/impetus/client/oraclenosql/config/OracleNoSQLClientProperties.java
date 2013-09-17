@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import oracle.kv.Consistency;
 import oracle.kv.Durability;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

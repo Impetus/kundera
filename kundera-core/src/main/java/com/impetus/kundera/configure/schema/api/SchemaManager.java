@@ -16,7 +16,6 @@
 package com.impetus.kundera.configure.schema.api;
 
 import java.util.List;
-import java.util.Map;
 
 import com.impetus.kundera.configure.schema.TableInfo;
 

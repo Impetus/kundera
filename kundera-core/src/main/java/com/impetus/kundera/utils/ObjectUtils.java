@@ -16,7 +16,6 @@
 package com.impetus.kundera.utils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -31,9 +30,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
-import javax.persistence.metamodel.Type.PersistenceType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

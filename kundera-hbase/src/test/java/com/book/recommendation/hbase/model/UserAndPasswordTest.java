@@ -16,25 +16,17 @@
 package com.book.recommendation.hbase.model;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
-import org.apache.hadoop.hbase.filter.PrefixFilter;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.client.Client;
 
 /**
  * @author Kuldeep.Mishra

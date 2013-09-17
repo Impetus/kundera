@@ -31,19 +31,12 @@ import com.impetus.kundera.configure.ClientProperties.DataStore;
  */
 public class AbstractPropertyReaderTest
 {
-
-    private PropertyReader reader;
-
-    private final String pu = "PropertyTest";
-
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        reader = new DummyPropertyReader(null);
-        new PersistenceUnitConfiguration(pu).configure();
     }
 
     /**
@@ -52,7 +45,7 @@ public class AbstractPropertyReaderTest
     @After
     public void tearDown() throws Exception
     {
-        reader = null;
+        
     }
 
     /**
@@ -63,9 +56,41 @@ public class AbstractPropertyReaderTest
     @Test
     public void testParseXML()
     {
+        PropertyReader   reader = new DummyPropertyReader(null);
+        String pu = "PropertyTest";
+        new PersistenceUnitConfiguration(pu).configure();
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
+        assertValues(cp);
+    }
+
+//    @Test
+    public void testParseXMLWithAsolutePath()
+    {
+        PropertyReader   reader = new DummyPropertyReader(null);
+        String pu = "PropertyTestwithabsolutepath";
+        new PersistenceUnitConfiguration(pu).configure();
+        ClientProperties cp = null;
+        reader.read(pu);
+        cp = DummyPropertyReader.dsmd.getClientProperties();
+        assertValues(cp);
+    }
+    
+//    @Test
+    public void testParseXMLWithVariable()
+    {
+        PropertyReader   reader = new DummyPropertyReader(null);
+        String pu = "PropertyTestwithvaraiable";
+        new PersistenceUnitConfiguration(pu).configure();
+        ClientProperties cp = null;
+        reader.read(pu);
+        cp = DummyPropertyReader.dsmd.getClientProperties();
+        assertValues(cp);
+    }
+    
+    private void assertValues(ClientProperties cp)
+    {
         Assert.assertNotNull(cp);
         Assert.assertNotNull(cp.getDatastores());
         Assert.assertEquals(3, cp.getDatastores().size());
@@ -74,7 +99,7 @@ public class AbstractPropertyReaderTest
             Assert.assertNotNull(store);
             Assert.assertNotNull(store.getName());
             // Test for hbase properties.
-            if (store.getName().equalsIgnoreCase("HBase"))
+            if (store.getName().trim().equalsIgnoreCase("HBase"))
             {
                 Assert.assertNotNull(store.getSchemas());
                 Assert.assertEquals(2, store.getSchemas().size());
@@ -96,7 +121,7 @@ public class AbstractPropertyReaderTest
 
             }
             // Test for mongo properties.
-            else if (store.getName().equalsIgnoreCase("Mongo"))
+            else if (store.getName().trim().equalsIgnoreCase("Mongo"))
             {
                 Assert.assertNull(store.getSchemas());
                 Assert.assertNotNull(store.getConnection());
@@ -106,7 +131,7 @@ public class AbstractPropertyReaderTest
                 Assert.assertEquals(2, store.getConnection().getServers().size());
             }
             // Test for cassandra properties.
-            else if (store.getName().equalsIgnoreCase("Cassandra"))
+            else if (store.getName().trim().equalsIgnoreCase("Cassandra"))
             {
                 Assert.assertNotNull(store.getSchemas());
                 Assert.assertEquals(3, store.getSchemas().size());

@@ -279,8 +279,6 @@ public class RedisClientFactory extends GenericClientFactory
                 connection.auth(password);
             }
             connection.connect();
-
-            // System.out.println("Returning connection");
             return connection;
         }
     }

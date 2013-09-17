@@ -14,7 +14,7 @@
 						<port>27017</port>
 					</server>
 					<server>
-						<host>192.168.145.167</host>
+						<host>192.168.145.66</host>
 						<port>27018</port>
 					</server>
 				</servers>

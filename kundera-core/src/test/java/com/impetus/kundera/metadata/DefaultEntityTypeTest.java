@@ -1,11 +1,6 @@
 package com.impetus.kundera.metadata;
 
-import java.lang.reflect.Field;
-
-import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Bindable.BindableType;
-
 import javax.persistence.metamodel.Type.PersistenceType;
 
 import junit.framework.Assert;
@@ -14,10 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.metadata.entities.SingularEntity;
-import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.metadata.model.type.DefaultEntityType;
-import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
-import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
 
 

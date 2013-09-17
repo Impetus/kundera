@@ -24,7 +24,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**

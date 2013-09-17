@@ -40,7 +40,6 @@ import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
-import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class AbstractEntityReader.

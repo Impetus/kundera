@@ -96,6 +96,41 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="PropertyTestwithvaraiable">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaXmlTest" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.client.property" value="${HOME}/Desktop/kunderaExternalProperties.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="PropertyTestwithabsolutepath">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaXmlTest" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.client.property"
+				value="/home/impadmin/Desktop/kunderaExternalProperties.xml" />
+		</properties>
+	</persistence-unit>
+
 	<persistence-unit name="metaDataTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -123,8 +158,7 @@
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithTableGenerator</class>
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutSequenceGenerator</class>
 		<class>com.impetus.kundera.metadata.validator.GeneratedIdWithOutTableGenerator</class>
-		<!-- <class>com.impetus.kundera.metadata.validator.FTEmployee</class>
-		<class>com.impetus.kundera.metadata.validator.PartTimeEmployee</class> -->
+		<!-- <class>com.impetus.kundera.metadata.validator.FTEmployee</class> <class>com.impetus.kundera.metadata.validator.PartTimeEmployee</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />

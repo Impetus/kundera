@@ -1,13 +1,15 @@
 package com.impetus.kundera.utils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,14 +105,15 @@ public class KunderaCoreUtils
      *            composite key instance
      * @return redis key
      */
-    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
+    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel,
+            final Object compositeKey)
     {
         // EmbeddableType keyObject =
         // metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
 
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-        
-//        Arrays.sort(fields);
+
+        // Arrays.sort(fields);
 
         StringBuilder stringBuilder = new StringBuilder();
         for (Field f : fields)
@@ -123,7 +126,7 @@ public class KunderaCoreUtils
                 {
                     String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
                                                                                            // value
-                    
+
                     // what if field value is null????
                     stringBuilder.append(fieldValue);
                     stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
@@ -143,4 +146,27 @@ public class KunderaCoreUtils
         return stringBuilder.toString();
     }
 
+    public static String resolvePath(String input)
+    {
+        if (null == input)
+        {
+            return input;
+        }
+
+        // matching for 2 groups match ${VAR_NAME} or $VAR_NAME
+
+        Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
+
+        Matcher matcher = pattern.matcher(input); // get a matcher object
+        StringBuffer sb = new StringBuffer();
+        EnvironmentConfiguration config = new EnvironmentConfiguration();
+        while (matcher.find())
+        {
+            String envVarName = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+            String envVarValue = config.getString(envVarName);
+            matcher.appendReplacement(sb, envVarValue != null ? envVarValue : "");
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
 }

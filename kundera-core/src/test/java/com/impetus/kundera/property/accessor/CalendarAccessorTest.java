@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import static org.junit.Assert.fail;
-
 import java.util.Calendar;
 
 import junit.framework.Assert;

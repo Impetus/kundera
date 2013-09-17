@@ -25,11 +25,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
-
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
+
+import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
 
 /**
  * Base class-reader.

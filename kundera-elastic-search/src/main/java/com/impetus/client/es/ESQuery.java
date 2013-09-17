@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Query;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.elasticsearch.index.query.AndFilterBuilder;

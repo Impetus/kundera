@@ -15,15 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Parameter;
 import javax.persistence.Query;
-import javax.persistence.TemporalType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

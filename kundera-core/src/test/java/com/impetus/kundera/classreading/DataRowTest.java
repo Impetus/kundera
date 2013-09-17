@@ -23,7 +23,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.impetus.kundera.db.DataRow;
-import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.query.Person;
 
 /**

@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
-import com.impetus.kundera.PersistenceUtilHelper;
+
 import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.proxy.collection.ProxyCollection;
 

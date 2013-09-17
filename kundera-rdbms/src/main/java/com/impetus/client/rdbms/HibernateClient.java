@@ -36,7 +36,6 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
@@ -71,8 +70,10 @@ import com.impetus.kundera.proxy.ProxyHelper;
  */
 public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
-    /** The sf. */
-    private SessionFactory sf;
+//    /** The sf. */
+//    private SessionFactory sf;
+
+    private RDBMSClientFactory clientFactory;
 
     /** The s. */
     private StatelessSession s;
@@ -97,10 +98,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            SessionFactory sf, Map<String, Object> puProperties, final ClientMetadata clientMetadata)
+            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata)
     {
 
-        this.sf = sf;
+        this.clientFactory = clientFactory;
         // TODO . once we clear this persistenceUnit stuff we need to simply
         // modify this to have a properties or even pass an EMF!
         this.persistenceUnit = persistenceUnit;
@@ -136,7 +137,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void delete(Object entity, Object pKey)
     {
-        s = getSessionFactory().openStatelessSession();
+        s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         s.delete(entity);
         tx.commit();
@@ -161,7 +162,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         if (s == null)
         {
-            s = getSessionFactory().openStatelessSession();
+            s = getStatelessSession();
             //
             // s.beginTransaction();
         }
@@ -191,7 +192,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
         List<E> objs = new ArrayList<E>();
-        Session s = getSessionFactory().openSession();
+        Session s = getSession();
         Transaction tx = s.beginTransaction();
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
@@ -219,7 +220,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         Transaction tx = null;
 
-        s = getSessionFactory().openStatelessSession();
+        s = getStatelessSession();
         tx = s.beginTransaction();
         try
         {
@@ -288,7 +289,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 .append(getFromClause(schemaName, joinTableName)).append(" WHERE ").append(joinColumnName).append("='")
                 .append(parentId).append("'");
 
-        Session s = getSessionFactory().openSession();
+        Session s = getSession();
         Transaction tx = s.beginTransaction();
 
         SQLQuery query = s.createSQLQuery(sqlQuery.toString());
@@ -317,7 +318,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(getFromClause(schemaName, tableName))
                 .append(" WHERE ").append(columnName).append("='").append(childIdStr).append("'");
 
-        Session s = getSessionFactory().openSession();
+        Session s = getSession();
         // Transaction tx = s.beginTransaction();
 
         SQLQuery query = s.createSQLQuery(sqlQuery.toString());
@@ -373,7 +374,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     private void insertRecordInJoinTable(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Set<Object> childrenIds)
     {
-        s = getSessionFactory().openStatelessSession();
+        s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         for (Object childId : childrenIds)
         {
@@ -415,9 +416,20 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     private StatelessSession getStatelessSession()
     {
-        return s != null ? s : getSessionFactory().openStatelessSession();
+        return s != null ? s : clientFactory.getStatelessSession();
     }
 
+    /**
+     * Gets the session instance.
+     * 
+     * @return the session instance
+     */
+    private Session getSession()
+    {
+        return  clientFactory.getSession();
+    }
+
+    
     /**
      * Find.
      * 
@@ -433,7 +445,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
         List<Object[]> result = new ArrayList<Object[]>();
 
-        s = getSessionFactory().openStatelessSession();
+        s = getStatelessSession();
 
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
@@ -484,8 +496,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         queryBuilder.append(colValue);
         queryBuilder.append("'");
-        s = getSessionFactory().openStatelessSession();
-        s.beginTransaction();
+        s = getStatelessSession();
+//        s.beginTransaction();
 
         List results = find(queryBuilder.toString(), m.getRelationNames(), m);
         return populateEnhanceEntities(m, m.getRelationNames(), results);
@@ -603,10 +615,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return clause;
     }
 
-    private SessionFactory getSessionFactory()
-    {
-        return sf;
-    }
+//    private SessionFactory getSessionFactory()
+//    {
+//        return sf;
+//    }
 
     /**
      * Updates foreign keys into master table

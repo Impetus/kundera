@@ -18,8 +18,8 @@ package com.impetus.kundera.proxy.collection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

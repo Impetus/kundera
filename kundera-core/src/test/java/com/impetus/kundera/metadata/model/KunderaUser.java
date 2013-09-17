@@ -23,16 +23,11 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PostPersist;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
-
-import com.impetus.kundera.persistence.event.PersonHandler;
 
 /**
  * @author impetus

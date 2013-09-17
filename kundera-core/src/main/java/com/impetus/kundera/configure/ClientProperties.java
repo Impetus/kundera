@@ -325,6 +325,7 @@ public class ClientProperties implements Serializable
                 private String port;
 
                 private Properties properties;
+
                 /**
                  * @return the host
                  */
@@ -365,11 +366,16 @@ public class ClientProperties implements Serializable
                  */
                 public Properties getProperties()
                 {
-                    return properties;
+                    if (this.properties == null)
+                    {
+                        this.properties = new Properties();
+                    }
+                    return this.properties;
                 }
 
                 /**
-                 * @param properties the properties to set
+                 * @param properties
+                 *            the properties to set
                  */
                 public void setProperties(Properties properties)
                 {

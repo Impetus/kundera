@@ -18,7 +18,11 @@ package com.impetus.client.rdbms;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
+
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
@@ -106,11 +110,10 @@ public class RDBMSClientFactory extends GenericClientFactory
         return sf;
     }
 
-
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, sf, externalProperties, clientMetadata);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, this, externalProperties, clientMetadata);
     }
 
     @Override
@@ -132,14 +135,30 @@ public class RDBMSClientFactory extends GenericClientFactory
                 + this.getClass().getSimpleName());
     }
 
-
     /**
      * Returns configuration object.
      */
     private void getConfigurationObject()
     {
-       RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties);
-       this.conf = reader.load(getPersistenceUnit());
+        RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties);
+        this.conf = reader.load(getPersistenceUnit());
     }
 
+    Session getSession()
+    {
+        if (sf != null)
+        {
+            return sf.openSession();
+        }
+        throw new PersistenceException("Session factory is not initialized");
+    }
+
+    StatelessSession getStatelessSession()
+    {
+        if (sf != null)
+        {
+            return sf.openStatelessSession();
+        }
+        throw new PersistenceException("Session factory is not initialized");
+    }
 }

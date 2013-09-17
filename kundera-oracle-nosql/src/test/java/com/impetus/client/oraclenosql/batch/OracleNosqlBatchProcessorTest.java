@@ -35,7 +35,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.api.Batcher;
 
 /**
- * Batch processing test case for cassandra.
+ * Batch processing test case for oracle-kv.
  * 
  * @author vivek.mishra
  * 

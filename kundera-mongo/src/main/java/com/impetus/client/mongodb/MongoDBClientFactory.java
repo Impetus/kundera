@@ -180,7 +180,7 @@ public class MongoDBClientFactory extends GenericClientFactory
             {
                 for (Server server : servers)
                 {
-                    addrs.add(new ServerAddress(server.getHost(), Integer.parseInt(server.getPort())));
+                    addrs.add(new ServerAddress(server.getHost().trim(), Integer.parseInt(server.getPort().trim())));
                 }
                 mongo = new Mongo(addrs);
             }

@@ -23,7 +23,6 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.polyglot.entities.AddressBMM;

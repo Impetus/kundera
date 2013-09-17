@@ -15,11 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.event;
 
+import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
-import javax.persistence.PostLoad;
-/*import javax.persistence.PostUpdate;
-import javax.persistence.PreUpdate;*/
 
 public class PersonHandler
 {

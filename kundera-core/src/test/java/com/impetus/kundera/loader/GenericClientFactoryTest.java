@@ -18,9 +18,6 @@ package com.impetus.kundera.loader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import junit.framework.Assert;
 
 import org.junit.Before;

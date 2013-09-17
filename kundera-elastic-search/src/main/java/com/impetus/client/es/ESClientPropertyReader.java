@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 

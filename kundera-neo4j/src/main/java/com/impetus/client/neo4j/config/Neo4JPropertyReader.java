@@ -17,8 +17,6 @@ package com.impetus.client.neo4j.config;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +104,7 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
             {
                 for (DataStore dataStore : getClientProperties().getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase(NEO4J_DATASTORE))
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(NEO4J_DATASTORE))
                     {
                         return dataStore;
                     }

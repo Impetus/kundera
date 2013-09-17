@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import static org.junit.Assert.*;
-
 import java.math.BigInteger;
 
 import junit.framework.Assert;

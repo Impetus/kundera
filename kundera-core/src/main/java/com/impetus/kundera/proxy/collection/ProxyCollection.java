@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy.collection;
 
-import java.util.Collection;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.model.Relation;
