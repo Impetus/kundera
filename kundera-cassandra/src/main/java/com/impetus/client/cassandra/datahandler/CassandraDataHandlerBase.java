@@ -69,7 +69,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.DoubleAccessor;
+import com.impetus.kundera.property.accessor.BigDecimalAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 
@@ -190,10 +190,10 @@ public abstract class CassandraDataHandlerBase
                 }
             }
         }
-        
-        if(log.isInfoEnabled())
+
+        if (log.isInfoEnabled())
         {
-            log.info("Returning entity {} for class {}", e,clazz);
+            log.info("Returning entity {} for class {}", e, clazz);
         }
         return e;
     }
@@ -352,12 +352,14 @@ public abstract class CassandraDataHandlerBase
      *            the m
      * @param columnFamily
      *            the colmun family
-     * @param columnTTLs TODO
+     * @param columnTTLs
+     *            TODO
      * @return the base data accessor. thrift row
      * @throws Exception
      *             the exception
      */
-    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception
+    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs)
+            throws Exception
     {
         // timestamp to use in thrift column objects
         // long timestamp = System.currentTimeMillis();
@@ -778,7 +780,6 @@ public abstract class CassandraDataHandlerBase
             log.error("Eror while retrieving data, Caused by: .", e);
             throw new PersistenceException(e);
         }
-        
 
         if (entity != null && tr.getId() != null)
         {
@@ -1138,19 +1139,16 @@ public abstract class CassandraDataHandlerBase
                     if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
                     {
                         entity = initialize(m, entity, null);
-                        
+
                         compoundKeyObject = compoundKeyObject == null ? getCompoundKey(m, entity) : compoundKeyObject;
-                        
+
                         setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
                         PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
                                 compoundKeyObject);
                         break;
                     }
                 }
-                // setFieldValue(entity, ,
-                // attribute)
-
-            }
+         }
             catch (IllegalArgumentException iaex)
             {
                 // ignore as it might not repesented within entity.
@@ -1161,7 +1159,7 @@ public abstract class CassandraDataHandlerBase
             {
                 log.error("Error while retrieving data, Caused by: .", e);
                 throw new PersistenceException(e);
-            }            
+            }
         }
         return entity;
     }
@@ -1207,11 +1205,10 @@ public abstract class CassandraDataHandlerBase
     private void setFieldValueViaCQL(Object entity, Object thriftColumnValue, Attribute attribute)
     {
         if (attribute != null)
-        {      
-            
+        {
             try
-            {                
-                if(attribute.isCollection())
+            {
+                if (attribute.isCollection())
                 {
                     setCollectionValue(entity, thriftColumnValue, attribute);
                 }
@@ -1227,7 +1224,6 @@ public abstract class CassandraDataHandlerBase
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
-                    // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
@@ -1235,14 +1231,12 @@ public abstract class CassandraDataHandlerBase
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
                     Integer value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
-                    // String value =
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
                 {
-                    DoubleAccessor accessor = new DoubleAccessor();
-                    Double value = accessor.fromBytes(Double.class, (byte[]) thriftColumnValue);
-                    // String value =
+                    BigDecimalAccessor accessor = new BigDecimalAccessor();
+                    BigDecimal value = accessor.fromBytes(BigDecimal.class, (byte[]) thriftColumnValue);
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else
@@ -1252,13 +1246,14 @@ public abstract class CassandraDataHandlerBase
             }
             catch (PropertyAccessException pae)
             {
-                log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
-            }            
+                log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), pae);
+            }
         }
     }
 
     /**
      * Populates collection field(s) into entity
+     * 
      * @param entity
      * @param thriftColumnValue
      * @param attribute
@@ -1321,7 +1316,7 @@ public abstract class CassandraDataHandlerBase
         {
             log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
             throw new PersistenceException(e);
-        }        
+        }
     }
 
     private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)
@@ -1357,8 +1352,9 @@ public abstract class CassandraDataHandlerBase
             }
             else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
             {
-                DoubleAccessor doubleAccessor = new DoubleAccessor();
-                Double value = doubleAccessor.fromBytes(Double.class, (byte[]) thriftColumnValue);
+                BigDecimalAccessor bigDecimalAccessor = new BigDecimalAccessor();
+                BigDecimal value = bigDecimalAccessor.fromBytes(BigDecimal.class, (byte[]) thriftColumnValue);
+
                 return value;
             }
             else
@@ -1370,13 +1366,14 @@ public abstract class CassandraDataHandlerBase
         }
         catch (PropertyAccessException pae)
         {
-            log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(),pae);
+            log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), pae);
         }
         return null;
     }
 
     /**
      * On column or super column thrift row.
+     * 
      * @param tr
      *            the tr
      * @param m
@@ -1387,10 +1384,12 @@ public abstract class CassandraDataHandlerBase
      *            the id
      * @param timestamp
      *            the timestamp2
-     * @param columnTTLs TODO
+     * @param columnTTLs
+     *            TODO
      */
 
-    private void onColumnOrSuperColumnThriftRow(ThriftRow tr, EntityMetadata m, Object e, Object id, long timestamp, Object columnTTLs)
+    private void onColumnOrSuperColumnThriftRow(ThriftRow tr, EntityMetadata m, Object e, Object id, long timestamp,
+            Object columnTTLs)
     {
 
         // Iterate through Super columns
@@ -1425,9 +1424,9 @@ public abstract class CassandraDataHandlerBase
                         prepareSuperColumn(tr, m, value, name, timestamp);
                     }
                     else
-                    {    
-                    	int ttl = getTTLForColumn(columnTTLs, attribute);                  	                   	                  	
-                    	prepareColumn(tr, m, value, name, timestamp, ttl);
+                    {
+                        int ttl = getTTLForColumn(columnTTLs, attribute);
+                        prepareColumn(tr, m, value, name, timestamp, ttl);
                     }
                 }
             }
@@ -1435,24 +1434,26 @@ public abstract class CassandraDataHandlerBase
 
     }
 
-	/**
-	 * Determined TTL for a given column
-	 */
-	private int getTTLForColumn(Object columnTTLs, Attribute attribute) {
-		Integer ttl = null;
-		if(columnTTLs != null)
-		{
-			if(columnTTLs instanceof Map)
-			{
-				ttl = (Integer)(columnTTLs == null ? 0 : ((Map)columnTTLs).get(((AbstractAttribute) attribute).getJPAColumnName()));
-			}
-			else if(columnTTLs instanceof Integer)
-			{
-				ttl = (Integer) columnTTLs;
-			}
-		}
-		return ttl == null ? 0 : ttl;
-	}
+    /**
+     * Determined TTL for a given column
+     */
+    private int getTTLForColumn(Object columnTTLs, Attribute attribute)
+    {
+        Integer ttl = null;
+        if (columnTTLs != null)
+        {
+            if (columnTTLs instanceof Map)
+            {
+                ttl = (Integer) (columnTTLs == null ? 0 : ((Map) columnTTLs).get(((AbstractAttribute) attribute)
+                        .getJPAColumnName()));
+            }
+            else if (columnTTLs instanceof Integer)
+            {
+                ttl = (Integer) columnTTLs;
+            }
+        }
+        return ttl == null ? 0 : ttl;
+    }
 
     private Object getColumnValue(EntityMetadata m, Object e, Field field)
     {
@@ -1481,7 +1482,8 @@ public abstract class CassandraDataHandlerBase
      *            the name
      * @param timestamp
      *            the timestamp
-     * @param ttl TODO
+     * @param ttl
+     *            TODO
      */
     private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp, int ttl)
     {
@@ -1497,7 +1499,7 @@ public abstract class CassandraDataHandlerBase
                 Column column = prepareColumn((byte[]) value, name, timestamp, ttl);
                 tr.addColumn(column);
             }
-        }      
+        }
 
     }
 
@@ -1552,7 +1554,8 @@ public abstract class CassandraDataHandlerBase
      *            the name
      * @param timestamp
      *            the timestamp
-     * @param ttl TODO
+     * @param ttl
+     *            TODO
      * @return the column
      */
     private Column prepareColumn(byte[] value, byte[] name, long timestamp, int ttl)
@@ -1560,8 +1563,9 @@ public abstract class CassandraDataHandlerBase
         Column column = new Column();
         column.setName(name);
         column.setValue(value);
-        column.setTimestamp(timestamp);        
-        if(ttl != 0) column.setTtl(ttl);        
+        column.setTimestamp(timestamp);
+        if (ttl != 0)
+            column.setTtl(ttl);
         return column;
     }
 
@@ -1579,7 +1583,7 @@ public abstract class CassandraDataHandlerBase
         CounterColumn counterColumn = new CounterColumn();
         counterColumn.setName(name);
         LongAccessor accessor = new LongAccessor();
-        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));        
+        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));
         return counterColumn;
     }
 

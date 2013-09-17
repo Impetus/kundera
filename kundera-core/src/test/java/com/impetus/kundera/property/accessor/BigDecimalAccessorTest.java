@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import static org.junit.Assert.*;
-
 import java.math.BigDecimal;
 
 import junit.framework.Assert;
@@ -61,7 +59,7 @@ public class BigDecimalAccessorTest
     {
         Assert.assertNull(accessor.fromBytes(BigDecimal.class, null));
         
-        BigDecimal v1 = new BigDecimal(1111111111);
+        BigDecimal v1 = new BigDecimal(1111111111.11111);
         byte[] b = accessor.toBytes(v1);
         
         BigDecimal v2 = accessor.fromBytes(BigDecimal.class, b);        

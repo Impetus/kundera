@@ -15,11 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
@@ -36,22 +35,19 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public BigDecimal fromBytes(Class targetClass, byte[] b)
+    public BigDecimal fromBytes(Class targetClass, byte[] bytes)
     {
-        String s;
-        try
+        if (bytes == null)
         {
-            if (b == null)
-            {
-                return null;
-            }
-            s = new String(b, Constants.ENCODING);
+            return null;
         }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-        return fromString(targetClass, s);
+        int scale = (((bytes[0]) << 24) | ((bytes[1] & 0xff) << 16) | ((bytes[2] & 0xff) << 8) | ((bytes[3] & 0xff)));
+
+        byte[] bibytes = Arrays.copyOfRange(bytes, 4, bytes.length);
+
+        BigInteger bi = new BigInteger(bibytes);
+
+        return new BigDecimal(bi, scale);
     }
 
     /*
@@ -67,8 +63,18 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         {
             return null;
         }
+
         BigDecimal b = (BigDecimal) object;
-        return b.toString().getBytes();
+        final int scale = b.scale();
+        final BigInteger unscaled = b.unscaledValue();
+        final byte[] value = unscaled.toByteArray();
+        final byte[] bytes = new byte[value.length + 4];
+        bytes[0] = (byte) (scale >>> 24);
+        bytes[1] = (byte) (scale >>> 16);
+        bytes[2] = (byte) (scale >>> 8);
+        bytes[3] = (byte) (scale >>> 0);
+        System.arraycopy(value, 0, bytes, 4, value.length);
+        return bytes;
     }
 
     /*
