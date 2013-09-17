@@ -292,12 +292,9 @@ class ResultIterator<E> implements IResultIterator<E>
                         // database trip anymore!.
                         results = null;
                     }
-
                 }
-
             }
         }
-
         return results;
     }
 
@@ -319,11 +316,9 @@ class ResultIterator<E> implements IResultIterator<E>
 
         final String tokenCondition = prepareNext(translator, queryWithoutLimit);
 
-        boolean tokenPresent = queryWithoutLimit.indexOf(CQLTranslator.TOKEN) > -1;
+        StringBuilder builder = new StringBuilder( queryWithoutLimit);
 
-        StringBuilder builder = new StringBuilder(tokenPresent ? tokenCondition : queryWithoutLimit);
-
-        if (!tokenPresent && tokenCondition != null)
+        if (tokenCondition != null)
         {
             if (query.getKunderaQuery().getFilterClauseQueue().isEmpty())
             {
@@ -423,7 +418,7 @@ class ResultIterator<E> implements IResultIterator<E>
             builder.append(CQLTranslator.CLOSE_BRACKET);
             builder.append(" > ");
             builder.append(CQLTranslator.TOKEN);
-            translator.appendValue(builder, idClazz, id, false);
+            translator.appendValue(builder, idClazz, id, false, false);
             builder.append(CQLTranslator.CLOSE_BRACKET);
             return builder.toString();
         }
@@ -531,7 +526,7 @@ class ResultIterator<E> implements IResultIterator<E>
             Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
             StringBuilder builder = new StringBuilder();
 
-            translator.appendValue(builder, idClazz, id, false);
+            translator.appendValue(builder, idClazz, id, false, false);
 
             query = query.replaceAll(pattern + object, pattern + builder.toString());
             query = query.replaceAll(pattern, CQLTranslator.TOKEN);

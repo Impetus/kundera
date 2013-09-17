@@ -124,7 +124,7 @@ public class CassandraCompositeTypeTest
         em.close();
     }
 
-    @Test
+//    @Test
     public void onAlterColumnType() throws Exception
     {
         // Here tweetDate is of type "int". On update will be changed to

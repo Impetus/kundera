@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -25,7 +26,7 @@
 	</repositories>
 
 	<properties>
-		<cassandra.version>1.2.4</cassandra.version>
+		<cassandra.version>1.2.9</cassandra.version>
 	</properties>
 
 	<!-- Dependencies -->
@@ -48,19 +49,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<dependency>
-			<groupId>com.impetus.client</groupId>
-			<artifactId>kundera-elastic-search</artifactId>
-			<version>2.8-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.impetus.core</groupId>
-					<artifactId>kundera-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
@@ -74,10 +62,29 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-elastic-search</artifactId>
+			<version>2.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-elastic-search</artifactId>
+			<version>2.8-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.lucene</groupId>
+					<artifactId>lucene-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
-			<version>${cassandra.version}</version>
+			<version>${cassandra.version}</version>			
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>

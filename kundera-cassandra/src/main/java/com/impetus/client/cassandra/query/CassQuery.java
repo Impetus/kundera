@@ -623,7 +623,7 @@ public class CassQuery extends QueryImpl
         CQLTranslator translator = new CQLTranslator();
 
         selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), m.getTableName()).toString());
+                translator.ensureCase(new StringBuilder(), m.getTableName(), false).toString());
 
         builder = CassandraUtilities.appendColumns(builder, columns, selectQuery, translator);
 
@@ -691,6 +691,7 @@ public class CassQuery extends QueryImpl
                 if (keyObj != null && idColumn.equals(fieldName))
                 {
                     Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+//                    boolean useToken = true;
                     for (Field field : fields)
                     {
                         if (!ReflectUtils.isTransientOrStatic(field))
@@ -718,9 +719,10 @@ public class CassQuery extends QueryImpl
                     ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName();
                     // compositeColumns.add(new
                     // BasicDBObject(compositeColumn,value));
+                    //TODO for partition key in case of embedded key.
                     translator.buildWhereClause(builder,
                             ((AbstractAttribute) keyObj.getAttribute(fieldName)).getBindableJavaType(),
-                            ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName(), value, condition);
+                            ((AbstractAttribute) keyObj.getAttribute(fieldName)).getJPAColumnName(), value, condition, false);
                     if (partitionKey == null)
                     {
                         partitionKey = keyObj.getAttribute(fieldName).getName();
@@ -734,7 +736,7 @@ public class CassQuery extends QueryImpl
                 {
                     translator.buildWhereClause(builder,
                             ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(),
-                            CassandraUtilities.getIdColumnName(m, externalProperties), value, condition);
+                            CassandraUtilities.getIdColumnName(m, externalProperties), value, condition, true);
                 }
                 else
                 {
@@ -742,7 +744,7 @@ public class CassQuery extends QueryImpl
                     Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
                             m.getFieldName(fieldName));
                     translator.buildWhereClause(builder, ((AbstractAttribute) attribute).getBindableJavaType(),
-                            fieldName, value, condition);
+                            fieldName, value, condition, false);
                     allowFiltering = true;
                 }
             }
@@ -836,7 +838,7 @@ public class CassQuery extends QueryImpl
         
         String tableName = metadata.getTableName();        
         update_Query = StringUtils.replace(update_Query, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), tableName).toString());
+                translator.ensureCase(new StringBuilder(), tableName, false).toString());
         
         StringBuilder builder = new StringBuilder(update_Query);
         
@@ -868,8 +870,6 @@ public class CassQuery extends QueryImpl
         builder.append(CQLTranslator.ADD_WHERE_CLAUSE);        
         buildWhereClause(kunderaQuery, metadata, metaModel, translator, builder);  
         
-        
-        
         return builder.toString();
     }
     
@@ -888,7 +888,7 @@ public class CassQuery extends QueryImpl
         
         String tableName = kunderaQuery.getEntityMetadata().getTableName();        
         delete_query = StringUtils.replace(delete_query, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), tableName).toString());
+                translator.ensureCase(new StringBuilder(), tableName, false).toString());
         
         StringBuilder builder = new StringBuilder(delete_query);        
         builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
@@ -925,13 +925,15 @@ public class CassQuery extends QueryImpl
                         Attribute attribute = compoundKey.getAttribute(field.getName());
                         String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                         Object value = PropertyAccessorHelper.getObject(filterClause.getValue(), field);
-                        translator.buildWhereClause(builder, field.getType(), columnName, value, filterClause.getCondition());
+//                        TODO
+                        translator.buildWhereClause(builder, field.getType(), columnName, value, filterClause.getCondition(), false);
                     }
                 }
             }
             else
             {
-                translator.buildWhereClause(builder, f.getType(), jpaColumnName, filterClause.getValue(), filterClause.getCondition());
+//              TODO
+                translator.buildWhereClause(builder, f.getType(), jpaColumnName, filterClause.getValue(), filterClause.getCondition(), false);
             }         
             
         }
@@ -961,5 +963,4 @@ public class CassQuery extends QueryImpl
         }
         return jpaColumnName;
     }
-
 }

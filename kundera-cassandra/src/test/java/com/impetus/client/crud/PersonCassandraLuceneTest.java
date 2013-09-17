@@ -166,6 +166,13 @@ public class PersonCassandraLuceneTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("after merge", p.getPersonName());
 
+        List<PersonLuceneCassandra> allPersons = em
+                .createQuery("select p from PersonLuceneCassandra p where p.personId = :id",
+                        PersonLuceneCassandra.class).setParameter("id", 1).getResultList();
+
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+
         // Delete without WHERE clause.
 
         String deleteQuery = "DELETE from PersonLuceneCassandra";
@@ -484,7 +491,7 @@ public class PersonCassandraLuceneTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-         emf.close();
+        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
         LuceneCleanupUtilities.cleanLuceneDirectory(LUCENE_IDX_CASSANDRA_TEST);
     }

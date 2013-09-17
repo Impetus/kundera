@@ -56,7 +56,7 @@ public class CompositeTypeRunner
         TSocket socket = new TSocket("localhost", 9160);
         TFramedTransport transport = new TFramedTransport(socket);
 
-        Cassandra.Client client = new Cassandra.Client(new TBinaryProtocol(transport));
+        Cassandra.Client client = new Cassandra.Client(new TBinaryProtocol(transport, true, true));
         transport.open();
         client.set_cql_version("3.0.0");
         List<CfDef> cfDefs = new ArrayList<CfDef>();
