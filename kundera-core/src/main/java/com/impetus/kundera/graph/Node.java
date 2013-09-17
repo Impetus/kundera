@@ -18,6 +18,7 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
@@ -452,6 +453,11 @@ public class Node implements NodeStateContext
     public void refresh()
     {
         getCurrentNodeState().handleRefresh(this);
+
+        // Fix for handling PostLoad event on refresh.
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        onPostEvent(metadata, EntityEvent.FIND);
+
     }
 
     @Override
@@ -494,6 +500,10 @@ public class Node implements NodeStateContext
     public void find()
     {
         getCurrentNodeState().handleFind(this);
+
+        // Fix for handling PostLoad event on find.
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        onPostEvent(metadata, EntityEvent.FIND);
     }
 
     @Override
@@ -714,7 +724,7 @@ public class Node implements NodeStateContext
 
     private enum EntityEvent
     {
-        UPDATE, PERSIST, REMOVE;
+        UPDATE, PERSIST, REMOVE,FIND;
 
         private final static Class getPreEvent(EntityEvent event)
         {
@@ -756,6 +766,10 @@ public class Node implements NodeStateContext
                 clazz = PostRemove.class;
                 break;
 
+            case FIND:
+                clazz = PostLoad.class;
+                break;
+                
             default:
                 // TODO: Throw an error.
             }

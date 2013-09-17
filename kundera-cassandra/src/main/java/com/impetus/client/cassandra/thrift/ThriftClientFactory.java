@@ -212,6 +212,13 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         CassandraHost cassandraHost = ((CassandraHostConfiguration) configuration).getCassandraHost(host, port);
         hostPools.remove(cassandraHost);
+
+        if (cassandraHost.isRetryHost())
+        {
+            logger.warn("Scheduling node for future retry");
+            ((CassandraRetryService) hostRetryService).add((CassandraHost) cassandraHost);
+        }
+
         return getPoolUsingPolicy();
     }
 

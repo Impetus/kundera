@@ -109,6 +109,8 @@ public class KunderaQuery
     private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>();
 
     private TypedParameter typedParameter;
+    
+    boolean isNativeQuery;
 
     /**
      * Instantiates a new kundera query.
@@ -710,6 +712,10 @@ public class KunderaQuery
         return entityClass;
     }
 
+    public boolean isNative()
+    {
+        return isNativeQuery;
+    }
     /**
      * Gets the entity metadata.
      * 
@@ -1319,4 +1325,7 @@ public class KunderaQuery
 
         return value;
     }
+
+
+    
 }

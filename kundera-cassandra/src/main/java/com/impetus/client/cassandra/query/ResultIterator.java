@@ -236,7 +236,11 @@ class ResultIterator<E> implements IResultIterator<E>
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        if (!appMetadata.isNative(((QueryImpl) query).getJPAQuery()) && ((CassandraClientBase) client).isCql3Enabled(m))
+        String queryString = appMetadata.getQuery(((QueryImpl) query).getJPAQuery());
+        
+        boolean isNative = ((CassQuery) query).isNative()/*queryString == null ? true : appMetadata.isNative(((QueryImpl) query).getJPAQuery())*/;        
+
+        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             String parsedQuery = query.onQueryOverCQL3(m, client, metaModel, null);
 
@@ -248,9 +252,9 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         else
         {
-            if (appMetadata.isNative(((QueryImpl) query).getJPAQuery()))
+            if (isNative)
             {
-                final String nativeQuery = appendWhereClauseWithScroll(((QueryImpl) query).getJPAQuery());
+                final String nativeQuery = appendWhereClauseWithScroll(queryString != null ? queryString:((QueryImpl) query).getJPAQuery());
                 results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(nativeQuery,
                         m.getEntityClazz(), null) : null;
             }

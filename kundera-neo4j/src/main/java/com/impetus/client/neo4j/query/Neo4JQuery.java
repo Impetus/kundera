@@ -78,9 +78,12 @@ public class Neo4JQuery extends QueryImpl
         List<Object> entities = new ArrayList<Object>();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
-        if (appMetadata.isNative(getJPAQuery()))
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+
+        if (isNative)
         {
-            String nativeQuery = appMetadata.getQuery(getJPAQuery());
+            String nativeQuery = query != null ? query : getJPAQuery();
             Neo4JNativeQuery nativeQueryImpl = Neo4JNativeQueryFactory.getNativeQueryImplementation(queryType);
             entities = nativeQueryImpl.executeNativeQuery(nativeQuery, (Neo4JClient) client, m);
         }

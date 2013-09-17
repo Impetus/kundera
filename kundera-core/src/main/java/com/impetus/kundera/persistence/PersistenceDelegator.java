@@ -531,10 +531,23 @@ public final class PersistenceDelegator
      */
     Query createQuery(String jpaQuery)
     {
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this);
-        return query;
+        return getQueryInstance(jpaQuery, false,null);
+    }
+    
+    /*
+     * 
+     */
+    Query createNativeQuery(String jpaQuery, Class resultClass)
+    {
+        return getQueryInstance(jpaQuery, true, resultClass);
     }
 
+    
+    private Query getQueryInstance(String jpaQuery, boolean isNative, Class mappedClass)
+    {
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this,mappedClass,isNative);
+        return query;
+    }
     /**
      * Checks if is open.
      * 

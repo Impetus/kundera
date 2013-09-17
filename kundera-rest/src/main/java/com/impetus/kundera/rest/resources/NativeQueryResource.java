@@ -257,7 +257,7 @@ public class NativeQueryResource
         }
         catch (Exception e)
         {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             return Response.serverError().build();
         }
 

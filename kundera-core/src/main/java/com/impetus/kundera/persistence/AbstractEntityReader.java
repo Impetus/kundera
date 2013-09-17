@@ -40,6 +40,7 @@ import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class AbstractEntityReader.
@@ -107,8 +108,7 @@ public class AbstractEntityReader
 
             Object relationalObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-            // TODO: Need to check if object is a collection instance but empty!
-            if (relationalObject == null || ProxyHelper.isProxyOrCollection(relationalObject))
+            if (KunderaCoreUtils.isEmptyOrNull(relationalObject) || ProxyHelper.isProxyOrCollection(relationalObject))
             {
                 onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded);
             }

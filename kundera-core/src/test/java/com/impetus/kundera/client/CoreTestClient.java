@@ -54,6 +54,8 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
             table.addRecord(id, entity);
             schema.addTable(entityMetadata.getTableName(), table);
         }
+        
+       
     }
 
     @Override

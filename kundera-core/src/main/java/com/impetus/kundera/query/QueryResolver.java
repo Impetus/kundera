@@ -16,6 +16,7 @@
 package com.impetus.kundera.query;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.persistence.Query;
@@ -41,9 +42,6 @@ public class QueryResolver
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(QueryResolver.class);
 
-    /** The kundera query. */
-    KunderaQuery kunderaQuery;
-
     /**
      * Gets the query implementation.
      * 
@@ -55,18 +53,24 @@ public class QueryResolver
      *            the persistence units
      * @return the query implementation
      */
-    public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator)
+    public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator, Class mappedClass,
+            boolean isNative)
     {
         if (jpaQuery == null)
         {
             throw new QueryHandlerException("Query String should not be null ");
         }
-        kunderaQuery = new KunderaQuery();
+        KunderaQuery kunderaQuery = new KunderaQuery();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
-        boolean isNative = appMetadata.isNative(jpaQuery);
-        // String pu = null;
+
+        isNative = mappedQuery != null ? appMetadata.isNative(jpaQuery) : isNative;
+        
+        
+//        mappedClass = appMetadata.getMappedClass(jpaQuery)
+
         EntityMetadata m = null;
+
         // In case of named native query
         if (!isNative)
         {
@@ -81,10 +85,34 @@ public class QueryResolver
         }
         else
         {
-            Class mappedClass = appMetadata.getMappedClass(jpaQuery);
+            // Means if it is a namedNativeQuery.
+            if(appMetadata.isNative(jpaQuery))
+            {
+                mappedClass = appMetadata.getMappedClass(jpaQuery);
+            }
+            // Class mappedClass = appMetadata.getMappedClass(jpaQuery);
 
             // pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
+            
+            kunderaQuery.isNativeQuery = true;
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
+
+            Field entityClazzField = null;
+            try
+            {
+                entityClazzField = kunderaQuery.getClass().getDeclaredField("entityClass");
+                if (entityClazzField != null && !entityClazzField.isAccessible())
+                {
+                    entityClazzField.setAccessible(true);
+                }
+
+                entityClazzField.set(kunderaQuery, mappedClass);
+            }
+            catch (Exception e)
+            {
+                log.error(e.getMessage());
+                throw new QueryHandlerException(e);
+            }
         }
 
         // PersistenceUnitMetadata puMetadata =
@@ -94,7 +122,7 @@ public class QueryResolver
 
         try
         {
-            query = getQuery(jpaQuery, persistenceDelegator, m);
+            query = getQuery(jpaQuery, persistenceDelegator, m, kunderaQuery);
         }
         catch (Exception e)
         {
@@ -131,9 +159,9 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    private Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
-            throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
-            InstantiationException, IllegalAccessException, InvocationTargetException
+    private Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m,
+            KunderaQuery kunderaQuery) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
+            IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
         Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();

@@ -88,7 +88,7 @@ public class NativeQueryTest
 
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
         Assert.assertEquals(nativeSql, q.getJPAQuery());
-        Assert.assertEquals(true, KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeSql));
+//        Assert.assertEquals(true, KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeSql));
     }
 
     /**

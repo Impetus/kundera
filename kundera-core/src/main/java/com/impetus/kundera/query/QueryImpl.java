@@ -33,6 +33,7 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
+import javax.persistence.PostLoad;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
@@ -145,6 +146,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
 
+        handlePostEvent(m);
+        
         if (!m.isRelationViaJoinTable() && (m.getRelationNames() == null || (m.getRelationNames().isEmpty())))
         {
             results = populateEntities(m, client);
@@ -168,6 +171,14 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             }
         }
         return results != null ? results : new ArrayList();
+    }
+
+    protected void handlePostEvent(EntityMetadata m)
+    {
+        if(!kunderaQuery.isDeleteUpdate())
+        {
+            persistenceDelegeator.getEventDispatcher().fireEventListeners(m, null, PostLoad.class);
+        }
     }
 
 
@@ -460,9 +471,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         EntityMetadata m = null;
-        if (appMetadata.isNative(getJPAQuery()))
+        
+        String query = appMetadata.getQuery(getJPAQuery());
+        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+        
+        if (isNative)
         {
-            Class clazz = appMetadata.getMappedClass(getJPAQuery());
+            Class clazz = kunderaQuery.getEntityClass()/*appMetadata.getMappedClass(getJPAQuery())*/;
             m = KunderaMetadataManager.getEntityMetadata(clazz);
         }
         else
