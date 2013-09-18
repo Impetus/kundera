@@ -18,9 +18,9 @@ package com.impetus.kundera.persistence.event;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
-import javax.persistence.PostLoad;
 
 import junit.framework.Assert;
 
@@ -31,8 +31,6 @@ import org.junit.Test;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.Person;
-//import com.sun.jndi.cosnaming.IiopUrl.Address;
 
 /**
  * Test case for {@link EntityEventDispatcher}
@@ -85,16 +83,13 @@ public class EntityEventDispatcherTest
         PersonEventDispatch person = new PersonEventDispatch("1", "John", "Smith");
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(person.getClass());
         eventDispatcher.fireEventListeners(m, person, PrePersist.class);
-        System.out.println(person.getFirstName());
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Smith", person.getLastName());
         eventDispatcher.fireEventListeners(m, person, PostPersist.class);
-        System.out.println(person.getLastName());
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Singh", person.getLastName());
         
         eventDispatcher.fireEventListeners(m, person, PostLoad.class);
-        System.out.println(person.getLastName());
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Post Load", person.getLastName());
         

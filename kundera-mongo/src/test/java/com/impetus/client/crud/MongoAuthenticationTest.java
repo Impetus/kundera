@@ -25,10 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 

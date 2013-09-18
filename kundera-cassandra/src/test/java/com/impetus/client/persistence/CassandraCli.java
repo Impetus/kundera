@@ -222,7 +222,6 @@ public final class CassandraCli
 
     private static void deleteCassandraFolders(String dir)
     {
-        // System.out.println("Cleaning up folder " + dir);
         File directory = new File(dir);
         // Get all files in directory
         File[] files = directory.listFiles();
@@ -232,7 +231,6 @@ public final class CassandraCli
             if (!file.delete())
             {
                 // Failed to delete file
-                // System.out.println("Failed to delete " + file);
             }
         }
     }
@@ -313,7 +311,7 @@ public final class CassandraCli
     {
         TSocket socket = new TSocket("127.0.0.1", 9160);
         TTransport transport = new TFramedTransport(socket);
-        TProtocol protocol = new TBinaryProtocol(transport);
+        TProtocol protocol = new TBinaryProtocol(transport, true, true);
         client = new Cassandra.Client(protocol);
         socket.open();
     }

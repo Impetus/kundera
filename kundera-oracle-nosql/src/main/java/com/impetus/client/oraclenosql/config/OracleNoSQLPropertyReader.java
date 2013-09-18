@@ -17,8 +17,6 @@ package com.impetus.client.oraclenosql.config;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +103,7 @@ public class OracleNoSQLPropertyReader extends AbstractPropertyReader implements
             {
                 for (DataStore dataStore : getClientProperties().getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase(ORACLE_NOSQL_DATASTORE))
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(ORACLE_NOSQL_DATASTORE))
                     {
                         return dataStore;
                     }

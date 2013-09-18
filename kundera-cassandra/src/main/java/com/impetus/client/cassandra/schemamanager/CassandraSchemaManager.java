@@ -329,8 +329,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
-    
-
     private boolean containsCollectionColumns(TableInfo tableInfo)
     {
         return !tableInfo.getCollectionColumnMetadatas().isEmpty();
@@ -459,7 +457,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             TSocket socket = new TSocket(host, Integer.parseInt(port));
             TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
+            TProtocol protocol = new TBinaryProtocol(transport, true, true);
             cassandra_client = new Cassandra.Client(protocol);
             try
             {
@@ -489,8 +487,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
         }
         throw new SchemaGenerationException("Error while opening socket, Caused by: .", message, "Cassandra");
-    }   
-    
+    }
+
     /**
      * Creates (or updates) a column family definition using CQL 3 Should
      * replace onCompoundKey
@@ -504,7 +502,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         CQLTranslator translator = new CQLTranslator();
         String columnFamilyQuery = CQLTranslator.CREATE_COLUMNFAMILY_QUERY;
         columnFamilyQuery = StringUtils.replace(columnFamilyQuery, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), tableInfo.getTableName()).toString());
+                translator.ensureCase(new StringBuilder(), tableInfo.getTableName(), false).toString());
 
         List<ColumnInfo> columns = tableInfo.getColumnMetadatas();
 
@@ -668,7 +666,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         CQLTranslator translator = new CQLTranslator();
         StringBuilder dropQuery = new StringBuilder("drop table ");
-        translator.ensureCase(dropQuery, tableInfo.getTableName());
+        translator.ensureCase(dropQuery, tableInfo.getTableName(), false);
         cassandra_client.execute_cql3_query(ByteBuffer.wrap(dropQuery.toString().getBytes()), Compression.NONE,
                 ConsistencyLevel.ONE);
     }
@@ -689,9 +687,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         CQLTranslator translator = new CQLTranslator();
         StringBuilder addColumnQuery = new StringBuilder("ALTER TABLE ");
-        translator.ensureCase(addColumnQuery, tableInfo.getTableName());
+        translator.ensureCase(addColumnQuery, tableInfo.getTableName(), false);
         addColumnQuery.append(" ADD ");
-        translator.ensureCase(addColumnQuery, column.getColumnName());
+        translator.ensureCase(addColumnQuery, column.getColumnName(), false);
         addColumnQuery.append(" "
                 + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType(),
                         isCql3Enabled(tableInfo))));
@@ -706,7 +704,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             ireforAddColumnbBuilder.append(column.getColumnName() + " because it conflicts with an existing column");
             if (ireforAddColumn.getWhy() != null && ireforAddColumn.getWhy().equals(ireforAddColumnbBuilder.toString()))
             {
-                alterColumnType(tableInfo, translator, column);
+//                alterColumnType(tableInfo, translator, column);
             }
             else
             {
@@ -734,9 +732,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void alterColumnType(TableInfo tableInfo, CQLTranslator translator, ColumnInfo column) throws Exception
     {
         StringBuilder alterColumnTypeQuery = new StringBuilder("ALTER TABLE ");
-        translator.ensureCase(alterColumnTypeQuery, tableInfo.getTableName());
+        translator.ensureCase(alterColumnTypeQuery, tableInfo.getTableName(), false);
         alterColumnTypeQuery.append(" ALTER ");
-        translator.ensureCase(alterColumnTypeQuery, column.getColumnName());
+        translator.ensureCase(alterColumnTypeQuery, column.getColumnName(), false);
         alterColumnTypeQuery.append(" TYPE "
                 + translator.getCQLType(CassandraValidationClassMapper.getValidationClass(column.getType(),
                         isCql3Enabled(tableInfo))));

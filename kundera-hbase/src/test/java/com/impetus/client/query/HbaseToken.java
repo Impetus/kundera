@@ -9,9 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
 @Entity
 @Table(name = "tokens", schema = "KunderaExamples@hbaseTest")
 public class HbaseToken

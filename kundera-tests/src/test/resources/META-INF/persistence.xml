@@ -36,7 +36,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->			
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 	</persistence-unit>
 
@@ -150,26 +150,18 @@
 	</persistence-unit>
 
 	<!-- Persistence Units for Pickr application -->
-	<!-- <persistence-unit name="picmysql">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<properties>
-			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.hbm2ddl.auto" value="create" />
-			<property name="hibernate.max_fetch_depth" value="0" />
-			<property name="hibernate.show_sql" value="true" />
-			<property name="hibernate.format_sql" value="true" />
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
-			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/Pickr" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/Pickr" 
-				/>
-			<property name="hibernate.connection.username" value="root" />
-			<property name="hibernate.connection.password" value="impetus" />
-			<property name="hibernate.current_session_context_class"
-				value="org.hibernate.context.ThreadLocalSessionContext" />
-			<property name="index.home.dir" value="./lucene" />
-		</properties>
-	</persistence-unit> -->
+	<!-- <persistence-unit name="picmysql"> <provider>com.impetus.kundera.KunderaPersistence</provider> 
+		<properties> <property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" 
+		/> <property name="hibernate.hbm2ddl.auto" value="create" /> <property name="hibernate.max_fetch_depth" 
+		value="0" /> <property name="hibernate.show_sql" value="true" /> <property 
+		name="hibernate.format_sql" value="true" /> <property name="hibernate.dialect" 
+		value="org.hibernate.dialect.MySQL5Dialect" /> <property name="hibernate.connection.driver_class" 
+		value="com.mysql.jdbc.Driver" /> <property name="hibernate.connection.url" 
+		value="jdbc:mysql://localhost:3306/Pickr" /> <property name="hibernate.connection.url" 
+		value="jdbc:mysql://192.168.145.168:3306/Pickr" /> <property name="hibernate.connection.username" 
+		value="root" /> <property name="hibernate.connection.password" value="impetus" 
+		/> <property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" 
+		/> <property name="index.home.dir" value="./lucene" /> </properties> </persistence-unit> -->
 	<persistence-unit name="piccandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -297,36 +289,40 @@
 	</persistence-unit>
 
 	<persistence-unit name="oracle_kvstore">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>		
-		<properties>			
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
-			<property name="kundera.port" value="5000"/>
+			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests"/>
-			<property name="kundera.dialect" value="kvstore"/>
-			<property name="kundera.client" value="kvstore"/>
-			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
-            <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>  
-			<property name="kundera.indexer.class" value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
- 		</properties>	
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.indexer.class"
+				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
+		</properties>
 	</persistence-unit>
-	
-	<persistence-unit name="oracle_kvstore_JTA" transaction-type="JTA">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>		
-		<properties>			
+
+	<persistence-unit name="oracle_kvstore_JTA"
+		transaction-type="JTA">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
-			<property name="kundera.port" value="5000"/>
+			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests"/>
-			<property name="kundera.dialect" value="kvstore"/>
-			<property name="kundera.client" value="kvstore"/>
-			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
-            <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>  
-			<property name="kundera.indexer.class" value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
- 		</properties>	
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.indexer.class"
+				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
+		</properties>
 	</persistence-unit>
-	
 
 </persistence>

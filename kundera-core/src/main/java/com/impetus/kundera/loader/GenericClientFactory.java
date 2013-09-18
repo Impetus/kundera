@@ -151,7 +151,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
 
             // Set Index Manager
-            indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+            indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_CURRENT),
                     luceneDirectoryPath));
         }
         else if (indexerClass != null)

@@ -16,7 +16,6 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 
 import javassist.Modifier;
@@ -48,7 +47,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Metadata processor class for persistent entities.

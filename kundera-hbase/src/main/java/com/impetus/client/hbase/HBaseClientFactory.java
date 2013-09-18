@@ -105,8 +105,8 @@ public class HBaseClientFactory extends GenericClientFactory
                 .getConnection() : null;
         if (conn != null && conn.getProperties() != null)
         {
-            String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
-            String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
+            String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum").trim();
+            String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort").trim();
             hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : node);
             hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort
                     : DEFAULT_ZOOKEEPER_PORT);

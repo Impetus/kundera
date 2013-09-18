@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
+package com.impetus.client.esindexer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -51,14 +51,11 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
-import com.impetus.client.cassandra.thrift.ThriftClient;
-import com.impetus.client.crud.PersonCassandra.Day;
+import com.impetus.client.crud.BaseTest;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -67,15 +64,17 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author kuldeep.mishra
  * 
  *         Run this script to create column family in cassandra with indexes.
- *         create column family PERSON with comparator=UTF8Type and
+ *         create column family PERSON_ESINDEXER with comparator=UTF8Type and
  *         column_metadata=[{column_name: PERSON_NAME, validation_class:
  *         UTF8Type, index_type: KEYS}, {column_name: AGE, validation_class:
  *         IntegerType, index_type: KEYS}];
  * 
  */
-public class PersonCassandraTest extends BaseTest
+public class PersonCassandraESIndexerTest extends BaseTest
 {
-    private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
+    private static final String _PU = "esIndexerTest";
+
+    private static final boolean USE_CQL = false;
 
     /** The emf. */
     private EntityManagerFactory emf;
@@ -85,12 +84,6 @@ public class PersonCassandraTest extends BaseTest
 
     /** The col. */
     private Map<Object, Object> col;
-
-    protected Map propertyMap = null;
-
-    protected boolean AUTO_MANAGE_SCHEMA = true;
-
-    protected boolean USE_CQL = false;
 
     /**
      * Sets the up.
@@ -104,18 +97,10 @@ public class PersonCassandraTest extends BaseTest
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-
-        if (propertyMap == null)
-        {
-            propertyMap = new HashMap();
-            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        }
-
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            // loadData();
-        }
-        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
+        loadData();
+        Map propertyMap = new HashMap();
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -129,107 +114,61 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onInsertCassandra() throws Exception
     {
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
-
-        Query findQuery = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
-        List<PersonCassandra> allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
-        Assert.assertTrue(allPersons.isEmpty());
-
-        findQuery = em.createQuery("Select p from PersonCassandra p where p.personName = vivek");
-        allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
-        Assert.assertTrue(allPersons.isEmpty());
-
-        findQuery = em.createQuery("Select p.age from PersonCassandra p where p.personName = vivek");
-        allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
-        Assert.assertTrue(allPersons.isEmpty());
-
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-
-        PersonCassandra personWithKey = new PersonCassandra();
-        personWithKey.setPersonId("111");
-        em.persist(personWithKey);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-
+        waitThread();
         em.clear();
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        PersonESIndexerCassandra p = findById(PersonESIndexerCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-        Assert.assertEquals(Day.THURSDAY, p.getDay());
 
         em.clear();
-        String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId >= 1";
+        String qry = "Select p.personId,p.personName from PersonESIndexerCassandra p where p.personId >= 1";
         Query q = em.createQuery(qry);
-        List<PersonCassandra> persons = q.getResultList();
+        List<PersonESIndexerCassandra> persons = q.getResultList();
 
-        assertFindByName(em, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
-        assertFindByNameAndAge(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "personName");
-        assertFindByNameAndAgeGTAndLT(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "20", "personName");
-        assertFindByNameAndAgeBetween(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15", "personName");
-        assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
+        assertFindByName(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class, "vivek", "personName");
+        assertFindByNameAndAge(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class, "vivek", "10",
+                "personName");
+        assertFindByNameAndAgeGTAndLT(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class, "vivek", "10",
+                "20", "personName");
+        assertFindByNameAndAgeBetween(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class, "vivek", "10",
+                "15", "personName");
+        assertFindByRange(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class, "1", "2", "personId");
+        assertFindWithoutWhereClause(em, "PersonESIndexerCassandra", PersonESIndexerCassandra.class);
 
+        // OR clause test case.
+        String orClauseQuery = "Select p from PersonESIndexerCassandra p where p.personName = 'vivek1' OR p.age = 10";
+
+        q = em.createQuery(orClauseQuery);
+
+        List<PersonESIndexerCassandra> results = q.getResultList();
+
+        Assert.assertEquals(1, results.size());
         // perform merge after query.
-        for (PersonCassandra person : persons)
+        for (PersonESIndexerCassandra person : persons)
         {
-            person.setPersonName("'after merge'");
+            person.setPersonName("after merge");
             em.merge(person);
         }
-
         em.clear();
 
-        // select rowid test
-        selectIdQuery();
-
-        em.clear();
-
-        p = findById(PersonCassandra.class, "1", em);
+        p = findById(PersonESIndexerCassandra.class, "1", em);
         Assert.assertNotNull(p);
-        Assert.assertEquals("'after merge'", p.getPersonName());
+        Assert.assertEquals("after merge", p.getPersonName());
 
-        String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
-        q = em.createQuery(updateQuery);
-        q.executeUpdate();
-
-        em.clear();
-        p = findById(PersonCassandra.class, "1", em);
-        Assert.assertNotNull(p);
-        Assert.assertEquals("'KK MISHRA'", p.getPersonName());
-        
-        testCountResult();
         // Delete without WHERE clause.
 
-        String deleteQuery = "DELETE from PersonCassandra";
+        String deleteQuery = "DELETE from PersonESIndexerCassandra";
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
-
-    }
-
-    private void testCountResult()
-    {
-        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-        ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        CQLTranslator translator = new CQLTranslator();
-
-        String query = "select count(*) from "
-                + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString();
-        Query q = em.createNativeQuery(query, PersonCassandra.class);
-        List noOfRows = q.getResultList();
-        Assert.assertEquals(new Long(3),
-                PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
-        Assert.assertEquals("count",
-                PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
-
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
 
     /**
@@ -241,95 +180,84 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onMergeCassandra() throws Exception
     {
-        // CassandraCli.cassandraSetUp();
-        // loadData();
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-
+        waitThread();
         em.clear();
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        PersonESIndexerCassandra p = findById(PersonESIndexerCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-        Assert.assertEquals(Month.APRIL, p.getMonth());
         // modify record.
         p.setPersonName("newvivek");
         em.merge(p);
-
-        assertOnMerge(em, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
+        waitThread();
+        assertOnMerge(em, "PersonESIndexerCassandra", "vivek", "newvivek", "personName");
     }
 
     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
-        // CassandraCli.cassandraSetUp();
-        // CassandraCli.initClient();
-        // loadData();
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-
+        waitThread();
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        PersonESIndexerCassandra p = findById(PersonESIndexerCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
         em.remove(p);
         em.clear();
 
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        TypedQuery<PersonESIndexerCassandra> query = em.createQuery("Select p from PersonESIndexerCassandra p",
+                PersonESIndexerCassandra.class);
 
-        List<PersonCassandra> results = query.getResultList();
+        List<PersonESIndexerCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
 
-        p1 = prepareData("1", 10);
+        p1 = prepare("1", 10);
         em.persist(p1);
 
-        query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        query = em.createQuery("Select p from PersonESIndexerCassandra p", PersonESIndexerCassandra.class);
 
         results = query.getResultList();
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
 
     }
 
     @Test
     public void onRefreshCassandra() throws Exception
     {
-        // cassandraSetUp();
-        // CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
         CassandraCli.client.set_keyspace("KunderaExamples");
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-
+        waitThread();
         // Check for contains
-        Object pp1 = prepareData("1", 10);
-        Object pp2 = prepareData("2", 20);
-        Object pp3 = prepareData("3", 15);
+        Object pp1 = prepare("1", 10);
+        Object pp2 = prepare("2", 20);
+        Object pp3 = prepare("3", 15);
         Assert.assertTrue(em.contains(pp1));
         Assert.assertTrue(em.contains(pp2));
         Assert.assertTrue(em.contains(pp3));
@@ -344,7 +272,7 @@ public class PersonCassandraTest extends BaseTest
         // Modify value in database directly, refresh and then check PC
         em.clear();
         em = emf.createEntityManager();
-        Object o1 = em.find(PersonCassandra.class, "1");
+        Object o1 = em.find(PersonESIndexerCassandra.class, "1");
 
         if (!USE_CQL)
         {
@@ -361,7 +289,7 @@ public class PersonCassandraTest extends BaseTest
             insertionList.add(mut);
             // Create Mutation Map
             Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
-            columnFamilyValues.put("PERSONCASSANDRA", insertionList);
+            columnFamilyValues.put("PERSON_ESINDEXER", insertionList);
             Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
             mulationMap.put(ByteBuffer.wrap("1".getBytes()), columnFamilyValues);
             CassandraCli.client.batch_mutate(mulationMap, ConsistencyLevel.ONE);
@@ -369,14 +297,15 @@ public class PersonCassandraTest extends BaseTest
         else
         {
             CQLTranslator translator = new CQLTranslator();
-            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
+            String query = "insert into \"PERSON_ESINDEXER\" (key,\"PERSON_NAME\",\"AGE\") values (1,'Amry',10 )";
             CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
+
         em.refresh(o1);
-        Object oo1 = em.find(PersonCassandra.class, "1");
+        Object oo1 = em.find(PersonESIndexerCassandra.class, "1");
         Assert.assertTrue(em.contains(o1));
-        Assert.assertEquals("Amry", ((PersonCassandra) oo1).getPersonName());
+        Assert.assertEquals("Amry", ((PersonESIndexerCassandra) oo1).getPersonName());
     }
 
     /**
@@ -392,22 +321,20 @@ public class PersonCassandraTest extends BaseTest
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        waitThread();
+        TypedQuery<PersonESIndexerCassandra> query = em.createQuery("Select p from PersonESIndexerCassandra p",
+                PersonESIndexerCassandra.class);
 
-        List<PersonCassandra> results = query.getResultList();
+        List<PersonESIndexerCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
     }
 
     /**
@@ -423,108 +350,43 @@ public class PersonCassandraTest extends BaseTest
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        TypedQuery<Object> query = em.createQuery("Select p from PersonCassandra p", Object.class);
+        waitThread();
+        TypedQuery<Object> query = em.createQuery("Select p from PersonESIndexerCassandra p", Object.class);
 
         List<Object> results = query.getResultList();
         Assert.assertNotNull(query);
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        Assert.assertEquals(PersonCassandra.class, results.get(0).getClass());
-    }
-
-    /**
-     * on invalid typed query.
-     * 
-     * @throws TException
-     * @throws InvalidRequestException
-     * @throws UnavailableException
-     * @throws TimedOutException
-     * @throws SchemaDisagreementException
-     */
-    @Test
-    public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
-            TimedOutException, SchemaDisagreementException
-    {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
-
-        TypedQuery<PersonAuth> query = null;
-        try
-        {
-            query = em.createQuery("Select p from PersonCassandra p", PersonAuth.class);
-            Assert.fail("Should have gone to catch block, as it is an invalid scenario!");
-        }
-        catch (IllegalArgumentException iaex)
-        {
-            Assert.assertNull(query);
-        }
+        Assert.assertEquals(PersonESIndexerCassandra.class, results.get(0).getClass());
     }
 
     @Test
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-        Object p1 = prepareData("1", 10);
-        Object p2 = prepareData("2", 20);
-        Object p3 = prepareData("3", 15);
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
         em.clear();
-        PersonCassandra person = em.find(PersonCassandra.class, "1");
+        waitThread();
+        PersonESIndexerCassandra person = em.find(PersonESIndexerCassandra.class, "1");
         em.remove(person);
         em.clear(); // just to make sure that not to be picked up from cache.
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        TypedQuery<PersonESIndexerCassandra> query = em.createQuery("Select p from PersonESIndexerCassandra p",
+                PersonESIndexerCassandra.class);
 
-        List<PersonCassandra> results = query.getResultList();
+        List<PersonESIndexerCassandra> results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-
-    }
-
-    private void selectIdQuery()
-    {/*
-      * String query = "select p.personId from PersonCassandra p"; Query q =
-      * em.createQuery(query); List<PersonCassandra> results =
-      * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * 
-      * query =
-      * "Select p.personId from PersonCassandra p where p.personName = vivek";
-      * // // find by name. q = em.createQuery(query); results =
-      * q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      * 
-      * q = em.createQuery(
-      * "Select p.personId from PersonCassandra p where p.personName = vivek and p.age > "
-      * + 10); results = q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(2,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      */
     }
 
     /**
@@ -535,14 +397,7 @@ public class PersonCassandraTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
-        em.close();
+    {
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
@@ -566,7 +421,7 @@ public class PersonCassandraTest extends BaseTest
     {
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
-        user_Def.name = "PERSONCASSANDRA";
+        user_Def.name = "PERSON_ESINDEXER";
         user_Def.keyspace = "KunderaExamples";
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
@@ -574,15 +429,12 @@ public class PersonCassandraTest extends BaseTest
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "Int32Type");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef2);
-        ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("MONTH_ENUM".getBytes()), "UTF8Type");
-        columnDef3.index_type = IndexType.KEYS;
-        user_Def.addToColumn_metadata(columnDef3);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
@@ -597,10 +449,10 @@ public class PersonCassandraTest extends BaseTest
             for (CfDef cfDef1 : cfDefn)
             {
 
-                if (cfDef1.getName().equalsIgnoreCase("PERSONCASSANDRA"))
+                if (cfDef1.getName().equalsIgnoreCase("PERSON_ESINDEXER"))
                 {
 
-                    CassandraCli.client.system_drop_column_family("PERSONCASSANDRA");
+                    CassandraCli.client.system_drop_column_family("PERSON_ESINDEXER");
 
                 }
             }
@@ -623,5 +475,68 @@ public class PersonCassandraTest extends BaseTest
 
         CassandraCli.client.set_keyspace("KunderaExamples");
 
+    }
+
+    /**
+     * Prepare data.
+     * 
+     * @param rowKey
+     *            the row key
+     * @param age
+     *            the age
+     * @return the person
+     */
+    private PersonESIndexerCassandra prepare(String rowKey, int age)
+    {
+        PersonESIndexerCassandra o = new PersonESIndexerCassandra();
+        o.setPersonId(rowKey);
+        o.setPersonName("vivek");
+        o.setAge(age + "");
+        o.setDay(PersonESIndexerCassandra.Day.MONDAY);
+        return o;
+    }
+
+    private void assertOnMerge(EntityManager em, String clazz, String oldName, String newName, String fieldName)
+    {
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + oldName);
+        List<PersonESIndexerCassandra> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + newName);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotSame(oldName, getPersonName(results.get(0)));
+        Assert.assertEquals(newName, getPersonName(results.get(0)));
+    }
+
+    /**
+     * Gets the person name.
+     * 
+     * @param <E>
+     *            the element type
+     * @param e
+     *            the e
+     * @param result
+     *            the result
+     * @return the person name
+     */
+    private String getPersonName(Object result)
+    {
+
+        return ((PersonESIndexerCassandra) result).getPersonName();
+    }
+
+    private void waitThread()
+    {
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

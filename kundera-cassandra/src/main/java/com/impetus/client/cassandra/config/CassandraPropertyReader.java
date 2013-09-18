@@ -50,6 +50,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
     public static CassandraSchemaMetadata csmd;
 
+    private static final String dataStoreName = "cassandra";
+
     public CassandraPropertyReader(Map externalProperties)
     {
         super(externalProperties);
@@ -73,7 +75,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
     public class CassandraSchemaMetadata extends AbstractSchemaMetadata
     {
 
-    
         /**
          * @return the replication_factor
          */
@@ -102,7 +103,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             String placementStrategy = SimpleStrategy.class.getName();
             if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
             {
-                placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
+                placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY)
+                        ;
             }
 
             if (logger.isInfoEnabled())
@@ -123,10 +125,8 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             return false;
         }
 
-
         public boolean isInvertedIndexingEnabled(String schemaName)
         {
-            final String dataStoreName = "cassandra";
             DataStore dataStore = getDataStore(dataStoreName);
             boolean result = false;
             if (schemaName != null && dataStore != null && dataStore.getSchemas() != null)
@@ -151,13 +151,12 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public String getCqlVersion()
         {
-            final String dataStoreName = "cassandra";
             DataStore dataStore = getDataStore(dataStoreName);
 
             if (dataStore != null)
             {
-                Properties properties = dataStore.getConnection() != null ? dataStore.getConnection()
-                        .getProperties() : null;
+                Properties properties = dataStore.getConnection() != null ? dataStore.getConnection().getProperties()
+                        : null;
 
                 if (properties != null)
                 {
@@ -182,7 +181,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public Schema getSchema(String schemaName)
         {
-            final String dataStoreName = "cassandra";
             DataStore dataStore = getDataStore(dataStoreName);
 
             if (dataStore != null)
@@ -227,7 +225,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public Properties getConnectionProperties()
         {
-            final String dataStoreName = "cassandra";
             DataStore ds = getDataStore(dataStoreName);
             Properties properties = new Properties();
             if (ds != null)
@@ -247,7 +244,6 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
         public List<Server> getConnectionServers()
         {
-            final String dataStoreName = "cassandra";
             DataStore ds = getDataStore(dataStoreName);
             List<Server> servers = new ArrayList<Server>();
             if (ds != null && ds.getConnection() != null)

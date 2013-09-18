@@ -18,8 +18,6 @@ package com.impetus.kundera.persistence;
 import javax.persistence.GenerationType;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -161,10 +161,7 @@ public class RDBMSCli
                 o = rs.getObject(i + 1); // Is SQL the first column is indexed
 
                 // with 1 not 0
-                System.out.print(o.toString() + " ");
             }
-
-            System.out.println(" ");
         }
     } // void dump( ResultSet rs )
 

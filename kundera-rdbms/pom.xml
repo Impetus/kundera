@@ -35,11 +35,16 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>4.1.7.Final</version>
 		</dependency>
-		<!-- <dependency>
+	<!-- 	<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
 		</dependency> -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>4.1.7.Final</version>
+		</dependency>
 		<!-- <dependency> <groupId>hsqldb</groupId> <artifactId>hsqldb</artifactId> 
 			<version>1.8.0.7</version> <scope>test</scope> </dependency> -->
 		<dependency>
@@ -87,26 +92,14 @@
 					</execution>
 				</executions>
 			</plugin>
-<!-- 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					The destination file for the code coverage report has to be set 
-						to the same value in the parent pom and in each module pom. Then JaCoCo will 
-						add up information in the same report, so that, it will give the cross-module 
-						code coverage.
-					<destFile>${project.basedir}/../target/jacoco-it.exec</destFile>
-				</configuration>
-				<executions>
-					<execution>
-						<id>post-test</id>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
- -->		</plugins>
+			<!-- <plugin> <groupId>org.jacoco</groupId> <artifactId>jacoco-maven-plugin</artifactId> 
+				<configuration> The destination file for the code coverage report has to 
+				be set to the same value in the parent pom and in each module pom. Then JaCoCo 
+				will add up information in the same report, so that, it will give the cross-module 
+				code coverage. <destFile>${project.basedir}/../target/jacoco-it.exec</destFile> 
+				</configuration> <executions> <execution> <id>post-test</id> <configuration> 
+				<skip>true</skip> </configuration> </execution> </executions> </plugin> -->
+		</plugins>
 	</build>
 
 </project>

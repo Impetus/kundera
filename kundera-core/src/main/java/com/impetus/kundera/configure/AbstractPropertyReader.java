@@ -15,16 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -58,14 +63,16 @@ public abstract class AbstractPropertyReader
      */
     public void read(String pu)
     {
-        String propertyFileName = externalProperties != null ? (String)externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) :null;
+        String propertyFileName = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
         puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         if (propertyFileName == null)
         {
             propertyFileName = puMetadata != null ? puMetadata
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
         }
-        if (propertyFileName != null && PropertyType.value(propertyFileName) != null && PropertyType.value(propertyFileName).equals(PropertyType.xml))
+        if (propertyFileName != null && PropertyType.value(propertyFileName) != null
+                && PropertyType.value(propertyFileName).equals(PropertyType.xml))
         {
             onXml(onParseXML(propertyFileName, puMetadata));
         }
@@ -81,9 +88,22 @@ public abstract class AbstractPropertyReader
     private ClientProperties onParseXML(String propertyFileName, PersistenceUnitMetadata puMetadata)
     {
         InputStream inStream = puMetadata.getClassLoader().getResourceAsStream(propertyFileName);
-        xStream = getXStreamObject();
-        if (inStream != null)
+        if (inStream == null)
         {
+            propertyFileName = KunderaCoreUtils.resolvePath(propertyFileName);
+            try
+            {
+                inStream = new FileInputStream(new File(propertyFileName));
+            }
+            catch (FileNotFoundException e)
+            {
+                log.warn("File {} not found, Caused by ", propertyFileName);
+                return null;
+            }
+        }
+        else
+        {
+            xStream = getXStreamObject();
             Object o = xStream.fromXML(inStream);
             return (ClientProperties) o;
         }
@@ -203,7 +223,7 @@ public abstract class AbstractPropertyReader
                 {
                     for (DataStore dataStore : getClientProperties().getDatastores())
                     {
-                        if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase(dataStoreName))
+                        if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(dataStoreName))
                         {
                             return dataStore;
                         }
@@ -217,6 +237,5 @@ public abstract class AbstractPropertyReader
             }
             return null;
         }
-
     }
 }

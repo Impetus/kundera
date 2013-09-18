@@ -20,9 +20,9 @@ import java.util.Map;
 
 import javax.persistence.Cache;
 
-import org.junit.Assert;
-
 import junit.framework.TestCase;
+
+import org.junit.Assert;
 
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.entity.PersonnelDTO;

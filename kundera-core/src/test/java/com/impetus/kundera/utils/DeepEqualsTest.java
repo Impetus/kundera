@@ -603,6 +603,5 @@ public class DeepEqualsTest extends TestCase
             ObjectUtils.deepCopy(p1);
         }
         long t2 = System.currentTimeMillis();
-        System.out.println(t2 - t1);
     }
 }

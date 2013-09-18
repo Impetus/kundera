@@ -16,7 +16,6 @@
 package com.impetus.kundera.property.accessor;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 
 import junit.framework.Assert;
 

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import static org.junit.Assert.*;
 import junit.framework.Assert;
 
 import org.junit.After;

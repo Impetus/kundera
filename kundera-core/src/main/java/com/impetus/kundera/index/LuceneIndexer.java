@@ -26,25 +26,21 @@ import java.util.Map;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.LogDocMergePolicy;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
@@ -109,7 +105,9 @@ public class LuceneIndexer extends DocumentIndexer
             if (file.exists())
             {
                 Directory sourceDir = FSDirectory.open(getIndexDirectory());
-                index = new RAMDirectory(sourceDir);
+
+                // TODO initialize context.
+                index = new RAMDirectory(sourceDir, IOContext.DEFAULT);
             }
             else
             {
@@ -120,11 +118,15 @@ public class LuceneIndexer extends DocumentIndexer
              */
             // isInitialized
             /* writer */
-            w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_34, analyzer);
+            LogDocMergePolicy logDocMergePolicy = new LogDocMergePolicy();
+            logDocMergePolicy.setMergeFactor(1000);
+            indexWriterConfig.setMergePolicy(logDocMergePolicy);
+            w = new IndexWriter(index, indexWriterConfig);
             /* reader = */
-            w.setMergePolicy(new LogDocMergePolicy());
+            // w.setMergePolicy(new LogDocMergePolicy());
             // w.setMergeFactor(1);
-            w.setMergeFactor(1000);
+            // w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
         catch (Exception e)
@@ -180,10 +182,10 @@ public class LuceneIndexer extends DocumentIndexer
                 if (!isInitialized)
                 {
                     Directory sourceDir = FSDirectory.open(getIndexDirectory());
-                    sourceDir.copy(sourceDir, index, true);
+                    copy(sourceDir, index);
                     isInitialized = true;
                 }
-                reader = IndexReader.open(index, true);
+                reader = IndexReader.open(index/* , true */);
             }
             catch (Exception e)
             {
@@ -251,11 +253,15 @@ public class LuceneIndexer extends DocumentIndexer
             w.deleteDocuments(q);
             w.commit();
             w.close();
-            w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_34, analyzer);
+            LogDocMergePolicy logDocMergePolicy = new LogDocMergePolicy();
+            logDocMergePolicy.setMergeFactor(1000);
+            indexWriterConfig.setMergePolicy(logDocMergePolicy);
+            w = new IndexWriter(index, indexWriterConfig);
             /* reader = */
-            w.setMergePolicy(new LogDocMergePolicy());
+            // w.setMergePolicy(new LogDocMergePolicy());
             // w.setMergeFactor(1);
-            w.setMergeFactor(1000);
+            // w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
             // flushInternal();
         }
@@ -365,9 +371,9 @@ public class LuceneIndexer extends DocumentIndexer
         {
             if (w != null && readyForCommit)
             {
-                w.optimize();
+                // w.optimize();
                 w.commit();
-                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+                copy(index, FSDirectory.open(getIndexDirectory()));
                 readyForCommit = false;
                 reader = null;
                 isInitialized = false;
@@ -391,7 +397,7 @@ public class LuceneIndexer extends DocumentIndexer
             if (w != null && readyForCommit)
             {
                 w.commit();
-                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+                copy(index, FSDirectory.open(getIndexDirectory()));
             }
         }
 
@@ -625,4 +631,13 @@ public class LuceneIndexer extends DocumentIndexer
     {
         throw new UnsupportedOperationException("Method not supported");
     }
+
+    private void copy(Directory src, Directory to) throws IOException
+    {
+        for (String file : src.listAll())
+        {
+            src.copy(to, file, file, IOContext.DEFAULT);
+        }
+    }
+
 }

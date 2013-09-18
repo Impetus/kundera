@@ -26,7 +26,6 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;

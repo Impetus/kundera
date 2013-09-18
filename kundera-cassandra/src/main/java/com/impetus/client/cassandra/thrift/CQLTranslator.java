@@ -278,7 +278,7 @@ public final class CQLTranslator
      */
     public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
     {
-        builder = ensureCase(builder, field);
+        builder = ensureCase(builder, field, false);
         builder.append(EQ_CLAUSE);
         appendColumnValue(builder, entity, member);
         builder.append(AND_CLAUSE);
@@ -292,11 +292,12 @@ public final class CQLTranslator
      * @param value
      * @param clause
      */
-    public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause)
+    public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
+            boolean useToken)
     {
-        builder = ensureCase(builder, field);
+        builder = ensureCase(builder, field, useToken);
         builder.append(clause);
-        appendValue(builder, fieldClazz, value, false);
+        appendValue(builder, fieldClazz, value, false, useToken);
         builder.append(AND_CLAUSE);
     }
 
@@ -309,11 +310,11 @@ public final class CQLTranslator
      */
     public void buildSetClauseForCounters(StringBuilder builder, String field, Object value)
     {
-        builder = ensureCase(builder, field);
+        builder = ensureCase(builder, field, false);
         builder.append(EQ_CLAUSE);
-        builder = ensureCase(builder, field);
+        builder = ensureCase(builder, field, false);
         builder.append(INCR_COUNTER);
-        appendValue(builder, value.getClass(), value, false);
+        appendValue(builder, value.getClass(), value, false, false);
         builder.append(COMMA_STR);
     }
 
@@ -326,18 +327,18 @@ public final class CQLTranslator
      */
     public void buildSetClause(EntityMetadata m, StringBuilder builder, String property, Object value)
     {
-        builder = ensureCase(builder, property);
+        builder = ensureCase(builder, property, false);
         builder.append(EQ_CLAUSE);
 
         if (m.isCounterColumnType())
         {
-            builder = ensureCase(builder, property);
+            builder = ensureCase(builder, property, false);
             builder.append(INCR_COUNTER);
             builder.append(value);
         }
         else
         {
-            appendValue(builder, value.getClass(), value, false);
+            appendValue(builder, value.getClass(), value, false, false);
         }
 
         builder.append(COMMA_STR);
@@ -352,11 +353,19 @@ public final class CQLTranslator
      *            column name.
      * @return builder object with appended column name.
      */
-    public StringBuilder ensureCase(StringBuilder builder, String fieldName)
+    public StringBuilder ensureCase(StringBuilder builder, String fieldName, boolean useToken)
     {
+        if (useToken)
+        {
+            builder.append(TOKEN);
+        }
         builder.append("\"");
         builder.append(fieldName);
         builder.append("\"");
+        if (useToken)
+        {
+            builder.append(CLOSE_BRACKET);
+        }
         return builder;
 
     }
@@ -422,7 +431,7 @@ public final class CQLTranslator
     {
         Object value = PropertyAccessorHelper.getObject(valueObj, column);
         boolean isPresent = false;
-        isPresent = appendValue(builder, column.getType(), value, isPresent);
+        isPresent = appendValue(builder, column.getType(), value, isPresent, false);
         return isPresent;
     }
 
@@ -439,7 +448,8 @@ public final class CQLTranslator
      *            if field is present.
      * @return true, if value is not null else false.
      */
-    public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent)
+    public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent,
+            boolean useToken)
     {
         if (List.class.isAssignableFrom(fieldClazz))
         {
@@ -458,7 +468,7 @@ public final class CQLTranslator
         else if (value != null)
         {
             isPresent = true;
-            appendValue(builder, fieldClazz, value);
+            appendValue(builder, fieldClazz, value, useToken);
         }
         return isPresent;
     }
@@ -480,7 +490,7 @@ public final class CQLTranslator
         {
             if (o != null)
             {
-                appendValue(builder, o.getClass(), o);
+                appendValue(builder, o.getClass(), o, false);
             }
             builder.append(",");
         }
@@ -509,7 +519,7 @@ public final class CQLTranslator
         {
             if (o != null)
             {
-                appendValue(builder, o.getClass(), o);
+                appendValue(builder, o.getClass(), o, false);
             }
             builder.append(",");
         }
@@ -539,9 +549,9 @@ public final class CQLTranslator
             Object mapValue = map.get(mapKey);
             if (mapKey != null && mapValue != null)
             {
-                appendValue(builder, mapKey.getClass(), mapKey);
+                appendValue(builder, mapKey.getClass(), mapKey, false);
                 builder.append(":");
-                appendValue(builder, mapValue.getClass(), mapValue);
+                appendValue(builder, mapValue.getClass(), mapValue, false);
             }
             builder.append(",");
         }
@@ -558,11 +568,17 @@ public final class CQLTranslator
      * @param fieldClazz
      * @param value
      */
-    private void appendValue(StringBuilder builder, Class fieldClazz, Object value)
+    private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
+        if (useToken)
+        {
+            builder.append(TOKEN);
+        }
+        
         if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz) || fieldClazz.isAssignableFrom(char.class)
                 || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum)
         {
+
 
             if (fieldClazz.isAssignableFrom(String.class))
             {
@@ -590,6 +606,11 @@ public final class CQLTranslator
         {
             builder.append(value);
         }
+
+        if (useToken)
+        {
+            builder.append(CLOSE_BRACKET);
+        }
     }
 
     /**
@@ -602,7 +623,7 @@ public final class CQLTranslator
      */
     public void appendColumnName(StringBuilder builder, String columnName)
     {
-        ensureCase(builder, columnName);
+        ensureCase(builder, columnName, false);
     }
 
     /**
@@ -617,7 +638,7 @@ public final class CQLTranslator
      */
     public void appendColumnName(StringBuilder builder, String columnName, String dataType)
     {
-        ensureCase(builder, columnName);
+        ensureCase(builder, columnName, false);
         builder.append(" "); // because only key columns
         builder.append(dataType);
     }

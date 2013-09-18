@@ -899,7 +899,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         String insert_Query = translator.INSERT_QUERY;
 
         insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName(), false).toString());
         HashMap<TranslationType, String> translation = translator.prepareColumnOrColumnValues(entity, entityMetadata,
                 TranslationType.ALL, externalProperties);
 
@@ -913,7 +913,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             columnNameBuilder.append(",");
             columnValueBuilder.append(",");
             translator.appendColumnName(columnNameBuilder, rl.getRelationName());
-            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true);
+            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true, false);
         }
 
         translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
@@ -962,7 +962,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         String update_Query = translator.UPDATE_QUERY;
 
         update_Query = StringUtils.replace(update_Query, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName()).toString());
+                translator.ensureCase(new StringBuilder(), entityMetadata.getTableName(), false).toString());
         StringBuilder builder = new StringBuilder(update_Query);
         builder.append(CQLTranslator.ADD_SET_CLAUSE);
 
@@ -1087,7 +1087,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         String deleteQuery = CQLTranslator.DELETE_QUERY;
 
         deleteQuery = StringUtils.replace(deleteQuery, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
+                translator.ensureCase(new StringBuilder(), metadata.getTableName(), false).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
         onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
@@ -1139,7 +1139,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Attribute attribute = metadata.getIdAttribute();
             translator.buildWhereClause(queryBuilder,
                     ((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType(),
-                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE);
+                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE, false);
         }
 
         // strip last "AND" clause.
@@ -1945,7 +1945,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             CQLTranslator translator = new CQLTranslator();
             String select_Query = translator.SELECTALL_QUERY;
             select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
-                    translator.ensureCase(new StringBuilder(), metadata.getTableName()).toString());
+                    translator.ensureCase(new StringBuilder(), metadata.getTableName(), false).toString());
             StringBuilder builder = new StringBuilder(select_Query);
             onWhereClause(metadata, rowId, translator, builder, metaModel);
             return CassandraClientBase.this.executeQuery(builder.toString(), metadata.getEntityClazz(), relationNames);
@@ -1968,12 +1968,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             CQLTranslator translator = new CQLTranslator();
             String selectQuery = translator.SELECTALL_QUERY;
             selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
-                    translator.ensureCase(new StringBuilder(), m.getTableName()).toString());
+                    translator.ensureCase(new StringBuilder(), m.getTableName(), false).toString());
 
             StringBuilder selectQueryBuilder = new StringBuilder(selectQuery);
             selectQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
 
-            translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, "=");
+            translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, CQLTranslator.EQ_CLAUSE, false);
             selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
                     selectQueryBuilder.length());
             return executeQuery(selectQueryBuilder.toString(), clazz, m.getRelationNames(), dataHandler, true);

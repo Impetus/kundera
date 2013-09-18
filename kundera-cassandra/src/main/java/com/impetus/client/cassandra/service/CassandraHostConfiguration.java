@@ -61,8 +61,8 @@ public class CassandraHostConfiguration extends HostConfiguration
         List<CassandraHost> cassandraHosts = new CopyOnWriteArrayList<CassandraHost>();
         for (Server server : servers)
         {
-            String host = server.getHost();
-            String portAsString = server.getPort();
+            String host = server.getHost().trim();
+            String portAsString = server.getPort().trim();
             onValidation(host, portAsString);
             Properties serverProperties = server.getProperties();
             CassandraHost cassandraHost = new CassandraHost(host, Integer.parseInt(portAsString));
@@ -79,6 +79,7 @@ public class CassandraHostConfiguration extends HostConfiguration
         for (int x = 0; x < hostVals.length; x++)
         {
             String host = hostVals[x].trim();
+            portAsString = portAsString.trim();
             onValidation(host, portAsString);
             int port = Integer.parseInt(portAsString);
             CassandraHost cassandraHost = port == CassandraHost.DEFAULT_PORT ? new CassandraHost(host)
@@ -105,6 +106,8 @@ public class CassandraHostConfiguration extends HostConfiguration
         String userName = null;
         String password = null;
         String maxWaitInMilli = null;
+        String failOverPolicy = null;
+        boolean hostRetry = false;
         if (puProperties != null)
         {
             maxActivePerNode = (String) puProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
@@ -121,31 +124,68 @@ public class CassandraHostConfiguration extends HostConfiguration
             maxWaitInMilli = (String) puProperties.get(CassandraConstants.MAX_WAIT);
         }
 
-        if (maxActivePerNode == null)
+        if (props != null)
         {
-            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-        }
-        if (maxIdlePerNode == null)
-        {
-            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-        }
-        if (minIdlePerNode == null)
-        {
-            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-        }
-        if (maxTotal == null)
-        {
-            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-        }
-        if (maxWaitInMilli == null)
-        {
-            maxWaitInMilli = props.getProperty(CassandraConstants.MAX_WAIT);
-        }
+            if (maxActivePerNode == null)
+            {
+                maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE) != null ? props
+                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE).trim() : null;
+            }
+            if (maxIdlePerNode == null)
+            {
+                maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE) != null ? props
+                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE).trim() : null;
+            }
+            if (minIdlePerNode == null)
+            {
+                minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE) != null ? props
+                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE).trim() : null;
+            }
+            if (maxTotal == null)
+            {
+                maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL) != null ? props
+                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL).trim() : null;
+            }
+            if (maxWaitInMilli == null)
+            {
+                maxWaitInMilli = props.getProperty(CassandraConstants.MAX_WAIT) != null ? props.getProperty(
+                        CassandraConstants.MAX_WAIT).trim() : null;
+            }
 
-        if (userName == null)
-        {
-            userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-            password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+            if (userName == null)
+            {
+                userName = props.getProperty(PersistenceProperties.KUNDERA_USERNAME);
+                password = props.getProperty(PersistenceProperties.KUNDERA_PASSWORD);
+            }
+            if (testOnBorrow == null)
+            {
+                testOnBorrow = props.getProperty(CassandraConstants.TEST_ON_BORROW) != null ? props.getProperty(
+                        CassandraConstants.TEST_ON_BORROW).trim() : null;
+            }
+            if (testOnConnect == null)
+            {
+                testOnConnect = props.getProperty(CassandraConstants.TEST_ON_CONNECT) != null ? props.getProperty(
+                        CassandraConstants.TEST_ON_CONNECT).trim() : null;
+            }
+            if (testOnReturn == null)
+            {
+                testOnReturn = props.getProperty(CassandraConstants.TEST_ON_RETURN) != null ? props.getProperty(
+                        CassandraConstants.TEST_ON_RETURN).trim() : null;
+            }
+            if (testWhileIdle == null)
+            {
+                testWhileIdle = props.getProperty(CassandraConstants.TEST_WHILE_IDLE) != null ? props.getProperty(
+                        CassandraConstants.TEST_WHILE_IDLE).trim() : null;
+            }
+            if (socketTimeOut == null)
+            {
+                socketTimeOut = props.getProperty(CassandraConstants.SOCKET_TIMEOUT) != null ? props.getProperty(
+                        CassandraConstants.SOCKET_TIMEOUT).trim() : null;
+            }
+            failOverPolicy = props.getProperty(Constants.FAILOVER_POLICY) != null ? props.getProperty(
+                    Constants.FAILOVER_POLICY).trim() : null;
+            hostRetry = Boolean.parseBoolean(props.getProperty(Constants.RETRY) != null ? props.getProperty(
+                    Constants.RETRY).trim() : null);
         }
         try
         {
@@ -174,33 +214,12 @@ public class CassandraHostConfiguration extends HostConfiguration
                 cassandraHost.setMaxWait(Integer.parseInt(maxWaitInMilli));
             }
 
-            if (testOnBorrow == null)
-            {
-                testOnBorrow = props.getProperty(CassandraConstants.TEST_ON_BORROW);
-            }
-            if (testOnConnect == null)
-            {
-                testOnConnect = props.getProperty(CassandraConstants.TEST_ON_CONNECT);
-            }
-            if (testOnReturn == null)
-            {
-                testOnReturn = props.getProperty(CassandraConstants.TEST_ON_RETURN);
-            }
-            if (testWhileIdle == null)
-            {
-                testWhileIdle = props.getProperty(CassandraConstants.TEST_WHILE_IDLE);
-            }
-            if (socketTimeOut == null)
-            {
-                socketTimeOut = props.getProperty(CassandraConstants.SOCKET_TIMEOUT);
-            }
-
             cassandraHost.setTestOnBorrow(Boolean.parseBoolean(testOnBorrow));
             cassandraHost.setTestOnConnect(Boolean.parseBoolean(testOnConnect));
             cassandraHost.setTestOnReturn(Boolean.parseBoolean(testOnReturn));
             cassandraHost.setTestWhileIdle(Boolean.parseBoolean(testWhileIdle));
-            cassandraHost.setHostFailoverPolicy(getFailoverPolicy(props.getProperty(Constants.FAILOVER_POLICY)));
-            cassandraHost.setRetryHost(Boolean.parseBoolean(props.getProperty(Constants.RETRY)));
+            cassandraHost.setHostFailoverPolicy(getFailoverPolicy(failOverPolicy));
+            cassandraHost.setRetryHost(hostRetry);
             cassandraHost.setUserName(userName);
             cassandraHost.setPassword(password);
 

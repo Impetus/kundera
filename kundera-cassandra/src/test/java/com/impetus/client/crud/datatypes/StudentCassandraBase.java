@@ -82,7 +82,7 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
     protected java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(date);
 
     /** The big decimal. */
-    protected BigDecimal bigDecimal = new BigDecimal(123456789);
+    protected BigDecimal bigDecimal = new BigDecimal(123456789.2345678);
 
     /** The big integer. */
     protected BigInteger bigInteger = new BigInteger("123456789");
@@ -319,8 +319,7 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
         Assert.assertEquals(sqlTimestamp.getMinutes(), s.getSqlTimestamp().getMinutes());
         Assert.assertEquals(sqlTimestamp.getSeconds(), s.getSqlTimestamp().getSeconds());
 
-        // Assert.assertEquals(Math.round(bigDecimal.doubleValue()),
-        // Math.round(s.getBigDecimal().doubleValue()));
+        Assert.assertEquals(bigDecimal,s.getBigDecimal());
         Assert.assertEquals(bigInteger, s.getBigInteger());
 
         Assert.assertEquals(calendar.get(Calendar.YEAR), s.getCalendar().get(Calendar.YEAR));

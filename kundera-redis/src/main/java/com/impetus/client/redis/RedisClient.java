@@ -70,7 +70,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Redis client implementation for REDIS.
@@ -357,7 +356,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (connection != null)
         {
-            // System.out.println("Closing" + this.connection);
             connection.disconnect();
             connection = null;
         }

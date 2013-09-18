@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +126,7 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
             {
                 for (DataStore dataStore : clientProperties.getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().equalsIgnoreCase("redis"))
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase("redis"))
                     {
                         return new HashMap(dataStore.getConnection().getProperties());
                     }

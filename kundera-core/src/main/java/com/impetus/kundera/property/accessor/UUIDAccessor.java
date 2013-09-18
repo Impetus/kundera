@@ -77,7 +77,6 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
             }
             long msb = 0;
             long lsb = 0;
-            assert bytes.length == 16;
             for (int i = 0; i < 8; i++)
                 msb = (msb << 8) | (bytes[i] & 0xff);
             for (int i = 8; i < 16; i++)

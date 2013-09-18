@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.neo4j;
 
-import java.io.File;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -27,7 +26,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
