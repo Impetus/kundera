@@ -224,25 +224,30 @@ public class LuceneIndexer extends DocumentIndexer
             log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
+        	QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
+                    Version.LUCENE_34));
+        	
+            qp.setLowercaseExpandedTerms(false);
+            qp.setAllowLeadingWildcard(true);
+            
             String luceneQuery = "+"
                     + ENTITY_CLASS_FIELD
                     + ":"
-                    + metadata.getEntityClazz().getCanonicalName().toLowerCase()
+                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase())
                     + " AND +"
-                    + getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(),
-                            ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()) + ":" + id.toString();
+                    + getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
+                    		QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName())) + ":" + QueryParser.escape(id.toString());
 
             /* String indexName, Query query, boolean autoCommit */
             // w.deleteDocuments(new Term(KUNDERA_ID_FIELD,
             // getKunderaId(metadata, id)));
 
-            QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
-                    Version.LUCENE_34));
-            qp.setLowercaseExpandedTerms(false);
-            qp.setAllowLeadingWildcard(true);
+            
             // qp.set
+           
+           
             Query q = qp.parse(luceneQuery);
-
+            
             w.deleteDocuments(q);
             w.commit();
             w.close();
