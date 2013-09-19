@@ -27,20 +27,20 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Cubicle", schema = "KunderaExamples@mongoTest")
-public class Cubicle {
-	
-	@GeneratedValue
+public class Cubicle
+{
+
+    @GeneratedValue
     @Id
     private String cubeID;
-	
-	
+
     @Column(name = "name")
     private String name;
-    
+
     @OneToOne(fetch = FetchType.EAGER)
-	private EmployeeCubicle residentEmployee;
-	
-	public String getCubeID()
+    private EmployeeCubicle residentEmployee;
+
+    public String getCubeID()
     {
         return cubeID;
     }
@@ -59,13 +59,15 @@ public class Cubicle {
     {
         this.name = name;
     }
-    
-	//@OneToOne(mappedBy="assignedCubicle")
-	public EmployeeCubicle getResidentEmployee() {
-	  return residentEmployee;
-	}
-	
-	public void setResidentEmployee(EmployeeCubicle employee) {
-	  this.residentEmployee = employee;
-	}
+
+    // @OneToOne(mappedBy="assignedCubicle")
+    public EmployeeCubicle getResidentEmployee()
+    {
+        return residentEmployee;
+    }
+
+    public void setResidentEmployee(EmployeeCubicle employee)
+    {
+        this.residentEmployee = employee;
+    }
 }
