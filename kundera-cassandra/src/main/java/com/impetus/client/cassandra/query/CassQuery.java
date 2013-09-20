@@ -312,13 +312,17 @@ public class CassQuery extends QueryImpl
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
             for (Object o : kunderaQuery.getFilterClauseQueue())
             {
-                FilterClause filterClause = (FilterClause) o;
-                if (!idColumn.equals(filterClause.getProperty()) || opsNotAllowed.contains(filterClause.getCondition()))
+                if (o instanceof FilterClause)
                 {
-                    result = false;
-                    break;
+                    FilterClause filterClause = (FilterClause) o;
+                    if (!idColumn.equals(filterClause.getProperty())
+                            || opsNotAllowed.contains(filterClause.getCondition()))
+                    {
+                        result = false;
+                        break;
+                    }
+                    result = true;
                 }
-                result = true;
             }
         }
         return result;
