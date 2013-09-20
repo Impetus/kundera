@@ -60,7 +60,8 @@ public class EmployeeCubicleTest
         emp1.setAssignedCubicle(cube1);
 
         em.persist(emp1);
-
+        em.clear();
+        
         EmployeeCubicle emp2 = new EmployeeCubicle();
         emp2.setName("test2");
 
@@ -79,7 +80,8 @@ public class EmployeeCubicleTest
         employee.setAssignedCubicle(cube2);
 
         em.merge(employee);
-
+        em.clear();
+        
         q = em.createQuery("select e from EmployeeCubicle e where e.name = 'test1'");
         employees = q.getResultList();
         Assert.assertNotNull(employees);
