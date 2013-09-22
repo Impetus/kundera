@@ -24,7 +24,8 @@ Each module is a maven based project. To build a specific module(for example src
 
 * mvn clean install -Dfile src/pom.xml
 
-More details about Kundera source code structure and build process are available https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md
+More details about Kundera source code structure and build process are available at => 
+https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md
 
 
 About Us
