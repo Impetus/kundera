@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>mongo</name>
+			<connection>
+				<properties>
+					<property name="read.preference" value="primary"></property>
+					<property name="socket.timeout" value="100000"></property>
+				</properties>
+				<servers>
+					<server>
+						<host>192.168.145.168</host>
+						<port>27017</port>
+					</server>
+					<server>
+						<host>192.168.145.66</host>
+						<port>27018</port>
+					</server>
+				</servers>
+			</connection>
+		</dataStore>
+		<dataStore>
+			<name>cassandra</name>
+			<schemas>
+				<schema>
+					<name>KunderaCassandraXmlTest</name>
+					<properties>
+						<property name="strategy.class" value="SimpleStrategy" />
+						<property name="replcation.factor" value="1" />
+						<property name="durable.writes" value="true" />
+					</properties>
+					<dataCenters>
+						<dataCenter>
+							<name>DC1</name>
+							<value>3</value>
+						</dataCenter>
+						<dataCenter>
+							<name>DC2</name>
+							<value>2</value>
+						</dataCenter>
+					</dataCenters>
+					<tables>
+						<table>
+							<name>CASSANDRAUSERXYZ</name>
+							<properties>
+								<property name="default.validation.class" value="UTF8Type"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+								<property name="comment" value="User Column Family"></property>
+								<property name="max.compaction.threshold" value="64"></property>
+								<property name="min.compaction.threshold" value="16"></property>
+								<property name="replicate.on.write" value="true"></property>
+								<property name="comparator.type" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>CASSANDRASUPERUSER</name>
+							<properties>
+								<property name="default.validation.class" value="UTF8Type"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+								<property name="comment" value="User Super Column Family"></property>
+								<property name="comparator.type" value="BytesType"></property>
+								<property name="subcomparator.type" value="BytesType"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+				<schema>
+					<name>KunderaCounterColumn</name>
+					<tables>
+						<table>
+							<name>counters</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>SuperCounters</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>InvalidCounterColumnEntity</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
+							<name>ValidCounterColumnFamily</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+				<schema>
+					<name>KunderaExamples</name>
+					<properties>
+						<property name="strategy.class" value="SimpleStrategy" />
+						<property name="replcation.factor" value="1" />
+						<property name="durable.writes" value="true" />
+						<property name="inverted.indexing.enabled" value="true" />
+					</properties>
+				</schema>
+			</schemas>
+		</dataStore>
+		<dataStore>
+			<name>hbase</name>
+			<connection>
+				<properties>
+					<property name="hbase.zookeeper.quorum" value="localhost"></property>
+					<property name="hbase.zookeeper.property.clientPort"
+						value="2181"></property>
+				</properties>
+			</connection>
+			<schemas>
+				<schema>
+					<name>KunderaHbaseXmlTest</name>
+					<tables>
+						<table>
+							<name>HBASEUSERXYZ</name>
+							<properties>
+								<property name="TTL" value="12345678" />
+								<property name="VERSIONS" value="6" />
+								<property name="MIN_VERSIONS" value="3" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+					</tables>
+				</schema>
+				<schema>
+					<name>KunderaExamples</name>
+					<tables>
+						<table>
+							<name>AGE</name>
+							<properties>
+								<property name="TTL" value="123456" />
+								<property name="MAX_VERSIONS" value="5" />
+								<property name="MIN_VERSIONS" value="2" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+						<table>
+							<name>PERSON_NAME</name>
+							<properties>
+								<property name="TTL" value="123456" />
+								<property name="MAX_VERSIONS" value="5" />
+								<property name="MIN_VERSIONS" value="2" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+					</tables>
+				</schema>
+			</schemas>
+		</dataStore>
+	</datastores>
+</clientProperties>

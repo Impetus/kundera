@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<schemas>
+				<schema>
+					<name>CompositeCassandra</name>
+					<properties>
+						<property name="strategy.class" value="SimpleStrategy" />
+						<property name="replcation.factor" value="1" />
+						<property name="durable.writes" value="true" />
+					</properties>
+					<dataCenters>
+						<dataCenter>
+							<name>DC1</name>
+							<value>3</value>
+						</dataCenter>
+						<dataCenter>
+							<name>DC2</name>
+							<value>2</value>
+						</dataCenter>
+					</dataCenters>
+					<tables>
+						<table>
+							<name>CompositeUserDataType</name>
+							<properties>
+								<property name="default.validation.class" value="UTF8Type"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+								<property name="comment" value="User Column Family"></property>
+								<property name="max.compaction.threshold" value="64"></property>
+								<property name="min.compaction.threshold" value="16"></property>
+								<property name="replicate.on.write" value="true"></property>
+								<property name="comparator.type" value="UTF8Type"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+			</schemas>
+		</dataStore>
+	</datastores>
+</clientProperties>

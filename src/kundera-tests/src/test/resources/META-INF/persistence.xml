@@ -1,0 +1,328 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
+	version="2.0">
+	<!-- Persistence Units for User-Address example (Cross-data store persistence) -->
+
+	<persistence-unit name="addCassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="./lucene" /> -->
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="secIdxAddCassandraJTA"
+		transaction-type="JTA">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="cassandra" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="addMongoJTA" transaction-type="JTA">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
+
+	<persistence-unit name="secIdxAddCassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
+		</properties>
+
+	</persistence-unit>
+	<persistence-unit name="addHbase">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="0" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="addMongo">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="rdbms">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.examples.crossdatastore.useraddress.entities.PersonnelUni1To1FK</class>
+		<class>com.impetus.kundera.examples.crossdatastore.useraddress.entities.HabitatUni1To1FK</class>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:KunderaTests" />
+			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.connection.pool_size" value="10" />
+			<property name="hibernate.connection.autocommit" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
+		</properties>
+	</persistence-unit>
+
+	<!-- Persistence Units for Pickr application -->
+	<persistence-unit name="picmysql">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create" /> -->
+			<!-- <property name="hibernate.show_sql" value="true" /> -->
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:Pickr" />
+			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.connection.pool_size" value="10" />
+			<property name="hibernate.connection.autocommit" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
+		</properties>
+	</persistence-unit>
+
+	<!-- Persistence Units for Pickr application -->
+	<!-- <persistence-unit name="picmysql"> <provider>com.impetus.kundera.KunderaPersistence</provider> 
+		<properties> <property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" 
+		/> <property name="hibernate.hbm2ddl.auto" value="create" /> <property name="hibernate.max_fetch_depth" 
+		value="0" /> <property name="hibernate.show_sql" value="true" /> <property 
+		name="hibernate.format_sql" value="true" /> <property name="hibernate.dialect" 
+		value="org.hibernate.dialect.MySQL5Dialect" /> <property name="hibernate.connection.driver_class" 
+		value="com.mysql.jdbc.Driver" /> <property name="hibernate.connection.url" 
+		value="jdbc:mysql://localhost:3306/Pickr" /> <property name="hibernate.connection.url" 
+		value="jdbc:mysql://192.168.145.168:3306/Pickr" /> <property name="hibernate.connection.username" 
+		value="root" /> <property name="hibernate.connection.password" value="impetus" 
+		/> <property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" 
+		/> <property name="index.home.dir" value="./lucene" /> </properties> </persistence-unit> -->
+	<persistence-unit name="piccandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="Pickr" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="picbase">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="Pickr" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="index.home.dir" value="./lucene" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="picongo">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="Pickr" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="redis">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.port" value="6379" />
+			<property name="kundera.keyspace" value="RedisK" />
+			<property name="kundera.dialect" value="redis" />
+			<property name="kundera.client" value="redis" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
+			<property name="kundera.password" value="Kundera@123" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.transaction.timeout" value="30" />
+		</properties>
+	</persistence-unit>
+
+	<!-- Persistence Units for IMDB application -->
+	<persistence-unit name="imdbCassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="imdb" />
+			<property name="kundera.dialect" value="cassandra" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="imdbNeo4J">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="7474" />
+			<property name="kundera.datastore.file.path" value="target/imdb.db" />
+			<property name="kundera.dialect" value="neo4j" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.neo4j.Neo4JClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.client.property" value="kunderaNeo4JTest.xml" />
+			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="imdbRDBMS">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
+			<!-- <property name="hibernate.show_sql" value="true" /> -->
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:imdb" />
+			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.connection.pool_size" value="10" />
+			<property name="hibernate.connection.autocommit" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.DriverManagerConnectionProviderImpl" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="imdbHbase">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="2181" />
+			<property name="kundera.keyspace" value="imdb" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="oracle_kvstore">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5000" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.indexer.class"
+				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="oracle_kvstore_JTA"
+		transaction-type="JTA">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5000" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.indexer.class"
+				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
+		</properties>
+	</persistence-unit>
+
+</persistence>
