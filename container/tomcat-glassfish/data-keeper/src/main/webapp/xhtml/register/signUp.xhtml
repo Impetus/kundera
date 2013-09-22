@@ -1,0 +1,74 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="signUpTemplate.xhtml" xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        Kwitter :: SignUp
+    </ui:define>
+
+	<ui:define name="content">
+
+		<table>
+			<tr>
+				<td><p:growl id="growl" sticky="false" showDetail="false" /></td>
+			</tr>
+		</table>
+		<br />
+		<p:panel header="SignUp to DataKeeper">
+			<h:form>
+
+				<p:growl id="growl" sticky="true" showDetail="true" />
+
+				<p:panel header="Employee Details">
+
+					<h:messages errorClass="error" />
+
+					<h:panelGrid columns="2" columnClasses="label, value"
+						styleClass="grid">
+
+						<h:outputText value="Employee Name: *" />
+						<p:inputText required="true" label="Employee Name"
+							value="#{registerBean.employee.employeeName}" />
+
+						<h:outputText value="Password: *" />
+						<p:password size="20" required="true" label="Password"
+							value="#{registerBean.employee.password}" />
+
+						<h:outputText value="Experience: *" />
+						<p:inputText required="true" label="Experience"
+							value="#{registerBean.employee.experience}" />
+
+						<h:outputText value="Joining Date: *" />
+						<p:calendar value="#{registerBean.employee.joiningDate}"
+							id="popupCal" />
+
+						<h:outputText value="Company Name" />
+						<p:inputText required="true" label="Company Name"
+							value="#{registerBean.employee.company}" />
+
+						<h:outputText value="Designation:*" />
+						<p:inputText required="true" label="Designation"
+							value="#{registerBean.employee.designation}" />
+
+						<h:outputText value="ManagerId: *" />
+						<p:inputText required="true" label="ManagerId"
+							value="#{registerBean.managerId}" />
+
+						<h:outputText value="Current Project *" />
+						<p:inputText required="true" label="Current Project"
+							value="#{registerBean.employee.currentProject}" />
+					</h:panelGrid>
+
+				</p:panel>
+
+				<h:panelGrid>
+					<p:commandButton value="Submit" update="growl"
+						action="#{registerBean.save}" />
+				</h:panelGrid>
+
+			</h:form>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>

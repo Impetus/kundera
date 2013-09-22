@@ -1,0 +1,57 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<p:panel header="Welcome, #{sessionScope.employee.employeeName}">
+
+		<table>
+			<tr>
+				<td><img src="../../images/BlankProfile.gif" height="200"
+					width="200" /></td>
+			</tr>
+
+
+
+			<tr>
+				<td><br /> <h:outputText value="Employee Detail"
+						style="font-weight:bold;" /> <br /></td>
+			</tr>
+			<ui:repeat var="employee" value="#{employee}">
+				<tr>
+					<td style="align: center"><h:outputText value="Employee Id:-" /></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.employeeId}" /></td>
+				</tr>
+				<tr>
+					<td style="align: center"><h:outputText value="Employee Name:-"/></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.employeeName}" /></td>
+				</tr>
+				<tr>
+					<td style="align: center"><h:outputText
+							value="Experience in year:-" /></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.experience}" /></td>
+				</tr>
+				<tr>
+					<td style="align: center"><h:outputText value="Designation:-" /></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.designation}" /></td>
+				</tr>
+				<tr>
+					<td style="align: center"><h:outputText value="Manager Name:-" /></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.manager.employeeName}" /></td>
+				</tr>
+				<tr>
+					<td style="align: center"><h:outputText value="Project:-" /></td>
+					<td style="align: center"><h:outputText
+							value="#{employee.currentProject}" /></td>
+				</tr>
+
+			</ui:repeat>
+
+		</table>
+	</p:panel>
+</ui:composition>

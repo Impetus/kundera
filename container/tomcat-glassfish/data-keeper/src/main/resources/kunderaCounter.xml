@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<schemas>
+				<schema>
+					<name>datakeeper</name>
+					<tables>
+						<table>
+							<name>SUBORDINATES_COUNTER</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+			</schemas>
+		</dataStore>
+	</datastores>
+</clientProperties>
