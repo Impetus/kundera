@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<connection>
+<!-- 				<properties>
+					<property name="cql.version" value="3.0.0" />
+					Load balancing specific configuration
+					<property name="loadbalancing.policy" value="roundrobin" />
+					<property name="retry" value="true" />
+					<property name="retry.delay" value="1" />
+					<property name="max.wait" value="3000" />
+				</properties> -->
+				<servers>
+					<server>
+						<host>
+							localhost
+						</host>
+						<port>
+							9160
+						</port>
+					</server>
+				</servers>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>
