@@ -112,6 +112,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         // No custom property currently defined by Kundera, leaving empty
         if (log.isDebugEnabled())
             log.debug("No custom property to set for Neo4J");
+        for (String key : properties.keySet())
+        {
+            Object value = properties.get(key);
+            if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
+            {
+                Integer batchSize = (Integer) value;
+                ((Neo4JClient) client).setBatchSize(batchSize);
+            }
+        }
     }
 
     /**

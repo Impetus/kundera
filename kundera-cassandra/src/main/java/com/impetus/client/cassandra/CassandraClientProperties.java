@@ -18,8 +18,10 @@ package com.impetus.client.cassandra;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
@@ -59,24 +61,29 @@ class CassandraClientProperties
                 }
                 else if (key.equals(TTL_PER_SESSION) && value instanceof Boolean)
                 {
-                    if(((Boolean) value).booleanValue())
+                    if (((Boolean) value).booleanValue())
                     {
                         cassandraClientBase.setTtlPerRequest(false);
-                    }                    
+                    }
                     cassandraClientBase.setTtlPerSession((Boolean) value);
-                    
+
                 }
                 else if (key.equals(TTL_PER_REQUEST) && value instanceof Boolean)
                 {
-                    if(((Boolean) value).booleanValue())
+                    if (((Boolean) value).booleanValue())
                     {
                         cassandraClientBase.setTtlPerSession(false);
-                    }  
+                    }
                     cassandraClientBase.setTtlPerRequest((Boolean) value);
                 }
                 else if (key.equals(TTL_VALUES) && value instanceof Map)
                 {
                     cassandraClientBase.setTtlValues((Map) value);
+                }
+                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && !StringUtils.isBlank(value.toString())
+                        && StringUtils.isNumeric(value.toString()))
+                {
+                    cassandraClientBase.setBatchSize(value.toString());
                 }
 
                 // Add more properties as needed
