@@ -255,7 +255,7 @@ public class KunderaQueryTest
                 Assert.assertNotNull(((FilterClause)clause).getCondition());
             } else
             {
-                Assert.assertEquals("AND", clause.toString());
+                Assert.assertEquals("AND", clause.toString().trim());
             }
         }
         
