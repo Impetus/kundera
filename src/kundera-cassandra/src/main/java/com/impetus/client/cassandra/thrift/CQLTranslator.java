@@ -48,6 +48,7 @@ import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -570,13 +571,21 @@ public final class CQLTranslator
      */
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
-        if (useToken)
+       // To allow handle byte array class object by converting it to string
+       if (value.getClass() == byte[].class)
         {
-            builder.append(TOKEN);
-        }
+           
+           builder.append("0x" +String.valueOf(Hex.encodeHex((PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toBytes(value)))));
+                     
+          
+        } else {        
+            if (useToken)
+            {
+              builder.append(TOKEN);
+            }
         
         if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz) || fieldClazz.isAssignableFrom(char.class)
-                || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum)
+                || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum )
         {
 
 
@@ -596,6 +605,7 @@ public final class CQLTranslator
             {
                 builder.append(((Enum) value).name());
             }
+          
             else
             {
                 builder.append(value);
@@ -604,14 +614,17 @@ public final class CQLTranslator
         }
         else
         {
-            builder.append(value);
+           builder.append(value);
         }
 
+       
+       }
         if (useToken)
         {
             builder.append(CLOSE_BRACKET);
         }
     }
+
 
     /**
      * Appends column name and ensure case sensitivity.
