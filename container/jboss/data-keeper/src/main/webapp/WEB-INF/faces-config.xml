@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_1.xsd"
+	version="2.1">
+	<navigation-rule>
+		<from-view-id>/xhtml/login/login.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>loginSuccessful</from-outcome>
+			<to-view-id>/xhtml/home/timeline.xhtml</to-view-id>
+		</navigation-case>
+		<navigation-case>
+			<from-outcome>loginFailed</from-outcome>
+			<to-view-id>/xhtml/login/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<from-view-id>/xhtml/register/signUp.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>signUpSuccessful</from-outcome>
+			<to-view-id>/xhtml/login/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<from-view-id>/xhtml/register/signUp.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>timeline</from-outcome>
+			<to-view-id>/xhtml/home/timeline.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<from-view-id>/xhtml/home/timeline.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>foundEmployess</from-outcome>
+			<to-view-id>/xhtml/home/showSubordinatesInfo.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<from-view-id>/xhtml/home/showSubordinatesInfo.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>foundEmployess</from-outcome>
+			<to-view-id>/xhtml/home/showSubordinatesInfo.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>logOfSuccessful</from-outcome>
+			<to-view-id>/xhtml/login/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>Account successfully deleted</from-outcome>
+			<to-view-id>/xhtml/login/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+</faces-config>

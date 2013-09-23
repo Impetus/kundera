@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	template="loginTemplate.xhtml" xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="title">
+        Kwitter :: Login
+    </ui:define>
+
+	<ui:define name="content">
+
+		<table>
+			<tr>
+				<td><p:growl id="growl" sticky="false" showDetail="false"/> </td>
+			</tr>
+		</table>
+		<br />
+		 <p:panel header="Login to DataKeeper">
+			<h:form>
+				<table>
+					<tr>
+						<td><h:outputText value="User Name:" /></td>
+						<td><p:inputText size="20" value="#{loginBean.employee.employeeName}" /></td>
+					</tr>
+					<tr>
+						<td><h:outputText value="Password:" /></td>
+						<td><p:password size="20"
+							value="#{loginBean.employee.password}" /></td>
+					</tr>
+					
+					<tr>						
+						<td colspan="2" align="right"><h:commandButton value="Submit"
+							action="#{loginBean.authenticate}" /></td>
+
+					</tr>
+					<tr>						
+						<td colspan="2" align="right">Not a member? <h:commandLink value="SignUp Now!"
+							action="/xhtml/register/signUp.xhtml" /></td>
+
+					</tr>
+				</table>
+			</h:form>
+		</p:panel>
+	</ui:define>
+</ui:composition>
+

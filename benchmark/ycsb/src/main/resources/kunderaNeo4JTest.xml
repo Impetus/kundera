@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>neo4j</name>
+			<connection>
+				<properties>					
+					<property name="node_auto_indexing" value="true"></property>					
+					<property name="node_keys_indexable" value="USER_ID"></property>										
+				</properties>
+			</connection>
+			</dataStore>
+	</datastores>
+</clientProperties>
