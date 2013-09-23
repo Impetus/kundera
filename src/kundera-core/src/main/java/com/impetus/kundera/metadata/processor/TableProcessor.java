@@ -102,17 +102,19 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz,
             Map puProperties)
     {
-        Table table = clazz.getAnnotation(Table.class);
-        // Set Name of persistence object
-        metadata.setTableName(table.name());
-        // Add named/native query related application metadata.
-        addNamedNativeQueryMetadata(clazz);
-        // set schema name and persistence unit name (if provided)
-        String schemaStr = table.schema();
-        
-        MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
+/*        Table table = clazz.getAnnotation(Table.class);
+        if (table != null)
+        {
+            // Set Name of persistence object
+            metadata.setTableName(table.name());
+            // Add named/native query related application metadata.
+            addNamedNativeQueryMetadata(clazz);
+            // set schema name and persistence unit name (if provided)
+            String schemaStr = table.schema();
 
-        // scan for fields
+            MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
+        }
+     */   // scan for fields
 
         // process for metamodelImpl
 

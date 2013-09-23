@@ -95,11 +95,11 @@ public class EntityValidatorImpl implements EntityValidator
             throw new InvalidEntityDefinitionException(clazz.getName() + " is not annotated with @Entity.");
         }
 
-        // Must be annotated with @Table
-        if (!clazz.isAnnotationPresent(Table.class))
-        {
-            throw new InvalidEntityDefinitionException(clazz.getName() + " must be annotated with @Table.");
-        }
+//        // Must be annotated with @Table
+//        if (!clazz.isAnnotationPresent(Table.class))
+//        {
+//            throw new InvalidEntityDefinitionException(clazz.getName() + " must be annotated with @Table.");
+//        }
 
         // must have a default no-argument constructor
         try
