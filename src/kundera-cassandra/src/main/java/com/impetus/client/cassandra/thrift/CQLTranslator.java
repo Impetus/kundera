@@ -33,6 +33,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.cli.CliParser.value_return;
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.CounterColumnType;
@@ -572,12 +573,11 @@ public final class CQLTranslator
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
        // To allow handle byte array class object by converting it to string
-       if (value.getClass() == byte[].class)
+       if (fieldClazz.isAssignableFrom(byte[].class))
         {
-           
-           builder.append("0x" +String.valueOf(Hex.encodeHex((PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toBytes(value)))));
-                     
-          
+           StringBuilder hexstr = new StringBuilder("0x");
+           builder.append(hexstr.append((Hex.encodeHex((byte []) value))));
+                    
         } else {        
             if (useToken)
             {
