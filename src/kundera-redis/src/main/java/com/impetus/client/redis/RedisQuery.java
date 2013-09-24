@@ -201,7 +201,7 @@ public class RedisQuery extends QueryImpl
             else
             {
 
-                String opr = clause.toString();
+                String opr = clause.toString().trim();
 
                 if (interpreter.getClause() == null)
                 {
