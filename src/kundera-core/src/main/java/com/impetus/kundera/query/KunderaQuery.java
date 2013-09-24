@@ -67,7 +67,7 @@ public class KunderaQuery
 
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile(
-            "=|\\s\\blike\\b|\\s\\bin\\b|>=|>|<=|<|\\s\\bset", Pattern.CASE_INSENSITIVE);
+            "=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset", Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
@@ -772,7 +772,7 @@ public class KunderaQuery
         {
             super();
             this.property = property;
-            this.condition = condition;
+            this.condition = condition.trim();
             this.value = KunderaQuery.getValue(value);
         }
 

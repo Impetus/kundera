@@ -166,7 +166,7 @@ public class OracleNoSQLQuery extends QueryImpl
             }
             else if (clause instanceof String)
             {
-                operatorWithIdClause = clause.toString();
+                operatorWithIdClause = clause.toString().trim();
             }
 
             if (idClauseFound && operatorWithIdClause != null)

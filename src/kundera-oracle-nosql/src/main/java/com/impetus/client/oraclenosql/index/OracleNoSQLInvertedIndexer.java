@@ -217,7 +217,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
             }
             else if (clause instanceof String)
             {
-                interClauseOperator = clause.toString();
+                interClauseOperator = clause.toString().trim();
             }
 
             addToResults(results, foundKeys, interClauseOperator);
