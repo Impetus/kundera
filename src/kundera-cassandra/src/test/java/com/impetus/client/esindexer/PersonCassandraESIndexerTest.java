@@ -45,15 +45,18 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.crud.BaseTest;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
@@ -84,6 +87,20 @@ public class PersonCassandraESIndexerTest extends BaseTest
 
     /** The col. */
     private Map<Object, Object> col;
+
+    private static Node node = null;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        node = new NodeBuilder().node();
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        node.close();
+    }
 
     /**
      * Sets the up.

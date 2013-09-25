@@ -74,46 +74,47 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        
+
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
-        
+
         FilterBuilder preIntraFilter = null;
         FilterBuilder preInterFilter = null;
         String interFilter = null;
-        
+
         // Select p from Person p where p.age= 32 and p.name= 'vivek';
-        
+
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-                FilterBuilder currentFilter = getFilter(clause,m,entity);
-                if(interFilter != null)
+                FilterBuilder currentFilter = getFilter(clause, m, entity);
+                if (interFilter != null)
                 {
-                    if(interFilter.equalsIgnoreCase("and"))
+                    if (interFilter.equalsIgnoreCase("and"))
                     {
-                        preInterFilter = new AndFilterBuilder(preIntraFilter,currentFilter);
-                    } else if(interFilter.equalsIgnoreCase("or"))
+                        preInterFilter = new AndFilterBuilder(preIntraFilter, currentFilter);
+                    }
+                    else if (interFilter.equalsIgnoreCase("or"))
                     {
-                        preInterFilter = new OrFilterBuilder(preIntraFilter,currentFilter);
+                        preInterFilter = new OrFilterBuilder(preIntraFilter, currentFilter);
                     }
                 }
 
                 preIntraFilter = currentFilter;
-            } else 
+            }
+            else
             {
                 String opr = o.toString();
-                interFilter=opr;
+                interFilter = opr.trim();
             }
         }
-        
-        
-        return ((ESClient)client).executeQuery(preInterFilter != null ? preInterFilter : preIntraFilter, m);
-        
-//        return null;
+
+        return ((ESClient) client).executeQuery(preInterFilter != null ? preInterFilter : preIntraFilter, m);
+
+        // return null;
     }
 
     /*
@@ -129,7 +130,7 @@ public class ESQuery<E> extends QueryImpl
     {
         List result = populateEntities(m, client);
         return setRelationEntities(result, client, m);
-//        return null;
+        // return null;
     }
 
     /*
@@ -166,16 +167,16 @@ public class ESQuery<E> extends QueryImpl
         return null;
     }
 
-    private FilterBuilder getFilter(FilterClause clause ,final EntityMetadata metadata, final EntityType entityType)
+    private FilterBuilder getFilter(FilterClause clause, final EntityMetadata metadata, final EntityType entityType)
     {
         String condition = clause.getCondition();
         Object value = clause.getValue();
         String name = clause.getProperty();
-        
+
         FilterBuilder filterBuilder = null;
         if (condition.equals("="))
         {
-            filterBuilder = new TermFilterBuilder(name,value);
+            filterBuilder = new TermFilterBuilder(name, value);
         }
         else if (condition.equals(">"))
         {
@@ -193,11 +194,8 @@ public class ESQuery<E> extends QueryImpl
         {
             filterBuilder = new RangeFilterBuilder(name).lte(value);
         }
-    
+
         return filterBuilder;
     }
 
 }
-
-
-

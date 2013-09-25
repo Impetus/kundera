@@ -26,6 +26,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,10 +47,13 @@ public class PersonESTest
 
     /** The em. */
     private EntityManager em;
+    
+    private static Node node = null;
 
     @Before
     public void setup()
     {
+        node = new NodeBuilder().node();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
@@ -235,6 +240,7 @@ public class PersonESTest
     {
         em.close();
         emf.close();
+        node.close();
     }
 
     private void waitThread() throws InterruptedException

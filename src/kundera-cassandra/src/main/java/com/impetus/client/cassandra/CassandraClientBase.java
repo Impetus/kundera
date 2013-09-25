@@ -1777,19 +1777,24 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             externalBatchSize = externalBatchSize != null? externalBatchSize.toString():null;
             batch_Size = puProperties != null ? (String)externalBatchSize
                     : null;
-            if (batch_Size != null)
-            {
-                batchSize = Integer.valueOf(batch_Size);
-                if (batchSize == 0)
-                {
-                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0.");
-                }
-            }
+            setBatchSize(batch_Size);
         }
         else if (batch_Size == null)
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
             batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
+        }
+    }
+
+    void setBatchSize(String batch_Size)
+    {
+        if (batch_Size != null)
+        {
+            batchSize = Integer.valueOf(batch_Size);
+            if (batchSize == 0)
+            {
+                throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0.");
+            }
         }
     }
 

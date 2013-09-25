@@ -954,25 +954,33 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     : null;
             if (batch_Size != null)
             {
-                batchSize = Integer.valueOf(batch_Size);
-                if (batchSize == 0)
-                {
-                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
-                }
+                setBatchSize(Integer.valueOf(batch_Size));
             }
         }
         else if (batch_Size == null)
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata.getBatchSize();
+            setBatchSize(puMetadata.getBatchSize());
         }
+    }
+
+    private void setBatchSize(int batch_Size)
+    {
+        this.batchSize = batch_Size;
     }
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        // new CassandraClientProperties().populateClientProperties(client,
-        // properties);
+        for (String key : properties.keySet())
+        {
+            Object value = properties.get(key);
+            if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
+            {
+                Integer batchSize = (Integer) value;
+                ((OracleNoSQLClient) client).setBatchSize(batchSize);
+            }
+        }
     }
 
     /**

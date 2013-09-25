@@ -21,6 +21,7 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
@@ -48,6 +49,11 @@ class HBaseClientProperties
                 if (key.equals(FILTER) && value instanceof Filter)
                 {
                     hbaseClient.setFilter((Filter) value);
+                }
+                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
+                {
+                    Integer batchSize = (Integer) value;
+                    hbaseClient.setBatchSize(batchSize);
                 }
 
                 // Add more

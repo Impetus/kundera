@@ -171,7 +171,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         try
         {
             result = fetch(entityClass, key, connection, null);
-       }
+        }
         catch (InstantiationException e)
         {
             logger.error("Error during find by key:", e);
@@ -568,7 +568,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 resultKeys = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
             }
 
-            results= fetchColumn(columnName, connection, results, resultKeys);
+            results = fetchColumn(columnName, connection, results, resultKeys);
 
             // return connection.hmget(getEncodedBytes(redisKey),
             // getEncodedBytes(columnName));
@@ -612,7 +612,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
 
         }
-        
+
         return results;
     }
 
@@ -1106,7 +1106,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
-/*    *//**
+    /*    *//**
      * Prepares composite key as a redis key.
      * 
      * @param m
@@ -1116,43 +1116,31 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @param compositeKey
      *            composite key instance
      * @return redis key
-     *//*
-    private String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel, final Object compositeKey)
-    {
-        // EmbeddableType keyObject =
-        // metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-
-        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Field f : fields)
-        {
-            if (!ReflectUtils.isTransientOrStatic(f))
-            {
-                // Attribute compositeColumn =
-                // keyObject.getAttribute(f.getName());
-                try
-                {
-                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                                                                                           // value
-                    stringBuilder.append(fieldValue);
-                    stringBuilder.append(COMPOSITE_KEY_SEPERATOR);
-                }
-                catch (IllegalArgumentException e)
-                {
-                    logger.error("Error during persist, Caused by:", e);
-                    throw new PersistenceException(e);
-                }
-            }
-        }
-
-        if (stringBuilder.length() > 0)
-        {
-            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(COMPOSITE_KEY_SEPERATOR));
-        }
-        return stringBuilder.toString();
-    }
-*/
+     */
+    /*
+     * private String prepareCompositeKey(final EntityMetadata m, final
+     * MetamodelImpl metaModel, final Object compositeKey) { // EmbeddableType
+     * keyObject = //
+     * metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+     * 
+     * Field[] fields =
+     * m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+     * 
+     * StringBuilder stringBuilder = new StringBuilder(); for (Field f : fields)
+     * { if (!ReflectUtils.isTransientOrStatic(f)) { // Attribute
+     * compositeColumn = // keyObject.getAttribute(f.getName()); try { String
+     * fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+     * // value stringBuilder.append(fieldValue);
+     * stringBuilder.append(COMPOSITE_KEY_SEPERATOR); } catch
+     * (IllegalArgumentException e) {
+     * logger.error("Error during persist, Caused by:", e); throw new
+     * PersistenceException(e); } } }
+     * 
+     * if (stringBuilder.length() > 0) {
+     * stringBuilder.deleteCharAt(stringBuilder
+     * .lastIndexOf(COMPOSITE_KEY_SEPERATOR)); } return
+     * stringBuilder.toString(); }
+     */
     /**
      * Wraps entity attributes into byte[] and return instance of attribute
      * wrapper.
@@ -1612,6 +1600,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         setConfig(properties);
+        for (String key : properties.keySet())
+        {
+            Object value = properties.get(key);
+            if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
+            {
+                Integer batchSize = (Integer) value;
+                ((RedisClient) client).setBatchSize(batchSize);
+            }
+        }
     }
 
     @Override
@@ -1689,18 +1686,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     : null;
             if (batch_Size != null)
             {
-                batchSize = Integer.valueOf(batch_Size);
-                if (batchSize == 0)
-                {
-                    throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
-                }
+                setBatchSize(Integer.valueOf(batch_Size));
             }
         }
         else if (batch_Size == null)
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata.getBatchSize();
+            setBatchSize(puMetadata.getBatchSize());
         }
+    }
+
+    private void setBatchSize(int batch_Size)
+    {
+        this.batchSize = batch_Size;
     }
 
     private void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders,

@@ -22,7 +22,11 @@ How to build
 ============
 Each module is a maven based project. To build a specific module(for example src). You need to execute a command as 
 
-* mvn clean install -Dfile src/pom.xml
+<b>mvn clean install -Dfile src/pom.xml </b>
+
+More details about Kundera source code structure and build process are available at => 
+https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md
+
 
 About Us
 ========

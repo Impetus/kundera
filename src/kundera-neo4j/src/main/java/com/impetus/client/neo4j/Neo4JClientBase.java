@@ -67,17 +67,18 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
                 : null;
         if (batch_Size != null)
         {
-            batchSize = Integer.valueOf(batch_Size);
-            if (batchSize == 0)
-            {
-                throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
-            }
+            setBatchSize(Integer.valueOf(batch_Size));
         }
         else
         {
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata.getBatchSize();
+            setBatchSize(puMetadata.getBatchSize());
         }
+    }
+
+    void setBatchSize(int batch_Size)
+    {
+        this.batchSize = batch_Size;
     }
 
     public int getBatchSize()

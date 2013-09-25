@@ -62,12 +62,12 @@ public class KunderaQuery
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
-    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
+            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|\\bin\\b|>=|>|<=|<|set",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile(
+            "=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset", Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
@@ -109,7 +109,7 @@ public class KunderaQuery
     private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>();
 
     private TypedParameter typedParameter;
-    
+
     boolean isNativeQuery;
 
     /**
@@ -483,7 +483,7 @@ public class KunderaQuery
                 }
 
                 String condition = tokens.get(1);
-                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
+                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase().trim()))
                 {
                     throw new JPQLParseException("Bad JPA query: " + clause);
                 }
@@ -500,7 +500,7 @@ public class KunderaQuery
             }
             else
             {
-                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase()))
+                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()))
                 {
                     filtersQueue.add(clause.toUpperCase());
                     newClause = true;
@@ -716,6 +716,7 @@ public class KunderaQuery
     {
         return isNativeQuery;
     }
+
     /**
      * Gets the entity metadata.
      * 
@@ -771,7 +772,7 @@ public class KunderaQuery
         {
             super();
             this.property = property;
-            this.condition = condition;
+            this.condition = condition.trim();
             this.value = KunderaQuery.getValue(value);
         }
 
@@ -1105,7 +1106,8 @@ public class KunderaQuery
      */
     private List<String> parseFilterForBetweenClause(List<String> tokens)
     {
-        final String between = "BETWEEN";
+        // There should be whitespace on bothside of keyword between.
+        final String between = " BETWEEN ";
 
         if (tokens.contains(between))
         {
@@ -1326,6 +1328,4 @@ public class KunderaQuery
         return value;
     }
 
-
-    
 }

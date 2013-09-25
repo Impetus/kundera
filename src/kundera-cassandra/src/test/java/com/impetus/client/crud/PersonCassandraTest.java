@@ -166,9 +166,8 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertEquals(Day.THURSDAY, p.getDay());
 
         em.clear();
-        String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId >= 1";
-        Query q = em.createQuery(qry);
-        List<PersonCassandra> persons = q.getResultList();
+        Query q;
+        List<PersonCassandra> persons = queryOverRowkey();
 
         assertFindByName(em, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "personName");
@@ -203,7 +202,7 @@ public class PersonCassandraTest extends BaseTest
         p = findById(PersonCassandra.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("'KK MISHRA'", p.getPersonName());
-        
+
         testCountResult();
         // Delete without WHERE clause.
 
@@ -211,6 +210,42 @@ public class PersonCassandraTest extends BaseTest
         q = em.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
 
+    }
+
+    private List<PersonCassandra> queryOverRowkey()
+    {
+        String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId = 1";
+        Query q = em.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(1, persons.size());
+
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId > 1";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+
+
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId < 2";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId <= 2";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId >= 1";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        
+        return persons;
     }
 
     private void testCountResult()

@@ -138,7 +138,8 @@ public class KunderaQueryParser
             {
                 if (isKeyword(keyword))
                 {
-                    throw new JPQLParseException("out of order keyword: " + keyword);
+                    throw new JPQLParseException("Out of order keyword " + keyword
+                            + ", entity alias must not be any reserved keyword.");
                 }
             }
         }
@@ -478,7 +479,7 @@ public class KunderaQueryParser
                 }
             }
             return content;
-        }     
+        }
 
         /**
          * Parse the next token looking for a keyword. The cursor position is

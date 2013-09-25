@@ -141,33 +141,34 @@ public class Neo4JQuery extends QueryImpl
 
                     // joiner
                     String appender = "";
-                    if (filter.getCondition().equals("="))
+                    String condition = filter.getCondition().trim();
+                    if (condition.equals("="))
                     {
                         sb.append(":");
                     }
-                    else if (filter.getCondition().equalsIgnoreCase("like"))
+                    else if (condition.equalsIgnoreCase("like"))
                     {
                         sb.append(":");
                         appender = "*";
                     }
-                    else if (filter.getCondition().equalsIgnoreCase(">"))
+                    else if (condition.equalsIgnoreCase(">"))
                     {
                         // TODO: Amresh need to look for "String.class"
                         // parameter.
                         sb.append(appendRange(filter.getValue().toString(), false, true, String.class));
                         appended = true;
                     }
-                    else if (filter.getCondition().equalsIgnoreCase(">="))
+                    else if (condition.equalsIgnoreCase(">="))
                     {
                         sb.append(appendRange(filter.getValue().toString(), true, true, String.class));
                         appended = true;
                     }
-                    else if (filter.getCondition().equalsIgnoreCase("<"))
+                    else if (condition.equalsIgnoreCase("<"))
                     {
                         sb.append(appendRange(filter.getValue().toString(), false, false, String.class));
                         appended = true;
                     }
-                    else if (filter.getCondition().equalsIgnoreCase("<="))
+                    else if (condition.equalsIgnoreCase("<="))
                     {
                         sb.append(appendRange(filter.getValue().toString(), true, false, String.class));
                         appended = true;
