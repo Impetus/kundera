@@ -17,6 +17,7 @@ package com.impetus.client.hbase;
 
 import java.util.Map;
 
+
 import org.apache.hadoop.hbase.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +47,31 @@ class HBaseClientProperties
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(FILTER) && value instanceof Filter)
+                if (key.equals(FILTER))
                 {
-                    hbaseClient.setFilter((Filter) value);
+                    if (value instanceof Filter) {
+                        
+                        hbaseClient.setFilter((Filter) value);
+                        
+                    } 
+                      
                 }
-                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
+                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
                 {
-                    Integer batchSize = (Integer) value;
-                    hbaseClient.setBatchSize(batchSize);
+                   
+                    if( value instanceof Integer )
+                    {
+                                        
+                       hbaseClient.setBatchSize((Integer) value);
+                      
+                    } 
+                    else if (value instanceof String) 
+                    {
+                       
+                       hbaseClient.setBatchSize(Integer.valueOf((String) value));
+                        
+                    }
+                    
                 }
 
                 // Add more
