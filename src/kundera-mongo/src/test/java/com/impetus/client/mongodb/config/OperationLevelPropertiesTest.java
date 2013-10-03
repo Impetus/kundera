@@ -15,6 +15,7 @@
  */
 package com.impetus.client.mongodb.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -54,7 +55,9 @@ public class OperationLevelPropertiesTest
     {
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
         em = emf.createEntityManager();
+        em.setProperty("batch.size",""+ 1);
         em.getDelegate();
+        
     }
 
     @Test
@@ -79,7 +82,8 @@ public class OperationLevelPropertiesTest
         WriteConcern wcNew = new WriteConcern(1, 300, true);
         DBEncoder encoderNew = new LazyDBEncoder();
         em.setProperty(MongoDBClientProperties.WRITE_CONCERN, wcNew);
-        // em.setProperty(MongoDBClientProperties.DB_ENCODER, encoderNew);
+        em.setProperty("batch.size", 0);
+       
 
         // Check Modified values
         WriteConcern wcModified = client.getWriteConcern();
@@ -106,7 +110,8 @@ public class OperationLevelPropertiesTest
         em.remove(p);
 
     }
-
+    
+   
     /**
      * @throws java.lang.Exception
      */

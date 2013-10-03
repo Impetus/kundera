@@ -59,7 +59,7 @@ public class MongoDBClientProperties
                         mongoDBClient.setWriteConcern((WriteConcern) value);
                         
                     }
-                    
+                   
                 }
                 else if (key.equals(DB_ENCODER))
                 {
@@ -68,7 +68,7 @@ public class MongoDBClientProperties
                        mongoDBClient.setEncoder((DBEncoder) value);
                         
                     } 
-                  
+                    
                    
                 }
                 else if (key.equals(BATCH_SIZE))
@@ -78,7 +78,7 @@ public class MongoDBClientProperties
                     {
                         mongoDBClient.setBatchSize((Integer) value);
                         
-                    } else if (value instanceof Integer) 
+                    } else if (value instanceof String) 
                     {
                        
                         mongoDBClient.setBatchSize(Integer.valueOf((String) value));

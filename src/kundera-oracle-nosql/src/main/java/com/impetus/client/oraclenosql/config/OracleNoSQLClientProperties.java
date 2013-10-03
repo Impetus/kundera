@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
@@ -55,23 +56,54 @@ public class OracleNoSQLClientProperties
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(WRITE_TIMEOUT) && value instanceof Integer)
+                if (key.equals(WRITE_TIMEOUT))
                 {
-                    oracleNoSQLClient.setTimeout((Integer) value);
+                    if (value instanceof Integer) 
+                    {
+                        oracleNoSQLClient.setTimeout((Integer) value);
+                        
+                    }
+                    else if (value instanceof String) 
+                    {
+                    
+                        oracleNoSQLClient.setTimeout(Integer.valueOf((String) value));
+                    }
+                    
                 }
                 else if (key.equals(DURABILITY) && value instanceof Durability)
                 {
+                    
                     oracleNoSQLClient.setDurability((Durability) value);
                 }
 
-                else if (key.equals(TIME_UNIT) && value instanceof TimeUnit)
+                else if (key.equals(TIME_UNIT))
                 {
-                    oracleNoSQLClient.setTimeUnit((TimeUnit) value);
+                    if (value instanceof TimeUnit) 
+                    {
+                      oracleNoSQLClient.setTimeUnit((TimeUnit) value);
+                    }
+                    else if (value instanceof String) 
+                    {
+                        oracleNoSQLClient.setTimeUnit(TimeUnit.valueOf((String) value));    
+                    }
+                    
                 }
 
                 else if (key.equals(CONSISTENCY) && value instanceof Consistency)
                 {
                     oracleNoSQLClient.setConsistency((Consistency) value);
+                } 
+                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
+                {
+                    if (value instanceof Integer) 
+                    {
+                        oracleNoSQLClient.setBatchSize((Integer) value);
+                    } 
+                    else if (value instanceof String)
+                    {
+                        oracleNoSQLClient.setBatchSize(Integer.valueOf((String)value));
+                    }
+                    
                 }
 
                 // Add more properties as needed
