@@ -165,8 +165,15 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         {
             PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
 
-            if (externalPropertyMap != null
-                    && externalPropertyMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
+            Map<String, Object> externalPuMap = externalPropertyMap;
+            
+            //in case of polyglot.
+            if(persistenceUnits.length > 1)
+            {
+                externalPuMap = (Map<String, Object>) externalPropertyMap.get(persistenceUnit);
+            }
+            if (externalPuMap != null
+                    && externalPuMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
                     || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
             {
                 SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
