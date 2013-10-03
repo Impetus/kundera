@@ -403,6 +403,7 @@ public class KunderaQuery
 
         if (null == entityClass)
         {
+            logger.error("No entity {} found, please verify it is properly annotated with @Entity and not a mapped Super class",entityName);
             throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
 
