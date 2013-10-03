@@ -127,7 +127,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
 
-                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100,
+                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), maxResults,
                             null);
                 }
                 else
@@ -155,7 +155,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // set
                     // to true!
                     ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true,
-                            m.getRelationNames(), 100, null);
+                            m.getRelationNames(), maxResults, null);
                 }
                 else
                 {
