@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
-public class Employee extends Person
+public class Employee extends MappedPerson
 {
 
     @Column

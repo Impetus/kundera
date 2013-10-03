@@ -15,15 +15,26 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.persistence.Persistence;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Junit Test case for @See TableProcessor.
@@ -57,6 +68,7 @@ public class TableProcessorTest
     @Test
     public void testProcessQueryMetadata() throws InstantiationException, IllegalAccessException
     {
+        final String persistenceUnit = "rdbms";
         final String named_query = "Select t from TestEntity t where t.field = :field";
         final String named_query1 = "Select t1 from TestEntity t1 where t1.field = :field";
         final String named_query2 = "Select t2 from TestEntity t2 where t2.field = :field";
@@ -66,11 +78,33 @@ public class TableProcessorTest
 
         EntityMetadata metadata = new EntityMetadata(EntitySample.class);
         metadata.setPersistenceUnit("rdbms");
-        TableProcessor tableProcessor = new TableProcessor(null);
-        tableProcessor.process(EntitySample.class, metadata);
 
-        // Get application metadata
+        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
+        puMetadata.setPersistenceUnitName(persistenceUnit);
+        
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
+        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseExamples");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.CoreTestClientFactory");
+
+        Properties p = new Properties();
+        p.putAll(props);
+        puMetadata.setProperties(p);
+
+
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+        Map<String, PersistenceUnitMetadata> metadataCol = new HashMap<String, PersistenceUnitMetadata>();
+
+        metadataCol.put(persistenceUnit, puMetadata);
+        appMetadata.addPersistenceUnitMetadata(metadataCol);
+
+        
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
+        metadataBuilder.buildEntityMetadata(metadata.getEntityClazz());
 
         // Named query asserts.
         Assert.assertNotNull(appMetadata.getQuery("test.named.query"));

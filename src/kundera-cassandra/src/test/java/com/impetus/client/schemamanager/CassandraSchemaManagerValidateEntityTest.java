@@ -30,10 +30,12 @@ import org.junit.Test;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.schemamanager.entites.InvalidCounterColumnEntity;
 import com.impetus.client.schemamanager.entites.ValidCounterColumnFamily;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -100,7 +102,7 @@ public class CassandraSchemaManagerValidateEntityTest
         // String persistenceUnit = "cassandraProperties";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+                "com.impetus.client.cassandra.thrift.ThriftClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCounterColumn");
@@ -126,17 +128,11 @@ public class CassandraSchemaManagerValidateEntityTest
         clazzToPu.put(InvalidCounterColumnEntity.class.getName(), pus);
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(ValidCounterColumnFamily.class);
-        EntityMetadata m1 = new EntityMetadata(InvalidCounterColumnEntity.class);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
 
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(ValidCounterColumnFamily.class, m);
-        processor.process(InvalidCounterColumnEntity.class, m1);
-        m.setPersistenceUnit(persistenceUnit);
-        m1.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(ValidCounterColumnFamily.class, m);
-        metaModel.addEntityMetadata(InvalidCounterColumnEntity.class, m1);
+        metaModel.addEntityMetadata(ValidCounterColumnFamily.class, metadataBuilder.buildEntityMetadata(ValidCounterColumnFamily.class));
+        metaModel.addEntityMetadata(InvalidCounterColumnEntity.class,metadataBuilder.buildEntityMetadata(InvalidCounterColumnEntity.class));
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
         metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());

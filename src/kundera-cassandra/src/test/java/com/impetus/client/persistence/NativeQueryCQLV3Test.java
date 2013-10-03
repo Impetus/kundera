@@ -34,10 +34,12 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.pelops.PelopsClient;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -197,17 +199,11 @@ public class NativeQueryCQLV3Test
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntity.class);
-        EntityMetadata m1 = new EntityMetadata(CassandraBatchEntity.class);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
 
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(CassandraEntity.class, m);
-        processor.process(CassandraBatchEntity.class, m1);
-
-        m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntity.class, m);
-        metaModel.addEntityMetadata(CassandraBatchEntity.class, m1);
+        metaModel.addEntityMetadata(CassandraEntity.class, metadataBuilder.buildEntityMetadata(CassandraEntity.class));
+        metaModel.addEntityMetadata(CassandraBatchEntity.class, metadataBuilder.buildEntityMetadata(CassandraBatchEntity.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());

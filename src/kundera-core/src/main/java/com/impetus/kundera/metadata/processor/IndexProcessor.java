@@ -110,10 +110,6 @@ public class IndexProcessor implements MetadataProcessor
         EntityType entityType = (EntityType) KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
 
-        if(entityType == null)
-        {
-            System.out.println("dd");
-        }
         Set<Attribute> attributes = entityType.getAttributes();
         for (Attribute attrib : attributes)
         {

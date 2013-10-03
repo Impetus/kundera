@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.kundera.Constants;
@@ -49,6 +50,7 @@ import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -504,18 +506,11 @@ public class CassandraSchemaOperationTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntitySimple.class);
 
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(CassandraEntitySimple.class, m);
-
-        IndexProcessor indexProcessor = new IndexProcessor();
-        indexProcessor.process(CassandraEntitySimple.class, m);
-
-        m.setPersistenceUnit(persistenceUnit);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySimple.class, m);
+        metaModel.addEntityMetadata(CassandraEntitySimple.class, metadataBuilder.buildEntityMetadata(CassandraEntitySimple.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 

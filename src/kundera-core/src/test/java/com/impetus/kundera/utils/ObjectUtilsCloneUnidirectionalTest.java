@@ -31,12 +31,14 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
 import com.impetus.kundera.entity.photo.PhotoUni_1_M_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_M_1_M;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -361,6 +363,7 @@ public class ObjectUtilsCloneUnidirectionalTest
 
         Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
 
+
         List<String> pus = new ArrayList<String>();
         pus.add(_persistenceUnit);
         clazzToPu.put(PhotographerUni_1_M_1_M.class.getName(), pus);
@@ -372,6 +375,8 @@ public class ObjectUtilsCloneUnidirectionalTest
         EntityMetadata m1 = new EntityMetadata(AlbumUni_1_M_1_M.class);
         EntityMetadata m2 = new EntityMetadata(PhotoUni_1_M_1_M.class);
 
+        KunderaMetadata.INSTANCE.setApplicationMetadata(appMetadata);
+        
         TableProcessor processor = new TableProcessor(null);
         processor.process(PhotographerUni_1_M_1_M.class, m);
         processor.process(AlbumUni_1_M_1_M.class, m1);
@@ -379,10 +384,13 @@ public class ObjectUtilsCloneUnidirectionalTest
 
         m.setPersistenceUnit(_persistenceUnit);
 
+        MetadataBuilder metadataBuilder = new MetadataBuilder(_persistenceUnit, CoreTestClient.class.getSimpleName(), null);
+
+        
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PhotographerUni_1_M_1_M.class, m);
-        metaModel.addEntityMetadata(AlbumUni_1_M_1_M.class, m1);
-        metaModel.addEntityMetadata(PhotoUni_1_M_1_M.class, m2);
+        metaModel.addEntityMetadata(PhotographerUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_M_1_M.class));
+        metaModel.addEntityMetadata(AlbumUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_M_1_M.class));
+        metaModel.addEntityMetadata(PhotoUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_M_1_M.class));
 
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());

@@ -79,7 +79,7 @@ public class MappedSuperClassTest
     @Test
     public void testValidateQuery()
     {
-        String query = " Select p from Person p";
+        String query = " Select p from MappedPerson p";
 
         try
         {
@@ -88,7 +88,7 @@ public class MappedSuperClassTest
         }
         catch (QueryHandlerException qhex)
         {
-            Assert.assertEquals("No entity found by the name: Person", qhex.getMessage());
+            Assert.assertEquals("No entity found by the name: MappedPerson", qhex.getMessage());
         }
 
     }
@@ -99,7 +99,7 @@ public class MappedSuperClassTest
 
         try
         {
-            Person p = new Person();
+            MappedPerson p = new MappedPerson();
             p.setId("dd");
             p.setFirstName("mapped");
             p.setLastName("superclass");
