@@ -45,6 +45,8 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -93,7 +95,9 @@ public class PersonCassandraESIndexerTest extends BaseTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        node = new NodeBuilder().node();
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        builder.put("path.data", "target/data");
+        node = new NodeBuilder().settings(builder).node();
     }
 
     @AfterClass

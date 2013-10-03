@@ -26,10 +26,13 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
@@ -50,10 +53,17 @@ public class PersonESTest
     
     private static Node node = null;
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        builder.put("path.data", "target/data");
+        node = new NodeBuilder().settings(builder).node();
+    }
+
     @Before
     public void setup()
     {
-        node = new NodeBuilder().node();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
@@ -235,12 +245,19 @@ public class PersonESTest
         // TODO: >,<,>=,<=
     }
 
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        node.close();
+    }
+
+    
     @After
     public void tearDown()
     {
         em.close();
         emf.close();
-        node.close();
+//        node.close();
     }
 
     private void waitThread() throws InterruptedException

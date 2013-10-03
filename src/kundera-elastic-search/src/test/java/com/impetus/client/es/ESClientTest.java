@@ -25,7 +25,12 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
@@ -44,7 +49,17 @@ import com.impetus.kundera.metadata.processor.TableProcessor;
 
 public class ESClientTest
 {
-    private final static String persistenceUnit="es-pu";
+    private final static String persistenceUnit = "es-pu";
+
+    private static Node node = null;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        builder.put("path.data", "target/data");
+        node = new NodeBuilder().settings(builder).node();
+    }
 
     @Before
     public void setup()
@@ -59,27 +74,27 @@ public class ESClientTest
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9300");
-        
+
         Field f = esFactory.getClass().getSuperclass().getDeclaredField("persistenceUnit");
-     
-        if(!f.isAccessible())
+
+        if (!f.isAccessible())
         {
             f.setAccessible(true);
         }
         f.set(esFactory, persistenceUnit);
-        esFactory.load(persistenceUnit,props);
-        
+        esFactory.load(persistenceUnit, props);
+
         ESClient client = (ESClient) esFactory.getClientInstance();
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonES.class);
-        
+
         PersonES entity = new PersonES();
         entity.setAge(21);
         entity.setDay(Day.FRIDAY);
         entity.setPersonId("1");
         entity.setPersonName("vivek");
         client.onPersist(metadata, entity, "1", null);
-        
+
         PersonES result = (PersonES) client.find(PersonES.class, "1");
         Assert.assertNotNull(result);
 
@@ -119,41 +134,41 @@ public class ESClientTest
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
 
-
-
-     
-      
-      EntityMetadata entityMetadata = new EntityMetadata(PersonES.class);
+        EntityMetadata entityMetadata = new EntityMetadata(PersonES.class);
 
         //
-      TableProcessor processor = new TableProcessor(null);
-      processor.process(PersonES.class, entityMetadata);
+        TableProcessor processor = new TableProcessor(null);
+        processor.process(PersonES.class, entityMetadata);
 
-      IndexProcessor indexProcessor = new IndexProcessor();
-      indexProcessor.process(PersonES.class, entityMetadata);
-//
-      entityMetadata.setPersistenceUnit(persistenceUnit);
-      
-//
-      MetamodelImpl metaModel = new MetamodelImpl();
-      metaModel.addEntityMetadata(PersonES.class, entityMetadata);
+        IndexProcessor indexProcessor = new IndexProcessor();
+        indexProcessor.process(PersonES.class, entityMetadata);
+        //
+        entityMetadata.setPersistenceUnit(persistenceUnit);
 
-      appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-//
-      metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-      metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-      metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
+        //
+        MetamodelImpl metaModel = new MetamodelImpl();
+        metaModel.addEntityMetadata(PersonES.class, entityMetadata);
 
-//        cla
-        
+        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        //
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
+
+        // cla
+
         String[] persistenceUnits = new String[] { persistenceUnit };
-      clazzToPu.put(PersonES.class.getName(), Arrays.asList(persistenceUnits));
-      
-      appMetadata.setClazzToPuMap(clazzToPu);
-      
-      new ClientFactoryConfiguraton(null, persistenceUnits).configure();
+        clazzToPu.put(PersonES.class.getName(), Arrays.asList(persistenceUnits));
+
+        appMetadata.setClazzToPuMap(clazzToPu);
+
+        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
-    
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        node.close();
+    }
 
 }
