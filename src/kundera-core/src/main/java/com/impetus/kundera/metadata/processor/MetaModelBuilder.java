@@ -670,17 +670,17 @@ public final class MetaModelBuilder<X, T>
         {
 
             validate(clazz, false);
-            if (!mappedSuperClassTypes.containsKey(clazz))
-            {
+//            if (!mappedSuperClassTypes.containsKey(clazz))
+//            {
                 managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
                         (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
                 onDeclaredFields(clazz, managedType);
                 mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
-            }
-            else
-            {
-                managedType = (AbstractManagedType<X>) mappedSuperClassTypes.get(clazz);
-            }
+//            }
+//            else
+//            {
+//                managedType = (AbstractManagedType<X>) mappedSuperClassTypes.get(clazz);
+//            }
         }
         else if (clazz.isAnnotationPresent(Entity.class) || isIdClass)
         {

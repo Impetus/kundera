@@ -15,11 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.persistence.AssociationOverride;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.CollectionAttribute;
@@ -30,6 +40,8 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
 /**
  * Implementation for <code>ManagedType</code> interface.
@@ -50,6 +62,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     /** The declared plural attributes. */
     private Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes;
 
+    private static final List<Class<? extends Annotation>> validJPAAnnotations = Arrays.asList(
+            AttributeOverrides.class, AttributeOverride.class/*, AssociationOverride.class*/);
+
+    private Map<String, Column> columnBindings = new ConcurrentHashMap<String, Column>();
+
     /**
      * Super constructor with arguments.
      * 
@@ -69,6 +86,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     {
         super(clazz, persistenceType);
         this.superClazzType = superClazzType;
+        bindTypeAnnotations();
     }
 
     /*
@@ -748,6 +766,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         declaredPluralAttributes.put(attributeName, attribute);
     }
 
+    public Column getAttributeBinding(Field attribute)
+    {
+        return columnBindings.get(attribute.getName());
+    }
     /**
      * Gets the declared plural attribute.
      * 
@@ -1044,4 +1066,65 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         }
     }
+
+    private void bindTypeAnnotations()
+    {
+        // TODO:: need to check @Embeddable attributes as well!
+
+        //TODO:: need to Handle association override in RelationMetadataProcessor.
+        
+        for (Class<? extends Annotation> ann : validJPAAnnotations)
+        {
+            if (getJavaType().isAnnotationPresent(ann))
+            {
+                checkForValid();
+
+                Annotation annotation = getJavaType().getAnnotation(ann);
+
+                if (ann.isAssignableFrom(AttributeOverride.class))
+                {
+                    bindAttribute(annotation);
+                }
+                else if (ann.isAssignableFrom(AttributeOverrides.class))
+                {
+
+                    AttributeOverride[] attribAnns = ((AttributeOverrides) annotation).value();
+
+                    for (AttributeOverride attribOverann : attribAnns)
+                    {
+                        bindAttribute(attribOverann);
+                    }
+
+                }/* else if(ann.isAssignableFrom(AssociationOverride.class))
+                {
+                        JoinColumn[] joinColumns = ((AssociationOverride)annotation).joinColumns();
+                        for(JoinColumn joinColumn : joinColumns)
+                        {
+                            String columnName = joinColumn.name();
+                            joinColumn.
+                            
+                        }
+                }*/
+
+            }
+        }
+    }
+
+    private void bindAttribute(Annotation annotation)
+    {
+        String fieldname = ((AttributeOverride) annotation).name();
+        Column column = ((AttributeOverride) annotation).column();
+        ((AbstractManagedType)this.superClazzType).columnBindings.put(fieldname, column); 
+//        columnBindings.put(fieldname, column);
+    }
+    
+    private void checkForValid()
+    {
+        if (this.superClazzType == null)
+        {
+            throw new IllegalArgumentException(
+                    "@AttributeOverride and @AttributeOverrides are only applicable if super class is @MappedSuperClass");
+        }
+    }
+
 }
