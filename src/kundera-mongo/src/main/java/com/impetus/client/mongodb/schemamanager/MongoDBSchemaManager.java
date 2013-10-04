@@ -103,7 +103,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         for (TableInfo tableInfo : tableInfos)
         {
             DBObject options = setCollectionProperties(tableInfo);
-            getDBName();
             DB db = mongo.getDB(databaseName);
             if (db.collectionExists(tableInfo.getTableName()))
             {
@@ -141,7 +140,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         for (TableInfo tableInfo : tableInfos)
         {
             DBObject options = setCollectionProperties(tableInfo);
-            getDBName();
             DB db = mongo.getDB(databaseName);
             DBCollection collection = null;
             if (!db.collectionExists(tableInfo.getTableName()))
@@ -342,21 +340,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         return;
     }
 
-    /**
-     * 
-     */
-    private void getDBName()
-    {
-        List<String> dbs = mongo.getDatabaseNames();
-        for (String dbName : dbs)
-        {
-            if (dbName.equalsIgnoreCase(databaseName))
-            {
-                databaseName = dbName;
-                break;
-            }
-        }
-    }
 
     @Override
     public boolean validateEntity(Class clazz)
