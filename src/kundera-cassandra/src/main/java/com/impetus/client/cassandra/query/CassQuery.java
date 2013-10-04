@@ -61,10 +61,13 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.SortOrder;
+import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
+
 
 /**
  * @author vivek.mishra
@@ -787,6 +790,20 @@ public class CassQuery extends QueryImpl
         {
             builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
         }
+        
+       
+        List<SortOrdering> orders = getKunderaQuery().getOrdering();
+        if (orders != null)
+        {
+           for (SortOrdering o : orders)
+           {
+              SortOrdering order = ((SortOrdering) o);
+              builder.append(" ");
+              translator.buildOrderByClause(builder, order.getColumnName(), order.getOrder(), false);
+             }
+         }
+
+       
 
         if (allowFiltering)
         {
@@ -798,6 +815,8 @@ public class CassQuery extends QueryImpl
         {
             onLimit(builder);
         }
+        
+      
 
         return isPresent;
     }

@@ -93,6 +93,8 @@ public final class CQLTranslator
     public static final String COLUMN_VALUES = "$COLUMNVALUES";
 
     public static final String AND_CLAUSE = " AND ";
+    
+    public static final String SORT_CLAUSE = " ORDER BY ";
 
     public static final String EQ_CLAUSE = "=";
 
@@ -767,5 +769,18 @@ public final class CQLTranslator
     public void buildFilteringClause(StringBuilder builder)
     {
         builder.append(" ALLOW FILTERING");
+    }
+    
+
+    /**
+     * @param builder
+     */
+    public void buildOrderByClause(StringBuilder builder,  String field, Object orderType,
+            boolean useToken)
+    {
+        builder.append(SORT_CLAUSE);
+        builder = ensureCase(builder, field, useToken);
+        builder.append(" ");
+        builder.append(orderType);
     }
 }
