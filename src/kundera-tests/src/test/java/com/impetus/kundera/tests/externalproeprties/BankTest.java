@@ -30,7 +30,7 @@ public class BankTest
     /**
      * 
      */
-    private static final String _PU = "secIdxAddCassandra,addMongo";
+    private static final String _PU = "secIdxAddCassandra,addMongo,piccandra,picongo";
 
     private EntityManagerFactory emf;
 
@@ -39,6 +39,8 @@ public class BankTest
     private Map<String, Object> mongoProperties = new HashMap<String, Object>();
 
     private Map<String, Object> cassandraProperties = new HashMap<String, Object>();
+    
+    private Map<String, Object> properties = new HashMap<String, Object>();
 
     private Map<String, Map<String, Object>> puPropertiesMap = new HashMap<String, Map<String, Object>>();
 
@@ -56,9 +58,13 @@ public class BankTest
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
 
         cassandraProperties.put("kundera.ddl.auto.prepare", "create-drop");
+        
+        properties.put("kundera.ddl.auto.prepare", "create-drop");
 
         puPropertiesMap.put("addMongo", mongoProperties);
         puPropertiesMap.put("secIdxAddCassandra", cassandraProperties);
+        puPropertiesMap.put("piccandra", properties);
+        puPropertiesMap.put("picongo", properties);
 
         emf = Persistence.createEntityManagerFactory(_PU, puPropertiesMap);
         em = emf.createEntityManager();

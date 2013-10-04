@@ -671,7 +671,12 @@ public final class PersistenceDelegator
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         if (metadata == null)
         {
-            throw new KunderaException("Entitymatadata should not be null");
+            log.error(
+                    "Entity metadata not found for {}, possible reasons may be: "
+                            + "1)not annotated with @Entity 2) is annotated with @MappedSuperclass"  
+                            + "3) does not properly with mapped persistence unit. Please verify with @Table annotation or persistence.xml"
+                            + clazz);
+            throw new KunderaException("Entity metadata not found for " + clazz.getName());
         }
         return metadata;
     }

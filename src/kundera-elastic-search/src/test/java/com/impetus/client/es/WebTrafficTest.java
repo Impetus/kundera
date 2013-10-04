@@ -21,7 +21,12 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -45,6 +50,16 @@ public class WebTrafficTest
     {
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
+    }
+
+    private static Node node = null;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        builder.put("path.data", "target/data");
+        node = new NodeBuilder().settings(builder).node();
     }
 
     @Test
@@ -79,4 +94,11 @@ public class WebTrafficTest
     {
         Thread.sleep(2000);
     }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        node.close();
+    }
+
 }

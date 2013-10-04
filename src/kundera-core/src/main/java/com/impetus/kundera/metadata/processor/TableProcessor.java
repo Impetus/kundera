@@ -28,7 +28,6 @@ import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.PersistenceException;
-import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -44,9 +43,11 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 /**
  * Metadata processor class for persistent entities.
@@ -102,17 +103,19 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz,
             Map puProperties)
     {
-        Table table = clazz.getAnnotation(Table.class);
-        // Set Name of persistence object
-        metadata.setTableName(table.name());
-        // Add named/native query related application metadata.
-        addNamedNativeQueryMetadata(clazz);
-        // set schema name and persistence unit name (if provided)
-        String schemaStr = table.schema();
-        
-        MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
+/*        Table table = clazz.getAnnotation(Table.class);
+        if (table != null)
+        {
+            // Set Name of persistence object
+            metadata.setTableName(table.name());
+            // Add named/native query related application metadata.
+            addNamedNativeQueryMetadata(clazz);
+            // set schema name and persistence unit name (if provided)
+            String schemaStr = table.schema();
 
-        // scan for fields
+            MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
+        }
+     */   // scan for fields
 
         // process for metamodelImpl
 
@@ -145,6 +148,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     addRelationIntoMetadata(clazz, f, metadata);
                 }
             }
+        
+        
+            validateAndSetId(metadata, clazz, metaModelBuilder);
         }
 
     }
@@ -242,6 +248,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private void onIdAttribute(final MetaModelBuilder builder, EntityMetadata entityMetadata, final Class clazz, Field f)
     {
         EntityType entity = (EntityType) builder.getManagedTypes().get(clazz);
+        
         Attribute attrib = entity.getAttribute(f.getName());
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
@@ -294,6 +301,37 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
         AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(f.getName());
         entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(), f.getName());
+    }
+
+
+    private <X, T> void validateAndSetId(EntityMetadata metadata, Class<X> clazz,
+            MetaModelBuilder<X, T> metaModelBuilder)
+    {
+        if (metadata.getIdAttribute() == null)
+        {
+            EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(clazz);
+            
+            if (entityType.getSupertype() != null)
+            {
+                Attribute idAttribute = ((AbstractIdentifiableType) entityType.getSupertype()).getIdAttribute();
+
+                
+                metadata.setIdAttribute((SingularAttribute) idAttribute);
+                populateIdAccessorMethods(metadata, clazz, (Field) idAttribute.getJavaMember());
+            }
+        }
+        
+        validateIdAttribute(metadata.getIdAttribute(),clazz);
+    }
+
+    private void validateIdAttribute(SingularAttribute idAttribute, Class clazz)
+    {
+        // Means if id attribute not found neither on entity or mappedsuper class.
+        
+        if(idAttribute == null)
+        {
+            throw new InvalidEntityDefinitionException(clazz.getName() + " must have an @Id field.");
+        }
     }
 
 }

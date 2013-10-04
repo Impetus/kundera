@@ -19,22 +19,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
+import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.Store;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
@@ -113,25 +120,40 @@ public class ObjectGraphBuilderTest
 
         Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
 
+        Map<String, Object> props = new HashMap<String, Object>();
+
+        props.put(Constants.PERSISTENCE_UNIT_NAME, _persistenceUnit);
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
+
         List<String> pus = new ArrayList<String>();
         pus.add(_persistenceUnit);
         clazzToPu.put(Store.class.getName(), pus);
         clazzToPu.put(BillingCounter.class.getName(), pus);
 
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
+        puMetadata.setPersistenceUnitName(_persistenceUnit);
+        Properties p = new Properties();
+        p.putAll(props);
+        puMetadata.setProperties(p);
+        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
+        metadata.put(_persistenceUnit, puMetadata);
+        appMetadata.addPersistenceUnitMetadata(metadata);
+
+        
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(Store.class);
-        EntityMetadata m1 = new EntityMetadata(BillingCounter.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(Store.class, m);
-        processor.process(BillingCounter.class, m1);
-
-        m.setPersistenceUnit(_persistenceUnit);
+        KunderaMetadata.INSTANCE.setApplicationMetadata(appMetadata);
+        
+        MetadataBuilder metadataBuilder = new MetadataBuilder(_persistenceUnit, CoreTestClient.class.getSimpleName(), null);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Store.class, m);
-        metaModel.addEntityMetadata(BillingCounter.class, m1);
+        metaModel.addEntityMetadata(Store.class, metadataBuilder.buildEntityMetadata(Store.class));
+        metaModel.addEntityMetadata(BillingCounter.class, metadataBuilder.buildEntityMetadata(BillingCounter.class));
 
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());

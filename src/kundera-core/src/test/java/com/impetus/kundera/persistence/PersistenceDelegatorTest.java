@@ -25,6 +25,7 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -100,9 +101,8 @@ public class PersistenceDelegatorTest
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals(
-                    "com.impetus.kundera.KunderaException: Entitymatadata should not be null",
-                    e.getMessage());
+            Assert.assertTrue(StringUtils.startsWith(e.getLocalizedMessage(),
+                    "com.impetus.kundera.KunderaException: Entity metadata not found for"));
         }
 
         em.clear();

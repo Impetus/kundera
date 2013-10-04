@@ -17,6 +17,7 @@ package com.impetus.kundera.metadata.model.type;
 
 import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
@@ -231,6 +232,11 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         this.idClassAttributes = idClassAttributes;
     }
 
+    public SingularAttribute<? super X, ?> getIdAttribute()
+    {
+        return idAttribute;
+    }
+    
     /**
      * On error.
      */

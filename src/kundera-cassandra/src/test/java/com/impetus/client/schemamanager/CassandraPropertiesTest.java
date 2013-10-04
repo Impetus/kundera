@@ -33,11 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.Doctor;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -180,15 +182,10 @@ public class CassandraPropertiesTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(Doctor.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(Doctor.class, m);
-
-        m.setPersistenceUnit(pu);
-
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Doctor.class, m);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(pu, ThriftClientFactory.class.getSimpleName(), null);
+
+        metaModel.addEntityMetadata(Doctor.class, metadataBuilder.buildEntityMetadata(Doctor.class));
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(pu).getManagedTypes());

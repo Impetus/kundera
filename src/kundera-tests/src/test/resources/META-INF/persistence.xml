@@ -162,6 +162,7 @@
 		value="root" /> <property name="hibernate.connection.password" value="impetus" 
 		/> <property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" 
 		/> <property name="index.home.dir" value="./lucene" /> </properties> </persistence-unit> -->
+		
 	<persistence-unit name="piccandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>

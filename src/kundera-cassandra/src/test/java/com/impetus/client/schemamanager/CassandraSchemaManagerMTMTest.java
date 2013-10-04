@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
@@ -35,6 +36,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -108,7 +110,7 @@ public class CassandraSchemaManagerMTMTest
     {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.PERSISTENCE_UNIT_NAME, _persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, ThriftClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, _keyspace);
@@ -137,18 +139,11 @@ public class CassandraSchemaManagerMTMTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntityPersonnelUniMToM.class);
-        EntityMetadata m1 = new EntityMetadata(CassandraEntityHabitatUniMToM.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(CassandraEntityPersonnelUniMToM.class, m);
-        processor.process(CassandraEntityHabitatUniMToM.class, m1);
-
-        m.setPersistenceUnit(_persistenceUnit);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(_persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, m);
-        metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, m1);
+        metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonnelUniMToM.class));
+        metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityHabitatUniMToM.class));
 
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());

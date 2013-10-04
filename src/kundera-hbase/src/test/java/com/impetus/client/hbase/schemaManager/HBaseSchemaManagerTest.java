@@ -31,11 +31,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -109,11 +112,7 @@ public class HBaseSchemaManagerTest
         appMetadata = null;
     }
 
-//    @Test
-//    public void testDu()
-//    {
-//
-//    }
+
 
     /**
      * Test schema operation.
@@ -232,16 +231,18 @@ public class HBaseSchemaManagerTest
         m8.setPersistenceUnit(persistenceUnit);
         m9.setPersistenceUnit(persistenceUnit);
 
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, HBaseClient.class.getSimpleName(), null);
+
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(HBaseEntitySuper.class, m1);
-        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1.class, m2);
-        metaModel.addEntityMetadata(HBaseEntityAddressUni1ToM.class, m3);
-        metaModel.addEntityMetadata(HBaseEntityAddressUniMTo1.class, m4);
-        metaModel.addEntityMetadata(HBaseEntityPersonUniMto1.class, m5);
-        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1.class, m6);
-        metaModel.addEntityMetadata(HBaseEntityPersonUni1ToM.class, m7);
-        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1PK.class, m8);
-        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1PK.class, m9);
+        metaModel.addEntityMetadata(HBaseEntitySuper.class, metadataBuilder.buildEntityMetadata(HBaseEntitySuper.class));
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1.class, metadataBuilder.buildEntityMetadata(HBaseEntityAddressUni1To1.class));
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1ToM.class, metadataBuilder.buildEntityMetadata(HBaseEntityAddressUni1ToM.class));
+        metaModel.addEntityMetadata(HBaseEntityAddressUniMTo1.class, metadataBuilder.buildEntityMetadata(HBaseEntityAddressUniMTo1.class));
+        metaModel.addEntityMetadata(HBaseEntityPersonUniMto1.class, metadataBuilder.buildEntityMetadata(HBaseEntityPersonUniMto1.class));
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1.class, metadataBuilder.buildEntityMetadata(HBaseEntityPersonUni1To1.class));
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1ToM.class, metadataBuilder.buildEntityMetadata(HBaseEntityPersonUni1ToM.class));
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1PK.class, metadataBuilder.buildEntityMetadata(HBaseEntityPersonUni1To1PK.class));
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1PK.class, metadataBuilder.buildEntityMetadata(HBaseEntityAddressUni1To1PK.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
