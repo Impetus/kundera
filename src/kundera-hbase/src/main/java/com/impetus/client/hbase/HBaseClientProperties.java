@@ -17,7 +17,6 @@ package com.impetus.client.hbase;
 
 import java.util.Map;
 
-
 import org.apache.hadoop.hbase.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,44 +37,61 @@ class HBaseClientProperties
 
     private static final String FILTER = "hbase.filter";
 
+    private HBaseClient hbaseClient;
+
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        HBaseClient hbaseClient = (HBaseClient) client;
+        this.hbaseClient = (HBaseClient) client;
 
         if (properties != null)
         {
+
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(FILTER))
+                if (checkNotNullMap(key, value))
                 {
-                    if (value instanceof Filter) {
-                        
-                        hbaseClient.setFilter((Filter) value);
-                        
-                    } 
-                      
-                }
-                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
-                {
-                   
-                    if( value instanceof Integer )
+                    if (key.equals(FILTER) && value instanceof Filter)
                     {
-                                        
-                       hbaseClient.setBatchSize((Integer) value);
-                      
-                    } 
-                    else if (value instanceof String) 
-                    {
-                       
-                       hbaseClient.setBatchSize(Integer.valueOf((String) value));
-                        
-                    }
-                    
-                }
 
-                // Add more
+                        this.hbaseClient.setFilter((Filter) value);
+
+                    }
+                    else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
+                    {
+
+                        setBatchSize(value);
+
+                    }
+
+                    // Add more
+                }
             }
         }
+    }
+
+    private void setBatchSize(Object value)
+    {
+        if (value instanceof Integer)
+        {
+
+            this.hbaseClient.setBatchSize((Integer) value);
+
+        }
+        else if (value instanceof String)
+        {
+
+            this.hbaseClient.setBatchSize(Integer.valueOf((String) value));
+
+        }
+
+    }
+
+    /**
+     * check key value map not null
+     */
+    private boolean checkNotNullMap(String key, Object value)
+    {
+        return key != null && value != null;
     }
 }

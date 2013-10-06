@@ -1,4 +1,5 @@
 package com.impetus.client.oraclenosql;
+
 /**
  * Copyright 2013 Impetus Infotech.
  *
@@ -15,9 +16,7 @@ package com.impetus.client.oraclenosql;
  * limitations under the License.
  */
 
-
 import java.util.Map;
-
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,14 +30,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.impetus.client.oraclenosql.OracleNoSQLClient;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import java.util.concurrent.TimeUnit;
 
 import oracle.kv.Consistency;
 import oracle.kv.Durability;
-
 
 /**
  * Test case for {@link OracleNoSQLClient}
@@ -53,7 +51,7 @@ public class OracleNoSQLPropertySetterTest
 
     /** The emf. */
     private EntityManagerFactory emf;
-    
+
     EntityManager em;
 
     /** The logger. */
@@ -67,7 +65,7 @@ public class OracleNoSQLPropertySetterTest
     {
         emf = Persistence.createEntityManagerFactory(PU);
         em = emf.createEntityManager();
-       
+
     }
 
     /**
@@ -82,14 +80,12 @@ public class OracleNoSQLPropertySetterTest
     @Test
     public void testProperties()
     {
-        
-          
-     // Get properties from client
+
+        // Get properties from client
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         OracleNoSQLClient client = (OracleNoSQLClient) clients.get(PU);
 
-
-     // Check default values
+        // Check default values
         Durability du = client.getDurability();
         Consistency consist = client.getConsistency();
         TimeUnit tu = client.getTimeUnit();
@@ -99,27 +95,27 @@ public class OracleNoSQLPropertySetterTest
         Assert.assertTrue(du instanceof Durability);
 
         // Set parameters into EM
-        em.setProperty("write.timeout", 0);
+        em.setProperty("write.timeout", 5);
         em.setProperty("durability", Durability.COMMIT_NO_SYNC);
         em.setProperty("time.unit", TimeUnit.HOURS);
         em.setProperty("consistency", Consistency.ABSOLUTE);
-        em.setProperty("batch.size",0);
-        
-  
-        Assert.assertEquals(0, client.getBatchSize());
-        Assert.assertEquals(0, client.getTimeout());
+        em.setProperty(PersistenceProperties.KUNDERA_BATCH_SIZE, 5);
+
+        Assert.assertEquals(5, client.getBatchSize());
+        Assert.assertEquals(5, client.getTimeout());
         Assert.assertEquals(TimeUnit.HOURS, client.getTimeUnit());
         Assert.assertEquals(Consistency.ABSOLUTE, client.getConsistency());
         Assert.assertEquals(Durability.COMMIT_NO_SYNC, client.getDurability());
-        
-     // Set parameters into EMas string
-        em.setProperty("write.timeout", "0");
-        em.setProperty("batch.size","0");
-        em.setProperty("time.unit", ""+TimeUnit.HOURS);
-        
-        Assert.assertEquals(0, client.getTimeout());
+
+        em.clear();
+
+        // Set parameters into EMas string
+        em.setProperty("write.timeout", "10");
+        em.setProperty(PersistenceProperties.KUNDERA_BATCH_SIZE, "10");
+        em.setProperty("time.unit", "" + TimeUnit.HOURS);
+
+        Assert.assertEquals(10, client.getTimeout());
         Assert.assertEquals(TimeUnit.HOURS, client.getTimeUnit());
-        Assert.assertEquals(0, client.getBatchSize());
+        Assert.assertEquals(10, client.getBatchSize());
     }
 }
-

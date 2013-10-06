@@ -16,8 +16,6 @@
 package com.impetus.client.cassandra.config;
 
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.lang.reflect.Field;
 
@@ -30,6 +28,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -53,6 +53,8 @@ public class CassandraPropertySetterTest
     private EntityManager em;
 
     private Map<String, Object> puProperties = new HashMap<String, Object>();
+    
+    private Logger logger = LoggerFactory.getLogger(CassandraPropertySetterTest.class);
 
     /**
      * creates client connection and keyspace
@@ -97,7 +99,7 @@ public class CassandraPropertySetterTest
             Map<String, Object> ttv = new HashMap<String, Object>();
 
             ttv.put("", "");
-            puPropertiesString.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+            puPropertiesString.put(CassandraConstants.CQL_VERSION, "" + CassandraConstants.CQL_VERSION_2_0);
             puPropertiesString.put("consistency.level", "" + (ConsistencyLevel.QUORUM));
             puPropertiesString.put("ttl.per.request", "" + true);
             puPropertiesString.put("ttl.per.session", "" + false);
@@ -123,10 +125,24 @@ public class CassandraPropertySetterTest
             Assert.assertEquals(((CassandraClientBase) client).getTtlValues().size(), ttv.size());
 
         }
-        catch (Exception e)
+        catch (NoSuchFieldException nfe)
         {
-            System.out.println(e.getMessage());
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",nfe.getMessage());
+          
         }
+        catch (IllegalArgumentException iae)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",iae.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",e.getMessage());
+        }
+        
+        
     }
 
     /**
@@ -167,10 +183,23 @@ public class CassandraPropertySetterTest
             Assert.assertEquals(((CassandraClientBase) client).getTtlValues().size(), ttv.size());
 
         }
-        catch (Exception e)
+        catch (NoSuchFieldException nfe)
         {
-            System.out.println(e.getMessage());
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",nfe.getMessage());
+          
         }
+        catch (IllegalArgumentException iae)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",iae.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",e.getMessage());
+        }
+        
     }
 
 }

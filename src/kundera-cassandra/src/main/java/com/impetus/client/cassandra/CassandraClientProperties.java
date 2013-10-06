@@ -41,91 +41,140 @@ class CassandraClientProperties
     private static final String CONSISTENCY_LEVEL = "consistency.level";
 
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
+    
+    private CassandraClientBase cassandraClientBase;
 
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        CassandraClientBase cassandraClientBase = (CassandraClientBase) client;
+        this.cassandraClientBase = (CassandraClientBase) client;
 
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
+
                 Object value = properties.get(key);
-                if (key.equals(CONSISTENCY_LEVEL))
-                {
-                    if (value instanceof String)
-                    {
-                        cassandraClientBase.setConsistencyLevel(ConsistencyLevel.valueOf((String) value));
-                    }
-                    else if (value instanceof ConsistencyLevel)
-                    {
-                        cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
-                    }
-                }
-
-                else if (key.equals(CQL_VERSION) && value instanceof String)
-                {
-                    cassandraClientBase.setCqlVersion((String) value);
-                }
-                else if (key.equals(TTL_PER_SESSION))
+                if (checkNotNullMap(key, value))
                 {
 
-                    if (value instanceof String)
+                    if (key.equals(CONSISTENCY_LEVEL))
                     {
-                        if (Boolean.valueOf((String) value).booleanValue())
-                        {
-                            cassandraClientBase.setTtlPerRequest(false);
-                        }
-                        cassandraClientBase.setTtlPerSession(Boolean.valueOf((String) value));
-
-                    }
-                    else if (value instanceof Boolean)
-                    {
-                        if (((Boolean) value).booleanValue())
-                        {
-                            cassandraClientBase.setTtlPerRequest(false);
-                        }
-
-                        cassandraClientBase.setTtlPerSession((Boolean) value);
-
-                    }
-                }
-                else if (key.equals(TTL_PER_REQUEST))
-                {
-
-                    if (value instanceof String)
-                    {
-                        if (Boolean.valueOf((String) value).booleanValue())
-                        {
-                            cassandraClientBase.setTtlPerSession(false);
-                        }
-                        cassandraClientBase.setTtlPerRequest(Boolean.valueOf((String) value));
-
-                    }
-                    else if (value instanceof Boolean)
-                    {
-                        if (((Boolean) value).booleanValue())
-                        {
-                            cassandraClientBase.setTtlPerSession(false);
-                        }
-
-                        cassandraClientBase.setTtlPerRequest((Boolean) value);
-
+                        setConsistencylevel(value);
+                       
                     }
 
-                }
-                else if (key.equals(TTL_VALUES) && value instanceof Map)
-                {
-                    cassandraClientBase.setTtlValues((Map) value);
-                }
-                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && !StringUtils.isBlank(value.toString())
-                        && StringUtils.isNumeric(value.toString()))
-                {
-                    cassandraClientBase.setBatchSize(value.toString());
-                }
+                    else if (key.equals(CQL_VERSION) && value instanceof String)
+                    {
+                        this.cassandraClientBase.setCqlVersion((String) value);
+                    }
+                    else if (key.equals(TTL_PER_SESSION))
+                    {
+                        setTTLPerSession(value);
 
-                // Add more properties as needed
+                                            }
+                    else if (key.equals(TTL_PER_REQUEST))
+                    {
+                        setTTLPerRequest(value);
+
+                        
+
+                    }
+                    else if (key.equals(TTL_VALUES) && value instanceof Map)
+                    {
+                        this.cassandraClientBase.setTtlValues((Map) value);
+                    }
+                    else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE)
+                            && !StringUtils.isBlank(value.toString()) && StringUtils.isNumeric(value.toString()))
+                    {
+                        this.cassandraClientBase.setBatchSize(value.toString());
+                    }
+
+                    // Add more properties as needed
+                }
             }
         }
+    }
+   
+    
+    /**
+     * set ttl per request
+     */
+    private void setTTLPerRequest(Object value)
+    {
+        if (value instanceof String)
+        {
+            if (Boolean.valueOf((String) value).booleanValue())
+            {
+                this.cassandraClientBase.setTtlPerSession(false);
+            }
+            this.cassandraClientBase.setTtlPerRequest(Boolean.valueOf((String) value));
+
+        }
+        else if (value instanceof Boolean)
+        {
+            if (((Boolean) value).booleanValue())
+            {
+                this.cassandraClientBase.setTtlPerSession(false);
+            }
+
+            this.cassandraClientBase.setTtlPerRequest((Boolean) value);
+
+        }
+        
+    }
+    
+    
+    /**
+     * set ttl per session
+     */
+    private void setTTLPerSession(Object value)
+    {
+        if (value instanceof String)
+        {
+            if (Boolean.valueOf((String) value).booleanValue())
+            {
+                this.cassandraClientBase.setTtlPerRequest(false);
+            }
+            this.cassandraClientBase.setTtlPerSession(Boolean.valueOf((String) value));
+
+        }
+        else if (value instanceof Boolean)
+        {
+            if (((Boolean) value).booleanValue())
+            {
+                this.cassandraClientBase.setTtlPerRequest(false);
+            }
+
+            this.cassandraClientBase.setTtlPerSession((Boolean) value);
+
+        }
+
+        
+    }
+
+    
+    /**
+     * set consistency level
+     */
+    private void setConsistencylevel(Object value)
+    {
+        if (value instanceof String)
+        {
+            this.cassandraClientBase.setConsistencyLevel(ConsistencyLevel.valueOf((String) value));
+        }
+        else if (value instanceof ConsistencyLevel)
+        {
+            this.cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
+        }
+        
+    }
+    
+    
+    /**
+     * check key value map not null
+     */
+    private boolean checkNotNullMap(String key, Object value)
+    {
+        return key != null && value != null;
     }
 }

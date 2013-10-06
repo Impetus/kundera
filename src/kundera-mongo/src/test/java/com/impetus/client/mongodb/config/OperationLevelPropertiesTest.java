@@ -55,7 +55,7 @@ public class OperationLevelPropertiesTest
     {
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
         em = emf.createEntityManager();
-        em.setProperty("batch.size",""+ 1);
+        
         em.getDelegate();
         
     }
@@ -76,13 +76,13 @@ public class OperationLevelPropertiesTest
         Assert.assertEquals(0, wc.getWtimeout());
         Assert.assertNotNull(encoder);
         Assert.assertTrue(encoder instanceof DefaultDBEncoder);
-
+        
         // Set parameters into EM
         // (See http://api.mongodb.org/java/2.6/com/mongodb/WriteConcern.html)
         WriteConcern wcNew = new WriteConcern(1, 300, true);
         DBEncoder encoderNew = new LazyDBEncoder();
         em.setProperty(MongoDBClientProperties.WRITE_CONCERN, wcNew);
-        em.setProperty("batch.size", 0);
+        em.setProperty(MongoDBClientProperties.BATCH_SIZE, 5);
        
 
         // Check Modified values
@@ -93,14 +93,26 @@ public class OperationLevelPropertiesTest
         Assert.assertEquals(1, wcModified.getW());
         Assert.assertEquals(300, wcModified.getWtimeout());
         Assert.assertNotNull(encoderModified);
+        Assert.assertEquals(5, client.getBatchSize());
         // Assert.assertTrue(encoderModified instanceof LazyDBEncoder);
-
+        em.clear();
+        
+        em.setProperty(MongoDBClientProperties.BATCH_SIZE,""+ 2);
+        Assert.assertEquals(2, client.getBatchSize());
+        
+        em.clear();
         // Write Entity to database
         PersonMongo person = new PersonMongo();
         person.setPersonId("1");
         person.setPersonName("Amresh");
         person.setAge(31);
         em.persist(person);
+        
+        PersonMongo person1 = new PersonMongo();
+        person1.setPersonId("2");
+        person1.setPersonName("Chhavi");
+        person1.setAge(31);
+        em.persist(person1);
 
         // Find entity from database
         PersonMongo p = em.find(PersonMongo.class, "1");

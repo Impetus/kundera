@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 
@@ -61,7 +60,7 @@ public class HbasePropertySetterTest
     /**
      * logger used for logging statement.
      */
-    private static final Logger logger = LoggerFactory.getLogger(HBaseUserTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(HbasePropertySetterTest.class);
 
     /**
      * setup habse client connection
@@ -98,9 +97,7 @@ public class HbasePropertySetterTest
     @Test
     public void testUsingExternalStringProperty() throws IOException
     {
-        try
-        {
-
+        
             Map<String, Object> puPropertiesString = new HashMap<String, Object>();
 
             puPropertiesString.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "10");
@@ -113,12 +110,9 @@ public class HbasePropertySetterTest
             Assert.assertEquals(((HBaseClient) client).getBatchSize(), 10);
 
         }
-        catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
+       
 
-    }
+    
 
     /**
      * Sets property of hbase client in form of object map
@@ -150,9 +144,21 @@ public class HbasePropertySetterTest
             Assert.assertEquals(f2.get(f1.get((HBaseClient) client)).toString(), filterlist.toString());
             Assert.assertEquals(((HBaseClient) client).getBatchSize(), 10);
         }
-        catch (Exception e)
+        catch (NoSuchFieldException nfe)
         {
-            System.out.println(e.getMessage());
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",nfe.getMessage());
+          
+        }
+        catch (IllegalArgumentException iae)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",iae.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail();
+            logger.error("Error in test, Caused by: .",e.getMessage());
         }
     }
 }

@@ -47,68 +47,108 @@ public class OracleNoSQLClientProperties
 
     private static final String CONSISTENCY = "consistency";
 
+    private OracleNoSQLClient oracleNoSQLClient;
+
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        OracleNoSQLClient oracleNoSQLClient = (OracleNoSQLClient) client;
+        this.oracleNoSQLClient = (OracleNoSQLClient) client;
 
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(WRITE_TIMEOUT))
+                if (checkNotNullMap(key, value))
                 {
-                    if (value instanceof Integer) 
+                    if (key.equals(WRITE_TIMEOUT))
                     {
-                        oracleNoSQLClient.setTimeout((Integer) value);
-                        
-                    }
-                    else if (value instanceof String) 
-                    {
-                    
-                        oracleNoSQLClient.setTimeout(Integer.valueOf((String) value));
-                    }
-                    
-                }
-                else if (key.equals(DURABILITY) && value instanceof Durability)
-                {
-                    
-                    oracleNoSQLClient.setDurability((Durability) value);
-                }
+                        setTimeOut(value);
 
-                else if (key.equals(TIME_UNIT))
-                {
-                    if (value instanceof TimeUnit) 
-                    {
-                      oracleNoSQLClient.setTimeUnit((TimeUnit) value);
                     }
-                    else if (value instanceof String) 
+                    else if (key.equals(DURABILITY) && value instanceof Durability)
                     {
-                        oracleNoSQLClient.setTimeUnit(TimeUnit.valueOf((String) value));    
-                    }
-                    
-                }
 
-                else if (key.equals(CONSISTENCY) && value instanceof Consistency)
-                {
-                    oracleNoSQLClient.setConsistency((Consistency) value);
-                } 
-                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
-                {
-                    if (value instanceof Integer) 
-                    {
-                        oracleNoSQLClient.setBatchSize((Integer) value);
-                    } 
-                    else if (value instanceof String)
-                    {
-                        oracleNoSQLClient.setBatchSize(Integer.valueOf((String)value));
+                        this.oracleNoSQLClient.setDurability((Durability) value);
                     }
-                    
-                }
 
-                // Add more properties as needed
+                    else if (key.equals(TIME_UNIT))
+                    {
+                        setTimeUnit(value);
+
+                    }
+
+                    else if (key.equals(CONSISTENCY) && value instanceof Consistency)
+                    {
+                        this.oracleNoSQLClient.setConsistency((Consistency) value);
+                    }
+                    else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
+                    {
+                        setBatchSize(value);
+
+                    }
+
+                    // Add more properties as needed
+                }
             }
         }
+    }
+
+    /**
+     * set time out
+     */
+    private void setTimeOut(Object value)
+    {
+        if (value instanceof Integer)
+        {
+            this.oracleNoSQLClient.setTimeout((Integer) value);
+
+        }
+        else if (value instanceof String)
+        {
+
+            this.oracleNoSQLClient.setTimeout(Integer.valueOf((String) value));
+        }
+
+    }
+
+    /**
+     * set time unit
+     */
+    private void setTimeUnit(Object value)
+    {
+        if (value instanceof TimeUnit)
+        {
+            this.oracleNoSQLClient.setTimeUnit((TimeUnit) value);
+        }
+        else if (value instanceof String)
+        {
+            this.oracleNoSQLClient.setTimeUnit(TimeUnit.valueOf((String) value));
+        }
+
+    }
+
+    /**
+     * set batch size
+     */
+    private void setBatchSize(Object value)
+    {
+        if (value instanceof Integer)
+        {
+            this.oracleNoSQLClient.setBatchSize((Integer) value);
+        }
+        else if (value instanceof String)
+        {
+            this.oracleNoSQLClient.setBatchSize(Integer.valueOf((String) value));
+        }
+
+    }
+
+    /**
+     * check key value map not null
+     */
+    private boolean checkNotNullMap(String key, Object value)
+    {
+        return key != null && value != null;
     }
 
 }
