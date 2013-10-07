@@ -44,6 +44,7 @@ import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.JPQLParseException;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -413,6 +414,24 @@ public class CassandraCompositeTypeTest
        
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
+        
+        try
+        {
+            orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
+            q = em.createQuery(orderClause);
+            q.setParameter("userId", "mevivs");
+            results = q.getResultList();
+                    
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            Assert.assertEquals(
+                    "InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
+                    e.getMessage());
+        }
+
     }
     
 

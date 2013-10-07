@@ -778,6 +778,7 @@ public final class CQLTranslator
     public void buildOrderByClause(StringBuilder builder,  String field, Object orderType,
             boolean useToken)
     {
+        builder.append(" ");
         builder.append(SORT_CLAUSE);
         builder = ensureCase(builder, field, useToken);
         builder.append(" ");

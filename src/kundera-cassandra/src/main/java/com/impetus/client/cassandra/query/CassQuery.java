@@ -795,12 +795,12 @@ public class CassQuery extends QueryImpl
         List<SortOrdering> orders = getKunderaQuery().getOrdering();
         if (orders != null)
         {
-           for (SortOrdering o : orders)
+           for (SortOrdering order : orders)
            {
-              SortOrdering order = ((SortOrdering) o);
-              builder.append(" ");
               translator.buildOrderByClause(builder, order.getColumnName(), order.getOrder(), false);
-             }
+              //as only one order clause will be available for a query
+              break;
+           }
          }
 
        
