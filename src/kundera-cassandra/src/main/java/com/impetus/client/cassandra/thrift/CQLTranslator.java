@@ -33,7 +33,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.cassandra.cli.CliParser.value_return;
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.CounterColumnType;
@@ -129,6 +128,8 @@ public final class CQLTranslator
     public static final String TOKEN = "token(";
 
     public static final String CLOSE_BRACKET = ")";
+    
+    public static final String SPACE_STRING = " ";
 
     public CQLTranslator()
     {
@@ -778,10 +779,10 @@ public final class CQLTranslator
     public void buildOrderByClause(StringBuilder builder,  String field, Object orderType,
             boolean useToken)
     {
-        builder.append(" ");
+        builder.append(SPACE_STRING);
         builder.append(SORT_CLAUSE);
         builder = ensureCase(builder, field, useToken);
-        builder.append(" ");
+        builder.append(SPACE_STRING);
         builder.append(orderType);
     }
 }
