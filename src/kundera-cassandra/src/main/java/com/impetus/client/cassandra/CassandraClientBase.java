@@ -33,7 +33,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.cassandra.cql3.CQL3Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -101,9 +100,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -1764,31 +1760,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return cqlClient.findByRelationQuery(m, columnName, columnValue, clazz, dataHandler);
     }
 
-    /**
-     * @param persistenceUnit
-     * @param puProperties
-     */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
         String batch_Size = null;
-        if (puProperties != null)
-        {
-            Object externalBatchSize = puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE);
-            externalBatchSize = externalBatchSize != null? externalBatchSize.toString():null;
-            batch_Size = puProperties != null ? (String)externalBatchSize
-                    : null;
-            setBatchSize(batch_Size);
-        }
-        else if (batch_Size == null)
-        {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
-        }
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+
+        Object externalBatchSize = puProperties!= null ?puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE):null;
+
+        batch_Size = (String) (externalBatchSize != null? externalBatchSize.toString():puMetadata.getBatchSize());
+
+        setBatchSize(batch_Size);
     }
 
     void setBatchSize(String batch_Size)
     {
-        if (batch_Size != null)
+        if (!StringUtils.isBlank(batch_Size))
         {
             batchSize = Integer.valueOf(batch_Size);
             if (batchSize == 0)
