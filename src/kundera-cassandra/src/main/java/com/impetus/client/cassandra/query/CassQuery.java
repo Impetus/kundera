@@ -56,6 +56,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -590,13 +591,19 @@ public class CassQuery extends QueryImpl
             {
                 String fieldName = m.getFieldName(jpaFieldName);
 
-                Attribute col = entity.getAttribute(fieldName);
-                // Column col = m.getColumn(jpaFieldName);
-                if (col == null)
+                String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
+                
+                if (!fieldName.equals(discriminatorColumn))
                 {
-                    throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+
+                    Attribute col = entity.getAttribute(fieldName);
+                    // Column col = m.getColumn(jpaFieldName);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+                    }
+                    f = (Field) col.getJavaMember();
                 }
-                f = (Field) col.getJavaMember();
             }
 
         }
@@ -606,11 +613,15 @@ public class CassQuery extends QueryImpl
         if (f != null && f.getType() != null)
         {
             return CassandraUtilities.toBytes(value, f);
-        }
-        else
+        }/*
+        else if(f == null || value == null)
         {
             log.error("Error while handling data type for " + jpaFieldName + ".");
             throw new QueryHandlerException("Field type is null for " + jpaFieldName + ".");
+        }*/ else
+        {
+            // default is String type
+            return CassandraUtilities.toBytes(value, String.class);
         }
     }
 

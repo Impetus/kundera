@@ -24,11 +24,15 @@ import java.util.Map;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
@@ -110,6 +114,8 @@ public final class EntityMetadata
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(EntityMetadata.class);
+
+    private EntityType entityType;
 
     /**
      * The Enum Type.
@@ -231,7 +237,24 @@ public final class EntityMetadata
      */
     public String getTableName()
     {
-        return tableName;
+        getEntityType();
+
+        return this.entityType != null && ((AbstractManagedType) this.entityType).getTableName() != null ? ((AbstractManagedType) this.entityType)
+                .getTableName() : tableName;
+    }
+
+    private void getEntityType()
+    {
+
+        if (this.entityType == null)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    getPersistenceUnit());
+            if (metaModel != null)
+            {
+                this.entityType = metaModel.entity(this.entityClazz);
+            }
+        }
     }
 
     /**
@@ -252,7 +275,10 @@ public final class EntityMetadata
      */
     public String getSchema()
     {
-        return schema;
+        getEntityType();
+
+        return this.entityType != null && ((AbstractManagedType) this.entityType).getSchemaName() != null ? ((AbstractManagedType) this.entityType)
+                .getSchemaName() : schema;
     }
 
     /**
@@ -710,36 +736,6 @@ public final class EntityMetadata
         this.idAttribute = idAttribute;
     }
 
-    // /**
-    // * @return the colToBeIndexed
-    // */
-    // public Map<String, com.impetus.kundera.newannotations.Index>
-    // getColToBeIndexed()
-    // {
-    // return colToBeIndexed;
-    // }
-    //
-    // /**
-    // * @param colToBeIndexed
-    // * the colToBeIndexed to set
-    // */
-    // public void setColToBeIndexed(Map<String,
-    // com.impetus.kundera.newannotations.Index> colToBeIndexed)
-    // {
-    // this.colToBeIndexed = colToBeIndexed;
-    // }
-
-    // /**
-    // * Checks if is indexable.
-    // *
-    // * @return true, if is indexable
-    // */
-    // public boolean isColumnIndexable(String columnName)
-    // {
-    // return getColToBeIndexed() != null && getColToBeIndexed().get(columnName)
-    // != null;
-    // }
-
     public void addJPAColumnMapping(String jpaColumnName, String fieldName)
     {
         jpaColumnMapping.put(jpaColumnName, fieldName);
@@ -747,6 +743,8 @@ public final class EntityMetadata
 
     public String getFieldName(String jpaColumnName)
     {
-        return jpaColumnMapping.get(jpaColumnName);
+        String fieldName = jpaColumnMapping.get(jpaColumnName);
+        return fieldName != null? fieldName:jpaColumnName;
     }
+
 }

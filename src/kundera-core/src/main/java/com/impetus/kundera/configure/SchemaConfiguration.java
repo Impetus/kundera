@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -56,6 +57,7 @@ import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
@@ -166,14 +168,13 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             PersistenceUnitMetadata puMetadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
 
             Map externalPuMap = externalPropertyMap;
-            
-            //in case of polyglot.
-            if(persistenceUnits.length > 1 && externalPropertyMap != null)
+
+            // in case of polyglot.
+            if (persistenceUnits.length > 1 && externalPropertyMap != null)
             {
                 externalPuMap = (Map) externalPropertyMap.get(persistenceUnit);
             }
-            if (externalPuMap != null
-                    && externalPuMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
+            if (externalPuMap != null && externalPuMap.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null
                     || puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) != null)
             {
                 SchemaManager schemaManager = getSchemaManagerForPu(persistenceUnit);
@@ -411,18 +412,46 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                         tableInfo.addColumnInfo(columnInfo);
                     }
                 }
-                else if(attr.isCollection() && MetadataUtils.isBasicElementCollectionField((Field)attr.getJavaMember()))
-                {            
+                else if (attr.isCollection()
+                        && MetadataUtils.isBasicElementCollectionField((Field) attr.getJavaMember()))
+                {
                     CollectionColumnInfo cci = new CollectionColumnInfo();
                     cci.setCollectionColumnName(((AbstractAttribute) attr).getJPAColumnName());
                     cci.setType(attr.getJavaType());
-                    cci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field)attr.getJavaMember()));          
-                    
-                    tableInfo.addCollectionColumnMetadata(cci);                    
+                    cci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field) attr.getJavaMember()));
+
+                    tableInfo.addCollectionColumnMetadata(cci);
                 }
             }
         }
-    }  
+
+        onInheritedProperty(tableInfo, entityType);
+    }
+
+    /**
+     * Add {@link DiscriminatorColumn} for schema generation.
+     * 
+     * @param tableInfo
+     *            table info.
+     * @param entityType
+     *            entity type.
+     */
+    private void onInheritedProperty(TableInfo tableInfo, EntityType entityType)
+    {
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+
+        if (discrColumn != null)
+        {
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumnName(discrColumn);
+            columnInfo.setType(String.class);
+            columnInfo.setIndexable(true);
+
+            IndexInfo idxInfo = new IndexInfo(discrColumn);
+            tableInfo.addColumnInfo(columnInfo);
+            tableInfo.addToIndexedColumnList(idxInfo);
+        }
+    }
 
     /**
      * Returns list of configured table/column families.

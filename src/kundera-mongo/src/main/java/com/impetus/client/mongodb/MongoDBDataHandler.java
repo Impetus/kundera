@@ -41,6 +41,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
@@ -255,6 +256,19 @@ public final class MongoDBDataHandler
                         MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
+        
+        if (((AbstractManagedType)entityType).isInherited())
+        {
+            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+            
+            // No need to check for empty or blank, as considering it as valid name for nosql!
+            if(discrColumn != null && discrValue != null)
+            {
+                dbObj.put(discrColumn,discrValue);
+            }
+        }
+        
         return dbObj;
     }
 

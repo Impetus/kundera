@@ -43,6 +43,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -987,15 +989,24 @@ public abstract class CassandraDataHandlerBase
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
-        if (m.isCounterColumnType())
+
+        String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+
+        if (!thriftColumnName.equals(discriminatorColumn))
         {
-            LongAccessor accessor = new LongAccessor();
-            Long value = accessor.fromBytes(Long.class, column.getValue());
+            if (m.isCounterColumnType())
+            {
+                LongAccessor accessor = new LongAccessor();
+                Long value = accessor.fromBytes(Long.class, column.getValue());
+                return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
+                        value.toString(), isCql3Enabled);
+            }
+
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
-                    value.toString(), isCql3Enabled);
+                    thriftColumnValue, isCql3Enabled);
         }
-        return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue,
-                isCql3Enabled);
+
+        return entity;
     }
 
     /**
@@ -1148,7 +1159,7 @@ public abstract class CassandraDataHandlerBase
                         break;
                     }
                 }
-         }
+            }
             catch (IllegalArgumentException iaex)
             {
                 // ignore as it might not repesented within entity.
@@ -1432,6 +1443,24 @@ public abstract class CassandraDataHandlerBase
             }
         }
 
+        // Add discriminator column.
+        onDiscriminatorColumn(tr, timestamp, entityType);
+    }
+
+    private void onDiscriminatorColumn(ThriftRow tr, long timestamp, EntityType entityType)
+    {
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            Column column = prepareColumn(PropertyAccessorHelper.getBytes(discrValue),
+                    PropertyAccessorHelper.getBytes(discrColumn), timestamp, 0);
+            tr.addColumn(column);
+
+        }
     }
 
     /**

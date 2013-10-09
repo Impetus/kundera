@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.processor.relation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import javax.persistence.AssociationOverride;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
@@ -74,7 +75,18 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
                 Arrays.asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
                 Relation.ForeignKey.ONE_TO_ONE);
 
-        if (isJoinedByPK)
+        if (relationField.isAnnotationPresent(AssociationOverride.class))
+        {
+            AssociationOverride annotation = relationField.getAnnotation(AssociationOverride.class);
+            JoinColumn[] joinColumns = annotation.joinColumns();
+
+            validateJoinColumns(joinColumns);
+
+            relation.setJoinColumnName(joinColumns[0].name());
+
+            JoinTable joinTable = annotation.joinTable();
+            onJoinTable(joinTable);
+        } else if (isJoinedByPK)
         {
             
             relation.setJoinedByPrimaryKey(true);
@@ -97,6 +109,23 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
         
+    }
+
+
+    private void onJoinTable(JoinTable joinTable)
+    {
+        if (joinTable != null)
+        {
+            throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
+        }
+    }
+
+    private void validateJoinColumns(JoinColumn[] joinColumns)
+    {
+        if (joinColumns.length > 1)
+        {
+            throw new UnsupportedOperationException("More than one join columns are not supported.");
+        }
     }
 
     @Override

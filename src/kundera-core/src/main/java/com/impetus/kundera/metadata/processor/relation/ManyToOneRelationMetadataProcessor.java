@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.processor.relation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import javax.persistence.AssociationOverride;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
@@ -71,7 +72,19 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
 
-        if (isJoinedByFK)
+        if (relationField.isAnnotationPresent(AssociationOverride.class))
+        {
+            AssociationOverride annotation = relationField.getAnnotation(AssociationOverride.class);
+            JoinColumn[] joinColumns = annotation.joinColumns();
+
+            validateJoinColumns(joinColumns);
+
+            relation.setJoinColumnName(joinColumns[0].name());
+
+            JoinTable joinTable = annotation.joinTable();
+            onJoinTable(joinTable);
+        }
+        else if (isJoinedByFK)
         {
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
             relation.setJoinColumnName(joinColumnAnn.name());
@@ -79,16 +92,33 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         else if (isJoinedByTable)
         {
             throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
-/*
-            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-
-            relation.setRelatedViaJoinTable(true);
-            relation.setJoinTableMetadata(jtMetadata);
-*/        }
+            /*
+             * JoinTableMetadata jtMetadata = new
+             * JoinTableMetadata(relationField);
+             * 
+             * relation.setRelatedViaJoinTable(true);
+             * relation.setJoinTableMetadata(jtMetadata);
+             */}
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
 
+    }
+
+    private void onJoinTable(JoinTable joinTable)
+    {
+        if (joinTable != null)
+        {
+            throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
+        }
+    }
+
+    private void validateJoinColumns(JoinColumn[] joinColumns)
+    {
+        if (joinColumns.length > 1)
+        {
+            throw new UnsupportedOperationException("More than one join columns are not supported.");
+        }
     }
 
     @Override
