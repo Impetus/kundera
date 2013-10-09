@@ -30,6 +30,8 @@ import javax.persistence.metamodel.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+
 /**
  * Abstract class for to provide generalisation, abstraction to
  * <code>Type</code> hierarchy.
@@ -176,6 +178,13 @@ public abstract class AbstractAttribute<X, T>
      */
     public String getJPAColumnName()
     {
+        // In case of Attribute override.
+        Column column = ((AbstractManagedType)this.managedType).getAttributeBinding(member);
+        if(column != null)
+        {
+            columnName = column.name();
+        }
+        
         return columnName;
     }
 
@@ -192,7 +201,6 @@ public abstract class AbstractAttribute<X, T>
     {
 
         String name = null;
-
         if (member.isAnnotationPresent(Column.class))
         {
             Column c = member.getAnnotation(Column.class);
@@ -227,6 +235,8 @@ public abstract class AbstractAttribute<X, T>
                 name = c.name();
             }
         }
+      
+        
         return name == null ? getName() : name;
     }
 

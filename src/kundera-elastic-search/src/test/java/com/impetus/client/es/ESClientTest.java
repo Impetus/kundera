@@ -38,6 +38,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -134,6 +135,8 @@ public class ESClientTest
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
 
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ESClient.class.getSimpleName(), null);
+
         EntityMetadata entityMetadata = new EntityMetadata(PersonES.class);
 
         //
@@ -147,7 +150,7 @@ public class ESClientTest
 
         //
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PersonES.class, entityMetadata);
+        metaModel.addEntityMetadata(PersonES.class, metadataBuilder.buildEntityMetadata(PersonES.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         //

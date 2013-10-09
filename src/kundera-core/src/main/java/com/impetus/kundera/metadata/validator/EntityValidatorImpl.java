@@ -24,6 +24,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -90,16 +91,26 @@ public class EntityValidatorImpl implements EntityValidator
             log.debug("Validating " + clazz.getName());
 
         // Is Entity?
+        if (clazz.isAnnotationPresent(MappedSuperclass.class))
+        {
+            throw new InvalidEntityDefinitionException("JPA operation over MappedSuperclass are not allowed" + clazz);
+        }
+        
+        
+        // Is Entity?
         if (!clazz.isAnnotationPresent(Entity.class))
         {
             throw new InvalidEntityDefinitionException(clazz.getName() + " is not annotated with @Entity.");
         }
 
-        // Must be annotated with @Table
-        if (!clazz.isAnnotationPresent(Table.class))
-        {
-            throw new InvalidEntityDefinitionException(clazz.getName() + " must be annotated with @Table.");
-        }
+        
+        // TODO:: add validation for MappedSuperClass.
+        
+//        // Must be annotated with @Table
+//        if (!clazz.isAnnotationPresent(Table.class))
+//        {
+//            throw new InvalidEntityDefinitionException(clazz.getName() + " must be annotated with @Table.");
+//        }
 
         // must have a default no-argument constructor
         try

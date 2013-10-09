@@ -52,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.oraclenosql.config.OracleNoSQLClientProperties;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
@@ -964,7 +965,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
-    private void setBatchSize(int batch_Size)
+    public void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
     }
@@ -972,15 +973,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        for (String key : properties.keySet())
-        {
-            Object value = properties.get(key);
-            if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
-            {
-                Integer batchSize = (Integer) value;
-                ((OracleNoSQLClient) client).setBatchSize(batchSize);
-            }
-        }
+        
+        new OracleNoSQLClientProperties().populateClientProperties(client, properties);
     }
 
     /**

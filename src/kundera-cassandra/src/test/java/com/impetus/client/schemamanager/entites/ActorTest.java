@@ -21,13 +21,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -110,7 +111,7 @@ public class ActorTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "CassandraSchemaOperationTest";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, ThriftClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
@@ -146,18 +147,10 @@ public class ActorTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(Actor.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(Actor.class, m);
-
-        IndexProcessor indexProcessor = new IndexProcessor();
-        indexProcessor.process(Actor.class, m);
-
-        m.setPersistenceUnit(persistenceUnit);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Actor.class, m);
+        metaModel.addEntityMetadata(Actor.class, metadataBuilder.buildEntityMetadata(Actor.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 

@@ -37,27 +37,61 @@ class HBaseClientProperties
 
     private static final String FILTER = "hbase.filter";
 
+    private HBaseClient hbaseClient;
+
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        HBaseClient hbaseClient = (HBaseClient) client;
+        this.hbaseClient = (HBaseClient) client;
 
         if (properties != null)
         {
+
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(FILTER) && value instanceof Filter)
+                if (checkNull(key, value))
                 {
-                    hbaseClient.setFilter((Filter) value);
-                }
-                else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE) && value instanceof Integer)
-                {
-                    Integer batchSize = (Integer) value;
-                    hbaseClient.setBatchSize(batchSize);
-                }
+                    if (key.equals(FILTER) && value instanceof Filter)
+                    {
 
-                // Add more
+                        this.hbaseClient.setFilter((Filter) value);
+
+                    }
+                    else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
+                    {
+
+                        setBatchSize(value);
+
+                    }
+
+                    // Add more
+                }
             }
         }
+    }
+
+    private void setBatchSize(Object value)
+    {
+        if (value instanceof Integer)
+        {
+
+            this.hbaseClient.setBatchSize((Integer) value);
+
+        }
+        else if (value instanceof String)
+        {
+
+            this.hbaseClient.setBatchSize(Integer.valueOf((String) value));
+
+        }
+
+    }
+
+    /**
+     * check key value map not null
+     */
+    private boolean checkNull(String key, Object value)
+    {
+        return key != null && value != null;
     }
 }

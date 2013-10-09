@@ -41,32 +41,65 @@ public class MongoDBClientProperties
 
     public static final String BATCH_SIZE = "batch.size";
 
+    private MongoDBClient mongoDBClient;
+
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        MongoDBClient mongoDBClient = (MongoDBClient) client;
+        this.mongoDBClient = (MongoDBClient) client;
 
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
+                if (checkNull(key, value))
+                {
+                    if (key.equals(WRITE_CONCERN) && value instanceof WriteConcern)
+                    {
 
-                if (key.equals(WRITE_CONCERN) && value instanceof WriteConcern)
-                {
-                    mongoDBClient.setWriteConcern((WriteConcern) value);
-                }
-                else if (key.equals(DB_ENCODER) && value instanceof DBEncoder)
-                {
-                    mongoDBClient.setEncoder((DBEncoder) value);
-                }
-                else if (key.equals(BATCH_SIZE) && value instanceof Integer)
-                {
-                    Integer batchSize = (Integer) value;
-                    mongoDBClient.setBatchSize(batchSize);
-                }
+                        this.mongoDBClient.setWriteConcern((WriteConcern) value);
 
+                    }
+                    else if (key.equals(DB_ENCODER) && value instanceof DBEncoder)
+                    {
+
+                        this.mongoDBClient.setEncoder((DBEncoder) value);
+
+                    }
+                    else if (key.equals(BATCH_SIZE))
+                    {
+                        setBatchSize(value);
+
+                    }
+                }
                 // Add more properties as needed
             }
         }
+    }
+
+    /**
+     * set batch size
+     */
+    private void setBatchSize(Object value)
+    {
+        if (value instanceof Integer)
+        {
+            this.mongoDBClient.setBatchSize((Integer) value);
+
+        }
+        else if (value instanceof String)
+        {
+
+            this.mongoDBClient.setBatchSize(Integer.valueOf((String) value));
+        }
+
+    }
+
+    /**
+     * check key value map not null
+     */
+    private boolean checkNull(String key, Object value)
+    {
+        return key != null && value != null;
     }
 }

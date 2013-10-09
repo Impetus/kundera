@@ -481,7 +481,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap)
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
-        String pu = getPersistenceUnitOfEntity(clazz);
+        String pu = m.getPersistenceUnit()/*getPersistenceUnitOfEntity(clazz)*/;
         String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
                 .getClient();
         if (pu != null && pu.equals(persistenceUnit)

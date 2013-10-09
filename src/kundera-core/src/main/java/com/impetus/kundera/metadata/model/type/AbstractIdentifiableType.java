@@ -231,6 +231,11 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         this.idClassAttributes = idClassAttributes;
     }
 
+    public SingularAttribute<? super X, ?> getIdAttribute()
+    {
+        return idAttribute;
+    }
+    
     /**
      * On error.
      */

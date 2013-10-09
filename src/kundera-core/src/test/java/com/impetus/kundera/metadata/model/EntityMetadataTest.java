@@ -33,10 +33,12 @@ import org.junit.Test;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
@@ -129,7 +131,7 @@ public class EntityMetadataTest
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
-//        props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "lucene");
+//        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, schemaProperty);
         clientMetadata.setLuceneIndexDir(null);
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -152,23 +154,13 @@ public class EntityMetadataTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(Employe.class);
-        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);       
 
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(Employe.class, m);
-        processor.process(KunderaUser.class, m1);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
 
-        IndexProcessor indexProcessor = new IndexProcessor();
-        indexProcessor.process(Employe.class, m);
-        indexProcessor.process(KunderaUser.class, m1);        
-        Assert.assertNotNull(m1.toString());
-
-        m.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Employe.class, m);
-        metaModel.addEntityMetadata(KunderaUser.class, m1);
+        metaModel.addEntityMetadata(Employe.class, metadataBuilder.buildEntityMetadata(Employe.class));
+        metaModel.addEntityMetadata(KunderaUser.class, metadataBuilder.buildEntityMetadata(KunderaUser.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
@@ -182,8 +174,6 @@ public class EntityMetadataTest
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
 
         new SchemaConfiguration(null, persistenceUnits).configure();
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
         return null;
     }
     

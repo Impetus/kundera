@@ -47,10 +47,13 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.metadata.entities.AssociationEntity;
+import com.impetus.kundera.metadata.entities.AttributeOverrideSubClass;
 import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
 import com.impetus.kundera.metadata.entities.EmbeddedIdOwnerEntity;
+import com.impetus.kundera.metadata.entities.EntityWithAttributeOverrides;
+import com.impetus.kundera.metadata.entities.EntityWithIdAttributeOverride;
 import com.impetus.kundera.metadata.entities.IDClassEntity;
 import com.impetus.kundera.metadata.entities.IDClassOwnerEntity;
 import com.impetus.kundera.metadata.entities.ListTypeAssociationEntity;
@@ -65,6 +68,7 @@ import com.impetus.kundera.metadata.entities.SubClassA;
 import com.impetus.kundera.metadata.entities.SubClassB;
 import com.impetus.kundera.metadata.entities.bi.AssociationBiEntity;
 import com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
@@ -777,6 +781,89 @@ public class MetaModelBuilderTest
         Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
     }
 
+    @Test
+    public <X extends Class, T extends Object> void testAttributeOverride()
+    {
+        
+        X clazz = (X) AttributeOverrideSubClass.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        clazz = (X) EntityWithAttributeOverrides.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(2, managedTypes.size());
+
+        Assert.assertEquals(1, builder.getMappedSuperClassTypes().size());
+
+        // on subClass EntityWithAttributeOverrides
+        AbstractManagedType managedType = managedTypes.get(EntityWithAttributeOverrides.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(5, managedType.getAttributes().size());
+        Assert.assertNotNull(managedType.getAttribute("mappedInt"));
+        
+        String jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
+
+        String jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
+        
+        Assert.assertEquals("MAPPED_INT",jpaName1);
+        Assert.assertEquals("MAPPED_FLOAT",jpaName2);
+        
+        Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
+
+        // on subClass AttributeOverrideSubClass
+        managedType = managedTypes.get(AttributeOverrideSubClass.class);
+
+
+        jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
+
+        jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
+
+        Assert.assertEquals("MAPPED_INT",jpaName1);
+        Assert.assertEquals("mappedFloat",jpaName2);
+
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(5, managedType.getAttributes().size());
+        Assert.assertNotNull(managedType.getAttribute("mappedInt"));
+        Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
+        
+        
+        clazz = (X) EntityWithIdAttributeOverride.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        managedType = managedTypes.get(EntityWithIdAttributeOverride.class);
+
+        jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("id")).getJPAColumnName();
+
+        jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
+        
+        String jpaName3 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
+        
+        Assert.assertEquals("ID_ATTRIB",jpaName1);
+        Assert.assertEquals("MAPPED_FLOAT",jpaName2);
+        Assert.assertEquals("mappedInt",jpaName3);
+
+    }
+    
     /**
      * Assert on owner type attributes.
      * 

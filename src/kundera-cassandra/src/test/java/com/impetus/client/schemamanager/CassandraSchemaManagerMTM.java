@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
@@ -34,6 +35,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -143,9 +145,12 @@ public class CassandraSchemaManagerMTM
 
         m.setPersistenceUnit(pu);
 
+        MetadataBuilder metadataBuilder = new MetadataBuilder(pu, ThriftClientFactory.class.getSimpleName(), null);
+
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, m);
-        metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, m1);
+
+        metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonnelUniMToM.class));
+        metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityHabitatUniMToM.class));
 
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(pu).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(pu).getEmbeddables());

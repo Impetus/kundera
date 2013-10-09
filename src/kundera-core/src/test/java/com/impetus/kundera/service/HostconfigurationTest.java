@@ -28,9 +28,12 @@ import org.junit.Test;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.Employe;
@@ -127,22 +130,13 @@ public class HostconfigurationTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(Employe.class);
-        EntityMetadata m1 = new EntityMetadata(KunderaUser.class);
 
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(Employe.class, m);
-        processor.process(KunderaUser.class, m1);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
 
-        IndexProcessor indexProcessor = new IndexProcessor();
-        indexProcessor.process(Employe.class, m);
-        indexProcessor.process(KunderaUser.class, m1);
-
-        m.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Employe.class, m);
-        metaModel.addEntityMetadata(KunderaUser.class, m1);
+        metaModel.addEntityMetadata(Employe.class, metadataBuilder.buildEntityMetadata(Employe.class));
+        metaModel.addEntityMetadata(KunderaUser.class, metadataBuilder.buildEntityMetadata(KunderaUser.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 

@@ -216,6 +216,33 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="mappedsu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Employee</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTest" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="invalidmappedsu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.InvalidPersonEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTest" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+		</properties>
+	</persistence-unit>
+	
+	
 </persistence>
 
 

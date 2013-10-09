@@ -100,13 +100,17 @@ public abstract class AbstractPropertyReader
                 log.warn("File {} not found, Caused by ", propertyFileName);
                 return null;
             }
+        
         }
-        else
+//        else
+//        {
+        if(inStream != null)
         {
             xStream = getXStreamObject();
             Object o = xStream.fromXML(inStream);
             return (ClientProperties) o;
         }
+        
         return null;
     }
 

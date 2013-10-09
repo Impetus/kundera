@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseClientFactory;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.Constants;
@@ -41,6 +42,7 @@ import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -349,15 +351,10 @@ public class HBaseSchemaOperationTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(HBaseEntitySimple.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(HBaseEntitySimple.class, m);
-
-        m.setPersistenceUnit(persistenceUnit);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, HBaseClient.class.getSimpleName(), null);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(HBaseEntitySimple.class, m);
+        metaModel.addEntityMetadata(HBaseEntitySimple.class, metadataBuilder.buildEntityMetadata(HBaseEntitySimple.class));
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 

@@ -41,9 +41,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -243,12 +245,10 @@ public class UpdateDeleteNamedQueryTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(CassandraEntitySample.class, m);
-        m.setPersistenceUnit(persistenceUnit);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
+
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySample.class, m);
+        metaModel.addEntityMetadata(CassandraEntitySample.class, metadataBuilder.buildEntityMetadata(CassandraEntitySample.class));
         metaModel.addEntityNameToClassMapping("CassandraEntitySample", CassandraEntitySample.class);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
