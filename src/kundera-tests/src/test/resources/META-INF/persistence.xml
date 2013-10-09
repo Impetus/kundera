@@ -193,9 +193,6 @@
 	</persistence-unit>
 	<persistence-unit name="picongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
-		<class>com.impetus.kundera.tests.entities.AddressMongoNoAnnotation</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
@@ -261,7 +258,6 @@
 	</persistence-unit>
 	<persistence-unit name="imdbRDBMS">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
 			<property name="current_session_context_class" value="thread" />
