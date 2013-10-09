@@ -67,25 +67,8 @@ public class PersonDetailAnnotationPolyglotTest
     @Test
     public void test()
     {
-        Map<String, Object> mongoProperties = new HashMap<String, Object>();
-
-        Map<String, Object> cassandraProperties = new HashMap<String, Object>();
-        
-        Map<String, Object> properties = new HashMap<String, Object>();
-
-        Map<String, Map<String, Object>> puPropertiesMap = new HashMap<String, Map<String, Object>>();
-        
-        mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
-
-        cassandraProperties.put("kundera.ddl.auto.prepare", "create-drop");
-        
-        properties.put("kundera.ddl.auto.prepare", "create-drop");
-
-        puPropertiesMap.put("addMongo", mongoProperties);
-        puPropertiesMap.put("secIdxAddCassandra", cassandraProperties);
-        puPropertiesMap.put("piccandra", properties);
-        puPropertiesMap.put("picongo", properties);
-        emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo,piccandra,picongo", puPropertiesMap);
+           
+        emf = Persistence.createEntityManagerFactory("addMongoNoAnnotateTest,secIdxAddCassandraNoAnnotateTest");
         em = emf.createEntityManager();
         
         AddressMongoNoAnnotation address = new AddressMongoNoAnnotation();
