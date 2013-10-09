@@ -16,6 +16,7 @@
 
 package com.impetus.client.cassandra.pelops;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -447,7 +448,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         // check for counter column
         if (isUpdate && metadata.isCounterColumnType())
         {
-            throw new UnsupportedOperationException("Merge is not permitted on counter column! ");
+            throw new UnsupportedOperationException("Invalid operation! Merge is not possible over counter column.");
         }
 
         String insert_Query = null;
@@ -456,9 +457,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
             try
             {
-                client.set_keyspace(metadata.getSchema());
-                insert_Query = createInsertQuery(metadata, entity, client, rlHolders, getTtlValues().get(metadata.getTableName()));
-                executeCQLQuery(insert_Query,true);
+                cqlClient.persist(metadata, entity, client, rlHolders,
+                        getTtlValues().get(metadata.getTableName()));
             }
             catch (InvalidRequestException e)
             {
@@ -481,6 +481,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 throw new KunderaException(e);
             }
             catch (SchemaDisagreementException e)
+            {
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
+                throw new KunderaException(e);
+            }
+            catch (UnsupportedEncodingException e)
             {
                 log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
