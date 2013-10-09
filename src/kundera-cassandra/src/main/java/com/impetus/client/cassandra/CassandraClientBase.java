@@ -1439,7 +1439,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 for (Class<?> entityClass : batchMutationMap.keySet())
                 {
                     conn.batch_mutate(batchMutationMap.get(entityClass), consistencyLevel);
-                    batchMutationMap = null; 
                 }
 
             }
@@ -1448,7 +1447,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
                 executeCQLQuery(batchQueryBuilder.toString(), isCql3Enabled);
-                batchQueryBuilder = null;
             }
         }
         catch (Exception e)
