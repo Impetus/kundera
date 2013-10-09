@@ -58,7 +58,7 @@ public class OracleNoSQLClientProperties
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (checkNotNullMap(key, value))
+                if (checkNull(key, value))
                 {
                     if (key.equals(WRITE_TIMEOUT))
                     {
@@ -146,7 +146,7 @@ public class OracleNoSQLClientProperties
     /**
      * check key value map not null
      */
-    private boolean checkNotNullMap(String key, Object value)
+    private boolean checkNull(String key, Object value)
     {
         return key != null && value != null;
     }

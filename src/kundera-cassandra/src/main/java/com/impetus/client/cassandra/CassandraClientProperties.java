@@ -43,7 +43,8 @@ class CassandraClientProperties
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
     
     private CassandraClientBase cassandraClientBase;
-
+    
+    
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         this.cassandraClientBase = (CassandraClientBase) client;
@@ -52,11 +53,12 @@ class CassandraClientProperties
         {
             for (String key : properties.keySet())
             {
-
+                
                 Object value = properties.get(key);
-                if (checkNotNullMap(key, value))
+                
+                if (checkNull(key, value))
                 {
-
+                   
                     if (key.equals(CONSISTENCY_LEVEL))
                     {
                         setConsistencylevel(value);
@@ -173,7 +175,7 @@ class CassandraClientProperties
     /**
      * check key value map not null
      */
-    private boolean checkNotNullMap(String key, Object value)
+    private boolean checkNull(String key, Object value)
     {
         return key != null && value != null;
     }

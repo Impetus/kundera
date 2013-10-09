@@ -49,7 +49,7 @@ class HBaseClientProperties
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (checkNotNullMap(key, value))
+                if (checkNull(key, value))
                 {
                     if (key.equals(FILTER) && value instanceof Filter)
                     {
@@ -90,7 +90,7 @@ class HBaseClientProperties
     /**
      * check key value map not null
      */
-    private boolean checkNotNullMap(String key, Object value)
+    private boolean checkNull(String key, Object value)
     {
         return key != null && value != null;
     }
