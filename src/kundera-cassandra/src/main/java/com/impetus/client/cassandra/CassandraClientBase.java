@@ -426,7 +426,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             conn.remove_counter((CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(),
                     path, consistencyLevel);
 
-        }        
+        }
         catch (Exception e)
         {
             log.error("Error during executing delete, Caused by: .", e);
@@ -527,7 +527,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }
 
-        }        
+        }
         catch (Exception e)
         {
             log.warn("Could not create secondary index on column family {}, Caused by: . ", tableName, e);
@@ -728,9 +728,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler, false);
     }
-    
+
     /**
      * Executes Update/ Delete CQL query
+     * 
      * @param cqlQuery
      * @return
      */
@@ -742,16 +743,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         try
         {
-            CqlResult result =  executeCQLQuery(cqlQuery, true);
+            CqlResult result = executeCQLQuery(cqlQuery, true);
             return result.getNum();
         }
         catch (Exception e)
-        {            
-            log.error("Error while executing updated query: {}, Caused by: . ",
-                    cqlQuery, e);
+        {
+            log.error("Error while executing updated query: {}, Caused by: . ", cqlQuery, e);
             return 0;
-        }        
-        
+        }
+
     }
 
     public Map<String, Object> getExternalProperties()
@@ -909,7 +909,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             columnNameBuilder.append(",");
             columnValueBuilder.append(",");
             translator.appendColumnName(columnNameBuilder, rl.getRelationName());
-            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true, false);
+            translator.appendValue(columnValueBuilder, rl.getRelationValue().getClass(), rl.getRelationValue(), true,
+                    false);
         }
 
         translation.put(TranslationType.COLUMN, columnNameBuilder.toString());
@@ -935,11 +936,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         return insert_Query;
     }
-    
-    
-
-
-    
 
     /**
      * Return update query string for given entity intended for counter column
@@ -1135,7 +1131,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Attribute attribute = metadata.getIdAttribute();
             translator.buildWhereClause(queryBuilder,
                     ((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType(),
-                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE, false);
+                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE,
+                    false);
         }
 
         // strip last "AND" clause.
@@ -1451,7 +1448,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
                 executeCQLQuery(batchQueryBuilder.toString(), false);
             }
-        }        
+        }
         catch (Exception e)
         {
             log.error("Error while persisting record. Caused by: .", e);
@@ -1630,7 +1627,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         try
         {
             client.set_cql_version(getCqlVersion());
-        }        
+        }
         catch (Exception e)
         {
             log.error("Error during borrowing a connection for persistence unit {}, Caused by: .", persistenceUnit, e);
@@ -1760,31 +1757,29 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return cqlClient.findByRelationQuery(m, columnName, columnValue, clazz, dataHandler);
     }
 
-    /**
-     * @param persistenceUnit
-     * @param puProperties
-     */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
         String batch_Size = null;
-        if (puProperties != null)
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+
+        String externalBatchSize = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_BATCH_SIZE) : null;
+
+        Integer intbatch = null;
+        if (puMetadata.getBatchSize() > 0)
         {
-            Object externalBatchSize = puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE);
-            externalBatchSize = externalBatchSize != null? externalBatchSize.toString():null;
-            batch_Size = puProperties != null ? (String)externalBatchSize
-                    : null;
-            setBatchSize(batch_Size);
+            intbatch = new Integer(puMetadata.getBatchSize());
         }
-        else if (batch_Size == null)
-        {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-            batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
-        }
+        batch_Size = (String) (externalBatchSize != null ? externalBatchSize : intbatch != null ? intbatch.toString()
+                : null);
+
+        setBatchSize(batch_Size);
     }
 
     void setBatchSize(String batch_Size)
     {
-        if (batch_Size != null)
+        if (!StringUtils.isBlank(batch_Size))
         {
             batchSize = Integer.valueOf(batch_Size);
             if (batchSize == 0)
@@ -1921,7 +1916,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         }
                     }
                 }
-            }            
+            }
             catch (Exception e)
             {
                 log.error("Error while executing native CQL query Caused by: .", e);
@@ -1974,7 +1969,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             StringBuilder selectQueryBuilder = new StringBuilder(selectQuery);
             selectQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
 
-            translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue, CQLTranslator.EQ_CLAUSE, false);
+            translator.buildWhereClause(selectQueryBuilder, columnValue.getClass(), columnName, columnValue,
+                    CQLTranslator.EQ_CLAUSE, false);
             selectQueryBuilder.delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE),
                     selectQueryBuilder.length());
             return executeQuery(selectQueryBuilder.toString(), clazz, m.getRelationNames(), dataHandler, true);

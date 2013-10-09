@@ -44,6 +44,7 @@ import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.JPQLParseException;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -348,6 +349,91 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
     }
+    
+    @Test
+    public void onOrderBYClause()
+    {
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        user1.setTweetBody("my first tweet");
+        user1.setTweetDate(currentDate);
+        em.persist(user1);
+
+        key = new CassandraCompoundKey("mevivs", 2, timeLineId);
+        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        user2.setTweetBody("my second tweet");
+        user2.setTweetDate(currentDate);
+        em.persist(user2);
+
+        key = new CassandraCompoundKey("mevivs", 3, timeLineId);
+        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        user3.setTweetBody("my third tweet");
+        user3.setTweetDate(currentDate);
+        em.persist(user3);
+
+        em.flush();
+
+        // em.clear(); // optional,just to clear persistence cache.
+
+        // em = emf.createEntityManager();
+        em.clear();
+
+        String orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId ASC";
+        Query q = em.createQuery(orderClause);
+        q.setParameter("userId", "mevivs");
+        List<CassandraPrimeUser> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
+        Assert.assertEquals(3, results.size());
+        
+        orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
+        q = em.createQuery(orderClause);
+        q.setParameter("userId", "mevivs");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(2).getTweetBody());
+        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals("my third tweet", results.get(0).getTweetBody());
+        Assert.assertEquals(3, results.size());
+
+        // With limit
+        q = em.createQuery(orderClause);
+        q.setParameter("userId", "mevivs");
+        q.setMaxResults(2);
+        results = q.getResultList();
+       
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        
+        try
+        {
+            orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
+            q = em.createQuery(orderClause);
+            q.setParameter("userId", "mevivs");
+            results = q.getResultList();
+                    
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            
+            Assert.assertEquals(
+                    "InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
+                    e.getMessage());
+        }
+
+    }
+    
 
     @Test
     public void onBatchInsert()
