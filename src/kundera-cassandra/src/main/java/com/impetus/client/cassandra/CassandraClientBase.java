@@ -1763,10 +1763,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
 
-        String externalBatchSize = puProperties != null ? (String)puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
-                : null;
+        String externalBatchSize = puProperties != null ? (String) puProperties
+                .get(PersistenceProperties.KUNDERA_BATCH_SIZE) : null;
 
-        batch_Size = (String) (externalBatchSize != null ? externalBatchSize : new Integer(puMetadata.getBatchSize()).toString());
+        Integer intbatch = null;
+        if (puMetadata.getBatchSize() > 0)
+        {
+            intbatch = new Integer(puMetadata.getBatchSize());
+        }
+        batch_Size = (String) (externalBatchSize != null ? externalBatchSize : intbatch != null ? intbatch.toString()
+                : null);
 
         setBatchSize(batch_Size);
     }
