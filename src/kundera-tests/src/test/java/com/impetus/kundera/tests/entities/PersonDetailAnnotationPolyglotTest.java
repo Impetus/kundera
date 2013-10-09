@@ -1,6 +1,18 @@
-/**
- * 
- */
+/*******************************************************************************
+ * * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.kundera.tests.entities;
 
 import java.util.HashMap;
@@ -16,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.RDBMSCli;
+
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.tests.cli.CassandraCli;
 
@@ -30,10 +42,10 @@ public class PersonDetailAnnotationPolyglotTest
 
     private EntityManager em;
 
-    private RDBMSCli cli;
+   
 
     /**
-     * @throws java.lang.Exception
+     * sets up cassandra client
      */
     @Before
     public void setUp() throws Exception
@@ -55,9 +67,25 @@ public class PersonDetailAnnotationPolyglotTest
     @Test
     public void test()
     {
-        Map propertyMap = new HashMap();
-        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
-        emf = Persistence.createEntityManagerFactory("noAnnotationAddCassandra,noAnnotationAddMongo", propertyMap);
+        Map<String, Object> mongoProperties = new HashMap<String, Object>();
+
+        Map<String, Object> cassandraProperties = new HashMap<String, Object>();
+        
+        Map<String, Object> properties = new HashMap<String, Object>();
+
+        Map<String, Map<String, Object>> puPropertiesMap = new HashMap<String, Map<String, Object>>();
+        
+        mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
+
+        cassandraProperties.put("kundera.ddl.auto.prepare", "create-drop");
+        
+        properties.put("kundera.ddl.auto.prepare", "create-drop");
+
+        puPropertiesMap.put("addMongo", mongoProperties);
+        puPropertiesMap.put("secIdxAddCassandra", cassandraProperties);
+        puPropertiesMap.put("piccandra", properties);
+        puPropertiesMap.put("picongo", properties);
+        emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo,piccandra,picongo", puPropertiesMap);
         em = emf.createEntityManager();
         
         AddressMongoNoAnnotation address = new AddressMongoNoAnnotation();
@@ -91,10 +119,11 @@ public class PersonDetailAnnotationPolyglotTest
     {
         
         Map propertyMap = new HashMap();
-               
-        EntityManagerFactory emfCass = Persistence.createEntityManagerFactory("noAnnotationAddMongo", propertyMap);
-        EntityManager emCass = emfCass.createEntityManager();
         
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
+        EntityManagerFactory emfCass = Persistence.createEntityManagerFactory("noAnnotationAddCassandra", propertyMap);
+        EntityManager emCass = emfCass.createEntityManager();
+       
         PersonDetailClassMap p = new PersonDetailClassMap();
         p.setPersonId("1");
         p.setFirstName("Chhavi");
@@ -111,8 +140,8 @@ public class PersonDetailAnnotationPolyglotTest
         emCass.close();
         emfCass.close();
         
-        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
-        EntityManagerFactory emfMongo = Persistence.createEntityManagerFactory("noAnnotationAddCassandra", propertyMap);
+        
+        EntityManagerFactory emfMongo = Persistence.createEntityManagerFactory("noAnnotationAddMongo", propertyMap);
         EntityManager emMongo = emfMongo.createEntityManager();
 
         

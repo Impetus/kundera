@@ -59,6 +59,7 @@
 
 	<persistence-unit name="secIdxAddCassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.UserCassandraNoAnnotation</class>
     	<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -92,6 +93,7 @@
 
 	<persistence-unit name="addMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.AddressMongoNoAnnotation</class>
 		<properties>
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
@@ -329,10 +331,9 @@
 	
 	<persistence-unit name="noAnnotationAddCassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kundera.tests.entities.UserCassandraNoAnnotation</class>
-		<class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-	    <properties>
+	    <class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
+	    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -350,7 +351,6 @@
 	<persistence-unit name="noAnnotationAddMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
-		<class>com.impetus.kundera.tests.entities.AddressMongoNoAnnotation</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
