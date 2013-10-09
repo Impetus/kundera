@@ -136,7 +136,7 @@ public class CouchDBClientTest
 
     }
 
-//    @Test
+    @Test
     public void testPersistJoinTableData()
     {
         final String schemaName = "couch";

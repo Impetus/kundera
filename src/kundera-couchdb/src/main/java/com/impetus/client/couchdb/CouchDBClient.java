@@ -1,20 +1,18 @@
 package com.impetus.client.couchdb;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.AuthCache;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -29,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.impetus.kundera.Constants;
@@ -147,35 +146,29 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         URI uri = null;
         try
         {
-            try
-            {
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+            HttpGet get;
+            Reader reader;
+            uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
+                    + entityMetadata.getSchema() + SAPRATOR + pKey, null, null);
+            get = new HttpGet(uri);
+            get.addHeader("Accept", "application/json");
+            response = httpClient.execute(get);
 
-                EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-                HttpGet get;
-                Reader reader;
-                uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
-                        + entityMetadata.getSchema() + SAPRATOR + pKey, null, null);
-                get = new HttpGet(uri);
-                get.addHeader("Accept", "application/json");
-                response = httpClient.execute(get);
+            reader = new InputStreamReader(response.getEntity().getContent());
+            JsonObject json = gson.fromJson(reader, JsonObject.class);
 
-                reader = new InputStreamReader(response.getEntity().getContent());
-                JsonObject json = gson.fromJson(reader, JsonObject.class);
+            JsonElement rev = json.get("_rev");
 
-                JsonElement rev = json.get("_rev");
+            StringBuilder builder = new StringBuilder();
+            builder.append("rev=");
+            builder.append(rev.getAsString());
+            String q = builder.toString();
 
-                StringBuilder builder = new StringBuilder();
-                builder.append("rev=");
-                builder.append(rev.getAsString());
-                String q = builder.toString();
+            uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
+                    + entityMetadata.getSchema() + SAPRATOR + pKey, q, null);
+            response.getEntity().getContent().close();
 
-                uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR + entityMetadata.getSchema()+SAPRATOR
-                        + pKey, q, null);
-            }
-            finally
-            {
-                response.getEntity().getContent().close();
-            }
             HttpDelete delete = new HttpDelete(uri);
 
             response = httpClient.execute(delete);
@@ -205,16 +198,96 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        // TODO Auto-generated method stub
+        String joinTableName = joinTableData.getJoinTableName();
+        String joinColumnName = joinTableData.getJoinColumnName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
+        List<JsonObject> objects = new ArrayList<JsonObject>();
+        for (Object key : joinTableRecords.keySet())
+        {
+            Set<Object> values = joinTableRecords.get(key);
+            Object joinColumnValue = key;
+
+            for (Object childId : values)
+            {
+                Map<String, Object> obj = new HashMap<String, Object>();
+                obj.put("_id", joinTableName + "#" + joinColumnValue.toString() + childId);
+                obj.put(joinColumnName, joinColumnValue);
+                obj.put(invJoinColumnName, childId);
+                JsonObject object = gson.toJsonTree(obj).getAsJsonObject();
+                objects.add(object);
+            }
+        }
+        try
+        {
+            URI uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
+                    + joinTableData.getSchemaName() + SAPRATOR + "_bulk_docs", null, null);
+
+            HttpPut put = new HttpPut(uri);
+            String json = String.format("{%s%s%s}", true, "\"docs\": ", gson.toJson(objects));
+            StringEntity stringEntity = null;
+            stringEntity = new StringEntity(json, Constants.CHARSET_UTF8);
+            stringEntity.setContentType("application/json");
+            put.setEntity(stringEntity);
+
+            HttpResponse response = httpClient.execute(httpHost, put, getContext());
+        }
+        catch (Exception e)
+        {
+            log.error("Error while persisting joinTable data");
+            throw new KunderaException(e);
+        }
     }
 
     @Override
-    public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
+    public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String inverseJoinColumnName,
             Object pKeyColumnValue, Class columnJavaType)
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<E> foreignKeys = new ArrayList<E>();
+
+        URI uri = null;
+        HttpResponse response = null;
+        try
+        {
+            String q = "key="+pKeyColumnValue;
+            uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
+                    + schemaName + SAPRATOR + "_design/id/_view/by_"+pKeyColumnName, q, null);
+            HttpGet get = new HttpGet(uri);
+            get.addHeader("Accept", "application/json");
+            response = httpClient.execute(get);
+
+            InputStream content = response.getEntity().getContent();
+            Reader reader = new InputStreamReader(content);
+            JsonObject json = gson.fromJson(reader, JsonObject.class);
+        
+            JsonArray array = json.getAsJsonArray();
+            for(JsonElement element : array)
+            {
+                foreignKeys.add((E) element.getAsJsonObject().get(inverseJoinColumnName).getAsString());                
+            }            
+        }
+        catch (Exception e)
+        {
+            log.error("Error while deleting object, Caused by: .", e);
+            throw new KunderaException(e);
+        }
+        finally
+        {
+            if (response != null)
+            {
+                try
+                {
+                    response.getEntity().getContent().close();
+                }
+                catch (Exception e)
+                {
+                    log.error("Error while deleting object, Caused by: .", e);
+                    throw new KunderaException(e);
+                }
+            }
+        }
+        return foreignKeys;
     }
 
     @Override
@@ -263,43 +336,21 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             uri = new URI(_PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(), SAPRATOR
                     + entityMetadata.getSchema() + SAPRATOR + id, null, null);
-        }
-        catch (URISyntaxException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        HttpPut put = new HttpPut(uri);
+            HttpPut put = new HttpPut(uri);
 
-        StringEntity stringEntity = null;
-        try
-        {
+            StringEntity stringEntity = null;
             stringEntity = new StringEntity(object.toString(), Constants.CHARSET_UTF8);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        stringEntity.setContentType("application/json");
-        put.setEntity(stringEntity);
+            stringEntity.setContentType("application/json");
+            put.setEntity(stringEntity);
 
-        try
-        {
             HttpResponse response = httpClient.execute(httpHost, put, getContext());
         }
-        catch (ClientProtocolException e)
+        catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while persisting entity " + id);
+            throw new KunderaException(e);
         }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
     }
 
     @Override
