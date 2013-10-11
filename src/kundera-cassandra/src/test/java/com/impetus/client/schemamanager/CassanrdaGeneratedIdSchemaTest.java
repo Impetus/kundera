@@ -55,7 +55,7 @@ public class CassanrdaGeneratedIdSchemaTest
         {
             KsDef ksDef = CassandraCli.client.describe_keyspace("kunderaGeneratedId");
             Assert.assertNotNull(ksDef);
-            Assert.assertEquals(13, ksDef.getCf_defsSize());
+            Assert.assertEquals(15, ksDef.getCf_defsSize());
             int count = 0;
             for (CfDef cfDef : ksDef.cf_defs)
             {

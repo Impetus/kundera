@@ -199,8 +199,8 @@ public class ObjectGraphBuilder
                         {
                             if (childObj != null)
                             {
-//                                getChildNodeState(metadata, childObj);
-                                addChildNodesToGraph(graph, node, relation, childObj, metadata != null ? getChildNodeState(metadata, childObj):initialNodeState);
+                                addChildNodesToGraph(graph, node, relation, childObj,
+                                        metadata != null ? getChildNodeState(metadata, childObj) : initialNodeState);
                             }
                         }
                 }
@@ -211,14 +211,16 @@ public class ObjectGraphBuilder
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {
-                            addChildNodesToGraph(graph, node, relation, entry, metadata != null ? getChildNodeState(metadata, entry):initialNodeState);
+                            addChildNodesToGraph(graph, node, relation, entry,
+                                    metadata != null ? getChildNodeState(metadata, entry) : initialNodeState);
                         }
                     }
                 }
                 else
                 {
                     // Construct child node and add to graph
-                    addChildNodesToGraph(graph, node, relation, childObject, metadata != null ? getChildNodeState(metadata, childObject):initialNodeState);
+                    addChildNodesToGraph(graph, node, relation, childObject,
+                            metadata != null ? getChildNodeState(metadata, childObject) : initialNodeState);
                 }
             }
         }
