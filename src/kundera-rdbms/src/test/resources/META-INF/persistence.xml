@@ -34,26 +34,33 @@
 				<property name="hibernate.connection.pool_size" value="10" /> <property name="hibernate.connection.autocommit" 
 				value="true" /> <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" 
 				/> -->
-			<!-- <property name="hibernate.max_fetch_depth" value="0" />
-			<property name="hibernate.show_sql" value="true" />
-			<property name="hibernate.format_sql" value="true" />
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
-			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testdb" />
-			<property name="hibernate.connection.username" value="root" />
-			<property name="hibernate.connection.password" value="impetus" />
-			<property name="hibernate.c3p0.min_size" value="10" />
-			<property name="hibernate.c3p0.max_size" value="100" />
-			<property name="hibernate.c3p0.timeout" value="300" />
-			<property name="hibernate.c3p0.max_statements" value="50" />
-			<property name="hibernate.c3p0.idle_test_period" value="3000" />
-			<property name="hibernate.hbm2ddl.auto" value="update" />
-			<property name="current_session_context_class" value="thread" /> -->
-			<!-- <property name="hibernate.connection.provider_class"
-				value="org.hibernate.connection.C3P0ConnectionProvider" /> -->
-			<property name="kundera.client.property" value="hibernate.properties" 
-				/>
+			<!-- <property name="hibernate.max_fetch_depth" value="0" /> <property 
+				name="hibernate.show_sql" value="true" /> <property name="hibernate.format_sql" 
+				value="true" /> <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" 
+				/> <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" 
+				/> <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testdb" 
+				/> <property name="hibernate.connection.username" value="root" /> <property 
+				name="hibernate.connection.password" value="impetus" /> <property name="hibernate.c3p0.min_size" 
+				value="10" /> <property name="hibernate.c3p0.max_size" value="100" /> <property 
+				name="hibernate.c3p0.timeout" value="300" /> <property name="hibernate.c3p0.max_statements" 
+				value="50" /> <property name="hibernate.c3p0.idle_test_period" value="3000" 
+				/> <property name="hibernate.hbm2ddl.auto" value="update" /> <property name="current_session_context_class" 
+				value="thread" /> -->
+			<!-- <property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider" 
+				/> -->
+			<property name="kundera.client.property" value="hibernate.properties" />
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="mappedPu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<property name="hibernate.max_fetch_depth" value="0" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="kundera.client.property" value="hibernate.properties" />
+		</properties>
+	</persistence-unit>
 </persistence>

@@ -592,12 +592,11 @@ public class CassQuery extends QueryImpl
             }
             else
             {
-                String fieldName = m.getFieldName(jpaFieldName);
-
                 String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
                 
-                if (!fieldName.equals(discriminatorColumn))
+                if (!jpaFieldName.equals(discriminatorColumn))
                 {
+                    String fieldName = m.getFieldName(jpaFieldName);
 
                     Attribute col = entity.getAttribute(fieldName);
                     // Column col = m.getColumn(jpaFieldName);

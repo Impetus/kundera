@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.mappedsuperclass.inheritence;
+package com.impetus.kundera.client.crud.mappedsuperclass;
 
 import java.util.Date;
 import java.util.List;
@@ -28,38 +28,41 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
- * @author vivek.mishra
- * junit for {@link MappedSuperclass}, {@link AttributeOverride}, {@link AttributeOverrides}.
+ * @author vivek.mishra junit for {@link MappedSuperclass},
+ *         {@link AttributeOverride}, {@link AttributeOverrides}.
  */
-public class TransactionTest
+public abstract class MappedSuperClassBase
 {
 
-    private static final String _PU = "cassandra_pu";
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(MappedSuperClassBase.class);
+
+    protected String _PU = "corePu";
 
     /** The emf. */
-    private static EntityManagerFactory emf;
+    protected static EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    protected static EntityManager em;
 
-    
-    @Before
-    public void setUp() throws Exception
+    protected void setUpInternal() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();
     }
 
-    @Test
-    public void test()
+    protected void assertInternal()
+    {
+        assertInternal(false);
+    }
+
+    protected void assertInternal(boolean wait)
     {
         CreditTransaction creditTx = new CreditTransaction();
         creditTx.setTxId("credit1");
@@ -68,7 +71,9 @@ public class TransactionTest
         creditTx.setTransactionDt(new Date());
         creditTx.setAmount(10);
         em.persist(creditTx);
-        
+
+        waitThread(wait);
+
         DebitTransaction debitTx = new DebitTransaction();
         debitTx.setTxId("debit1");
         debitTx.setTxStatus(Status.PENDING);
@@ -76,27 +81,27 @@ public class TransactionTest
         debitTx.setBankIdentifier("sbi");
         debitTx.setAmount(-10);
         em.persist(debitTx);
-        
+
+        waitThread(wait);
         em.clear();
         String creditQuery = "Select c from CreditTransaction c where c.bankIdentifier = 'sbi'";
-        
+
         Query query = em.createQuery(creditQuery);
-        
+
         List<CreditTransaction> results = query.getResultList();
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("credit1",results.get(0).getTxId());
-        
+        Assert.assertEquals("credit1", results.get(0).getTxId());
+
         em.clear();
         String debitQuery = "Select d from DebitTransaction d where d.bankIdentifier = 'sbi'";
-        
+
         query = em.createQuery(debitQuery);
-        
+
         List<DebitTransaction> debitResults = query.getResultList();
         Assert.assertEquals(1, debitResults.size());
-        Assert.assertEquals("debit1",debitResults.get(0).getTxId());
-        
-    }
+        Assert.assertEquals("debit1", debitResults.get(0).getTxId());
 
+    }
 
     /**
      * Tear down.
@@ -104,21 +109,33 @@ public class TransactionTest
      * @throws Exception
      *             the exception
      */
-    @After
-    public void tearDown() throws Exception
+    protected void tearDownInternal() throws Exception
     {
-        CassandraCli.dropKeySpace("KunderaTests");
-        if(emf != null)
+        if (emf != null)
         {
             emf.close();
         }
 
-        if(em != null)
+        if (em != null)
         {
             em.close();
         }
-        
+
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
+    private void waitThread(boolean toWait)
+    {
+        if (toWait)
+        {
+            try
+            {
+                Thread.sleep(2000);
+            }
+            catch (InterruptedException e)
+            {
+                log.error("Error while thread interruption, {}", e);
+            }
+        }
+    }
 }

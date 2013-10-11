@@ -636,4 +636,22 @@ public class MetadataUtils
         }
         return false;
     }
+
+
+    public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
+    {
+//        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
+        
+        Set<Attribute> attributes = entityType.getAttributes();
+        
+        Iterator<Attribute> iter = attributes.iterator();
+        
+        while(iter.hasNext())
+        {
+            Attribute attribute = iter.next();
+            entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
+        }
+    
+    }
+
 }

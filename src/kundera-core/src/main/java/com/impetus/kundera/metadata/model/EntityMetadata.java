@@ -28,9 +28,11 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
@@ -239,7 +241,7 @@ public final class EntityMetadata
     {
         getEntityType();
 
-        return this.entityType != null && ((AbstractManagedType) this.entityType).getTableName() != null ? ((AbstractManagedType) this.entityType)
+        return this.entityType != null && !StringUtils.isBlank(((AbstractManagedType) this.entityType).getTableName()) ? ((AbstractManagedType) this.entityType)
                 .getTableName() : tableName;
     }
 
@@ -277,7 +279,7 @@ public final class EntityMetadata
     {
         getEntityType();
 
-        return this.entityType != null && ((AbstractManagedType) this.entityType).getSchemaName() != null ? ((AbstractManagedType) this.entityType)
+        return this.entityType != null && !StringUtils.isBlank(((AbstractManagedType) this.entityType).getSchemaName()) ? ((AbstractManagedType) this.entityType)
                 .getSchemaName() : schema;
     }
 
@@ -744,6 +746,15 @@ public final class EntityMetadata
     public String getFieldName(String jpaColumnName)
     {
         String fieldName = jpaColumnMapping.get(jpaColumnName);
+        
+        if(fieldName == null)
+        {
+            getEntityType();
+            MetadataUtils.onJPAColumnMapping(this.entityType, this); // rebase. require in case of concrete super entity class.
+            fieldName = jpaColumnMapping.get(jpaColumnName);
+            
+        }
+        
         return fieldName != null? fieldName:jpaColumnName;
     }
 

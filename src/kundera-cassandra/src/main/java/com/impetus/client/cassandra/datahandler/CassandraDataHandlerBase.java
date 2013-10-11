@@ -1217,6 +1217,7 @@ public abstract class CassandraDataHandlerBase
     {
         if (attribute != null)
         {
+            
             try
             {
                 if (attribute.isCollection())

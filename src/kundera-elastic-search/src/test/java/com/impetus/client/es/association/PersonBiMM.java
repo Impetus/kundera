@@ -31,7 +31,7 @@ import javax.persistence.Table;
  *  Bi M-M person entity.
  */
 @Entity
-@Table(name="PERSONNELBIMM", schema="esSchema@es-pu")
+//@Table(name="PERSONNELBIMM", schema="esSchema@es-pu")
 public class PersonBiMM
 {
     @Id

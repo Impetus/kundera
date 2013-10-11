@@ -111,7 +111,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
         if (superClazzType != null)
         {
-            attributes.addAll(superClazzType.getDeclaredAttributes());
+            attributes.addAll(superClazzType.getAttributes());
         }
 
         return attributes;
@@ -152,7 +152,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         SingularAttribute<? super X, Y> attribute = getDeclaredSingularAttribute(paramString, paramClass, false);
         if (superClazzType != null && attribute == null)
         {
-            return superClazzType.getDeclaredSingularAttribute(paramString, paramClass);
+            return superClazzType.getSingularAttribute(paramString, paramClass);
         }
         checkForValid(paramString, attribute);
         return attribute;
@@ -185,7 +185,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         if (superClazzType != null)
         {
-            Set parentAttrib = superClazzType.getDeclaredSingularAttributes();
+            Set parentAttrib = superClazzType.getSingularAttributes();
 
             if (parentAttrib != null)
             {
@@ -450,7 +450,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         if (superClazzType != null)
         {
-            pluralAttributes.addAll(superClazzType.getDeclaredPluralAttributes());
+            pluralAttributes.addAll(superClazzType.getPluralAttributes());
         }
 
         return pluralAttributes;
@@ -487,7 +487,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName, false);
         if (attribute == null && superClazzType != null)
         {
-            attribute = superClazzType.getDeclaredAttribute(paramName);
+            attribute = superClazzType.getAttribute(paramName);
         }
 
         checkForValid(paramName, attribute);
@@ -531,7 +531,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         {
             if (attribute == null && superClazzType != null)
             {
-                attribute = superClazzType.getDeclaredSingularAttribute(paramString);
+                attribute = superClazzType.getSingularAttribute(paramString);
             }
         }
         catch (IllegalArgumentException iaex)
@@ -1138,7 +1138,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             // means there is a super class
             // scan for inheritence model.
 
-            if (superClazzType.getJavaType().isAnnotationPresent(Inheritance.class))
+            if (superClazzType.getPersistenceType().equals(PersistenceType.ENTITY)
+                    && superClazzType.getJavaType().isAnnotationPresent(Inheritance.class))
             {
                 Inheritance inheritenceAnn = superClazzType.getJavaType().getAnnotation(Inheritance.class);
 
@@ -1189,14 +1190,14 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
             // if join table
             // TODOO: PRIMARY KEY JOIN COLUMN
-            model = new InheritanceModel(InheritanceType.TABLE_PER_CLASS, tableName, schemaName);
+            model = new InheritanceModel(InheritanceType.JOINED, tableName, schemaName);
 
             break;
 
         case TABLE_PER_CLASS:
 
             // don't override, use original ones.
-            model = new InheritanceModel(InheritanceType.JOINED, null, null);
+            model = new InheritanceModel(InheritanceType.TABLE_PER_CLASS, null, null);
 
             break;
 

@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.mappedsuperclass.inheritence;
+package com.impetus.kundera.client.crud.mappedsuperclass;
 
 import java.util.Date;
 
@@ -34,7 +34,7 @@ import javax.persistence.Table;
 @Table(name = "TRNX")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tx_type")
-public class Transaction
+public class Transaction 
 {
 
     @Id
@@ -43,8 +43,21 @@ public class Transaction
     @Column
     private String bankIdentifier;
 
+    
     @Column
     private Date transactionDt;
+
+    public Date getTransactionDt()
+    {
+        return transactionDt;
+    }
+
+    public void setTransactionDt(Date transactionDt)
+    {
+        this.transactionDt = transactionDt;
+    }
+
+
 
     public String getTxId()
     {
@@ -66,14 +79,5 @@ public class Transaction
         this.bankIdentifier = bankIdentifier;
     }
 
-    public Date getTransactionDt()
-    {
-        return transactionDt;
-    }
-
-    public void setTransactionDt(Date transactionDt)
-    {
-        this.transactionDt = transactionDt;
-    }
 
 }

@@ -428,8 +428,14 @@ public class KunderaQuery
 
         // String filter = getFilter();
 
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                getPersistenceUnit());
+        EntityType entityType = metaModel.entity(entityClass);
+        
         if (null == filter)
         {
+            List<String> clauses = new ArrayList<String>();
+            addDiscriminatorClause(clauses, entityType);
             return;
         }
 
@@ -442,10 +448,6 @@ public class KunderaQuery
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                getPersistenceUnit());
-        EntityType entityType = metaModel.entity(entityClass);
-        
 /*        if(((AbstractManagedType)entityType).isInherited())
         {
             String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
@@ -536,6 +538,14 @@ public class KunderaQuery
             }
         }
         
+        addDiscriminatorClause(clauses, entityType);
+
+        
+//        appendDiscriminator();
+    }
+
+    private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
+    {
         if(((AbstractManagedType)entityType).isInherited())
         {
             String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
@@ -552,9 +562,6 @@ public class KunderaQuery
                 filtersQueue.add(filterClause);
             }
         }
-
-        
-//        appendDiscriminator();
     }
 
     /**

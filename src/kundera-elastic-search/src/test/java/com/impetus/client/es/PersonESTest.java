@@ -257,6 +257,8 @@ public class PersonESTest
     {
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
 //        node.close();
     }
 

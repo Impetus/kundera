@@ -46,6 +46,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -176,8 +177,9 @@ public class HBaseQuery extends QueryImpl
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
                     columns.toArray(new String[columns.size()]), null);
         }
-        
-//        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+
+        // MetadataUtils.useSecondryIndex(((ClientBase)
+        // client).getClientMetadata());
         if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             if (filter == null && !translator.isFindById)
@@ -526,9 +528,14 @@ public class HBaseQuery extends QueryImpl
             }
             else
             {
-                String fieldName = m.getFieldName(jpaFieldName);
-                Attribute col = entity.getAttribute(fieldName);
-                fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
+                String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
+
+                if (!jpaFieldName.equals(discriminatorColumn))
+                {
+                    String fieldName = m.getFieldName(jpaFieldName);
+                    Attribute col = entity.getAttribute(fieldName);
+                    fieldClazz = ((AbstractAttribute) col).getBindableJavaType();
+                }
             }
         }
 
@@ -538,8 +545,12 @@ public class HBaseQuery extends QueryImpl
         }
         else
         {
-            log.error("Error while handling data type for {} .", jpaFieldName);
-            throw new QueryHandlerException("field type is null for:" + jpaFieldName);
+            // Treat default as UTF8-Type. { in case of discriminator column}
+            return HBaseUtils.getBytes(value, String.class);
+            // log.error("Error while handling data type for {} .",
+            // jpaFieldName);
+            // throw new QueryHandlerException("field type is null for:" +
+            // jpaFieldName);
         }
     }
 
@@ -556,7 +567,8 @@ public class HBaseQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
 
-//        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+        // MetadataUtils.useSecondryIndex(((ClientBase)
+        // client).getClientMetadata());
         if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");

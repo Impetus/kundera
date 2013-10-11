@@ -260,11 +260,11 @@ public class MongoDBQuery extends QueryImpl
                 else
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());
-                    String fieldName = m.getFieldName(property);
                     String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
-                    
-                    if(!fieldName.equals(discriminatorColumn))
+
+                    if (!property.equals(discriminatorColumn))
                     {
+                        String fieldName = m.getFieldName(property);
                         f = (Field) entity.getAttribute(fieldName).getJavaMember();
                     }
                 }

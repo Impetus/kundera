@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.mappedsuperclass.inheritence;
+package com.impetus.kundera.client.crud.mappedsuperclass;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
@@ -23,6 +23,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.impetus.kundera.client.crud.mappedsuperclass.Status;
+import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
+
 /**
  * @author vivek.mishra
  * Credit transaction extends {@link Transaction}
@@ -31,7 +34,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "TRNX_CREDIT")
-@DiscriminatorValue(value = "CREDIT")
+@DiscriminatorValue(value = "credit")
 @AttributeOverride(name="bankIdentifier",column= @Column(name="CREDIT_BANK_IDENT"))
 public class CreditTransaction extends Transaction
 {

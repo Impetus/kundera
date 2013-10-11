@@ -60,6 +60,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -1295,10 +1296,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             String columnName = PropertyAccessorFactory.STRING.fromBytes(String.class, nameInByte);
 
             byte[] value = results.get(nameInByte);
-            String fieldName = entityMetadata.getFieldName(columnName);
+            String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
 
-            if (fieldName != null)
+            if (columnName != null && !columnName.equals(discriminatorColumn))
             {
+                String fieldName = entityMetadata.getFieldName(columnName);
+
                 Attribute attribute = entityType.getAttribute(fieldName);
 
                 if (relationNames != null && relationNames.contains(columnName))
@@ -1733,6 +1736,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
+            byte[] nameInBytes = getEncodedBytes(discrColumn);
+            wrapper.addColumn(nameInBytes, valueInBytes);
+            wrapper.addIndex(getHashKey(entityMetadata.getTableName(), discrColumn), getDouble(discrValue));
+            wrapper.addIndex(getHashKey(entityMetadata.getTableName(), getHashKey(discrColumn, discrValue)),
+                    getDouble(discrValue));
+        }
 
         String rowKey = null;
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))

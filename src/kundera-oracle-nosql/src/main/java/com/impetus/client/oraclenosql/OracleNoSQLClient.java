@@ -71,6 +71,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -183,10 +184,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                 String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
                 minorKeyFirstPart = handler.removeLOBSuffix(minorKeyFirstPart);
-                String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
-
-                if (fieldName != null)
+                String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+                if (minorKeyFirstPart != null && !minorKeyFirstPart.equals(discriminatorColumn))
                 {
+                    String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
+
                     Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
 
                     if (metamodel.isEmbeddable(f.getType()))
@@ -549,6 +551,23 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     }
                 }
             }
+        }
+
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            // Key
+            Key key = Key.createKey(majorKeyComponent, discrColumn);
+
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
+            Value value = Value.createValue(valueInBytes);
+
+            Operation op = kvStore.getOperationFactory().createPut(key, value);
+            persistOperations.add(op);
         }
         handler.execute(persistOperations);
     }
@@ -973,7 +992,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        
+
         new OracleNoSQLClientProperties().populateClientProperties(client, properties);
     }
 

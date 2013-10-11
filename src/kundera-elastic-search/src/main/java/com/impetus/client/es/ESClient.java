@@ -16,7 +16,10 @@
 package com.impetus.client.es;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +65,11 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
@@ -110,6 +115,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         try
         {
+             
             Map<String, Object> values = new HashMap<String, Object>();
 
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -122,10 +128,11 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             addSource(entity, values, entityType);
 
             addRelations(rlHolders, values);
-
+            addDiscriminator(values, entityType);
+            
             IndexResponse response = txClient
                     .prepareIndex(entityMetadata.getSchema().toLowerCase(),
-                            entityMetadata.getEntityClazz().getSimpleName(), keyAsString).setSource(values).execute()
+                            entityMetadata.getTableName(), keyAsString).setSource(values).execute()
                     .actionGet();
 
             // IndexRequest request = new
@@ -139,6 +146,18 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             // Nothing as of now.
         }
 
+    }
+
+    private void addDiscriminator(Map<String, Object> values, EntityType entityType)
+    {
+        String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+        
+        // No need to check for empty or blank, as considering it as valid name for nosql!
+        if(discrColumn != null && discrValue != null)
+        {
+            values.put(discrColumn, discrValue);
+        }
     }
 
     private void addRelations(List<RelationHolder> rlHolders, Map<String, Object> values)
@@ -180,7 +199,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         try
         {
             get = txClient
-                    .prepareGet(metadata.getSchema().toLowerCase(), metadata.getEntityClazz().getSimpleName(),
+                    .prepareGet(metadata.getSchema().toLowerCase(), metadata.getTableName(),
                             keyAsString).setOperationThreaded(false).execute().get();
         }
         catch (InterruptedException iex)
@@ -230,6 +249,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     List executeQuery(FilterBuilder filter, final EntityMetadata entityMetadata)
     {
 
+        
         Class clazz = entityMetadata.getEntityClazz();
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -240,7 +260,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         List results = new ArrayList();
 
         SearchResponse response = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase())
-                .setTypes(entityMetadata.getEntityClazz().getSimpleName()).setFilter(filter).execute().actionGet();
+                .setTypes(entityMetadata.getTableName()).setFilter(filter).execute().actionGet();
         SearchHits hits = response.getHits();
 
         Object entity = null;
@@ -330,7 +350,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
             try
             {
-                txClient.prepareDelete(metadata.getSchema().toLowerCase(), metadata.getEntityClazz().getSimpleName(),
+                txClient.prepareDelete(metadata.getSchema().toLowerCase(), metadata.getTableName(),
                         keyAsString.toString()/* index, type, id */).setOperationThreaded(false).execute().get();
             }
             catch (InterruptedException iex)
@@ -492,7 +512,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                                                                                                  * "*"
                                                                                                  * )
                                                                                                  */
-            .setTypes(entityClazz.getSimpleName()).setQuery(QueryBuilders.termQuery(colName, colValue)).execute().get();
+            .setTypes(metadata.getTableName()).setQuery(QueryBuilders.termQuery(colName, colValue)).execute().get();
 
             SearchHits hits = response.getHits();
             for (SearchHit hit : hits)
@@ -590,8 +610,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                     {
                         // create a delete request.
 
-                        DeleteRequest request = new DeleteRequest(metadata.getSchema().toLowerCase(), metadata
-                                .getEntityClazz().getSimpleName(), key);
+                        DeleteRequest request = new DeleteRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key);
                         bulkRequest.add(request);
 
                     }
@@ -604,8 +623,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                         addRelations(relationHolders, values);
 
-                        UpdateRequest request = new UpdateRequest(metadata.getSchema().toLowerCase(), metadata
-                                .getEntityClazz().getSimpleName(), key).doc(values);
+                        UpdateRequest request = new UpdateRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key).doc(values);
                         bulkRequest.add(request);
                     }
                     else
@@ -618,8 +636,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                         addRelations(relationHolders, values);
 
-                        IndexRequest request = new IndexRequest(metadata.getSchema().toLowerCase(), metadata
-                                .getEntityClazz().getSimpleName(), key).source(values);
+                        IndexRequest request = new IndexRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key).source(values);
                         bulkRequest.add(request);
 
                     }
@@ -712,9 +729,20 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
     private void setField(Object result, Object key, Attribute attribute, Object fieldValue)
     {
-        if (key == null || !key.equals(fieldValue))
+        if (fieldValue != null)
         {
-            PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), fieldValue);
+            if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Date.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(java.sql.Date.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Timestamp.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Calendar.class))
+            {
+                PropertyAccessorFactory.STRING.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
+                        fieldValue.toString());
+            }
+            else if (key == null || !key.equals(fieldValue))
+            {
+                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), fieldValue);
+            }
         }
     }
 

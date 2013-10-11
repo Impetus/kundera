@@ -151,8 +151,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 }
             }
         
-        
-            onJPAColumnMapping(metaModelBuilder, metadata);
+            EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
+
+            MetadataUtils.onJPAColumnMapping(entityType, metadata);
             validateAndSetId(metadata, clazz, metaModelBuilder);
         }
 
@@ -306,9 +307,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(), f.getName());
     }
 */
-    private void onJPAColumnMapping(final MetaModelBuilder builder, EntityMetadata entityMetadata)
+/*    public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
     {
-        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
+//        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
         
         Set<Attribute> attributes = entityType.getAttributes();
         
@@ -321,7 +322,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
     
     }
-
+*/
     
     private <X, T> void validateAndSetId(EntityMetadata metadata, Class<X> clazz,
             MetaModelBuilder<X, T> metaModelBuilder)

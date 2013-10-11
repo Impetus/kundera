@@ -233,7 +233,8 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
 
     public SingularAttribute<? super X, ?> getIdAttribute()
     {
-        return idAttribute;
+        return idAttribute == null ? getSuperClazzType() != null ? ((AbstractIdentifiableType) getSuperClazzType())
+                .getIdAttribute() : null : idAttribute;
     }
     
     /**

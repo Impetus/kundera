@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.mappedsuperclass.inheritence;
+package com.impetus.kundera.client.crud.mappedsuperclass;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -22,6 +22,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+
+import com.impetus.kundera.client.crud.mappedsuperclass.Status;
+import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
 
 /**
  * @author vivek.mishra

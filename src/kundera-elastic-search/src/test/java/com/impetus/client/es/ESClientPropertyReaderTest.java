@@ -25,14 +25,16 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
- * @author vivek.mishra
- * junit for {@link ESClientPropertyReader} 
+ * @author vivek.mishra junit for {@link ESClientPropertyReader}
  */
 public class ESClientPropertyReaderTest
 {
@@ -55,21 +57,21 @@ public class ESClientPropertyReaderTest
     @Test
     public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
     {
-        Map<String,Client<ESQuery>> clients = (Map<String, Client<ESQuery>>) em.getDelegate();
-        
+        Map<String, Client<ESQuery>> clients = (Map<String, Client<ESQuery>>) em.getDelegate();
+
         ESClient client = (ESClient) clients.get(PERSISTENCE_UNIT);
-        
+
         Field factoryField = client.getClass().getDeclaredField("factory");
-        
-        if(!factoryField.isAccessible())
+
+        if (!factoryField.isAccessible())
         {
             factoryField.setAccessible(true);
         }
-        
+
         ESClientFactory factory = (ESClientFactory) factoryField.get(client);
-        
-        
-        Field propertyReader = ((ESClientFactory) factory).getClass().getSuperclass().getDeclaredField("propertyReader");
+
+        Field propertyReader = ((ESClientFactory) factory).getClass().getSuperclass()
+                .getDeclaredField("propertyReader");
 
         if (!propertyReader.isAccessible())
         {
@@ -84,6 +86,22 @@ public class ESClientPropertyReaderTest
         Assert.assertEquals("true", props.get("discovery.zen.ping.unicast.enabled"));
         Assert.assertEquals("false", props.get("discovery.zen.multicast.enabled"));
         Assert.assertEquals("true", props.get("discovery.zen.unicast.enabled"));
+    }
+
+    @After
+    public void tearDown()
+    {
+        if (em != null)
+        {
+            em.close();
+        }
+
+        if (emf != null)
+        {
+            emf.close();
+        }
+        
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.InheritanceType;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.Bindable;
@@ -30,6 +31,7 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
@@ -66,12 +68,12 @@ import com.impetus.kundera.metadata.entities.SingularEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.entities.SubClassA;
 import com.impetus.kundera.metadata.entities.SubClassB;
+import com.impetus.kundera.metadata.entities.SubSingularEntity;
 import com.impetus.kundera.metadata.entities.bi.AssociationBiEntity;
 import com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
-
 
 /**
  * MetaModelBuilderTest.
@@ -136,7 +138,7 @@ public class MetaModelBuilderTest
 
             AbstractManagedType<X> managedType = assertOnManagedType(builder, managedTypeField, SingularEntity.class);
             assertOnIdAttribute(managedType, "key", Integer.class);
-            //illeagaltypesTest(managedType);
+            // illeagaltypesTest(managedType);
 
             // on optional attribute
             log.info("Assert on optional attribute");
@@ -334,7 +336,7 @@ public class MetaModelBuilderTest
         for (Field f : field)
         {
             builder.construct(AssociationEntity.class, f);
-            
+
         }
 
         Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
@@ -344,15 +346,16 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToOOwnerEntity.class);
         Assert.assertNotNull(managedType);
-//        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-//        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-//                .size());
+        // Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length,
+        // managedType.getAttributes().size());
+        // Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length,
+        // managedType.getDeclaredAttributes()
+        // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType.getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType.getDeclaredAttributes()
-                .size());
-        
-        
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType
+                .getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType
+                .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
@@ -365,24 +368,24 @@ public class MetaModelBuilderTest
         Assert.assertEquals(true, associationAttribute.isAssociation());
         Assert.assertEquals(OToOOwnerEntity.class, associationAttribute.getDeclaringType().getJavaType());
         Assert.assertEquals("association", associationAttribute.getName());
-        
-        
-        
+
         // Assertion on AssociationEntity.
         managedType = managedTypes.get(AssociationEntity.class);
         Assert.assertNotNull(managedType);
-//        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-//        Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
-//        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-//                .size());
-      Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType.getAttributes().size());
-      Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
-      Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType.getDeclaredAttributes()
-              .size());
+        // Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length,
+        // managedType.getAttributes().size());
+        // Assert.assertEquals(AssociationEntity.class,
+        // managedType.getJavaType());
+        // Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length,
+        // managedType.getDeclaredAttributes()
+        // .size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType
+                .getAttributes().size());
+        Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType
+                .getDeclaredAttributes().size());
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
-        
-      
-        
+
     }
 
     /**
@@ -422,13 +425,16 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToOOwnerBiEntity.class);
         Assert.assertNotNull(managedType);
-//        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-//        Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-//                .size());
+        // Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length,
+        // managedType.getAttributes().size());
+        // Assert.assertEquals(OToOOwnerBiEntity.class.getDeclaredFields().length,
+        // managedType.getDeclaredAttributes()
+        // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType.getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType.getDeclaredAttributes()
-                .size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
+                .getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
+                .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
@@ -445,15 +451,19 @@ public class MetaModelBuilderTest
         // Assertion on AssociationBiEntity.
         managedType = managedTypes.get(AssociationBiEntity.class);
         Assert.assertNotNull(managedType);
-//        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-//        Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
-//        Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-//                .size());
+        // Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length,
+        // managedType.getAttributes().size());
+        // Assert.assertEquals(AssociationBiEntity.class,
+        // managedType.getJavaType());
+        // Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length,
+        // managedType.getDeclaredAttributes()
+        // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType
+                .getAttributes().size());
         Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType.getDeclaredAttributes()
-                .size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType
+                .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
 
@@ -470,7 +480,6 @@ public class MetaModelBuilderTest
         Assert.assertEquals(OToOOwnerBiEntity.class, ownerAttribute.getJavaType());
         Assert.assertEquals(managedTypes.get(OToOOwnerBiEntity.class),
                 ((SingularAttribute<? super X, ?>) ownerAttribute).getType());
-        
 
     }
 
@@ -510,13 +519,16 @@ public class MetaModelBuilderTest
         // Assertion on owner Entity
         AbstractManagedType<?> managedType = managedTypes.get(OToMOwnerEntity.class);
         Assert.assertNotNull(managedType);
-//        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
-//        Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes()
-//                .size());
+        // Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length,
+        // managedType.getAttributes().size());
+        // Assert.assertEquals(OToMOwnerEntity.class.getDeclaredFields().length,
+        // managedType.getDeclaredAttributes()
+        // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType.getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType.getDeclaredAttributes()
-                .size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType
+                .getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType
+                .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
 
@@ -524,19 +536,16 @@ public class MetaModelBuilderTest
         CollectionAttribute<? super X, ?> collectionAttribute = (CollectionAttribute<? super X, ?>) managedType
                 .getCollection("association", AssociationEntity.class);
         Assert.assertNotNull(collectionAttribute);
-        
-     // assert on getDeclaredCollection.
+
+        // assert on getDeclaredCollection.
         CollectionAttribute<? super X, ?> declaredCollectionAttribute = (CollectionAttribute<? super X, ?>) managedType
                 .getDeclaredCollection("association", AssociationEntity.class);
         Assert.assertNotNull(declaredCollectionAttribute);
-        
+
         // assert on getDeclaredCollection.
         CollectionAttribute<? super X, ?> declaredCollectionAttributeParam = (CollectionAttribute<? super X, ?>) managedType
                 .getDeclaredCollection("association");
         Assert.assertNotNull(declaredCollectionAttributeParam);
-        
-        
-        
 
         // assert with invalid collection type class.
         try
@@ -632,16 +641,14 @@ public class MetaModelBuilderTest
         assertOnOwnerTypeAttributes(managedType, "collectionAssociation", CollectionTypeAssociationEntity.class,
                 Collection.class);
         assertOnOwnerTypeAttributes(managedType, "mapAssociation", MapTypeAssociationEntity.class, Map.class);
-        
+
         // Assert on set attribute class.
         assertOnSetAttribute(managedType, "setAssocition", SetTypeAssociationEntity.class, Set.class);
-        // Assert on list  attribute class.
+        // Assert on list attribute class.
         assertOnListAttribute(managedType, "listAssociation", ListTypeAssociationEntity.class, List.class);
-        // Assert on map  attribute class.
+        // Assert on map attribute class.
         assertOnMapAttribute(managedType, "mapAssociation", Integer.class, MapTypeAssociationEntity.class);
-        
-    
-    
+
     }
 
     /**
@@ -672,7 +679,6 @@ public class MetaModelBuilderTest
         Assert.assertEquals(2, managedType.getAttributes().size());
         Attribute idAttribute = managedType.getAttribute("id");
 
-        
         SingularAttribute idAttrib = null;
         try
         {
@@ -784,7 +790,7 @@ public class MetaModelBuilderTest
     @Test
     public <X extends Class, T extends Object> void testAttributeOverride()
     {
-        
+
         X clazz = (X) AttributeOverrideSubClass.class;
         // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
         builder.process(clazz);
@@ -814,33 +820,31 @@ public class MetaModelBuilderTest
         Assert.assertNotNull(managedType);
         Assert.assertEquals(5, managedType.getAttributes().size());
         Assert.assertNotNull(managedType.getAttribute("mappedInt"));
-        
-        String jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
 
-        String jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
-        
-        Assert.assertEquals("MAPPED_INT",jpaName1);
-        Assert.assertEquals("MAPPED_FLOAT",jpaName2);
-        
+        String jpaName1 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedInt")).getJPAColumnName();
+
+        String jpaName2 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedFloat")).getJPAColumnName();
+
+        Assert.assertEquals("MAPPED_INT", jpaName1);
+        Assert.assertEquals("MAPPED_FLOAT", jpaName2);
+
         Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
 
         // on subClass AttributeOverrideSubClass
         managedType = managedTypes.get(AttributeOverrideSubClass.class);
 
+        jpaName1 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedInt")).getJPAColumnName();
 
-        jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
+        jpaName2 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedFloat")).getJPAColumnName();
 
-        jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
-
-        Assert.assertEquals("MAPPED_INT",jpaName1);
-        Assert.assertEquals("mappedFloat",jpaName2);
+        Assert.assertEquals("MAPPED_INT", jpaName1);
+        Assert.assertEquals("mappedFloat", jpaName2);
 
         Assert.assertNotNull(managedType);
         Assert.assertEquals(5, managedType.getAttributes().size());
         Assert.assertNotNull(managedType.getAttribute("mappedInt"));
         Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
-        
-        
+
         clazz = (X) EntityWithIdAttributeOverride.class;
         // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
         builder.process(clazz);
@@ -852,18 +856,48 @@ public class MetaModelBuilderTest
 
         managedType = managedTypes.get(EntityWithIdAttributeOverride.class);
 
-        jpaName1 = ((AbstractAttribute<X, T>)managedType.getAttribute("id")).getJPAColumnName();
+        jpaName1 = ((AbstractAttribute<X, T>) managedType.getAttribute("id")).getJPAColumnName();
 
-        jpaName2 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedFloat")).getJPAColumnName();
-        
-        String jpaName3 = ((AbstractAttribute<X, T>)managedType.getAttribute("mappedInt")).getJPAColumnName();
-        
-        Assert.assertEquals("ID_ATTRIB",jpaName1);
-        Assert.assertEquals("MAPPED_FLOAT",jpaName2);
-        Assert.assertEquals("mappedInt",jpaName3);
+        jpaName2 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedFloat")).getJPAColumnName();
+
+        String jpaName3 = ((AbstractAttribute<X, T>) managedType.getAttribute("mappedInt")).getJPAColumnName();
+
+        Assert.assertEquals("ID_ATTRIB", jpaName1);
+        Assert.assertEquals("MAPPED_FLOAT", jpaName2);
+        Assert.assertEquals("mappedInt", jpaName3);
 
     }
-    
+
+    @Test
+    public <X extends Class, T extends Object> void testInheritenceStrategy()
+    {
+        X clazz = (X) SubSingularEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+        
+        EntityType<X> managedType = (EntityType<X>) builder.getManagedTypes().get(SubSingularEntity.class);
+        
+        InheritanceType type = ((AbstractManagedType<X>)managedType).getInheritenceType();
+        
+        Assert.assertEquals(InheritanceType.TABLE_PER_CLASS, type);
+        
+        
+         clazz = (X) SingularEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+        
+    }
+
     /**
      * Assert on owner type attributes.
      * 
@@ -891,11 +925,7 @@ public class MetaModelBuilderTest
         Assert.assertNotNull(((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember());
         Assert.assertNotNull(fieldName, ((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember()
                 .getName());
-        
-        
 
-        
-        
     }
 
     /**
@@ -928,12 +958,6 @@ public class MetaModelBuilderTest
         Assert.assertNotNull(byteAttribute);
         Assert.assertFalse(byteAttribute.isId());
         Assert.assertEquals(byte[].class, byteAttribute.getBindableJavaType());
-        
-       
-        
-      
-        
-        
 
     }
 
@@ -978,8 +1002,10 @@ public class MetaModelBuilderTest
     private <X> void assertOnEmbeddableType(Class entityClazz, Attribute<X, String> attribute,
             EmbeddableType<X> embeddableType, String attributeName, Class attributeClazz)
     {
-//        Assert.assertEquals(entityClazz.getDeclaredFields().length, embeddableType.getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(entityClazz), embeddableType.getAttributes().size());
+        // Assert.assertEquals(entityClazz.getDeclaredFields().length,
+        // embeddableType.getAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(entityClazz), embeddableType.getAttributes()
+                .size());
         Assert.assertEquals(entityClazz, embeddableType.getJavaType());
         Attribute attributeTwo = (Attribute) embeddableType.getAttribute(attributeName);
         Assert.assertNotNull(attribute);
@@ -1030,8 +1056,10 @@ public class MetaModelBuilderTest
         Assert.assertEquals(BindableType.ENTITY_TYPE, ((EntityType<X>) managedType).getBindableType());
         Assert.assertEquals(PersistenceType.ENTITY, ((EntityType<X>) managedType).getPersistenceType());
         Assert.assertEquals(clazz.getSimpleName(), ((EntityType<X>) managedType).getName());
-//        Assert.assertEquals(clazz.getDeclaredFields().length, managedType.getSingularAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(clazz), managedType.getSingularAttributes().size());
+        // Assert.assertEquals(clazz.getDeclaredFields().length,
+        // managedType.getSingularAttributes().size());
+        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(clazz), managedType.getSingularAttributes()
+                .size());
         return managedType;
     }
 
@@ -1066,34 +1094,32 @@ public class MetaModelBuilderTest
         log.info("Assert on id attribute");
         Assert.assertEquals(key, managedType.getSingularAttribute(key).getName());
         Assert.assertTrue(((AbstractIdentifiableType<X>) managedType).hasSingleIdAttribute());
-        
+
         SingularAttribute<? super X, Integer> idAttribute = ((AbstractIdentifiableType<X>) managedType).getId(clazz);
-      
+
         Assert.assertNotNull(idAttribute);
         Assert.assertTrue(idAttribute.isId());
         Assert.assertFalse(idAttribute.isOptional());
         Assert.assertEquals(idAttribute.getName(), key);
         Assert.assertEquals(clazz, idAttribute.getJavaType());
-        
-        SingularAttribute<? super X, Integer> idAttributeDeclared = ((AbstractIdentifiableType<X>) managedType).getDeclaredId(clazz);
-        
+
+        SingularAttribute<? super X, Integer> idAttributeDeclared = ((AbstractIdentifiableType<X>) managedType)
+                .getDeclaredId(clazz);
+
         Assert.assertNotNull(idAttributeDeclared);
         Assert.assertTrue(idAttributeDeclared.isId());
         Assert.assertFalse(idAttributeDeclared.isOptional());
         Assert.assertEquals(idAttributeDeclared.getName(), key);
         Assert.assertEquals(clazz, idAttributeDeclared.getJavaType());
-        
+
         Type<?> idType = ((AbstractIdentifiableType<X>) managedType).getIdType();
         Assert.assertNotNull(idType);
-        
-        
+
         IdentifiableType<? super X> idIdentifiableType = ((AbstractIdentifiableType<X>) managedType).getSupertype();
         Assert.assertNull(idIdentifiableType);
-        
-        
-        
+
     }
-    
+
     /**
      * Assert on set attributes.
      * 
@@ -1106,37 +1132,33 @@ public class MetaModelBuilderTest
      * @param javaClazz
      *            the java clazz
      */
-    private <X> void assertOnSetAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
-            Class javaClazz)
+    private <X> void assertOnSetAttribute(AbstractManagedType<? super X> managedType, String fieldName,
+            Class fieldClazz, Class javaClazz)
     {
-    	SetAttribute<? super X, ?> rowSetId = (SetAttribute<? super X, ?>) managedType
-        .getSet(fieldName);
+        SetAttribute<? super X, ?> rowSetId = (SetAttribute<? super X, ?>) managedType.getSet(fieldName);
         Assert.assertNotNull(rowSetId);
         Assert.assertEquals(rowSetId.getName(), fieldName);
         Assert.assertEquals(Set.class, rowSetId.getJavaType());
-     
-        SetAttribute<? super X, ?> rowDeclaredId = (SetAttribute<? super X, ?>) managedType
-        .getDeclaredSet(fieldName);
+
+        SetAttribute<? super X, ?> rowDeclaredId = (SetAttribute<? super X, ?>) managedType.getDeclaredSet(fieldName);
         Assert.assertNotNull(rowDeclaredId);
         Assert.assertEquals(rowDeclaredId.getName(), fieldName);
         Assert.assertEquals(Set.class, rowDeclaredId.getJavaType());
-        
-        SetAttribute<? super X, ?> rowClassSetId = (SetAttribute<? super X, ?>) managedType
-        .getSet(fieldName,fieldClazz);
+
+        SetAttribute<? super X, ?> rowClassSetId = (SetAttribute<? super X, ?>) managedType.getSet(fieldName,
+                fieldClazz);
         Assert.assertNotNull(rowClassSetId);
         Assert.assertEquals(rowClassSetId.getName(), fieldName);
         Assert.assertEquals(Set.class, rowClassSetId.getJavaType());
-        
-    
-        SetAttribute<? super X, ?> rowClassDeclaredId = (SetAttribute<? super X, ?>) managedType
-        .getDeclaredSet(fieldName, fieldClazz);
+
+        SetAttribute<? super X, ?> rowClassDeclaredId = (SetAttribute<? super X, ?>) managedType.getDeclaredSet(
+                fieldName, fieldClazz);
         Assert.assertNotNull(rowClassSetId);
         Assert.assertEquals(rowClassDeclaredId.getName(), fieldName);
         Assert.assertEquals(Set.class, rowClassDeclaredId.getJavaType());
-       
 
     }
-    
+
     /**
      * Assert on List attributes.
      * 
@@ -1149,37 +1171,34 @@ public class MetaModelBuilderTest
      * @param javaClazz
      *            the java clazz
      */
-    private <X> void assertOnListAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
-            Class javaClazz)
+    private <X> void assertOnListAttribute(AbstractManagedType<? super X> managedType, String fieldName,
+            Class fieldClazz, Class javaClazz)
     {
-    	ListAttribute<? super X, ?> rowListId = (ListAttribute<? super X, ?>) managedType
-        .getList(fieldName);
+        ListAttribute<? super X, ?> rowListId = (ListAttribute<? super X, ?>) managedType.getList(fieldName);
         Assert.assertNotNull(rowListId);
         Assert.assertEquals(rowListId.getName(), fieldName);
         Assert.assertEquals(List.class, rowListId.getJavaType());
-     
+
         ListAttribute<? super X, ?> listDeclaredId = (ListAttribute<? super X, ?>) managedType
-        .getDeclaredList(fieldName);
+                .getDeclaredList(fieldName);
         Assert.assertNotNull(listDeclaredId);
         Assert.assertEquals(listDeclaredId.getName(), fieldName);
         Assert.assertEquals(List.class, listDeclaredId.getJavaType());
-        
-        ListAttribute<? super X, ?> listClassSetId = (ListAttribute<? super X, ?>) managedType
-        .getList(fieldName,fieldClazz);
+
+        ListAttribute<? super X, ?> listClassSetId = (ListAttribute<? super X, ?>) managedType.getList(fieldName,
+                fieldClazz);
         Assert.assertNotNull(listClassSetId);
         Assert.assertEquals(listClassSetId.getName(), fieldName);
         Assert.assertEquals(List.class, listClassSetId.getJavaType());
-        
-    
-        ListAttribute<? super X, ?> listClassDeclaredId = (ListAttribute<? super X, ?>) managedType
-        .getDeclaredList(fieldName, fieldClazz);
+
+        ListAttribute<? super X, ?> listClassDeclaredId = (ListAttribute<? super X, ?>) managedType.getDeclaredList(
+                fieldName, fieldClazz);
         Assert.assertNotNull(listClassDeclaredId);
         Assert.assertEquals(listClassDeclaredId.getName(), fieldName);
         Assert.assertEquals(List.class, listClassDeclaredId.getJavaType());
-       
 
     }
-    
+
     /**
      * Assert on Map attributes.
      * 
@@ -1192,33 +1211,32 @@ public class MetaModelBuilderTest
      * @param javaClazz
      *            the java clazz
      */
-    private <X> void assertOnMapAttribute(AbstractManagedType<? super X> managedType, String fieldName, Class fieldClazz,
-            Class javaClazz)
+    private <X> void assertOnMapAttribute(AbstractManagedType<? super X> managedType, String fieldName,
+            Class fieldClazz, Class javaClazz)
     {
-    	MapAttribute<? super X, ?, ?>  mapSetId = (MapAttribute<? super X, ?, ?>) managedType
-        .getMap(fieldName);
+        MapAttribute<? super X, ?, ?> mapSetId = (MapAttribute<? super X, ?, ?>) managedType.getMap(fieldName);
         Assert.assertNotNull(mapSetId);
         Assert.assertEquals(mapSetId.getName(), fieldName);
         Assert.assertEquals(Map.class, mapSetId.getJavaType());
-     
-        MapAttribute<? super X, ?, ?>  mapDeclaredId = (MapAttribute<? super X, ?, ?>) managedType
-        .getDeclaredMap(fieldName);
+
+        MapAttribute<? super X, ?, ?> mapDeclaredId = (MapAttribute<? super X, ?, ?>) managedType
+                .getDeclaredMap(fieldName);
         Assert.assertNotNull(mapDeclaredId);
         Assert.assertEquals(mapDeclaredId.getName(), fieldName);
         Assert.assertEquals(Map.class, mapDeclaredId.getJavaType());
-        
-        /*MapAttribute<? super X, ?, ?>  rowClassSetId = (MapAttribute<? super X, ?, ?>) managedType
-        .getMap(fieldName,int.class,String.class);
-        Assert.assertNotNull(rowClassSetId);
-        
-    
-        MapAttribute<? super X, ?, ?>  rowClassDeclaredId = (MapAttribute<? super X, ?, ?> ) managedType
-        .getDeclaredMap(fieldName, fieldClazz, javaClazz);
-        Assert.assertNotNull(rowClassSetId);*/
-       
+
+        /*
+         * MapAttribute<? super X, ?, ?> rowClassSetId = (MapAttribute<? super
+         * X, ?, ?>) managedType .getMap(fieldName,int.class,String.class);
+         * Assert.assertNotNull(rowClassSetId);
+         * 
+         * 
+         * MapAttribute<? super X, ?, ?> rowClassDeclaredId = (MapAttribute<?
+         * super X, ?, ?> ) managedType .getDeclaredMap(fieldName, fieldClazz,
+         * javaClazz); Assert.assertNotNull(rowClassSetId);
+         */
 
     }
-
 
     /**
      * Gets the managed types.
@@ -1256,7 +1274,7 @@ public class MetaModelBuilderTest
         }
         return null;
     }
-    
+
     /**
      * On embedded id test.
      * 
@@ -1265,22 +1283,22 @@ public class MetaModelBuilderTest
      * @param <T>
      *            the generic type
      */
-    
-    private <X>void illeagaltypesTest(AbstractManagedType<X> managedType){
-    	try {
-    	 
-    	  SingularAttribute<? super X, Double> idNullAttribute = ((AbstractIdentifiableType<X>) managedType).getId(Double.class);
-         
-    	}
-        
-       
+
+    private <X> void illeagaltypesTest(AbstractManagedType<X> managedType)
+    {
+        try
+        {
+
+            SingularAttribute<? super X, Double> idNullAttribute = ((AbstractIdentifiableType<X>) managedType)
+                    .getId(Double.class);
+
+        }
+
         catch (IllegalArgumentException e)
         {
             Assert.fail(e.getMessage());
         }
-        
-        
-    	
+
     }
 
 }

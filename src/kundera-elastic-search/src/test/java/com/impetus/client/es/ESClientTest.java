@@ -168,10 +168,12 @@ public class ESClientTest
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
+    
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         node.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
 }
