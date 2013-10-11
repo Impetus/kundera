@@ -726,7 +726,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             log.info("Executing cql query {}.", cqlQuery);
         }
-        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler, false);
+        return cqlClient.executeQuery(cqlQuery, clazz, relationalField, dataHandler, true);
     }
 
     /**
@@ -1446,7 +1446,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (!nodes.isEmpty() && isCql3Enabled)
             {
                 batchQueryBuilder.append(CQLTranslator.APPLY_BATCH);
-                executeCQLQuery(batchQueryBuilder.toString(), false);
+                executeCQLQuery(batchQueryBuilder.toString(), isCql3Enabled);
             }
         }
         catch (Exception e)

@@ -269,7 +269,7 @@ public class CRUDResourceTest extends JerseyTest
 
         /** Native Query - Select */
         // Get All books
-        String nativeQuery = "Select * from " + "BOOK";
+        String nativeQuery = "Select * from " + "\"BOOK\"";
         String nativeQueryResult = restClient.runNativeQuery(sessionToken, "Book", nativeQuery,
                 new HashMap<String, Object>());
         log.debug("Native Query Select Result:" + nativeQueryResult);

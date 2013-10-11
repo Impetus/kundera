@@ -4,7 +4,9 @@
 package com.impetus.client.cassandra.thrift;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -36,6 +38,7 @@ public class PersonIdentityTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("CompositeCassandra");
+                
         emf = Persistence.createEntityManagerFactory("composite_pu");
         em = emf.createEntityManager();
     }
@@ -46,9 +49,9 @@ public class PersonIdentityTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("CompositeCassandra");
         em.close();
         emf.close();
+        CassandraCli.dropKeySpace("CompositeCassandra");
     }
 
     @Test
@@ -79,6 +82,10 @@ public class PersonIdentityTest
         em.persist(identity);
 
         em.clear();
+        
+        em.close();
+        
+        em = emf.createEntityManager();
 
         PersonIdentity foundPerson = em.find(PersonIdentity.class, "1");
 

@@ -53,7 +53,7 @@ import com.impetus.kundera.client.Client;
  * 
  */
 public class UserInfoTest
-{   
+{
     private EntityManagerFactory emf;
 
     /**
@@ -73,10 +73,7 @@ public class UserInfoTest
     @Test
     public void onCRUD()
     {
-        EntityManager em = emf.createEntityManager();
-        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("composite_pu");
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+        EntityManager em = createEM();
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -90,6 +87,9 @@ public class UserInfoTest
         timeLine.setUserInfo(userInfo);
         em.persist(timeLine);
         em.clear();
+        em.close();
+
+        em = createEM();
 
         // Find
         CassandraEmbeddedAssociation result = em.find(CassandraEmbeddedAssociation.class, key);
@@ -105,7 +105,8 @@ public class UserInfoTest
         em.merge(result);
 
         em.clear();
-
+        em.close();
+        em = createEM();
         // Find
         result = null;
         result = em.find(CassandraEmbeddedAssociation.class, key);
@@ -118,18 +119,27 @@ public class UserInfoTest
         em.remove(result);
 
         em.clear();
+        em.close();
+
+        em = createEM();
         result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNull(result);
 
     }
 
-    @Test
-    public void onQuery()
+    private EntityManager createEM()
     {
         EntityManager em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get("composite_pu");
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
+        return em;
+    }
+
+    @Test
+    public void onQuery()
+    {
+        EntityManager em = createEM();
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -144,6 +154,7 @@ public class UserInfoTest
         em.persist(timeLine);
 
         em.clear(); // optional,just to clear persistence cache.
+        em.flush();
 
         final String noClause = "Select t from CassandraEmbeddedAssociation t";
 
@@ -157,7 +168,9 @@ public class UserInfoTest
         em.remove(timeLine);
 
         em.clear();// optional,just to clear persistence cache.
+        em.close();
 
+        em = createEM();
         UserInfo user_Info = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNull(user_Info);
     }
@@ -168,8 +181,8 @@ public class UserInfoTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("CompositeCassandra");
         emf.close();
+        CassandraCli.dropKeySpace("CompositeCassandra");
     }
 
     /**
