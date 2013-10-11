@@ -207,14 +207,27 @@ public class MetadataBuilder
    private void applyMetadataChanges(EntityMetadata metadata)
    {
        metadata.setPersistenceUnit(persistenceUnit);
-       PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-               .getPersistenceUnitMetadata(persistenceUnit);
-       String keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
        
        // precedence to @Table annotation.
        if(metadata.getSchema() == null)
        {
-           metadata.setSchema(keyspace);
+           Object keyspace = puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+           
+           if(keyspace == null)
+           {
+               PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                       .getPersistenceUnitMetadata(persistenceUnit);
+
+               keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+           }
+           if(keyspace != null)
+           {
+               metadata.setSchema(keyspace.toString());
+           }
+           else
+           {
+               //TODO throw Exception about empty keyspace?
+           }
        }
        if (metadata.getTableName() == null)
        {
