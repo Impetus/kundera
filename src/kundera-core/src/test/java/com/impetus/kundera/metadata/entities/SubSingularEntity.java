@@ -18,10 +18,11 @@ package com.impetus.kundera.metadata.entities;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing.
+ * Entity with sub singular attributes for meta model processing {@link InheritanceType} .
  * 
  * @author vivek.mishra
  * 
