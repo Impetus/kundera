@@ -76,7 +76,7 @@ public class CassanrdaGeneratedIdSchemaTest
                 {
                     Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
                     List<ColumnDef> columnDefs = cfDef.getColumn_metadata();
-                    Assert.assertEquals(1, columnDefs.size());
+                    Assert.assertEquals(4, columnDefs.size());
                     count++;
                 }
 
