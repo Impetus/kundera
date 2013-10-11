@@ -81,7 +81,7 @@ public class CassanrdaGeneratedIdSchemaTest
                 }
 
             }
-            Assert.assertEquals(13, count);
+            Assert.assertEquals(15, count);
         }
         catch (NotFoundException e)
         {
