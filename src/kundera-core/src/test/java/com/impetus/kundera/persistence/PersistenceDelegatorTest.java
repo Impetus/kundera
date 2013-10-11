@@ -38,6 +38,8 @@ import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.configure.CoreEntityAddressUni1To1;
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.entities.AssociationEntity;
+import com.impetus.kundera.metadata.entities.OToOOwnerEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -76,14 +78,17 @@ public class PersistenceDelegatorTest
     @Test
     public void testPersist()
     {
-        try {
-			em.persist(null);
-			Assert.fail("A null entity should have thrown exception while persisting");
-		} catch (Exception e1) {
-			Assert.assertTrue(e1.getCause().getClass().equals(IllegalArgumentException.class));
-		}    	
-    	
-    	PersonnelDTO dto = new PersonnelDTO();
+        try
+        {
+            em.persist(null);
+            Assert.fail("A null entity should have thrown exception while persisting");
+        }
+        catch (Exception e1)
+        {
+            Assert.assertTrue(e1.getCause().getClass().equals(IllegalArgumentException.class));
+        }
+
+        PersonnelDTO dto = new PersonnelDTO();
         try
         {
             em.persist(dto);
@@ -158,25 +163,25 @@ public class PersistenceDelegatorTest
         dto = em.find(PersonnelDTO.class, "123");
         Assert.assertNotNull(dto);
     }
-    
+
     @Test
     public void testFindForObjectArray()
     {
         PersonnelDTO dto = new PersonnelDTO();
         dto.setPersonId("111");
         em.persist(dto);
-        
+
         dto = new PersonnelDTO();
         dto.setPersonId("222");
         em.persist(dto);
-        
+
         dto = new PersonnelDTO();
         dto.setPersonId("333");
         em.persist(dto);
-        
+
         PersistenceDelegator pd = ((EntityManagerImpl) em).getPersistenceDelegator();
-        
-        List<PersonnelDTO> persons = pd.find(PersonnelDTO.class, new String[]{"111", "222", "333"});
+
+        List<PersonnelDTO> persons = pd.find(PersonnelDTO.class, new String[] { "111", "222", "333" });
         Assert.assertNotNull(persons);
         Assert.assertEquals(3, persons.size());
     }
@@ -379,31 +384,119 @@ public class PersistenceDelegatorTest
     @Test
     public void testCreateQueryWithNull()
     {
-        PersistenceDelegator pd = ((EntityManagerImpl)em).getPersistenceDelegator();
+        PersistenceDelegator pd = ((EntityManagerImpl) em).getPersistenceDelegator();
         try
         {
             pd.createQuery(null);
             Assert.fail("Should have gone to catch block!");
-        }catch(QueryHandlerException qhex)
+        }
+        catch (QueryHandlerException qhex)
         {
             Assert.assertEquals("Query String should not be null ", qhex.getMessage());
         }
     }
-    
+
     @Test
     public void testPopulateClientProperties()
     {
         Map props = new HashMap();
         props.put("core.test.property", "core-test-property-value");
-        
-        PersistenceDelegator pd = ((EntityManagerImpl)em).getPersistenceDelegator();
+
+        PersistenceDelegator pd = ((EntityManagerImpl) em).getPersistenceDelegator();
         pd.populateClientProperties(props);
-        
+
         Map map = em.getProperties();
-        Map<String, Client> clients = (Map<String, Client>)em.getDelegate();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         CoreTestClient client = (CoreTestClient) clients.get("kunderatest");
         Assert.assertEquals("core-test-property-value", client.getCoreTestProperty());
-        
+
     }
 
+    @Test
+    public void testEntityState()
+    {
+        EntityManagerFactory emf1 = Persistence.createEntityManagerFactory("keyspace");
+        EntityManager em1 = emf1.createEntityManager();
+
+        PersistenceDelegator pd = ((EntityManagerImpl) em1).getPersistenceDelegator();
+
+        persist(pd);
+
+        OToOOwnerEntity found = pd.find(OToOOwnerEntity.class, (byte) 1);
+
+        assertOnFind(found);
+
+        AssociationEntity association = new AssociationEntity();
+        association.setAddress("noida");
+        association.setAge(12);
+        association.setRowKey("address1");
+
+        applyOperations(pd, found, association, true);
+
+        pd.doFlush();
+        pd.clear();
+
+        found = pd.find(OToOOwnerEntity.class, (byte) 1); // as already removed.
+        Assert.assertNull(found);
+
+        persist(pd); // again persist.
+
+        found = pd.find(OToOOwnerEntity.class, (byte) 1);
+        assertOnFind(found);
+
+        found.setAssociation(association);
+
+        applyOperations(pd, found, association, false);
+
+        pd.detach(association);
+
+        try
+        {
+            pd.remove(found);
+            Assert.fail("Should have gone to catch block!");
+        }
+        catch (IllegalArgumentException iex)
+        {
+            Assert.assertNotNull(iex.getMessage());
+        }
+    }
+
+    private void assertOnFind(OToOOwnerEntity found)
+    {
+        Assert.assertNotNull(found);
+        Assert.assertNull(found.getAssociation());
+    }
+
+    private void persist(PersistenceDelegator pd)
+    {
+        OToOOwnerEntity owner;
+        owner = new OToOOwnerEntity();
+        owner.setAmount(10);
+        owner.setName("owner1");
+        owner.setRowKey((byte) 1);
+        // pd = ((EntityManagerImpl) em1).getPersistenceDelegator();
+
+        pd.persist(owner);
+
+        pd.doFlush();
+        pd.clear();
+    }
+
+    private void applyOperations(PersistenceDelegator pd, OToOOwnerEntity found, AssociationEntity association,
+            boolean remove)
+    {
+        found.setAssociation(association);
+        pd.merge(found);
+
+        pd.doFlush();
+
+        pd.detach(association);
+
+        pd.merge(found); // detach over association entity should work.
+
+        if (remove)
+            pd.remove(found); // since we have called merge, so association
+                              // entity should be in MANAGED_STATE and cascade
+                              // should work.
+    }
 }

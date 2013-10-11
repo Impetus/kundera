@@ -42,7 +42,7 @@ public class OToOOwnerEntity
     @Column(name = "AMOUNT")
     private int amount;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Column(name = "Association_ID")
     private AssociationEntity association;
 

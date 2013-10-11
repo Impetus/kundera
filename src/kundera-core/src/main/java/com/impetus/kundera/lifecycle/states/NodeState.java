@@ -104,7 +104,15 @@ public abstract class NodeState
                     if (cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
-                        childNode.merge();
+                        if (childNode.isInState(TransientState.class))
+                        {
+                            childNode.persist();
+                        }
+                        else
+                        {
+
+                            childNode.merge();
+                        }
                     }
                     break;
 
