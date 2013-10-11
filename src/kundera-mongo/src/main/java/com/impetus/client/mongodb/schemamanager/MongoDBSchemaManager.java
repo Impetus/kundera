@@ -205,8 +205,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 mongo = new Mongo(host, Integer.parseInt(port));
                 db = mongo.getDB(databaseName);
-                db.authenticate(userName, password.toCharArray());
-                return true;
+                return db.authenticate(userName, password.toCharArray());
             }
             catch (UnknownHostException e)
             {
