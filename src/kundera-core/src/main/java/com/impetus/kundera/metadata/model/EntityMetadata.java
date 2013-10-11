@@ -755,7 +755,7 @@ public final class EntityMetadata
             
         }
         
-        return fieldName != null? fieldName:jpaColumnName;
+        return fieldName;
     }
 
 }
