@@ -1302,59 +1302,62 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 String fieldName = entityMetadata.getFieldName(columnName);
 
-                Attribute attribute = entityType.getAttribute(fieldName);
-
-                if (relationNames != null && relationNames.contains(columnName))
+                if (fieldName != null)
                 {
-                    Field field = (Field) attribute.getJavaMember();
-                    EntityMetadata associationMetadata = KunderaMetadataManager
-                            .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
-                    relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
-                            .getBindableJavaType(), value));
+                    Attribute attribute = entityType.getAttribute(fieldName);
+
+                    if (relationNames != null && relationNames.contains(columnName))
+                    {
+                        Field field = (Field) attribute.getJavaMember();
+                        EntityMetadata associationMetadata = KunderaMetadataManager
+                                .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
+                        relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
+                                .getBindableJavaType(), value));
+                    }
+                    else
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
+                    }
                 }
                 else
                 {
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
-                }
-            }
-            else
-            {
-                // means it might be an embeddable field, if not simply omit
-                // this field.
+                    // means it might be an embeddable field, if not simply omit
+                    // this field.
 
-                if (StringUtils.contains(columnName, ":"))
-                {
-                    StringTokenizer tokenizer = new StringTokenizer(columnName, ":");
-                    while (tokenizer.hasMoreTokens())
+                    if (StringUtils.contains(columnName, ":"))
                     {
-                        String embeddedFieldName = tokenizer.nextToken();
-                        String embeddedColumnName = tokenizer.nextToken();
-
-                        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata
-                                .getEntityClazz());
-
-                        EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
-
-                        Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
-
-                        Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
-                                .getAttribute(embeddedFieldName).getJavaMember());
-
-                        if (embeddedObject == null)
+                        StringTokenizer tokenizer = new StringTokenizer(columnName, ":");
+                        while (tokenizer.hasMoreTokens())
                         {
-                            embeddedObject = ((AbstractAttribute) entityType.getAttribute(embeddedFieldName))
-                                    .getBindableJavaType().newInstance();
-                            PropertyAccessorHelper.set(entity, (Field) entityType.getAttribute(embeddedFieldName)
-                                    .getJavaMember(), embeddedObject);
+                            String embeddedFieldName = tokenizer.nextToken();
+                            String embeddedColumnName = tokenizer.nextToken();
+
+                            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata
+                                    .getEntityClazz());
+
+                            EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
+
+                            Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
+
+                            Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
+                                    .getAttribute(embeddedFieldName).getJavaMember());
+
+                            if (embeddedObject == null)
+                            {
+                                embeddedObject = ((AbstractAttribute) entityType.getAttribute(embeddedFieldName))
+                                        .getBindableJavaType().newInstance();
+                                PropertyAccessorHelper.set(entity, (Field) entityType.getAttribute(embeddedFieldName)
+                                        .getJavaMember(), embeddedObject);
+                            }
+
+                            PropertyAccessorHelper.set(embeddedObject, (Field) attrib.getJavaMember(), value);
+                            // PropertyAccessorHelper.
+
                         }
-
-                        PropertyAccessorHelper.set(embeddedObject, (Field) attrib.getJavaMember(), value);
-                        // PropertyAccessorHelper.
-
                     }
-                }
-                // It might be a case of embeddable attribute.
+                    // It might be a case of embeddable attribute.
 
+                }
             }
 
         }

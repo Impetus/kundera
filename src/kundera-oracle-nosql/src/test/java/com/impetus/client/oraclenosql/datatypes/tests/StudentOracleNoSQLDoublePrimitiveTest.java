@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLDoublePrimitive;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class StudentOracleNoSQLDoublePrimitiveTest extends OracleNoSQLBase
 {
@@ -33,7 +34,7 @@ public class StudentOracleNoSQLDoublePrimitiveTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

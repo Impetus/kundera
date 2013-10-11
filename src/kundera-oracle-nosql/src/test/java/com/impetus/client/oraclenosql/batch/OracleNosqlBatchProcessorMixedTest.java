@@ -29,6 +29,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+
 /**
  * Test case for more than one entities persisted in the same batch
  * 
@@ -112,6 +114,7 @@ public class OracleNosqlBatchProcessorMixedTest
         }
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     private List<PersonBatchOracleNosql> preparePersonData(Integer noOfRecords)
