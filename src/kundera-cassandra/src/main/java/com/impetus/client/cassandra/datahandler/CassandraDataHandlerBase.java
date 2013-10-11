@@ -1106,10 +1106,11 @@ public abstract class CassandraDataHandlerBase
             // populate relation.
             if (relationNames != null && relationNames.contains(thriftColumnName) && thriftColumnValue != null)
             {
+                
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
-                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
+                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(((AbstractAttribute)attribute).getBindableJavaType());
                 Object value;
                 if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                 {

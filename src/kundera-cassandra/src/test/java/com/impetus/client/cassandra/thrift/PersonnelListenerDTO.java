@@ -50,7 +50,7 @@ public class PersonnelListenerDTO
     private String lastName;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "personId")
+    @JoinColumn(name = "addressId")
     private AddressListenerDTO address;
 
     /**
