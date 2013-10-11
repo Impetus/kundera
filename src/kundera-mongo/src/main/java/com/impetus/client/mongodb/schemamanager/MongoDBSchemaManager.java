@@ -20,6 +20,8 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.kundera.loader.ClientLoaderException;
+import com.impetus.kundera.loader.KunderaAuthenticationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,7 +207,29 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 mongo = new Mongo(host, Integer.parseInt(port));
                 db = mongo.getDB(databaseName);
-                return db.authenticate(userName, password.toCharArray());
+
+                boolean authenticate = true;
+                String errMsg = null;
+
+                if (userName != null && password != null)
+                {
+                    authenticate = db.authenticate(userName, password.toCharArray());
+                }
+                else if ((userName != null && password == null) || (userName == null && password != null))
+                {
+                    errMsg = "Invalid configuration provided for authentication, please specify both non-nullable 'kundera.username' and 'kundera.password' properties";
+                    logger.error(errMsg);
+                    throw new ClientLoaderException(errMsg);
+                }
+
+                if (!authenticate)
+                {
+                    errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :"
+                            + password + " provided";
+                    throw new KunderaAuthenticationException(errMsg);
+                }
+                
+                return authenticate;
             }
             catch (UnknownHostException e)
             {
