@@ -27,7 +27,7 @@ import com.impetus.kundera.index.IndexCollection;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON_BATCH", schema = "KunderaTests@oracleNosqlBatchTest")
+@Table(name = "PERSON_BATCH", schema = "OracleNoSqlTests@oracleNosqlBatchTest")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonBatchOracleNosqlEntity
 {

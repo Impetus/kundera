@@ -162,6 +162,7 @@ public class MetadataBuilder
      */
     private EntityMetadata belongsToPersistenceUnit(EntityMetadata metadata)
     {
+
         // if pu is null and client is not rdbms OR metadata pu does not match
         // with configured one. don't process for anything.
 
@@ -169,6 +170,7 @@ public class MetadataBuilder
                 .getPersistenceUnitMetadata(persistenceUnit);
         String keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
 
+        
         if (metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit)
                 || (metadata.getSchema() != null && !metadata.getSchema().equals(keyspace)))
         {

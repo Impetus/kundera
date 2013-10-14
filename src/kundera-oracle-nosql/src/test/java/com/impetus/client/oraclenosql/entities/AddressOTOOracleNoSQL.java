@@ -9,7 +9,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "ADDRESS_OTO", schema = "KunderaTests@twikvstore")
+@Table(name = "ADDRESS_OTO", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "street") })
 public class AddressOTOOracleNoSQL
 {

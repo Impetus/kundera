@@ -24,6 +24,7 @@
 		<properties>
 			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="kundera.keyspace" value="testdb" />
 			<!-- DO NOT delete these -->
 			<!-- <property name="current_session_context_class" value="thread" /> -->
 			<!-- <property name="hibernate.show_sql" value="true" /> -->
@@ -48,6 +49,9 @@
 				value="thread" /> -->
 			<!-- <property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider" 
 				/> -->
+<!-- 			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+ -->			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.property" value="hibernate.properties" />
 		</properties>
 	</persistence-unit>
@@ -58,9 +62,9 @@
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
 			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
 			<property name="hibernate.max_fetch_depth" value="0" />
-			<property name="hibernate.show_sql" value="true" />
+<!-- 			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.format_sql" value="true" />
-			<property name="kundera.client.property" value="hibernate.properties" />
+ -->			<property name="kundera.client.property" value="hibernate.properties" />
 		</properties>
 	</persistence-unit>
 </persistence>

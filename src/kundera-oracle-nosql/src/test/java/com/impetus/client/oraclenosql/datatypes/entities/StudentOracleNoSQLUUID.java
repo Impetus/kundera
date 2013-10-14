@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "StudentOracleNoSQLUUID", schema = "KunderaTests@twikvstore")
+@Table(name = "StudentOracleNoSQLUUID", schema = "OracleNoSqlTests@twikvstore")
 public class StudentOracleNoSQLUUID
 {
 

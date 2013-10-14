@@ -30,7 +30,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "PERSON_EMBEDDED", schema = "KunderaTests@twikvstore")
+@Table(name = "PERSON_EMBEDDED", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonEmbeddedKVStore
 {

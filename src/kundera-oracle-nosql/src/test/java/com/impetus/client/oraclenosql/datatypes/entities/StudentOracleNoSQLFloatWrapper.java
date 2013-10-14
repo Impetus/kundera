@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "StudentOracleNoSQLFloatWrapper", schema = "KunderaTests@twikvstore")
+@Table(name = "StudentOracleNoSQLFloatWrapper", schema = "OracleNoSqlTests@twikvstore")
 public class StudentOracleNoSQLFloatWrapper
 {
 

@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "StudentOracleNoSQLBytePrimitive", schema = "KunderaTests@twikvstore")
+@Table(name = "StudentOracleNoSQLBytePrimitive", schema = "OracleNoSqlTests@twikvstore")
 public class StudentOracleNoSQLBytePrimitive
 {
 

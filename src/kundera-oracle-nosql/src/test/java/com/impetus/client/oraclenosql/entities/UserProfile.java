@@ -31,7 +31,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "USER_PROFILE", schema = "KunderaTests@twikvstore")
+@Table(name = "USER_PROFILE", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "userName") })
 public class UserProfile
 {
