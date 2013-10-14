@@ -30,7 +30,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "ROLE")
+@Table(name = "ROLE",schema = "imdb")
 @IndexCollection(columns = { @Index(name = "roleType", type = "KEYS") })
 public class Role
 {

@@ -25,7 +25,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests@oracle_kvstore_JTA")
+@Table(name = "PERSONNEL", schema = "OracleNoSqlTests@oracle_kvstore_JTA")
 public class OraclePersonnelOTOFKEntityJTA
 {
     @Id

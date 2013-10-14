@@ -120,6 +120,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 // get entity metadata(table info as well as columns)
                 // if table info exists, get it from map.
                 boolean found = false;
+                
                 Type type = entityMetadata.getType();
                 Class idClassName = entityMetadata.getIdAttribute() != null ? entityMetadata.getIdAttribute()
                         .getJavaType() : null;

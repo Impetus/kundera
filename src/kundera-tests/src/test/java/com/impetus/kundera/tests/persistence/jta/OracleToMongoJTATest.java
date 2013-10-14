@@ -71,6 +71,7 @@ public class OracleToMongoJTATest
         initialContext.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
 
         emf = Persistence.createEntityManagerFactory("oracle_kvstore_JTA,addMongoJTA");
+        
         em = emf.createEntityManager();
     }
 
