@@ -87,6 +87,7 @@ public class MetadataBuilder
         metadataProcessors.add(new CacheableAnnotationProcessor());
         metadataProcessors.add(new IndexProcessor());
         metadataProcessors.add(new EntityListenersProcessor());
+        
     }
 
     /**
@@ -168,9 +169,10 @@ public class MetadataBuilder
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-
+        String keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
         
+        keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
+
         if (metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit)
                 || (metadata.getSchema() != null && !metadata.getSchema().equals(keyspace)))
         {
@@ -198,7 +200,10 @@ public class MetadataBuilder
         metadata.setPersistenceUnit(persistenceUnit);
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+        
+        String keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        
+        keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
 
         // precedence to @Table annotation.
         if (metadata.getSchema() == null)
