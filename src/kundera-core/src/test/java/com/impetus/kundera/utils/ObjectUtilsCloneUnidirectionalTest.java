@@ -58,7 +58,7 @@ public class ObjectUtilsCloneUnidirectionalTest
 
     private final String kundera_client = "com.impetus.client.rdbms.RDBMSClientFactory";
 
-    private String _keyspace = "kunderatest";
+    private String _keyspace = "KunderaTest";
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);

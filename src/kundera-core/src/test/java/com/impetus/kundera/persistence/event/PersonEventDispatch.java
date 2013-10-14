@@ -28,7 +28,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "person", schema = "kunderatest@kunderatest")
+@Table(name = "person", schema = "KunderaTest@kunderatest")
 @EntityListeners({ PersonHandler.class })
 public class PersonEventDispatch
 {

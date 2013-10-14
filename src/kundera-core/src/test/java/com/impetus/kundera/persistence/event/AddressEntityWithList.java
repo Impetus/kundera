@@ -31,7 +31,7 @@ import javax.persistence.Table;
  *  Address entity with internal call backs.
  */
 @Entity
-@Table(name = "ADDRESS", schema = "kunderatest@kunderatest")
+@Table(name = "ADDRESS", schema = "KunderaTest@kunderatest")
 public class AddressEntityWithList
 {
     @Id

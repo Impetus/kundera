@@ -561,7 +561,7 @@ public class FlushStackManagerTest
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaTest");
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
 //        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

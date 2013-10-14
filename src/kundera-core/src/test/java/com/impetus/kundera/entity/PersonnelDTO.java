@@ -27,7 +27,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "person", schema = "kunderatest@kunderatest")
+@Table(name = "person", schema = "KunderaTest@kunderatest")
 public class PersonnelDTO
 {
 

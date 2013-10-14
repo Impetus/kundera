@@ -204,7 +204,7 @@
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
-			<property name="kundera.keyspace" value="KunderaTest" />
+			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="rdbms" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
