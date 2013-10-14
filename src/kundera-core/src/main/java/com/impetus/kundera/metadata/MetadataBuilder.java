@@ -169,7 +169,7 @@ public class MetadataBuilder
 
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
         
         keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
 
@@ -201,7 +201,7 @@ public class MetadataBuilder
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         
-        String keyspace = (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
         
         keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
 
