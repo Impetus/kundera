@@ -90,7 +90,7 @@ public abstract class AbstractSchemaManager
     protected void exportSchema(final String persistenceUnit, List<TableInfo> tables)
     {
         // Get persistence unit metadata
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        this.puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String paramString = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;

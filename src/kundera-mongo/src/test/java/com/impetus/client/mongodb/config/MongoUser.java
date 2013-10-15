@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "MongoUser", schema = "KunderaCassandraXmlTest@mongoTest")
+@Table(name = "MongoUser", schema = "KunderaExamples@mongoTest")
 public class MongoUser
 {
 
