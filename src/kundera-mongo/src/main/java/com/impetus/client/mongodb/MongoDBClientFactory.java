@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +151,15 @@ public class MongoDBClientFactory extends GenericClientFactory
 
         DB mongoDB = mongo.getDB(keyspace);
 
-        authenticate(props, mongoDB);
+        try
+        {
+            MongoDBUtils.authenticate(props, externalProperties, mongoDB);
+        }
+        catch (ClientLoaderException e)
+        {
+            logger.error(e.getMessage());
+            throw e;
+        }
         logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         return mongoDB;
 
@@ -259,55 +268,6 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             propertyReader = new MongoDBPropertyReader(externalProperties);
             propertyReader.read(getPersistenceUnit());
-        }
-    }
-
-    /**
-     * Method to authenticate connection with mongodb. throws runtime error if:
-     * a) userName and password, any one is not null. b) if authentication
-     * fails.
-     * 
-     * 
-     * @param props
-     *            persistence properties.
-     * @param mongoDB
-     *            mongo db connection.
-     */
-    private void authenticate(Properties props, DB mongoDB)
-    {
-        String password = null;
-        String userName = null;
-        if (externalProperties != null)
-        {
-            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
-            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
-        }
-        if (userName == null)
-        {
-            userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-        }
-        if (password == null)
-        {
-            password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-        }
-        boolean authenticate = true;
-        String errMsg = null;
-        if (userName != null && password != null)
-        {
-            authenticate = mongoDB.authenticate(userName, password.toCharArray());
-        }
-        else if ((userName != null && password == null) || (userName == null && password != null))
-        {
-            errMsg = "Invalid configuration provided for authentication, please specify both non-nullable 'kundera.username' and 'kundera.password' properties";
-            logger.error(errMsg);
-            throw new ClientLoaderException(errMsg);
-        }
-
-        if (!authenticate)
-        {
-            errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :"
-                    + password + " provided";
-            throw new KunderaAuthenticationException(errMsg);
         }
     }
 
