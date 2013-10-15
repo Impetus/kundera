@@ -745,10 +745,10 @@ public final class EntityMetadata
 
     public String getFieldName(String jpaColumnName)
     {
-        if(jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
-        {
-            return this.getIdAttribute().getName();
-        }
+//        if(jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
+//        {
+//            return this.getIdAttribute().getName();
+//        }
         
         String fieldName = jpaColumnMapping.get(jpaColumnName);
         
@@ -757,9 +757,13 @@ public final class EntityMetadata
             getEntityType();
             MetadataUtils.onJPAColumnMapping(this.entityType, this); // rebase. require in case of concrete super entity class.
             fieldName = jpaColumnMapping.get(jpaColumnName);
-            
         }
         
+        
+        if(fieldName == null && jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
+        {
+            return this.getIdAttribute().getName();
+        }
         
         
         return fieldName;
