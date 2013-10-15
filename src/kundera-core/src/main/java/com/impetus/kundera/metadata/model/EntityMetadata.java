@@ -745,6 +745,11 @@ public final class EntityMetadata
 
     public String getFieldName(String jpaColumnName)
     {
+        if(jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
+        {
+            return this.getIdAttribute().getName();
+        }
+        
         String fieldName = jpaColumnMapping.get(jpaColumnName);
         
         if(fieldName == null)
@@ -754,6 +759,8 @@ public final class EntityMetadata
             fieldName = jpaColumnMapping.get(jpaColumnName);
             
         }
+        
+        
         
         return fieldName;
     }

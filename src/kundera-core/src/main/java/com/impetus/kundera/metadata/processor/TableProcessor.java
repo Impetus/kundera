@@ -153,8 +153,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         
             EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
 
-            MetadataUtils.onJPAColumnMapping(entityType, metadata);
             validateAndSetId(metadata, clazz, metaModelBuilder);
+            MetadataUtils.onJPAColumnMapping(entityType, metadata);
         }
 
     }
