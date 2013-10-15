@@ -649,7 +649,12 @@ public class MetadataUtils
         while(iter.hasNext())
         {
             Attribute attribute = iter.next();
-            entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
+            
+            //jpa column mapping is for non id columns only.
+            if(!entityMetadata.getIdAttribute().equals(attribute))
+            {
+                entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
+            }
         }
     
     }
