@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,11 +22,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON", schema = "couchdatabase@couchdb_pu")
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonCouchDB
 {
 

@@ -12,6 +12,7 @@
 			<property name="kundera.keyspace" value="couchdatabase" />
 			<property name="kundera.dialect" value="couchdb" />
 			<property name="kundera.client" value="couchdb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
 			<property name="kundera.cache.provider.class"

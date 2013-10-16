@@ -16,6 +16,8 @@
 
 package com.impetus.client.couchdb;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,13 +31,19 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.apache.http.HttpHost;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.couchdb.PersonCouchDB.Day;
+import com.impetus.client.couchdb.entities.Month;
+import com.impetus.client.couchdb.entities.PersonCouchDB;
+import com.impetus.client.couchdb.entities.PersonCouchDB.Day;
+import com.impetus.client.couchdb.utils.CouchDBTestUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
@@ -61,6 +69,10 @@ public class CouchDBClientTest
     /** The emf. */
     private EntityManagerFactory emf;
 
+    private HttpClient httpClient;
+
+    private HttpHost httpHost;
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(CouchDBClientTest.class);
 
@@ -71,6 +83,8 @@ public class CouchDBClientTest
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(_PU);
+        httpClient = CouchDBTestUtils.initiateHttpClient(_PU);
+        httpHost = new HttpHost("localhost", 5984);
     }
 
     @Test
@@ -86,10 +100,9 @@ public class CouchDBClientTest
         em.close();
     }
 
-//    @Test
+    @Test
     public void testCRUDWithBatch()
     {
-
         Map<String, String> batchProperty = new HashMap<String, String>(1);
         batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "5");
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(_PU, batchProperty);
@@ -126,28 +139,22 @@ public class CouchDBClientTest
         em.clear();
         em.close();
         em = null;
-
-        // emf.close();
-        //
-        // emf = null;
-        // batchProperty.put(PersistenceProperties.KUNDERA_BATCH_SIZE, null);
-        // emf = Persistence.createEntityManagerFactory(REDIS_PU,
-        // batchProperty);
-
     }
 
     @Test
-    public void testPersistJoinTableData()
+    public void testPersistJoinTableData() throws ClientProtocolException, URISyntaxException, IOException
     {
-        final String schemaName = "couch";
+        final String schemaName = "couchdatabase";
         final String tableName = "couchjointable";
-        final String joinColumn = "joincolumn";
+        final String joinColumn = "joinColumnName";
         final String inverseJoinColumn = "inverseJoinColumnName";
 
+        CouchDBTestUtils.createViews(new String[] { joinColumn, inverseJoinColumn }, tableName, httpHost, schemaName,
+                httpClient);
         JoinTableData joinTableData = new JoinTableData(OPERATION.INSERT, schemaName, tableName, joinColumn,
                 inverseJoinColumn, null);
 
-        UUID joinKey = UUID.randomUUID();
+        String joinKey = "4";
 
         Integer inverseJoinKey1 = new Integer(10);
         Double inverseJoinKey2 = new Double(12.23);
@@ -177,7 +184,6 @@ public class CouchDBClientTest
         columns = client.getColumnsById(schemaName, tableName, joinColumn, inverseJoinColumn, joinKey, String.class);
 
         Assert.assertTrue(columns.isEmpty());
-
     }
 
     /**
@@ -211,8 +217,7 @@ public class CouchDBClientTest
         Assert.assertNotNull(result);
         client.delete(result, ROW_KEY);
         result = (PersonCouchDB) client.find(PersonCouchDB.class, ROW_KEY);
-//        TODO result should be null.
-        Assert.assertNotNull(result);
+        Assert.assertNull(result);
     }
 
     /**
@@ -223,7 +228,6 @@ public class CouchDBClientTest
      */
     private void onInsert(CouchDBClient client)
     {
-        // CouchDBClient client = (CouchDBClient) clients.get(REDIS_PU);
         final String nodeId = "node1";
         final String originalName = "vivek";
         PersonCouchDB object = new PersonCouchDB();
@@ -253,17 +257,7 @@ public class CouchDBClientTest
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();
-
-        // Delete by query.
-//        String deleteQuery = "Delete from PersonCouchDB p";
-//        Query query = em.createQuery(deleteQuery);
-//        query.executeUpdate();
-
-        em.close();
-
         emf.close();
-        emf = null;
+//        CouchDBTestUtils.dropDatabase("couchdatabase", httpClient, httpHost);
     }
-
 }

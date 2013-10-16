@@ -1,4 +1,4 @@
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.entities;
 
 public enum Month
 {

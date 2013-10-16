@@ -1,4 +1,4 @@
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.entities;
 
 import java.util.UUID;
 
@@ -12,11 +12,7 @@ import com.sun.jersey.api.client.WebResource;
 
 public class CouchUser
 {
-    @JsonProperty("_id")
-    private String id;
-
-    @JsonProperty("_rev")
-    private String rev;
+    private String _id;
 
     private int age;
 
@@ -24,22 +20,12 @@ public class CouchUser
 
     public String getId()
     {
-        return id;
+        return _id;
     }
 
     public void setId(String id)
     {
-        this.id = id;
-    }
-
-    public String getRev()
-    {
-        return rev;
-    }
-
-    public void setRev(String rev)
-    {
-        this.rev = rev;
+        this._id = id;
     }
 
     public int getAge()
