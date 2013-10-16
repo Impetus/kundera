@@ -74,6 +74,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.BigDecimalAccessor;
+import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.ByteAccessor;
@@ -1239,15 +1240,15 @@ public abstract class CassandraDataHandlerBase
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class)
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
                 {
-                    ShortAccessor accessor = new ShortAccessor();
-                    short value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
+                    IntegerAccessor accessor = new IntegerAccessor();
+                    int value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
                 {
-                    ByteAccessor accessor = new ByteAccessor();
-                    byte value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                    IntegerAccessor accessor = new IntegerAccessor();
+                    int value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
@@ -1415,8 +1416,9 @@ public abstract class CassandraDataHandlerBase
             else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class)
                     || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
             {
-                ShortAccessor shortAccessor = new ShortAccessor();
-                short value = shortAccessor.fromBytes(short.class, (byte[]) thriftColumnValue);
+                // byte and short are treated as int data type with Kundera.
+                IntegerAccessor shortAccessor = new IntegerAccessor();
+                int value = shortAccessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                 objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
                         String.valueOf(value));
                 return objValue;
@@ -1424,8 +1426,8 @@ public abstract class CassandraDataHandlerBase
             else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
                     || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
             {
-                ByteAccessor byteAccessor = new ByteAccessor();
-                byte value = byteAccessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                IntegerAccessor byteAccessor = new IntegerAccessor();
+                int value = byteAccessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
                 objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
                         String.valueOf(value));
                 return objValue;
