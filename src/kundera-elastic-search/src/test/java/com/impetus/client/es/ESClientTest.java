@@ -116,7 +116,7 @@ public class ESClientTest
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, ESClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9300");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "esSchema");
         clientMetadata.setLuceneIndexDir(null);
 
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
@@ -168,10 +168,12 @@ public class ESClientTest
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
+    
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         node.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
 }

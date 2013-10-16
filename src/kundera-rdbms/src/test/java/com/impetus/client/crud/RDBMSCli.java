@@ -167,8 +167,14 @@ public class RDBMSCli
 
     public void createSchema(final String schemaName) throws SQLException
     {
+        try
+        {
         String sql = "CREATE schema " + schemaName + " AUTHORIZATION DBA";
         update(sql);
+        }catch(Exception e)
+        {
+            // do nothing..
+        }
 //        update("set " + schemaName);
     }
 

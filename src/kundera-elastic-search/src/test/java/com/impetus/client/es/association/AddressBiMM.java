@@ -29,7 +29,7 @@ import javax.persistence.Table;
  *  Bi M-M address entity.
  */
 @Entity
-@Table(name = "ADDRESSBIMM", schema="esSchema@es-pu")
+//@Table(name = "ADDRESSBIMM", schema="esSchema@es-pu")
 public class AddressBiMM
 {
     @Id

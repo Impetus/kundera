@@ -35,6 +35,7 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
 
 import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
@@ -43,6 +44,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +67,8 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.attributes.DefaultMapAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -72,6 +76,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.BigDecimalAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
+import com.impetus.kundera.property.accessor.ShortAccessor;
+import com.impetus.kundera.property.accessor.ByteAccessor;
 
 /**
  * Base class for all Cassandra Data Handlers.
@@ -987,15 +993,24 @@ public abstract class CassandraDataHandlerBase
     {
         String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
         byte[] thriftColumnValue = column.getValue();
-        if (m.isCounterColumnType())
+
+        String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+
+        if (!thriftColumnName.equals(discriminatorColumn))
         {
-            LongAccessor accessor = new LongAccessor();
-            Long value = accessor.fromBytes(Long.class, column.getValue());
+            if (m.isCounterColumnType())
+            {
+                LongAccessor accessor = new LongAccessor();
+                Long value = accessor.fromBytes(Long.class, column.getValue());
+                return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
+                        value.toString(), isCql3Enabled);
+            }
+
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
-                    value.toString(), isCql3Enabled);
+                    thriftColumnValue, isCql3Enabled);
         }
-        return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue,
-                isCql3Enabled);
+
+        return entity;
     }
 
     /**
@@ -1095,10 +1110,12 @@ public abstract class CassandraDataHandlerBase
             // populate relation.
             if (relationNames != null && relationNames.contains(thriftColumnName) && thriftColumnValue != null)
             {
+
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
-                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
+                EntityMetadata relationMetadata = KunderaMetadataManager
+                        .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
                 Object value;
                 if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                 {
@@ -1148,7 +1165,7 @@ public abstract class CassandraDataHandlerBase
                         break;
                     }
                 }
-         }
+            }
             catch (IllegalArgumentException iaex)
             {
                 // ignore as it might not repesented within entity.
@@ -1206,6 +1223,7 @@ public abstract class CassandraDataHandlerBase
     {
         if (attribute != null)
         {
+
             try
             {
                 if (attribute.isCollection())
@@ -1223,14 +1241,14 @@ public abstract class CassandraDataHandlerBase
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
-                    Integer value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
+                    int value = accessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
                         || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
                 {
                     IntegerAccessor accessor = new IntegerAccessor();
-                    Integer value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                    int value = accessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), String.valueOf(value));
                 }
                 else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(BigDecimal.class))
@@ -1286,7 +1304,7 @@ public abstract class CassandraDataHandlerBase
                     outputCollection.addAll(setType.compose(valueByteBuffer));
                 }
 
-                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), outputCollection);
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), marshalCollection(valueValidationClass, outputCollection, genericClass));
             }
 
             else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Map.class))
@@ -1306,9 +1324,12 @@ public abstract class CassandraDataHandlerBase
                 MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
                         (AbstractType) valueClassInstance);
 
-                Map outputMap = new HashMap();
-                outputMap.putAll(mapType.compose(valueByteBuffer));
-                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), outputMap);
+                Map rawMap = new HashMap();
+                rawMap.putAll(mapType.compose(valueByteBuffer));
+
+                Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), dataCollection.isEmpty() ? rawMap
+                        : dataCollection);
 
             }
         }
@@ -1317,6 +1338,64 @@ public abstract class CassandraDataHandlerBase
             log.error("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), e);
             throw new PersistenceException(e);
         }
+    }
+
+    
+    private Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
+    {
+        Collection mappedCollection = result;
+        
+        if(cassandraTypeClazz.isAssignableFrom(BytesType.class))
+        {
+            mappedCollection = (Collection) PropertyAccessorHelper.getObject(result.getClass());
+            for(Object value : result)
+            {
+                mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer)value).array()));
+            }
+        }
+        
+        return mappedCollection;
+    }
+    
+    /**
+     * In case, key or value class is of type blob. Iterate and populate corresponding byte[] 
+     * 
+     * @param mapGenericClasses
+     * @param keyClass
+     * @param valueClass
+     * @param rawMap
+     * @return
+     */
+    private Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
+    {
+        Map dataCollection = new HashMap();
+
+        if (keyClass.isAssignableFrom(BytesType.class) || valueClass.isAssignableFrom(BytesType.class))
+        {
+            Iterator iter = rawMap.keySet().iterator();
+
+            while (iter.hasNext())
+            {
+
+                Object key = iter.next();
+                Object value = rawMap.get(key);
+
+                if (keyClass.isAssignableFrom(BytesType.class))
+                {
+                    key = PropertyAccessorHelper
+                            .getObject(mapGenericClasses.get(0), ((ByteBuffer) key).array());
+                }
+
+                if (valueClass.isAssignableFrom(BytesType.class))
+                {
+                    value = PropertyAccessorHelper.getObject(mapGenericClasses.get(1),
+                            ((ByteBuffer) value).array());
+                }
+
+                dataCollection.put(key, value);
+            }
+        }
+        return dataCollection;
     }
 
     private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)
@@ -1334,18 +1413,21 @@ public abstract class CassandraDataHandlerBase
                         (byte[]) thriftColumnValue));
                 return objValue;
             }
-            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class))
+            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(short.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Short.class))
             {
-                IntegerAccessor intAccessor = new IntegerAccessor();
-                Integer value = intAccessor.fromBytes(short.class, (byte[]) thriftColumnValue);
+                // byte and short are treated as int data type with Kundera.
+                IntegerAccessor shortAccessor = new IntegerAccessor();
+                int value = shortAccessor.fromBytes(short.class, (byte[]) thriftColumnValue);
                 objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
                         String.valueOf(value));
                 return objValue;
             }
-            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class))
+            else if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(byte.class)
+                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Byte.class))
             {
-                IntegerAccessor intAccessor = new IntegerAccessor();
-                Integer value = intAccessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
+                IntegerAccessor byteAccessor = new IntegerAccessor();
+                int value = byteAccessor.fromBytes(byte.class, (byte[]) thriftColumnValue);
                 objValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
                         String.valueOf(value));
                 return objValue;
@@ -1432,6 +1514,24 @@ public abstract class CassandraDataHandlerBase
             }
         }
 
+        // Add discriminator column.
+        onDiscriminatorColumn(tr, timestamp, entityType);
+    }
+
+    private void onDiscriminatorColumn(ThriftRow tr, long timestamp, EntityType entityType)
+    {
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            Column column = prepareColumn(PropertyAccessorHelper.getBytes(discrValue),
+                    PropertyAccessorHelper.getBytes(discrColumn), timestamp, 0);
+            tr.addColumn(column);
+
+        }
     }
 
     /**

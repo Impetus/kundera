@@ -55,7 +55,7 @@ public class CassanrdaGeneratedIdSchemaTest
         {
             KsDef ksDef = CassandraCli.client.describe_keyspace("kunderaGeneratedId");
             Assert.assertNotNull(ksDef);
-            Assert.assertEquals(13, ksDef.getCf_defsSize());
+            Assert.assertEquals(15, ksDef.getCf_defsSize());
             int count = 0;
             for (CfDef cfDef : ksDef.cf_defs)
             {
@@ -72,9 +72,10 @@ public class CassanrdaGeneratedIdSchemaTest
                     Assert.assertTrue(cfDef.getDefault_validation_class().equals(CounterColumnType.class.getName()));
                     count++;
                 }
-                else
+                // Mapped super class test classes are created with 4 columns and without @Table annotation. Hence eligible for this pu as well.
+                else if(!cfDef.getName().equals("TRNX_CREDIT") && !cfDef.getName().equals("DebitTransaction"))
                 {
-                    Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
+                     Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
                     List<ColumnDef> columnDefs = cfDef.getColumn_metadata();
                     Assert.assertEquals(1, columnDefs.size());
                     count++;

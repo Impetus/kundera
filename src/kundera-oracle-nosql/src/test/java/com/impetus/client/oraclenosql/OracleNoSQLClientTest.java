@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.entities.PersonOTOOracleNoSQL;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
@@ -70,6 +71,7 @@ public class OracleNoSQLClientTest
     public void tearDown() throws Exception
     {
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

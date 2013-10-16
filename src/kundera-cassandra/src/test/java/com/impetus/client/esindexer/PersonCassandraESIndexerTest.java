@@ -46,7 +46,6 @@ import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -251,6 +250,9 @@ public class PersonCassandraESIndexerTest extends BaseTest
 
         p1 = prepare("1", 10);
         em.persist(p1);
+
+        
+        waitThread();
 
         query = em.createQuery("Select p from PersonESIndexerCassandra p", PersonESIndexerCassandra.class);
 

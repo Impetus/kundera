@@ -309,7 +309,7 @@ public class ObjectUtilsCloneBidirectionalTest
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaTest");
 //        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, schemaProperty);
 
        

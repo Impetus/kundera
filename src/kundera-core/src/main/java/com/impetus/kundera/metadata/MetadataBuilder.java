@@ -66,7 +66,7 @@ public class MetadataBuilder
 
     /** kundera client */
     private String client;
-    
+
     private Map puProperties;
 
     /**
@@ -87,6 +87,7 @@ public class MetadataBuilder
         metadataProcessors.add(new CacheableAnnotationProcessor());
         metadataProcessors.add(new IndexProcessor());
         metadataProcessors.add(new EntityListenersProcessor());
+        
     }
 
     /**
@@ -122,18 +123,19 @@ public class MetadataBuilder
 
         for (MetadataProcessor processor : metadataProcessors)
         {
-//            // in case it is not intend for current persistence unit.
-//            checkForRDBMS(metadata);
-//            checkForNeo4J(metadata);
-            
-            setSchemaAndPU(clazz,metadata);
+            // // in case it is not intend for current persistence unit.
+            // checkForRDBMS(metadata);
+            // checkForNeo4J(metadata);
+
+            setSchemaAndPU(clazz, metadata);
+
             processor.process(clazz, metadata);
             metadata = belongsToPersistenceUnit(metadata);
             if (metadata == null)
             {
                 break;
             }
-            
+
             // Check for schema attribute of Table annotation.
             if (MetadataUtils.isSchemaAttributeRequired(metadata.getPersistenceUnit())
                     && StringUtils.isBlank(metadata.getSchema()))
@@ -144,147 +146,139 @@ public class MetadataBuilder
                             + ". This entity won't be persisted");
                 }
                 throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
-                        + metadata.getTableName()+ ". This entity won't be persisted");
+                        + metadata.getTableName() + ". This entity won't be persisted");
             }
         }
 
         return metadata;
     }
 
-    private void checkForRDBMS(EntityMetadata metadata)
+    /**
+     * If parameterised metadata is not for intended persistence unit, assign it
+     * to null.
+     * 
+     * @param metadata
+     *            entity metadata
+     * @return metadata.
+     */
+    private EntityMetadata belongsToPersistenceUnit(EntityMetadata metadata)
     {
-        if (Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
+
+        // if pu is null and client is not rdbms OR metadata pu does not match
+        // with configured one. don't process for anything.
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
+        
+        keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
+
+        if (metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit)
+                || (metadata.getSchema() != null && !metadata.getSchema().equals(keyspace)))
         {
-            // no more "null" as persistence unit for RDBMS scenarios!
-            metadata.setPersistenceUnit(persistenceUnit);
+            metadata = null;
+        }
+        else
+        {
+            applyMetadataChanges(metadata);
+        }
+
+        /*
+         * if ((metadata.getPersistenceUnit() == null &&
+         * !(Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client) ||
+         * Constants.NEO4J_CLIENT_FACTORY .equalsIgnoreCase(client))) ||
+         * metadata.getPersistenceUnit() != null &&
+         * !metadata.getPersistenceUnit().equals(persistenceUnit)) { metadata =
+         * null; }
+         */
+
+        return metadata;
+    }
+
+    private void applyMetadataChanges(EntityMetadata metadata)
+    {
+        metadata.setPersistenceUnit(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        
+        String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
+        
+        keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
+
+        // precedence to @Table annotation.
+        if (metadata.getSchema() == null)
+        {
+            metadata.setSchema(keyspace);
+        }
+        if (metadata.getTableName() == null)
+        {
+            metadata.setTableName(metadata.getEntityClazz().getSimpleName());
         }
     }
 
-    private void checkForNeo4J(EntityMetadata metadata)
+    private void setSchemaAndPU(Class<?> clazz, EntityMetadata metadata)
     {
-        if (Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(client))
+        Table table = clazz.getAnnotation(Table.class);
+        if (table != null)
         {
-            // no more "null" as persistence unit for RDBMS scenarios!
+            // Set Name of persistence object
+            metadata.setTableName(table.name());
+            // Add named/native query related application metadata.
+            addNamedNativeQueryMetadata(clazz);
+            // set schema name and persistence unit name (if provided)
+            String schemaStr = table.schema();
+
+            MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
+        }
+        if (metadata.getPersistenceUnit() == null)
+        {
             metadata.setPersistenceUnit(persistenceUnit);
         }
     }
 
     /**
-    * If parameterised metadata is not for intended persistence unit, assign it
-    * to null.
-    * 
-    * @param metadata
-    *            entity metadata
-    * @return metadata.
-    */
-   private EntityMetadata belongsToPersistenceUnit(EntityMetadata metadata)
-   {
-       // if pu is null and client is not rdbms OR metadata pu does not match
-       // with configured one. don't process for anything.
+     * Add named/native query annotated fields to application meta data.
+     * 
+     * @param clazz
+     *            entity class.
+     */
+    private void addNamedNativeQueryMetadata(Class clazz)
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        String name, query = null;
+        if (clazz.isAnnotationPresent(NamedQuery.class))
+        {
+            NamedQuery ann = (NamedQuery) clazz.getAnnotation(NamedQuery.class);
+            appMetadata.addQueryToCollection(ann.name(), ann.query(), false, clazz);
+        }
 
-       if (metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
-       {
+        if (clazz.isAnnotationPresent(NamedQueries.class))
+        {
+            NamedQueries ann = (NamedQueries) clazz.getAnnotation(NamedQueries.class);
 
-           metadata = null;
-       }
-       else 
-       {
-           applyMetadataChanges(metadata);
-       }
+            NamedQuery[] anns = ann.value();
+            for (NamedQuery a : anns)
+            {
+                appMetadata.addQueryToCollection(a.name(), a.query(), false, clazz);
+            }
+        }
 
-       /*
-        * if ((metadata.getPersistenceUnit() == null &&
-        * !(Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client) ||
-        * Constants.NEO4J_CLIENT_FACTORY .equalsIgnoreCase(client))) ||
-        * metadata.getPersistenceUnit() != null &&
-        * !metadata.getPersistenceUnit().equals(persistenceUnit)) { metadata =
-        * null; }
-        */
+        if (clazz.isAnnotationPresent(NamedNativeQuery.class))
+        {
+            NamedNativeQuery ann = (NamedNativeQuery) clazz.getAnnotation(NamedNativeQuery.class);
+            appMetadata.addQueryToCollection(ann.name(), ann.query(), true, clazz);
+        }
 
-       return metadata;
-   }
+        if (clazz.isAnnotationPresent(NamedNativeQueries.class))
+        {
+            NamedNativeQueries ann = (NamedNativeQueries) clazz.getAnnotation(NamedNativeQueries.class);
 
-   private void applyMetadataChanges(EntityMetadata metadata)
-   {
-       metadata.setPersistenceUnit(persistenceUnit);
-       PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-               .getPersistenceUnitMetadata(persistenceUnit);
-       String keyspace = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-       
-       // precedence to @Table annotation.
-       if(metadata.getSchema() == null)
-       {
-           metadata.setSchema(keyspace);
-       }
-       if (metadata.getTableName() == null)
-       {
-           metadata.setTableName(metadata.getEntityClazz().getSimpleName());
-       }
-   }
-
-   private void setSchemaAndPU(Class<?> clazz,EntityMetadata metadata)
-   {
-       Table table = clazz.getAnnotation(Table.class);
-       if (table != null)
-       {
-           // Set Name of persistence object
-           metadata.setTableName(table.name());
-           // Add named/native query related application metadata.
-           addNamedNativeQueryMetadata(clazz);
-           // set schema name and persistence unit name (if provided)
-           String schemaStr = table.schema();
-
-           MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
-       } 
-       if(metadata.getPersistenceUnit() == null)
-       {
-           metadata.setPersistenceUnit(persistenceUnit);
-       }
-   }
-
-   /**
-    * Add named/native query annotated fields to application meta data.
-    * 
-    * @param clazz
-    *            entity class.
-    */
-   private void addNamedNativeQueryMetadata(Class clazz)
-   {
-       ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-       String name, query = null;
-       if (clazz.isAnnotationPresent(NamedQuery.class))
-       {
-           NamedQuery ann = (NamedQuery) clazz.getAnnotation(NamedQuery.class);
-           appMetadata.addQueryToCollection(ann.name(), ann.query(), false, clazz);
-       }
-
-       if (clazz.isAnnotationPresent(NamedQueries.class))
-       {
-           NamedQueries ann = (NamedQueries) clazz.getAnnotation(NamedQueries.class);
-
-           NamedQuery[] anns = ann.value();
-           for (NamedQuery a : anns)
-           {
-               appMetadata.addQueryToCollection(a.name(), a.query(), false, clazz);
-           }
-       }
-
-       if (clazz.isAnnotationPresent(NamedNativeQuery.class))
-       {
-           NamedNativeQuery ann = (NamedNativeQuery) clazz.getAnnotation(NamedNativeQuery.class);
-           appMetadata.addQueryToCollection(ann.name(), ann.query(), true, clazz);
-       }
-
-       if (clazz.isAnnotationPresent(NamedNativeQueries.class))
-       {
-           NamedNativeQueries ann = (NamedNativeQueries) clazz.getAnnotation(NamedNativeQueries.class);
-
-           NamedNativeQuery[] anns = ann.value();
-           for (NamedNativeQuery a : anns)
-           {
-               appMetadata.addQueryToCollection(a.name(), a.query(), true, clazz);
-           }
-       }
-   }
+            NamedNativeQuery[] anns = ann.value();
+            for (NamedNativeQuery a : anns)
+            {
+                appMetadata.addQueryToCollection(a.name(), a.query(), true, clazz);
+            }
+        }
+    }
 
 }

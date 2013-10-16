@@ -25,11 +25,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
@@ -48,6 +50,7 @@ import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.cassandra.thrift.Column;
 import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -56,6 +59,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -221,7 +225,7 @@ public final class CQLTranslator
      *            column name builder
      * @param externalProperties
      */
-    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
+/*    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
             StringBuilder columnBuilder, Map<String, Object> externalProperties)
     {
@@ -270,6 +274,86 @@ public final class CQLTranslator
                     }
                 }
             }
+        }
+    }
+*/
+
+    
+    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
+            MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
+            StringBuilder columnBuilder, Map<String, Object> externalProperties)
+    {
+        Set<Attribute> attributes = entityType.getAttributes();
+        Iterator<Attribute> iterator = attributes.iterator();
+        while (iterator.hasNext())
+        {
+            Attribute attribute = iterator.next();
+
+            Field field = (Field) attribute.getJavaMember();
+            if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+            {
+                if (field.getType().equals(m.getIdAttribute().getBindableJavaType()))
+                {
+                    // builder.
+                    // Means it is a compound key! As other
+                    // iterate for it's fields to populate it's values in order!
+                    EmbeddableType compoundKey = metaModel.embeddable(field.getType());
+                    Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
+                    for (Field compositeColumn : field.getType().getDeclaredFields())
+                    {
+                        if (!ReflectUtils.isTransientOrStatic(compositeColumn))
+                        {
+                            onTranslation(type, builder, columnBuilder,
+                                    ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
+                                            .getJPAColumnName(), compoundKeyObj, compositeColumn);
+                        }
+                    }
+                }
+                else
+                {
+                    throw new PersistenceException(
+                            "Super columns are not supported via cql for compound/composite keys!");
+                }
+            }
+            else
+            {
+                if (!ReflectUtils.isTransientOrStatic(field)
+                        && m.getIdAttribute().getName().equals(attribute.getName()))
+                {
+                    onTranslation(type, builder, columnBuilder,
+                            CassandraUtilities.getIdColumnName(m, externalProperties), record, field);
+                }
+                else if (!ReflectUtils.isTransientOrStatic(field))
+                {
+                    // AbstractAttribute attrib = (AbstractAttribute)
+                    // entityType.getAttribute(field.getName());
+
+                    if (!attribute.isAssociation())
+                    {
+                        onTranslation(type, builder, columnBuilder, ((AbstractAttribute) attribute).getJPAColumnName(),
+                                record, field);
+                    }
+                }
+            }
+        }
+        
+        // on inherited columns.
+        onDiscriminatorColumn(builder,columnBuilder,entityType);
+    }
+
+    private void onDiscriminatorColumn(StringBuilder builder, StringBuilder columnBuilder, EntityType entityType)
+    {
+        String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+        
+        // No need to check for empty or blank, as considering it as valid name for nosql!
+        if(discrColumn != null && discrValue != null)
+        {
+            appendValue(builder, String.class, discrValue, false);
+            builder.append(",");
+            appendColumnName(columnBuilder, discrColumn);
+            columnBuilder.append(","); // because only key columns
+
         }
     }
 

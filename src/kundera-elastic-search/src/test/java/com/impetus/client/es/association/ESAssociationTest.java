@@ -29,10 +29,13 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra junit for Elastic search association.
@@ -163,6 +166,23 @@ public class ESAssociationTest
         em.remove(person2);
 
     }
+    
+    @After
+    public void tearDown()
+    {
+        if(em != null)
+        {
+            em.close();
+        }
+        
+        if(emf != null)
+        {
+            emf.close();
+        }
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
+    }
+
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {

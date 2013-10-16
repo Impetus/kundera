@@ -20,6 +20,9 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.kundera.loader.ClientLoaderException;
+import com.impetus.kundera.loader.KunderaAuthenticationException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,6 +208,20 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 mongo = new Mongo(host, Integer.parseInt(port));
                 db = mongo.getDB(databaseName);
+
+                try
+                {
+                    MongoDBUtils.authenticate(puMetadata.getProperties(), externalProperties, db);
+                }
+                catch (ClientLoaderException e)
+                {
+                    throw new SchemaGenerationException(e);
+                }
+                catch (KunderaAuthenticationException e)
+                {
+                    throw new SchemaGenerationException(e);
+                }
+                
                 return true;
             }
             catch (UnknownHostException e)

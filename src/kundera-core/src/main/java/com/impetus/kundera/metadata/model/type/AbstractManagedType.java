@@ -25,11 +25,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.AssociationOverride;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
-import javax.persistence.JoinColumn;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Bindable;
 import javax.persistence.metamodel.CollectionAttribute;
@@ -40,8 +43,6 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
-
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
 /**
  * Implementation for <code>ManagedType</code> interface.
@@ -62,10 +63,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     /** The declared plural attributes. */
     private Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes;
 
+    @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> validJPAAnnotations = Arrays.asList(
-            AttributeOverrides.class, AttributeOverride.class/*, AssociationOverride.class*/);
+            AttributeOverrides.class, AttributeOverride.class);
 
     private Map<String, Column> columnBindings = new ConcurrentHashMap<String, Column>();
+
+    private InheritanceModel model;
 
     /**
      * Super constructor with arguments.
@@ -87,6 +91,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         super(clazz, persistenceType);
         this.superClazzType = superClazzType;
         bindTypeAnnotations();
+        this.model = buildInheritenceModel();
     }
 
     /*
@@ -106,7 +111,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
         if (superClazzType != null)
         {
-            attributes.addAll(superClazzType.getDeclaredAttributes());
+            attributes.addAll(superClazzType.getAttributes());
         }
 
         return attributes;
@@ -147,7 +152,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         SingularAttribute<? super X, Y> attribute = getDeclaredSingularAttribute(paramString, paramClass, false);
         if (superClazzType != null && attribute == null)
         {
-            return superClazzType.getDeclaredSingularAttribute(paramString, paramClass);
+            return superClazzType.getSingularAttribute(paramString, paramClass);
         }
         checkForValid(paramString, attribute);
         return attribute;
@@ -180,7 +185,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         if (superClazzType != null)
         {
-            Set parentAttrib = superClazzType.getDeclaredSingularAttributes();
+            Set parentAttrib = superClazzType.getSingularAttributes();
 
             if (parentAttrib != null)
             {
@@ -445,7 +450,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         if (superClazzType != null)
         {
-            pluralAttributes.addAll(superClazzType.getDeclaredPluralAttributes());
+            pluralAttributes.addAll(superClazzType.getPluralAttributes());
         }
 
         return pluralAttributes;
@@ -482,7 +487,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName, false);
         if (attribute == null && superClazzType != null)
         {
-            attribute = superClazzType.getDeclaredAttribute(paramName);
+            attribute = superClazzType.getAttribute(paramName);
         }
 
         checkForValid(paramName, attribute);
@@ -526,7 +531,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         {
             if (attribute == null && superClazzType != null)
             {
-                attribute = superClazzType.getDeclaredSingularAttribute(paramString);
+                attribute = superClazzType.getSingularAttribute(paramString);
             }
         }
         catch (IllegalArgumentException iaex)
@@ -770,6 +775,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     {
         return columnBindings.get(attribute.getName());
     }
+
     /**
      * Gets the declared plural attribute.
      * 
@@ -1071,8 +1077,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     {
         // TODO:: need to check @Embeddable attributes as well!
 
-        //TODO:: need to Handle association override in RelationMetadataProcessor.
-        
+        // TODO:: need to Handle association override in
+        // RelationMetadataProcessor.
+
         for (Class<? extends Annotation> ann : validJPAAnnotations)
         {
             if (getJavaType().isAnnotationPresent(ann))
@@ -1095,16 +1102,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
                         bindAttribute(attribOverann);
                     }
 
-                }/* else if(ann.isAssignableFrom(AssociationOverride.class))
-                {
-                        JoinColumn[] joinColumns = ((AssociationOverride)annotation).joinColumns();
-                        for(JoinColumn joinColumn : joinColumns)
-                        {
-                            String columnName = joinColumn.name();
-                            joinColumn.
-                            
-                        }
-                }*/
+                }
 
             }
         }
@@ -1114,16 +1112,160 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     {
         String fieldname = ((AttributeOverride) annotation).name();
         Column column = ((AttributeOverride) annotation).column();
-        ((AbstractManagedType)this.superClazzType).columnBindings.put(fieldname, column); 
-//        columnBindings.put(fieldname, column);
+        ((AbstractManagedType) this.superClazzType).columnBindings.put(fieldname, column);
     }
-    
+
     private void checkForValid()
     {
         if (this.superClazzType == null)
         {
             throw new IllegalArgumentException(
                     "@AttributeOverride and @AttributeOverrides are only applicable if super class is @MappedSuperClass");
+        }
+    }
+
+    /**
+     * Build inheritance model.
+     * 
+     * @return inheritance model instance.
+     */
+    private InheritanceModel buildInheritenceModel()
+    {
+        InheritanceModel model = null;
+
+        if (superClazzType != null)
+        {
+            // means there is a super class
+            // scan for inheritence model.
+
+            if (superClazzType.getPersistenceType().equals(PersistenceType.ENTITY)
+                    && superClazzType.getJavaType().isAnnotationPresent(Inheritance.class))
+            {
+                Inheritance inheritenceAnn = superClazzType.getJavaType().getAnnotation(Inheritance.class);
+
+                InheritanceType strategyType = inheritenceAnn.strategy();
+
+                String descriminator = null;
+                String descriminatorValue = null;
+                String tableName = null;
+                String schemaName = null;
+                tableName = superClazzType.getJavaType().getSimpleName();
+
+                if (superClazzType.getJavaType().isAnnotationPresent(Table.class))
+                {
+                    tableName = superClazzType.getJavaType().getAnnotation(Table.class).name();
+                    schemaName = superClazzType.getJavaType().getAnnotation(Table.class).schema();
+                }
+
+                model = onStrategyType(model, strategyType, descriminator, descriminatorValue, tableName, schemaName);
+
+            }
+
+        }
+
+        return model;
+    }
+
+    private InheritanceModel onStrategyType(InheritanceModel model, InheritanceType strategyType, String descriminator,
+            String descriminatorValue, String tableName, String schemaName)
+    {
+        switch (strategyType)
+        {
+        case SINGLE_TABLE:
+
+            // if single table
+
+            if (superClazzType.getJavaType().isAnnotationPresent(DiscriminatorColumn.class))
+            {
+                descriminator = superClazzType.getJavaType().getAnnotation(DiscriminatorColumn.class).name();
+                descriminatorValue = getJavaType().getAnnotation(DiscriminatorValue.class).value();
+            }
+
+            model = new InheritanceModel(InheritanceType.SINGLE_TABLE, descriminator, descriminatorValue,
+                    tableName, schemaName);
+
+            break;
+
+        case JOINED:
+
+            // if join table
+            // TODOO: PRIMARY KEY JOIN COLUMN
+            model = new InheritanceModel(InheritanceType.JOINED, tableName, schemaName);
+
+            break;
+
+        case TABLE_PER_CLASS:
+
+            // don't override, use original ones.
+            model = new InheritanceModel(InheritanceType.TABLE_PER_CLASS, null, null);
+
+            break;
+
+        default:
+            // do nothing.
+            break;
+        }
+        return model;
+    }
+
+    public boolean isInherited()
+    {
+        return this.model != null;
+    }
+
+    public InheritanceType getInheritenceType()
+    {
+
+        return isInherited() ? this.model.inheritenceType : null;
+    }
+
+    public String getDiscriminatorColumn()
+    {
+        return isInherited() ? this.model.discriminatorColumn : null;
+    }
+
+    public String getDiscriminatorValue()
+    {
+        return isInherited() ? this.model.discriminatorValue : null;
+    }
+
+    public String getTableName()
+    {
+        return isInherited() ? this.model.tableName : null;
+    }
+
+    public String getSchemaName()
+    {
+        return isInherited() ? this.model.schemaName : null;
+    }
+
+    private static class InheritanceModel
+    {
+        private InheritanceType inheritenceType;
+
+        private String discriminatorColumn;
+
+        private String discriminatorValue;
+
+        private String tableName;
+
+        private String schemaName;
+
+        InheritanceModel(final InheritanceType type, final String discriminatorCol, final String discriminatorValue,
+                final String tableName, final String schemaName)
+        {
+            this.inheritenceType = type;
+            this.discriminatorColumn = discriminatorCol;
+            this.discriminatorValue = discriminatorValue;
+            this.tableName = tableName;
+            this.schemaName = schemaName;
+        }
+
+        InheritanceModel(final InheritanceType type, final String tableName, final String schemaName)
+        {
+            this.inheritenceType = type;
+            this.tableName = tableName;
+            this.schemaName = schemaName;
         }
     }
 

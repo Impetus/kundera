@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.PersonKVStore;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * The Class EntityTransactionTest.
@@ -299,6 +300,7 @@ public class OracleEntityTransactionTest
         int updateCount = query.executeUpdate();
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     /**

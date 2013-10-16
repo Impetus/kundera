@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +46,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
 /**
  * The Class KunderaQuery.
@@ -426,8 +428,14 @@ public class KunderaQuery
 
         // String filter = getFilter();
 
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                getPersistenceUnit());
+        EntityType entityType = metaModel.entity(entityClass);
+        
         if (null == filter)
         {
+            List<String> clauses = new ArrayList<String>();
+            addDiscriminatorClause(clauses, entityType);
             return;
         }
 
@@ -440,6 +448,25 @@ public class KunderaQuery
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
+/*        if(((AbstractManagedType)entityType).isInherited())
+        {
+            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+            
+            if(discrColumn != null && discrValue != null)
+            {
+                if(!clauses.isEmpty())
+                {
+                    clauses.add(" AND ");
+                }
+                
+                clauses.add(entityAlias+"."+discrColumn+ "= " + discrValue );
+            }
+        }
+*///        entityAlias
+        
+//        entityType
+        
         for (String clause : clauses)
         {
             if (newClause)
@@ -462,10 +489,8 @@ public class KunderaQuery
                 String columnName = null;
                 try
                 {
-                    Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                            getPersistenceUnit());
                     // String columnName = metadata.getColumnName(property);
-                    columnName = ((AbstractAttribute) metaModel.entity(entityClass).getAttribute(property))
+                    columnName = ((AbstractAttribute) entityType.getAttribute(property))
                             .getJPAColumnName();
                 }
                 catch (IllegalArgumentException iaex)
@@ -510,6 +535,31 @@ public class KunderaQuery
                 {
                     throw new JPQLParseException("bad jpa query: " + clause);
                 }
+            }
+        }
+        
+        addDiscriminatorClause(clauses, entityType);
+
+        
+//        appendDiscriminator();
+    }
+
+    private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
+    {
+        if(((AbstractManagedType)entityType).isInherited())
+        {
+            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+            
+            if(discrColumn != null && discrValue != null)
+            {
+                if(!clauses.isEmpty())
+                {
+                    filtersQueue.add("AND");
+                }
+             
+                FilterClause filterClause = new FilterClause(discrColumn,"=",discrValue);
+                filtersQueue.add(filterClause);
             }
         }
     }

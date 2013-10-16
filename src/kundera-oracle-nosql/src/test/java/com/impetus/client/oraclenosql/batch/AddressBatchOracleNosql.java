@@ -30,7 +30,7 @@ import com.impetus.kundera.index.IndexCollection;
  */
 
 @Entity
-@Table(name = "ADDRESS_BATCH", schema = "KunderaTests@oracleNosqlBatchTestSizeTwenty")
+@Table(name = "ADDRESS_BATCH", schema = "OracleNoSqlTests@oracleNosqlBatchTestSizeTwenty")
 @IndexCollection(columns = { @Index(name = "STREET") })
 public class AddressBatchOracleNosql
 {

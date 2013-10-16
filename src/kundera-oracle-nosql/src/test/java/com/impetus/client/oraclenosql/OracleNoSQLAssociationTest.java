@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.AddressOTOOracleNoSQL;
 import com.impetus.client.oraclenosql.entities.PersonOTOOracleNoSQL;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for association between two entities in OracleNoSQL
@@ -60,6 +61,7 @@ public class OracleNoSQLAssociationTest
     {
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

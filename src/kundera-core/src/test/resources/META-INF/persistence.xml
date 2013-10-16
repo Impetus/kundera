@@ -204,7 +204,7 @@
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
-			<property name="kundera.keyspace" value="KunderaTest" />
+			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="rdbms" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
@@ -241,6 +241,22 @@
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
 		</properties>
 	</persistence-unit>
+
+	
+	<persistence-unit name="keyspace">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.entities.OToOOwnerEntity</class>
+		<class>com.impetus.kundera.metadata.entities.AssociationEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="testSchema" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+		</properties>
+	</persistence-unit>
+	
 	
 	
 </persistence>

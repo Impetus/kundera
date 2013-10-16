@@ -16,7 +16,9 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javassist.Modifier;
 
@@ -142,15 +144,17 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
                     onFamilyType(metadata, clazz, f);
 
-                    onJPAColumnMapping(metaModelBuilder, metadata, f);
+//                    onJPAColumnMapping(metaModelBuilder, metadata, f);
 
                     /* Scan for Relationship field */
                     addRelationIntoMetadata(clazz, f, metadata);
                 }
             }
         
-        
+            EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
+
             validateAndSetId(metadata, clazz, metaModelBuilder);
+            MetadataUtils.onJPAColumnMapping(entityType, metadata);
         }
 
     }
@@ -296,14 +300,30 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param f
      *            the f
      */
-    private void onJPAColumnMapping(final MetaModelBuilder builder, EntityMetadata entityMetadata, Field f)
+/*    private void onJPAColumnMapping(final MetaModelBuilder builder, EntityMetadata entityMetadata, Field f)
     {
         EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
         AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(f.getName());
         entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(), f.getName());
     }
-
-
+*/
+/*    public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
+    {
+//        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
+        
+        Set<Attribute> attributes = entityType.getAttributes();
+        
+        Iterator<Attribute> iter = attributes.iterator();
+        
+        while(iter.hasNext())
+        {
+            Attribute attribute = iter.next();
+            entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
+        }
+    
+    }
+*/
+    
     private <X, T> void validateAndSetId(EntityMetadata metadata, Class<X> clazz,
             MetaModelBuilder<X, T> metaModelBuilder)
     {

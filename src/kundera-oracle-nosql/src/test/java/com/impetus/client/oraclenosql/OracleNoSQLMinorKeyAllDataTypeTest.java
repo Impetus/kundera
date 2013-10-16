@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.PersonOracleNoSQLAllDataType;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for validating correct persistence for all supported data types
@@ -72,6 +73,7 @@ public class OracleNoSQLMinorKeyAllDataTypeTest
     {
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

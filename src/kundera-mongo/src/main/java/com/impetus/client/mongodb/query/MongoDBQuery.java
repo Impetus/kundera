@@ -47,6 +47,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -259,8 +260,13 @@ public class MongoDBQuery extends QueryImpl
                 else
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());
-                    String fieldName = m.getFieldName(property);
-                    f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                    String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
+
+                    if (!property.equals(discriminatorColumn))
+                    {
+                        String fieldName = m.getFieldName(property);
+                        f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                    }
                 }
 
                 if (value.getClass().isAssignableFrom(String.class) && f != null

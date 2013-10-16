@@ -9,16 +9,22 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.loader.ClientLoaderException;
+import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 
 /**
@@ -105,5 +111,56 @@ public class MongoDBUtils
             value = PropertyAccessorHelper.fromSourceToTargetClass(targetClass, sourceClass, value);
         }
         return value;
+    }
+
+    /**
+     * Method to authenticate connection with mongodb. throws runtime error if:
+     * a) userName and password, any one is not null. b) if authentication
+     * fails.
+     *
+     *
+     * @param props
+     *            persistence properties.
+     * @param externalProperties
+     *            external persistence properties.
+     * @param mongoDB
+     *            mongo db connection.
+     */
+    public static void authenticate(Properties props, Map<String, Object> externalProperties, DB mongoDB)
+    {
+        String password = null;
+        String userName = null;
+        if (externalProperties != null)
+        {
+            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+        }
+        if (userName == null)
+        {
+            userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+        }
+        if (password == null)
+        {
+            password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        }
+        boolean authenticate = true;
+        String errMsg = null;
+        if (userName != null && password != null)
+        {
+            authenticate = mongoDB.authenticate(userName, password.toCharArray());
+        }
+        else if ((userName != null && password == null) || (userName == null && password != null))
+        {
+            errMsg = "Invalid configuration provided for authentication, please specify both non-nullable"
+                    + " 'kundera.username' and 'kundera.password' properties";
+            throw new ClientLoaderException(errMsg);
+        }
+
+        if (!authenticate)
+        {
+            errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :"
+                    + password + " provided";
+            throw new KunderaAuthenticationException(errMsg);
+        }
     }
 }

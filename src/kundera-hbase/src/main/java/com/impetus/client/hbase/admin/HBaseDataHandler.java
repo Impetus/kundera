@@ -65,6 +65,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -344,6 +345,19 @@ public class HBaseDataHandler implements DataHandler
         {
             hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations, m.getTableName());
         }
+        
+        // add discriminator column
+        String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
+        
+        // No need to check for empty or blank, as considering it as valid name for nosql!
+        if(discrColumn != null && discrValue != null)
+        {
+            List<RelationHolder> discriminator = new ArrayList<RelationHolder>(1);
+            discriminator.add(new RelationHolder(discrColumn, discrValue));
+            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, discriminator, m.getTableName());
+        }
+
         puthTable(hTable);
     }
 

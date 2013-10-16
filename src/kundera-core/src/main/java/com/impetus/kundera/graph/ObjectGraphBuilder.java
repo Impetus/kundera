@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -176,7 +177,8 @@ public class ObjectGraphBuilder
 
             if (childObject != null && !ProxyHelper.isProxy(childObject))
             {
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(childObject.getClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PropertyAccessorHelper.getGenericClass(relation.getProperty()));
+                
                 if (metadata != null && relation.isJoinedByPrimaryKey())
                 {
                     PropertyAccessorHelper.setId(childObject, metadata,
@@ -197,7 +199,8 @@ public class ObjectGraphBuilder
                         {
                             if (childObj != null)
                             {
-                                addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
+                                addChildNodesToGraph(graph, node, relation, childObj,
+                                        metadata != null ? getChildNodeState(metadata, childObj) : initialNodeState);
                             }
                         }
                 }
@@ -208,14 +211,16 @@ public class ObjectGraphBuilder
                     {
                         for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
                         {
-                            addChildNodesToGraph(graph, node, relation, entry, initialNodeState);
+                            addChildNodesToGraph(graph, node, relation, entry,
+                                    metadata != null ? getChildNodeState(metadata, entry) : initialNodeState);
                         }
                     }
                 }
                 else
                 {
                     // Construct child node and add to graph
-                    addChildNodesToGraph(graph, node, relation, childObject, initialNodeState);
+                    addChildNodesToGraph(graph, node, relation, childObject,
+                            metadata != null ? getChildNodeState(metadata, childObject) : initialNodeState);
                 }
             }
         }
@@ -223,6 +228,16 @@ public class ObjectGraphBuilder
         // Means compelte graph is build.
         node.setGraphCompleted(true);
         return node;
+    }
+
+    private NodeState getChildNodeState(EntityMetadata metadata, Object childObj)
+    {
+        Object childId = PropertyAccessorHelper.getId(childObj, metadata);
+        String childNodeId = ObjectGraphUtils.getNodeId(childId, childObj.getClass());
+
+        Node childNodeInCache = persistenceCache.getMainCache().getNodeFromCache(childNodeId);
+
+        return childNodeInCache != null ? childNodeInCache.getCurrentNodeState():new TransientState();
     }
 
     /**

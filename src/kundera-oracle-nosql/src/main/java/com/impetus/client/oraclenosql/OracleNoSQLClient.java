@@ -71,6 +71,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -183,69 +184,72 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
                 String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
                 minorKeyFirstPart = handler.removeLOBSuffix(minorKeyFirstPart);
-                String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
-
-                if (fieldName != null)
+                String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+                if (minorKeyFirstPart != null && !minorKeyFirstPart.equals(discriminatorColumn))
                 {
-                    Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
-
-                    if (metamodel.isEmbeddable(f.getType()))
+                    String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
+                    if (fieldName != null)
                     {
-                        // Populate embedded attribute
-                        Class<?> embeddableClass = f.getType();
-                        if (metamodel.isEmbeddable(embeddableClass))
-                        {
-                            String minorKeySecondPart = keyValueVersion.getKey().getMinorPath().get(1);
-                            minorKeySecondPart = handler.removeLOBSuffix(minorKeySecondPart);
+                        Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
 
-                            Object embeddedObject = PropertyAccessorHelper.getObject(entity, f);
-                            if (embeddedObject == null)
+                        if (metamodel.isEmbeddable(f.getType()))
+                        {
+                            // Populate embedded attribute
+                            Class<?> embeddableClass = f.getType();
+                            if (metamodel.isEmbeddable(embeddableClass))
                             {
-                                embeddedObject = embeddableClass.newInstance();
-                                PropertyAccessorHelper.set(entity, f, embeddedObject);
+                                String minorKeySecondPart = keyValueVersion.getKey().getMinorPath().get(1);
+                                minorKeySecondPart = handler.removeLOBSuffix(minorKeySecondPart);
+
+                                Object embeddedObject = PropertyAccessorHelper.getObject(entity, f);
+                                if (embeddedObject == null)
+                                {
+                                    embeddedObject = embeddableClass.newInstance();
+                                    PropertyAccessorHelper.set(entity, f, embeddedObject);
+                                }
+
+                                EmbeddableType embeddableType = metamodel.embeddable(embeddableClass);
+
+                                Attribute columnAttribute = embeddableType.getAttribute(minorKeySecondPart);
+                                Field columnField = (Field) columnAttribute.getJavaMember();
+
+                                if (columnField != null)
+                                {
+                                    if (columnsToSelect == null
+                                            || columnsToSelect.isEmpty()
+                                            || columnsToSelect.contains(((AbstractAttribute) columnAttribute)
+                                                    .getJPAColumnName()))
+                                    {
+                                        populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);
+                                    }
+                                }
                             }
 
-                            EmbeddableType embeddableType = metamodel.embeddable(embeddableClass);
-
-                            Attribute columnAttribute = embeddableType.getAttribute(minorKeySecondPart);
-                            Field columnField = (Field) columnAttribute.getJavaMember();
-
-                            if (columnField != null)
+                        }
+                        else if (entityType.getAttribute(fieldName) != null)
+                        {
+                            Value v = keyValueVersion.getValue();
+                            if (f != null && entityMetadata.getRelation(f.getName()) == null)
                             {
                                 if (columnsToSelect == null
                                         || columnsToSelect.isEmpty()
-                                        || columnsToSelect.contains(((AbstractAttribute) columnAttribute)
-                                                .getJPAColumnName()))
+                                        || columnsToSelect.contains(((AbstractAttribute) entityType
+                                                .getAttribute(fieldName)).getJPAColumnName()))
                                 {
-                                    populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);
+                                    populateField(entity, f, keyValueVersion, minorKeyFirstPart);
+
                                 }
                             }
-                        }
-                    }
-                    else if (entityType.getAttribute(fieldName) != null)
-                    {
-                        Value v = keyValueVersion.getValue();
-                        if (f != null && entityMetadata.getRelation(f.getName()) == null)
-                        {
-                            if (columnsToSelect == null
-                                    || columnsToSelect.isEmpty()
-                                    || columnsToSelect
-                                            .contains(((AbstractAttribute) entityType.getAttribute(fieldName))
-                                                    .getJPAColumnName()))
+
+                            else if (entityMetadata.getRelationNames() != null
+                                    && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
                             {
-                                populateField(entity, f, keyValueVersion, minorKeyFirstPart);
-
+                                Relation relation = entityMetadata.getRelation(f.getName());
+                                EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                                        .getTargetEntity());
+                                relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
+                                        .getIdAttribute().getBindableJavaType(), v.getValue()));
                             }
-                        }
-
-                        else if (entityMetadata.getRelationNames() != null
-                                && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
-                        {
-                            Relation relation = entityMetadata.getRelation(f.getName());
-                            EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(relation
-                                    .getTargetEntity());
-                            relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
-                                    .getIdAttribute().getBindableJavaType(), v.getValue()));
                         }
                     }
                 }
@@ -549,6 +553,23 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     }
                 }
             }
+        }
+
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            // Key
+            Key key = Key.createKey(majorKeyComponent, discrColumn);
+
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
+            Value value = Value.createValue(valueInBytes);
+
+            Operation op = kvStore.getOperationFactory().createPut(key, value);
+            persistOperations.add(op);
         }
         handler.execute(persistOperations);
     }
@@ -973,7 +994,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        
+
         new OracleNoSQLClientProperties().populateClientProperties(client, properties);
     }
 

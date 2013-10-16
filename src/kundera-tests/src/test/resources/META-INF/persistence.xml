@@ -46,7 +46,7 @@
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
-			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.keyspace" value="KunderaJTATests" />
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
@@ -297,7 +297,7 @@
 			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.cache.provider.class"
@@ -316,7 +316,7 @@
 			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.cache.provider.class"

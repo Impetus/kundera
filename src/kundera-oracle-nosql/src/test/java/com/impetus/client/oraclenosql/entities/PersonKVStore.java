@@ -31,7 +31,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaTests@twikvstore")
+@Table(name = "PERSON", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 @NamedQueries(value = { @NamedQuery(name = "findByAge", query = "Select p from PersonKVStore p where p.age=:age"),
         @NamedQuery(name = "findByName", query = "Select p from PersonKVStore p where p.personName = ?1") })

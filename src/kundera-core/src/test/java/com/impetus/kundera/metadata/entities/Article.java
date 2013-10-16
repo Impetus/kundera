@@ -36,7 +36,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name="article", schema="KunderaMetaDataTest@patest")
+@Table(name="article", schema="KunderaTests@patest")
 @IndexCollection(columns = { @Index(name = "body")})
 public class Article
 {    

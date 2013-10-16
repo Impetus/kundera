@@ -33,7 +33,7 @@ import javax.persistence.TemporalType;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON_ALL_DATA_TYPE", schema = "KunderaTests@twikvstore")
+@Table(name = "PERSON_ALL_DATA_TYPE", schema = "OracleNoSqlTests@twikvstore")
 public class PersonOracleNoSQLAllDataType
 {
     @Id

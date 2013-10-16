@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.Office;
 import com.impetus.client.oraclenosql.entities.PersonEmbeddedKVStore;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for CRUD and query operations on an entity that contains one
@@ -55,6 +56,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     @Test

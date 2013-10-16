@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.api.Batcher;
 
 /**
@@ -133,6 +134,7 @@ public class OracleNosqlBatchProcessorTest
         }
         em.close();
         emf.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
     private List<PersonBatchOracleNosqlEntity> prepareData(Integer noOfRecords)

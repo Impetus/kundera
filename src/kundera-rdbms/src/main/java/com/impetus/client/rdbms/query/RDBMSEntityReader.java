@@ -51,6 +51,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
@@ -554,11 +555,18 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     private boolean isStringProperty(EntityType entityType, String jpaColumnName, EntityMetadata m)
     {
+        String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        
         if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equals(jpaColumnName))
         {
             return ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType().isAssignableFrom(String.class);
         }
         String fieldName = m.getFieldName(jpaColumnName);
+        if(fieldName.equals(discriminatorColumn))
+        {
+            return true;
+        }
+
         Attribute col = entityType.getAttribute(fieldName);
         // Column col = m.getColumn(fieldName);
 

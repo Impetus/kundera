@@ -18,6 +18,8 @@ package com.impetus.kundera.metadata.entities;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
 /**
@@ -29,6 +31,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public class SingularEntity
 {
 

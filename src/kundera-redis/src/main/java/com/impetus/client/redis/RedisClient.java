@@ -60,6 +60,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -1295,63 +1296,68 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             String columnName = PropertyAccessorFactory.STRING.fromBytes(String.class, nameInByte);
 
             byte[] value = results.get(nameInByte);
-            String fieldName = entityMetadata.getFieldName(columnName);
+            String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
 
-            if (fieldName != null)
+            if (columnName != null && !columnName.equals(discriminatorColumn))
             {
-                Attribute attribute = entityType.getAttribute(fieldName);
+                String fieldName = entityMetadata.getFieldName(columnName);
 
-                if (relationNames != null && relationNames.contains(columnName))
+                if (fieldName != null)
                 {
-                    Field field = (Field) attribute.getJavaMember();
-                    EntityMetadata associationMetadata = KunderaMetadataManager
-                            .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
-                    relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
-                            .getBindableJavaType(), value));
+                    Attribute attribute = entityType.getAttribute(fieldName);
+
+                    if (relationNames != null && relationNames.contains(columnName))
+                    {
+                        Field field = (Field) attribute.getJavaMember();
+                        EntityMetadata associationMetadata = KunderaMetadataManager
+                                .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
+                        relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
+                                .getBindableJavaType(), value));
+                    }
+                    else
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
+                    }
                 }
                 else
                 {
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), value);
-                }
-            }
-            else
-            {
-                // means it might be an embeddable field, if not simply omit
-                // this field.
+                    // means it might be an embeddable field, if not simply omit
+                    // this field.
 
-                if (StringUtils.contains(columnName, ":"))
-                {
-                    StringTokenizer tokenizer = new StringTokenizer(columnName, ":");
-                    while (tokenizer.hasMoreTokens())
+                    if (StringUtils.contains(columnName, ":"))
                     {
-                        String embeddedFieldName = tokenizer.nextToken();
-                        String embeddedColumnName = tokenizer.nextToken();
-
-                        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata
-                                .getEntityClazz());
-
-                        EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
-
-                        Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
-
-                        Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
-                                .getAttribute(embeddedFieldName).getJavaMember());
-
-                        if (embeddedObject == null)
+                        StringTokenizer tokenizer = new StringTokenizer(columnName, ":");
+                        while (tokenizer.hasMoreTokens())
                         {
-                            embeddedObject = ((AbstractAttribute) entityType.getAttribute(embeddedFieldName))
-                                    .getBindableJavaType().newInstance();
-                            PropertyAccessorHelper.set(entity, (Field) entityType.getAttribute(embeddedFieldName)
-                                    .getJavaMember(), embeddedObject);
+                            String embeddedFieldName = tokenizer.nextToken();
+                            String embeddedColumnName = tokenizer.nextToken();
+
+                            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata
+                                    .getEntityClazz());
+
+                            EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
+
+                            Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
+
+                            Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
+                                    .getAttribute(embeddedFieldName).getJavaMember());
+
+                            if (embeddedObject == null)
+                            {
+                                embeddedObject = ((AbstractAttribute) entityType.getAttribute(embeddedFieldName))
+                                        .getBindableJavaType().newInstance();
+                                PropertyAccessorHelper.set(entity, (Field) entityType.getAttribute(embeddedFieldName)
+                                        .getJavaMember(), embeddedObject);
+                            }
+
+                            PropertyAccessorHelper.set(embeddedObject, (Field) attrib.getJavaMember(), value);
+                            // PropertyAccessorHelper.
+
                         }
-
-                        PropertyAccessorHelper.set(embeddedObject, (Field) attrib.getJavaMember(), value);
-                        // PropertyAccessorHelper.
-
                     }
-                }
-                // It might be a case of embeddable attribute.
+                    // It might be a case of embeddable attribute.
 
+                }
             }
 
         }
@@ -1733,6 +1739,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
+            byte[] nameInBytes = getEncodedBytes(discrColumn);
+            wrapper.addColumn(nameInBytes, valueInBytes);
+            wrapper.addIndex(getHashKey(entityMetadata.getTableName(), discrColumn), getDouble(discrValue));
+            wrapper.addIndex(getHashKey(entityMetadata.getTableName(), getHashKey(discrColumn, discrValue)),
+                    getDouble(discrValue));
+        }
 
         String rowKey = null;
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
