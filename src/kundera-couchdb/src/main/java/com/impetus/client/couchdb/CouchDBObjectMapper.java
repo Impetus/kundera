@@ -186,7 +186,7 @@ public class CouchDBObjectMapper
                         if (relations.contains(fieldName)
                                 && !fieldName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
                         {
-                            Object colValue = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
+                            JsonElement colValue = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
                             if (colValue != null)
                             {
                                 String colFieldName = m.getFieldName(fieldName);
@@ -194,10 +194,10 @@ public class CouchDBObjectMapper
                                         : null;
                                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
                                         .getJavaType());
-                                colValue = PropertyAccessorHelper.fromSourceToTargetClass(relationMetadata
-                                        .getIdAttribute().getJavaType(), String.class, colValue);
+                               Object colVal = PropertyAccessorHelper.fromSourceToTargetClass(relationMetadata
+                                        .getIdAttribute().getJavaType(), String.class, colValue.getAsString());
+                                relationValue.put(fieldName, colVal);
                             }
-                            relationValue.put(fieldName, colValue);
                         }
                     }
                 }

@@ -409,6 +409,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // Workaround for pool
         this.indexManager.flush();
         puProperties = null;
+        clear();
     }
 
     /**

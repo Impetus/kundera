@@ -129,7 +129,7 @@ public class CouchDBTestUtils
                     CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
             HttpDelete delete = new HttpDelete(uri);
 
-            client.execute(httpHost, delete, CouchDBUtils.getContext(httpHost));
+            response = client.execute(httpHost, delete, CouchDBUtils.getContext(httpHost));
         }
         catch (URISyntaxException e)
         {

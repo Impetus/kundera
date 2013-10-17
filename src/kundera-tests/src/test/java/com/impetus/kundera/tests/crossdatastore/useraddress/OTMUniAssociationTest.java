@@ -188,8 +188,6 @@ public class OTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            // PersonnelUni1ToM p = (PersonnelUni1ToM)
-            // dao.findPerson(PersonnelUni1ToM.class, );
             dao.remove("unionetomany_1", PersonnelUni1ToM.class);
             PersonnelUni1ToM pAfterRemoval = (PersonnelUni1ToM) dao
                     .findPerson(PersonnelUni1ToM.class, "unionetomany_1");

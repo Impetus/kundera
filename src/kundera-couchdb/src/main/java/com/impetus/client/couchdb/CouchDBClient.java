@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, Batcher, ClientPropertiesSetter,
         AutoGenerator
@@ -101,8 +102,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             }
 
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema() + CouchDBConstants.URL_SAPRATOR
-                            + entityMetadata.getTableName() + key, null, null);
+                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
+                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + key, null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
@@ -166,8 +167,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             HttpGet get;
             Reader reader;
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema() + CouchDBConstants.URL_SAPRATOR
-                            + entityMetadata.getTableName() + pKey, null, null);
+                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
+                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + pKey, null, null);
             get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -217,7 +218,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 try
                 {
                     URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + joinTableData.getSchemaName()
+                            CouchDBConstants.URL_SAPRATOR + joinTableData.getSchemaName().toLowerCase()
                                     + CouchDBConstants.URL_SAPRATOR + id, null, null);
 
                     HttpPut put = new HttpPut(uri);
@@ -253,8 +254,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             String q = "key=" + appendQuotes(pKeyColumnValue);
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName + CouchDBConstants.URL_SAPRATOR + "_design/" + tableName
-                            + "/_view/" + pKeyColumnName, q, null);
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                            + "_design/" + tableName + "/_view/" + pKeyColumnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -276,7 +277,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 JsonElement value = element.getAsJsonObject().get("value").getAsJsonObject().get(inverseJoinColumnName);
                 if (value != null)
                 {
-                    foreignKeys.add((E) value.getAsString());
+                    foreignKeys.add((E) PropertyAccessorHelper.fromSourceToTargetClass(columnJavaType, String.class,
+                            value.getAsString()));
                 }
             }
         }
@@ -298,12 +300,13 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     {
         List foreignKeys = new ArrayList();
         HttpResponse response = null;
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         try
         {
             String q = "key=" + appendQuotes(columnValue);
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName + CouchDBConstants.URL_SAPRATOR + "_design/" + tableName
-                            + "/_view/" + columnName, q, null);
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                            + "_design/" + tableName + "/_view/" + columnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -323,7 +326,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 JsonElement value = element.getAsJsonObject().get("value").getAsJsonObject().get(pKeyName);
                 if (value != null)
                 {
-                    foreignKeys.add(value.getAsString());
+                    foreignKeys.add(PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute()
+                            .getBindableJavaType(), String.class, value.getAsString()));
                 }
             }
         }
@@ -348,8 +352,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             String q = "key=" + appendQuotes(columnValue);
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName + CouchDBConstants.URL_SAPRATOR + "_design/" + tableName
-                            + "/_view/" + columnName, q, null);
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                            + "_design/" + tableName + "/_view/" + columnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -397,7 +401,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         q = builder.toString();
 
         uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                CouchDBConstants.URL_SAPRATOR + schemaName + CouchDBConstants.URL_SAPRATOR + pKey, q, null);
+                CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + pKey, q,
+                null);
 
         HttpDelete delete = new HttpDelete(uri);
 
@@ -442,8 +447,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             JsonObject object = CouchDBObjectMapper.getJsonOfEntity(entityMetadata, entity, id, rlHolders);
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema() + CouchDBConstants.URL_SAPRATOR
-                            + entityMetadata.getTableName() + id, null, null);
+                    CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
+                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + id, null, null);
 
             HttpPut put = new HttpPut(uri);
 
@@ -452,8 +457,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             if (isUpdate)
             {
                 uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                        CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema() + CouchDBConstants.URL_SAPRATOR
-                                + entityMetadata.getTableName() + id, null, null);
+                        CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
+                                + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + id, null, null);
                 HttpGet get = new HttpGet(uri);
                 get.addHeader("Accept", "application/json");
                 response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
@@ -555,13 +560,9 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             {
                 try
                 {
-                    URI uri = new URI(
-                            CouchDBConstants.PROTOCOL,
-                            null,
-                            httpHost.getHostName(),
-                            httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + "_bulk_docs",
-                            null, null);
+                    URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                                    + "_bulk_docs", null, null);
 
                     HttpPost post = new HttpPost(uri);
                     String object = String.format("{%s%s}", "\"all_or_nothing\": true,",
@@ -626,8 +627,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         try
         {
             StringBuilder q = new StringBuilder();
-            String _id = CouchDBConstants.URL_SAPRATOR + m.getSchema() + CouchDBConstants.URL_SAPRATOR + "_design/"
-                    + m.getTableName() + "/_view/";
+            String _id = CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                    + "_design/" + m.getTableName() + "/_view/";
             if (interpreter.isIdQuery() && !interpreter.isRangeQuery() && interpreter.getOperator() == null)
             {
                 results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
@@ -776,14 +777,15 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         if (designDocument.get_rev() == null)
         {
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema() + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    null, null);
         }
         else
         {
             StringBuilder builder = new StringBuilder("rev=");
             builder.append(designDocument.get_rev());
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema() + CouchDBConstants.URL_SAPRATOR + id,
+                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
                     builder.toString(), null);
         }
         HttpPut put = new HttpPut(uri);
@@ -793,7 +795,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         put.setEntity(entity);
         try
         {
-           response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
+            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
         }
         finally
         {
@@ -803,7 +805,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
     private Object appendQuotes(Object value)
     {
-        if (value.getClass().isAssignableFrom(String.class))
+        if (value instanceof String || value instanceof Character)
         {
             StringBuilder builder = new StringBuilder();
             builder.append("\"");
@@ -845,7 +847,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + m.getTableName();
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema() + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));

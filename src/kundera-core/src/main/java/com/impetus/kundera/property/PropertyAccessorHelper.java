@@ -15,13 +15,17 @@
  ******************************************************************************/
 package com.impetus.kundera.property;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -377,7 +381,7 @@ public class PropertyAccessorHelper
         catch (Exception e)
         {
             throw new PropertyAccessException(e);
-        }        
+        }
     }
 
     /**
@@ -402,7 +406,7 @@ public class PropertyAccessorHelper
             {
                 if (parameters.length == 1)
                 {
-                    genericClass = (Class<?>) parameters[0];
+                    genericClass = toClass(parameters[0]);
                 }
                 else
                 {
@@ -435,7 +439,9 @@ public class PropertyAccessorHelper
 
             for (Type parameter : parameters)
             {
-                genericClasses.add((Class<?>) parameter);
+                // workaround for jdk1.6 issue.
+                genericClasses.add(toClass(parameter));
+
             }
 
         }
@@ -548,5 +554,21 @@ public class PropertyAccessorHelper
             }
         }
         return null;
+    }
+
+    /**
+     * Borrowed from java.lang.class
+     * @param o
+     * @return
+     */
+    
+    private static Class<?> toClass(Type o)
+    {
+        if (o instanceof GenericArrayType)
+        {
+            Class clazz = Array.newInstance(toClass(((GenericArrayType) o).getGenericComponentType()), 0).getClass();
+            return clazz;
+        }
+        return (Class<?>) o;
     }
 }

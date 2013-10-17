@@ -167,6 +167,10 @@ public class CouchDBQuery extends QueryImpl
                         throw new QueryHandlerException("Invalid intra clause:" + opr + " not supported for CouchDB");
                     }
                 }
+                else if (interpreter.getOperator() != null && !interpreter.getOperator().equalsIgnoreCase(opr))
+                {
+                    throw new QueryHandlerException("Multiple combination of AND/OR clause not supported for CouchDB");
+                }
                 // it is a case of "AND", "OR" clause
             }
         }
