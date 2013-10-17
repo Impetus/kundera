@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.property;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -438,14 +440,8 @@ public class PropertyAccessorHelper
             for (Type parameter : parameters)
             {
                 // workaround for jdk1.6 issue.
-                if (parameter.getClass().isAssignableFrom(GenericArrayTypeImpl.class))
-                {
-                    genericClasses.add((Class<?>) ((GenericArrayTypeImpl) parameter).getGenericComponentType());
-                }
-                else
-                {
-                    genericClasses.add((Class<?>) parameter);
-                }
+                genericClasses.add((Class<?>) toClass(parameter));
+              
             }
 
         }
@@ -558,5 +554,16 @@ public class PropertyAccessorHelper
             }
         }
         return null;
+    }
+
+
+    private static Class<?> toClass(Type o) {
+        if (o instanceof GenericArrayType)
+        {
+            return Array.newInstance(toClass(((GenericArrayType)o).getGenericComponentType()),
+                                     0)
+                .getClass();
+        }
+        return (Class<?>) o;
     }
 }
