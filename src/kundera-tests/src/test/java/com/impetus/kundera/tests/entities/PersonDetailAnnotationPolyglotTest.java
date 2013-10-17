@@ -28,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.tests.cli.CassandraCli;
 
@@ -42,8 +41,6 @@ public class PersonDetailAnnotationPolyglotTest
 
     private EntityManager em;
 
-   
-
     /**
      * sets up cassandra client
      */
@@ -51,26 +48,29 @@ public class PersonDetailAnnotationPolyglotTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        
+
     }
 
     /**
-     * @throws java.lang.Exception
+     * drops the keyspace of cassandra
      */
     @After
     public void tearDown() throws Exception
     {
-  
+
         CassandraCli.dropKeySpace("KunderaTests");
     }
-
+    
+    /**
+     * Test method for testing asscoiation between Mongodb and cassandra
+     */
     @Test
     public void test()
     {
-           
+
         emf = Persistence.createEntityManagerFactory("addMongoNoAnnotateTest,secIdxAddCassandraNoAnnotateTest");
         em = emf.createEntityManager();
-        
+
         AddressMongoNoAnnotation address = new AddressMongoNoAnnotation();
         address.setAddressId("1");
         address.setStreet("sector 20, G Block");
@@ -91,52 +91,120 @@ public class PersonDetailAnnotationPolyglotTest
         Assert.assertNotNull(result.get(0).getAddress());
         Assert.assertEquals("sector 20, G Block", result.get(0).getAddress().getStreet());
         Assert.assertEquals("Kuldeep", result.get(0).getPersonName());
-        
+
         em.close();
         emf.close();
     }
     
-   
+    /**
+     * Test method for testing polyglot between Mongodb and cassandra
+     */
     @Test
     public void testAnnotateforCassToMongo()
     {
-        
+
         Map propertyMap = new HashMap();
-        
+
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
         EntityManagerFactory emfCass = Persistence.createEntityManagerFactory("noAnnotationAddCassandra", propertyMap);
         EntityManager emCass = emfCass.createEntityManager();
-       
+
         PersonDetailClassMap p = new PersonDetailClassMap();
         p.setPersonId("1");
         p.setFirstName("Chhavi");
         p.setLastName("Gangwal");
         emCass.persist(p);
         emCass.clear();
-        
+
         PersonDetailClassMap found = emCass.find(PersonDetailClassMap.class, "1");
         Assert.assertNotNull(found);
         Assert.assertEquals("1", found.getPersonId());
         Assert.assertEquals("Chhavi", found.getFirstName());
         Assert.assertEquals("Gangwal", found.getLastName());
-        
+
         emCass.close();
         emfCass.close();
-        
-        
+
         EntityManagerFactory emfMongo = Persistence.createEntityManagerFactory("noAnnotationAddMongo", propertyMap);
         EntityManager emMongo = emfMongo.createEntityManager();
 
-        
         emMongo.persist(found);
-        
+
         PersonDetailClassMap foundMongo = emMongo.find(PersonDetailClassMap.class, "1");
         Assert.assertNotNull(foundMongo);
         Assert.assertEquals("1", foundMongo.getPersonId());
         Assert.assertEquals("Chhavi", foundMongo.getFirstName());
         Assert.assertEquals("Gangwal", foundMongo.getLastName());
-        
+
         emMongo.close();
         emfMongo.close();
     }
+    
+    /**
+     * Test method for testing polyglot between RDBMS and cassandra
+     */
+    @Test
+    public void testRDBMSPolyglot()
+    {
+
+        emf = Persistence.createEntityManagerFactory("cassandraAddressNoAnnotate,rdbmsNoAnnotateTest");
+        em = emf.createEntityManager();
+
+        PersonRDBMSPolyglot person = new PersonRDBMSPolyglot();
+        person.setPersonId("p1");
+
+        AddressCassandra address = new AddressCassandra();
+        address.setAddressId("addr_1");
+        address.setStreet("Street");
+
+        person.setAddress(address);
+
+        em.persist(person);
+        
+        PersonRDBMSPolyglot found = em.find(PersonRDBMSPolyglot.class, "p1");
+        Assert.assertNotNull(found);
+        Assert.assertEquals("p1", found.getPersonId());
+      
+
+        em.close();
+        emf.close();
+
+    }
+    
+    /**
+     * Test method for testing entity with no id set
+     */
+    @Test
+    public void testInvalidEntityObject()
+    {
+        try
+        {
+
+            Map<String, Object> puProperties = new HashMap<String, Object>();
+            puProperties.put("kundera.ddl.auto.prepare", "create-drop");
+
+            emf = Persistence.createEntityManagerFactory("rdbms,secIdxAddCassandra,piccandra,addMongo,picongo",
+                    puProperties);
+
+            em = emf.createEntityManager();
+
+            AddressCassandra address = new AddressCassandra();
+            address.setAddressId("addr_1");
+            address.setStreet("Street");
+
+            PersonRDBMSPolyglot person = new PersonRDBMSPolyglot();
+            person.setAddress(address);
+
+            em.persist(person);
+
+            em.close();
+            emf.close();
+        }
+        catch (Exception iex)
+        {
+            Assert.assertNotNull(iex.getMessage());
+        }
+
+    }
+
 }

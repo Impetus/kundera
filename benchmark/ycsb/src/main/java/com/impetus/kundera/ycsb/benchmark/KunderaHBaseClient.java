@@ -97,10 +97,10 @@ public class KunderaHBaseClient extends DB
             Object o = em.find(HBaseUser.class, key);
             assert o != null;
             j++;
-            if (j % 5000 == 0)
-            {
+//            if (j % 5000 == 0)
+//            {
                 em.clear();
-            }
+//            }
 //            em.clear();
             return Ok;
         }
@@ -174,7 +174,7 @@ public class KunderaHBaseClient extends DB
 
         try
         {
-        	HBaseUser u = new HBaseUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
+            HBaseUser u = new HBaseUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
             em.persist(u);
            j++;
             if (j % 5000 == 0)
