@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl;
+
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -377,7 +379,7 @@ public class PropertyAccessorHelper
         catch (Exception e)
         {
             throw new PropertyAccessException(e);
-        }        
+        }
     }
 
     /**
@@ -435,7 +437,15 @@ public class PropertyAccessorHelper
 
             for (Type parameter : parameters)
             {
-                genericClasses.add((Class<?>) parameter);
+                // workaround for jdk1.6 issue.
+                if (parameter.getClass().isAssignableFrom(GenericArrayTypeImpl.class))
+                {
+                    genericClasses.add((Class<?>) ((GenericArrayTypeImpl) parameter).getGenericComponentType());
+                }
+                else
+                {
+                    genericClasses.add((Class<?>) parameter);
+                }
             }
 
         }
