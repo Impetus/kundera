@@ -218,7 +218,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             return ServerError;
         }
 
-        for (KeyValue kv : r.list())
+        for (KeyValue kv : r.raw())
         {
             String column = Bytes.toString(kv.getQualifier());
             Object value = PropertyAccessorHelper.getObject(Object.class, kv.getValue());
@@ -451,6 +451,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             System.out.println("Setting up put for key: " + key);
         }
         Put p = new Put(Bytes.toBytes(key));
+        
+        // getString(key, "24"), getString(key, "gzb"), getString(key, "mishra")
+        
+        
         for (Map.Entry<String, ByteIterator> entry : values.entrySet())
         {
             if (_debug)
