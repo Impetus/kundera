@@ -27,17 +27,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.tests.CouchDBBase;
+import com.impetus.client.couchdb.entities.CouchDBToken;
+import com.impetus.client.couchdb.entities.CouchDBTokenClient;
 import com.impetus.client.couchdb.entities.Month;
 import com.impetus.client.couchdb.entities.PersonCouchDB;
 import com.impetus.client.couchdb.entities.PersonCouchDB.Day;
-import com.impetus.client.couchdb.entities.CouchDBToken;
-import com.impetus.client.couchdb.entities.CouchDBTokenClient;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
 /**
- * @author vivek.mishra junit for {@link IResultIterator}.
+ * @author Kuldeep.mishra junit for {@link IResultIterator}.
  */
 public class ResultIteratorTest extends CouchDBBase
 {

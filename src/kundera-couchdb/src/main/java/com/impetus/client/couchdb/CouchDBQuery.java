@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.couchdb;
 
 import java.util.ArrayList;
@@ -8,6 +23,9 @@ import java.util.Queue;
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -23,14 +41,25 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 
+/**
+ * Extends QueryImpl for CouchDB query.
+ * 
+ * @author Kuldeep Mishra
+ * 
+ */
 public class CouchDBQuery extends QueryImpl
 {
+    private static final Logger log = LoggerFactory.getLogger(CouchDBQuery.class);
+
     public CouchDBQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
         super(query, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
     }
 
+    /**
+     * Populate results.
+     */
     @Override
     protected List populateEntities(EntityMetadata m, Client client)
     {
@@ -38,6 +67,9 @@ public class CouchDBQuery extends QueryImpl
         return ((CouchDBClient) client).createAndExecuteQuery(interpreter);
     }
 
+    /**
+     * Recursively populate entity.
+     */
     @Override
     protected List recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
@@ -90,6 +122,12 @@ public class CouchDBQuery extends QueryImpl
                         getEntityMetadata()), getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
 
+    /**
+     * 
+     * @param clauseQueue
+     * @param m
+     * @return
+     */
     private CouchDBQueryInterpreter onTranslation(Queue clauseQueue, EntityMetadata m)
     {
 
@@ -145,6 +183,7 @@ public class CouchDBQuery extends QueryImpl
                 }
                 else
                 {
+                    log.error("Condition:" + condition + " not supported for CouchDB");
                     throw new QueryHandlerException("Condition:" + condition + " not supported for CouchDB");
                 }
             }
@@ -160,16 +199,19 @@ public class CouchDBQuery extends QueryImpl
                     }
                     else if (opr.equalsIgnoreCase("OR"))
                     {
-                        throw new QueryHandlerException("Invalid intra clause OR is not supported for CouchDB");
+                        log.error("Condition: OR not supported in CouchDB");
+                        throw new QueryHandlerException("Invalid intra clause OR is not supported in CouchDB");
                     }
                     else
                     {
+                        log.error("Invalid intra clause:" + opr + " is not supported in CouchDB");
                         throw new QueryHandlerException("Invalid intra clause:" + opr + " not supported for CouchDB");
                     }
                 }
                 else if (interpreter.getOperator() != null && !interpreter.getOperator().equalsIgnoreCase(opr))
                 {
-                    throw new QueryHandlerException("Multiple combination of AND/OR clause not supported for CouchDB");
+                    log.error("Multiple combination of AND/OR clause not supported in CouchDB");
+                    throw new QueryHandlerException("Multiple combination of AND/OR clause not supported in CouchDB");
                 }
                 // it is a case of "AND", "OR" clause
             }

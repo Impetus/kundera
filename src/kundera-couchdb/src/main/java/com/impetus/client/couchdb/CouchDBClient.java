@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.couchdb;
 
 import java.io.IOException;
@@ -11,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,6 +71,12 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+/**
+ * CouchDB client.
+ * 
+ * @author Kuldeep Mishra
+ * 
+ */
 public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, Batcher, ClientPropertiesSetter,
         AutoGenerator
 {
@@ -179,7 +199,6 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND))
             {
                 onDelete(entityMetadata.getSchema(), entityMetadata.getTableName() + pKey, response, json);
-
             }
         }
         catch (Exception e)
@@ -231,7 +250,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 }
                 catch (Exception e)
                 {
-                    log.error("Error while persisting joinTable data");
+                    log.error("Error while persisting joinTable data, coused by.", e);
                     throw new KunderaException(e);
                 }
                 finally
@@ -486,8 +505,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while persisting entity " + id);
-            throw new KunderaException(e);
+            log.error("Error while persisting entity with id {}, caused by {}. ", id, e);
+            throw new KunderaException("Error while persisting entity with id " + id + ", caused by: " + e);
         }
         finally
         {
@@ -574,6 +593,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 }
                 catch (Exception e)
                 {
+                    log.error("Error while executing batch, caused by {}. ", e);
                     throw new KunderaException("Error while executing batch. caused by :" + e);
                 }
             }
@@ -620,7 +640,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
-    public List createAndExecuteQuery(CouchDBQueryInterpreter interpreter)
+    /**
+     * 
+     * @param interpreter
+     * @return
+     */
+    List createAndExecuteQuery(CouchDBQueryInterpreter interpreter)
     {
         EntityMetadata m = interpreter.getMetadata();
         List results = new ArrayList();
@@ -659,6 +684,16 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return results;
     }
 
+    /**
+     * 
+     * @param q
+     * @param _id
+     * @param m
+     * @param results
+     * @throws IOException
+     * @throws ClientProtocolException
+     * @throws URISyntaxException
+     */
     void executeQuery(StringBuilder q, String _id, EntityMetadata m, List results) throws IOException,
             ClientProtocolException, URISyntaxException
     {
@@ -695,6 +730,18 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
     }
 
+    /**
+     * 
+     * @param interpreter
+     * @param m
+     * @param q
+     * @param _id
+     * @return
+     * @throws URISyntaxException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     * @throws ClientProtocolException
+     */
     String createQuery(CouchDBQueryInterpreter interpreter, EntityMetadata m, StringBuilder q, String _id)
             throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException
     {
@@ -756,6 +803,17 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return _id;
     }
 
+    /**
+     * 
+     * @param interpreter
+     * @param m
+     * @param viewName
+     * @param columns
+     * @throws URISyntaxException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     * @throws ClientProtocolException
+     */
     private void createDesignDocumentIfNotExist(CouchDBQueryInterpreter interpreter, EntityMetadata m, String viewName,
             List<String> columns) throws URISyntaxException, UnsupportedEncodingException, IOException,
             ClientProtocolException
@@ -771,7 +829,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
         if (views.get(viewName.toString()) == null)
         {
-            createView(views, viewName, columns);
+            CouchDBUtils.createView(views, viewName, columns);
         }
         String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + m.getTableName();
         if (designDocument.get_rev() == null)
@@ -803,6 +861,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /**
+     * 
+     * @param value
+     * @return
+     */
     private Object appendQuotes(Object value)
     {
         if (value instanceof String || value instanceof Character)
@@ -840,6 +903,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         this.batchSize = batch_Size;
     }
 
+    /**
+     * 
+     * @param m
+     * @return
+     */
     private CouchDBDesignDocument getDesignDocument(EntityMetadata m)
     {
         HttpResponse response = null;
@@ -868,33 +936,5 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             CouchDBUtils.closeContent(response);
         }
-    }
-
-    private void createView(Map<String, MapReduce> views, String columnName, List<String> columns)
-    {
-        Iterator<String> iterator = columns.iterator();
-
-        MapReduce mapr = new MapReduce();
-        StringBuilder mapBuilder = new StringBuilder();
-        StringBuilder ifBuilder = new StringBuilder("function(doc){if(");
-        StringBuilder emitFunction = new StringBuilder("{emit([");
-        while (iterator.hasNext())
-        {
-            String nextToken = iterator.next();
-            ifBuilder.append("doc." + nextToken);
-            ifBuilder.append(" && ");
-            emitFunction.append("doc." + nextToken);
-            emitFunction.append(",");
-        }
-        ifBuilder.delete(ifBuilder.toString().lastIndexOf(" && "), ifBuilder.toString().lastIndexOf(" && ") + 3);
-        emitFunction.deleteCharAt(emitFunction.toString().lastIndexOf(","));
-
-        ifBuilder.append(")");
-        emitFunction.append("], doc)}}");
-
-        mapBuilder.append(ifBuilder.toString()).append(emitFunction.toString());
-
-        mapr.setMap(mapBuilder.toString());
-        views.put(columnName, mapr);
     }
 }

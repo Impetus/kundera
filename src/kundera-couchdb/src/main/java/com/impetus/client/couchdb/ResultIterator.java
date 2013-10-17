@@ -15,18 +15,16 @@
  */
 package com.impetus.client.couchdb;
 
-import java.awt.geom.CubicCurve2D;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.apache.http.client.ClientProtocolException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -35,12 +33,15 @@ import com.impetus.kundera.query.IResultIterator;
 /**
  * @author kuldeep.mishra .
  * 
- *         Implementation of MongoDB result iteration.
+ *         Implementation of CouchDB result iteration.
  * 
  * @param <E>
  */
 class ResultIterator<E> implements IResultIterator<E>
 {
+    /** The logger. */
+    private static Logger logger = LoggerFactory.getLogger(ResultIterator.class);
+
     private EntityMetadata m;
 
     private CouchDBClient client;
@@ -144,9 +145,10 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (Exception e)
         {
-            throw new KunderaAuthenticationException("Error while executing query, caused by : " + e);
+            logger.error("Error while executing query, caused by {}.", e);
+            throw new KunderaException("Error while executing query, caused by : " + e);
         }
-        if (results != null && results.size() >= 1)
+        if (results != null && !results.isEmpty())
         {
             Object object = results.get(0);
             results = new ArrayList();
@@ -156,9 +158,7 @@ class ResultIterator<E> implements IResultIterator<E>
             }
             else
             {
-                List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
-                ls.add((EnhanceEntity) object);
-                return setRelationEntities(ls.get(0), client, m);
+                return setRelationEntities(object, client, m);
             }
         }
         return null;

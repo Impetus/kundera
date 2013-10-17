@@ -38,16 +38,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>1.8</version>
-		</dependency>
-		<dependency>
-			<groupId>org.ektorp</groupId>
-			<artifactId>org.ektorp</artifactId>
-			<version>1.2.2</version>
-		</dependency>
 		<!-- Apache HttpComponents -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

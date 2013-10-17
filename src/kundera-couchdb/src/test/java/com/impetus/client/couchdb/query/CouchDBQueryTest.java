@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import com.impetus.client.couchdb.entities.PersonCouchDB;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
- * @author vivek
+ * @author Kuldeep Mishra
  * 
  */
 public class CouchDBQueryTest extends CouchDBBase

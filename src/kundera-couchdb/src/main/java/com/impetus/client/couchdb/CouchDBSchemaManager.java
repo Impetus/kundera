@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2013 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.couchdb;
 
 import java.io.IOException;
@@ -47,6 +62,12 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 
+/**
+ * Schema Manager for couchdb.
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 public class CouchDBSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
     /** The logger. */
@@ -72,6 +93,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         super.exportSchema(persistenceUnit, schemas);
     }
 
+    /**
+     * drop design document from db.
+     */
     @Override
     public void dropSchema()
     {
@@ -90,8 +114,8 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                     StringBuilder builder = new StringBuilder("rev=");
                     builder.append(designDocument.get_rev());
                     URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
-                            builder.toString(), null);
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                                    + id, builder.toString(), null);
                     HttpDelete delete = new HttpDelete(uri);
                     try
                     {
@@ -106,16 +130,23 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (Exception e)
         {
+            logger.error("Error while creating database, caused by {}.", e);
             throw new SchemaGenerationException("Error while creating database", e, "couchDB");
         }
     }
 
+    /**
+     * To validate entity.
+     */
     @Override
     public boolean validateEntity(Class clazz)
     {
         return true;
     }
 
+    /**
+     * Instantiate http client.
+     */
     @Override
     protected boolean initiateClient()
     {
@@ -162,13 +193,16 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (Exception e)
         {
-            logger.error("Error Creating HTTP client. " + e.getMessage());
+            logger.error("Error Creating HTTP client {}. ", e);
             throw new IllegalStateException(e);
         }
         return true;
 
     }
 
+    /**
+     * Validate design document.
+     */
     @Override
     protected void validate(List<TableInfo> tableInfos)
     {
@@ -224,6 +258,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * Update design document.
+     */
     @Override
     protected void update(List<TableInfo> tableInfos)
     {
@@ -260,16 +297,16 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                 if (designDocument.get_rev() == null)
                 {
                     uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null,
-                            null);
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                                    + id, null, null);
                 }
                 else
                 {
                     StringBuilder builder = new StringBuilder("rev=");
                     builder.append(designDocument.get_rev());
                     uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
-                            builder.toString(), null);
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
+                                    + id, builder.toString(), null);
                 }
                 HttpPut put = new HttpPut(uri);
 
@@ -288,10 +325,14 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (Exception e)
         {
+            logger.error("Error while creating database, caused by {}.", e);
             throw new SchemaGenerationException("Error while creating database", e, "couchDB");
         }
     }
 
+    /**
+     * Create database and design document.
+     */
     @Override
     protected void create(List<TableInfo> tableInfos)
     {
@@ -317,8 +358,13 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                 createViewForSelectAll(tableInfo, views);
 
                 designDocument.setViews(views);
-                URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                        CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                URI uri = new URI(
+                        CouchDBConstants.PROTOCOL,
+                        null,
+                        httpHost.getHostName(),
+                        httpHost.getPort(),
+                        CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                        null, null);
                 HttpPut put = new HttpPut(uri);
 
                 String jsonObject = gson.toJson(designDocument);
@@ -336,16 +382,25 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (Exception e)
         {
+            logger.error("Error while creating database {} , caused by {}.", databaseName, e);
             throw new SchemaGenerationException("Error while creating database", e, "couchDB");
         }
     }
 
+    /**
+     * Create database and design document.
+     */
     @Override
     protected void create_drop(List<TableInfo> tableInfos)
     {
         create(tableInfos);
     }
 
+    /**
+     * 
+     * @param views
+     * @param columnName
+     */
     private void createViewIfNotExist(Map<String, MapReduce> views, String columnName)
     {
         if (views.get(columnName) == null)
@@ -354,6 +409,11 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * 
+     * @param views
+     * @param columnName
+     */
     private void createView(Map<String, MapReduce> views, String columnName)
     {
         MapReduce mapr = new MapReduce();
@@ -361,6 +421,11 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         views.put(columnName, mapr);
     }
 
+    /**
+     * 
+     * @param tableInfo
+     * @param views
+     */
     private void createViewForSelectAllIfNotExist(TableInfo tableInfo, Map<String, MapReduce> views)
     {
         if (views.get("all") == null)
@@ -369,6 +434,11 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * 
+     * @param tableInfo
+     * @param views
+     */
     private void createViewForSelectAll(TableInfo tableInfo, Map<String, MapReduce> views)
     {
         MapReduce mapr = new MapReduce();
@@ -376,6 +446,13 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         views.put("all", mapr);
     }
 
+    /**
+     * 
+     * @param drop
+     * @throws URISyntaxException
+     * @throws IOException
+     * @throws ClientProtocolException
+     */
     private void createDatabaseIfNotExist(boolean drop) throws URISyntaxException, IOException, ClientProtocolException
     {
         boolean exist = checkForDBExistence();
@@ -404,6 +481,14 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * Check for db existence.
+     * 
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     * @throws URISyntaxException
+     */
     private boolean checkForDBExistence() throws ClientProtocolException, IOException, URISyntaxException
     {
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
@@ -427,6 +512,13 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * Drop database.
+     * 
+     * @throws IOException
+     * @throws ClientProtocolException
+     * @throws URISyntaxException
+     */
     private void dropDatabase() throws IOException, ClientProtocolException, URISyntaxException
     {
         HttpResponse delRes = null;
@@ -443,13 +535,20 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         }
     }
 
+    /**
+     * Get design document.
+     * 
+     * @param id
+     * @return
+     */
     private CouchDBDesignDocument getDesignDocument(String id)
     {
         HttpResponse response = null;
         try
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                    CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
