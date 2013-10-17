@@ -52,7 +52,7 @@ public class PersonDetailAnnotationPolyglotTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * drops the keyspace of cassandra
      */
     @After
     public void tearDown() throws Exception
@@ -60,7 +60,10 @@ public class PersonDetailAnnotationPolyglotTest
 
         CassandraCli.dropKeySpace("KunderaTests");
     }
-
+    
+    /**
+     * Test method for testing asscoiation between Mongodb and cassandra
+     */
     @Test
     public void test()
     {
@@ -92,7 +95,10 @@ public class PersonDetailAnnotationPolyglotTest
         em.close();
         emf.close();
     }
-
+    
+    /**
+     * Test method for testing polyglot between Mongodb and cassandra
+     */
     @Test
     public void testAnnotateforCassToMongo()
     {
@@ -133,7 +139,10 @@ public class PersonDetailAnnotationPolyglotTest
         emMongo.close();
         emfMongo.close();
     }
-
+    
+    /**
+     * Test method for testing polyglot between RDBMS and cassandra
+     */
     @Test
     public void testRDBMSPolyglot()
     {
@@ -161,7 +170,10 @@ public class PersonDetailAnnotationPolyglotTest
         emf.close();
 
     }
-
+    
+    /**
+     * Test method for testing entity with no id set
+     */
     @Test
     public void testInvalidEntityObject()
     {
