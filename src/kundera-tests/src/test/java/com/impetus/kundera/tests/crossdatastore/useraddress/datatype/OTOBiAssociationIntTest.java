@@ -46,7 +46,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 
 public class OTOBiAssociationIntTest extends TwinAssociation
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore","addCouchdb" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore"/*,"addCouchdb"*/ };
 
     private static final BigDecimal ADDRESS_ID = new BigDecimal("123456");
 
