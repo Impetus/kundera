@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.crud;
 
 import java.util.HashSet;
 import java.util.Set;

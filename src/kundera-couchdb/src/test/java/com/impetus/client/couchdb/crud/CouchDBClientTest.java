@@ -14,7 +14,7 @@
  *  * limitations under the License.
  ******************************************************************************/
 
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.crud;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.couchdb.CouchDBClient;
 import com.impetus.client.couchdb.entities.Month;
 import com.impetus.client.couchdb.entities.PersonCouchDB;
 import com.impetus.client.couchdb.entities.PersonCouchDB.Day;
