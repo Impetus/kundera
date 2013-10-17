@@ -39,6 +39,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.yahoo.ycsb.ByteArrayByteIterator;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DBException;
@@ -186,11 +187,11 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         Result r = null;
         try
         {
-            if (_debug)
-            {
-                System.out.println("Doing read from HBase columnfamily " + _columnFamily);
-                System.out.println("Doing read for key: " + key);
-            }
+//            if (_debug)
+//            {
+//                System.out.println("Doing read from HBase columnfamily " + _columnFamily);
+//                System.out.println("Doing read for key: " + key);
+//            }
             Get g = new Get(Bytes.toBytes(key));
             if (fields == null)
             {
@@ -217,14 +218,18 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             return ServerError;
         }
 
-        for (KeyValue kv : r.raw())
+        for (KeyValue kv : r.list())
         {
-            result.put(Bytes.toString(kv.getQualifier()), new ByteArrayByteIterator(kv.getValue()));
-            if (_debug)
-            {
-                System.out.println("Result for field: " + Bytes.toString(kv.getQualifier()) + " is: "
-                        + Bytes.toString(kv.getValue()));
-            }
+            String column = Bytes.toString(kv.getQualifier());
+            Object value = PropertyAccessorHelper.getObject(Object.class, kv.getValue());
+            assert column != null;
+            assert value != null;
+//            result.put(Bytes.toString(kv.getQualifier()), new ByteArrayByteIterator(kv.getValue()));
+//            if (_debug)
+//            {
+//                System.out.println("Result for field: " + Bytes.toString(kv.getQualifier()) + " is: "
+//                        + Bytes.toString(kv.getValue()));
+//            }
 
         }
         return Ok;
