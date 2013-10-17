@@ -406,7 +406,7 @@ public class PropertyAccessorHelper
             {
                 if (parameters.length == 1)
                 {
-                    genericClass = (Class<?>) parameters[0];
+                    genericClass = toClass(parameters[0]);
                 }
                 else
                 {
@@ -440,8 +440,8 @@ public class PropertyAccessorHelper
             for (Type parameter : parameters)
             {
                 // workaround for jdk1.6 issue.
-                genericClasses.add((Class<?>) toClass(parameter));
-              
+                genericClasses.add(toClass(parameter));
+
             }
 
         }
@@ -556,13 +556,18 @@ public class PropertyAccessorHelper
         return null;
     }
 
-
-    private static Class<?> toClass(Type o) {
+    /**
+     * Borrowed from java.lang.class
+     * @param o
+     * @return
+     */
+    
+    private static Class<?> toClass(Type o)
+    {
         if (o instanceof GenericArrayType)
         {
-            return Array.newInstance(toClass(((GenericArrayType)o).getGenericComponentType()),
-                                     0)
-                .getClass();
+            Class clazz = Array.newInstance(toClass(((GenericArrayType) o).getGenericComponentType()), 0).getClass();
+            return clazz;
         }
         return (Class<?>) o;
     }
