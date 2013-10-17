@@ -31,7 +31,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -57,7 +58,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
     public String _table = "";
 
-    public HTable _hTable = null;
+    public HTableInterface _hTable = null;
 
     public String _columnFamily = "";
 
@@ -72,6 +73,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
     public static final int NoMatchingRecord = -3;
 
     public static final Object tableLock = new Object();
+
+    public static final int poolSize = 100;
+
+    private HTablePool hTablePool = new HTablePool(config, poolSize);
 
     /**
      * Initialize any state for this DB. Called once per DB instance; there is
@@ -104,36 +109,39 @@ public class HBaseClient extends com.yahoo.ycsb.DB
      */
     public void cleanup() throws DBException
     {
-//        // Get the measurements instance as this is the only client that should
-//        // count clean up time like an update since autoflush is off.
-////        Measurements _measurements = Measurements.getMeasurements();
-//        try
-//        {
-////            long st = System.nanoTime();
-//     /*       if (_hTable != null)
-//            {
-//                _hTable.flushCommits();
-//            }*/
-////            long en = System.nanoTime();
-////            _measurements.measure("UPDATE", (int) ((en - st) / 1000));
-//        }
-//        catch (IOException e)
-//        {
-//            throw new DBException(e);
-//        }
+        // // Get the measurements instance as this is the only client that
+        // should
+        // // count clean up time like an update since autoflush is off.
+        // // Measurements _measurements = Measurements.getMeasurements();
+        // try
+        // {
+        // // long st = System.nanoTime();
+        // /* if (_hTable != null)
+        // {
+        // _hTable.flushCommits();
+        // }*/
+        // // long en = System.nanoTime();
+        // // _measurements.measure("UPDATE", (int) ((en - st) / 1000));
+        // }
+        // catch (IOException e)
+        // {
+        // throw new DBException(e);
+        // }
     }
 
     public void getHTable(String table) throws IOException
     {
-        synchronized (tableLock)
-        {
-            _hTable = new HTable(config, table);
-            // 2 suggestions from
-            // http://ryantwopointoh.blogspot.com/2009/01/performance-of-hbase-importing.html
-            // _hTable.setAutoFlush(true);
-            // _hTable.setWriteBufferSize(1024*1024*12);
-            // return hTable;
-        }
+        // synchronized (tableLock)
+        // {
+
+        _hTable = hTablePool.getTable(table);
+        // _hTable = new HTable(config, table);
+        // 2 suggestions from
+        // http://ryantwopointoh.blogspot.com/2009/01/performance-of-hbase-importing.html
+        // _hTable.setAutoFlush(true);
+        // _hTable.setWriteBufferSize(1024*1024*12);
+        // return hTable;
+        // }
 
     }
 
@@ -208,7 +216,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             return ServerError;
         }
 
-        for (KeyValue kv : r.list())
+        for (KeyValue kv : r.raw())
         {
             result.put(Bytes.toString(kv.getQualifier()), new ByteArrayByteIterator(kv.getValue()));
             if (_debug)
