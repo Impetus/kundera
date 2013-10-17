@@ -401,5 +401,41 @@
 		</properties>
 
 	</persistence-unit>
+	
+	<persistence-unit name="cassandraAddressNoAnnotate">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.AddressCassandra</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+    	<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create-drop" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
+		</properties>
+
+	</persistence-unit>
+	<persistence-unit name="rdbmsNoAnnotateTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.PersonRDBMSPolyglot</class>
+		<class>com.impetus.kundera.tests.entities.AddressCassandra</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="current_session_context_class" value="thread" />
+			<!-- <property name="hibernate.show_sql" value="true" /> --> 
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:KunderaTests" />
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			
+		</properties>
+	</persistence-unit>
 
 </persistence>
