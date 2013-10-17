@@ -13,9 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities;
-
-import java.util.Set;
+package com.impetus.client.couchdb.entities;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,30 +21,32 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
-@IndexCollection(columns = { @Index(name = "personName") })
-public class PersonnelUniMToMInt
+@Table(name = "PERSONNEL", schema = "couchdatabase@couchdbJTA_pu")
+public class CouchDBPersonJTAEntity
 {
     @Id
     @Column(name = "PERSON_ID")
-    private int personId;
+    private String personId;
 
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "PERSONNEL_ADDRESS", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID")}, schema = "KunderaTests")
-    private Set<HabitatUniMToMBigInteger> addresses;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDRESS_ID")
+    private CouchDBAddressJTAEntity address;
 
-    public int getPersonId()
+    /**
+     * 
+     */
+    public CouchDBPersonJTAEntity()
+    {
+    }
+
+    public String getPersonId()
     {
         return personId;
     }
@@ -61,19 +61,19 @@ public class PersonnelUniMToMInt
         this.personName = personName;
     }
 
-    public void setPersonId(int personId)
+    public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
-    public Set<HabitatUniMToMBigInteger> getAddresses()
+    public CouchDBAddressJTAEntity getAddress()
     {
-        return addresses;
+        return address;
     }
 
-    public void setAddresses(Set<HabitatUniMToMBigInteger> addresses)
+    public void setAddress(CouchDBAddressJTAEntity address)
     {
-        this.addresses = addresses;
+        this.address = address;
     }
 
 }

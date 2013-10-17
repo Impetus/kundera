@@ -52,7 +52,9 @@ public class PersistenceValidator
         if (id == null)
         {
             log.error("Entity to be persisted can't have Primary key set to null.");
-            return false;
+            throw new IllegalArgumentException(
+            "Entity to be persisted can't have Primary key set to null.");
+           // return false;
         }
         return true;
     }

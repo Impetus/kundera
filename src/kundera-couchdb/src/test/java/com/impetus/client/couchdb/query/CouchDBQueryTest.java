@@ -14,7 +14,7 @@
  *  * limitations under the License.
  ******************************************************************************/
 
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.query;
 
 import java.util.List;
 

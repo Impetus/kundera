@@ -1,4 +1,4 @@
-package com.impetus.client.couchdb;
+package com.impetus.client.couchdb.crud;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

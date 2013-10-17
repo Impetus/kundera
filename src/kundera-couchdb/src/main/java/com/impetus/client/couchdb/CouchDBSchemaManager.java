@@ -90,7 +90,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                     StringBuilder builder = new StringBuilder("rev=");
                     builder.append(designDocument.get_rev());
                     URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id,
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
                             builder.toString(), null);
                     HttpDelete delete = new HttpDelete(uri);
                     try
@@ -260,7 +260,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                 if (designDocument.get_rev() == null)
                 {
                     uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id, null,
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null,
                             null);
                 }
                 else
@@ -268,7 +268,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                     StringBuilder builder = new StringBuilder("rev=");
                     builder.append(designDocument.get_rev());
                     uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                            CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id,
+                            CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
                             builder.toString(), null);
                 }
                 HttpPut put = new HttpPut(uri);
@@ -318,7 +318,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
 
                 designDocument.setViews(views);
                 URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                        CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                        CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null, null);
                 HttpPut put = new HttpPut(uri);
 
                 String jsonObject = gson.toJson(designDocument);
@@ -388,7 +388,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         if (!exist)
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
+                    CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase(), null, null);
 
             HttpPut put = new HttpPut(uri);
             HttpResponse putRes = null;
@@ -407,7 +407,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
     private boolean checkForDBExistence() throws ClientProtocolException, IOException, URISyntaxException
     {
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
+                CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase(), null, null);
 
         HttpGet get = new HttpGet(uri);
         HttpResponse getRes = null;
@@ -433,7 +433,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         try
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
+                    CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase(), null, null);
             HttpDelete delete = new HttpDelete(uri);
             delRes = httpClient.execute(httpHost, delete, CouchDBUtils.getContext(httpHost));
         }
@@ -449,7 +449,7 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
         try
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id, null, null);
+                    CouchDBConstants.URL_SAPRATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id, null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
