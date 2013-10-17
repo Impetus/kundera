@@ -341,13 +341,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public final void close()
     {
-        checkClosed();
-        // session.clear();
-        // session = null;
-        if (!PersistenceUnitTransactionType.JTA.equals(this.transactionType))
-        {
-            getPersistenceDelegator().clear();
-        }
+        clear();
+
         getPersistenceDelegator().close();
 
         this.closed = true;
