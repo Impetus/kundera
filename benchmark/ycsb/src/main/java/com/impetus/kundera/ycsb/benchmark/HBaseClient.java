@@ -45,6 +45,7 @@ import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.StringByteIterator;
 
 /**
+ * YCSB
  * HBase client for YCSB framework
  */
 public class HBaseClient extends com.yahoo.ycsb.DB
