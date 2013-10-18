@@ -221,7 +221,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         for (KeyValue kv : r.raw())
         {
             String column = Bytes.toString(kv.getQualifier());
-            Object value = PropertyAccessorHelper.getObject(Object.class, kv.getValue());
+            Object value = new ByteArrayByteIterator(kv.getValue()) ;/*PropertyAccessorHelper.getObject(Object.class, kv.getValue());*/
             assert column != null;
             assert value != null;
 //            result.put(Bytes.toString(kv.getQualifier()), new ByteArrayByteIterator(kv.getValue()));
