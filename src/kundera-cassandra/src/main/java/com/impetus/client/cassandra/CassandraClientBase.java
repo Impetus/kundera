@@ -1329,7 +1329,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
 

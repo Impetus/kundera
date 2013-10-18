@@ -644,7 +644,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }

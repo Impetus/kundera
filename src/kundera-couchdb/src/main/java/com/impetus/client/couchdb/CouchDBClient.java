@@ -622,7 +622,6 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
 

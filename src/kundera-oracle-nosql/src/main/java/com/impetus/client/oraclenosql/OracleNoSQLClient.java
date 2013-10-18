@@ -946,7 +946,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }

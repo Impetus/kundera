@@ -91,7 +91,6 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }

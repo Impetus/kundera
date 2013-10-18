@@ -172,24 +172,29 @@ public class EntityValidatorImpl implements EntityValidator
     private void validateGeneratedValueAnnotation(final Class<?> clazz, Field field)
     {
         Table table = clazz.getAnnotation(Table.class);
-        String schemaName = table.schema();
-        if (schemaName != null && schemaName.indexOf('@') > 0)
+        // Still we need to validate for this after post metadata population.
+        if (table != null)
         {
-            schemaName = schemaName.substring(0, schemaName.indexOf('@'));
-            GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-            if (generatedValue != null && generatedValue.generator() != null && !generatedValue.generator().isEmpty())
+            String schemaName = table.schema();
+            if (schemaName != null && schemaName.indexOf('@') > 0)
             {
-                if (!(field.isAnnotationPresent(TableGenerator.class)
-                        || field.isAnnotationPresent(SequenceGenerator.class)
-                        || clazz.isAnnotationPresent(TableGenerator.class) || clazz
-                        .isAnnotationPresent(SequenceGenerator.class)))
+                schemaName = schemaName.substring(0, schemaName.indexOf('@'));
+                GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+                if (generatedValue != null && generatedValue.generator() != null
+                        && !generatedValue.generator().isEmpty())
                 {
-                    log.error("Unknown Id.generator{}: for class{}",generatedValue.generator(),clazz);
-                    throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
-                }
-                else
-                {
-                    checkForGenerator(clazz, field, generatedValue, schemaName);
+                    if (!(field.isAnnotationPresent(TableGenerator.class)
+                            || field.isAnnotationPresent(SequenceGenerator.class)
+                            || clazz.isAnnotationPresent(TableGenerator.class) || clazz
+                                .isAnnotationPresent(SequenceGenerator.class)))
+                    {
+                        log.error("Unknown Id.generator{}: for class{}", generatedValue.generator(), clazz);
+                        throw new IllegalArgumentException("Unknown Id.generator: " + generatedValue.generator());
+                    }
+                    else
+                    {
+                        checkForGenerator(clazz, field, generatedValue, schemaName);
+                    }
                 }
             }
         }

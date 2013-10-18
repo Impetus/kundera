@@ -671,7 +671,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }
