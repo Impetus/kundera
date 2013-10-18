@@ -77,7 +77,7 @@ public class CassandraSchemaGenerationUsingXmlTest
             Assert.assertTrue(ksDef.isDurable_writes());
             Assert.assertNotNull(ksDef.getCf_defs());
             Assert.assertNotNull(ksDef.getStrategy_options());
-            Assert.assertEquals(7, ksDef.getCf_defsSize());
+            Assert.assertEquals(8, ksDef.getCf_defsSize());
 
             for (CfDef cfDef : ksDef.getCf_defs())
             {
