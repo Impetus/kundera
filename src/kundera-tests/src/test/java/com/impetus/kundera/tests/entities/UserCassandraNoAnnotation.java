@@ -23,7 +23,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 

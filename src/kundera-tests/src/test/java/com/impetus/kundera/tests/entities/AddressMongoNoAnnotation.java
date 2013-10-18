@@ -19,7 +19,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 

@@ -36,16 +36,12 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.http.HttpHost;
-import org.apache.http.client.HttpClient;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
-import com.impetus.client.couchdb.CouchDBUtils;
-import com.impetus.client.couchdb.utils.CouchDBTestUtils;
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.redis.RedisPropertyReader;

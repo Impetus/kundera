@@ -16,9 +16,7 @@
 package com.impetus.kundera.tests.entities;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,13 +27,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
-
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.HBaseCli;
-import com.impetus.kundera.tests.entities.PersonDetailNoSchema;
-import com.impetus.kundera.tests.entities.PersonDetailNoTable;
 
 
 public class PersonDetailTestAnnotation

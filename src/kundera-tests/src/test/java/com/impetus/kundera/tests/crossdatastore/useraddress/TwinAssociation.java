@@ -24,8 +24,6 @@ import java.util.Map;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.HttpClient;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
