@@ -96,7 +96,7 @@ public class PersistenceDelegatorTest
         catch (KunderaException e)
         {
             Assert.assertEquals(
-                    "java.lang.IllegalArgumentException: Entity object is invalid, operation failed. Please check previous log message for details",
+                    "java.lang.IllegalArgumentException: Entity to be persisted can't have Primary key set to null.",
                     e.getMessage());
         }
         try
@@ -249,8 +249,7 @@ public class PersistenceDelegatorTest
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals(
-                    "java.lang.IllegalArgumentException: Entity object is invalid, operation failed. Please check previous log message for details",
+            Assert.assertEquals("java.lang.IllegalArgumentException: Entity to be persisted can't have Primary key set to null.",
                     e.getMessage());
         }
     }
