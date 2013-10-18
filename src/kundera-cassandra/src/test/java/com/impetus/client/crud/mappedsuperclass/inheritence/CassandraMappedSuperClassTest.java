@@ -36,6 +36,7 @@ public class CassandraMappedSuperClassTest extends MappedSuperClassBase
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         _PU = "cassandra_pu";
         super.setUpInternal();
     }

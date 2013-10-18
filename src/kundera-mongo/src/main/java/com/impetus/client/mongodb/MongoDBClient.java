@@ -578,7 +578,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }

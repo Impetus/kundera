@@ -882,7 +882,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         if (nodes != null)
         {
             nodes.clear();
-            nodes = null;
             nodes = new ArrayList<Node>();
         }
     }
