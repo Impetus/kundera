@@ -43,18 +43,21 @@
 			<artifactId>lucene-core</artifactId>
 			<!-- <version>3.5.0</version> -->
 			<version>4.4.0</version>
+			<optional>true</optional> 
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-common</artifactId>
 			<version>4.4.0</version>
 			<scope>compile</scope>
+			<optional>true</optional> 
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>
 			<version>4.4.0</version>
 			<scope>compile</scope>
+			<optional>true</optional> 
 			<exclusions>
 				<exclusion>
 					<artifactId>jakarta-regexp</artifactId>
