@@ -27,7 +27,11 @@ public interface CouchDBConstants
 
     public static final String URL_SAPRATOR = "/";
 
-    public static final String DESIGN = "_design";
+    public static final String DESIGN = "_design" + URL_SAPRATOR;
+
+    public static final String VIEW = URL_SAPRATOR + "_view" + URL_SAPRATOR;
+
+    public static final String LANGUAGE = "javascript";
 
     public static final String LINE_SEP = System.getProperty("line.separator");
 }

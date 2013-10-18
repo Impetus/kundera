@@ -15,7 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.couchdb;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +30,21 @@ import java.util.Map;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.impetus.client.couchdb.CouchDBDesignDocument.MapReduce;
 import com.impetus.kundera.KunderaException;
 
@@ -40,6 +56,9 @@ import com.impetus.kundera.KunderaException;
  */
 public class CouchDBUtils
 {
+
+    private static final Logger log = LoggerFactory.getLogger(CouchDBUtils.class);
+
     /**
      * 
      * @param httpHost
@@ -88,7 +107,11 @@ public class CouchDBUtils
         MapReduce mapr = new MapReduce();
         StringBuilder mapBuilder = new StringBuilder();
         StringBuilder ifBuilder = new StringBuilder("function(doc){if(");
-        StringBuilder emitFunction = new StringBuilder("{emit([");
+        StringBuilder emitFunction = new StringBuilder("{emit(");
+        if (columns != null && columns.size() > 1)
+        {
+            emitFunction.append("[");
+        }
         while (iterator.hasNext())
         {
             String nextToken = iterator.next();
@@ -101,11 +124,129 @@ public class CouchDBUtils
         emitFunction.deleteCharAt(emitFunction.toString().lastIndexOf(","));
 
         ifBuilder.append(")");
-        emitFunction.append("], doc)}}");
+        if (columns != null && columns.size() > 1)
+        {
+            emitFunction.append("]");
+        }
+        emitFunction.append(", doc)}}");
 
         mapBuilder.append(ifBuilder.toString()).append(emitFunction.toString());
 
         mapr.setMap(mapBuilder.toString());
         views.put(columnName, mapr);
+    }
+
+    /**
+     * 
+     * @param value
+     * @return
+     */
+    static Object appendQuotes(Object value)
+    {
+        if (value instanceof String || value instanceof Character)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.append("\"");
+            builder.append(value);
+            builder.append("\"");
+            return builder.toString();
+        }
+        return value;
+    }
+
+    /**
+     * 
+     * @param interpreter
+     * @param m
+     * @param viewName
+     * @param columns
+     * @throws URISyntaxException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     * @throws ClientProtocolException
+     */
+    public static void createDesignDocumentIfNotExist(HttpClient httpClient, HttpHost httpHost, Gson gson,
+            String tableName, String schemaName, String viewName, List<String> columns) throws URISyntaxException,
+            UnsupportedEncodingException, IOException, ClientProtocolException
+    {
+        URI uri;
+        HttpResponse response = null;
+        CouchDBDesignDocument designDocument = CouchDBUtils.getDesignDocument(httpClient, httpHost, gson, tableName,
+                schemaName);
+        Map<String, MapReduce> views = designDocument.getViews();
+        if (views == null)
+        {
+            views = new HashMap<String, MapReduce>();
+        }
+
+        if (views.get(viewName.toString()) == null)
+        {
+            CouchDBUtils.createView(views, viewName, columns);
+        }
+        String id = CouchDBConstants.DESIGN + tableName;
+        if (designDocument.get_rev() == null)
+        {
+            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    null, null);
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder("rev=");
+            builder.append(designDocument.get_rev());
+            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    builder.toString(), null);
+        }
+        HttpPut put = new HttpPut(uri);
+
+        designDocument.setViews(views);
+        String jsonObject = gson.toJson(designDocument);
+        StringEntity entity = new StringEntity(jsonObject);
+        put.setEntity(entity);
+        try
+        {
+            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
+        }
+        finally
+        {
+            CouchDBUtils.closeContent(response);
+        }
+    }
+
+    /**
+     * 
+     * @param m
+     * @return
+     */
+    private static CouchDBDesignDocument getDesignDocument(HttpClient httpClient, HttpHost httpHost, Gson gson,
+            String tableName, String schemaName)
+    {
+        HttpResponse response = null;
+        try
+        {
+            String id = CouchDBConstants.DESIGN + tableName;
+            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    null, null);
+            HttpGet get = new HttpGet(uri);
+            get.addHeader("Accept", "application/json");
+            response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
+
+            InputStream content = response.getEntity().getContent();
+            Reader reader = new InputStreamReader(content);
+
+            JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
+            return gson.fromJson(jsonObject, CouchDBDesignDocument.class);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while fetching design document object, Caused by: .", e);
+            throw new KunderaException(e);
+        }
+        finally
+        {
+            CouchDBUtils.closeContent(response);
+        }
     }
 }

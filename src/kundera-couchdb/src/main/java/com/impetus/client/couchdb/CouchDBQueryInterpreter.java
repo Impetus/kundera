@@ -177,7 +177,7 @@ public class CouchDBQueryInterpreter
 
     public String getOperator()
     {
-        return operator;
+        return this.operator;
     }
 
     public void setOperator(String operator)

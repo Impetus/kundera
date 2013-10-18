@@ -132,6 +132,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             Reader reader = new InputStreamReader(content);
 
             JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
+
+            // Check for deleted object. if object is deleted then return null.
             if (jsonObject.get(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()) == null)
             {
                 return null;
@@ -139,12 +141,10 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
             return CouchDBObjectMapper.getEntityFromJson(entityClass, entityMetadata, jsonObject,
                     entityMetadata.getRelationNames());
-            // Object o = gson.fromJson(jsonObject, entityClass);
-
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while finding object by key {}, Caused by {}.", key, e);
             throw new KunderaException(e);
         }
         finally
@@ -203,7 +203,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while deleting object, Caused by {}.", e);
             throw new KunderaException(e);
         }
         finally
@@ -250,7 +250,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 }
                 catch (Exception e)
                 {
-                    log.error("Error while persisting joinTable data, coused by.", e);
+                    log.error("Error while persisting joinTable data, coused by {}.", e);
                     throw new KunderaException(e);
                 }
                 finally
@@ -271,10 +271,10 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         HttpResponse response = null;
         try
         {
-            String q = "key=" + appendQuotes(pKeyColumnValue);
+            String q = "key=" + CouchDBUtils.appendQuotes(pKeyColumnValue);
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
-                            + "_design/" + tableName + "/_view/" + pKeyColumnName, q, null);
+                            + CouchDBConstants.DESIGN + tableName + CouchDBConstants.VIEW + pKeyColumnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -303,7 +303,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while fetching column by id {}, Caused by {}.", pKeyColumnValue, e);
             throw new KunderaException(e);
         }
         finally
@@ -322,10 +322,10 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         try
         {
-            String q = "key=" + appendQuotes(columnValue);
+            String q = "key=" + CouchDBUtils.appendQuotes(columnValue);
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
-                            + "_design/" + tableName + "/_view/" + columnName, q, null);
+                            + CouchDBConstants.DESIGN + tableName + CouchDBConstants.VIEW + columnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -352,7 +352,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while fetching ids for column where column name is" + columnName
+                    + " and column value is {} , Caused by {}.", columnValue, e);
             throw new KunderaException(e);
         }
         finally
@@ -369,10 +370,10 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         HttpResponse response = null;
         try
         {
-            String q = "key=" + appendQuotes(columnValue);
+            String q = "key=" + CouchDBUtils.appendQuotes(columnValue);
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR
-                            + "_design/" + tableName + "/_view/" + columnName, q, null);
+                            + CouchDBConstants.DESIGN + tableName + CouchDBConstants.VIEW + columnName, q, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
@@ -398,7 +399,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while deleting row by column where column name is " + columnName
+                    + " and column value is {}, Caused by {}.", columnValue, e);
             throw new KunderaException(e);
         }
         finally
@@ -475,9 +477,6 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
             if (isUpdate)
             {
-                uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                        CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
-                                + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + id, null, null);
                 HttpGet get = new HttpGet(uri);
                 get.addHeader("Accept", "application/json");
                 response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
@@ -506,7 +505,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         catch (Exception e)
         {
             log.error("Error while persisting entity with id {}, caused by {}. ", id, e);
-            throw new KunderaException("Error while persisting entity with id " + id + ", caused by: " + e);
+            throw new KunderaException(e);
         }
         finally
         {
@@ -653,7 +652,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             StringBuilder q = new StringBuilder();
             String _id = CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR
-                    + "_design/" + m.getTableName() + "/_view/";
+                    + CouchDBConstants.DESIGN + m.getTableName() + CouchDBConstants.VIEW;
             if (interpreter.isIdQuery() && !interpreter.isRangeQuery() && interpreter.getOperator() == null)
             {
                 results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
@@ -677,10 +676,9 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         catch (Exception e)
         {
-            log.error("Error while deleting object, Caused by: .", e);
+            log.error("Error while executing query, Caused by {}.", e);
             throw new KunderaException(e);
         }
-
         return results;
     }
 
@@ -754,7 +752,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             for (String columnName : interpreter.getKeyValues().keySet())
             {
                 viewName.append(columnName + "AND");
-                q.append(appendQuotes(interpreter.getKeyValues().get(columnName)));
+                q.append(CouchDBUtils.appendQuotes(interpreter.getKeyValues().get(columnName)));
                 q.append(",");
                 columns.add(columnName);
             }
@@ -762,7 +760,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             q.append("]");
             viewName.delete(viewName.toString().lastIndexOf("AND"), viewName.toString().lastIndexOf("AND") + 3);
             _id = _id + viewName.toString();
-            createDesignDocumentIfNotExist(interpreter, m, viewName.toString(), columns);
+            CouchDBUtils.createDesignDocumentIfNotExist(httpClient, httpHost, gson, m.getTableName(), m.getSchema(),
+                    viewName.toString(), columns);
         }
         else if (interpreter.getKeyValues() != null)
         {
@@ -771,7 +770,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                 String queryString = null;
                 if (interpreter.getStartKeyValue() != null)
                 {
-                    queryString = "startkey=" + appendQuotes(interpreter.getStartKeyValue());
+                    queryString = "startkey=" + CouchDBUtils.appendQuotes(interpreter.getStartKeyValue());
                     q.append(queryString);
                 }
                 if (interpreter.getEndKeyValue() != null)
@@ -780,7 +779,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                     {
                         q.append("&");
                     }
-                    queryString = "endkey=" + appendQuotes(interpreter.getEndKeyValue());
+                    queryString = "endkey=" + CouchDBUtils.appendQuotes(interpreter.getEndKeyValue());
                     q.append(queryString);
                     if (interpreter.isIncludeLastKey())
                     {
@@ -791,7 +790,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             }
             else if (interpreter.getKeyValue() != null)
             {
-                q.append("key=" + appendQuotes(interpreter.getKeyValue()));
+                q.append("key=" + CouchDBUtils.appendQuotes(interpreter.getKeyValue()));
             }
             _id = _id + interpreter.getKeyName();
         }
@@ -801,82 +800,6 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
 
         return _id;
-    }
-
-    /**
-     * 
-     * @param interpreter
-     * @param m
-     * @param viewName
-     * @param columns
-     * @throws URISyntaxException
-     * @throws UnsupportedEncodingException
-     * @throws IOException
-     * @throws ClientProtocolException
-     */
-    private void createDesignDocumentIfNotExist(CouchDBQueryInterpreter interpreter, EntityMetadata m, String viewName,
-            List<String> columns) throws URISyntaxException, UnsupportedEncodingException, IOException,
-            ClientProtocolException
-    {
-        URI uri;
-        HttpResponse response = null;
-        CouchDBDesignDocument designDocument = getDesignDocument(m);
-        Map<String, MapReduce> views = designDocument.getViews();
-        if (views == null)
-        {
-            views = new HashMap<String, MapReduce>();
-        }
-
-        if (views.get(viewName.toString()) == null)
-        {
-            CouchDBUtils.createView(views, viewName, columns);
-        }
-        String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + m.getTableName();
-        if (designDocument.get_rev() == null)
-        {
-            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
-                    null, null);
-        }
-        else
-        {
-            StringBuilder builder = new StringBuilder("rev=");
-            builder.append(designDocument.get_rev());
-            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
-                    builder.toString(), null);
-        }
-        HttpPut put = new HttpPut(uri);
-
-        String jsonObject = gson.toJson(designDocument);
-        StringEntity entity = new StringEntity(jsonObject);
-        put.setEntity(entity);
-        try
-        {
-            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
-        }
-        finally
-        {
-            CouchDBUtils.closeContent(response);
-        }
-    }
-
-    /**
-     * 
-     * @param value
-     * @return
-     */
-    private Object appendQuotes(Object value)
-    {
-        if (value instanceof String || value instanceof Character)
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append("\"");
-            builder.append(value);
-            builder.append("\"");
-            return builder.toString();
-        }
-        return value;
     }
 
     /**
@@ -901,40 +824,5 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
-    }
-
-    /**
-     * 
-     * @param m
-     * @return
-     */
-    private CouchDBDesignDocument getDesignDocument(EntityMetadata m)
-    {
-        HttpResponse response = null;
-        try
-        {
-            String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + m.getTableName();
-            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
-                    null, null);
-            HttpGet get = new HttpGet(uri);
-            get.addHeader("Accept", "application/json");
-            response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
-
-            InputStream content = response.getEntity().getContent();
-            Reader reader = new InputStreamReader(content);
-
-            JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
-            return gson.fromJson(jsonObject, CouchDBDesignDocument.class);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while fetching design document object, Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        finally
-        {
-            CouchDBUtils.closeContent(response);
-        }
     }
 }

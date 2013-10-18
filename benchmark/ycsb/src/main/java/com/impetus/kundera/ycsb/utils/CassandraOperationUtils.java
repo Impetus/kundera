@@ -192,27 +192,30 @@ public class CassandraOperationUtils
         cfDef.setKey_validation_class("UTF8Type");
         cfDef.setComparator_type("UTF8Type");
 
-        CfDef cfDef1 = new CfDef(keyspace, "kthrift" + columnFamily); // kundera thrift client.
+        CfDef cfDef1 = new CfDef(keyspace, "kthrift" + columnFamily); // kundera
+                                                                      // thrift
+                                                                      // client.
         cfDef1.setDefault_validation_class("UTF8Type");
         cfDef1.setKey_validation_class("UTF8Type");
         cfDef1.setComparator_type("UTF8Type");
 
-
-        CfDef cfDef2 = new CfDef(keyspace, "kpelops" + columnFamily); // kundera pelops client.
+        CfDef cfDef2 = new CfDef(keyspace, "kpelops" + columnFamily); // kundera
+                                                                      // pelops
+                                                                      // client.
         cfDef2.setDefault_validation_class("UTF8Type");
         cfDef2.setKey_validation_class("UTF8Type");
         cfDef2.setComparator_type("UTF8Type");
 
-
-        CfDef cfDef3 = new CfDef(keyspace, "pelops" + columnFamily); // pelops client.
+        CfDef cfDef3 = new CfDef(keyspace, "pelops" + columnFamily); // pelops
+                                                                     // client.
         cfDef3.setDefault_validation_class("UTF8Type");
         cfDef3.setKey_validation_class("UTF8Type");
         cfDef3.setComparator_type("UTF8Type");
 
         cfDefs.add(cfDef);
-        cfDefs.add(cfDef1); 
+        cfDefs.add(cfDef1);
         cfDefs.add(cfDef2);
-        cfDefs.add(cfDef3); 
+        cfDefs.add(cfDef3);
         ksDef = new KsDef(keyspace, "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
         Map<String, String> strategy_options = new HashMap<String, String>();
         strategy_options.put("replication_factor", "1");
@@ -310,7 +313,7 @@ public class CassandraOperationUtils
         {
             TSocket socket = new TSocket(host, port);
             TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
+            TProtocol protocol = new TBinaryProtocol(transport, true, true);
             cassandra_client = new Cassandra.Client(protocol);
             try
             {

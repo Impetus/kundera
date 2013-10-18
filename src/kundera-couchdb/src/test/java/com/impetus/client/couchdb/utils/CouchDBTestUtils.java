@@ -18,7 +18,9 @@ package com.impetus.client.couchdb.utils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
@@ -56,7 +58,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 /**
  * 
  * @author Kuldeep Mishra
- *
+ * 
  */
 public class CouchDBTestUtils
 {
@@ -171,36 +173,13 @@ public class CouchDBTestUtils
     public static void createViews(String[] columns, String tableName, HttpHost httpHost, String databaseName,
             HttpClient httpClient) throws URISyntaxException, ClientProtocolException, IOException
     {
-        HttpResponse response = null;
-        CouchDBDesignDocument designDocument = new CouchDBDesignDocument();
-        Map<String, MapReduce> views = new HashMap<String, CouchDBDesignDocument.MapReduce>();
-        designDocument.setLanguage("javascript");
-        String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + tableName;
+        Gson gson = new Gson();
         for (String columnName : columns)
         {
-            MapReduce mapr = new MapReduce();
-            mapr.setMap("function(doc){" + CouchDBConstants.LINE_SEP + " if(doc." + columnName + "){"
-                    + CouchDBConstants.LINE_SEP + " emit(doc." + columnName + ", doc); " + CouchDBConstants.LINE_SEP
-                    + " } " + CouchDBConstants.LINE_SEP + " }");
-            views.put(columnName, mapr);
-        }
-        designDocument.setViews(views);
-        URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                CouchDBConstants.URL_SAPRATOR + databaseName + CouchDBConstants.URL_SAPRATOR + id, null, null);
-        HttpPut put = new HttpPut(uri);
-
-        JsonObject jsonObject = new Gson().toJsonTree(designDocument).getAsJsonObject();
-        jsonObject.addProperty("_id", id);
-
-        StringEntity entity = new StringEntity(jsonObject.toString());
-        put.setEntity(entity);
-        try
-        {
-            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
-        }
-        finally
-        {
-            CouchDBUtils.closeContent(response);
+            List<String> columnList = new ArrayList<String>();
+            columnList.add(columnName);
+            CouchDBUtils.createDesignDocumentIfNotExist(httpClient, httpHost, gson, tableName, databaseName,
+                    columnName, columnList);
         }
     }
 }

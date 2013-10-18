@@ -214,7 +214,7 @@ public class CouchDBClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        return true;
+        return false;
     }
 
     @Override

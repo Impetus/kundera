@@ -42,7 +42,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -73,6 +75,14 @@ public class CouchDBObjectMapper
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
+        // Add discriminator column and value.
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        if (discrValue != null)
+        {
+            jsonObject.add(discrColumn, getJsonPrimitive(discrValue, discrValue.getClass()));
+        }
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
             log.error("Composite key not supported in CouchDB as of now.");
@@ -106,8 +116,8 @@ public class CouchDBObjectMapper
                 }
                 catch (PropertyAccessException paex)
                 {
-                    log.error("Can't access property " + column.getName());
-                    throw new PropertyAccessException("Can't access property, caused by {}. " + paex);
+                    log.error("Can't access property {}.", column.getName());
+                    throw new PropertyAccessException(paex);
                 }
             }
         }
@@ -199,12 +209,16 @@ public class CouchDBObjectMapper
             // List<Column> columns = m.getColumnsAsList();
             EntityType entityType = metaModel.entity(entityClass);
 
+            String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+
             Set<Attribute> columns = entityType.getAttributes();
 
             for (Attribute column : columns)
             {
                 JsonElement value = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
-                if (!column.equals(m.getIdAttribute()) && value != null && !value.equals(JsonNull.INSTANCE))
+                if (!column.equals(m.getIdAttribute())
+                        && !((AbstractAttribute) column).getJPAColumnName().equals(discriminatorColumn)
+                        && value != null && !value.equals(JsonNull.INSTANCE))
                 {
                     String fieldName = ((AbstractAttribute) column).getJPAColumnName();
 
@@ -215,8 +229,7 @@ public class CouchDBObjectMapper
                     }
                     else if (!column.isAssociation())
                     {
-                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), PropertyAccessorHelper
-                                .fromSourceToTargetClass(column.getJavaType(), String.class, value.getAsString()));
+                        setFieldValue(entity, column, value);
                     }
                     else if (relations != null)
                     {
@@ -232,8 +245,7 @@ public class CouchDBObjectMapper
                             if (colValue != null)
                             {
                                 String colFieldName = m.getFieldName(fieldName);
-                                Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName)
-                                        : null;
+                                Attribute attribute = entityType.getAttribute(colFieldName);
                                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
                                         .getJavaType());
                                 Object colVal = PropertyAccessorHelper.fromSourceToTargetClass(relationMetadata
@@ -256,11 +268,25 @@ public class CouchDBObjectMapper
         }
         catch (Exception e)
         {
-            log.error("Error while extracting entity object from json. coused by {}. ", e);
-            throw new KunderaException("Error while extracting entity object from json. coused by :" + e);
+            log.error("Error while extracting entity object from json, caused by {}.", e);
+            throw new KunderaException(e);
         }
     }
 
+    private static void setFieldValue(Object entity, Attribute column, JsonElement value)
+    {
+        if (column.getJavaType().isAssignableFrom(byte[].class))
+        {
+            PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(),
+                    PropertyAccessorFactory.STRING.toBytes(value.getAsString()));
+        }
+        else
+        {
+            PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), PropertyAccessorHelper
+                    .fromSourceToTargetClass(column.getJavaType(), String.class, value.getAsString()));
+        }
+    }
+    
     /**
      * @param entityType
      * @param column
@@ -299,11 +325,7 @@ public class CouchDBObjectMapper
             for (Attribute column : columns)
             {
                 JsonElement value = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
-                PropertyAccessorHelper.set(
-                        obj,
-                        (Field) column.getJavaMember(),
-                        PropertyAccessorHelper.fromSourceToTargetClass(column.getJavaType(), String.class,
-                                value.getAsString()));
+                setFieldValue(obj, column, value);
             }
             return obj;
         }
@@ -338,6 +360,10 @@ public class CouchDBObjectMapper
             else if (clazz.isAssignableFrom(Character.class) || value instanceof Character)
             {
                 return new JsonPrimitive((Character) value);
+            }
+            else if (clazz.isAssignableFrom(byte[].class) || value instanceof byte[])
+            {
+                return new JsonPrimitive(PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) value));
             }
             else
             {

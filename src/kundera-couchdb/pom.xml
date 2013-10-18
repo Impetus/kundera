@@ -58,6 +58,16 @@
 			<version>0.8</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- contiperf dependency should not be here -->
+
+		<dependency>
+			<groupId>org.databene</groupId>
+			<artifactId>contiperf</artifactId>
+			<version>2.2.0</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

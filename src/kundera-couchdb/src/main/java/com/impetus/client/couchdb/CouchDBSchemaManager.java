@@ -105,9 +105,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 HttpResponse deleteResponse = null;
                 Map<String, MapReduce> views = new HashMap<String, MapReduce>();
-                String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + tableInfo.getTableName();
+                String id = CouchDBConstants.DESIGN + tableInfo.getTableName();
                 CouchDBDesignDocument designDocument = getDesignDocument(id);
-                designDocument.setLanguage("javascript");
+                designDocument.setLanguage(CouchDBConstants.LANGUAGE);
                 views = designDocument.getViews();
                 if (views != null)
                 {
@@ -216,9 +216,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
             for (TableInfo tableInfo : tableInfos)
             {
                 Map<String, MapReduce> views = new HashMap<String, MapReduce>();
-                String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + tableInfo.getTableName();
+                String id = CouchDBConstants.DESIGN + tableInfo.getTableName();
                 CouchDBDesignDocument designDocument = getDesignDocument(id);
-                designDocument.setLanguage("javascript");
+                designDocument.setLanguage(CouchDBConstants.LANGUAGE);
                 views = designDocument.getViews();
                 if (views == null)
                 {
@@ -272,9 +272,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
 
             for (TableInfo tableInfo : tableInfos)
             {
-                String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + tableInfo.getTableName();
+                String id = CouchDBConstants.DESIGN + tableInfo.getTableName();
                 CouchDBDesignDocument designDocument = getDesignDocument(id);
-                designDocument.setLanguage("javascript");
+                designDocument.setLanguage(CouchDBConstants.LANGUAGE);
                 Map<String, MapReduce> views = designDocument.getViews();
                 if (views == null)
                 {
@@ -344,8 +344,8 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 CouchDBDesignDocument designDocument = new CouchDBDesignDocument();
                 Map<String, MapReduce> views = new HashMap<String, CouchDBDesignDocument.MapReduce>();
-                designDocument.setLanguage("javascript");
-                String id = CouchDBConstants.DESIGN + CouchDBConstants.URL_SAPRATOR + tableInfo.getTableName();
+                designDocument.setLanguage(CouchDBConstants.LANGUAGE);
+                String id = CouchDBConstants.DESIGN + tableInfo.getTableName();
                 for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
                 {
                     createView(views, indexInfo.getColumnName());

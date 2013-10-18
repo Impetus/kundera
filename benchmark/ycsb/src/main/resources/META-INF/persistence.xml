@@ -49,8 +49,7 @@
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url"
-				value="jdbc:mysql://localhost:3306/testPerformance" />
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testPerformance" />
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.show_sql" value="false" />
@@ -135,6 +134,23 @@
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="kundera_couchdb_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5984" />
+			<property name="kundera.keyspace" value="kundera" />
+			<property name="kundera.dialect" value="couchdb" />
+			<property name="kundera.client" value="couchdb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.couchdb.CouchDBClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
