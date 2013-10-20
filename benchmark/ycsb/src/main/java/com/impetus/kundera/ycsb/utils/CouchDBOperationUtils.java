@@ -16,7 +16,6 @@
 package com.impetus.kundera.ycsb.utils;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpHost;
@@ -26,8 +25,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -37,8 +34,6 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.HttpContext;
 
-import com.impetus.client.couchdb.CouchDBConstants;
-import com.impetus.client.couchdb.CouchDBUtils;
 import common.Logger;
 
 /**
@@ -55,7 +50,7 @@ public class CouchDBOperationUtils
 
     public void createdatabase(String keyspace, String host, int port) throws URISyntaxException, IOException
 
-    {
+    {/*
         initiateClient(host, port);
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                 CouchDBConstants.URL_SAPRATOR + keyspace.toLowerCase(), null, null);
@@ -72,11 +67,11 @@ public class CouchDBOperationUtils
         {
             CouchDBUtils.closeContent(putRes);
         }
-    }
+    */}
 
     public void dropDatabase(String keyspace, String host, int port) throws URISyntaxException,
             ClientProtocolException, IOException
-    {
+    {/*
         initiateClient(host, port);
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                 CouchDBConstants.URL_SAPRATOR + keyspace.toLowerCase(), null, null);
@@ -93,7 +88,7 @@ public class CouchDBOperationUtils
         {
             CouchDBUtils.closeContent(delReq);
         }
-    }
+    */}
 
     public HttpClient initiateClient(String host, int port)
     {
