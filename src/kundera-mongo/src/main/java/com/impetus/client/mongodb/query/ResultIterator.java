@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.impetus.client.mongodb.DefaultMongoDBDataHandler;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.client.Client;
@@ -59,7 +60,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.client = client;
         this.fetchSize = fetchSize;
         this.persistenceDelegator = pd;
-        this.handler = new MongoDBDataHandler();
+        this.handler = new DefaultMongoDBDataHandler();
         onQuery(orderByClause, basicDBObject, keys);
     }
 
