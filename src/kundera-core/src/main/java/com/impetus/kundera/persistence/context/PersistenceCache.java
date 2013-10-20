@@ -82,27 +82,20 @@ public class PersistenceCache
         if (mainCache != null)
         {
             mainCache.clear();
-            mainCache = null;
         }
 
         if (embeddedCache != null)
         {
             embeddedCache.clear();
-            embeddedCache = null;
         }
         if (elementCollectionCache != null)
         {
             elementCollectionCache.clear();
-            elementCollectionCache = null;
         }
         if (transactionalCache != null)
         {
             transactionalCache.clear();
-            transactionalCache = null;
         }
-
-        initialize();
-
     }
 
     /**

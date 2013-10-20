@@ -182,11 +182,14 @@ public class CacheBase {
      * 
      */
     public void clear() {
-        this.nodeMappings.clear();
-        this.headNodes.clear();
-        this.nodeMappings=null;
-        this.headNodes=null;
-        nodeMappings = new HashMap<String, Node>();
-        headNodes = new HashSet<Node>();
+        if(this.nodeMappings != null)
+        {
+            this.nodeMappings.clear();
+        }
+        
+        if(this.headNodes != null)
+        {
+            this.headNodes.clear();
+        }
     }
 }
