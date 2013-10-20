@@ -107,7 +107,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
         this.puProperties = puProperties;
-        handler = new MongoDBDataHandler();
+        handler = new DefaultMongoDBDataHandler();
         this.clientMetadata = clientMetadata;
 
         populateBatchSize(persistenceUnit, this.puProperties);
