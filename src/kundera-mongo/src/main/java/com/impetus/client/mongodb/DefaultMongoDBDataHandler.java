@@ -54,7 +54,8 @@ import com.mongodb.DBObject;
  * 
  * @author amresh.singh
  */
-public final class DefaultMongoDBDataHandler implements MongoDBDataHandler {
+public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
+{
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(DefaultMongoDBDataHandler.class);
