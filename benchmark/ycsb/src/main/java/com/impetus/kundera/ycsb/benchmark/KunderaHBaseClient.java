@@ -69,6 +69,7 @@ public class KunderaHBaseClient extends DB
      */
     public void cleanup() throws DBException
     {
+        em.clear();
 //        em.close();
     }
 
