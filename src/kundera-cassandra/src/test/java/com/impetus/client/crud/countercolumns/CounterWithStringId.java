@@ -26,7 +26,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "CountersWithString",schema = "KunderaTests@cassandra_pu")
+@Table(name = "CountersWithString",schema = "KunderaCounterColumn@CassandraCounterTest")
 public class CounterWithStringId
 {
 
