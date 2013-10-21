@@ -30,12 +30,19 @@ Currently Supported Datasources
 *  Redis
 *  OracleNoSQL
 *  Neo4j
+*  Elastic-search
+*  Couchdb
 *  Relational databases
 
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.7 is released tag.
+####Please Note: trunk is current development branch. kundera-2.8 is released tag.
+
+#### 21-October-2013 - Kundera 2.8 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.7:
+* Support for couchdb as a datastore.
+* Support for MappedSuperclass and JPA Inheritence strategy.
 
 #### 03-September-2013 - Kundera 2.7 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.6:
