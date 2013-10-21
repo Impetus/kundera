@@ -233,6 +233,7 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         {
             q = em.createQuery(query);
             students = q.getResultList();
+            Assert.fail("Should have gone to catch block");
             Assert.assertNotNull(students);
             Assert.assertEquals(1, students.size());
             count = 0;
@@ -248,7 +249,7 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         }
         catch (QueryHandlerException qhe)
         {
-            Assert.assertEquals("Unsupported clause OR for Hbase", qhe.getMessage());
+            Assert.assertNotNull(qhe.getMessage());
         }
     }
 

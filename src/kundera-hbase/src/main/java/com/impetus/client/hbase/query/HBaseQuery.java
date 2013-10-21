@@ -42,6 +42,7 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -157,7 +158,7 @@ public class HBaseQuery extends QueryImpl
     {
         // Called only in case of standalone entity.
         QueryTranslator translator = new QueryTranslator();
-        translator.translate(getKunderaQuery(), m);
+        translator.translate(getKunderaQuery(), m, ((ClientBase) client).getClientMetadata());
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
         Map<Boolean, Filter> filter = translator.getFilter();
@@ -346,9 +347,10 @@ public class HBaseQuery extends QueryImpl
          * @param m
          *            entity's metadata.
          */
-        void translate(KunderaQuery query, EntityMetadata m)
+        void translate(KunderaQuery query, EntityMetadata m, ClientMetadata clientMetadata)
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+           
             for (Object obj : query.getFilterClauseQueue())
             {
                 boolean isIdColumn = false;
@@ -369,12 +371,16 @@ public class HBaseQuery extends QueryImpl
                 {
                     // Case of AND and OR clause.
                     String opr = obj.toString();
-                    if (opr.equalsIgnoreCase("or"))
+                    if (MetadataUtils.useSecondryIndex(clientMetadata))
                     {
+                     if (opr.trim().equalsIgnoreCase("or"))
+                     {
                         log.error("Support for OR clause is not enabled with in Hbase");
                         throw new QueryHandlerException("Unsupported clause " + opr + " for Hbase");
+                     }
                     }
                 }
+             
             }
         }
 
@@ -574,7 +580,7 @@ public class HBaseQuery extends QueryImpl
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
         }
         QueryTranslator translator = new QueryTranslator();
-        translator.translate(getKunderaQuery(), m);
+        translator.translate(getKunderaQuery(), m, ((ClientBase) client).getClientMetadata());
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
 

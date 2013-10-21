@@ -22,12 +22,16 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON_HBASE", schema = "KunderaExamples@hbaseTest")
+@IndexCollection(columns={@Index(name="personName"),@Index(name="age")})
 public class PersonHBase
 {
 
