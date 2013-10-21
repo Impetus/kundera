@@ -47,7 +47,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class MTMBiAssociationIntTest extends TwinAssociation
 
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore"/*,"addCouchdb"*/ };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore","addCouchdb" };
 
     private short addressID1 = Short.MAX_VALUE;
 

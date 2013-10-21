@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.Persistence;
-
 import junit.framework.Assert;
 
 import org.junit.After;

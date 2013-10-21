@@ -25,8 +25,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.mortbay.log.Log;
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.ycsb.entities.MongoUser;
 import com.yahoo.ycsb.ByteIterator;

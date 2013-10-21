@@ -32,18 +32,14 @@ import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.Employe;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.KunderaUser;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.metadata.processor.TableProcessor;
 
 /**
  * @author vivek.mishra

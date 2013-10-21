@@ -507,7 +507,7 @@ public final class PersistenceDelegator
         Client client = clientMap.get(persistenceUnit);
         if (client == null)
         {
-            throw new ClientResolverException("No client configured for persistenceUnit" + persistenceUnit);
+            throw new ClientResolverException("No client configured for persistenceUnit " + persistenceUnit);
         }
         return client;
     }
@@ -674,7 +674,7 @@ public final class PersistenceDelegator
             log.error(
                     "Entity metadata not found for {}, possible reasons may be: "
                             + "1)not annotated with @Entity 2) is annotated with @MappedSuperclass"  
-                            + "3) does not properly with mapped persistence unit. Please verify with @Table annotation or persistence.xml"
+                            + "3) does not properly with mapped persistence unit. Please verify with @Table annotation or persistence.xml "
                             + clazz);
             throw new KunderaException("Entity metadata not found for " + clazz.getName());
         }

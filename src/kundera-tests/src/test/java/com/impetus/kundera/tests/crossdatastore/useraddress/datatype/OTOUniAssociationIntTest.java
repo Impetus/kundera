@@ -67,7 +67,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class OTOUniAssociationIntTest extends TwinAssociation
 {
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "rdbms", "addMongo", "oracle_kvstore",
-            "addCassandra"/*,"addCouchdb"*/ };
+            "addCassandra","addCouchdb" };
 
     private static final Integer ADDRESS_ID = new Integer(1234567);
 

@@ -76,7 +76,7 @@ public class KunderaCoreUtils
         {
             return true;
         }
-        
+
         if (!ProxyHelper.isProxyOrCollection(o))
         {
             if (PropertyAccessorHelper.isCollection(o.getClass()))
@@ -173,5 +173,19 @@ public class KunderaCoreUtils
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static int countNonSyntheticFields(Class<?> clazz)
+    {
+        int count = 0;
+        for (Field f : clazz.getDeclaredFields())
+        {
+            if (!f.isSynthetic() || !ReflectUtils.isTransientOrStatic(f))
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 }

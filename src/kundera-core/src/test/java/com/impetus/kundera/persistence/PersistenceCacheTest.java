@@ -40,11 +40,9 @@ import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.Store;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**

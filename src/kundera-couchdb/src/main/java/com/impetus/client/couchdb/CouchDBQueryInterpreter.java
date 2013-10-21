@@ -54,6 +54,8 @@ public class CouchDBQueryInterpreter
 
     private String operator;
 
+    private boolean isQueryOnCompositeKey = false;
+
     public CouchDBQueryInterpreter(String[] columns, int limit, EntityMetadata m)
     {
         this.m = m;
@@ -194,4 +196,15 @@ public class CouchDBQueryInterpreter
     {
         this.keyName = keyName;
     }
+
+    public boolean isQueryOnCompositeKey()
+    {
+        return isQueryOnCompositeKey;
+    }
+
+    public void setQueryOnCompositeKey(boolean isQueryOnCompositeKey)
+    {
+        this.isQueryOnCompositeKey = isQueryOnCompositeKey;
+    }
+
 }

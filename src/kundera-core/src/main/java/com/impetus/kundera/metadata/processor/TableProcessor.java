@@ -16,9 +16,7 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javassist.Modifier;
 
@@ -44,7 +42,6 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
