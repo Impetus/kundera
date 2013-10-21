@@ -47,7 +47,7 @@ public class CounterWithStringIdTest
         CassandraCli.cassandraSetUp();
         Map<String, String> propertyMap = new HashMap<String, String>();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        emf = Persistence.createEntityManagerFactory("cassandra_pu", propertyMap);
+        emf = Persistence.createEntityManagerFactory("CassandraCounterTest", propertyMap);
         em = emf.createEntityManager();
     }
 
@@ -74,7 +74,7 @@ public class CounterWithStringIdTest
         
         Assert.assertNotNull(result);
         Assert.assertEquals("cnt1",result.getId());
-        Assert.assertEquals(2,result.getCounter());
+        Assert.assertEquals(3,result.getCounter());
 
 
         
@@ -83,7 +83,7 @@ public class CounterWithStringIdTest
     @After
     public void tearDown()
     {
-//        CassandraCli.dropKeySpace("KunderaTests");
+        CassandraCli.dropKeySpace("KunderaCounterColumn");
         if (em != null)
         {
             em.close();

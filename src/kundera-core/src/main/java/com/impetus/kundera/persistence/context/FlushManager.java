@@ -318,8 +318,6 @@ public class FlushManager
         if (joinTableDataCollection != null && !joinTableDataCollection.isEmpty())
         {
             joinTableDataCollection.clear();
-            joinTableDataCollection = null;
-            joinTableDataCollection = new ArrayList<JoinTableData>();
         }
 
         if (eventLogQueue != null)

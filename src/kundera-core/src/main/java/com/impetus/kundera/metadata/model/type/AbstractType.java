@@ -15,13 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.persistence.AssociationOverride;
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.metamodel.Type;
 
 /**

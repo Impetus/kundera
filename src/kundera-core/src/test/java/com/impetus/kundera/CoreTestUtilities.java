@@ -22,7 +22,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * @author vivek.mishra
@@ -53,20 +52,6 @@ public final class CoreTestUtilities
         PersistenceDelegator delegator = (PersistenceDelegator) pdField.get(em);
         return delegator;
 
-    }
-
-    public static int countNonSyntheticFields(Class<?> clazz)
-    {
-        int count=0;
-        for(Field f : clazz.getDeclaredFields())
-        {
-            if(!f.isSynthetic() || !ReflectUtils.isTransientOrStatic(f))
-            {
-                count++;
-            }
-        }
-        
-        return count;
     }
 
     public static Parameter getParameter()

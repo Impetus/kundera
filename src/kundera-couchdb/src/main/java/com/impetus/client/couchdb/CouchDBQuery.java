@@ -22,6 +22,7 @@ import java.util.Queue;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.slf4j.Logger;
@@ -151,40 +152,68 @@ public class CouchDBQuery extends QueryImpl
                 Object value = ((FilterClause) clause).getValue();
                 String condition = ((FilterClause) clause).getCondition();
                 String columnName = ((FilterClause) clause).getProperty();
-                Attribute col = entity.getAttribute(m.getFieldName(columnName));
-                interpreter.setKeyValues(columnName,
-                        PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(), value.getClass(), value));
-                interpreter.setKeyName(columnName);
-                if (columnName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
-                {
-                    interpreter.setIdQuery(true);
-                }
 
-                if (condition.equals("="))
+                int indexOfDot = columnName.indexOf(".");
+                if (indexOfDot >= 0)
                 {
-                    interpreter.setKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
-                            value.getClass(), value));
-                }
-                else if (condition.equals(">=") || condition.equals(">"))
-                {
-                    interpreter.setStartKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
-                            value.getClass(), value));
-                }
-                else if (condition.equals("<="))
-                {
-                    interpreter.setEndKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
-                            value.getClass(), value));
-                }
-                else if (condition.equals("<"))
-                {
-                    interpreter.setEndKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
-                            value.getClass(), value));
-                    interpreter.setIncludeLastKey(false);
+                    EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                    String embeddedeFieldName = columnName.substring(0, indexOfDot);
+                    if (embeddedeFieldName.equals(((AbstractAttribute) m.getIdAttribute()).getName()))
+                    {
+                        interpreter.setQueryOnCompositeKey(true);
+                        interpreter.setKeyName(embeddedeFieldName);
+                        String colName = columnName.substring(indexOfDot + 1);
+                        Attribute attribute = embeddableType.getAttribute(colName);
+                        interpreter.setIdQuery(true);
+                        interpreter.setKeyValues(
+                                colName,
+                                PropertyAccessorHelper.fromSourceToTargetClass(attribute.getJavaType(),
+                                        value.getClass(), value));
+                    }
+                    else
+                    {
+                        log.error("Query on embedded column/any field of embedded column, is not supported in CouchDB");
+                        throw new QueryHandlerException(
+                                "Query on embedded column/any field of embedded column, is not supported in CouchDB");
+                    }
                 }
                 else
                 {
-                    log.error("Condition:" + condition + " not supported for CouchDB");
-                    throw new QueryHandlerException("Condition:" + condition + " not supported for CouchDB");
+                    Attribute col = entity.getAttribute(m.getFieldName(columnName));
+                    interpreter.setKeyValues(columnName,
+                            PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(), value.getClass(), value));
+                    interpreter.setKeyName(columnName);
+                    if (columnName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
+                    {
+                        interpreter.setIdQuery(true);
+                    }
+
+                    if (condition.equals("="))
+                    {
+                        interpreter.setKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
+                                value.getClass(), value));
+                    }
+                    else if (condition.equals(">=") || condition.equals(">"))
+                    {
+                        interpreter.setStartKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
+                                value.getClass(), value));
+                    }
+                    else if (condition.equals("<="))
+                    {
+                        interpreter.setEndKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
+                                value.getClass(), value));
+                    }
+                    else if (condition.equals("<"))
+                    {
+                        interpreter.setEndKeyValue(PropertyAccessorHelper.fromSourceToTargetClass(col.getJavaType(),
+                                value.getClass(), value));
+                        interpreter.setIncludeLastKey(false);
+                    }
+                    else
+                    {
+                        log.error("Condition:" + condition + " not supported for CouchDB");
+                        throw new QueryHandlerException("Condition:" + condition + " not supported for CouchDB");
+                    }
                 }
             }
             else

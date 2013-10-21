@@ -76,6 +76,13 @@
 							</properties>
 						</table>
 						<table>
+							<name>CountersWithString</name>
+							<properties>
+								<property name="default.validation.class" value="CounterColumnType"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+							</properties>
+						</table>
+						<table>
 							<name>SuperCounters</name>
 							<properties>
 								<property name="default.validation.class" value="CounterColumnType"></property>

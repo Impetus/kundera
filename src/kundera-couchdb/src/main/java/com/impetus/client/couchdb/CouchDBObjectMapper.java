@@ -26,6 +26,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Object mapper for json
@@ -83,22 +85,33 @@ public class CouchDBObjectMapper
         {
             jsonObject.add(discrColumn, getJsonPrimitive(discrValue, discrValue.getClass()));
         }
-        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+
+        // Populate id attribute.
+        SingularAttribute idAttribute = m.getIdAttribute();
+        if (metaModel.isEmbeddable(idAttribute.getBindableJavaType()))
         {
-            log.error("Composite key not supported in CouchDB as of now.");
-            throw new OperationNotSupportedException("Composite key not supported in CouchDB as of now.");
+            Field field = (Field) idAttribute.getJavaMember();
+            EmbeddableType embeddableType = metaModel.embeddable(idAttribute.getBindableJavaType());
+            String _id = get_Id(field, PropertyAccessorHelper.getObject(entity, field), embeddableType,
+                    m.getTableName());
+            jsonObject.addProperty("_id", _id);
+            Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) idAttribute.getJavaMember());
+            Set<Attribute> embeddableAttributes = embeddableType.getAttributes();
+
+            jsonObject.add(((AbstractAttribute) idAttribute).getJPAColumnName(),
+                    getJsonObject(field.getType().getDeclaredFields(), embeddableType, embeddedObject));
         }
         else
         {
             jsonObject.addProperty("_id", m.getTableName() + PropertyAccessorHelper.getString(id));
-            jsonObject.add(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(),
-                    getJsonPrimitive(id, m.getIdAttribute().getJavaType()));
+            jsonObject.add(((AbstractAttribute) idAttribute).getJPAColumnName(),
+                    getJsonPrimitive(id, idAttribute.getJavaType()));
         }
         // Populate columns
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
         {
-            if (!column.equals(m.getIdAttribute()))
+            if (!column.equals(idAttribute))
             {
                 try
                 {
@@ -169,6 +182,24 @@ public class CouchDBObjectMapper
         return jsonObject;
     }
 
+    private static JsonElement getJsonObject(Field[] declaredFields, EmbeddableType embeddableType,
+            Object embeddedObject)
+    {
+        JsonObject jsonObject = new JsonObject();
+        for (Field field : declaredFields)
+        {
+            
+            if (!ReflectUtils.isTransientOrStatic(field)
+                    && !embeddableType.getAttribute(field.getName()).isAssociation())
+            {
+                Object valueObject = PropertyAccessorHelper.getObject(embeddedObject, field);
+                jsonObject.add(((AbstractAttribute) (embeddableType.getAttribute(field.getName()))).getJPAColumnName(),
+                        getJsonPrimitive(valueObject, embeddableType.getAttribute(field.getName()).getJavaType()));
+            }
+        }
+        return jsonObject;
+    }
+
     /**
      * 
      * @param entityClass
@@ -196,8 +227,12 @@ public class CouchDBObjectMapper
             idClass = m.getIdAttribute().getJavaType();
             if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
             {
-                log.error("Composite key not supported in CouchDB as of now.");
-                throw new OperationNotSupportedException("Composite key not supported in CouchDB as of now.");
+                Class javaType = m.getIdAttribute().getBindableJavaType();
+                PropertyAccessorHelper.setId(
+                        entity,
+                        m,
+                        getObjectFromJson(rowKey.getAsJsonObject(), javaType, metaModel.embeddable(javaType)
+                                .getAttributes()));
             }
             else
             {
@@ -282,11 +317,14 @@ public class CouchDBObjectMapper
         }
         else
         {
-            PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), PropertyAccessorHelper
-                    .fromSourceToTargetClass(column.getJavaType(), String.class, value.getAsString()));
+            PropertyAccessorHelper.set(
+                    entity,
+                    (Field) column.getJavaMember(),
+                    PropertyAccessorHelper.fromSourceToTargetClass(column.getJavaType(), String.class,
+                            value.getAsString()));
         }
     }
-    
+
     /**
      * @param entityType
      * @param column
@@ -317,7 +355,7 @@ public class CouchDBObjectMapper
      * @param columns
      * @return
      */
-    private static Object getObjectFromJson(JsonObject jsonObj, Class clazz, Set<Attribute> columns)
+    static Object getObjectFromJson(JsonObject jsonObj, Class clazz, Set<Attribute> columns)
     {
         try
         {
@@ -371,5 +409,20 @@ public class CouchDBObjectMapper
             }
         }
         return null;
+    }
+
+    static String get_Id(Field field, Object embeddedObject, EmbeddableType embeddableType, String _id)
+    {
+        Field[] fields = field.getType().getDeclaredFields();
+        for (Field columnField : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(columnField)
+                    && !embeddableType.getAttribute(columnField.getName()).isAssociation())
+            {
+                Object valueObject = PropertyAccessorHelper.getObject(embeddedObject, columnField);
+                _id = _id + PropertyAccessorHelper.getString(valueObject);
+            }
+        }
+        return _id;
     }
 }

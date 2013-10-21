@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.naming.OperationNotSupportedException;
+import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -50,7 +52,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.impetus.client.couchdb.CouchDBDesignDocument.MapReduce;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
@@ -64,12 +65,16 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * CouchDB client.
@@ -114,16 +119,30 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     {
         HttpResponse response = null;
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
         try
         {
             if (key instanceof JsonElement)
             {
                 key = ((JsonElement) key).getAsString();
             }
+            String _id = null;
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                Field field = (Field) entityMetadata.getIdAttribute().getJavaMember();
+                EmbeddableType embeddableType = metaModel.embeddable(entityMetadata.getIdAttribute()
+                        .getBindableJavaType());
+                _id = CouchDBObjectMapper.get_Id(field, key, embeddableType, entityMetadata.getTableName());
+            }
+            else
+            {
+                _id = entityMetadata.getTableName() + PropertyAccessorHelper.getString(key);
+            }
 
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
-                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + key, null, null);
+                            + CouchDBConstants.URL_SAPRATOR + _id, null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
@@ -180,25 +199,36 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     public void delete(Object entity, Object pKey)
     {
         HttpResponse response = null;
-        URI uri = null;
         try
         {
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-            HttpGet get;
-            Reader reader;
-            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+            String _id = null;
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                Field field = (Field) entityMetadata.getIdAttribute().getJavaMember();
+                EmbeddableType embeddableType = metaModel.embeddable(entityMetadata.getIdAttribute()
+                        .getBindableJavaType());
+                _id = CouchDBObjectMapper.get_Id(field, pKey, embeddableType, entityMetadata.getTableName());
+            }
+            else
+            {
+                _id = entityMetadata.getTableName() + PropertyAccessorHelper.getString(pKey);
+            }
+            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
-                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + pKey, null, null);
-            get = new HttpGet(uri);
+                            + CouchDBConstants.URL_SAPRATOR + _id, null, null);
+            HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
 
-            reader = new InputStreamReader(response.getEntity().getContent());
+            Reader reader = new InputStreamReader(response.getEntity().getContent());
             JsonObject json = gson.fromJson(reader, JsonObject.class);
             closeContent(response);
             if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND))
             {
-                onDelete(entityMetadata.getSchema(), entityMetadata.getTableName() + pKey, response, json);
+                onDelete(entityMetadata.getSchema(), _id, response, json);
             }
         }
         catch (Exception e)
@@ -467,9 +497,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         try
         {
             JsonObject object = CouchDBObjectMapper.getJsonOfEntity(entityMetadata, entity, id, rlHolders);
+
+            String _id = object.get("_id").getAsString();
+
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
                     CouchDBConstants.URL_SAPRATOR + entityMetadata.getSchema().toLowerCase()
-                            + CouchDBConstants.URL_SAPRATOR + entityMetadata.getTableName() + id, null, null);
+                            + CouchDBConstants.URL_SAPRATOR + _id, null, null);
 
             HttpPut put = new HttpPut(uri);
 
@@ -649,11 +682,38 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         List results = new ArrayList();
         try
         {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
             StringBuilder q = new StringBuilder();
             String _id = CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR
                     + CouchDBConstants.DESIGN + m.getTableName() + CouchDBConstants.VIEW;
-            if (interpreter.isIdQuery() && !interpreter.isRangeQuery() && interpreter.getOperator() == null)
+            if ((interpreter.isIdQuery() && !interpreter.isRangeQuery() && interpreter.getOperator() == null)
+                    || interpreter.isQueryOnCompositeKey())
             {
+                if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+                {
+                    EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                    if (KunderaCoreUtils.countNonSyntheticFields(m.getIdAttribute().getBindableJavaType()) == interpreter
+                            .getKeyValues().size())
+                    {
+                        Object key = CouchDBObjectMapper.getObjectFromJson(gson.toJsonTree(interpreter.getKeyValues())
+                                .getAsJsonObject(), m.getIdAttribute().getBindableJavaType(), embeddableType
+                                .getAttributes());
+                        results.add(find(m.getEntityClazz(), key));
+                        return results;
+                    }
+                    else if (m.getIdAttribute().getName().equals(interpreter.getKeyName())
+                            && interpreter.getKeyValues().size() == 1)
+                    {
+                        results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
+                        return results;
+                    }
+                    else
+                    {
+                        log.error("There should be each and every field of composite key.");
+                        throw new QueryHandlerException("There should be each and every field of composite key.");
+                    }
+                }
                 results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
                 return results;
             }
