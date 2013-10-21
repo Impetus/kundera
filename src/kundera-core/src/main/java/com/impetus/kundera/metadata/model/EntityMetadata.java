@@ -24,7 +24,6 @@ import java.util.Map;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 

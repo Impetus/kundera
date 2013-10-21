@@ -36,12 +36,15 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.http.HttpHost;
+import org.apache.http.client.HttpClient;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
+import com.impetus.client.couchdb.utils.CouchDBTestUtils;
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.redis.RedisPropertyReader;
@@ -99,16 +102,16 @@ public abstract class AssociationBase
     // "addMongo", "rdbms", "redis", "addCassandra",
     // "oracle_kvstore" , "addHbase"};
 
-    private String persistenceUnits = "rdbms,addMongo,oracle_kvstore,addCassandra,piccandra,secIdxAddCassandra,picongo,redis";
+    private String persistenceUnits = "rdbms,addMongo,oracle_kvstore,addCassandra,piccandra,secIdxAddCassandra,picongo,redis,addCouchdb";
 
     protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
-            "oracle_kvstore"/*, "addCouchdb"  , "addHbase" */};
+            "oracle_kvstore", "addCouchdb" /* , "addHbase" */};
 
     protected RDBMSCli cli;
 
-//    private HttpClient httpClient;
-//
-//    private HttpHost httpHost;
+    private HttpClient httpClient;
+
+    private HttpHost httpHost;
 
     /**
      * Sets the up internal.
@@ -135,8 +138,8 @@ public abstract class AssociationBase
             em = dao.getEntityManager(persistenceUnits, propertyMap);
             this.colFamilies = colFamilies;
 
-//            httpClient = CouchDBTestUtils.initiateHttpClient("addCouchdb");
-//            httpHost = new HttpHost("localhost", 5984);
+            httpClient = CouchDBTestUtils.initiateHttpClient("addCouchdb");
+            httpHost = new HttpHost("localhost", 5984);
         }
         catch (Exception e)
         {
@@ -283,23 +286,23 @@ public abstract class AssociationBase
 
                 }
 
-//                if (client.equalsIgnoreCase("com.impetus.client.couchdb.CouchDBClientFactory"))
-//                {
-//                    try
-//                    {
-//                        CouchDBTestUtils.createDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
-//                        CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" }, "ADDRESS",
-//                                httpHost, "KunderaTests".toLowerCase(), httpClient);
-//                        CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
-//                                "PERSONNEL", httpHost, "KunderaTests".toLowerCase(), httpClient);
-//                        CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, "PERSONNEL_ADDRESS",
-//                                httpHost, "KunderaTests".toLowerCase(), httpClient);
-//                    }
-//                    catch (Exception e)
-//                    {
-//                        log.error("error during creating design document in couchDB", e);
-//                    }
-//                }
+                if (client.equalsIgnoreCase("com.impetus.client.couchdb.CouchDBClientFactory"))
+                {
+                    try
+                    {
+                        CouchDBTestUtils.createDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
+                        CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" }, "ADDRESS",
+                                httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
+                                "PERSONNEL", httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, "PERSONNEL_ADDRESS",
+                                httpHost, "KunderaTests".toLowerCase(), httpClient);
+                    }
+                    catch (Exception e)
+                    {
+                        log.error("error during creating design document in couchDB", e);
+                    }
+                }
                 
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
                 mAdd.setSchema(schema != null ? schema : KEYSPACE);
@@ -347,7 +350,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-//        CouchDBTestUtils.dropDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
+        CouchDBTestUtils.dropDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
         // HBaseCli.stopCluster();
         // dao.closeEntityManagerFactory();
 

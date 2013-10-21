@@ -135,6 +135,7 @@
 	<module>kundera-rest</module>
         <module>kundera-redis</module>
 	<module>kundera-oracle-nosql</module>
+        <module>kundera-couchdb</module>
 	<module>kundera-tests</module>
       </modules>
     </profile>
@@ -179,6 +180,16 @@
       <modules>
         <module>kundera-core</module>
         <module>kundera-oracle-nosql</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>couchdb</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>kundera-core</module>
+        <module>kundera-couchdb</module>
       </modules>
     </profile>
     <profile>

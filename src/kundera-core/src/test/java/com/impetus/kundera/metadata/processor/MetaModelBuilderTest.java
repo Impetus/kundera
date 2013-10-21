@@ -31,7 +31,6 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.ListAttribute;
-import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
@@ -47,7 +46,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.metadata.entities.AssociationEntity;
 import com.impetus.kundera.metadata.entities.AttributeOverrideSubClass;
 import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
@@ -74,6 +72,7 @@ import com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * MetaModelBuilderTest.
@@ -352,9 +351,9 @@ public class MetaModelBuilderTest
         // managedType.getDeclaredAttributes()
         // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToOOwnerEntity.class), managedType
                 .getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToOOwnerEntity.class), managedType
                 .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
@@ -379,10 +378,10 @@ public class MetaModelBuilderTest
         // Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length,
         // managedType.getDeclaredAttributes()
         // .size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(AssociationEntity.class), managedType
                 .getAttributes().size());
         Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(AssociationEntity.class), managedType
                 .getDeclaredAttributes().size());
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
 
@@ -431,9 +430,9 @@ public class MetaModelBuilderTest
         // managedType.getDeclaredAttributes()
         // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
                 .getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToOOwnerBiEntity.class), managedType
                 .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
@@ -459,10 +458,10 @@ public class MetaModelBuilderTest
         // managedType.getDeclaredAttributes()
         // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(AssociationBiEntity.class), managedType
                 .getAttributes().size());
         Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(AssociationBiEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(AssociationBiEntity.class), managedType
                 .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "assoRowKey", String.class);
@@ -525,9 +524,9 @@ public class MetaModelBuilderTest
         // managedType.getDeclaredAttributes()
         // .size());
 
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToMOwnerEntity.class), managedType
                 .getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(OToMOwnerEntity.class), managedType
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(OToMOwnerEntity.class), managedType
                 .getDeclaredAttributes().size());
 
         assertOnIdAttribute(managedType, "rowKey", byte.class);
@@ -1004,7 +1003,7 @@ public class MetaModelBuilderTest
     {
         // Assert.assertEquals(entityClazz.getDeclaredFields().length,
         // embeddableType.getAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(entityClazz), embeddableType.getAttributes()
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(entityClazz), embeddableType.getAttributes()
                 .size());
         Assert.assertEquals(entityClazz, embeddableType.getJavaType());
         Attribute attributeTwo = (Attribute) embeddableType.getAttribute(attributeName);
@@ -1058,7 +1057,7 @@ public class MetaModelBuilderTest
         Assert.assertEquals(clazz.getSimpleName(), ((EntityType<X>) managedType).getName());
         // Assert.assertEquals(clazz.getDeclaredFields().length,
         // managedType.getSingularAttributes().size());
-        Assert.assertEquals(CoreTestUtilities.countNonSyntheticFields(clazz), managedType.getSingularAttributes()
+        Assert.assertEquals(KunderaCoreUtils.countNonSyntheticFields(clazz), managedType.getSingularAttributes()
                 .size());
         return managedType;
     }

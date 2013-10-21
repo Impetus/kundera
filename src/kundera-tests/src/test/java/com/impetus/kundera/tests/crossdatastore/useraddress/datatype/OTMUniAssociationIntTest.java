@@ -57,7 +57,7 @@ public class OTMUniAssociationIntTest extends TwinAssociation
     private static final int _PID = 12345;
 
     public static final String[] ALL_PUs_UNDER_TEST = new String[] {"addCassandra", "addMongo",
-            "oracle_kvstore"/*,"addCouchdb"*/ };
+            "oracle_kvstore","addCouchdb" };
 
     /**
      * Inits the.

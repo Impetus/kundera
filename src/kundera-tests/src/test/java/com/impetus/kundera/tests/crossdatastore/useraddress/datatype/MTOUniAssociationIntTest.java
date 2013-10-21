@@ -53,7 +53,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     private static final Long ADDRESS_ID = new Long(123456);
 
     public static final String[] ALL_PUs_UNDER_TEST = new String[] {"addCassandra", "addMongo",
-            "oracle_kvstore"/*,"addCouchdb" */};
+            "oracle_kvstore","addCouchdb" };
 
     /**
      * Inits the.

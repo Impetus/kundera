@@ -28,13 +28,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_M_1_M;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.property.accessor.StringAccessor;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * @author amresh.singh
@@ -362,7 +362,7 @@ public class PropertyAccessorHelperTest
         {
             Field[] fields = PropertyAccessorHelper.getDeclaredFields(PhotographerUni_1_M_1_M.class.getDeclaredField("albums"));
             Assert.assertNotNull(fields);
-            Assert.assertEquals(8, CoreTestUtilities.countNonSyntheticFields(PhotographerUni_1_M_1_M.class));            
+            Assert.assertEquals(8, KunderaCoreUtils.countNonSyntheticFields(PhotographerUni_1_M_1_M.class));            
         }
         catch (SecurityException e)
         {

@@ -18,8 +18,6 @@ package com.impetus.kundera.classreading;
 import java.io.File;
 import java.io.FileInputStream;
 
-
-
 import junit.framework.Assert;
 
 import org.junit.After;

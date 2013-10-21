@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
 
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +32,12 @@ import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.QualifierFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.elasticsearch.node.Node;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.crud.PersonHBase.Day;
@@ -149,6 +154,63 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
+        
+        try{
+        
+          q = em.createQuery("Select p.personId from PersonHBase p where p.personName = vivek OR p.age > " + 10);
+          results = q.getResultList();
+          Assert.fail("Should have gone to catch block");
+        
+        } 
+        catch(Exception e){
+            Assert.assertNotNull(e.getMessage());
+            
+        }
+    }
+    
+    @Test
+    public void onInsertLuceneHbase() throws Exception
+    {
+        // enabled for es indexing.
+        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        builder.put("path.data", "target/data");
+        Node node = new NodeBuilder().settings(builder).node();
+//        
+        Map<String, Object> puProperties = new HashMap<String, Object>();
+        puProperties.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
+//        puProperties.put("index.home.dir","./lucene"); // uncomment for lucene
+        
+        EntityManagerFactory emfLucene = Persistence.createEntityManagerFactory("hbaseTest", puProperties);
+        EntityManager emLucene = emfLucene.createEntityManager();
+        
+        Object p1 = prepareHbaseInstance("1", 10);
+        Object p2 = prepareHbaseInstance("2", 20);
+        Object p3 = prepareHbaseInstance("3", 15);
+        emLucene.persist(p1);
+        emLucene.persist(p2);
+        emLucene.persist(p3);
+        
+        Thread.sleep(1000);
+        
+        col.put("1", p1);
+        col.put("2", p2);
+        col.put("3", p3);
+        emLucene.flush();
+        emLucene.clear();
+       
+             
+        
+        Query q = emLucene.createQuery("Select p.personId from PersonHBase p where p.personName = vivek1 OR p.age= 10");
+        List<PersonHBase> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertEquals("vivek",results.get(0).getPersonName());
+        Assert.assertEquals(10,results.get(0).getAge().intValue());
+        node.close();
+        emLucene.close();
+        emfLucene.close();
     }
 
     private void init()
