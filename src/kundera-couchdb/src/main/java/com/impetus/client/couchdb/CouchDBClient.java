@@ -178,7 +178,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         List results = new ArrayList();
         for (Object key : keys)
         {
-            results.add(find(entityClass, key));
+            Object object = find(entityClass, key);
+            if (object != null)
+            {
+                results.add(object);
+            }
         }
         return results;
     }
@@ -472,7 +476,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             for (Object id : new HashSet(Arrays.asList(ids)))
             {
-                resultSet.add(find(entityClazz, id));
+                Object object = find(entityClazz, id);
+                if (object != null)
+                {
+                    resultSet.add(object);
+                }
             }
         }
         return resultSet;
@@ -690,6 +698,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             if ((interpreter.isIdQuery() && !interpreter.isRangeQuery() && interpreter.getOperator() == null)
                     || interpreter.isQueryOnCompositeKey())
             {
+                Object object = null;
                 if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
                 {
                     EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
@@ -699,13 +708,21 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                         Object key = CouchDBObjectMapper.getObjectFromJson(gson.toJsonTree(interpreter.getKeyValues())
                                 .getAsJsonObject(), m.getIdAttribute().getBindableJavaType(), embeddableType
                                 .getAttributes());
-                        results.add(find(m.getEntityClazz(), key));
+                        object = find(m.getEntityClazz(), key);
+                        if (object != null)
+                        {
+                            results.add(object);
+                        }
                         return results;
                     }
                     else if (m.getIdAttribute().getName().equals(interpreter.getKeyName())
                             && interpreter.getKeyValues().size() == 1)
                     {
-                        results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
+                        object = find(m.getEntityClazz(), interpreter.getKeyValue());
+                        if (object != null)
+                        {
+                            results.add(object);
+                        }
                         return results;
                     }
                     else
@@ -714,7 +731,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                         throw new QueryHandlerException("There should be each and every field of composite key.");
                     }
                 }
-                results.add(find(m.getEntityClazz(), interpreter.getKeyValue()));
+                object = find(m.getEntityClazz(), interpreter.getKeyValue());
+                if (object != null)
+                {
+                    results.add(object);
+                }
                 return results;
             }
 
@@ -776,8 +797,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             JsonArray array = jsonElement.getAsJsonArray();
             for (JsonElement element : array)
             {
-                results.add(CouchDBObjectMapper.getEntityFromJson(m.getEntityClazz(), m,
-                        element.getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames()));
+                Object entityFromJson = CouchDBObjectMapper.getEntityFromJson(m.getEntityClazz(), m, element
+                        .getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames());
+                if (entityFromJson != null)
+                {
+                    results.add(entityFromJson);
+                }
             }
         }
         finally

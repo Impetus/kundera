@@ -219,7 +219,10 @@ public class CouchDBObjectMapper
 
             // Populate primary key column
             JsonElement rowKey = jsonObj.get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
-            Class<?> rowKeyValueClass = rowKey.getClass();
+            if(rowKey == null)
+            {
+                return null;
+            }
             Class<?> idClass = null;
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
