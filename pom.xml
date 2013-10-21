@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<groupId>com.impetus</groupId>
+	<artifactId>kundera-parent</artifactId>
+	<version>2.8-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>kundera</name>
+	<url>https://github.com/impetus-opensource/Kundera</url>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git@github.com:impetus-opensource/Kundera.git</connection>
+		<developerConnection>scm:git:git@github.com:impetus-opensource/Kundera.git</developerConnection>
+		<url>git@github.com:impetus-opensource/Kundera.git</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>vivek.mishra</id>
+			<name>Vivek Mishra</name>
+			<email>vivek.mishra@yahoo.com</email>
+		</developer>
+		<developer>
+			<id>amresh.singh</id>
+			<name>Amresh Kumar Singh</name>
+			<email>amresh1002@gmail.com</email>
+		</developer>
+		<developer>
+			<id>Kuldeep.mishra</id>
+			<name>Kuldeep Kumar Mishra</name>
+			<email>kuld.cs.mishra@gmail.com</email>
+		</developer>
+	</developers>
+
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.language>java</sonar.language>
+	</properties>
+
+
+	<repositories>
+		<repository>
+			<id>clover</id>
+			<name>Clover maven repo</name>
+			<url>http://mirrors.ibiblio.org/pub/mirrors/maven</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>kundera-missing</id>
+			<name>Kundera Public Missing Resources Repository</name>
+			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>riptano</id>
+			<name>riptano</name>
+			<url>http://mvn.riptano.com/content/repositories/public</url>
+		</repository>
+		<repository>
+			<id>maven.scale7.org</id>
+			<name>Scale7 Maven Repo</name>
+			<url>https://github.com/s7/mvnrepo/raw/master</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<!-- Build profiles -->
+	<profiles>
+
+		<profile>
+			<id>all</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>src</module>
+			</modules>
+		</profile>
+	</profiles>
+
+	<build>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>perform</goal>
+						</goals>
+						<configuration>
+							<pomFileName>src/pom.xml</pomFileName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
