@@ -20,7 +20,9 @@ import java.io.IOException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import com.impetus.kundera.ycsb.runner.CouchDBRunner;
 
@@ -30,6 +32,7 @@ import com.impetus.kundera.ycsb.runner.CouchDBRunner;
  * @author vivek.mishra
  * 
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CouchDBYCSBTest extends YCSBBaseTest
 {
 
@@ -40,18 +43,20 @@ public class CouchDBYCSBTest extends YCSBBaseTest
     public void setUp() throws Exception
     {
         System.setProperty("fileName", "src/main/resources/db-couch.properties");
+        // in case property file name is not set as system property.
         super.setUp();
     }
 
     @Test
     public void onTest() throws Exception
     {
-        testConcurrentWorkload();
-//        testRead();
+       testConcurrentWorkload();
+        testRead();
 //        testUpdate();
+
     }
 
-    private void testConcurrentWorkload() throws IOException, ConfigurationException
+    void testConcurrentWorkload() throws IOException, ConfigurationException
     {
         onChangeRunType("load");
         Runtime runtime = Runtime.getRuntime();
@@ -60,13 +65,13 @@ public class CouchDBYCSBTest extends YCSBBaseTest
         process();
     }
 
-    private void testRead() throws Exception
+    void testRead() throws Exception
     {
         onChangeRunType("t");
         onRead();
     }
 
-    private void testUpdate() throws Exception
+    void testUpdate() throws Exception
     {
         onChangeRunType(true);
         onUpdate();
@@ -91,8 +96,8 @@ public class CouchDBYCSBTest extends YCSBBaseTest
         config.setProperty("ycsbjar.location", ycsbJarLocation);
         config.save();
         runner = new CouchDBRunner(propsFileName, config);
-        // Runtime runtime = Runtime.getRuntime();
-        // runner.startServer(runType.equals("load"), runtime);
+//        Runtime runtime = Runtime.getRuntime();
+//        runner.startServer(runType.equals("load"), runtime);
 
     }
 

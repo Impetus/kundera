@@ -15,8 +15,6 @@
  */
 package com.impetus.kundera.ycsb.runner;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +37,7 @@ public class CouchDBRunner extends YCSBRunner
 
     public CouchDBRunner(final String propertyFile, final Configuration config)
     {
-        super(propertyFile, config);
+        super(propertyFile,config);
         operationUtils = new CouchDBOperationUtils();
         crudUtils = new HibernateCRUDUtils();
     }
@@ -51,12 +49,7 @@ public class CouchDBRunner extends YCSBRunner
         {
             operationUtils.createdatabase(schema, host, port);
         }
-        catch (IOException e)
-        {
-            logger.error(e);
-            throw new RuntimeException(e);
-        }
-        catch (URISyntaxException e)
+        catch (Exception e)
         {
             logger.error(e);
             throw new RuntimeException(e);
@@ -66,16 +59,13 @@ public class CouchDBRunner extends YCSBRunner
     @Override
     public void stopServer(Runtime runTime)
     {
+    	// No need to run with "t" option.
+    	
         try
         {
             operationUtils.dropDatabase(schema, host, port);
         }
-        catch (IOException e)
-        {
-            logger.error(e);
-            throw new RuntimeException(e);
-        }
-        catch (URISyntaxException e)
+        catch (Exception e)
         {
             logger.error(e);
             throw new RuntimeException(e);
@@ -83,22 +73,41 @@ public class CouchDBRunner extends YCSBRunner
     }
 
     protected void sendMail()
-    {/*
+    {
         Map<String, Double> delta = new HashMap<String, Double>();
-
-        double kunderaCouchDBToNativeDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(
-                clients[0]).doubleValue())
-                / timeTakenByClient.get(clients[1]).doubleValue() * 100);
-        delta.put("kunderaCouchDBToNativeDelta", kunderaCouchDBToNativeDelta);
-
-        if (kunderaCouchDBToNativeDelta > 8.00)
+        double kunderaPelopsToPelopsDelta = 0.0;
+        double kunderaThriftToThriftDelta = 0.0;
+        if (timeTakenByClient.get(clients[1]) != null && timeTakenByClient.get(clients[0]) != null)
         {
-            MailUtils.sendMail(delta, isUpdate ? "update" : runType, "hbase");
-        }
-        else
-        {
-            MailUtils.sendPositiveEmail(delta, isUpdate ? "update" : runType, "hbase");
 
+            kunderaPelopsToPelopsDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(
+                    clients[0]).doubleValue())
+                    / timeTakenByClient.get(clients[1]).doubleValue() * 100);
         }
-    */}
+
+        if (clients.length ==3 && timeTakenByClient.get(clients[2]) != null && timeTakenByClient.get(clients[3]) != null)
+        {
+            kunderaThriftToThriftDelta = ((timeTakenByClient.get(clients[3]).doubleValue() - timeTakenByClient.get(
+                    clients[2]).doubleValue())
+                    / timeTakenByClient.get(clients[3]).doubleValue() * 100);
+        }
+        // double kunderaPelopsToHectorDelta =
+        // ((timeTakenByClient.get(clients[1]) -
+        // timeTakenByClient.get(clients[4]))
+        // / timeTakenByClient.get(clients[1]) * 100);
+        delta.put("kunderaPelopsToPelopsDelta", kunderaPelopsToPelopsDelta);
+        delta.put("kunderaThriftToThriftDelta", kunderaThriftToThriftDelta);
+        // delta.put("kunderaPelopsToHectorDelta", kunderaPelopsToHectorDelta);
+
+        if ( /*(kunderaPelopsToHectorDelta > 10.00) || */(kunderaPelopsToPelopsDelta > 8.00)
+                || (kunderaThriftToThriftDelta > 8.00))
+        {
+            MailUtils.sendMail(delta, isUpdate ? "update" : runType, "cassandra");
+        } else
+        {
+            MailUtils.sendPositiveEmail(delta, isUpdate ? "update" : runType, "cassandra");
+            
+        }
+
+    }
 }
