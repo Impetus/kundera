@@ -40,6 +40,13 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.impetus.client</groupId>
+			<artifactId>kundera-elastic-search</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
