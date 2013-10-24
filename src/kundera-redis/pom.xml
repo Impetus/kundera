@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.9-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 			<exclusions>
