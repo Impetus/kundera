@@ -1,0 +1,152 @@
+/**
+ * Copyright 2013 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.impetus.client.redis;
+
+import java.util.Map;
+import java.util.Set;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Queable;
+import redis.clients.jedis.Transaction;
+
+import com.impetus.client.redis.RedisClient.AttributeWrapper;
+import com.impetus.kundera.index.Indexer;
+
+/**
+ * @author vivek.mishra
+ * 
+ */
+public class RedisIndexer implements Indexer
+{
+
+    private Object pipeLineOrConnection;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.index.Indexer#index(java.lang.Class,
+     * java.util.Map, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public void index(Class entityClazz, Map<String, Object> values, Object parentId, Class parentClazz)
+    {
+        Set<String> indexNames = values.keySet();
+        for (String idx_Name : indexNames)
+        {
+            Double value = (Double) values.get(idx_Name);
+            Pipeline pipeLine = null;
+            try
+            {
+            if (this.pipeLineOrConnection.getClass().isAssignableFrom(Jedis.class))
+            {
+                pipeLine = ((Jedis) this.pipeLineOrConnection).pipelined();
+                pipeLine.zadd(idx_Name, value, parentId.toString());
+//                pipeLine.sync();
+            }
+            else
+            {
+                ((Transaction) this.pipeLineOrConnection).zadd(idx_Name, value, parentId.toString());
+            }
+            }finally
+            {
+                if(pipeLine != null)
+                {
+                    pipeLine.sync();
+                }
+            }
+        }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.index.Indexer#search(java.lang.Class,
+     * java.lang.String, int, int)
+     */
+    @Override
+    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.index.Indexer#search(java.lang.String,
+     * java.lang.Class, java.lang.Class, java.lang.Object, int, int)
+     */
+    @Override
+    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
+            int start, int count)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.index.Indexer#unIndex(java.lang.Class,
+     * java.lang.Object)
+     */
+    @Override
+    public void unIndex(Class entityClazz, Object entity)
+    {
+        throw new UnsupportedOperationException("Removing index is implicitly managed by RedisClient's unindex method");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.index.Indexer#close()
+     */
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    void assignConnection(Object connection)
+    {
+        this.pipeLineOrConnection = connection;
+    }
+
+    private void unIndex(final AttributeWrapper wrapper, final String member)
+    {
+        Set<String> keys = wrapper.getIndexes().keySet();
+     
+        // keys
+        for (String key : keys)
+        {
+            if (this.pipeLineOrConnection.getClass().isAssignableFrom(Transaction.class))
+            {
+                ((Transaction) this.pipeLineOrConnection).zrem(key, member);
+
+            }
+            else
+            {
+                ((Pipeline) this.pipeLineOrConnection).zrem(key, member);
+
+            }
+        }
+    }
+
+}

@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Queable;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -52,6 +53,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.SequenceGenerator;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -109,10 +111,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         this.factory = factory;
         reader = new RedisEntityReader();
         this.indexManager = factory.getIndexManager();
+        initializeIndexer();
         this.persistenceUnit = persistenceUnit;
         this.clientMetadata = factory.getClientMetadata();
         setBatchSize(persistenceUnit, factory.getOverridenProperties());
     }
+
 
     /*
      * (non-Javadoc)
@@ -943,7 +947,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @author vivek.mishra
      * 
      */
-    private class AttributeWrapper
+    class AttributeWrapper
     {
         private Map<byte[], byte[]> columns;
 
@@ -982,7 +986,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             return columns;
         }
 
-        Map<String, Double> getIndexes()
+        Map getIndexes()
         {
             return indexes;
         }
@@ -1041,23 +1045,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @param rowKey
      *            row key to be stor
      */
-    private void addIndex(final Object connection, final AttributeWrapper wrapper, final String rowKey)
+    private void addIndex(final Object connection, final AttributeWrapper wrapper, final String rowKey,
+            final EntityMetadata metadata)
     {
-        Set<String> indexKeys = wrapper.getIndexes().keySet();
-        for (String idx_Name : indexKeys)
+        Indexer indexer = indexManager.getIndexer();
+
+        if (indexer != null)
         {
-            if (resource != null && resource.isActive())
-            {
-                ((Transaction) connection).zadd(idx_Name, wrapper.getIndexes().get(idx_Name), rowKey);
-
-            }
-            else
-            {
-                ((Pipeline) connection).zadd(idx_Name, wrapper.getIndexes().get(idx_Name), rowKey);
-
-            }
+            indexer.index(metadata.getEntityClazz(), wrapper.getIndexes(), rowKey, null);
         }
-
     }
 
     /**
@@ -1070,6 +1066,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @param member
      *            sorted set member name.
      */
+
+
     private void unIndex(final Object connection, final AttributeWrapper wrapper, final String member)
     {
         Set<String> keys = wrapper.getIndexes().keySet();
@@ -1087,6 +1085,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
         }
     }
+    
 
     /**
      * On release connection.
@@ -1248,14 +1247,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // add column name as key and value as value
             wrapper.addColumn(name, value);
             // // {tablename:columnname,hashcode} for value
-            wrapper.addIndex(
-                    getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
-                    getDouble(valueAsStr));
 
-            wrapper.addIndex(
-                    getHashKey(entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
-                    getDouble(valueAsStr));
+            // selective indexing.
+            if (entityMetadata.getIndexProperties().containsKey(((AbstractAttribute) attrib).getJPAColumnName()))
+            {
+                wrapper.addIndex(
+                        getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
+                        getDouble(valueAsStr));
+
+                wrapper.addIndex(
+                        getHashKey(entityMetadata.getTableName(),
+                                getHashKey(((AbstractAttribute) attrib).getJPAColumnName(), valueAsStr)),
+                        getDouble(valueAsStr));
+            }
         }
     }
 
@@ -1810,7 +1814,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
 
         // Add inverted indexes for column based search.
-        addIndex(connection, wrapper, rowKey);
+        addIndex(connection, wrapper, rowKey,entityMetadata);
 
     }
 
@@ -1856,7 +1860,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         deleteRelation(connection, entityMetadata, rowKey);
 
         // Delete inverted indexes.
-        unIndex(connection, wrapper, rowKey);
+        unIndex(connection,wrapper, rowKey);
 
         if (resource != null && resource.isActive())
         {
@@ -1889,4 +1893,20 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             return (latestCount - 1) * discriptor.getAllocationSize();
         }
     }
+
+
+    @Override
+    protected void indexNode(Node node, EntityMetadata entityMetadata)
+    {
+        // Do nothing as 
+    }
+ 
+    private void initializeIndexer()
+    {
+        if(this.indexManager.getIndexer() != null)
+        {
+            ((RedisIndexer)this.indexManager.getIndexer()).assignConnection(getConnection());
+        }
+    }
+
 }

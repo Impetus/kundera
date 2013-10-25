@@ -25,6 +25,8 @@ import javax.persistence.Enumerated;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
 import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * @author vivek.mishra
@@ -37,7 +39,7 @@ import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
 @AttributeOverrides(value = { @AttributeOverride(name = "txId", column = @Column(name = "DEBIT_ID")),
         @AttributeOverride(name = "bankIdentifier", column = @Column(name = "DEBIT_BANK_IDENT")),
         @AttributeOverride(name = "transactionDt", column = @Column(name = "TX_DT")) })
-
+@IndexCollection(columns={@Index(name="bankIdentifier")})
 public class DebitTransaction extends Transaction
 {
 

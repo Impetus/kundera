@@ -22,6 +22,8 @@
 			<!-- <property name="kundera.pool.size.max.active" value="10" /> -->
 			<property name="kundera.client.property" value="RedisTest.xml" />
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.redis.RedisTransaction" />
+			<property name="kundera.indexer.class" value="com.impetus.client.redis.RedisIndexer" />
+			
 		</properties>
 	</persistence-unit>
 

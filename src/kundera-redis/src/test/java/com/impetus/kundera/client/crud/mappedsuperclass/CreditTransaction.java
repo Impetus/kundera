@@ -25,6 +25,8 @@ import javax.persistence.Table;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
 import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * @author vivek.mishra
@@ -36,6 +38,7 @@ import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
 @Table(name = "TRNX_CREDIT")
 @DiscriminatorValue(value = "credit")
 @AttributeOverride(name="bankIdentifier",column= @Column(name="CREDIT_BANK_IDENT"))
+@IndexCollection(columns={@Index(name="bankIdentifier")})
 public class CreditTransaction extends Transaction
 {
 

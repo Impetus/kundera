@@ -22,11 +22,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON", schema = "RedisK@redis_pu")
+@IndexCollection(columns={@Index(name="personName"),@Index(name="age")})
 public class PersonRedis
 {
 
