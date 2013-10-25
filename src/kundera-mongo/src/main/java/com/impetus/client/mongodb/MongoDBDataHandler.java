@@ -467,11 +467,14 @@ public final class MongoDBDataHandler
             Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedField);
 
             embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
-
-            Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(
-                    (BasicDBList) embeddedDocumentObject, embeddedField.getType(), embeddedObjectClass,
-                    embeddable.getAttributes());
-            PropertyAccessorHelper.set(entity, embeddedField, embeddedCollection);
+            
+            if(embeddedDocumentObject != null)
+            {
+                Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(
+                        (BasicDBList) embeddedDocumentObject, embeddedField.getType(), embeddedObjectClass,
+                        embeddable.getAttributes());
+                PropertyAccessorHelper.set(entity, embeddedField, embeddedCollection);
+            }
         }
         else
         {
