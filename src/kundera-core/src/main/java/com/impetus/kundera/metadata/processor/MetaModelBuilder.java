@@ -246,7 +246,7 @@ public final class MetaModelBuilder<X, T>
                         if (attribType.isAnnotationPresent(Entity.class))
                         {
                             EntityType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
-                                    PersistenceType.ENTITY, null);
+                                    PersistenceType.ENTITY, (AbstractIdentifiableType) getType(attribType.getSuperclass(), false));
                             managedTypes.put(attribType, entityType);
                         }
                         else
