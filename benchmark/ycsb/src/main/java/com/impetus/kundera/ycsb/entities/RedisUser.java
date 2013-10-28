@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "user", schema = "kundera@kundera_redis_pu")
+@Table(name = "user", schema = "0@kundera_redis_pu")
 public class RedisUser
 {
 
