@@ -36,8 +36,7 @@ public class CarPartResource extends AbstractResource
     @Column
     private String col;
     
-    @Embedded
-    private CarEngine engine;
+    
 
     public String getCol()
     {
@@ -49,15 +48,6 @@ public class CarPartResource extends AbstractResource
         this.col = col;
     }
     
-    public CarEngine getEngine()
-    {
-        return engine;
-    }
-
-    public void setEngine(CarEngine engine)
-    {
-        this.engine = engine;
-    }
-
+  
 
 }

@@ -17,6 +17,7 @@ package com.impetus.kundera.metadata.processor;
 
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
@@ -33,6 +34,9 @@ public abstract class AbstractResource
 
     @Column
     private String resourceName;
+    
+    @Embedded
+    private CarEngine engine;
 
     public String getCarPartResourceId()
     {
@@ -52,6 +56,16 @@ public abstract class AbstractResource
     public void setCarPartResourceName(String resourceName)
     {
         this.resourceName = resourceName;
+    }
+    
+    public CarEngine getEngine()
+    {
+        return engine;
+    }
+
+    public void setEngine(CarEngine engine)
+    {
+        this.engine = engine;
     }
 
 }
