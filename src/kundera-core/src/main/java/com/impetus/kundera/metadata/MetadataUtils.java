@@ -591,6 +591,15 @@ public class MetadataUtils
                 .equalsIgnoreCase(clientFactoryName));
     }
     
+    public static boolean indexSearchEnabled(final String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        String clientFactoryName = puMetadata != null ? puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+        return !(Constants.REDIS_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName));
+        
+    }
+    
     /**
      * Checks whether a given field is Element collection field of BASIC type
      * @param collectionField

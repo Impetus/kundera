@@ -375,7 +375,8 @@ public class AbstractEntityReader
             // well.
             Client associatedClient = pd.getClient(targetEntityMetadata);
 
-            if (!MetadataUtils.useSecondryIndex(((ClientBase) associatedClient).getClientMetadata()))
+            if (!MetadataUtils.useSecondryIndex(((ClientBase) associatedClient).getClientMetadata())
+                    && MetadataUtils.indexSearchEnabled(targetEntityMetadata.getPersistenceUnit()))
             {
 
                 relationalEntities = getAssociationBuilder().getAssociatedEntitiesFromIndex(
