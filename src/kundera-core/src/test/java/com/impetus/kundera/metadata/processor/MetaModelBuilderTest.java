@@ -785,6 +785,164 @@ public class MetaModelBuilderTest
         Assert.assertNotNull(managedType.getAttribute("mappedInt"));
         Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
     }
+    
+    /**
+     * Test mapped super class.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
+     */
+    @Test
+    public <X extends Class, T extends Object> void testAssociationMappedSuperClass()
+    {
+        X clazz = (X) CarPart.class;
+      
+        builder.process(clazz);
+        
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(0, builder.getMappedSuperClassTypes().size());
+        
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        clazz = (X) CarPartResource.class;
+       
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(2, managedTypes.size());
+
+        Assert.assertEquals(1, builder.getMappedSuperClassTypes().size());
+
+        // on class CarPart
+        AbstractManagedType managedType = managedTypes.get(CarPart.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(2, managedType.getAttributes().size());
+    
+
+        // on class CarPartResource
+        managedType = managedTypes.get(CarPartResource.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(4, managedType.getAttributes().size());
+       
+    }
+    
+    /**
+     * Test mapped super class.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
+     */
+    @Test
+    public <X extends Class, T extends Object> void testEmbeddableForMappedSuperClass()
+    {
+        X clazz = (X) CarPart.class;
+      
+        builder.process(clazz);
+        
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(0, builder.getMappedSuperClassTypes().size());
+     
+        
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        clazz = (X) CarPartResource.class;
+       
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(2, managedTypes.size());
+
+       
+        Assert.assertEquals(1, builder.getMappedSuperClassTypes().size());
+
+        // on class CarPart
+        AbstractManagedType managedType = managedTypes.get(CarPart.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(2, managedType.getAttributes().size());
+    
+
+        // on class CarPartResource
+        managedType = managedTypes.get(CarPartResource.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(4, managedType.getAttributes().size());
+        
+       
+        Field embeddableField;
+        try
+        {
+            embeddableField = builder.getClass().getDeclaredField("embeddables");
+         
+            if (!embeddableField.isAccessible())
+            {
+                embeddableField.setAccessible(true);
+            }
+            Map<Class<?>, AbstractManagedType<?>> embeddables = ((Map<Class<?>, AbstractManagedType<?>>) embeddableField
+                    .get(builder));
+            Assert.assertEquals(1, embeddables.size());
+
+            Field managedTypeField = builder.getClass().getDeclaredField("managedType");
+            if (!managedTypeField.isAccessible())
+            {
+                managedTypeField.setAccessible(true);
+            }
+
+         
+
+            // assert on embeddable first attribute
+            SingularAttribute embeddableAttrib = managedType.getSingularAttribute("engine");
+            assertOnEmbeddable(embeddableAttrib, CarEngine.class);
+            EmbeddableType<X> embeddableType = (EmbeddableType<X>) embeddableAttrib.getType();
+            Attribute<X, String> attribute = (Attribute<X, String>) embeddableType.getAttribute("engineId");
+            assertOnEmbeddableType(CarEngine.class, attribute, embeddableType, "engineId", String.class);
+
+           
+
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+       
+    }
+
 
     @Test
     public <X extends Class, T extends Object> void testAttributeOverride()
