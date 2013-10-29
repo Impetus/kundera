@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
-import java.util.List;
-
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+
 
 
 
@@ -36,7 +33,8 @@ public class CarPartResource extends AbstractResource
     @Column
     private String col;
     
-    
+    @Embedded
+    private CarTyre tyre;
 
     public String getCol()
     {

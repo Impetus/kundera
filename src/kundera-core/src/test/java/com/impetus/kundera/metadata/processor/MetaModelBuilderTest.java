@@ -835,7 +835,7 @@ public class MetaModelBuilderTest
         // on class CarPartResource
         managedType = managedTypes.get(CarPartResource.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(4, managedType.getAttributes().size());
+        Assert.assertEquals(5, managedType.getAttributes().size());
        
     }
     
@@ -850,6 +850,8 @@ public class MetaModelBuilderTest
     @Test
     public <X extends Class, T extends Object> void testEmbeddableForMappedSuperClass()
     {
+        Field embeddableField;
+        
         X clazz = (X) CarPart.class;
       
         builder.process(clazz);
@@ -881,19 +883,16 @@ public class MetaModelBuilderTest
        
         Assert.assertEquals(1, builder.getMappedSuperClassTypes().size());
 
-        // on class CarPart
-        AbstractManagedType managedType = managedTypes.get(CarPart.class);
-        Assert.assertNotNull(managedType);
-        Assert.assertEquals(2, managedType.getAttributes().size());
+       
     
 
         // on class CarPartResource
-        managedType = managedTypes.get(CarPartResource.class);
+        AbstractManagedType managedType = managedTypes.get(CarPartResource.class);
         Assert.assertNotNull(managedType);
-        Assert.assertEquals(4, managedType.getAttributes().size());
+       
         
        
-        Field embeddableField;
+        
         try
         {
             embeddableField = builder.getClass().getDeclaredField("embeddables");
@@ -904,7 +903,7 @@ public class MetaModelBuilderTest
             }
             Map<Class<?>, AbstractManagedType<?>> embeddables = ((Map<Class<?>, AbstractManagedType<?>>) embeddableField
                     .get(builder));
-            Assert.assertEquals(1, embeddables.size());
+            Assert.assertEquals(2, embeddables.size());
 
             Field managedTypeField = builder.getClass().getDeclaredField("managedType");
             if (!managedTypeField.isAccessible())
