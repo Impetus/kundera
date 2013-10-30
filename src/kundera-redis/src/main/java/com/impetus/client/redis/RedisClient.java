@@ -263,7 +263,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 {
                     for (int i = 0; i < fields.length; i++)
                     {
-                        columns.put(fields[i], fieldValues.get(i));
+                        if(fieldValues.get(i) != null)
+                        {
+                            columns.put(fields[i], fieldValues.get(i));
+                        }
                     }
                 }
             }
@@ -1164,7 +1167,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // PropertyAccessorHelper.get(entity,
         for (Attribute attr : attributes)
         {
-            if (!entityMetadata.getIdAttribute().equals(attr) && !attr.isAssociation())
+            if (/*!entityMetadata.getIdAttribute().equals(attr) && */!attr.isAssociation())
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
                 {
@@ -1773,46 +1776,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
-        // Add row key to list(Required for wild search over table).
 
         if (resource != null && resource.isActive())
         {
             ((Transaction) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-
-            ((Transaction) connection).zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-
-            ((Transaction) connection)
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
         }
         else
         {
             ((Pipeline) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-
-            ((Pipeline) connection).zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-
-            ((Pipeline) connection)
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
         }
 
         // Add inverted indexes for column based search.
+        
+        // Add row key to list(Required for wild search over table).
+
+        wrapper.addIndex(getHashKey(entityMetadata.getTableName(),
+                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
+
+        // Add row-key as inverted index as well needed for multiple clause
+        // search with key and non row key.
+        wrapper.addIndex(getHashKey(
+                entityMetadata.getTableName(),
+                getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
+
         addIndex(connection, wrapper, rowKey,entityMetadata);
 
     }

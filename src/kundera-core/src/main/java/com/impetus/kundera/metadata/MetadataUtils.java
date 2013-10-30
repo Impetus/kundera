@@ -591,6 +591,13 @@ public class MetadataUtils
                 .equalsIgnoreCase(clientFactoryName));
     }
     
+    /**
+     * Index based search has to be optional, ideally need to register a callback in case index persistence/search etc is optional.
+     * 
+     * @param persistenceUnit persistence unit
+     * 
+     * @return true, if index based search is enabled.
+     */
     public static boolean indexSearchEnabled(final String persistenceUnit)
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
