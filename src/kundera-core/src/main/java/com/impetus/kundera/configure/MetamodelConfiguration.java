@@ -36,6 +36,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Table;
 import javax.persistence.metamodel.Metamodel;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -340,6 +341,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
+        
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
         try
@@ -347,6 +349,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             cf = new ClassFile(dstream);
 
             className = cf.getName();
+            
             List<String> annotations = new ArrayList<String>();
 
             reader.accumulateAnnotations(annotations,
@@ -362,19 +365,33 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 {
                     // Class<?> clazz =
                     // Thread.currentThread().getContextClassLoader().loadClass(className);
-
+                    
                     Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+                    String annotateEntityName = clazz.getAnnotation(Entity.class).name();
 
-                    if (entityNameToClassMap.containsKey(clazz.getSimpleName())
-                            && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName()))
+                    if ((entityNameToClassMap.containsKey(clazz.getSimpleName())
+                            && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName())))
                     {
                         throw new MetamodelLoaderException("Name conflict between classes "
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()
                                 + ". Make sure no two entity classes with the same name "
                                 + " are specified for persistence unit " + persistenceUnit);
+                    } else if (!StringUtils.isBlank(annotateEntityName) && entityNameToClassMap.containsKey(annotateEntityName))
+                    {
+                        throw new MetamodelLoaderException("Name conflict between classes "
+                                + entityNameToClassMap.get(annotateEntityName).getName() + " and " + clazz.getName()
+                                + ". Make sure no two entity classes with the same name "
+                                + " are specified for persistence unit " + persistenceUnit);
+                        
                     }
 
-                    entityNameToClassMap.put(clazz.getSimpleName(), clazz);
+                    if (!StringUtils.isBlank(annotateEntityName))
+                    {
+                        entityNameToClassMap.put(annotateEntityName, clazz);
+                    } else {
+
+                       entityNameToClassMap.put(clazz.getSimpleName(), clazz);
+                    }
 
                     EntityMetadata metadata = entityMetadataMap.get(clazz);
                     if (null == metadata)
@@ -472,6 +489,11 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         {
             puCol.add(pu);
             clazzToPuMap.put(clazz.getName(), puCol);
+            String annotateEntityName = clazz.getAnnotation(Entity.class).name();
+            if (!StringUtils.isBlank(annotateEntityName))
+            {
+                clazzToPuMap.put(annotateEntityName, puCol);
+            }
         }
 
         return clazzToPuMap;
@@ -481,7 +503,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap)
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
-        String pu = m.getPersistenceUnit()/*getPersistenceUnitOfEntity(clazz)*/;
+        String pu = m.getPersistenceUnit()/* getPersistenceUnitOfEntity(clazz) */;
         String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
                 .getClient();
         if (pu != null && pu.equals(persistenceUnit)
