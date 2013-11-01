@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.query;
+package com.impetus.client.crud;
 
 import java.util.List;
 import java.util.Map;
@@ -32,15 +32,15 @@ import org.junit.Test;
 
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.PersonEntityNameAnnotation.Day;
+import com.impetus.client.crud.PersonMongoNameAnnotation.Day;
 
 /**
  * Test case to perform check entity name annotation support
  * select)
  */
-public class PersonEntityNameTest 
+public class PersonMongoNameTest 
 {
-    private static final String PU = "patest";
+    private static final String PU = "mongoTest";
 
 
     private EntityManagerFactory emf;
@@ -64,15 +64,15 @@ public class PersonEntityNameTest
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
 
-        Query findQuery = em.createQuery("Select p from PF p", PersonEntityNameAnnotation.class);
-        List<PersonEntityNameAnnotation> allPersons = findQuery.getResultList();
+        Query findQuery = em.createQuery("Select p from PesonMongo p", PersonMongoNameAnnotation.class);
+        List<PersonMongoNameAnnotation> allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
 
-        findQuery = em.createQuery("Select p from PF p where p.personName = vivek");
+        findQuery = em.createQuery("Select p from PesonMongo p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
 
-        findQuery = em.createQuery("Select p.age from PF p where p.personName = vivek");
+        findQuery = em.createQuery("Select p.age from PesonMongo p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
 
@@ -80,25 +80,25 @@ public class PersonEntityNameTest
         em.persist(p2);
         em.persist(p3);
 
-        PersonEntityNameAnnotation personWithKey = new PersonEntityNameAnnotation();
+        PersonMongoNameAnnotation personWithKey = new PersonMongoNameAnnotation();
         personWithKey.setPersonId("111");
         em.persist(personWithKey);        
 
         em.clear();
-        PersonEntityNameAnnotation p = findById(PersonEntityNameAnnotation.class, "1", em);
+        PersonMongoNameAnnotation p = findById(PersonMongoNameAnnotation.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
         Assert.assertEquals(Day.THURSDAY, p.getDay());
 
         em.clear();
-        String qry = "Select p.personId,p.personName from PF p where p.personId >= 1";
+        String qry = "Select p.personId,p.personName from PesonMongo p where p.personId >= 1";
         Query q = em.createQuery(qry);
-        List<PersonEntityNameAnnotation> persons = q.getResultList();
+        List<PersonMongoNameAnnotation> persons = q.getResultList();
 
-        assertFindByName(em, "PersonEntityNameAnnotation", PersonEntityNameAnnotation.class, "vivek", "personName");  
+        assertFindByName(em, "PersonEntityNameAnnotation", PersonMongoNameAnnotation.class, "vivek", "personName");  
         
         // Delete without WHERE clause.
-        String deleteQuery = "DELETE from PF";
+        String deleteQuery = "DELETE from PesonMongo";
         q = em.createQuery(deleteQuery);
         q.executeUpdate();
 
@@ -119,9 +119,9 @@ public class PersonEntityNameTest
     }
     
 
-    private PersonEntityNameAnnotation prepareData(String rowKey, int age)
+    private PersonMongoNameAnnotation prepareData(String rowKey, int age)
     {
-        PersonEntityNameAnnotation o = new PersonEntityNameAnnotation();
+        PersonMongoNameAnnotation o = new PersonMongoNameAnnotation();
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
         o.setAge(age);
@@ -140,7 +140,7 @@ public class PersonEntityNameTest
             String fieldName)
     {
 
-        String query = "Select p from PF p where p." + fieldName + " = " + name;
+        String query = "Select p from PesonMongo p where p." + fieldName + " = " + name;
         // // find by name.
         Query q = em.createQuery(query);
         List<E> results = q.getResultList();
@@ -156,7 +156,7 @@ public class PersonEntityNameTest
     private <E extends Object> String getPersonName(E e, Object result)
     {
 
-        return ((PersonEntityNameAnnotation) result).getPersonName();
+        return ((PersonMongoNameAnnotation) result).getPersonName();
     }
 }
 

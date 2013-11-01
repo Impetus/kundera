@@ -367,31 +367,21 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                     // Thread.currentThread().getContextClassLoader().loadClass(className);
                     
                     Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
-                    String annotateEntityName = clazz.getAnnotation(Entity.class).name();
-
-                    if ((entityNameToClassMap.containsKey(clazz.getSimpleName())
-                            && !entityNameToClassMap.get(clazz.getSimpleName()).getName().equals(clazz.getName())))
-                    {
-                        throw new MetamodelLoaderException("Name conflict between classes "
-                                + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()
-                                + ". Make sure no two entity classes with the same name "
-                                + " are specified for persistence unit " + persistenceUnit);
-                    } else if (!StringUtils.isBlank(annotateEntityName) && entityNameToClassMap.containsKey(annotateEntityName))
-                    {
-                        throw new MetamodelLoaderException("Name conflict between classes "
-                                + entityNameToClassMap.get(annotateEntityName).getName() + " and " + clazz.getName()
-                                + ". Make sure no two entity classes with the same name "
-                                + " are specified for persistence unit " + persistenceUnit);
+                    
+                    //get the name of entity to be used for entity to class map if or not annotated with name 
+                    String entityName = getEntityName(clazz); 
                         
-                    }
 
-                    if (!StringUtils.isBlank(annotateEntityName))
+                    if ((entityNameToClassMap.containsKey(entityName)
+                            && !entityNameToClassMap.get(entityName).getName().equals(clazz.getName())))
                     {
-                        entityNameToClassMap.put(annotateEntityName, clazz);
-                    } else {
-
-                       entityNameToClassMap.put(clazz.getSimpleName(), clazz);
-                    }
+                        throw new MetamodelLoaderException("Name conflict between classes "
+                                + entityNameToClassMap.get(entityName).getName() + " and " + clazz.getName()
+                                + ". Make sure no two entity classes with the same name "
+                                + " are specified for persistence unit " + persistenceUnit);
+                    } 
+                    entityNameToClassMap.put(entityName, clazz);
+                   
 
                     EntityMetadata metadata = entityMetadataMap.get(clazz);
                     if (null == metadata)
@@ -442,6 +432,15 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         }
 
         return classes;
+    }
+    
+    /**
+     * @param clazz
+     */
+    private String getEntityName(Class<?> clazz)
+    {
+        return !StringUtils.isBlank(clazz.getAnnotation(Entity.class).name()) ? 
+                   clazz.getAnnotation(Entity.class).name() : clazz.getSimpleName();
     }
 
     /**
