@@ -263,7 +263,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 {
                     for (int i = 0; i < fields.length; i++)
                     {
-                        columns.put(fields[i], fieldValues.get(i));
+                        if(fieldValues.get(i) != null)
+                        {
+                            columns.put(fields[i], fieldValues.get(i));
+                        }
                     }
                 }
             }
@@ -1047,10 +1050,21 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private void addIndex(final Object connection, final AttributeWrapper wrapper, final String rowKey,
             final EntityMetadata metadata)
     {
+        
         Indexer indexer = indexManager.getIndexer();
 
         if (indexer != null)
         {
+         // Add row key to list(Required for wild search over table).
+            wrapper.addIndex(getHashKey(metadata.getTableName(),
+                    ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
+
+            // Add row-key as inverted index as well needed for multiple clause
+            // search with key and non row key.
+            wrapper.addIndex(getHashKey(
+                    metadata.getTableName(),
+                    getHashKey(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
+
             indexer.index(metadata.getEntityClazz(), wrapper.getIndexes(), rowKey, null);
         }
     }
@@ -1164,7 +1178,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // PropertyAccessorHelper.get(entity,
         for (Attribute attr : attributes)
         {
-            if (!entityMetadata.getIdAttribute().equals(attr) && !attr.isAssociation())
+            if (/*!entityMetadata.getIdAttribute().equals(attr) && */!attr.isAssociation())
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
                 {
@@ -1230,7 +1244,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             Attribute attrib, Attribute embeddedAttrib)
     {
         byte[] value = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
-        String valueAsStr = PropertyAccessorHelper.getString(embeddedObject, (Field) attrib.getJavaMember());
         byte[] name;
         if (value != null)
         {
@@ -1250,6 +1263,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // selective indexing.
             if (entityMetadata.getIndexProperties().containsKey(((AbstractAttribute) attrib).getJPAColumnName()))
             {
+                String valueAsStr = PropertyAccessorHelper.getString(embeddedObject, (Field) attrib.getJavaMember());
                 wrapper.addIndex(
                         getHashKey(entityMetadata.getTableName(), ((AbstractAttribute) attrib).getJPAColumnName()),
                         getDouble(valueAsStr));
@@ -1773,46 +1787,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
-        // Add row key to list(Required for wild search over table).
 
         if (resource != null && resource.isActive())
         {
             ((Transaction) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-
-            ((Transaction) connection).zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-
-            ((Transaction) connection)
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
         }
         else
         {
             ((Pipeline) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
-
-            ((Pipeline) connection).zadd(
-                    getHashKey(entityMetadata.getTableName(),
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()),
-                    getDouble(rowKey), rowKey);
-
-            // Add row-key as inverted index as well needed for multiple clause
-            // search with key and non row key.
-
-            ((Pipeline) connection)
-                    .zadd(getHashKey(
-                            entityMetadata.getTableName(),
-                            getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
-                            getDouble(rowKey), rowKey);
         }
 
         // Add inverted indexes for column based search.
+        
+//        // Add row key to list(Required for wild search over table).
+//
+//        wrapper.addIndex(getHashKey(entityMetadata.getTableName(),
+//                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
+//
+//        // Add row-key as inverted index as well needed for multiple clause
+//        // search with key and non row key.
+//        wrapper.addIndex(getHashKey(
+//                entityMetadata.getTableName(),
+//                getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
+
         addIndex(connection, wrapper, rowKey,entityMetadata);
 
     }

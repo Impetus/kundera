@@ -67,6 +67,7 @@ public class RedisQueryTest
         logger.info("On testPopulateEntities");
 
         EntityManager em = emf.createEntityManager();
+        purge(em);
 
         final String originalName = "vivek";
 
@@ -251,6 +252,14 @@ public class RedisQueryTest
         Assert.assertTrue(results.isEmpty());
     }
 
+    private void purge(EntityManager em)
+    {
+        // Delete by query.
+        String deleteQuery = "Delete from PersonRedis p";
+        Query query = em.createQuery(deleteQuery);
+        int updateCount = query.executeUpdate();
+    }
+
     /**
      * @throws java.lang.Exception
      */
@@ -259,10 +268,7 @@ public class RedisQueryTest
     {
         EntityManager em = emf.createEntityManager();
 
-        // Delete by query.
-        String deleteQuery = "Delete from PersonRedis p";
-        Query query = em.createQuery(deleteQuery);
-        int updateCount = query.executeUpdate();
+        purge(em);
 
         em.close();
         emf.close();
