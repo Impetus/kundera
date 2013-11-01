@@ -275,7 +275,7 @@ public class MongoDBQuery extends QueryImpl
                     value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
                             value.toString());
                 }
-                value = populateValue(value, value.getClass());
+                value = MongoDBUtils.populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
@@ -475,26 +475,26 @@ public class MongoDBQuery extends QueryImpl
         return 0;
     }
 
-    /**
-     * @param valObj
-     * @return
-     */
-    public Object populateValue(Object valObj, Class clazz)
-    {
-        if (isUTF8Value(clazz))
-        {
-            return valObj.toString();
-        }
-        return valObj;
-    }
-
-    private boolean isUTF8Value(Class<?> clazz)
-    {
-        return (clazz.isAssignableFrom(BigDecimal.class))
-                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
-                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
-    }
+//    /**
+//     * @param valObj
+//     * @return
+//     */
+//    public Object populateValue(Object valObj, Class clazz)
+//    {
+//        if (isUTF8Value(clazz))
+//        {
+//            return valObj.toString();
+//        }
+//        return valObj;
+//    }
+//
+//    private boolean isUTF8Value(Class<?> clazz)
+//    {
+//        return (clazz.isAssignableFrom(BigDecimal.class))
+//                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
+//                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
+//                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
+//    }
 
     @Override
     public void close()

@@ -114,10 +114,10 @@ public class KunderaRedisClient extends DB
 //            System.out.println(o);
             assert o != null;
             j++;
-            if (j % 5000 == 0)
-            {
+//            if (j % 5000 == 0)
+  //          {
                 em.clear();
-            }
+    //        }
             return Ok;
         }
         catch (Exception e)
@@ -270,10 +270,10 @@ public class KunderaRedisClient extends DB
                 vals.put("age", new StringByteIterator("57"));
                 vals.put("middlename", new StringByteIterator("bradley"));
                 vals.put("favoritecolor", new StringByteIterator("blue"));
-//                int res = cli.insert("usertable", "BrianFrankCooper", vals);
+                int res = cli.insert("usertable", "BrianFrankCooper", vals);
                 
                 cli.read("usertable", "BrianFrankCooper", null, null);
-//                System.out.println("Result of insert: " + res);
+                System.out.println("Result of insert: " + res);
                 try
                 {
                     cli.cleanup();

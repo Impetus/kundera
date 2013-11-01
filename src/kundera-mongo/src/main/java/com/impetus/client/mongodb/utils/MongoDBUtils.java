@@ -58,14 +58,14 @@ public class MongoDBUtils
         // To ensure order.
         for (Field f : fields)
         {
-            if(!ReflectUtils.isTransientOrStatic(f))
+            if (!ReflectUtils.isTransientOrStatic(f))
             {
                 Attribute compositeColumn = compoundKey.getAttribute(f.getName());
 
                 compoundKeyObj.put(
-                    ((AbstractAttribute) compositeColumn).getJPAColumnName(),
-                    populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()),
-                            ((AbstractAttribute) compositeColumn).getBindableJavaType()));
+                        ((AbstractAttribute) compositeColumn).getJPAColumnName(),
+                        populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()),
+                                ((AbstractAttribute) compositeColumn).getBindableJavaType()));
             }
         }
         return compoundKeyObj;
@@ -91,7 +91,8 @@ public class MongoDBUtils
     private static boolean isUTF8Value(Class<?> clazz)
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
-                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class)));
+                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
+                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class)));
     }
 
     /**
@@ -117,8 +118,8 @@ public class MongoDBUtils
      * Method to authenticate connection with mongodb. throws runtime error if:
      * a) userName and password, any one is not null. b) if authentication
      * fails.
-     *
-     *
+     * 
+     * 
      * @param props
      *            persistence properties.
      * @param externalProperties
