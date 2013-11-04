@@ -88,14 +88,16 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             relation.setJoinTableMetadata(jtMetadata);
 */        }
         else
-        {
-            
-            String joinColumnName = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
+        {   
+            String joinColumnName = null;
+            if (metadata.getIdAttribute() != null)
+            {
+                joinColumnName = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
+            }
             if (relation.getMappedBy() != null)
             {
                 try
                 {
-
                     Field mappedField = metadata.getEntityClazz().getDeclaredField(relation.getMappedBy());
                     if (mappedField != null && mappedField.isAnnotationPresent(JoinColumn.class))
                     {
