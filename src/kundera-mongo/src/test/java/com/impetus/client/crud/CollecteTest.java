@@ -102,7 +102,7 @@ public class CollecteTest
         Assert.assertEquals(c.getPhotos().iterator().next().getMd5(), "1235847EA873");
     }
 
-    @After
+    //@After
     public void tearDown()
     {
         em.close();
