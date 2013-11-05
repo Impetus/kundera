@@ -103,6 +103,55 @@ public class PersonMongoNameTest
         q.executeUpdate();
 
     }
+    
+    @Test
+    public void testEmptytableName() throws Exception
+    {
+        PersonMongoEmptyTableName p1 = new PersonMongoEmptyTableName();
+        p1.setPersonId("1");
+        p1.setPersonName("vivek");
+        p1.setAge(10);
+       
+
+        Query findQuery = em.createQuery("Select p from PersonMongoEmptyTableName p", PersonMongoEmptyTableName.class);
+        List<PersonMongoEmptyTableName> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+
+        findQuery = em.createQuery("Select p from PersonMongoEmptyTableName p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+
+        findQuery = em.createQuery("Select p.age from PersonMongoEmptyTableName p where p.personName = vivek");
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+
+        em.persist(p1);
+     
+
+        PersonMongoEmptyTableName personWithKey = new PersonMongoEmptyTableName();
+        personWithKey.setPersonId("111");
+        em.persist(personWithKey);        
+
+        em.clear();
+        PersonMongoEmptyTableName p = findById(PersonMongoEmptyTableName.class, "1", em);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("vivek", p.getPersonName());
+       
+
+        em.clear();
+        String qry = "Select p.personId,p.personName from PersonMongoEmptyTableName p where p.personId = 1";
+        Query q = em.createQuery(qry);
+        List<PersonMongoEmptyTableName> persons = q.getResultList();
+
+        
+        
+        // Delete without WHERE clause.
+        String deleteQuery = "DELETE from PersonMongoEmptyTableName";
+        q = em.createQuery(deleteQuery);
+        q.executeUpdate();
+
+    }
+ 
  
    
 
