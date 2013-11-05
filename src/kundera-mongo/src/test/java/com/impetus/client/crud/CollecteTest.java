@@ -90,6 +90,22 @@ public class CollecteTest
         testSelect();
 
     }
+    
+    @Test
+    public void testNullEmbeddableInsert()
+    {
+        // une collecte
+        Collecte c = new Collecte();
+        c.setId("0001");
+        c.setEAN("3251248033108");
+        c.setIdProduit(123342124L);
+        c.setDateStatut(new Date());
+        c.setStatut(0);
+               
+        em.persist(c);
+        testNullEmbeddable();
+
+    }
 
     private void testSelect()
     {
@@ -101,8 +117,19 @@ public class CollecteTest
         Assert.assertEquals(c.getPhotos().size(), 3);
         Assert.assertEquals(c.getPhotos().iterator().next().getMd5(), "1235847EA873");
     }
+    
+    private void testNullEmbeddable()
+    {
+        Query q = em.createQuery("select c from Collecte c where c.id =:id");
+        q.setParameter("id", "0001");
+        List<Collecte> collectes = q.getResultList();
+        Collecte c = collectes.get(0);
+        Assert.assertEquals(c.getEAN(), "3251248033108");
+        Assert.assertNull(c.getPhotos());
+        
+    }
 
-    //@After
+    @After
     public void tearDown()
     {
         em.close();
