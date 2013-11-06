@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.Map;
+
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -55,6 +58,10 @@ public class PersonMongo
     @Column(name = "MONTH_ENUM")
     @Enumerated(EnumType.STRING)
     private Month month;
+
+    @ElementCollection
+    @Column(name = "map")
+    private Map<String, Month> map;
 
     /**
      * Gets the person id.
@@ -138,5 +145,15 @@ public class PersonMongo
     enum Month
     {
         JAN, FEB, MARCH, APRIL, MAY, JUNE;
+    }
+
+    public Map<String, Month> getMap()
+    {
+        return map;
+    }
+
+    public void setMap(Map<String, Month> map)
+    {
+        this.map = map;
     }
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -269,8 +270,17 @@ public class DocumentObjectMapper
                 {
                 case MAP:
                     Map mapObj = (Map) valueObject;
-                    BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
-                    dbObj.put(((AbstractAttribute) column).getJPAColumnName(), builder.get());
+                    // BasicDBObjectBuilder builder =
+                    // BasicDBObjectBuilder.start(mapObj);
+                    BasicDBObjectBuilder b = new BasicDBObjectBuilder();
+                    Iterator i = mapObj.entrySet().iterator();
+                    while (i.hasNext())
+                    {
+                        Map.Entry entry = (Map.Entry) i.next();
+                        b.add(entry.getKey().toString(),
+                                MongoDBUtils.populateValue(entry.getValue(), entry.getValue().getClass()));
+                    }
+                    dbObj.put(((AbstractAttribute) column).getJPAColumnName(), b.get());
                     break;
                 case SET:
                 case LIST:
