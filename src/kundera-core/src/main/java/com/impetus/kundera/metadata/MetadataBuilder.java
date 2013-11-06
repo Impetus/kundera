@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Entity;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
@@ -220,8 +221,10 @@ public class MetadataBuilder
         Table table = clazz.getAnnotation(Table.class);
         if (table != null)
         {
+          //  !StringUtils.isBlank(clazz.getAnnotation(Entity.class).name()) 
             // Set Name of persistence object
-            metadata.setTableName(table.name());
+            metadata.setTableName(!StringUtils.isBlank(table.name()) ? 
+                     table.name() : clazz.getSimpleName());
             // Add named/native query related application metadata.
             addNamedNativeQueryMetadata(clazz);
             // set schema name and persistence unit name (if provided)

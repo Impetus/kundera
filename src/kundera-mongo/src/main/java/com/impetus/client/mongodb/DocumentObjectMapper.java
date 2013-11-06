@@ -26,12 +26,14 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.gis.geometry.Point;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.attributes.AttributeType;
 import com.impetus.kundera.persistence.EntityReaderException;
@@ -67,13 +69,22 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    static BasicDBObject getDocumentFromObject(Object obj, Set<Attribute> columns) throws PropertyAccessException
+    static BasicDBObject getDocumentFromObject(Metamodel metaModel, Object obj, Set<Attribute> columns)
+            throws PropertyAccessException
     {
         BasicDBObject dBObj = new BasicDBObject();
 
         for (Attribute column : columns)
         {
-            extractFieldValue(obj, dBObj, column);
+            if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
+            {
+                MongoDBDataHandler handler = new MongoDBDataHandler();
+                handler.onEmbeddable(column, obj, metaModel, dBObj);
+            }
+            else
+            {
+                extractFieldValue(obj, dBObj, column);
+            }
         }
         return dBObj;
     }
@@ -90,14 +101,14 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    static BasicDBObject[] getDocumentListFromCollection(Collection coll, Set<Attribute> columns)
+    static BasicDBObject[] getDocumentListFromCollection(Metamodel metaModel, Collection coll, Set<Attribute> columns)
             throws PropertyAccessException
     {
         BasicDBObject[] dBObjects = new BasicDBObject[coll.size()];
         int count = 0;
         for (Object o : coll)
         {
-            dBObjects[count] = getDocumentFromObject(o, columns);
+            dBObjects[count] = getDocumentFromObject(metaModel, o, columns);
             count++;
         }
         return dBObjects;
@@ -116,14 +127,23 @@ public class DocumentObjectMapper
      *            the columns
      * @return the object from document
      */
-    static Object getObjectFromDocument(BasicDBObject documentObj, Class clazz, Set<Attribute> columns)
+    static Object getObjectFromDocument(Metamodel metamodel, BasicDBObject documentObj, Class clazz,
+            Set<Attribute> columns)
     {
         try
         {
             Object obj = clazz.newInstance();
             for (Attribute column : columns)
             {
-                setFieldValue(documentObj, obj, column);
+                if (((MetamodelImpl) metamodel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
+                {
+                    MongoDBDataHandler handler = new MongoDBDataHandler();
+                    handler.onViaEmbeddable(column, obj, metamodel, documentObj);
+                }
+                else
+                {
+                    setFieldValue(documentObj, obj, column);
+                }
             }
             return obj;
         }
@@ -151,7 +171,7 @@ public class DocumentObjectMapper
     static void setFieldValue(DBObject document, Object entityObject, Attribute column)
     {
         Object value = null;
-        
+
         if (document != null)
         {
             value = document.get(((AbstractAttribute) column).getJPAColumnName());
@@ -298,10 +318,11 @@ public class DocumentObjectMapper
      *            the embedded object class
      * @param columns
      *            the columns
+     * @param metamodel
      * @return the collection from document list
      */
-    static Collection<?> getCollectionFromDocumentList(BasicDBList documentList, Class embeddedCollectionClass,
-            Class embeddedObjectClass, Set<Attribute> columns)
+    static Collection<?> getCollectionFromDocumentList(Metamodel metamodel, BasicDBList documentList,
+            Class embeddedCollectionClass, Class embeddedObjectClass, Set<Attribute> columns)
     {
         Collection<Object> embeddedCollection = null;
         if (embeddedCollectionClass.equals(Set.class))
@@ -320,7 +341,8 @@ public class DocumentObjectMapper
 
         for (Object dbObj : documentList)
         {
-            embeddedCollection.add(getObjectFromDocument((BasicDBObject) dbObj, embeddedObjectClass, columns));
+            embeddedCollection
+                    .add(getObjectFromDocument(metamodel, (BasicDBObject) dbObj, embeddedObjectClass, columns));
         }
 
         return embeddedCollection;

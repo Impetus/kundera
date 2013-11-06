@@ -29,6 +29,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +75,8 @@ public final class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
+            List<String> relations)
     {
         // Entity object
         Object entity = null;
@@ -129,7 +131,7 @@ public final class MongoDBDataHandler
                     Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                     if (metaModel.isEmbeddable(javaType))
                     {
-                        onViaEmbeddable(entityType, column, m, entity, metaModel.embeddable(javaType), document);
+                        onViaEmbeddable(column, entity, metaModel, document);
                     }
                     else if (!column.isAssociation())
                     {
@@ -235,7 +237,7 @@ public final class MongoDBDataHandler
                     Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                     if (metaModel.isEmbeddable(javaType))
                     {
-                        dbObj = onEmbeddable(entityType, column, m, entity, metaModel.embeddable(javaType), dbObj);
+                        dbObj = onEmbeddable(/* entityType, */column, /* m, */entity, metaModel, dbObj);
                     }
                     else if (!column.isAssociation())
                     {
@@ -256,19 +258,20 @@ public final class MongoDBDataHandler
                         MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
-        
-        if (((AbstractManagedType)entityType).isInherited())
+
+        if (((AbstractManagedType) entityType).isInherited())
         {
-            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
-            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
-            
-            // No need to check for empty or blank, as considering it as valid name for nosql!
-            if(discrColumn != null && discrValue != null)
+            String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+            String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+            // No need to check for empty or blank, as considering it as valid
+            // name for nosql!
+            if (discrColumn != null && discrValue != null)
             {
-                dbObj.put(discrColumn,discrValue);
+                dbObj.put(discrColumn, discrValue);
             }
         }
-        
+
         return dbObj;
     }
 
@@ -392,14 +395,14 @@ public final class MongoDBDataHandler
                         Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(superColumnField);
                         for (Object dbObj : (BasicDBList) embeddedDocumentObject)
                         {
-                            Object embeddedObject = new DocumentObjectMapper().getObjectFromDocument(
+                            Object embeddedObject = new DocumentObjectMapper().getObjectFromDocument(metaModel,
                                     (BasicDBObject) dbObj, embeddedObjectClass, superColumn.getAttributes());
                             Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
                         }
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
-                        Object embeddedObject = DocumentObjectMapper.getObjectFromDocument(
+                        Object embeddedObject = DocumentObjectMapper.getObjectFromDocument(metaModel,
                                 (BasicDBObject) embeddedDocumentObject, superColumn.getJavaType(),
                                 superColumn.getAttributes());
                         list.add(embeddedObject);
@@ -422,10 +425,13 @@ public final class MongoDBDataHandler
      * @param m
      * @param entity
      */
-    private DBObject onEmbeddable(EntityType entityType, Attribute column, EntityMetadata m, Object entity,
-            EmbeddableType embeddableType, DBObject dbObj)
+    DBObject onEmbeddable(/* EntityType entityType, */Attribute column, /*
+                                                                         * EntityMetadata
+                                                                         * m,
+                                                                         */Object entity, Metamodel metaModel,
+            DBObject dbObj)
     {
-
+        EmbeddableType embeddableType = metaModel.embeddable(((AbstractAttribute) column).getBindableJavaType());
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
         if (embeddedObject != null)
         {
@@ -434,15 +440,15 @@ public final class MongoDBDataHandler
                 Collection embeddedCollection = (Collection) embeddedObject;
                 // means it is case of element collection
 
-                dbObj.put(
-                        ((AbstractAttribute) column).getJPAColumnName(),
-                        DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
-                                embeddableType.getAttributes()));
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), DocumentObjectMapper
+                        .getDocumentListFromCollection(metaModel, embeddedCollection, embeddableType.getAttributes()));
             }
             else
             {
-                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
-                        DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddableType.getAttributes()));
+                dbObj.put(
+                        ((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentFromObject(metaModel, embeddedObject,
+                                embeddableType.getAttributes()));
             }
         }
 
@@ -457,9 +463,9 @@ public final class MongoDBDataHandler
      * @param embeddable
      * @param document
      */
-    private void onViaEmbeddable(EntityType entityType, Attribute column, EntityMetadata m, Object entity,
-            EmbeddableType embeddable, DBObject document)
+    void onViaEmbeddable(Attribute column, Object entity, Metamodel metamodel, DBObject document)
     {
+        EmbeddableType embeddable = metamodel.embeddable(((AbstractAttribute) column).getBindableJavaType());
         Field embeddedField = (Field) column.getJavaMember();
         Object embeddedDocumentObject = null;
         if (column.isCollection())
@@ -467,16 +473,20 @@ public final class MongoDBDataHandler
             Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedField);
 
             embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
+           
+            if(embeddedDocumentObject != null)
+            {
+                Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(metamodel,
+                        (BasicDBList) embeddedDocumentObject, embeddedField.getType(), embeddedObjectClass,
+                        embeddable.getAttributes());
+                PropertyAccessorHelper.set(entity, embeddedField, embeddedCollection);
+            }
 
-            Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(
-                    (BasicDBList) embeddedDocumentObject, embeddedField.getType(), embeddedObjectClass,
-                    embeddable.getAttributes());
-            PropertyAccessorHelper.set(entity, embeddedField, embeddedCollection);
         }
         else
         {
             embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
-            PropertyAccessorHelper.set(entity, embeddedField, DocumentObjectMapper.getObjectFromDocument(
+            PropertyAccessorHelper.set(entity, embeddedField, DocumentObjectMapper.getObjectFromDocument(metamodel,
                     (BasicDBObject) embeddedDocumentObject, ((AbstractAttribute) column).getBindableJavaType(),
                     embeddable.getAttributes()));
         }
