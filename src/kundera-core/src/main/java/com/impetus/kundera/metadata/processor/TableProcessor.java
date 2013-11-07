@@ -43,6 +43,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
+import com.impetus.kundera.metadata.model.type.DefaultEntityType;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
@@ -102,19 +103,17 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz,
             Map puProperties)
     {
-/*        Table table = clazz.getAnnotation(Table.class);
-        if (table != null)
-        {
-            // Set Name of persistence object
-            metadata.setTableName(table.name());
-            // Add named/native query related application metadata.
-            addNamedNativeQueryMetadata(clazz);
-            // set schema name and persistence unit name (if provided)
-            String schemaStr = table.schema();
-
-            MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr, puProperties);
-        }
-     */   // scan for fields
+        /*
+         * Table table = clazz.getAnnotation(Table.class); if (table != null) {
+         * // Set Name of persistence object
+         * metadata.setTableName(table.name()); // Add named/native query
+         * related application metadata. addNamedNativeQueryMetadata(clazz); //
+         * set schema name and persistence unit name (if provided) String
+         * schemaStr = table.schema();
+         * 
+         * MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr,
+         * puProperties); }
+         */// scan for fields
 
         // process for metamodelImpl
 
@@ -141,13 +140,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
                     onFamilyType(metadata, clazz, f);
 
-//                    onJPAColumnMapping(metaModelBuilder, metadata, f);
+                    // onJPAColumnMapping(metaModelBuilder, metadata, f);
 
                     /* Scan for Relationship field */
                     addRelationIntoMetadata(clazz, f, metadata);
                 }
             }
-        
+
             EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
 
             validateAndSetId(metadata, clazz, metaModelBuilder);
@@ -249,11 +248,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private void onIdAttribute(final MetaModelBuilder builder, EntityMetadata entityMetadata, final Class clazz, Field f)
     {
         EntityType entity = (EntityType) builder.getManagedTypes().get(clazz);
-        
+
         Attribute attrib = entity.getAttribute(f.getName());
         if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
-            entityMetadata.setIdAttribute((SingularAttribute) attrib);          
+            entityMetadata.setIdAttribute((SingularAttribute) attrib);
             populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }
@@ -273,7 +272,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if (entityMetadata.getType() == null || !entityMetadata.getType().equals(Type.SUPER_COLUMN_FAMILY))
         {
             if ((f.isAnnotationPresent(Embedded.class) && f.getType().getAnnotation(Embeddable.class) != null))
-            {                
+            {
                 entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
             }
             else if (f.isAnnotationPresent(ElementCollection.class) && !MetadataUtils.isBasicElementCollectionField(f))
@@ -297,55 +296,129 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param f
      *            the f
      */
-/*    private void onJPAColumnMapping(final MetaModelBuilder builder, EntityMetadata entityMetadata, Field f)
-    {
-        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
-        AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(f.getName());
-        entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(), f.getName());
-    }
-*/
-/*    public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
-    {
-//        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
-        
-        Set<Attribute> attributes = entityType.getAttributes();
-        
-        Iterator<Attribute> iter = attributes.iterator();
-        
-        while(iter.hasNext())
-        {
-            Attribute attribute = iter.next();
-            entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
-        }
-    
-    }
-*/
-    
+    /*
+     * private void onJPAColumnMapping(final MetaModelBuilder builder,
+     * EntityMetadata entityMetadata, Field f) { EntityType entityType =
+     * (EntityType)
+     * builder.getManagedTypes().get(entityMetadata.getEntityClazz());
+     * AbstractAttribute attribute = (AbstractAttribute)
+     * entityType.getAttribute(f.getName());
+     * entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(),
+     * f.getName()); }
+     */
+    /*
+     * public static void onJPAColumnMapping(final EntityType entityType,
+     * EntityMetadata entityMetadata) { // EntityType entityType = (EntityType)
+     * builder.getManagedTypes().get(entityMetadata.getEntityClazz());
+     * 
+     * Set<Attribute> attributes = entityType.getAttributes();
+     * 
+     * Iterator<Attribute> iter = attributes.iterator();
+     * 
+     * while(iter.hasNext()) { Attribute attribute = iter.next();
+     * entityMetadata.
+     * addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(),
+     * attribute.getName()); }
+     * 
+     * }
+     */
+
     private <X, T> void validateAndSetId(EntityMetadata metadata, Class<X> clazz,
             MetaModelBuilder<X, T> metaModelBuilder)
     {
         if (metadata.getIdAttribute() == null)
         {
             EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(clazz);
-            
+
             if (entityType.getSupertype() != null)
             {
-                Attribute idAttribute = ((AbstractIdentifiableType) entityType.getSupertype()).getIdAttribute();
+                Attribute idAttribute = null;
+                if (!entityType.getSupertype().getClass().isAssignableFrom(DefaultEntityType.class))
+                {
+                    idAttribute = ((AbstractIdentifiableType) entityType.getSupertype()).getIdAttribute();
+                }
+                else
+                {
+                    idAttribute = populateSuperClassGetId(clazz.getSuperclass(), metaModelBuilder);
+                }
 
-                
                 metadata.setIdAttribute((SingularAttribute) idAttribute);
                 populateIdAccessorMethods(metadata, clazz, (Field) idAttribute.getJavaMember());
             }
         }
+
+        validateIdAttribute(metadata.getIdAttribute(), clazz);
+    }
+
+    /**
+     * Populate metadata.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
+     * @param metaModelBuilder
+     *            the metaModelBuilder
+     * @param clazz
+     *            the clazz
+     */
+    private <X, T> Attribute populateSuperClassGetId(Class<? super X> clazz, MetaModelBuilder<X, T> metaModelBuilder)
+    {
+
+        // process for metamodelImpl
+        EntityMetadata metadata = new EntityMetadata(clazz);
+
+        metaModelBuilder.process((Class<X>) clazz);
+
+        for (Field f : clazz.getDeclaredFields())
+        {
+            if (f != null && !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
+                    && !f.isAnnotationPresent(Transient.class))
+            {
+                // construct metamodel.
+                metaModelBuilder.construct((Class<X>) clazz, f);
+
+                // on id attribute.
+
+                onIdAttribute(metaModelBuilder, metadata, clazz, f);
+
+                // determine if it is a column family or super column
+                // family.
+
+                onFamilyType(metadata, clazz, f);
+
+                // onJPAColumnMapping(metaModelBuilder, metadata, f);
+
+                /* Scan for Relationship field */
+                addRelationIntoMetadata(clazz, f, metadata);
+            }
+        }
+        Attribute idAttribute = metadata.getIdAttribute();
+
+        EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
+
+        if (idAttribute == null && entityType.getSupertype() != null)
+        {
+
+            if (entityType.getSupertype().getClass().isAssignableFrom(DefaultEntityType.class))
+            {
+                idAttribute = populateSuperClassGetId(clazz.getSuperclass(), metaModelBuilder);
+            }
+        } else  if (idAttribute == null)
+        {
+            throw new InvalidEntityDefinitionException(clazz.getName() + " must have an @Id field.");
+        }
         
-        validateIdAttribute(metadata.getIdAttribute(),clazz);
+        return idAttribute;
+
     }
 
     private void validateIdAttribute(SingularAttribute idAttribute, Class clazz)
     {
-        // Means if id attribute not found neither on entity or mappedsuper class.
-        
-        if(idAttribute == null)
+        // Means if id attribute not found neither on entity or mappedsuper
+        // class.
+
+        if (idAttribute == null)
         {
             throw new InvalidEntityDefinitionException(clazz.getName() + " must have an @Id field.");
         }

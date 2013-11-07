@@ -121,6 +121,60 @@ public class TableProcessorTest
         Assert.assertNotNull(appMetadata.getQuery("test.native.query2"));
         Assert.assertEquals(appMetadata.getQuery("test.native.query2"), native_query2);
     }
+    
+    /**
+     * Test process query metadata.
+     * 
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    @Test
+    public void testProcessInheritedClass() throws InstantiationException, IllegalAccessException
+    {
+        final String persistenceUnit = "inheritanceTest";
+       
+
+        EntityMetadata metadata = new EntityMetadata(Shape.class);
+        metadata.setPersistenceUnit(persistenceUnit);
+
+        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
+        puMetadata.setPersistenceUnitName(persistenceUnit);
+        
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
+        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseExamples");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.CoreTestClientFactory");
+
+        Properties p = new Properties();
+        p.putAll(props);
+        puMetadata.setProperties(p);
+        
+      
+
+        TableProcessor t1 = new TableProcessor(p);
+         
+        
+        metadata = new EntityMetadata(Rectangle.class);
+        metadata.setPersistenceUnit(persistenceUnit);
+        t1.process(Rectangle.class, metadata);
+        Assert.assertNotNull(metadata.getIdAttribute());
+                 
+        metadata = new EntityMetadata(Circle.class);
+        metadata.setPersistenceUnit(persistenceUnit);
+        t1.process(Circle.class, metadata);
+        Assert.assertNotNull(metadata.getIdAttribute());
+        
+        metadata = new EntityMetadata(Shape.class);
+        metadata.setPersistenceUnit(persistenceUnit);
+        t1.process(Shape.class, metadata);
+        Assert.assertNotNull(metadata.getIdAttribute());
+         
+    }
+
 
     /**
      * Tear down.
