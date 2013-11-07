@@ -39,7 +39,7 @@ public class OracleNosqlClient extends DB
 
     public static final int ERROR = -1;
 
-    private static KVStoreConfig config = new KVStoreConfig("KunderaTests", "localhost:5000");
+    private static KVStoreConfig config = new KVStoreConfig("OracleNoSqlTests", "localhost:5000");
 
     private static KVStore store = KVStoreFactory.getStore(config);
 
