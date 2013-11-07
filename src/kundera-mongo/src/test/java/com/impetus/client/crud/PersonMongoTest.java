@@ -95,6 +95,10 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(Day.FRIDAY, p.getDay());
         Assert.assertEquals(Month.JAN, p.getMonth());
         Assert.assertEquals("vivek", p.getPersonName());
+        Assert.assertNotNull(p.getMap());
+        Assert.assertFalse(p.getMap().isEmpty());
+        Assert.assertEquals(2, p.getMap().size());
+
         assertFindByName(em, "PersonMongo", PersonMongo.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonMongo", PersonMongo.class, "vivek", "10", "personName");
         assertFindByNameAndAgeGTAndLT(em, "PersonMongo", PersonMongo.class, "vivek", "10", "20", "personName");
@@ -119,8 +123,7 @@ public class PersonMongoTest extends BaseTest
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertEquals(3, allPersons.size());
-        
-        
+
         query = em.createQuery("select p from PersonMongo p");
         query.setMaxResults(2);
         results = query.getResultList();
@@ -155,7 +158,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
-        
+
         query = "Select p.personId from PersonMongo p where p.personName = vivek";
         // // find by name.
         q = em.createQuery(query);
