@@ -45,8 +45,7 @@ import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.StringByteIterator;
 
 /**
- * YCSB
- * HBase client for YCSB framework
+ * YCSB HBase client for YCSB framework
  */
 public class HBaseClient extends com.yahoo.ycsb.DB
 {
@@ -172,10 +171,11 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
         try
         {
-            /*if (_hTable == null)
-            {*/
-                getHTable(_table);
-//            }
+            /*
+             * if (_hTable == null) {
+             */
+            getHTable(_table);
+            // }
         }
         catch (IOException e)
         {
@@ -186,11 +186,12 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         Result r = null;
         try
         {
-//            if (_debug)
-//            {
-//                System.out.println("Doing read from HBase columnfamily " + _columnFamily);
-//                System.out.println("Doing read for key: " + key);
-//            }
+            // if (_debug)
+            // {
+            // System.out.println("Doing read from HBase columnfamily " +
+            // _columnFamily);
+            // System.out.println("Doing read for key: " + key);
+            // }
             Get g = new Get(Bytes.toBytes(key));
             if (fields == null)
             {
@@ -216,19 +217,40 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             // better
             return ServerError;
         }
+        finally
+        {
+            try
+            {
+                hTablePool.putTable(_hTable);
+            }
+            catch (IOException e)
+            {
+            }
+        }
 
         for (KeyValue kv : r.raw())
         {
             String column = Bytes.toString(kv.getQualifier());
-            Object value = new ByteArrayByteIterator(kv.getValue()) ;/*PropertyAccessorHelper.getObject(Object.class, kv.getValue());*/
+            Object value = new ByteArrayByteIterator(kv.getValue());/*
+                                                                     * PropertyAccessorHelper
+                                                                     * .
+                                                                     * getObject
+                                                                     * (
+                                                                     * Object.class
+                                                                     * ,
+                                                                     * kv.getValue
+                                                                     * ());
+                                                                     */
             assert column != null;
             assert value != null;
-//            result.put(Bytes.toString(kv.getQualifier()), new ByteArrayByteIterator(kv.getValue()));
-//            if (_debug)
-//            {
-//                System.out.println("Result for field: " + Bytes.toString(kv.getQualifier()) + " is: "
-//                        + Bytes.toString(kv.getValue()));
-//            }
+            // result.put(Bytes.toString(kv.getQualifier()), new
+            // ByteArrayByteIterator(kv.getValue()));
+            // if (_debug)
+            // {
+            // System.out.println("Result for field: " +
+            // Bytes.toString(kv.getQualifier()) + " is: "
+            // + Bytes.toString(kv.getValue()));
+            // }
 
         }
         return Ok;
@@ -329,10 +351,16 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             }
             return ServerError;
         }
-
         finally
         {
             scanner.close();
+            try
+            {
+                hTablePool.putTable(_hTable);
+            }
+            catch (IOException e)
+            {
+            }
         }
 
         return Ok;
@@ -405,6 +433,16 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             // do nothing for now...hope this is rare
             return ServerError;
         }
+        finally
+        {
+            try
+            {
+                hTablePool.putTable(_hTable);
+            }
+            catch (IOException e)
+            {
+            }
+        }
 
         return Ok;
     }
@@ -427,10 +465,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         // if this is a "new" table, init HTable object. Else, use existing one
         try
         {
-//            if (_hTable == null)
-//            {
-                getHTable(_table);
-//            }
+            // if (_hTable == null)
+            // {
+            getHTable(_table);
+            // }
         }
         catch (IOException e)
         {
@@ -450,10 +488,9 @@ public class HBaseClient extends com.yahoo.ycsb.DB
             System.out.println("Setting up put for key: " + key);
         }
         Put p = new Put(Bytes.toBytes(key));
-        
+
         // getString(key, "24"), getString(key, "gzb"), getString(key, "mishra")
-        
-        
+
         for (Map.Entry<String, ByteIterator> entry : values.entrySet())
         {
             if (_debug)
@@ -479,6 +516,16 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         {
             // do nothing for now...hope this is rare
             return ServerError;
+        }
+        finally
+        {
+            try
+            {
+                hTablePool.putTable(_hTable);
+            }
+            catch (IOException e)
+            {
+            }
         }
 
         return Ok;
