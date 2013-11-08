@@ -136,7 +136,7 @@ public class ProxySetTest
     }
     
     @After
-    public static void tearDown()
+    public void tearDown()
     {
         
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
