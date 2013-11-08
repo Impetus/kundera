@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -48,6 +50,10 @@ public abstract class BaseTest
         o.setAge(age);
         o.setDay(Day.FRIDAY);
         o.setMonth(Month.JAN);
+        Map<String, Month> map = new HashMap<String, Month>();
+        map.put("first month", Month.JAN);
+        map.put("second month", Month.FEB);
+        o.setMap(map);
         return o;
     }
 

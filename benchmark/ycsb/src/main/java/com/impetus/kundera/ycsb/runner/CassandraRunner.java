@@ -114,7 +114,7 @@ public class CassandraRunner extends YCSBRunner
                     / timeTakenByClient.get(clients[1]).doubleValue() * 100);
         }
 
-        if (clients.length ==3 && timeTakenByClient.get(clients[2]) != null && timeTakenByClient.get(clients[3]) != null)
+        if (clients.length ==4 && timeTakenByClient.get(clients[2]) != null && timeTakenByClient.get(clients[3]) != null)
         {
             kunderaThriftToThriftDelta = ((timeTakenByClient.get(clients[3]).doubleValue() - timeTakenByClient.get(
                     clients[2]).doubleValue())

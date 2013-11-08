@@ -47,7 +47,6 @@ public class RedisYCSBTest extends YCSBBaseTest
     public void onTest() throws Exception
     {
         testConcurrentWorkload();
-        
         testRead();
 //        testUpdate();
     }
@@ -62,7 +61,12 @@ public class RedisYCSBTest extends YCSBBaseTest
 
     private void testRead() throws Exception
     {
+        //stop and start server
+        onDestroy();
         onChangeRunType("t");
+        Thread.sleep(30000);
+        Runtime runtime = Runtime.getRuntime();
+        runner.startServer(true, runtime);
         onRead();
     }
 

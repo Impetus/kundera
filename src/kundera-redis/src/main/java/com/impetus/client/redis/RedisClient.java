@@ -1380,9 +1380,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         if (entity != null)
         {
-            Class javaType = entityMetadata.getIdAttribute().getJavaType();
+            Class javaType = entityMetadata.getIdAttribute().getBindableJavaType();
 
-            if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType())
+                    && key.getClass().isAssignableFrom(String.class) && !key.getClass().equals(javaType))
             {
                 key = PropertyAccessorFactory.getPropertyAccessor(javaType).fromString(javaType, key.toString());
             }

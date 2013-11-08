@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "kunderauser", schema = "KunderaTests@kundera_oracle_pu")
+@Table(name = "kunderauser", schema = "OracleNoSqlTests@kundera_oracle_pu")
 public class OracleNosqlUser {
 
 	@Id

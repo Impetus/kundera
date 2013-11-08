@@ -131,7 +131,7 @@
 			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
-			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.cache.provider.class"
