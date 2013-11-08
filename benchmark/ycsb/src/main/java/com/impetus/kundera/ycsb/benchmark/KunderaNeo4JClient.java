@@ -78,10 +78,10 @@ public class KunderaNeo4JClient extends DB
      */
     public void cleanup() throws DBException
     {
-        em.clear();
-//        em.close();
-        //emf.close();
         em.getTransaction().commit();
+        em.clear();
+        em.close();
+        //emf.close();
     }
     
     
