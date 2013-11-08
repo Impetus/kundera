@@ -11,12 +11,12 @@ public class Circle extends Shape
 
  
   
-    public int getEngineId()
+    public int getRadius()
     {
         return radius;
     }
 
-    public void setEngineId(int radius)
+    public void setRadius(int radius)
     {
         this.radius = radius;
     }

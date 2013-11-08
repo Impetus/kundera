@@ -27,6 +27,8 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -131,6 +133,13 @@ public class ProxySetTest
         Assert.assertTrue(proxySet.isEmpty());
         
         
+    }
+    
+    @After
+    public static void tearDown()
+    {
+        
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
 }

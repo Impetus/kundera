@@ -143,8 +143,7 @@ public class TableProcessorTest
         final String persistenceUnit = "rdbms";
        
 
-        EntityMetadata metadata = new EntityMetadata(Shape.class);
-        metadata.setPersistenceUnit(persistenceUnit);
+        EntityMetadata metadata;
 
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
@@ -166,6 +165,7 @@ public class TableProcessorTest
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Rectangle.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
+        
                             
         metadata = new EntityMetadata(Circle.class);
         metadata.setPersistenceUnit(persistenceUnit);

@@ -15,12 +15,17 @@
  ******************************************************************************/
 package com.impetus.kundera.client.crud.mappedsuperclass;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+
 
 /**
  * @author vivek.mishra
@@ -36,6 +41,9 @@ public class Transaction extends AbstractTransaction
     
     @Column
     private String bankIdentifier;
+    
+    @OneToOne(cascade = { CascadeType.ALL },fetch = FetchType.EAGER)
+    private Ledger ledger;
 
     public String getBankIdentifier()
     {
@@ -45,6 +53,16 @@ public class Transaction extends AbstractTransaction
     public void setBankIdentifier(String bankIdentifier)
     {
         this.bankIdentifier = bankIdentifier;
+    }
+    
+    public Ledger getLedger()
+    {
+        return ledger;
+    }
+
+    public void setLedger(Ledger ledger)
+    {
+        this.ledger = ledger;
     }
 
 }
