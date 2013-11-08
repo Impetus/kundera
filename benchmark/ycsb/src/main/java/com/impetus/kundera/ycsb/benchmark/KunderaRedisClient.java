@@ -114,10 +114,10 @@ public class KunderaRedisClient extends DB
 //            System.out.println(o);
             assert o != null;
             j++;
-//            if (j % 5000 == 0)
-  //          {
+            if (j % 5000 == 0)
+            {
                 em.clear();
-    //        }
+            }
             return Ok;
         }
         catch (Exception e)
