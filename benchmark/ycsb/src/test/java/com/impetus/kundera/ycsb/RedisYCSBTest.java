@@ -64,6 +64,7 @@ public class RedisYCSBTest extends YCSBBaseTest
         //stop and start server
         onDestroy();
         onChangeRunType("t");
+        Thread.sleep(30000);
         Runtime runtime = Runtime.getRuntime();
         runner.startServer(true, runtime);
         onRead();
