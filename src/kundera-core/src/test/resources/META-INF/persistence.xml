@@ -260,6 +260,10 @@
 	
 	<persistence-unit name="inheritanceTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.processor.Rectangle</class>
+		<class>com.impetus.kundera.metadata.processor.Circle</class>
+		<class>com.impetus.kundera.metadata.processor.Geometry</class>
+		<class>com.impetus.kundera.metadata.processor.Shape</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 	   <properties>
 			<property name="kundera.nodes" value="localhost" />

@@ -16,14 +16,21 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
@@ -133,7 +140,7 @@ public class TableProcessorTest
     @Test
     public void testProcessInheritedClass() throws InstantiationException, IllegalAccessException
     {
-        final String persistenceUnit = "inheritanceTest";
+        final String persistenceUnit = "rdbms";
        
 
         EntityMetadata metadata = new EntityMetadata(Shape.class);
@@ -153,16 +160,13 @@ public class TableProcessorTest
         p.putAll(props);
         puMetadata.setProperties(p);
         
-      
-
         TableProcessor t1 = new TableProcessor(p);
-         
-        
+               
         metadata = new EntityMetadata(Rectangle.class);
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Rectangle.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
-                 
+                            
         metadata = new EntityMetadata(Circle.class);
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Circle.class, metadata);
@@ -172,7 +176,64 @@ public class TableProcessorTest
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Shape.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
+
+    }
+    
+    /**
+     * Test process query metadata.
+     * 
+    */
+    @Test
+    public void testInheritedRelations() 
+    {
+        final String persistenceUnit = "inheritanceTest";
+        
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        EntityManager em = emf.createEntityManager();
+        
+        Rectangle rect1 = new Rectangle();
+        rect1.setId("r1");
+        rect1.setName("Rect1");
+
+        Geometry geo1 = new Geometry();
+        geo1.setGeoId("g1");
+        geo1.setName("Two D");
+
+        rect1.setGeometry(geo1);
+      
+        Circle circle = new Circle();
+        circle.setId("c1");
+        circle.setName("Circle1");
+        circle.setGeometry(geo1);
          
+        em.persist(rect1);
+        em.persist(circle);
+        em.clear();
+         
+        Geometry geo2 = new Geometry();
+        geo2.setGeoId("g2");
+        geo2.setName("Closed");
+
+       
+        Rectangle rectangle = em.find(Rectangle.class, "r1");
+     
+        Assert.assertNotNull(rectangle.getGeometry());
+        Assert.assertEquals("Two D", rectangle.getGeometry().getName());
+       
+
+        rectangle.setGeometry(geo2);
+
+        em.merge(rectangle);
+        em.clear();
+        
+        
+        circle = em.find(Circle.class, "c1");
+        Assert.assertNotNull(circle.getGeometry());
+        Assert.assertEquals("Two D", circle.getGeometry().getName());
+        em.clear();
+       
+        em.close();
+        emf.close();
     }
 
 

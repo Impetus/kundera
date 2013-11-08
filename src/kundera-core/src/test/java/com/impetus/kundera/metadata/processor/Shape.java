@@ -18,18 +18,26 @@ package com.impetus.kundera.metadata.processor;
 import javax.persistence.Entity;
 
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+
+
 
 @Entity
 public class Shape
 {
     
     @Id
+    @Column(name = "shape_id")
     private String id;
     
     @Column(name = "name")
     private String name;
+    
+    @OneToOne(mappedBy = "shape",fetch = FetchType.EAGER)
+    private Geometry geometry;
 
    
     public String getId()
@@ -50,6 +58,16 @@ public class Shape
     public void setName(String name)
     {
         this.name = name;
+    }
+    
+    public Geometry getGeometry()
+    {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry)
+    {
+        this.geometry = geometry;
     }
 
 }
