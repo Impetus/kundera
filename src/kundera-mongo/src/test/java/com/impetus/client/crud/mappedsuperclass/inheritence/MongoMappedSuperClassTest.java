@@ -35,6 +35,7 @@ import com.impetus.kundera.client.crud.mappedsuperclass.DebitTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.Ledger;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 
@@ -48,6 +49,7 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         _PU = "mongoTest";
         setUpInternal();
     }
@@ -106,6 +108,7 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
         List<DebitTransaction> debitResults = query.getResultList();
         Assert.assertEquals(1, debitResults.size());
         Assert.assertEquals("debit1", debitResults.get(0).getTxId());
+        em.clear();
 
     }
 
