@@ -59,14 +59,14 @@ public class Ledger
         this.user = user;
     }
     
-//    public Transaction getTransaction()
-//    {
-//        return trans;
-//    }
-//
-//    public void setTransaction(Transaction trans)
-//    {
-//        this.trans = trans;
-//    }
+    public Transaction getTransaction()
+    {
+        return trans;
+    }
+
+    public void setTransaction(Transaction trans)
+    {
+        this.trans = trans;
+    }
 
 }
