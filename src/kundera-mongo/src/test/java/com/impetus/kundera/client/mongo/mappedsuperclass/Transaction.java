@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.client.crud.mappedsuperclass;
+package com.impetus.kundera.client.mongo.mappedsuperclass;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,6 +24,8 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.impetus.kundera.client.crud.mappedsuperclass.AbstractTransaction;
 
 
 

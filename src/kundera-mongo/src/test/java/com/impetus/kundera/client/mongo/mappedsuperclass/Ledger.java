@@ -1,4 +1,4 @@
-package com.impetus.kundera.client.crud.mappedsuperclass;
+package com.impetus.kundera.client.mongo.mappedsuperclass;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

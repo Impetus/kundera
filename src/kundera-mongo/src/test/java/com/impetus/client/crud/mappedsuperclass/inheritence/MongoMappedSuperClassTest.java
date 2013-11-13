@@ -32,9 +32,9 @@ import org.junit.Test;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.DebitTransaction;
-import com.impetus.kundera.client.crud.mappedsuperclass.Ledger;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
+import com.impetus.kundera.client.mongo.mappedsuperclass.Ledger;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
@@ -76,6 +76,8 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
         ledger.setPayee("User1");
         
         creditTx.setLedger(ledger);
+        
+//        ledger.setTransaction(creditTx);
         em.persist(creditTx);
      
            
