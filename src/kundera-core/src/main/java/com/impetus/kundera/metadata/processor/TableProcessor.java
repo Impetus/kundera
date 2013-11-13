@@ -124,7 +124,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
                     .getMetaModelBuilder(metadata.getPersistenceUnit());
 
-            onBuildMetaModelSuperClass(clazz.getSuperclass(), metaModelBuilder);
+            onBuildMetaModelSuperClass(clazz, metaModelBuilder);
 
             metaModelBuilder.process(clazz);
 
@@ -196,10 +196,12 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param metaModelBuilder
      *            the metaModelBuilder
      */
-    private <X, T> void onBuildMetaModelSuperClass(Class<? super X> clazz, MetaModelBuilder<X, T> metaModelBuilder)
+    private <X, T> void onBuildMetaModelSuperClass(Class<X> clazz, MetaModelBuilder<X, T> metaModelBuilder)
     {
+        
         if (clazz.getSuperclass() != null && clazz.getSuperclass().isAnnotationPresent(javax.persistence.Entity.class))
         {
+          
             while (clazz != null && clazz.isAnnotationPresent(javax.persistence.Entity.class))
             {
                 metaModelBuilder.process((Class<X>) clazz);
@@ -213,7 +215,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     }
 
                 }
-                clazz = clazz.getSuperclass();
+                clazz = (Class<X>) clazz.getSuperclass();
             }
         }
     }
