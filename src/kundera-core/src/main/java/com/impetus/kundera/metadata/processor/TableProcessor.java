@@ -198,7 +198,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      */
     private <X, T> void onBuildMetaModelSuperClass(Class<? super X> clazz, MetaModelBuilder<X, T> metaModelBuilder)
     {
-        if (clazz.getSuperclass() != null && clazz.getSuperclass().isAnnotationPresent(javax.persistence.Entity.class))
+        if (clazz != null && clazz.isAnnotationPresent(javax.persistence.Entity.class))
         {
             while (clazz != null && clazz.isAnnotationPresent(javax.persistence.Entity.class))
             {
