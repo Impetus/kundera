@@ -174,7 +174,7 @@ public class MetadataBuilder
         keyspace = keyspace == null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE):keyspace;
 
         if (metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit)
-                || (metadata.getSchema() != null && !metadata.getSchema().equals(keyspace)))
+                || (keyspace != null && metadata.getSchema() != null && !metadata.getSchema().equals(keyspace)))
         {
             metadata = null;
         }

@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -82,8 +84,18 @@ public class RDBMSClientFactory extends GenericClientFactory
     {
 
         getConfigurationObject();
-        Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                getPersistenceUnit())).getEntityNameToClassMap().values();
+        
+        
+        Set<String> pus =  KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().keySet();
+        
+        Collection<Class<?>> classes = new ArrayList<Class<?>>();
+        
+        for(String pu : pus)
+        {
+            classes.addAll(
+            /* Collection<Class<?>> classes = */((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetamodel(pu)).getEntityNameToClassMap().values());
+        }
         // to keep hibernate happy! As in our case all scanned classes are not
         // meant for rdbms, so initally i have set depth to zero!
         conf.setProperty("hibernate.max_fetch_depth", "0");
