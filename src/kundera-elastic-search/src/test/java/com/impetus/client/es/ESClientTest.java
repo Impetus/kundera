@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,14 +55,18 @@ public class ESClientTest
 {
     private final static String persistenceUnit = "es-pu";
 
-    private static Node node = null;
+    private static Node node;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        builder.put("path.data", "target/data");
-        node = new NodeBuilder().settings(builder).node();
+        if (!checkIfServerRunning())
+        {
+          ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+          builder.put("path.data", "target/data");
+          node = new NodeBuilder().settings(builder).node();
+        }
+        
     }
 
     @Before
@@ -172,8 +179,34 @@ public class ESClientTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        node.close();
+        if (checkIfServerRunning())
+        {
+          node.close();
+        }
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+    }
+    
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 9300);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+
     }
 
 }
