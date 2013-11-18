@@ -1,4 +1,4 @@
-package com.impetus.kundera.client.crud.mappedsuperclass;
+package com.impetus.kundera.client.mongo.mappedsuperclass;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,14 +59,14 @@ public class Ledger
         this.user = user;
     }
     
-//    public Transaction getTransaction()
-//    {
-//        return trans;
-//    }
-//
-//    public void setTransaction(Transaction trans)
-//    {
-//        this.trans = trans;
-//    }
+    public Transaction getTransaction()
+    {
+        return trans;
+    }
+
+    public void setTransaction(Transaction trans)
+    {
+        this.trans = trans;
+    }
 
 }

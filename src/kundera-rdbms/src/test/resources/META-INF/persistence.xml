@@ -24,8 +24,8 @@
 		<properties>
 			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="kundera.keyspace" value="testdb" />
-			<!-- DO NOT delete these -->
+<!-- 			<property name="kundera.keyspace" value="testdb" />
+ -->			<!-- DO NOT delete these -->
 			<!-- <property name="current_session_context_class" value="thread" /> -->
 			<!-- <property name="hibernate.show_sql" value="true" /> -->
 			<!-- <property name="hibernate.format_sql" value="true" /> <property name="hibernate.connection.driver_class" 

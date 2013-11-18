@@ -32,9 +32,10 @@ import org.junit.Test;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.DebitTransaction;
-import com.impetus.kundera.client.crud.mappedsuperclass.Ledger;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
+import com.impetus.kundera.client.mongo.mappedsuperclass.Ledger;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 
@@ -48,6 +49,7 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         _PU = "mongoTest";
         setUpInternal();
     }
@@ -74,19 +76,11 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
         ledger.setPayee("User1");
         
         creditTx.setLedger(ledger);
+        
+//        ledger.setTransaction(creditTx);
         em.persist(creditTx);
      
-
-        DebitTransaction debitTx = new DebitTransaction();
-        debitTx.setTxId("debit1");
-        debitTx.setTxStatus(Status.PENDING);
-        debitTx.setTransactionDt(new Date());
-        debitTx.setBankIdentifier("sbi");
-        debitTx.setAmount(-10);
-        debitTx.setLedger(ledger);
-        em.persist(debitTx);
-
-       
+           
         em.clear();
         String creditQuery = "Select c from CreditTransaction c where c.bankIdentifier = 'sbi'";
 
@@ -99,13 +93,7 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
         
     
         em.clear();
-        String debitQuery = "Select d from DebitTransaction d where d.bankIdentifier = 'sbi'";
-
-        query = em.createQuery(debitQuery);
-
-        List<DebitTransaction> debitResults = query.getResultList();
-        Assert.assertEquals(1, debitResults.size());
-        Assert.assertEquals("debit1", debitResults.get(0).getTxId());
+      
 
     }
 

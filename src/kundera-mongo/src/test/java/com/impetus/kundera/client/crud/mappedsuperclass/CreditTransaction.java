@@ -24,7 +24,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
-import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
+import com.impetus.kundera.client.mongo.mappedsuperclass.Transaction;
 
 /**
  * @author vivek.mishra
