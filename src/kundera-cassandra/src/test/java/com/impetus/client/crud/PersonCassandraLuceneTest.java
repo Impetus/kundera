@@ -96,7 +96,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
 //        loadData();
         Map propertyMap = new HashMap();
-        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+//        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
