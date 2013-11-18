@@ -28,6 +28,7 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,19 +53,14 @@ public class ESClientTest
 {
     private final static String persistenceUnit = "es-pu";
 
-    private static Node node = null;
+    private Node node = null;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception
+    @Before
+    public void setup() throws Exception
     {
         ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
         builder.put("path.data", "target/data");
         node = new NodeBuilder().settings(builder).node();
-    }
-
-    @Before
-    public void setup()
-    {
         getEntityManagerFactory();
     }
 
@@ -168,9 +164,8 @@ public class ESClientTest
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
-    
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception
+    @After
+    public void tearDown() throws Exception
     {
         node.close();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
