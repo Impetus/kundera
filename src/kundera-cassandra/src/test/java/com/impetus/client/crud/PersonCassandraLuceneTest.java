@@ -94,9 +94,9 @@ public class PersonCassandraLuceneTest extends BaseTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+//        loadData();
         Map propertyMap = new HashMap();
-        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -523,7 +523,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDef.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef);
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         user_Def.addToColumn_metadata(columnDef1);
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ENUM".getBytes()), "UTF8Type");

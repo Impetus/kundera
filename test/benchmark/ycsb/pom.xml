@@ -13,8 +13,9 @@
 	<artifactId>kundera-ycsb</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
-	<name>kundera-benchmarks</name>
-	<url>http://maven.apache.org</url>
+
+	<name>ycsb</name>
+	<url>https://github.com/impetus-opensource/Kundera</url>
 
 	<dependencies>
 

@@ -3,17 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera-parent</artifactId>
 	<version>2.9-SNAPSHOT</version>
+	</parent>
+
+	<groupId>com.impetus.kundera</groupId>
+	<artifactId>examples</artifactId>
+	<version>2.9-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>kundera</name>
+	<name>examples</name>
 	<url>https://github.com/impetus-opensource/Kundera</url>
 
 	<licenses>
@@ -34,17 +34,17 @@
 		<developer>
 			<id>vivek.mishra</id>
 			<name>Vivek Mishra</name>
-			<email>vivek.mishra@impetus.co.in</email>
+			<email>vivek.mishra@yahoo.com</email>
 		</developer>
 		<developer>
-			<id>chhavi.gangwal</id>
-			<name>Chhavi Gangwal</name>
-			<email>chhavi.gangwal@impetus.co.in</email>
+			<id>amresh.singh</id>
+			<name>Amresh Kumar Singh</name>
+			<email>amresh1002@gmail.com</email>
 		</developer>
 		<developer>
 			<id>Kuldeep.mishra</id>
 			<name>Kuldeep Kumar Mishra</name>
-			<email>kuldeep.mishra@impetus.co.in</email>
+			<email>kuld.cs.mishra@gmail.com</email>
 		</developer>
 	</developers>
 
@@ -104,47 +104,8 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<module>src</module>
+				<module>container</module>
 			</modules>
 		</profile>
-
-	        <profile>
-			<id>benchmark</id>
-			<modules>
-                                <module>test</module>
-			</modules>
-		</profile>
-
-	        <profile>
-			<id>examples</id>
-			<modules>
-                                <module>examples</module>
-			</modules>
-		</profile>
-
 	</profiles>
-
-	<build>
-		
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>perform</goal>
-						</goals>
-						<configuration>
-							<pomFileName>src/pom.xml</pomFileName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
-
 </project>

@@ -137,7 +137,9 @@ public class CassQuery extends QueryImpl
                                                    * .isNative(getJPAQuery())
                                                    */;
 
-        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
+        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
+                && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+        //            if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
                     m.getEntityClazz(), null);
