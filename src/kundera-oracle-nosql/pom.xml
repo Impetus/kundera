@@ -27,7 +27,6 @@
 	</repositories>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.version>2.6-SNAPSHOT</project.version>
 	</properties>
 
 
