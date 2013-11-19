@@ -121,7 +121,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        return false;
+        return true;
     }
 
     @Override
