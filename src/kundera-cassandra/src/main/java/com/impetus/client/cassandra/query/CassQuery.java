@@ -131,15 +131,12 @@ public class CassQuery extends QueryImpl
                 m.getPersistenceUnit());
 
         String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*
-                                                   * query == null ? true :
-                                                   * appMetadata
-                                                   * .isNative(getJPAQuery())
-                                                   */;
+        boolean isNative = kunderaQuery.isNative();
 
         if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
                 && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         //            if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
+
         {
             result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
                     m.getEntityClazz(), null);

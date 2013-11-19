@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +31,8 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
@@ -52,19 +54,17 @@ public class ESClientTest
 {
     private final static String persistenceUnit = "es-pu";
 
-    private static Node node = null;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception
-    {
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        builder.put("path.data", "target/data");
-        node = new NodeBuilder().settings(builder).node();
-    }
+    private Node node = null;
 
     @Before
-    public void setup()
+    public void setup() throws Exception
     {
+        if (!checkIfServerRunning())
+        {
+            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+            builder.put("path.data", "target/data");
+            node = new NodeBuilder().settings(builder).node();
+        }
         getEntityManagerFactory();
     }
 
@@ -168,12 +168,35 @@ public class ESClientTest
         new ClientFactoryConfiguraton(null, persistenceUnits).configure();
     }
 
-    
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception
+    @After
+    public void tearDown() throws Exception
     {
-        node.close();
+        if (checkIfServerRunning())
+        {
+            node.close();
+        }
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 9300);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
 }

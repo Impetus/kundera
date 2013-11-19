@@ -1,5 +1,8 @@
 package com.impetus.client.es.mappedsuperclass;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.persistence.Query;
@@ -20,14 +23,17 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 public class ESMappedSuperClassTest extends MappedSuperClassBase
 {
 
-    private static Node node = null;
+    private static Node node;
 
     @Before
     public void setUp() throws Exception
     {
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        builder.put("path.data", "target/data");
-        node = new NodeBuilder().settings(builder).node();
+        if (!checkIfServerRunning())
+        {
+          ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+          builder.put("path.data", "target/data");
+          node = new NodeBuilder().settings(builder).node();
+        }
         _PU = "es-pu";
         setUpInternal();
     }
@@ -42,9 +48,35 @@ public class ESMappedSuperClassTest extends MappedSuperClassBase
     @After
     public void tearDown() throws Exception
     {
-        node.close();
+        if (checkIfServerRunning())
+        {
+          node.close();
+        }
         tearDownInternal();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
+    }
+    
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 9300);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
 
     }
 }

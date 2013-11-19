@@ -145,7 +145,7 @@ public class UserInfoTest
         Assert.assertEquals("Vivek", results.get(0).getFirstName());
         Assert.assertEquals("Mishra", results.get(0).getLastName());
         Assert.assertEquals("mevivs_info", results.get(0).getUserInfoId());
-        Assert.assertEquals(currentDate, results.get(0).getTimeLine().get(0).getTweetDate());
+        Assert.assertEquals(currentDate.getTime(), results.get(0).getTimeLine().get(0).getTweetDate().getTime());
         Assert.assertEquals(timeLineId, results.get(0).getTimeLine().get(0).getKey().getTimeLineId());
 
         // Query with composite key clause.
