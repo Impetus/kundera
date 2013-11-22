@@ -166,7 +166,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
     @Override
     public boolean hasSingleIdAttribute()
     {
-        return !isIdClass && idAttribute != null;
+        return !isIdClass && getIdAttribute() != null;
     }
 
     /*
@@ -193,6 +193,12 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         {
             return idClassAttributes;
         }
+        else if (getSuperClazzType() != null
+                /*&& getSuperClazzType().getJavaType().isAssignableFrom(AbstractIdentifiableType.class)*/)
+        {
+            idClassAttributes = ((AbstractIdentifiableType) getSuperClazzType()).getIdClassAttributes();
+        }
+
         throw new IllegalArgumentException("The identifiable type does not have an id class");
     }
 
@@ -233,10 +239,13 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
 
     public SingularAttribute<? super X, ?> getIdAttribute()
     {
-        return idAttribute == null ? getSuperClazzType() != null ? ((AbstractIdentifiableType) getSuperClazzType())
-                .getIdAttribute() : null : idAttribute;
+        idAttribute = idAttribute == null ? getSuperClazzType() != null
+                /*&& getSuperClazzType().getJavaType().isAssignableFrom(AbstractIdentifiableType.class)*/ ? ((AbstractIdentifiableType) getSuperClazzType())
+                .getIdAttribute() : null
+                : idAttribute;
+        return idAttribute;
     }
-    
+
     /**
      * On error.
      */
