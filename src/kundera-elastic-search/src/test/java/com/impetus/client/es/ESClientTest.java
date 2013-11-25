@@ -69,7 +69,7 @@ public class ESClientTest
     }
 
     @Test
-    public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException
     {
         ESClientFactory esFactory = new ESClientFactory();
         Map<String, Object> props = new HashMap<String, Object>();
@@ -96,6 +96,7 @@ public class ESClientTest
         entity.setPersonName("vivek");
         client.onPersist(metadata, entity, "1", null);
 
+        Thread.sleep(3000);
         PersonES result = (PersonES) client.find(PersonES.class, "1");
         Assert.assertNotNull(result);
 
