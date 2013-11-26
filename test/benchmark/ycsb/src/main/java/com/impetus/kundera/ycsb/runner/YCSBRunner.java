@@ -204,7 +204,7 @@ public abstract class YCSBRunner
 
     protected String getCommandString(String clazz, String workLoad)
     {
-        StringBuilder command = new StringBuilder("java -Xms512M -Xmx3072M -cp ");
+        StringBuilder command = new StringBuilder("java -Xms512M -Xmx2048M -cp ");
         command.append(clientjarlocation);
         command.append(":");
         command.append(ycsbJarLocation);
