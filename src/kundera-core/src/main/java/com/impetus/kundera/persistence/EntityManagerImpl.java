@@ -16,12 +16,14 @@
 package com.impetus.kundera.persistence;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityExistsException;
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
@@ -30,10 +32,13 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.transaction.UserTransaction;
@@ -986,5 +991,85 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             return clientFactory.getClientInstance();
         }
         throw new ClientResolverException(" No client configured for: " + persistenceUnit);
+    }
+
+    @Override
+    public <T> EntityGraph<T> createEntityGraph(Class<T> arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityGraph<?> createEntityGraph(String arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createNamedStoredProcedureQuery(String arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Query createQuery(CriteriaUpdate arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Query createQuery(CriteriaDelete arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0, Class... arg1)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public StoredProcedureQuery createStoredProcedureQuery(String arg0, String... arg1)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public EntityGraph<?> getEntityGraph(String arg0)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <T> List<EntityGraph<? super T>> getEntityGraphs(Class<T> arg0)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public boolean isJoinedToTransaction()
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return false;
     }
 }

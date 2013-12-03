@@ -129,4 +129,18 @@ public class KunderaPersistence implements PersistenceProvider
         return cache;
     }
 
+    @Override
+    public void generateSchema(PersistenceUnitInfo arg0, Map arg1)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // do nothing.
+    }
+
+    @Override
+    public boolean generateSchema(String arg0, Map arg1)
+    {
+        // returning default.
+        return false;
+    }
+
 }

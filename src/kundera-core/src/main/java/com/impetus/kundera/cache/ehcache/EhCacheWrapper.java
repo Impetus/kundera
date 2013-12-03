@@ -130,4 +130,13 @@ public class EhCacheWrapper implements Cache
         ehcache.removeAll();
     }
 
+    @Override
+    public <T> T unwrap(Class<T> arg0)
+    {
+        // Not yet supported.
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        
+        return null;
+    }
+
 }
