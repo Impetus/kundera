@@ -22,13 +22,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Cache;
-import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.Query;
-import javax.persistence.SynchronizationType;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -412,41 +409,5 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
         logger.error("Client Factory Not Configured For Specified Client Type : ");
         throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
-    }
-
-    @Override
-    public EntityManager createEntityManager(SynchronizationType paramSynchronizationType)
-    {
-        return createEntityManager();
-    }
-
-    @Override
-    public EntityManager createEntityManager(SynchronizationType paramSynchronizationType, Map paramMap)
-    {
-        // TODO Auto-generated method stub
-        return createEntityManager(paramMap);
-    }
-
-    @Override
-    public void addNamedQuery(String paramString, Query paramQuery)
-    {
-        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
-        // Do nothing. Not yet implemented.
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> paramClass)
-    {
-        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
-        // Do nothing. Not yet implemented.
-        return null;
-    }
-
-    @Override
-    public <T> void addNamedEntityGraph(String paramString, EntityGraph<T> paramEntityGraph)
-    {
-        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
-        // Do nothing. Not yet implemented.
-        
     }
 }
