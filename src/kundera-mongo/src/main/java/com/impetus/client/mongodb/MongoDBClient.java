@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.metamodel.EntityType;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -219,11 +222,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
-//        if (log.isDebugEnabled())
-//        {
-//            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
-//        }
-
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
@@ -243,15 +241,39 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // DBCursor cursor = dbCollection.findOne(query);
         DBObject fetchedDocument = dbCollection.findOne(query);
 
-        /*
-         * if (cursor.hasNext()) { fetchedDocument = cursor.next(); } else {
-         * return null; }
-         */
+        // Here you need to fetch by sub managed type.
+
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
         if (fetchedDocument != null)
         {
-            Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
-                    fetchedDocument, relationNames);
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            EntityMetadata subEntityMetadata = null;
+            Object enhancedEntity = null;
+            if (!subManagedType.isEmpty())
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    String discColumn = subEntity.getDiscriminatorColumn();
+                    String disColValue = subEntity.getDiscriminatorValue();
+                    Object value = fetchedDocument.get(discColumn);
+                    if (value != null && value.toString().equals(disColValue))
+                    {
+                        subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                        break;
+                    }
+                }
+
+                enhancedEntity = handler.getEntityFromDocument(subEntityMetadata.getEntityClazz(), subEntityMetadata,
+                        fetchedDocument, subEntityMetadata.getRelationNames());
+            }
+            else
+            {
+                enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+                        fetchedDocument, relationNames);
+            }
 
             return enhancedEntity;
         }
@@ -284,9 +306,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
-                    fetchedDocument, entityMetadata.getRelationNames());
-            entities.add(entity);
+            populateEntity(entityMetadata, entities, fetchedDocument);
         }
         return entities;
     }
@@ -349,8 +369,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
-            entities.add(entity);
+            populateEntity(entityMetadata, entities, fetchedDocument);
+//            Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
+//            entities.add(entity);
         }
         return entities;
     }
@@ -487,8 +508,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, m.getRelationNames());
-            results.add(entity);
+            populateEntity(m, results, fetchedDocument);
+//            Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, m.getRelationNames());
+//            results.add(entity);
         }
 
         return results.isEmpty() ? null : results;
@@ -848,4 +870,50 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         Object result = mongoDb.eval(script);
         return result;
     }
+
+
+    private void populateEntity(EntityMetadata entityMetadata, List entities, DBObject fetchedDocument)
+    {
+        if (fetchedDocument != null)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetamodel(entityMetadata.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            EntityMetadata subEntityMetadata = null;
+            Object enhancedEntity = null;
+            if (!subManagedType.isEmpty())
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    String discColumn = subEntity.getDiscriminatorColumn();
+                    String disColValue = subEntity.getDiscriminatorValue();
+                    Object value = fetchedDocument.get(discColumn);
+                    if (value != null && value.toString().equals(disColValue))
+                    {
+                        subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                        break;
+                    }
+                }
+
+                enhancedEntity = handler.getEntityFromDocument(subEntityMetadata.getEntityClazz(),
+                        subEntityMetadata, fetchedDocument, subEntityMetadata.getRelationNames());
+
+            }
+            else
+            {
+                enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+                        fetchedDocument, entityMetadata.getRelationNames());
+            }
+
+            if(enhancedEntity != null)
+            {
+                entities.add(enhancedEntity);
+            }
+        }
+    }
+
 }

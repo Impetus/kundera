@@ -17,6 +17,8 @@ package com.impetus.kundera.metadata.model.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +73,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private InheritanceModel model;
 
+    private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
+    
     /**
      * Super constructor with arguments.
      * 
@@ -91,6 +95,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         super(clazz, persistenceType);
         this.superClazzType = superClazzType;
         bindTypeAnnotations();
+        if(this.superClazzType != null)
+        {
+            ((AbstractManagedType<? super X>) this.superClazzType).addSubManagedType(this);
+        }
         this.model = buildInheritenceModel();
     }
 
@@ -776,6 +784,20 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return columnBindings.get(attribute.getName());
     }
 
+    private void addSubManagedType(ManagedType inheritedType)
+    {
+       if(Modifier.isAbstract(this.getJavaType().getModifiers()))
+       {
+           subManagedTypes.add(inheritedType); 
+       }
+    }
+    
+    
+    public List<ManagedType<X>> getSubManagedType()
+    {
+        return subManagedTypes;
+    }
+    
     /**
      * Gets the declared plural attribute.
      * 
