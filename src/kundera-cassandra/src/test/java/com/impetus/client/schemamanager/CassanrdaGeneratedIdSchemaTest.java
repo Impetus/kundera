@@ -73,8 +73,9 @@ public class CassanrdaGeneratedIdSchemaTest
                     count++;
                 }
                 // Mapped super class test classes are created with 4 columns and without @Table annotation. Hence eligible for this pu as well.
-                else if(!cfDef.getName().equals("TRNX_CREDIT") && !cfDef.getName().equals("DebitTransaction"))
+                else if(!cfDef.getName().equals("user_account") && !cfDef.getName().equals("social_profile") && !cfDef.getName().equals("TRNX_CREDIT") && !cfDef.getName().equals("DebitTransaction"))
                 {
+//                    System.out.println(cfDef.getName());
                      Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
                     List<ColumnDef> columnDefs = cfDef.getColumn_metadata();
                     Assert.assertEquals(1, columnDefs.size());
