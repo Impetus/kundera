@@ -27,9 +27,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 
 
 public class PersonDetailTestAnnotation

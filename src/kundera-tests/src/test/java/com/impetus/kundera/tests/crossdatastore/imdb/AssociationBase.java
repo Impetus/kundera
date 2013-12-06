@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import com.impetus.client.crud.RDBMSCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -51,7 +52,6 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
-import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.crossdatastore.imdb.dao.IMDBDaoImpl;
 

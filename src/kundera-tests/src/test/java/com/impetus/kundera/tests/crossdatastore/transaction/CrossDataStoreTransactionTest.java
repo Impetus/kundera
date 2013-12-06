@@ -41,7 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatOToOFKEntity;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelOToOFKEntity;
 
@@ -124,7 +124,7 @@ public class CrossDataStoreTransactionTest
 
         try
         {
-            ksDef = com.impetus.kundera.tests.cli.CassandraCli.client.describe_keyspace("KunderaTests");
+            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
 
             List<CfDef> cfDefn = ksDef.getCf_defs();

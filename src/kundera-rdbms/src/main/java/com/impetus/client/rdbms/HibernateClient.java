@@ -447,7 +447,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         s = getStatelessSession();
 
-        s.beginTransaction();
+//        s.beginTransaction().begin();
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
         if (relations != null)
         {
@@ -468,7 +468,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 }
             }
         }
-        s.getTransaction().commit();
+//        s.getTransaction().commit();
         return q.list();
     }
 

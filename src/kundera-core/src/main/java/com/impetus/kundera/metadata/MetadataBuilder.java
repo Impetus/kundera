@@ -197,6 +197,8 @@ public class MetadataBuilder
 
     private void applyMetadataChanges(EntityMetadata metadata)
     {
+//        log.debug("In apply changes class is " + metadata.getEntityClazz().getName());
+//        log.debug("In apply changes pu is " + persistenceUnit);
         metadata.setPersistenceUnit(persistenceUnit);
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
@@ -221,7 +223,7 @@ public class MetadataBuilder
         Table table = clazz.getAnnotation(Table.class);
         if (table != null)
         {
-          //  !StringUtils.isBlank(clazz.getAnnotation(Entity.class).name()) 
+//            log.debug("In set schema and pu, class is " + clazz.getName());
             // Set Name of persistence object
             metadata.setTableName(!StringUtils.isBlank(table.name()) ? 
                      table.name() : clazz.getSimpleName());
@@ -234,6 +236,7 @@ public class MetadataBuilder
         }
         if (metadata.getPersistenceUnit() == null)
         {
+//            log.debug("In set schema and pu, pu is " + persistenceUnit);
             metadata.setPersistenceUnit(persistenceUnit);
         }
     }

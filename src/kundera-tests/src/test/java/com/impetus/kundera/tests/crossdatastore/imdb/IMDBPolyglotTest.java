@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Role;

@@ -146,7 +146,7 @@
 			</exclusions>
 
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
@@ -186,8 +186,8 @@
 			<artifactId>persistence-api</artifactId>
 			<version>2.0</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
-			<version>3.5.0</version> </dependency> -->
+		<dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
+			<version>3.5.0</version> </dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
@@ -198,8 +198,8 @@
 			<artifactId>cglib</artifactId>
 			<version>2.2</version>
 		</dependency>
-		<!-- <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
-			<version>r08</version> </dependency> -->
+		<dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
+			<version>r08</version> </dependency> 
 		<dependency>
 			<groupId>com.github.stephenc</groupId>
 			<artifactId>jamm</artifactId>
@@ -209,20 +209,21 @@
 			<groupId>org.xerial</groupId>
 			<artifactId>snappy</artifactId>
 			<version>1.0.1-rc4</version>
-		</dependency>
+		</dependency> -->
 
 
 		<!-- Non public dependencies- being picked from kundera svn repository -->
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.safehaus.jug</groupId>
 			<artifactId>jug-asl</artifactId>
 			<version>2.0.0</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 
 		<!-- Required for running tests for embedded cassandra mode -->
-		<dependency>
+		
+		<!-- <dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
 			<version>UNKNOWN</version>
@@ -232,10 +233,10 @@
 			<artifactId>clhm-production</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
-		<!-- <dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
+		<dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
 			<version>3.9.0.GA</version> </dependency> -->
 		<!-- Cassandra Dependencies -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
 			<version>1.2.4</version>
@@ -255,10 +256,10 @@
 			<groupId>org.xerial</groupId>
 			<artifactId>snappy</artifactId>
 			<version>1.0.1-rc4</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- HBase depndencies -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
 			<version>0.92.1</version>
@@ -288,7 +289,7 @@
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-core</artifactId>
 			<version>1.0.2</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- contiperf dependency -->
 
@@ -298,17 +299,17 @@
 			<version>2.2.0</version>
 		</dependency>
 
-		<dependency>
+		 <dependency>
 			<groupId>net.sourceforge.jexcelapi</groupId>
 			<artifactId>jxl</artifactId>
 			<version>2.6</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
 			<version>3.5.0</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- kundera dependencies -->
 
@@ -482,19 +483,19 @@
 			<version>2.5-SNAPSHOT</version> <type>test-jar</type> <scope>test</scope> 
 			</dependency> -->
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>4.1.7.Final</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 
 
 		<!-- Unit Testing libraries -->

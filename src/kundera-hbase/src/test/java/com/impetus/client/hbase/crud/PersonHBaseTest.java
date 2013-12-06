@@ -33,11 +33,11 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.QualifierFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.elasticsearch.node.Node;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.crud.PersonHBase.Day;

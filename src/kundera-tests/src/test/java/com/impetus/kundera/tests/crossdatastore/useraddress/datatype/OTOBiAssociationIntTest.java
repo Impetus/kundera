@@ -39,7 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatBi1To1FKBigDecimal;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.PersonnelBi1To1FKInt;

@@ -44,6 +44,9 @@ import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
+import com.impetus.kundera.metadata.model.annotation.EntityAnnotationProcessor;
+
 /**
  * Implementation for <code>ManagedType</code> interface.
  * 
@@ -71,6 +74,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private InheritanceModel model;
 
+    private EntityAnnotationProcessor entityAnnotation;
+    
     /**
      * Super constructor with arguments.
      * 
@@ -92,6 +97,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         this.superClazzType = superClazzType;
         bindTypeAnnotations();
         this.model = buildInheritenceModel();
+        entityAnnotation = new DefaultEntityAnnotationProcessor(clazz);
     }
 
     /*
@@ -1269,4 +1275,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+    public EntityAnnotationProcessor getEntityAnnotation()
+    {
+        return entityAnnotation;
+    }
+       
 }

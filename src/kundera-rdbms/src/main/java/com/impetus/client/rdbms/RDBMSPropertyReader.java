@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -28,11 +31,14 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * @author vivek.mishra
  * 
- * Implementation class to read external property configuration. Extends {@link AbstractPropertyReader}(future purpose), though none of method is supported.
+ *         Implementation class to read external property configuration. Extends
+ *         {@link AbstractPropertyReader}(future purpose), though none of method
+ *         is supported.
  */
 public class RDBMSPropertyReader extends AbstractPropertyReader
 {
@@ -50,11 +56,12 @@ public class RDBMSPropertyReader extends AbstractPropertyReader
      * 
      * @param pu
      */
-    
+
     public Configuration load(String pu)
     {
         Configuration conf = new Configuration().addProperties(HibernateUtils.getProperties(pu));
-        String propertyFileName = externalProperties != null ? (String)externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) :null;
+        String propertyFileName = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
         puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         if (propertyFileName == null)
         {
@@ -63,8 +70,8 @@ public class RDBMSPropertyReader extends AbstractPropertyReader
         }
         if (propertyFileName != null)
         {
-            PropertyType fileType  = PropertyType.value(propertyFileName);
-            
+            PropertyType fileType = PropertyType.value(propertyFileName);
+
             switch (fileType)
             {
             case xml:
@@ -73,31 +80,51 @@ public class RDBMSPropertyReader extends AbstractPropertyReader
 
             case properties:
                 Properties props = new Properties();
-                
+
                 InputStream ioStream = puMetadata.getClassLoader().getResourceAsStream(propertyFileName);
+                if (ioStream == null)
+                {
+                    propertyFileName = KunderaCoreUtils.resolvePath(propertyFileName);
+                    try
+                    {
+                        ioStream = new FileInputStream(new File(propertyFileName));
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        log.warn("File {} not found, Caused by ", propertyFileName);
+                    }
+                }
                 try
                 {
-                    props.load(ioStream);
+                    if (ioStream != null)
+                    {
+                        props.load(ioStream);
+                    }
                 }
                 catch (IOException e)
                 {
-                    log.error("Skipping as error occurred while loading property file {}, Cause by : {}.",propertyFileName,e);
+                    log.error("Skipping as error occurred while loading property file {}, Cause by : {}.",
+                            propertyFileName, e);
                 }
-                
+
                 conf.addProperties(props);
                 break;
 
             default:
-                log.error("Unsupported type{} for file{}, skipping load of properties.",fileType,propertyFileName);
+                log.error("Unsupported type{} for file{}, skipping load of properties.", fileType, propertyFileName);
                 break;
             }
         }
-        
+
         return conf;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus.kundera.configure.ClientProperties)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus
+     * .kundera.configure.ClientProperties)
      */
     @Override
     protected void onXml(ClientProperties cp)

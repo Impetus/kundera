@@ -26,9 +26,9 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

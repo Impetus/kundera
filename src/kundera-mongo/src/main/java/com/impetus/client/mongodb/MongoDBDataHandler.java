@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
@@ -75,16 +74,16 @@ public final class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
-            List<String> relations)
+    public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m, DBObject document,
+            List<String> relations, Map<String, Object> relationValue)
     {
         // Entity object
-        Object entity = null;
+        // Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
         try
         {
-            entity = entityClass.newInstance();
+            // entity = entityClass.newInstance();
 
             // Populate primary key column
             Object rowKey = document.get("_id");
@@ -92,7 +91,6 @@ public final class MongoDBDataHandler
             Class<?> idClass = null;
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
-            Map<String, Object> relationValue = null;
             idClass = m.getIdAttribute().getJavaType();
             rowKey = MongoDBUtils.populateValue(rowKey, idClass);
 
@@ -113,11 +111,9 @@ public final class MongoDBDataHandler
             {
                 rowKey = MongoDBUtils.getTranslatedObject(rowKey, rowKeyValueClass, idClass);
                 PropertyAccessorHelper.setId(entity, m, rowKey);
-
             }
 
             // Populate entity columns
-            // List<Column> columns = m.getColumnsAsList();
             EntityType entityType = metaModel.entity(entityClass);
 
             Set<Attribute> columns = entityType.getAttributes();
@@ -126,7 +122,7 @@ public final class MongoDBDataHandler
             {
                 if (!column.equals(m.getIdAttribute()))
                 {
-                    String fieldName = ((AbstractAttribute) column).getJPAColumnName();
+                    String jpaColumnName = ((AbstractAttribute) column).getJPAColumnName();
 
                     Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                     if (metaModel.isEmbeddable(javaType))
@@ -144,13 +140,13 @@ public final class MongoDBDataHandler
                             relationValue = new HashMap<String, Object>();
                         }
 
-                        if (relations.contains(fieldName)
-                                && !fieldName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
+                        if (relations.contains(jpaColumnName)
+                                && !jpaColumnName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
                         {
-                            Object colValue = document.get(fieldName);
+                            Object colValue = document.get(jpaColumnName);
                             if (colValue != null)
                             {
-                                String colFieldName = m.getFieldName(fieldName);
+                                String colFieldName = m.getFieldName(jpaColumnName);
                                 Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName)
                                         : null;
                                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
@@ -158,38 +154,74 @@ public final class MongoDBDataHandler
                                 colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
                                         relationMetadata.getIdAttribute().getJavaType());
                             }
-                            relationValue.put(fieldName, colValue);
+                            relationValue.put(jpaColumnName, colValue);
                         }
                     }
                 }
             }
 
-            if (relationValue != null && !relationValue.isEmpty())
-            {
-                EnhanceEntity e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
-                return e;
-            }
-            else
-            {
-                return entity;
-            }
+            /*
+             * for (String jpaColumnName : document.keySet()) { if
+             * (jpaColumnName.equals("_id")) { continue; }
+             * 
+             * String fieldName = m.getFieldName(jpaColumnName); if
+             * (!jpaColumnName.equals(((AbstractAttribute)
+             * m.getIdAttribute()).getJPAColumnName()) && fieldName != null) {
+             * Attribute column =
+             * metaModel.entity(m.getEntityClazz()).getAttribute(fieldName);
+             * Class javaType = ((AbstractAttribute)
+             * column).getBindableJavaType(); if
+             * (metaModel.isEmbeddable(javaType)) { onViaEmbeddable(column,
+             * entity, metaModel, document); } else if (!column.isAssociation())
+             * { DocumentObjectMapper.setFieldValue(document, entity, column); }
+             * } else if (relations != null &&
+             * !jpaColumnName.equals(((AbstractAttribute)
+             * m.getIdAttribute()).getJPAColumnName())) { if (relationValue ==
+             * null) { relationValue = new HashMap<String, Object>(); }
+             * 
+             * if (relations.contains(jpaColumnName) &&
+             * !jpaColumnName.equals(((AbstractAttribute)
+             * m.getIdAttribute()).getJPAColumnName())) { Object colValue =
+             * document.get(jpaColumnName); if (colValue != null) { String
+             * colFieldName = m.getFieldName(jpaColumnName); Attribute attribute
+             * = colFieldName != null ? entityType.getAttribute(colFieldName) :
+             * null; EntityMetadata relationMetadata =
+             * KunderaMetadataManager.getEntityMetadata(attribute
+             * .getJavaType()); colValue =
+             * MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
+             * relationMetadata .getIdAttribute().getJavaType()); }
+             * relationValue.put(jpaColumnName, colValue); } }
+             * 
+             * }
+             */
+
+//            if (relationValue != null && !relationValue.isEmpty())
+//            {
+//                /* EnhanceEntity */entity = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m),
+//                        relationValue);
+//                return entity;
+//            }
+//            else
+//            {
+//                return entity;
+//            }
+            return relationValue;
         }
         catch (InstantiationException e)
         {
             log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
-            return entity;
+            return relationValue;
         }
         catch (IllegalAccessException e)
         {
             log.error("Error while Getting entity from Document, Caused by: ", e);
-            return entity;
+            return relationValue;
         }
         catch (PropertyAccessException e)
         {
             log.error("Error while Getting entity from Document, Caused by: ", e);
-            return entity;
+            return relationValue;
         }
-
     }
 
     /**
@@ -205,10 +237,10 @@ public final class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity, List<RelationHolder> relations)
+    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations)
             throws PropertyAccessException
     {
-        // List<Column> columns = m.getColumnsAsList();
+        Map<String, DBObject> dbObjects = new HashMap<String, DBObject>();
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -217,19 +249,18 @@ public final class MongoDBDataHandler
         // Populate Row Key
         Object id = PropertyAccessorHelper.getId(entity, m);
 
-        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-        {
-            MongoDBUtils.populateCompoundKey(dbObj, m, metaModel, id);
-        }
-        else
-        {
-            dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
-        }
+        DBObject dbObj = getDBObject(m, m.getTableName(), dbObjects, metaModel, id);
+
+        dbObjects.put(m.getTableName(), dbObj);
+
         // Populate columns
-        // for (Column column : columns)
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
         {
+            String tableName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
+                    .getTableName() : m.getTableName();
+            dbObj = getDBObject(m, tableName, dbObjects, metaModel, id);
+
             if (!column.equals(m.getIdAttribute()))
             {
                 try
@@ -237,7 +268,7 @@ public final class MongoDBDataHandler
                     Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                     if (metaModel.isEmbeddable(javaType))
                     {
-                        dbObj = onEmbeddable(/* entityType, */column, /* m, */entity, metaModel, dbObj);
+                        dbObj = onEmbeddable(column, entity, metaModel, dbObj);
                     }
                     else if (!column.isAssociation())
                     {
@@ -249,18 +280,22 @@ public final class MongoDBDataHandler
                     log.error("Can't access property " + column.getName());
                 }
             }
+            dbObjects.put(tableName, dbObj);
         }
         if (relations != null)
         {
+            dbObj = dbObjects.get(m.getTableName());
             for (RelationHolder rh : relations)
             {
                 dbObj.put(rh.getRelationName(),
                         MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
+            dbObjects.put(m.getTableName(), dbObj);
         }
 
         if (((AbstractManagedType) entityType).isInherited())
         {
+            dbObj = dbObjects.get(m.getTableName());
             String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
             String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
 
@@ -270,29 +305,30 @@ public final class MongoDBDataHandler
             {
                 dbObj.put(discrColumn, discrValue);
             }
+            dbObjects.put(m.getTableName(), dbObj);
         }
-
-        return dbObj;
+        return dbObjects;
     }
 
-    /**
-     * Returns column name from the filter property which is in the form
-     * dbName.columnName
-     * 
-     * @param filterProperty
-     *            the filter property
-     * @return the column name
-     */
-    private String getColumnName(String filterProperty)
+    private DBObject getDBObject(EntityMetadata m, String tableName, Map<String, DBObject> dbObjects,
+            MetamodelImpl metaModel, Object id)
     {
-        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-        String columnName = "";
-        while (st.hasMoreTokens())
+        tableName = tableName != null ? tableName : m.getTableName();
+        DBObject dbObj = dbObjects.get(tableName);
+        if (dbObj == null)
         {
-            columnName = st.nextToken();
+            dbObj = new BasicDBObject();
         }
 
-        return columnName;
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            MongoDBUtils.populateCompoundKey(dbObj, m, metaModel, id);
+        }
+        else
+        {
+            dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
+        }
+        return dbObj;
     }
 
     /**
@@ -326,16 +362,12 @@ public final class MongoDBDataHandler
     {
         List list = new ArrayList();// List of embedded object to be returned
 
-        // MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-
         // Specified after entity alias in query
-        String columnName = result /* getColumnName(result) */;
+        String columnName = result;
 
         // Something user didn't specify and we have to derive
         // TODO: User must specify this in query and remove this logic once
         // query format is changed
-        // String enclosingDocumentName = getEnclosingDocumentName(m,
-        // columnName);
 
         String enclosingDocumentName = null;
 
@@ -348,14 +380,10 @@ public final class MongoDBDataHandler
         try
         {
             attrib = entityType.getAttribute(columnName);
-            // if (!m.getColumnFieldNames().contains(columnName))
-            // {
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
             for (String key : embeddables.keySet())
-            // for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
             {
                 superColumn = embeddables.get(key);
-                // List<Column> columns = superColumn.getColumns();
                 columns = superColumn.getAttributes();
 
                 for (Attribute column : columns)
@@ -370,15 +398,15 @@ public final class MongoDBDataHandler
         }
         catch (IllegalArgumentException iax)
         {
-            log.info("No column found for: " + columnName);
+            if (log.isWarnEnabled())
+            {
+                log.warn("No column found for: " + columnName);
+            }
         }
 
         // Query for fetching entities based on user specified criteria
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
                 mongoQuery, keys).limit(maxResult);
-
-        // EmbeddableType superColumn =
-        // m.getEmbeddedColumn(enclosingDocumentName);
 
         if (superColumn != null)
         {
@@ -406,7 +434,6 @@ public final class MongoDBDataHandler
                                 (BasicDBObject) embeddedDocumentObject, superColumn.getJavaType(),
                                 superColumn.getAttributes());
                         list.add(embeddedObject);
-
                     }
                     else
                     {
@@ -425,11 +452,7 @@ public final class MongoDBDataHandler
      * @param m
      * @param entity
      */
-    DBObject onEmbeddable(/* EntityType entityType, */Attribute column, /*
-                                                                         * EntityMetadata
-                                                                         * m,
-                                                                         */Object entity, Metamodel metaModel,
-            DBObject dbObj)
+    DBObject onEmbeddable(Attribute column, Object entity, Metamodel metaModel, DBObject dbObj)
     {
         EmbeddableType embeddableType = metaModel.embeddable(((AbstractAttribute) column).getBindableJavaType());
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
@@ -451,7 +474,6 @@ public final class MongoDBDataHandler
                                 embeddableType.getAttributes()));
             }
         }
-
         return dbObj;
     }
 
@@ -473,15 +495,14 @@ public final class MongoDBDataHandler
             Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedField);
 
             embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
-           
-            if(embeddedDocumentObject != null)
+
+            if (embeddedDocumentObject != null)
             {
                 Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(metamodel,
                         (BasicDBList) embeddedDocumentObject, embeddedField.getType(), embeddedObjectClass,
                         embeddable.getAttributes());
                 PropertyAccessorHelper.set(entity, embeddedField, embeddedCollection);
             }
-
         }
         else
         {
@@ -491,5 +512,4 @@ public final class MongoDBDataHandler
                     embeddable.getAttributes()));
         }
     }
-
 }

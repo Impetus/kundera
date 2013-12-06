@@ -35,7 +35,6 @@ import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.MetadataBuilder;

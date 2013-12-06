@@ -30,6 +30,8 @@ import javax.persistence.metamodel.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.model.annotation.DefaultFieldAnnotationProcessor;
+import com.impetus.kundera.metadata.model.annotation.FieldAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
 /**
@@ -65,6 +67,11 @@ public abstract class AbstractAttribute<X, T>
 
     /** Column name */
     private String columnName;
+    
+    /** Name of Table, to which this attribute belongs to */
+    private String tableName;
+    
+    private FieldAnnotationProcessor fieldAnnotation;
 
     /**
      * Instantiates a new abstract attribute.
@@ -91,6 +98,8 @@ public abstract class AbstractAttribute<X, T>
         this.managedType = managedType;
         this.member = member;
         this.columnName = getValidJPAColumnName();
+        this.tableName = getTableName();
+        this.fieldAnnotation = new DefaultFieldAnnotationProcessor(member);
     }
 
     /*
@@ -189,6 +198,22 @@ public abstract class AbstractAttribute<X, T>
     }
 
     /**
+     * Returns assigned table name.
+     * 
+     * @return table name.
+     */
+    public String getTableName()
+    {
+        Column column = ((AbstractManagedType)this.managedType).getAttributeBinding(member);
+        if(column != null)
+        {
+            tableName = column.table();
+        }
+        
+        return tableName;
+    }
+    
+    /**
      * Gets the valid jpa column name.
      * 
      * @param entity
@@ -240,4 +265,8 @@ public abstract class AbstractAttribute<X, T>
         return name == null ? getName() : name;
     }
 
+    public FieldAnnotationProcessor getFieldAnnotation()
+    {
+        return fieldAnnotation;
+    }
 }

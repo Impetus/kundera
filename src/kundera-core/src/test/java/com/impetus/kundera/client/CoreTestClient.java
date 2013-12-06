@@ -243,7 +243,6 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
     public void setIndexManager(IndexManager im){
         this.indexManager = im;
     }
-    
-    
+   
 
 }

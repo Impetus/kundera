@@ -45,9 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.accessor.DateAccessor;
-import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * @author Kuldeep Mishra
@@ -351,7 +351,7 @@ public class EmbeddedRDBMSUserTest
 
         try
         {
-            ksDef = com.impetus.kundera.tests.cli.CassandraCli.client.describe_keyspace(KEYSPACE);
+            ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
             CassandraCli.client.set_keyspace(KEYSPACE);
 
             List<CfDef> cfDefn = ksDef.getCf_defs();

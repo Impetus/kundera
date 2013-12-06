@@ -32,7 +32,7 @@ import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 
 /**
  * Utilities for Test setup

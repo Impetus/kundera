@@ -68,8 +68,8 @@ public class KunderaQuery
             "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile(
-            "=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset", Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset",
+            Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
@@ -405,7 +405,9 @@ public class KunderaQuery
 
         if (null == entityClass)
         {
-            logger.error("No entity {} found, please verify it is properly annotated with @Entity and not a mapped Super class",entityName);
+            logger.error(
+                    "No entity {} found, please verify it is properly annotated with @Entity and not a mapped Super class",
+                    entityName);
             throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
 
@@ -428,10 +430,9 @@ public class KunderaQuery
 
         // String filter = getFilter();
 
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                getPersistenceUnit());
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityClass);
-        
+
         if (null == filter)
         {
             List<String> clauses = new ArrayList<String>();
@@ -448,25 +449,21 @@ public class KunderaQuery
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
-/*        if(((AbstractManagedType)entityType).isInherited())
-        {
-            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
-            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
-            
-            if(discrColumn != null && discrValue != null)
-            {
-                if(!clauses.isEmpty())
-                {
-                    clauses.add(" AND ");
-                }
-                
-                clauses.add(entityAlias+"."+discrColumn+ "= " + discrValue );
-            }
-        }
-*///        entityAlias
-        
-//        entityType
-        
+        /*
+         * if(((AbstractManagedType)entityType).isInherited()) { String
+         * discrColumn =
+         * ((AbstractManagedType)entityType).getDiscriminatorColumn(); String
+         * discrValue =
+         * ((AbstractManagedType)entityType).getDiscriminatorValue();
+         * 
+         * if(discrColumn != null && discrValue != null) {
+         * if(!clauses.isEmpty()) { clauses.add(" AND "); }
+         * 
+         * clauses.add(entityAlias+"."+discrColumn+ "= " + discrValue ); } }
+         */// entityAlias
+
+        // entityType
+
         for (String clause : clauses)
         {
             if (newClause)
@@ -490,12 +487,11 @@ public class KunderaQuery
                 try
                 {
                     // String columnName = metadata.getColumnName(property);
-                    columnName = ((AbstractAttribute) entityType.getAttribute(property))
-                            .getJPAColumnName();
+                    columnName = ((AbstractAttribute) entityType.getAttribute(property)).getJPAColumnName();
                 }
                 catch (IllegalArgumentException iaex)
                 {
-                    logger.info("No column found by this name : " + property + " checking for embeddedfield");
+                    logger.warn("No column found by this name : " + property + " checking for embeddedfield");
                 }
                 // where condition may be for search within embedded object
                 if (columnName == null && property.indexOf(".") > 0)
@@ -506,6 +502,12 @@ public class KunderaQuery
                     {
                         columnName = property;
                     }
+                }
+
+                if (columnName == null)
+                {
+                    logger.error("No column found by this name : " + property);
+                    throw new JPQLParseException("No column found by this name : " + property + ". Check your query.");
                 }
 
                 String condition = tokens.get(1);
@@ -537,28 +539,27 @@ public class KunderaQuery
                 }
             }
         }
-        
+
         addDiscriminatorClause(clauses, entityType);
 
-        
-//        appendDiscriminator();
+        // appendDiscriminator();
     }
 
     private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
     {
-        if(((AbstractManagedType)entityType).isInherited())
+        if (((AbstractManagedType) entityType).isInherited())
         {
-            String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
-            String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
-            
-            if(discrColumn != null && discrValue != null)
+            String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+            String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+            if (discrColumn != null && discrValue != null)
             {
-                if(!clauses.isEmpty())
+                if (!clauses.isEmpty())
                 {
                     filtersQueue.add("AND");
                 }
-             
-                FilterClause filterClause = new FilterClause(discrColumn,"=",discrValue);
+
+                FilterClause filterClause = new FilterClause(discrColumn, "=", discrValue);
                 filtersQueue.add(filterClause);
             }
         }

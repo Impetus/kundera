@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 
 /**
  * @author impadmin

@@ -50,8 +50,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
-import com.impetus.kundera.tests.cli.CassandraCli;
 
 /**
  * @author vivek.mishra
@@ -261,6 +261,6 @@ public class EjbJTAContextTest
             CassandraCli.client.system_add_keyspace(ksDef);
         }
 
-        com.impetus.kundera.tests.cli.CassandraCli.client.set_keyspace("KunderaTests");
+        CassandraCli.client.set_keyspace("KunderaTests");
     }
 }

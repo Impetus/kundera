@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +59,11 @@ public class MetamodelImpl implements Metamodel
     /** The mapped super class types. */
     private Map<Class<?>, ManagedType<?>> mappedSuperClassTypes;
 
+    /** Entity name to id discriptor. */
     private Map<String, IdDiscriptor> keyValues;
+
+    /** Entity name to List of Secondary tables */
+    private Map<Class<?>, List<String>> classToTables;
 
     /*
      * (non-Javadoc)
@@ -366,12 +371,11 @@ public class MetamodelImpl implements Metamodel
             EntityType entityType = entityTypes.get(clazz);
             return entityType.getAttribute(fieldName);
         }
-
         throw new IllegalArgumentException("No entity found: " + clazz);
     }
 
     /**
-     * Custome implementation to offer map of embeddables available for given
+     * Custom implementation to offer map of embeddables available for given
      * entityType.
      * 
      * @param clazz
@@ -395,9 +399,7 @@ public class MetamodelImpl implements Metamodel
                     embeddableAttibutes.put(attribute.getName(),
                             embeddable(((AbstractAttribute) attribute).getBindableJavaType()));
                 }
-
             }
-
         }
         return embeddableAttibutes;
     }

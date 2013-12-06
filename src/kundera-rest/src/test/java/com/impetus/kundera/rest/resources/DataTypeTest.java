@@ -48,7 +48,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.rest.common.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.Professional;

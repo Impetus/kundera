@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUni1To1FK;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
 
@@ -276,7 +276,7 @@ public class OTOUniAssociationTest extends TwinAssociation
 
         try
         {
-            ksDef = com.impetus.kundera.tests.cli.CassandraCli.client.describe_keyspace("KunderaTests");
+            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
 
             List<CfDef> cfDefn = ksDef.getCf_defs();

@@ -17,6 +17,7 @@ package com.impetus.client.mongodb.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.impetus.client.mongodb.MongoDBClient;
@@ -96,8 +97,17 @@ class ResultIterator<E> implements IResultIterator<E>
         {
             fetchSize--;
             DBObject document = cursor.next();
-            E entityFromDocument = (E) handler.getEntityFromDocument(m.getEntityClazz(), m, document,
-                    m.getRelationNames());
+            E entityFromDocument = instantiateEntity(m.getEntityClazz(), null);
+            Map<String, Object> relationValue = null;
+            relationValue = handler.getEntityFromDocument(m.getEntityClazz(), entityFromDocument, m, document,
+                    m.getRelationNames(), relationValue);
+
+            if (relationValue != null && !relationValue.isEmpty())
+            {
+                entityFromDocument = (E) new EnhanceEntity(entityFromDocument, PropertyAccessorHelper.getId(
+                        entityFromDocument, m), relationValue);
+            }
+
             if (!m.isRelationViaJoinTable() && (m.getRelationNames() == null || (m.getRelationNames().isEmpty())))
             {
                 return entityFromDocument;
@@ -108,6 +118,29 @@ class ResultIterator<E> implements IResultIterator<E>
                 ls.add((EnhanceEntity) entityFromDocument);
                 return setRelationEntities(ls.get(0), client, m);
             }
+        }
+        return null;
+    }
+
+    private E instantiateEntity(Class<?> entityClazz, Object entity)
+    {
+        try
+        {
+            if (entity == null)
+            {
+                return (E) entityClazz.newInstance();
+            }
+            return (E) entity;
+        }
+        catch (InstantiationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return null;
     }

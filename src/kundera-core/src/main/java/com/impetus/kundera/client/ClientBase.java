@@ -85,9 +85,9 @@ public abstract class ClientBase
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
-        /* id = */onPersist(metadata, entity, id, relationHolders);
-        id = PropertyAccessorHelper.getId(entity, metadata);
-        node.setEntityId(id);
+        onPersist(metadata, entity, id, relationHolders);
+//        id = PropertyAccessorHelper.getId(entity, metadata);
+//        node.setEntityId(id);
         indexNode(node, metadata);
     }
 
@@ -221,7 +221,11 @@ public abstract class ClientBase
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
 
-
+    
+//    protected abstract Map<String, Object> preparePersistentObject(EntityMetadata entityMetadata, Object entity, Object id,
+//            List<RelationHolder> rlHolders);
+    
+    
     public ClientMetadata getClientMetadata()
     {
         return this.clientMetadata;

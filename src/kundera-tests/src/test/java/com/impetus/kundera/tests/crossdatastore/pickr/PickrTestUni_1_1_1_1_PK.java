@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.album.AlbumUni_1_1_1_1_PK;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photo.PhotoUni_1_1_1_1_PK;
 import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.PhotographerUni_1_1_1_1_PK;

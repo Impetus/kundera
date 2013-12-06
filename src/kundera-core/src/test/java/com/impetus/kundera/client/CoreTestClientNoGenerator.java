@@ -180,5 +180,4 @@ public class CoreTestClientNoGenerator extends ClientBase implements Client<Luce
     {
 
     }
-
 }

@@ -15,12 +15,16 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.persistence.SecondaryTable;
+import javax.persistence.SecondaryTables;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.types.ObjectId;
@@ -33,6 +37,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.graph.Node;
@@ -44,9 +49,12 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -57,7 +65,7 @@ import com.mongodb.DefaultDBEncoder;
 import com.mongodb.WriteConcern;
 
 /**
- * CLient class for MongoDB database.
+ * Client class for MongoDB database.
  * 
  * @author impetusopensource
  */
@@ -219,17 +227,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
-//        if (log.isDebugEnabled())
-//        {
-//            log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
-//        }
-
-        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
-
         BasicDBObject query = new BasicDBObject();
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
 
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
@@ -240,22 +243,61 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             query.put("_id", MongoDBUtils.populateValue(key, key.getClass()));
         }
 
-        // DBCursor cursor = dbCollection.findOne(query);
-        DBObject fetchedDocument = dbCollection.findOne(query);
+        // For secondary tables.
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+        secondaryTables.add(entityMetadata.getTableName());
 
-        /*
-         * if (cursor.hasNext()) { fetchedDocument = cursor.next(); } else {
-         * return null; }
-         */
+        Object enhancedEntity = null;
+        Map<String, Object> relationValue = null;
 
-        if (fetchedDocument != null)
+        for (String tableName : secondaryTables)
         {
-            Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
-                    fetchedDocument, relationNames);
+            DBCollection dbCollection = mongoDb.getCollection(tableName);
 
-            return enhancedEntity;
+            DBObject fetchedDocument = dbCollection.findOne(query);
+
+            if (fetchedDocument != null)
+            {
+                enhancedEntity = instantiateEntity(entityClass, enhancedEntity);
+                relationValue = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), enhancedEntity,
+                        entityMetadata, fetchedDocument, relationNames, relationValue);
+
+            }
         }
 
+        if (relationValue != null && !relationValue.isEmpty())
+        {
+            EnhanceEntity entity = new EnhanceEntity(enhancedEntity, PropertyAccessorHelper.getId(enhancedEntity,
+                    entityMetadata), relationValue);
+            return entity;
+        }
+        else
+        {
+            return enhancedEntity;
+        }
+    }
+
+    private Object instantiateEntity(Class entityClass, Object entity)
+    {
+        try
+        {
+            if (entity == null)
+            {
+                return entityClass.newInstance();
+            }
+            return entity;
+        }
+        catch (InstantiationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -284,8 +326,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
-                    fetchedDocument, entityMetadata.getRelationNames());
+            Object entity = instantiateEntity(entityClass, null);
+            Map<String, Object> relationValue = null;
+            relationValue = handler.getEntityFromDocument(entityClass, entity, entityMetadata, fetchedDocument,
+                    entityMetadata.getRelationNames(), relationValue);
+            if (relationValue != null && !relationValue.isEmpty())
+            {
+                entity = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, entityMetadata), relationValue);
+            }
             entities.add(entity);
         }
         return entities;
@@ -349,7 +397,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
+            Object entity = instantiateEntity(clazz, null);
+            Map<String, Object> relationValue = null;
+            relationValue = handler.getEntityFromDocument(clazz, entity, entityMetadata, fetchedDocument,
+                    relationNames, relationValue);
+            if (relationValue != null && !relationValue.isEmpty())
+            {
+                entity = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, entityMetadata), relationValue);
+            }
             entities.add(entity);
         }
         return entities;
@@ -394,7 +449,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         dbCollection.remove(query, getWriteConcern(), encoder);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
-
     }
 
     /*
@@ -487,7 +541,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, m.getRelationNames());
+            Object entity = instantiateEntity(entityClazz, null);
+            Map<String, Object> relationValue = null;
+            relationValue = handler.getEntityFromDocument(entityClazz, entity, m, fetchedDocument,
+                    m.getRelationNames(), relationValue);
+            if (relationValue != null && !relationValue.isEmpty())
+            {
+                entity = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+            }
             results.add(entity);
         }
 
@@ -517,7 +578,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         BasicDBObject query = new BasicDBObject();
         query.put(columnName, columnValue);
         dbCollection.remove(query, getWriteConcern(), encoder);
-
     }
 
     /*
@@ -552,7 +612,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             nodes.add(node);
         }
-
         onBatchLimit();
     }
 
@@ -603,7 +662,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 }
                 else
                 {
-
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
                     collections = onPersist(collections, node.getData(), node.getEntityId(), metadata, relationHolders,
@@ -613,7 +671,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 node.handlePostEvent();
             }
         }
-
         if (!collections.isEmpty())
         {
             onFlushCollection(collections);
@@ -657,59 +714,61 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             EntityMetadata metadata, List<RelationHolder> relationHolders, boolean isUpdate)
     {
         persistenceUnit = metadata.getPersistenceUnit();
-        String documentName = metadata.getTableName();
-        DBObject document = null;
-        document = new BasicDBObject();
-        document = handler.getDocumentFromEntity(document, metadata, entity, relationHolders);
+        // String documentName = metadata.getTableName();
+        Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders);
 
         if (isUpdate)
         {
-            BasicDBObject query = new BasicDBObject();
-
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());
-
-            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            for (String documentName : documents.keySet())
             {
-                MongoDBUtils.populateCompoundKey(query, metadata, metaModel, id);
-            }
-            else
-            {
-                query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
-            }
-            DBCollection dbCollection = mongoDb.getCollection(documentName);
-            // dbCollection.findAndModify(query, document);
+                BasicDBObject query = new BasicDBObject();
 
-            DBObject obj = dbCollection.findOne(query);
-            if (obj != null)
-            {
-                obj.putAll(document);
+                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getMetamodel(metadata.getPersistenceUnit());
 
-                dbCollection.save(obj);
-            }
-            else
-            {
-                dbCollection.save(document);
+                if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+                {
+                    MongoDBUtils.populateCompoundKey(query, metadata, metaModel, id);
+                }
+                else
+                {
+                    query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
+                }
+                DBCollection dbCollection = mongoDb.getCollection(documentName);
+
+                DBObject obj = dbCollection.findOne(query);
+                if (obj != null)
+                {
+                    obj.putAll(documents.get(documentName));
+
+                    dbCollection.save(obj);
+                }
+                else
+                {
+                    dbCollection.save(documents.get(documentName));
+                }
             }
         }
         else
         {
-            // a db collection can have multiple records..
-            // and we can have a collection of records as well.
-            List<DBObject> dbStatements = null;
-            if (collections.containsKey(documentName))
+            for (String documentName : documents.keySet())
             {
-                dbStatements = collections.get(documentName);
-                dbStatements.add(document);
-            }
-            else
-            {
-                dbStatements = new ArrayList<DBObject>();
-                dbStatements.add(document);
-                collections.put(documentName, dbStatements);
+                // a db collection can have multiple records..
+                // and we can have a collection of records as well.
+                List<DBObject> dbStatements = null;
+                if (collections.containsKey(documentName))
+                {
+                    dbStatements = collections.get(documentName);
+                    dbStatements.add(documents.get(documentName));
+                }
+                else
+                {
+                    dbStatements = new ArrayList<DBObject>();
+                    dbStatements.add(documents.get(documentName));
+                    collections.put(documentName, dbStatements);
+                }
             }
         }
-
         return collections;
     }
 

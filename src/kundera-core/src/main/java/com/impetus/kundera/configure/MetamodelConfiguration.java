@@ -182,9 +182,10 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             reader = new ClasspathReader(classesToScan);
             // resources = reader.findResourcesByContextLoader();
         }
-
+       
         InputStream[] iStreams = null;
-        if (this.getClass().getClassLoader() instanceof URLClassLoader)
+        PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
+        if (this.getClass().getClassLoader() instanceof URLClassLoader && !puMetadata.getExcludeUnlistedClasses())
         {
             URL[] managedClasses = reader.findResources();
             if (managedClasses != null)
@@ -341,7 +342,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
-        
+
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
         try
@@ -349,7 +350,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             cf = new ClassFile(dstream);
 
             className = cf.getName();
-            
+
             List<String> annotations = new ArrayList<String>();
 
             reader.accumulateAnnotations(annotations,
@@ -365,23 +366,22 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 {
                     // Class<?> clazz =
                     // Thread.currentThread().getContextClassLoader().loadClass(className);
-                    
-                    Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
-                    
-                    //get the name of entity to be used for entity to class map if or not annotated with name 
-                    String entityName = getEntityName(clazz); 
-                        
 
-                    if ((entityNameToClassMap.containsKey(entityName)
-                            && !entityNameToClassMap.get(entityName).getName().equals(clazz.getName())))
+                    Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+
+                    // get the name of entity to be used for entity to class map
+                    // if or not annotated with name
+                    String entityName = getEntityName(clazz);
+
+                    if ((entityNameToClassMap.containsKey(entityName) && !entityNameToClassMap.get(entityName)
+                            .getName().equals(clazz.getName())))
                     {
                         throw new MetamodelLoaderException("Name conflict between classes "
                                 + entityNameToClassMap.get(entityName).getName() + " and " + clazz.getName()
                                 + ". Make sure no two entity classes with the same name "
                                 + " are specified for persistence unit " + persistenceUnit);
-                    } 
+                    }
                     entityNameToClassMap.put(entityName, clazz);
-                   
 
                     EntityMetadata metadata = entityMetadataMap.get(clazz);
                     if (null == metadata)
@@ -433,14 +433,14 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
 
         return classes;
     }
-    
+
     /**
      * @param clazz
      */
     private String getEntityName(Class<?> clazz)
     {
-        return !StringUtils.isBlank(clazz.getAnnotation(Entity.class).name()) ? 
-                   clazz.getAnnotation(Entity.class).name() : clazz.getSimpleName();
+        return !StringUtils.isBlank(clazz.getAnnotation(Entity.class).name()) ? clazz.getAnnotation(Entity.class)
+                .name() : clazz.getSimpleName();
     }
 
     /**
