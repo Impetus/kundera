@@ -16,9 +16,12 @@
 package com.impetus.client.hbase;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.kundera.DataWrapper;
 
@@ -37,7 +40,9 @@ public class HBaseData implements DataWrapper
     private byte[] rowKey;
 
     /** The columns. */
-    private List<KeyValue> columns;
+//    private List<KeyValue> columns;
+    
+    private Map<String, byte[]> columns = new HashMap<String, byte[]>();
 
     /**
      * constructor with fields.
@@ -84,25 +89,28 @@ public class HBaseData implements DataWrapper
         return rowKey;
     }
 
-    /**
-     * Getter for list of columns.
-     * 
-     * @return list of columns
-     */
-    public List<KeyValue> getColumns()
+    public byte[] getColumnValue(String qualifier )
     {
-        return columns != null ? Collections.unmodifiableList(columns) : null;
+        return columns.get(qualifier);
+    }
+    
+    public Map<String, byte[]> getColumns()
+    {
+        return columns;
     }
 
-    /**
-     * Sets the columns.
-     * 
-     * @param columns
-     *            the new columns
-     */
     public void setColumns(List<KeyValue> columns)
     {
-        this.columns = columns;
+        for(KeyValue column : columns)
+        {
+            putColumn(column.getQualifier(), column.getValue());
+        }
     }
 
+    private void putColumn(byte[] qualifier, byte[] qualifierValue)
+    {
+        this.columns.put(Bytes.toString(qualifier), qualifierValue);
+    }
+    
+    
 }
