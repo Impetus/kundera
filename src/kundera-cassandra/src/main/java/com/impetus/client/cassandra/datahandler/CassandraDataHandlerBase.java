@@ -624,14 +624,27 @@ public abstract class CassandraDataHandlerBase
                     {
                         entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations,
                                 isCql3Enabled);
-                        if(entity == null)
+                        
+                   
+                        String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+
+                        String discriminatorValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+                        
+                        if (thriftColumnName != null && thriftColumnName.equals(discriminatorColumn)
+                                && column.getValue() != null && !PropertyAccessorFactory.STRING.fromBytes(String.class, column.getValue()).equals(discriminatorValue))
                         {
+                            entity = null;
                             break;
                         }
+                        
+                        /*if(entity == null)
+                        {
+                            break;
+                        }*/
                     }
                 }
             }
-
+            
             // Add all super columns to entity
             Collection embeddedCollection = null;
             Field embeddedCollectionField = null;
@@ -1017,12 +1030,12 @@ public abstract class CassandraDataHandlerBase
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
                     thriftColumnValue, isCql3Enabled);
         }
-        else if (thriftColumnName.contains(discriminatorColumn)
+/*        else if (thriftColumnName.contains(discriminatorColumn)
                 && !PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue).equals(discriminatorValue))
         {
             entity = null;
         }
-
+*/
         return entity;
     }
 
