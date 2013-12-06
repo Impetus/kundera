@@ -53,7 +53,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
         }
         catch (NumberFormatException e)
         {
-            log.warn("number format exception caught!,returning null!");
+            log.warn("Number format exception caught!,returning null!");
             return null;
         }
     }
@@ -110,6 +110,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number fromat exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

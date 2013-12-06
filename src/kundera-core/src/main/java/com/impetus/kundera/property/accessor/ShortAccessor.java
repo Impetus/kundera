@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -25,6 +28,7 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class ShortAccessor implements PropertyAccessor<Short>
 {
+    public static Logger log = LoggerFactory.getLogger(ShortAccessor.class);
 
     /*
      * (non-Javadoc)
@@ -35,7 +39,13 @@ public class ShortAccessor implements PropertyAccessor<Short>
     public Short fromBytes(Class targetClass, byte[] data)
     {
         if (data == null || data.length != 2)
+        {
+            if (log.isWarnEnabled())
+            {
+                log.warn("Bytes length not equal to 2");
+            }
             return 0x0;
+        }
         return (short) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
 
     }
@@ -100,6 +110,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

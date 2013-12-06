@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -36,6 +38,9 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class DateAccessor implements PropertyAccessor<Date>
 {
+
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(DateAccessor.class);
 
     /** The Constant DATE_FORMATTER. */
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
@@ -117,6 +122,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
+            log.error("Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -143,6 +149,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
+            log.error("Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -187,6 +194,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -227,7 +235,7 @@ public class DateAccessor implements PropertyAccessor<Date>
             }
 
         }
-
+        log.error("Required Date format is not supported!" + date);
         throw new PropertyAccessException("Required Date format is not supported!" + date);
     }
 

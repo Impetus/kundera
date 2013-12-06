@@ -17,6 +17,9 @@ package com.impetus.kundera.property.accessor;
 
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -28,6 +31,7 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class StringAccessor implements PropertyAccessor<String>
 {
+    public static Logger log = LoggerFactory.getLogger(StringAccessor.class);
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /*
@@ -45,6 +49,7 @@ public class StringAccessor implements PropertyAccessor<String>
         }
         catch (UnsupportedEncodingException e)
         {
+            log.error("Unsupported encoding exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
 
@@ -66,6 +71,7 @@ public class StringAccessor implements PropertyAccessor<String>
         }
         catch (UnsupportedEncodingException e)
         {
+            log.error("Unsupported encoding exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
 

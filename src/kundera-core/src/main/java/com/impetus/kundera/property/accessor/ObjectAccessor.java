@@ -66,10 +66,12 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
         catch (IOException e)
         {
+            log.error("IO exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
         catch (ClassNotFoundException e)
         {
+            log.error("Class not found exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
 
@@ -107,6 +109,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
         catch (IOException e)
         {
+            log.error("IO exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
         return null;
@@ -145,6 +148,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

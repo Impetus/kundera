@@ -17,6 +17,9 @@ package com.impetus.kundera.property.accessor;
 
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -28,6 +31,8 @@ import com.impetus.kundera.property.PropertyAccessor;
 @SuppressWarnings("rawtypes")
 public class EnumAccessor implements PropertyAccessor<Enum>
 {
+
+    private final static Logger log = LoggerFactory.getLogger(EnumAccessor.class);
 
     @Override
     public Enum fromBytes(Class targetClass, byte[] b)
@@ -43,6 +48,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         }
         catch (UnsupportedEncodingException e)
         {
+            log.error("Unsupported encoding exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
         return fromString(targetClass, s);
@@ -62,6 +68,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         }
         catch (UnsupportedEncodingException e)
         {
+            log.error("Unsupported encoding exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -88,6 +95,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
             }
             catch (IllegalArgumentException ex)
             {
+                log.error("Illegal argument exception, Caused by {}.", ex);
                 throw new PropertyAccessException(ex);
             }
         }

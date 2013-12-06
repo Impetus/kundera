@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -34,7 +37,8 @@ import com.vividsolutions.jts.io.WKTReader;
  */
 public class PointAccessor implements PropertyAccessor<Point>
 {
-
+    public static Logger log = LoggerFactory.getLogger(PointAccessor.class);
+    
     @Override
     public Point fromBytes(Class targetClass, byte[] b)
     {
@@ -48,10 +52,12 @@ public class PointAccessor implements PropertyAccessor<Point>
         }
         catch (IOException e)
         {
+            log.error("IO exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
         catch (ClassNotFoundException e)
         {
+            log.error("Class not found exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
         return o;
@@ -71,6 +77,7 @@ public class PointAccessor implements PropertyAccessor<Point>
         }
         catch (IOException e)
         {
+            log.error("IO exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -94,6 +101,7 @@ public class PointAccessor implements PropertyAccessor<Point>
         }
         catch (ParseException e)
         {
+            log.error("Parse exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -25,6 +28,8 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class BooleanAccessor implements PropertyAccessor<Boolean>
 {
+
+    private final static Logger log = LoggerFactory.getLogger(BooleanAccessor.class);
 
     /*
      * (non-Javadoc)
@@ -48,7 +53,6 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     {
         if (object != null)
         {
-
             Boolean b = (Boolean) object;
 
             return new byte[] { (byte) (b ? 0x01 : 0x00) }; // bool -> {1 byte}
@@ -90,6 +94,7 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

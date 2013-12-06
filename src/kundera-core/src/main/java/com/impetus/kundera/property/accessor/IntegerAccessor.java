@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -25,6 +28,8 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class IntegerAccessor implements PropertyAccessor<Integer>
 {
+
+    private final static Logger log = LoggerFactory.getLogger(IntegerAccessor.class);
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /*
@@ -93,6 +98,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
         }
         catch (NumberFormatException e)
         {
+            log .error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

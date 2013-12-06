@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -26,6 +29,8 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class CharAccessor implements PropertyAccessor<Character>
 {
 
+    private final static Logger log = LoggerFactory.getLogger(CharAccessor.class);
+
     /*
      * (non-Javadoc)
      * 
@@ -35,8 +40,13 @@ public class CharAccessor implements PropertyAccessor<Character>
     public Character fromBytes(Class targetClass, byte[] data)
     {
         if (data == null || data.length != 2)
+        {
+            if (log.isWarnEnabled())
+            {
+                log.warn("Data length is not matching");
+            }
             return 0x0;
-
+        }
         return (char) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
     }
 
@@ -75,11 +85,11 @@ public class CharAccessor implements PropertyAccessor<Character>
     @Override
     public String toString(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
-        
+
         return object.toString();
     }
 
@@ -97,6 +107,7 @@ public class CharAccessor implements PropertyAccessor<Character>
         {
             if (s == null)
             {
+                log.error("Can't convert String " + s + " to character");
                 throw new PropertyAccessException("Can't convert String " + s + " to character");
             }
 
@@ -114,6 +125,7 @@ public class CharAccessor implements PropertyAccessor<Character>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception caught,Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

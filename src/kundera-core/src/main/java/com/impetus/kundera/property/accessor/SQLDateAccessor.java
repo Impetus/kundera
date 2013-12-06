@@ -18,6 +18,8 @@ package com.impetus.kundera.property.accessor;
 import java.sql.Date;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -30,6 +32,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class SQLDateAccessor implements PropertyAccessor<Date>
 
 {
+    public static Logger log = LoggerFactory.getLogger(SQLDateAccessor.class);
 
     /*
      * (non-Javadoc)
@@ -53,6 +56,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
+            log.error("Error occured, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
 
@@ -81,6 +85,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
+            log.error("Error occured, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
 

@@ -17,6 +17,9 @@ package com.impetus.kundera.property.accessor;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -28,6 +31,8 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class LongAccessor implements PropertyAccessor<Long>
 {
 
+    private final static Logger log = LoggerFactory.getLogger(LongAccessor.class);
+
     /*
      * (non-Javadoc)
      * 
@@ -38,6 +43,10 @@ public class LongAccessor implements PropertyAccessor<Long>
     {
         if (bytes == null || bytes.length != 8)
         {
+            if (log.isWarnEnabled())
+            {
+                log.warn("Bytes length not equal to 8");
+            }
             return null;
         }
         return (ByteBuffer.wrap(bytes).getLong());
@@ -58,6 +67,10 @@ public class LongAccessor implements PropertyAccessor<Long>
             ByteBuffer buffer = ByteBuffer.allocate(8);
             buffer.putLong(l);
             return buffer.array();
+        }
+        if (log.isWarnEnabled())
+        {
+            log.warn("Object is null.");
         }
         return null;
     }
@@ -88,6 +101,10 @@ public class LongAccessor implements PropertyAccessor<Long>
         {
             if (s == null)
             {
+                if (log.isWarnEnabled())
+                {
+                    log.warn("String s is null.");
+                }
                 return null;
             }
             Long l = new Long(s);
@@ -95,6 +112,7 @@ public class LongAccessor implements PropertyAccessor<Long>
         }
         catch (NumberFormatException e)
         {
+            log.error("Number format exception, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }

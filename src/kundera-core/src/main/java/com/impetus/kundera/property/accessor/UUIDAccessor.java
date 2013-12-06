@@ -17,6 +17,9 @@ package com.impetus.kundera.property.accessor;
 
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -28,6 +31,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class UUIDAccessor implements PropertyAccessor<UUID>
 {
 
+    public static Logger log = LoggerFactory.getLogger(UUIDAccessor.class);
     /*
      * (non-Javadoc)
      * 
@@ -85,6 +89,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
+            log.error("Error occured, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -109,6 +114,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
+            log.error("Error occured, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
@@ -149,6 +155,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
+            log.error("Error occured, Caused by {}.", e);
             throw new PropertyAccessException(e);
         }
     }
