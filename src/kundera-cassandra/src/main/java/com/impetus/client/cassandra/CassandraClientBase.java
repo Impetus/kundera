@@ -32,6 +32,7 @@ import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -97,6 +98,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -255,13 +257,42 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<Column>> qResults)
     {
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+        List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
         for (Bytes key : qResults.keySet())
         {
             List<Column> columns = qResults.get(key);
             ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                     key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-            Object o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            Object o = null;
+
+            if (!subManagedType.isEmpty())
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager
+                            .getEntityMetadata(subEntity.getJavaType());
+
+                    o = getDataHandler().populateEntity(tr, subEntityMetadata, subEntityMetadata.getRelationNames(),
+                            isRelation);
+                    if(o != null)
+                    {
+                        break;
+                    }
+                }
+
+            }
+            else
+            {
+                o = getDataHandler().populateEntity(tr, m, relations, isRelation);
+            }
 
             if (log.isInfoEnabled())
             {
@@ -598,14 +629,30 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
-            if (isCql3Enabled(metadata))
+
+            EntityType entityType = metaModel.entity(clazz);
+
+            List<ManagedType> subTypes = ((AbstractManagedType) entityType).getSubManagedType();
+
+            if (!subTypes.isEmpty())
             {
-                result = cqlClient.find(metaModel, metadata, rowId, relationNames);
+                for (ManagedType subEntity : subTypes)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager
+                            .getEntityMetadata(subEntity.getJavaType());
+                    result = populate(clazz, subEntityMetadata, rowId, subEntityMetadata.getRelationNames(), metaModel);
+                    if (result != null && !result.isEmpty())
+                    {
+                        break;
+                    }
+
+                }
             }
             else
             {
-                result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
+                result = populate(clazz, metadata, rowId, relationNames, metaModel);
             }
+
         }
         catch (Exception e)
         {
@@ -616,6 +663,21 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         return result != null && !result.isEmpty() ? result.get(0) : null;
+    }
+
+    private List<Object> populate(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames,
+            MetamodelImpl metaModel)
+    {
+        List<Object> result;
+        if (isCql3Enabled(metadata))
+        {
+            result = cqlClient.find(metaModel, metadata, rowId, relationNames);
+        }
+        else
+        {
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
+        }
+        return result;
     }
 
     /**

@@ -32,6 +32,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.PluralAttribute;
 
 import org.apache.cassandra.db.marshal.AbstractType;
@@ -607,6 +608,7 @@ public abstract class CassandraDataHandlerBase
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entityType = metaModel.entity(m.getEntityClazz());
+            
             boolean isCql3Enabled = clientBase.isCql3Enabled(m);
             for (Column column : tr.getColumns())
             {
@@ -622,6 +624,10 @@ public abstract class CassandraDataHandlerBase
                     {
                         entity = onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations,
                                 isCql3Enabled);
+                        if(entity == null)
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -996,6 +1002,8 @@ public abstract class CassandraDataHandlerBase
 
         String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
 
+        String discriminatorValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+        
         if (!thriftColumnName.equals(discriminatorColumn))
         {
             if (m.isCounterColumnType())
@@ -1008,6 +1016,11 @@ public abstract class CassandraDataHandlerBase
 
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
                     thriftColumnValue, isCql3Enabled);
+        }
+        else if (thriftColumnName.contains(discriminatorColumn)
+                && !PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue).equals(discriminatorValue))
+        {
+            entity = null;
         }
 
         return entity;
