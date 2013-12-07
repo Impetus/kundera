@@ -5,6 +5,8 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.Column;
+
 public class DefaultFieldAnnotationProcessor implements FieldAnnotationProcessor
 {
     private Map<String, Annotation> fieldAnnotations;
@@ -45,4 +47,20 @@ public class DefaultFieldAnnotationProcessor implements FieldAnnotationProcessor
         }
     }
 
+    public String getTableNameOfColumn()
+    {
+        Column column = (Column) getAnnotation(Column.class.getName());
+
+        String tableName = null;
+        if (column != null)
+        {
+            tableName = column.table();
+        }
+
+        if (tableName == null || tableName.isEmpty())
+        {
+            return null;
+        }
+        return tableName;
+    }
 }

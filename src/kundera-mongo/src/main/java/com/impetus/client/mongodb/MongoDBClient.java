@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.SecondaryTable;
-import javax.persistence.SecondaryTables;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -263,7 +260,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             if (fetchedDocument != null)
             {
-                enhancedEntity = instantiateEntity(entityClass, enhancedEntity);
                 List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
 
                 EntityMetadata subEntityMetadata = null;
@@ -319,13 +315,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         catch (InstantiationException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
         }
         catch (IllegalAccessException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
         }
         return null;
     }
@@ -474,8 +468,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
 
-        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
-
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
@@ -491,7 +483,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             query.put("_id", MongoDBUtils.populateValue(pKey, pKey.getClass()));
         }
-        dbCollection.remove(query, getWriteConcern(), encoder);
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
+        // For secondary tables.
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+        secondaryTables.add(entityMetadata.getTableName());
+
+        for (String collectionName : secondaryTables)
+        {
+            DBCollection dbCollection = mongoDb.getCollection(collectionName);
+            dbCollection.remove(query, getWriteConcern(), encoder);
+        }
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
 
@@ -769,7 +772,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         persistenceUnit = metadata.getPersistenceUnit();
         // String documentName = metadata.getTableName();
         Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders);
-
         if (isUpdate)
         {
             for (String documentName : documents.keySet())
@@ -995,7 +997,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             }
             else
             {
-                enhancedEntity = instantiateEntity(subEntityMetadata.getEntityClazz(), enhancedEntity);
+                enhancedEntity = instantiateEntity(entityMetadata.getEntityClazz(), enhancedEntity);
                 relationValue = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), enhancedEntity,
                         entityMetadata, fetchedDocument, entityMetadata.getRelationNames(), relationValue);
             }

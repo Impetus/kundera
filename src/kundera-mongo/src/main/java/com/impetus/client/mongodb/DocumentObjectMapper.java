@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,24 +71,35 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    static BasicDBObject getDocumentFromObject(Metamodel metaModel, Object obj, Set<Attribute> columns)
-            throws PropertyAccessException
+    static Map<String, DBObject> getDocumentFromObject(Metamodel metaModel, Object obj, Set<Attribute> columns,
+            String tableName) throws PropertyAccessException
     {
+        Map<String, DBObject> embeddedObjects = new HashMap<String, DBObject>();
         BasicDBObject dBObj = new BasicDBObject();
 
         for (Attribute column : columns)
         {
+           String collectionName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
+                    .getTableName() : tableName;
+
+            DBObject dbObject = embeddedObjects.get(collectionName);
+            if (dbObject == null)
+            {
+                dbObject = new BasicDBObject();
+                embeddedObjects.put(collectionName, dbObject);
+            }
+
             if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
             {
                 MongoDBDataHandler handler = new MongoDBDataHandler();
-                handler.onEmbeddable(column, obj, metaModel, dBObj);
+                handler.onEmbeddable(column, obj, metaModel, dBObj, collectionName);
             }
             else
             {
-                extractFieldValue(obj, dBObj, column);
+                extractFieldValue(obj, dbObject, column);
             }
         }
-        return dBObj;
+        return embeddedObjects;
     }
 
     /**
@@ -102,14 +114,14 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    static BasicDBObject[] getDocumentListFromCollection(Metamodel metaModel, Collection coll, Set<Attribute> columns)
-            throws PropertyAccessException
+    static BasicDBObject[] getDocumentListFromCollection(Metamodel metaModel, Collection coll, Set<Attribute> columns,
+            String tableName) throws PropertyAccessException
     {
         BasicDBObject[] dBObjects = new BasicDBObject[coll.size()];
         int count = 0;
         for (Object o : coll)
         {
-            dBObjects[count] = getDocumentFromObject(metaModel, o, columns);
+            dBObjects[count] = (BasicDBObject) getDocumentFromObject(metaModel, o, columns, tableName).values().toArray()[0];
             count++;
         }
         return dBObjects;
@@ -127,35 +139,37 @@ public class DocumentObjectMapper
      * @param columns
      *            the columns
      * @return the object from document
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
-    static Object getObjectFromDocument(Metamodel metamodel, BasicDBObject documentObj, Class clazz,
-            Set<Attribute> columns)
+    static Object getObjectFromDocument(Metamodel metamodel, BasicDBObject documentObj, Set<Attribute> columns,
+            Object obj) throws InstantiationException, IllegalAccessException
     {
-        try
+        // try
+        // {
+        // Object obj = clazz.newInstance();
+        for (Attribute column : columns)
         {
-            Object obj = clazz.newInstance();
-            for (Attribute column : columns)
+            if (((MetamodelImpl) metamodel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
             {
-                if (((MetamodelImpl) metamodel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
-                {
-                    MongoDBDataHandler handler = new MongoDBDataHandler();
-                    handler.onViaEmbeddable(column, obj, metamodel, documentObj);
-                }
-                else
-                {
-                    setFieldValue(documentObj, obj, column);
-                }
+                MongoDBDataHandler handler = new MongoDBDataHandler();
+                handler.onViaEmbeddable(column, obj, metamodel, documentObj);
             }
-            return obj;
+            else
+            {
+                setFieldValue(documentObj, obj, column);
+            }
         }
-        catch (InstantiationException e)
-        {
-            throw new PersistenceException(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new PersistenceException(e);
-        }
+        return obj;
+        // }
+        // catch (InstantiationException e)
+        // {
+        // throw new PersistenceException(e);
+        // }
+        // catch (IllegalAccessException e)
+        // {
+        // throw new PersistenceException(e);
+        // }
     }
 
     /**
@@ -351,8 +365,19 @@ public class DocumentObjectMapper
 
         for (Object dbObj : documentList)
         {
-            embeddedCollection
-                    .add(getObjectFromDocument(metamodel, (BasicDBObject) dbObj, embeddedObjectClass, columns));
+            try
+            {
+                Object obj = embeddedObjectClass.newInstance();
+                embeddedCollection.add(getObjectFromDocument(metamodel, (BasicDBObject) dbObj, columns, obj));
+            }
+            catch (InstantiationException e)
+            {
+                throw new PersistenceException(e);
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new PersistenceException(e);
+            }
         }
 
         return embeddedCollection;

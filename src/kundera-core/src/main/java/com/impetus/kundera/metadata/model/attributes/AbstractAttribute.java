@@ -67,11 +67,11 @@ public abstract class AbstractAttribute<X, T>
 
     /** Column name */
     private String columnName;
-    
+
     /** Name of Table, to which this attribute belongs to */
     private String tableName;
-    
-    private FieldAnnotationProcessor fieldAnnotation;
+
+    private FieldAnnotationProcessor fieldAnnotationProcessor;
 
     /**
      * Instantiates a new abstract attribute.
@@ -98,8 +98,8 @@ public abstract class AbstractAttribute<X, T>
         this.managedType = managedType;
         this.member = member;
         this.columnName = getValidJPAColumnName();
+        this.fieldAnnotationProcessor = new DefaultFieldAnnotationProcessor(member);
         this.tableName = getTableName();
-        this.fieldAnnotation = new DefaultFieldAnnotationProcessor(member);
     }
 
     /*
@@ -188,12 +188,12 @@ public abstract class AbstractAttribute<X, T>
     public String getJPAColumnName()
     {
         // In case of Attribute override.
-        Column column = ((AbstractManagedType)this.managedType).getAttributeBinding(member);
-        if(column != null)
+        Column column = ((AbstractManagedType) this.managedType).getAttributeBinding(member);
+        if (column != null)
         {
             columnName = column.name();
         }
-        
+
         return columnName;
     }
 
@@ -204,15 +204,21 @@ public abstract class AbstractAttribute<X, T>
      */
     public String getTableName()
     {
-        Column column = ((AbstractManagedType)this.managedType).getAttributeBinding(member);
-        if(column != null)
-        {
-            tableName = column.table();
-        }
+//        Column column = ((AbstractManagedType) this.managedType).getAttributeBinding(member);
+//        if (column != null)
+//        {
+//            tableName = column.table();
+//        }
+//
+//        if (tableName == null || tableName.isEmpty())
+//        {
+//            return null;
+//        }
+//        return tableName;
         
-        return tableName;
+        return ((DefaultFieldAnnotationProcessor)fieldAnnotationProcessor).getTableNameOfColumn();
     }
-    
+
     /**
      * Gets the valid jpa column name.
      * 
@@ -260,13 +266,12 @@ public abstract class AbstractAttribute<X, T>
                 name = c.name();
             }
         }
-      
-        
+
         return name == null ? getName() : name;
     }
 
     public FieldAnnotationProcessor getFieldAnnotation()
     {
-        return fieldAnnotation;
+        return fieldAnnotationProcessor;
     }
 }

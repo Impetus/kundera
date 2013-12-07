@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.utils.MongoDBUtils;
-import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -74,8 +73,8 @@ public final class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m, DBObject document,
-            List<String> relations, Map<String, Object> relationValue)
+    public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m,
+            DBObject document, List<String> relations, Map<String, Object> relationValue)
     {
         // Entity object
         // Object entity = null;
@@ -195,16 +194,17 @@ public final class MongoDBDataHandler
              * }
              */
 
-//            if (relationValue != null && !relationValue.isEmpty())
-//            {
-//                /* EnhanceEntity */entity = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m),
-//                        relationValue);
-//                return entity;
-//            }
-//            else
-//            {
-//                return entity;
-//            }
+            // if (relationValue != null && !relationValue.isEmpty())
+            // {
+            // /* EnhanceEntity */entity = new EnhanceEntity(entity,
+            // PropertyAccessorHelper.getId(entity, m),
+            // relationValue);
+            // return entity;
+            // }
+            // else
+            // {
+            // return entity;
+            // }
             return relationValue;
         }
         catch (InstantiationException e)
@@ -249,9 +249,9 @@ public final class MongoDBDataHandler
         // Populate Row Key
         Object id = PropertyAccessorHelper.getId(entity, m);
 
-        DBObject dbObj = getDBObject(m, m.getTableName(), dbObjects, metaModel, id);
+        DBObject dbObj = MongoDBUtils.getDBObject(m, m.getTableName(), dbObjects, metaModel, id);
 
-        dbObjects.put(m.getTableName(), dbObj);
+        // dbObjects.put(m.getTableName(), dbObj);
 
         // Populate columns
         Set<Attribute> columns = entityType.getAttributes();
@@ -259,7 +259,7 @@ public final class MongoDBDataHandler
         {
             String tableName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
                     .getTableName() : m.getTableName();
-            dbObj = getDBObject(m, tableName, dbObjects, metaModel, id);
+            dbObj = MongoDBUtils.getDBObject(m, tableName, dbObjects, metaModel, id);
 
             if (!column.equals(m.getIdAttribute()))
             {
@@ -268,7 +268,19 @@ public final class MongoDBDataHandler
                     Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                     if (metaModel.isEmbeddable(javaType))
                     {
-                        dbObj = onEmbeddable(column, entity, metaModel, dbObj);
+                        Map<String, DBObject> embeddedObjects = onEmbeddable(column, entity, metaModel, dbObj,
+                                m.getTableName());
+                        for (String documentName : embeddedObjects.keySet())
+                        {
+                            DBObject db = dbObjects.get(documentName);
+                            if (db == null)
+                            {
+                                db = MongoDBUtils.getDBObject(m, documentName, dbObjects, metaModel, id);
+                            }
+                            db.put(((AbstractAttribute) column).getJPAColumnName(), embeddedObjects.get(documentName));
+                            dbObjects.put(documentName, db);
+
+                        }
                     }
                     else if (!column.isAssociation())
                     {
@@ -280,7 +292,7 @@ public final class MongoDBDataHandler
                     log.error("Can't access property " + column.getName());
                 }
             }
-            dbObjects.put(tableName, dbObj);
+            // dbObjects.put(tableName, dbObj);
         }
         if (relations != null)
         {
@@ -290,7 +302,7 @@ public final class MongoDBDataHandler
                 dbObj.put(rh.getRelationName(),
                         MongoDBUtils.populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
-            dbObjects.put(m.getTableName(), dbObj);
+            // dbObjects.put(m.getTableName(), dbObj);
         }
 
         if (((AbstractManagedType) entityType).isInherited())
@@ -305,30 +317,9 @@ public final class MongoDBDataHandler
             {
                 dbObj.put(discrColumn, discrValue);
             }
-            dbObjects.put(m.getTableName(), dbObj);
+            // dbObjects.put(m.getTableName(), dbObj);
         }
         return dbObjects;
-    }
-
-    private DBObject getDBObject(EntityMetadata m, String tableName, Map<String, DBObject> dbObjects,
-            MetamodelImpl metaModel, Object id)
-    {
-        tableName = tableName != null ? tableName : m.getTableName();
-        DBObject dbObj = dbObjects.get(tableName);
-        if (dbObj == null)
-        {
-            dbObj = new BasicDBObject();
-        }
-
-        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-        {
-            MongoDBUtils.populateCompoundKey(dbObj, m, metaModel, id);
-        }
-        else
-        {
-            dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
-        }
-        return dbObj;
     }
 
     /**
@@ -355,10 +346,12 @@ public final class MongoDBDataHandler
      * @return the embedded object list
      * @throws PropertyAccessException
      *             the property access exception
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
             BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys)
-            throws PropertyAccessException
+            throws PropertyAccessException, InstantiationException, IllegalAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
@@ -423,16 +416,17 @@ public final class MongoDBDataHandler
                         Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(superColumnField);
                         for (Object dbObj : (BasicDBList) embeddedDocumentObject)
                         {
+                            Object obj = embeddedObjectClass.newInstance();
                             Object embeddedObject = new DocumentObjectMapper().getObjectFromDocument(metaModel,
-                                    (BasicDBObject) dbObj, embeddedObjectClass, superColumn.getAttributes());
+                                    (BasicDBObject) dbObj, superColumn.getAttributes(), obj);
                             Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
                         }
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
+                        Object obj = superColumn.getJavaType().newInstance();
                         Object embeddedObject = DocumentObjectMapper.getObjectFromDocument(metaModel,
-                                (BasicDBObject) embeddedDocumentObject, superColumn.getJavaType(),
-                                superColumn.getAttributes());
+                                (BasicDBObject) embeddedDocumentObject, superColumn.getAttributes(), obj);
                         list.add(embeddedObject);
                     }
                     else
@@ -452,10 +446,13 @@ public final class MongoDBDataHandler
      * @param m
      * @param entity
      */
-    DBObject onEmbeddable(Attribute column, Object entity, Metamodel metaModel, DBObject dbObj)
+    Map<String, DBObject> onEmbeddable(Attribute column, Object entity, Metamodel metaModel, DBObject dbObj,
+            String tableName)
     {
         EmbeddableType embeddableType = metaModel.embeddable(((AbstractAttribute) column).getBindableJavaType());
         Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+        Map<String, DBObject> embeddedObjects = new HashMap<String, DBObject>();
+
         if (embeddedObject != null)
         {
             if (column.isCollection())
@@ -464,17 +461,17 @@ public final class MongoDBDataHandler
                 // means it is case of element collection
 
                 dbObj.put(((AbstractAttribute) column).getJPAColumnName(), DocumentObjectMapper
-                        .getDocumentListFromCollection(metaModel, embeddedCollection, embeddableType.getAttributes()));
+                        .getDocumentListFromCollection(metaModel, embeddedCollection, embeddableType.getAttributes(),
+                                tableName));
             }
             else
             {
-                dbObj.put(
-                        ((AbstractAttribute) column).getJPAColumnName(),
-                        DocumentObjectMapper.getDocumentFromObject(metaModel, embeddedObject,
-                                embeddableType.getAttributes()));
+                embeddedObjects = DocumentObjectMapper.getDocumentFromObject(metaModel, embeddedObject,
+                        embeddableType.getAttributes(), tableName);
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), embeddedObjects.get(tableName));
             }
         }
-        return dbObj;
+        return embeddedObjects;
     }
 
     /**
@@ -484,12 +481,16 @@ public final class MongoDBDataHandler
      * @param entity
      * @param embeddable
      * @param document
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     void onViaEmbeddable(Attribute column, Object entity, Metamodel metamodel, DBObject document)
+            throws InstantiationException, IllegalAccessException
     {
         EmbeddableType embeddable = metamodel.embeddable(((AbstractAttribute) column).getBindableJavaType());
         Field embeddedField = (Field) column.getJavaMember();
         Object embeddedDocumentObject = null;
+
         if (column.isCollection())
         {
             Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedField);
@@ -506,10 +507,14 @@ public final class MongoDBDataHandler
         }
         else
         {
+            Object obj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+            if (obj == null)
+            {
+                obj = ((AbstractAttribute) column).getBindableJavaType().newInstance();
+            }
             embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
             PropertyAccessorHelper.set(entity, embeddedField, DocumentObjectMapper.getObjectFromDocument(metamodel,
-                    (BasicDBObject) embeddedDocumentObject, ((AbstractAttribute) column).getBindableJavaType(),
-                    embeddable.getAttributes()));
+                    (BasicDBObject) embeddedDocumentObject, embeddable.getAttributes(), obj));
         }
     }
 }

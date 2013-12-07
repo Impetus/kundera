@@ -164,4 +164,26 @@ public class MongoDBUtils
             throw new KunderaAuthenticationException(errMsg);
         }
     }
+    
+    public static DBObject getDBObject(EntityMetadata m, String tableName, Map<String, DBObject> dbObjects,
+            MetamodelImpl metaModel, Object id)
+    {
+        tableName = tableName != null ? tableName : m.getTableName();
+        DBObject dbObj = dbObjects.get(tableName);
+        if (dbObj == null)
+        {
+            dbObj = new BasicDBObject();
+            dbObjects.put(tableName, dbObj);
+        }
+
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            MongoDBUtils.populateCompoundKey(dbObj, m, metaModel, id);
+        }
+        else
+        {
+            dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
+        }
+        return dbObj;
+    }
 }
