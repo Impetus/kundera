@@ -677,7 +677,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                 if (subManagedType.isEmpty())
                 {
-                    populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
+                    entities = populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
                 }
                 else
                 {
@@ -685,7 +685,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     {
                         EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
                                 .getJavaType());
-                        populateData(subEntityMetadata, keySlices, entities,
+                        entities = populateData(subEntityMetadata, keySlices, entities,
                                 subEntityMetadata.getRelationNames() != null, subEntityMetadata.getRelationNames());
 //                        TODOO:: if(entities != null)
 
@@ -861,7 +861,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         super.close();
     }
 
-    private void populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities, boolean isRelational,
+    private List populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities, boolean isRelational,
             List<String> relationNames)
     {
         try
@@ -902,6 +902,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     e);
             throw new KunderaException(e);
         }
+        return entities;
     }
 
     /** Query related methods */

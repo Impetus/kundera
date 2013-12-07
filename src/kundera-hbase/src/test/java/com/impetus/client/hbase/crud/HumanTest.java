@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class HumanTest
 {
@@ -78,5 +79,7 @@ public class HumanTest
         {
             cli.dropTable("KunderaExamples");
         }
+        
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 }

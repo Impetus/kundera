@@ -34,6 +34,7 @@ import org.junit.Test;
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * 
@@ -84,6 +85,7 @@ public class CitySimilarityTest
         em.remove(em.find(CitySimilarity.class, "100_1"));
         em.remove(em.find(CitySimilarity.class, "100_2"));
         em.close();
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         emf.close();
         cli.stopCluster(null);
     }
