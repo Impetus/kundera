@@ -1,3 +1,20 @@
+/**
+ * Copyright 2012 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.impetus.kundera.utils;
 
 import java.lang.reflect.Field;
@@ -10,6 +27,7 @@ import java.util.regex.Pattern;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.configuration.EnvironmentConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +168,15 @@ public class KunderaCoreUtils
         }
         return stringBuilder.toString();
     }
-
+    
+    /**
+     * Resolves variable in path given as string
+     * 
+     * @param input
+     *            String input url
+     * Code inspired by :http://stackoverflow.com/questions/2263929/
+     * regarding-application-properties-file-and-environment-variable
+     */
     public static String resolvePath(String input)
     {
         if (null == input)
@@ -160,18 +186,38 @@ public class KunderaCoreUtils
 
         // matching for 2 groups match ${VAR_NAME} or $VAR_NAME
 
-        Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
-
-        Matcher matcher = pattern.matcher(input); // get a matcher object
+        // Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
+        Pattern pathPattern = Pattern.compile("\\$\\{(.+?)\\}");
+        Matcher matcherPattern = pathPattern.matcher(input); // get a matcher object
         StringBuffer sb = new StringBuffer();
         EnvironmentConfiguration config = new EnvironmentConfiguration();
-        while (matcher.find())
+        SystemConfiguration sysConfig = new SystemConfiguration();
+
+        while (matcherPattern.find())
         {
-            String envVarName = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
-            String envVarValue = config.getString(envVarName);
-            matcher.appendReplacement(sb, envVarValue != null ? envVarValue : "");
+
+            String confVarName = matcherPattern.group(1) != null ? matcherPattern.group(1) : matcherPattern.group(2);
+            String envConfVarValue = config.getString(confVarName);
+            String sysVarValue = sysConfig.getString(confVarName);
+
+            if (envConfVarValue != null)
+            {
+
+                matcherPattern.appendReplacement(sb, envConfVarValue);
+
+            }
+            else if (sysVarValue != null)
+            {
+
+                matcherPattern.appendReplacement(sb, sysVarValue);
+
+            }
+            else
+            {
+                matcherPattern.appendReplacement(sb, "");
+            }
         }
-        matcher.appendTail(sb);
+        matcherPattern.appendTail(sb);
         return sb.toString();
     }
 
