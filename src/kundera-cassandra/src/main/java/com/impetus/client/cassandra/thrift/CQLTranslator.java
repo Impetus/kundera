@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.thrift;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -662,8 +664,10 @@ public final class CQLTranslator
        // To allow handle byte array class object by converting it to string
        if (fieldClazz.isAssignableFrom(byte[].class))
         {
+           ByteBuffer buf = ByteBuffer.wrap((byte[]) value, 0, ((byte[]) value).length);
            StringBuilder hexstr = new StringBuilder("0x");
-           builder.append(hexstr.append((Hex.encodeHex((byte []) value))));
+           builder.append(hexstr.append(ByteBufferUtil.bytesToHex(buf)));
+          
                     
         } else {        
             if (useToken)
