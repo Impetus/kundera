@@ -86,8 +86,8 @@ public abstract class ClientBase
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
         onPersist(metadata, entity, id, relationHolders);
-//        id = PropertyAccessorHelper.getId(entity, metadata);
-//        node.setEntityId(id);
+        id = PropertyAccessorHelper.getId(entity, metadata);
+        node.setEntityId(id);
         indexNode(node, metadata);
     }
 
