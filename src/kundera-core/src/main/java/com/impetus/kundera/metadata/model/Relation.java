@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
@@ -253,14 +254,11 @@ public final class Relation
         
         if(isBiDirectional())
         {
-            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity);
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(joinClassMetadata.getPersistenceUnit());
-
-            EntityType entityType = metaModel.entity(joinClassMetadata.getEntityClazz());
-            
-            Attribute biDirectionalAttrib = entityType.getAttribute(this.biDirectionalField.getName());
-            joinColumnName = ((AbstractAttribute)biDirectionalAttrib).getJPAColumnName();
+            // Give precedence to join column name!
+            if(biDirectionalField.isAnnotationPresent(JoinColumn.class))
+            {
+                joinColumnName = biDirectionalField.getAnnotation(JoinColumn.class).name();
+            }
         }
         
         return joinColumnName !=null? joinColumnName:property.getName();
