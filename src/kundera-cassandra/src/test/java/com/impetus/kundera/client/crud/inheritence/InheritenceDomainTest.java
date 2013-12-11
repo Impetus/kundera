@@ -111,7 +111,8 @@ public class InheritenceDomainTest
     }
 
     
-    @Test
+    //TODO:: enable once https://github.com/impetus-opensource/Kundera/issues/456 is fixed!
+//    @Test
     public void testRelationViaPelops()
     {
         EntityManagerFactory emfPelops = Persistence.createEntityManagerFactory("cass_pu");
@@ -126,7 +127,7 @@ public class InheritenceDomainTest
     }
 
 
-    @Test
+//    @Test
     public void testAbstractEntityViaPelops()
     {
         
