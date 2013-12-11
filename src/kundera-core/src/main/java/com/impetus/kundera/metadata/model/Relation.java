@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -247,6 +249,18 @@ public final class Relation
         if(joinTableMetadata != null)
         {
             joinColumnName = joinTableMetadata.getJoinColumns() != null? joinTableMetadata.getJoinColumns().iterator().next():null;
+        }
+        
+        if(isBiDirectional())
+        {
+            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetamodel(joinClassMetadata.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(joinClassMetadata.getEntityClazz());
+            
+            Attribute biDirectionalAttrib = entityType.getAttribute(this.biDirectionalField.getName());
+            joinColumnName = ((AbstractAttribute)biDirectionalAttrib).getJPAColumnName();
         }
         
         return joinColumnName !=null? joinColumnName:property.getName();

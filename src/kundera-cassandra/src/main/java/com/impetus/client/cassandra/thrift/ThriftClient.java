@@ -337,6 +337,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             throw new PersistenceException("ThriftClient is closed.");
         }
+        return findByRowKeys(entityClass,relationNames,isWrapReq,metadata,rowIds);
+        /*
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
 
         List entities = null;
 
@@ -376,7 +382,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new KunderaException(e);
         }
         return entities;
-    }
+    */}
 
     /**
      * Finds a {@link List} of entities from database for given super columns
@@ -604,7 +610,39 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         if (isCql3Enabled(m))
         {
-            entities = findByRelationQuery(m, colName, colValue, entityClazz, dataHandler);
+            /*
+             * 
+             */
+            entities = new ArrayList<Object>();
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetamodel(m.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            if (subManagedType.isEmpty())
+            {
+                entities.addAll(findByRelationQuery(m, colName, colValue, entityClazz, dataHandler));
+            }
+            else
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
+                            .getJavaType());
+                    
+                    entities.addAll(findByRelationQuery(subEntityMetadata, colName, colValue, subEntityMetadata.getEntityClazz(), dataHandler));
+                    
+//                    entities = populateData(subEntityMetadata, keySlices, entities,
+//                            subEntityMetadata.getRelationNames() != null, subEntityMetadata.getRelationNames());
+//                    TODOO:: if(entities != null)
+
+                }
+            }
+
+            
         }
         else
         {
@@ -715,7 +753,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             if (isCql3Enabled(metadata))
             {
                 String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
-                executeQuery(deleteQuery, metadata.getEntityClazz(), null);
+                executeQuery(deleteQuery, metadata.getEntityClazz(), null,false);
             }
             else
             {
@@ -908,9 +946,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     /** Query related methods */
 
     @Override
-    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
+    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField, boolean isNative)
     {
-        return super.executeSelectQuery(cqlQuery, clazz, relationalField, dataHandler);
+        return super.executeSelectQuery(cqlQuery, clazz, relationalField, dataHandler, isNative);
     }
 
     @Override

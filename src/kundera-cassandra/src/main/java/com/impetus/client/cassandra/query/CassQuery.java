@@ -139,14 +139,14 @@ public class CassQuery extends QueryImpl
 
         {
             result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
-                    m.getEntityClazz(), null);
+                    m.getEntityClazz(), null,isNative);
         }
         else
         {
             if (isNative)
             {
                 result = ((CassandraClientBase) client).executeQuery(query != null ? query : getJPAQuery(),
-                        m.getEntityClazz(), null);
+                        m.getEntityClazz(), null,isNative);
             }
             else
             {
@@ -214,13 +214,13 @@ public class CassQuery extends QueryImpl
         if (isNative)
         {
             ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(query != null ? query
-                    : getJPAQuery(), m.getEntityClazz(), null);
+                    : getJPAQuery(), m.getEntityClazz(), null,isNative);
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             ls = ((CassandraClientBase) client).executeQuery(
                     onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(),
-                    m.getRelationNames());
+                    m.getRelationNames(),isNative);
         }
         else
         {
@@ -266,7 +266,7 @@ public class CassQuery extends QueryImpl
         if (isNative)
         {
             ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(query != null ? query
-                    : getJPAQuery(), m.getEntityClazz(), null);
+                    : getJPAQuery(), m.getEntityClazz(), null,isNative);
         }
         else if (kunderaQuery.isDeleteUpdate())
         {
