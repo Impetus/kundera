@@ -59,6 +59,8 @@ import org.apache.cassandra.db.marshal.InetAddressType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sun.security.pkcs.EncodingException;
+
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.ByteAccessor;
 import com.impetus.kundera.property.accessor.CalendarAccessor;
@@ -483,10 +485,9 @@ public final class CassandraDataTypeBuilder<X>
             }
             catch (CharacterCodingException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
+                throw new PersistenceException(e);
             }
-            return null;
         }
     }
 

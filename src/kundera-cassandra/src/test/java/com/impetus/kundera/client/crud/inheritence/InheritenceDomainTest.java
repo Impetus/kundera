@@ -206,9 +206,9 @@ public class InheritenceDomainTest
          
 //         Uncomment this to test https://github.com/impetus-opensource/Kundera/issues/460
 //         uacc.setDispName("UpdatedTest");
-         em.persist(fbprofile);
+//         em.persist(fbprofile);
          
-         em.persist(twprofile1);
+//         em.persist(twprofile1);
          em.clear();
 
          String uaQuery = "Select ua from UserAccount ua";

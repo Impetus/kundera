@@ -45,10 +45,10 @@ public class ManagedState extends NodeState
 
         // Cascade persist operation for related entities for whom cascade=ALL
         // or PERSIST
-        if(((Node)nodeStateContext).isDirty())
-        {
+//        if(((Node)nodeStateContext).isDirty())
+//        {
             recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
-        }
+//        }
     }
 
     @Override
