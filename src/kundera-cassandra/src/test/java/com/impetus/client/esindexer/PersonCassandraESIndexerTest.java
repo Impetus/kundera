@@ -239,7 +239,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
         Assert.assertEquals("vivek", p.getPersonName());
         em.remove(p);
         em.clear();
-
+        waitThread();
         TypedQuery<PersonESIndexerCassandra> query = em.createQuery("Select p from PersonESIndexerCassandra p",
                 PersonESIndexerCassandra.class);
 
@@ -404,6 +404,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
         PersonESIndexerCassandra person = em.find(PersonESIndexerCassandra.class, "1");
         em.remove(person);
         em.clear(); // just to make sure that not to be picked up from cache.
+        waitThread();
         TypedQuery<PersonESIndexerCassandra> query = em.createQuery("Select p from PersonESIndexerCassandra p",
                 PersonESIndexerCassandra.class);
 

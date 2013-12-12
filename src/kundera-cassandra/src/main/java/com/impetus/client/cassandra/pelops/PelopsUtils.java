@@ -16,12 +16,32 @@
 package com.impetus.client.cassandra.pelops;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
 import net.dataforte.cassandra.pool.PoolConfiguration;
 
+import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.ListType;
+import org.apache.cassandra.db.marshal.MapType;
+import org.apache.cassandra.db.marshal.SetType;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
@@ -29,7 +49,15 @@ import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.service.CassandraHost;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.BigDecimalAccessor;
+import com.impetus.kundera.property.accessor.IntegerAccessor;
 
 /**
  * The Class PelopsUtils.
@@ -212,5 +240,41 @@ public class PelopsUtils
         String poolName = PelopsUtils.generatePoolName(nodes[0].getAddress(), ((CommonsBackedPool) pool).getCluster()
                 .getConnectionConfig().getThriftPort(), ((CommonsBackedPool) pool).getKeyspace());
         return poolName;
+    }
+
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param tr
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    public static Object initialize(EntityMetadata m, Object entity, Object id)
+    {
+        try
+        {
+            if (entity == null)
+            {
+                entity = m.getEntityClazz().newInstance();
+            }
+            if (id != null)
+            {
+                PropertyAccessorHelper.setId(entity, m, id);
+            }
+            return entity;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException("Error occured while instantiating entity.", e);
+        }
     }
 }

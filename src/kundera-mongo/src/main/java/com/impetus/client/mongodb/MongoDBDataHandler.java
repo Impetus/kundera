@@ -158,53 +158,6 @@ public final class MongoDBDataHandler
                     }
                 }
             }
-
-            /*
-             * for (String jpaColumnName : document.keySet()) { if
-             * (jpaColumnName.equals("_id")) { continue; }
-             * 
-             * String fieldName = m.getFieldName(jpaColumnName); if
-             * (!jpaColumnName.equals(((AbstractAttribute)
-             * m.getIdAttribute()).getJPAColumnName()) && fieldName != null) {
-             * Attribute column =
-             * metaModel.entity(m.getEntityClazz()).getAttribute(fieldName);
-             * Class javaType = ((AbstractAttribute)
-             * column).getBindableJavaType(); if
-             * (metaModel.isEmbeddable(javaType)) { onViaEmbeddable(column,
-             * entity, metaModel, document); } else if (!column.isAssociation())
-             * { DocumentObjectMapper.setFieldValue(document, entity, column); }
-             * } else if (relations != null &&
-             * !jpaColumnName.equals(((AbstractAttribute)
-             * m.getIdAttribute()).getJPAColumnName())) { if (relationValue ==
-             * null) { relationValue = new HashMap<String, Object>(); }
-             * 
-             * if (relations.contains(jpaColumnName) &&
-             * !jpaColumnName.equals(((AbstractAttribute)
-             * m.getIdAttribute()).getJPAColumnName())) { Object colValue =
-             * document.get(jpaColumnName); if (colValue != null) { String
-             * colFieldName = m.getFieldName(jpaColumnName); Attribute attribute
-             * = colFieldName != null ? entityType.getAttribute(colFieldName) :
-             * null; EntityMetadata relationMetadata =
-             * KunderaMetadataManager.getEntityMetadata(attribute
-             * .getJavaType()); colValue =
-             * MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
-             * relationMetadata .getIdAttribute().getJavaType()); }
-             * relationValue.put(jpaColumnName, colValue); } }
-             * 
-             * }
-             */
-
-            // if (relationValue != null && !relationValue.isEmpty())
-            // {
-            // /* EnhanceEntity */entity = new EnhanceEntity(entity,
-            // PropertyAccessorHelper.getId(entity, m),
-            // relationValue);
-            // return entity;
-            // }
-            // else
-            // {
-            // return entity;
-            // }
             return relationValue;
         }
         catch (InstantiationException e)

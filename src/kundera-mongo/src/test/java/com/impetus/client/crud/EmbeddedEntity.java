@@ -6,7 +6,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class EmbeddedEntity
 {
-    @Column(name = "EMAIL_ID", table = "MONGO_SECONDARY_TABLE")
+    @Column(name = "EMAIL_ID", table = "SECONDARY_TABLE")
     private String emailId;
 
     @Column(name = "PHONE_NO")

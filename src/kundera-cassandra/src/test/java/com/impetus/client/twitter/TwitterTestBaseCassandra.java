@@ -201,7 +201,7 @@ public abstract class TwitterTestBaseCassandra
         assertUpdatedUser1(user1);
 
         twitter.removeUser(user1);
-
+        
         UserCassandra user1AfterRemoval = twitter.findUserById(userId1);
         Assert.assertNull(user1AfterRemoval);
 

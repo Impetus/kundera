@@ -34,6 +34,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -96,7 +97,7 @@ public final class CQLTranslator
     public static final String COLUMN_VALUES = "$COLUMNVALUES";
 
     public static final String AND_CLAUSE = " AND ";
-    
+
     public static final String SORT_CLAUSE = " ORDER BY ";
 
     public static final String EQ_CLAUSE = "=";
@@ -132,7 +133,7 @@ public final class CQLTranslator
     public static final String TOKEN = "token(";
 
     public static final String CLOSE_BRACKET = ")";
-    
+
     public static final String SPACE_STRING = " ";
 
     public CQLTranslator()
@@ -158,10 +159,10 @@ public final class CQLTranslator
      * @return Map containing translation type as key and string as translated
      *         CQL string.
      */
-    public HashMap<TranslationType, String> prepareColumnOrColumnValues(final Object record,
+    public HashMap<TranslationType, Map<String, StringBuilder>> prepareColumnOrColumnValues(final Object record,
             final EntityMetadata entityMetadata, TranslationType type, Map<String, Object> externalProperties)
     {
-        HashMap<TranslationType, String> parsedColumnOrColumnValue = new HashMap<CQLTranslator.TranslationType, String>();
+        HashMap<TranslationType, Map<String, StringBuilder>> parsedColumnOrColumnValue = new HashMap<CQLTranslator.TranslationType, Map<String, StringBuilder>>();
         if (type == null)
         {
             throw new TranslationException("Please specify TranslationType: either COLUMN or VALUE");
@@ -171,25 +172,30 @@ public final class CQLTranslator
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
 
-        StringBuilder builder = new StringBuilder();
-        StringBuilder columnBuilder = new StringBuilder();
+        Map<String, StringBuilder> builders = new HashMap<String, StringBuilder>();
+        Map<String, StringBuilder> columnBuilders = new HashMap<String, StringBuilder>();
 
-        onTranslation(record, entityMetadata, type, metaModel, entityClazz, entityType, builder, columnBuilder,
+        onTranslation(record, entityMetadata, type, metaModel, entityClazz, entityType, builders, columnBuilders,
                 externalProperties);
 
-        if (type.equals(TranslationType.ALL) || type.equals(TranslationType.VALUE))
+        for (String tableName : columnBuilders.keySet())
         {
-            builder.deleteCharAt(builder.length() - 1);
+            StringBuilder builder = builders.get(tableName);
+            StringBuilder columnBuilder = columnBuilders.get(tableName);
+
+            if (type.equals(TranslationType.ALL) || type.equals(TranslationType.VALUE))
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+
+            if (type.equals(TranslationType.ALL) || type.equals(TranslationType.COLUMN))
+            {
+                columnBuilder.deleteCharAt(columnBuilder.length() - 1);
+            }
         }
+        parsedColumnOrColumnValue.put(TranslationType.COLUMN, columnBuilders);
 
-        if (type.equals(TranslationType.ALL) || type.equals(TranslationType.COLUMN))
-        {
-            columnBuilder.deleteCharAt(columnBuilder.length() - 1);
-        }
-
-        parsedColumnOrColumnValue.put(TranslationType.COLUMN, columnBuilder.toString());
-
-        parsedColumnOrColumnValue.put(TranslationType.VALUE, builder.toString());
+        parsedColumnOrColumnValue.put(TranslationType.VALUE, builders);
 
         return parsedColumnOrColumnValue;
     }
@@ -204,150 +210,115 @@ public final class CQLTranslator
         return CQLKeywordMapper.getType(property);
     }
 
-    /**
-     * On translation to column name or column value based on translation type.
-     * 
-     * @param record
-     *            record
-     * @param m
-     *            entity metadata
-     * @param type
-     *            translation type
-     * @param metaModel
-     *            meta model
-     * @param entityClazz
-     *            entity class
-     * @param entityType
-     *            entity type
-     * @param builder
-     *            column value builder
-     * @param columnBuilder
-     *            column name builder
-     * @param externalProperties
-     */
-/*    private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
-            MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
-            StringBuilder columnBuilder, Map<String, Object> externalProperties)
-    {
-        for (Field field : entityClazz.getDeclaredFields())
-        {
-            if (metaModel.isEmbeddable(field.getType()))
-            {
-                if (field.getType().equals(m.getIdAttribute().getBindableJavaType()))
-                {
-                    // builder.
-                    // Means it is a compound key! As other
-                    // iterate for it's fields to populate it's values in order!
-                    EmbeddableType compoundKey = metaModel.embeddable(field.getType());
-                    Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
-                    for (Field compositeColumn : field.getType().getDeclaredFields())
-                    {
-                        if (!ReflectUtils.isTransientOrStatic(compositeColumn))
-                        {
-                            onTranslation(type, builder, columnBuilder,
-                                    ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
-                                            .getJPAColumnName(), compoundKeyObj, compositeColumn);
-                        }
-                    }
-                }
-                else
-                {
-                    throw new PersistenceException(
-                            "Super columns are not supported via cql for compound/composite keys!");
-                }
-            }
-            else
-            {
-                if (!ReflectUtils.isTransientOrStatic(field)
-                        && m.getIdAttribute().getName().equals(entityType.getAttribute(field.getName()).getName()))
-                {
-                    onTranslation(type, builder, columnBuilder,
-                            CassandraUtilities.getIdColumnName(m, externalProperties), record, field);
-                }
-                else if (!ReflectUtils.isTransientOrStatic(field))
-                {
-                    AbstractAttribute attrib = (AbstractAttribute) entityType.getAttribute(field.getName());
-
-                    if (!attrib.isAssociation())
-                    {
-                        onTranslation(type, builder, columnBuilder, attrib.getJPAColumnName(), record, field);
-                    }
-                }
-            }
-        }
-    }
-*/
-
-    
     private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
-            MetamodelImpl metaModel, Class entityClazz, EntityType entityType, StringBuilder builder,
-            StringBuilder columnBuilder, Map<String, Object> externalProperties)
+            MetamodelImpl metaModel, Class entityClazz, EntityType entityType, Map<String, StringBuilder> builders,
+            Map<String, StringBuilder> columnBuilders, Map<String, Object> externalProperties)
     {
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
+        SingularAttribute idAttribute = m.getIdAttribute();
         while (iterator.hasNext())
         {
             Attribute attribute = iterator.next();
 
-            Field field = (Field) attribute.getJavaMember();
-            if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
-            {
-                if (field.getType().equals(m.getIdAttribute().getBindableJavaType()))
-                {
-                    // builder.
-                    // Means it is a compound key! As other
-                    // iterate for it's fields to populate it's values in order!
-                    EmbeddableType compoundKey = metaModel.embeddable(field.getType());
-                    Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
-                    for (Field compositeColumn : field.getType().getDeclaredFields())
-                    {
-                        if (!ReflectUtils.isTransientOrStatic(compositeColumn))
-                        {
-                            onTranslation(type, builder, columnBuilder,
-                                    ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
-                                            .getJPAColumnName(), compoundKeyObj, compositeColumn);
-                        }
-                    }
-                }
-                else
-                {
-                    throw new PersistenceException(
-                            "Super columns are not supported via cql for compound/composite keys!");
-                }
-            }
-            else
-            {
-                if (!ReflectUtils.isTransientOrStatic(field)
-                        && m.getIdAttribute().getName().equals(attribute.getName()))
-                {
-                    onTranslation(type, builder, columnBuilder,
-                            CassandraUtilities.getIdColumnName(m, externalProperties), record, field);
-                }
-                else if (!ReflectUtils.isTransientOrStatic(field))
-                {
-                    // AbstractAttribute attrib = (AbstractAttribute)
-                    // entityType.getAttribute(field.getName());
+            // Populating table name.
+            String tableName = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
+                    .getTableName() : m.getTableName();
 
-                    if (!attribute.isAssociation())
-                    {
-                        onTranslation(type, builder, columnBuilder, ((AbstractAttribute) attribute).getJPAColumnName(),
-                                record, field);
-                    }
+            StringBuilder columnBuilder = columnBuilders.get(tableName);
+            if (columnBuilder == null)
+            {
+                columnBuilder = new StringBuilder();
+                columnBuilders.put(tableName, columnBuilder);
+            }
+
+            StringBuilder builder = builders.get(tableName);
+            if (builder == null)
+            {
+                builder = new StringBuilder();
+                builders.put(tableName, builder);
+            }
+            Field field = (Field) attribute.getJavaMember();
+            if (!attribute.equals(idAttribute))
+            {
+                if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                {
+                    if (field.getType().equals(idAttribute.getBindableJavaType()))
+                    {/*
+                        // builder.
+                        // Means it is a compound key! As other
+                        // iterate for it's fields to populate it's values in
+                        // order!
+                        EmbeddableType compoundKey = metaModel.embeddable(field.getType());
+                        Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
+                        for (Field compositeColumn : field.getType().getDeclaredFields())
+                        {
+                            if (!ReflectUtils.isTransientOrStatic(compositeColumn))
+                            {
+                                onTranslation(type, builder, columnBuilder,
+                                        ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
+                                                .getJPAColumnName(), compoundKeyObj, compositeColumn);
+                            }
+                        }
+                    */throw new PersistenceException(
+                            "Super columns are not supported via cql for compound/composite keys!");
+                        }
+//                    else
+//                    {
+//                        throw new PersistenceException(
+//                                "Super columns are not supported via cql for compound/composite keys!");
+//                    }
+                }
+                else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation())
+                {
+                    onTranslation(type, builder, columnBuilder, ((AbstractAttribute) attribute).getJPAColumnName(),
+                            record, field);
                 }
             }
         }
-        
+
+        for (String tableName : columnBuilders.keySet())
+        {
+            StringBuilder builder = builders.get(tableName);
+            StringBuilder columnBuilder = columnBuilders.get(tableName);
+            Field field = (Field) idAttribute.getJavaMember();
+            if (metaModel.isEmbeddable(((AbstractAttribute) idAttribute).getBindableJavaType()))
+            {
+                // builder.
+                // Means it is a compound key! As other
+                // iterate for it's fields to populate it's values in
+                // order!
+                EmbeddableType compoundKey = metaModel.embeddable(field.getType());
+                Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
+                for (Field compositeColumn : field.getType().getDeclaredFields())
+                {
+                    if (!ReflectUtils.isTransientOrStatic(compositeColumn))
+                    {
+                        onTranslation(type, builder, columnBuilder,
+                                ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
+                                        .getJPAColumnName(), compoundKeyObj, compositeColumn);
+                    }
+                }
+            }
+            else if (!ReflectUtils.isTransientOrStatic(field))
+            {
+                onTranslation(type, builder, columnBuilder, CassandraUtilities.getIdColumnName(m, externalProperties),
+                        record, field);
+            }
+        }
+
         // on inherited columns.
-        onDiscriminatorColumn(builder,columnBuilder,entityType);
+        onDiscriminatorColumn(builders.get(m.getTableName()), columnBuilders.get(m.getTableName()), entityType);
     }
 
     private void onDiscriminatorColumn(StringBuilder builder, StringBuilder columnBuilder, EntityType entityType)
     {
-        String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
-        String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
-        
-        // No need to check for empty or blank, as considering it as valid name for nosql!
-        if(discrColumn != null && discrValue != null)
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
         {
             appendValue(builder, String.class, discrValue, false);
             builder.append(",");
@@ -484,7 +455,7 @@ public final class CQLTranslator
         {
         case ALL:
             if (appendColumnValue(builder, record, column))
-            {
+            {                
                 builder.append(",");
                 appendColumnName(columnBuilder, columnName);
                 columnBuilder.append(","); // because only key columns
@@ -659,59 +630,59 @@ public final class CQLTranslator
      */
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
-       // To allow handle byte array class object by converting it to string
-       if (fieldClazz.isAssignableFrom(byte[].class))
+        // To allow handle byte array class object by converting it to string
+        if (fieldClazz.isAssignableFrom(byte[].class))
         {
-           StringBuilder hexstr = new StringBuilder("0x");
-           builder.append(hexstr.append((Hex.encodeHex((byte []) value))));
-                    
-        } else {        
+            StringBuilder hexstr = new StringBuilder("0x");
+            builder.append(hexstr.append((Hex.encodeHex((byte[]) value))));
+
+        }
+        else
+        {
             if (useToken)
             {
-              builder.append(TOKEN);
+                builder.append(TOKEN);
             }
-        
-        if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz) || fieldClazz.isAssignableFrom(char.class)
-                || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum )
-        {
 
+            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
+                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
+                    || value instanceof Enum)
+            {
 
-            if (fieldClazz.isAssignableFrom(String.class))
-            {
-                // To allow escape character
-                value = ((String) value).replaceAll("'", "''");
-            }
-            builder.append("'");
+                if (fieldClazz.isAssignableFrom(String.class))
+                {
+                    // To allow escape character
+                    value = ((String) value).replaceAll("'", "''");
+                }
+                builder.append("'");
 
-            if (isDate(fieldClazz)) // For CQL, date has to
-                                    // be in date.getTime()
-            {
-                builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
+                if (isDate(fieldClazz)) // For CQL, date has to
+                                        // be in date.getTime()
+                {
+                    builder.append(PropertyAccessorFactory.getPropertyAccessor(fieldClazz).toString(value));
+                }
+                else if (value instanceof Enum)
+                {
+                    builder.append(((Enum) value).name());
+                }
+
+                else
+                {
+                    builder.append(value);
+                }
+                builder.append("'");
             }
-            else if (value instanceof Enum)
-            {
-                builder.append(((Enum) value).name());
-            }
-          
             else
             {
                 builder.append(value);
             }
-            builder.append("'");
-        }
-        else
-        {
-           builder.append(value);
-        }
 
-       
-       }
+        }
         if (useToken)
         {
             builder.append(CLOSE_BRACKET);
         }
     }
-
 
     /**
      * Appends column name and ensure case sensitivity.
@@ -855,13 +826,11 @@ public final class CQLTranslator
     {
         builder.append(" ALLOW FILTERING");
     }
-    
 
     /**
      * @param builder
      */
-    public void buildOrderByClause(StringBuilder builder,  String field, Object orderType,
-            boolean useToken)
+    public void buildOrderByClause(StringBuilder builder, String field, Object orderType, boolean useToken)
     {
         builder.append(SPACE_STRING);
         builder.append(SORT_CLAUSE);

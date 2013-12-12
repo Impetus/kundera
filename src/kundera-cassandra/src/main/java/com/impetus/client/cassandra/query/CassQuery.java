@@ -69,7 +69,6 @@ import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
 
-
 /**
  * @author vivek.mishra
  * 
@@ -135,18 +134,18 @@ public class CassQuery extends QueryImpl
 
         if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
                 && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
-        //            if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
+        // if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
 
         {
-            result = ((CassandraClientBase) client).executeQuery(onQueryOverCQL3(m, client, metaModel, null),
-                    m.getEntityClazz(), null);
+            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+                    onQueryOverCQL3(m, client, metaModel, null));
         }
         else
         {
             if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(query != null ? query : getJPAQuery(),
-                        m.getEntityClazz(), null);
+                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, query != null ? query
+                        : getJPAQuery());
             }
             else
             {
@@ -206,21 +205,17 @@ public class CassQuery extends QueryImpl
                 m.getPersistenceUnit());
 
         String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*
-                                                   * query == null ? true :
-                                                   * appMetadata.
-                                                   */;
+        boolean isNative = kunderaQuery.isNative();
 
         if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(query != null ? query
-                    : getJPAQuery(), m.getEntityClazz(), null);
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+                    query != null ? query : getJPAQuery());
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = ((CassandraClientBase) client).executeQuery(
-                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()), m.getEntityClazz(),
-                    m.getRelationNames());
+            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(),
+                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
         }
         else
         {
@@ -257,16 +252,12 @@ public class CassQuery extends QueryImpl
 
         String query = appMetadata.getQuery(getJPAQuery());
 
-        boolean isNative = kunderaQuery.isNative()/*
-                                                   * query == null ? true :
-                                                   * appMetadata
-                                                   * .isNative(getJPAQuery())
-                                                   */;
+        boolean isNative = kunderaQuery.isNative();
 
         if (isNative)
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(query != null ? query
-                    : getJPAQuery(), m.getEntityClazz(), null);
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null,
+                    query != null ? query : getJPAQuery());
         }
         else if (kunderaQuery.isDeleteUpdate())
         {
@@ -592,7 +583,7 @@ public class CassQuery extends QueryImpl
             else
             {
                 String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
-                
+
                 if (!jpaFieldName.equals(discriminatorColumn))
                 {
                     String fieldName = m.getFieldName(jpaFieldName);
@@ -615,11 +606,12 @@ public class CassQuery extends QueryImpl
         {
             return CassandraUtilities.toBytes(value, f);
         }/*
-        else if(f == null || value == null)
-        {
-            log.error("Error while handling data type for " + jpaFieldName + ".");
-            throw new QueryHandlerException("Field type is null for " + jpaFieldName + ".");
-        }*/ else
+          * else if(f == null || value == null) {
+          * log.error("Error while handling data type for " + jpaFieldName +
+          * "."); throw new QueryHandlerException("Field type is null for " +
+          * jpaFieldName + "."); }
+          */
+        else
         {
             // default is String type
             return CassandraUtilities.toBytes(value, String.class);
@@ -799,20 +791,17 @@ public class CassQuery extends QueryImpl
         {
             builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
         }
-        
-       
+
         List<SortOrdering> orders = getKunderaQuery().getOrdering();
         if (orders != null)
         {
-           for (SortOrdering order : orders)
-           {
-              translator.buildOrderByClause(builder, order.getColumnName(), order.getOrder(), false);
-              //as only one order clause will be available for a query
-              break;
-           }
-         }
-
-       
+            for (SortOrdering order : orders)
+            {
+                translator.buildOrderByClause(builder, order.getColumnName(), order.getOrder(), false);
+                // as only one order clause will be available for a query
+                break;
+            }
+        }
 
         if (allowFiltering)
         {
@@ -824,8 +813,6 @@ public class CassQuery extends QueryImpl
         {
             onLimit(builder);
         }
-        
-      
 
         return isPresent;
     }

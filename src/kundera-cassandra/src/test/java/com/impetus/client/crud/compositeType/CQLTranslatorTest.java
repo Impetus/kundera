@@ -16,6 +16,7 @@
 package com.impetus.client.crud.compositeType;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.EntityManagerFactory;
@@ -74,12 +75,12 @@ public class CQLTranslatorTest
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(CassandraPrimeUser.class);
-        String translatedSql = translator
+        Map<String, StringBuilder> translatedSql = translator
                 .prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE, null).get(
                         TranslationType.VALUE);
         String columnAsCsv = "'mevivs',1," + timeLineId /*+ ",'my first tweet','" + currentDate.getTime() + */ /*+ "'"*/;
         
-        Assert.assertTrue(StringUtils.contains(translatedSql, columnAsCsv));
+        Assert.assertTrue(StringUtils.contains(translatedSql.get(entityMetadata.getTableName()).toString(), columnAsCsv));
 //        Assert.assertEquals(columnAsCsv, translatedSql);
     }
     

@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -127,7 +130,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.reader = reader;
         this.clientFactory = clientFactory;
         this.clientMetadata = clientFactory.getClientMetadata();
-        this.invertedIndexHandler = new PelopsInvertedIndexHandler(this, MetadataUtils.useSecondryIndex(this.clientMetadata));
+        this.invertedIndexHandler = new PelopsInvertedIndexHandler(this,
+                MetadataUtils.useSecondryIndex(this.clientMetadata));
         this.pool = pool;
     }
 
@@ -198,25 +202,33 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
-        if (isCql3Enabled(metadata))
-        {
-            String deleteQuery = onDeleteQuery(metadata, metaModel, pKey);
-            executeQuery(deleteQuery, metadata.getEntityClazz(), null);
-        }
-        else
-        {
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+        // For secondary tables.
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+        secondaryTables.add(metadata.getTableName());
 
-            if (metadata.isCounterColumnType())
+        for (String tableName : secondaryTables)
+        {
+            if (isCql3Enabled(metadata))
             {
-                deleteRecordFromCounterColumnFamily(pKey, metadata, getConsistencyLevel());
+                String deleteQuery = onDeleteQuery(metadata, tableName, metaModel, pKey);
+                executeCQLQuery(deleteQuery, isCql3Enabled(metadata));
             }
             else
             {
-                RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
-                rowDeletor.deleteRow(metadata.getTableName(),
-                        CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()),
-                        getConsistencyLevel());
+                if (metadata.isCounterColumnType())
+                {
+                    deleteRecordFromCounterColumnFamily(pKey, tableName, metadata, getConsistencyLevel());
+                }
+                else
+                {
+                    RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
+                    rowDeletor.deleteRow(tableName,
+                            CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()),
+                            getConsistencyLevel());
 
+                }
             }
         }
         // Delete from Lucene if applicable
@@ -457,8 +469,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
             try
             {
-                cqlClient.persist(metadata, entity, client, rlHolders,
-                        getTtlValues().get(metadata.getTableName()));
+                cqlClient.persist(metadata, entity, client, rlHolders, getTtlValues().get(metadata.getTableName()));
             }
             catch (InvalidRequestException e)
             {
@@ -493,83 +504,90 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         else
         {
-            ThriftRow tf = null;
+            Collection<ThriftRow> tfRows = null;
             try
             {
                 String columnFamily = metadata.getTableName();
-                tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily, getTtlValues().get(columnFamily));
+                tfRows = dataHandler.toThriftRow(entity, id, metadata, columnFamily, getTtlValues().get(columnFamily));
             }
             catch (Exception e)
             {
                 log.error("Error during persist, Caused by: .", e);
                 throw new KunderaException(e);
             }
-            addRelationsToThriftRow(metadata, tf, rlHolders);
-            Mutator mutator = clientFactory.getMutator(pool);
-            if (metadata.isCounterColumnType())
+            for (ThriftRow tf : tfRows)
             {
-                if (log.isInfoEnabled())
-                {
-                    log.info("Persisting counter column family record for row key {}", tf.getId());
-                }
-                List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
-                List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
-                if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
-                {
-                    mutator.writeCounterColumns(metadata.getTableName(),
-                            CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                            Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
-                }
 
-                if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+                if (tf.getColumnFamilyName().equals(metadata.getTableName()))
                 {
-                    for (CounterSuperColumn sc : thriftCounterSuperColumns)
-                    {
-                        mutator.writeSubCounterColumns(metadata.getTableName(),
-                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                                Bytes.fromByteArray(sc.getName()), sc.getColumns());
-                    }
+                    addRelationsToThriftRow(metadata, tf, rlHolders);
                 }
-            }
-            else
-            {
-                List<Column> thriftColumns = tf.getColumns();
-                List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-                if (thriftColumns != null && !thriftColumns.isEmpty())
+                Mutator mutator = clientFactory.getMutator(pool);
+                if (metadata.isCounterColumnType())
                 {
                     if (log.isInfoEnabled())
                     {
-//                        log.info("Persisting column family record for row key {}", tf.getId());
+                        log.info("Persisting counter column family record for row key {}", tf.getId());
+                    }
+                    List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
+                    List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
+                    if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
+                    {
+                        mutator.writeCounterColumns(metadata.getTableName(),
+                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                                Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
                     }
 
-                    // Bytes.from
-                    mutator.writeColumns(metadata.getTableName(),
-                            CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                            Arrays.asList(tf.getColumns().toArray(new Column[0])));
+                    if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+                    {
+                        for (CounterSuperColumn sc : thriftCounterSuperColumns)
+                        {
+                            mutator.writeSubCounterColumns(metadata.getTableName(),
+                                    CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                                    Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                        }
+                    }
                 }
-
-                if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+                else
                 {
-                    for (SuperColumn sc : thriftSuperColumns)
+                    List<Column> thriftColumns = tf.getColumns();
+                    List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+                    if (thriftColumns != null && !thriftColumns.isEmpty())
                     {
                         if (log.isInfoEnabled())
                         {
-                            log.info("Persisting super column family record for row key {}", tf.getId());
+                            // log.info("Persisting column family record for row key {}",
+                            // tf.getId());
                         }
 
-                        mutator.writeSubColumns(metadata.getTableName(),
+                        // Bytes.from
+                        mutator.writeColumns(metadata.getTableName(),
                                 CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                                Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                                Arrays.asList(tf.getColumns().toArray(new Column[0])));
+                    }
+
+                    if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+                    {
+                        for (SuperColumn sc : thriftSuperColumns)
+                        {
+                            if (log.isInfoEnabled())
+                            {
+                                log.info("Persisting super column family record for row key {}", tf.getId());
+                            }
+
+                            mutator.writeSubColumns(metadata.getTableName(),
+                                    CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
+                                    Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                        }
                     }
                 }
-            }
 
-            mutator.execute(getConsistencyLevel());
-            tf = null;
-            
-            if(isTtlPerRequest())
+                mutator.execute(getConsistencyLevel());
+            }
+            tfRows = null;
+            if (isTtlPerRequest())
             {
-            	getTtlValues().clear();
+                getTtlValues().clear();
             }
         }
     }
@@ -644,9 +662,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * 
      */
     @Override
-    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
+    public List executeQuery(Class clazz, List<String> relationalField, String... cqlQuery)
     {
-        return super.executeSelectQuery(cqlQuery, clazz, relationalField, dataHandler);
+        return super.executeSelectQuery(clazz, relationalField, dataHandler, cqlQuery);
     }
 
     /**
@@ -784,7 +802,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
-            List<String> columns, List<IndexExpression> conditions,int maxResults) throws Exception
+            List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception
     {
         Selector selector = clientFactory.getSelector(pool);
 

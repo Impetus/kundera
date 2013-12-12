@@ -237,26 +237,25 @@ class ResultIterator<E> implements IResultIterator<E>
                 m.getPersistenceUnit());
 
         String queryString = appMetadata.getQuery(((QueryImpl) query).getJPAQuery());
-        
-        boolean isNative = ((CassQuery) query).isNative()/*queryString == null ? true : appMetadata.isNative(((QueryImpl) query).getJPAQuery())*/;        
+
+        boolean isNative = ((CassQuery) query).isNative();
 
         if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
             String parsedQuery = query.onQueryOverCQL3(m, client, metaModel, null);
 
             parsedQuery = appendWhereClauseWithScroll(parsedQuery);
-            results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(parsedQuery,
-                    m.getEntityClazz(), m.getRelationNames()) : null;
-//            appMetadata.removeNativeQuery()
-
+            results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(),
+                    m.getRelationNames(), parsedQuery) : null;
         }
         else
         {
             if (isNative)
             {
-                final String nativeQuery = appendWhereClauseWithScroll(queryString != null ? queryString:((QueryImpl) query).getJPAQuery());
-                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(nativeQuery,
-                        m.getEntityClazz(), null) : null;
+                final String nativeQuery = appendWhereClauseWithScroll(queryString != null ? queryString
+                        : ((QueryImpl) query).getJPAQuery());
+                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+                        nativeQuery) : null;
             }
             else
             {
@@ -320,7 +319,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
         final String tokenCondition = prepareNext(translator, queryWithoutLimit);
 
-        StringBuilder builder = new StringBuilder( queryWithoutLimit);
+        StringBuilder builder = new StringBuilder(queryWithoutLimit);
 
         if (tokenCondition != null)
         {

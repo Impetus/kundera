@@ -254,7 +254,6 @@ public class PropertyAccessorHelper
         // classes' getId() method
         if (entity instanceof EnhanceEntity)
         {
-
             return ((EnhanceEntity) entity).getEntityId();
         }
 

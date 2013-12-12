@@ -17,6 +17,7 @@ package com.impetus.client.cassandra.pelops;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,13 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -61,18 +67,37 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
         rowKeys.add(ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType())));
 
-        Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
-                .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
-                        Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
 
-        ThriftRow tr = new ThriftRow();
-        tr.setId(rowKey);
-        tr.setColumnFamilyName(m.getTableName());
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
 
-        tr = thriftTranslator
-                .translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(), m.getType(), tr);
+        // For secondary tables.
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+        secondaryTables.add(m.getTableName());
+        Object e = null;
+        e = PelopsUtils.initialize(m, e, null);
 
-        return populateEntity(tr, m, relationNames, isWrapReq);
+        Map<String, Object> relations = new HashMap<String, Object>();
+
+        for (String tableName : secondaryTables)
+        {
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
+                    .getColumnOrSuperColumnsFromRows(new ColumnParent(tableName), rowKeys,
+                            Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
+
+            ThriftRow tr = new ThriftRow();
+            tr.setId(rowKey);
+            tr.setColumnFamilyName(tableName);
+
+            tr = thriftTranslator.translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(),
+                    m.getType(), tr);
+
+            relations = populateEntity(tr, m, e, relationNames, isWrapReq, relations);
+        }
+        return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), relations)
+                : e;
     }
 
     /** Translation Methods */

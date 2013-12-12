@@ -31,9 +31,15 @@ import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftClientFactory.Connection;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -77,18 +83,46 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         Connection conn = thriftClient.getConection();
         try
         {
-            List<ColumnOrSuperColumn> columnOrSuperColumns = conn.getClient().get_slice(key, new ColumnParent(
-                    m.getTableName()), predicate, consistencyLevel);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
 
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
-            thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
-            e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns);
+            AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
+
+            // For secondary tables.
+            List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                    .getSecondaryTablesName();
+            secondaryTables.add(m.getTableName());
+
+            e = PelopsUtils.initialize(m, e, null);
+
+            Map<String, Object> relations = new HashMap<String, Object>();
+
+            for (String tableName : secondaryTables)
+            {
+                List<ColumnOrSuperColumn> columnOrSuperColumns = conn.getClient().get_slice(key,
+                        new ColumnParent(tableName), predicate, consistencyLevel);
+
+                Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
+                thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
+                if (!columnOrSuperColumns.isEmpty())
+                {
+                    e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns, relations);
+                }
+            }
+            if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
+            {
+                return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
+                        relations) : e;
+            }
+            else
+            {
+                return null;
+            }
         }
         finally
         {
             thriftClient.releaseConnection(conn);
         }
-        return e;
     }
 
     @Override
@@ -107,17 +141,19 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      * @throws CharacterCodingException
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow) throws CharacterCodingException
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow, Map<String, Object> relations)
+            throws CharacterCodingException
     {
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (ByteBuffer key : columnOrSuperColumnsFromRow.keySet())
         {
+            Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.array());
             ThriftRow tr = new ThriftRow();
             tr.setColumnFamilyName(m.getTableName());
-            tr.setId(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.array()));
+            tr.setId(id);
             tr = dataGenerator.translateToThriftRow(columnOrSuperColumnsFromRow, m.isCounterColumnType(), m.getType(),
                     tr);
-            e = populateEntity(tr, m, relationNames, isWrapReq);
+            relations = populateEntity(tr, m, e, relationNames, isWrapReq, relations);
         }
         return e;
     }

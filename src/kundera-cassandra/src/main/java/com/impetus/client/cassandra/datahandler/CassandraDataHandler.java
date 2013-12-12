@@ -15,7 +15,9 @@
  */
 package com.impetus.client.cassandra.datahandler;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -106,7 +108,7 @@ public interface CassandraDataHandler
      *            the is wrap req
      * @return the object
      */
-    Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq);
+    Map<String, Object> populateEntity(ThriftRow tr, EntityMetadata m, Object entity, List<String> relationNames, boolean isWrapReq, Map<String, Object> relations);
 
     /**
      * @param e
@@ -117,5 +119,5 @@ public interface CassandraDataHandler
      * @return
      * @throws Exception
      */
-    ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception;
+    Collection<ThriftRow> toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception;
 }
