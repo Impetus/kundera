@@ -137,14 +137,14 @@ public class CassQuery extends QueryImpl
         // if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
 
         {
-            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative,
                     onQueryOverCQL3(m, client, metaModel, null));
         }
         else
         {
             if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, query != null ? query
+                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative, query != null ? query
                         : getJPAQuery());
             }
             else
@@ -209,12 +209,12 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(),
+            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(),isNative,
                     onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
         }
         else
@@ -256,7 +256,7 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null,
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null,isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (kunderaQuery.isDeleteUpdate())

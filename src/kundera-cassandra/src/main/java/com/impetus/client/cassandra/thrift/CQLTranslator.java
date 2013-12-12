@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.thrift;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -245,29 +247,29 @@ public final class CQLTranslator
                 {
                     if (field.getType().equals(idAttribute.getBindableJavaType()))
                     {/*
-                        // builder.
-                        // Means it is a compound key! As other
-                        // iterate for it's fields to populate it's values in
-                        // order!
-                        EmbeddableType compoundKey = metaModel.embeddable(field.getType());
-                        Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
-                        for (Field compositeColumn : field.getType().getDeclaredFields())
-                        {
-                            if (!ReflectUtils.isTransientOrStatic(compositeColumn))
-                            {
-                                onTranslation(type, builder, columnBuilder,
-                                        ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
-                                                .getJPAColumnName(), compoundKeyObj, compositeColumn);
-                            }
-                        }
-                    */throw new PersistenceException(
-                            "Super columns are not supported via cql for compound/composite keys!");
-                        }
-//                    else
-//                    {
-//                        throw new PersistenceException(
-//                                "Super columns are not supported via cql for compound/composite keys!");
-//                    }
+                      * // builder. // Means it is a compound key! As other //
+                      * iterate for it's fields to populate it's values in //
+                      * order! EmbeddableType compoundKey =
+                      * metaModel.embeddable(field.getType()); Object
+                      * compoundKeyObj =
+                      * PropertyAccessorHelper.getObject(record, field); for
+                      * (Field compositeColumn :
+                      * field.getType().getDeclaredFields()) { if
+                      * (!ReflectUtils.isTransientOrStatic(compositeColumn)) {
+                      * onTranslation(type, builder, columnBuilder,
+                      * ((AbstractAttribute)
+                      * (compoundKey.getAttribute(compositeColumn.getName())))
+                      * .getJPAColumnName(), compoundKeyObj, compositeColumn); }
+                      * }
+                      */
+                        throw new PersistenceException(
+                                "Super columns are not supported via cql for compound/composite keys!");
+                    }
+                    // else
+                    // {
+                    // throw new PersistenceException(
+                    // "Super columns are not supported via cql for compound/composite keys!");
+                    // }
                 }
                 else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation())
                 {
@@ -455,7 +457,7 @@ public final class CQLTranslator
         {
         case ALL:
             if (appendColumnValue(builder, record, column))
-            {                
+            {
                 builder.append(",");
                 appendColumnName(columnBuilder, columnName);
                 columnBuilder.append(","); // because only key columns

@@ -172,7 +172,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
             try
             {
                 Method m = clazz.getMethod("clone");
-                o = m.invoke(clazz);
+                o = m.invoke(object);
             }
             catch (SecurityException e)
             {

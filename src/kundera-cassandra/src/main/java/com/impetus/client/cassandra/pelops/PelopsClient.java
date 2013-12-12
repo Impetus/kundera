@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -171,25 +172,19 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        List entities = null;
-        Object conn = getConection();
-        try
-        {
-            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    getConsistencyLevel(), rowIds);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while retrieving records for entity {}, row keys {}", entityClass, rowIds);
-            throw new KunderaException(e);
-        }
-        finally
-        {
-            releaseConnection(conn);
-        }
+        return findByRowKeys(entityClass, relationNames, isWrapReq, metadata, rowIds);
 
-        return entities;
-    }
+        /*
+         * List entities = null; Object conn = getConection(); try { entities =
+         * dataHandler.fromThriftRow(entityClass, metadata, relationNames,
+         * isWrapReq, getConsistencyLevel(), rowIds); } catch (Exception e) {
+         * log
+         * .error("Error while retrieving records for entity {}, row keys {}",
+         * entityClass, rowIds); throw new KunderaException(e); } finally {
+         * releaseConnection(conn); }
+         * 
+         * return entities;
+         */}
 
     @Override
     public void delete(Object entity, Object pKey)
@@ -426,7 +421,35 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
             entities = new ArrayList<Object>(qResults.size());
             // iterate through complete map and
-            populateData(m, qResults, entities, false, m.getRelationNames(), dataHandler);
+            // populateData(m, qResults, entities, false, m.getRelationNames(),
+            // dataHandler);
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+
+            EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+            List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
+
+            if (subManagedType.isEmpty())
+            {
+//                entities = populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
+                entities = populateData(m, qResults, entities, false, m.getRelationNames(), dataHandler);
+            }
+            else
+            {
+                for (AbstractManagedType subEntity : subManagedType)
+                {
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager
+                            .getEntityMetadata(subEntity.getJavaType());
+//                    entities = populateData(subEntityMetadata, keySlices, entities,
+//                            subEntityMetadata.getRelationNames() != null, subEntityMetadata.getRelationNames());
+                    entities = populateData(subEntityMetadata, qResults, entities, false,
+                            subEntityMetadata.getRelationNames(), dataHandler);
+
+                }
+            }
+
         }
         return entities;
     }
@@ -662,9 +685,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * 
      */
     @Override
-    public List executeQuery(Class clazz, List<String> relationalField, String... cqlQuery)
+    public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String... cqlQuery)
     {
-        return super.executeSelectQuery(clazz, relationalField, dataHandler, cqlQuery);
+        return super.executeSelectQuery(clazz, relationalField, dataHandler,isNative, cqlQuery);
     }
 
     /**

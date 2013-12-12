@@ -1,4 +1,4 @@
-package com.book.recommendation.hbase.model;
+package com.impetus.recommendation.hbase.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

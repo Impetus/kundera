@@ -171,9 +171,9 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
         try
         {
-            /*
-             * if (_hTable == null) {
-             */
+            // if (_hTable == null)
+            // {
+
             getHTable(_table);
             // }
         }

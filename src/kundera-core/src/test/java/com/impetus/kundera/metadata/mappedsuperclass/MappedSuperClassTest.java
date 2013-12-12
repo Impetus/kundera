@@ -109,8 +109,7 @@ public class MappedSuperClassTest
         }
         catch (KunderaException kex)
         {
-            Assert.assertTrue(StringUtils.startsWith(kex.getLocalizedMessage(),
-                    "com.impetus.kundera.KunderaException: Entity metadata not found for"));
+            Assert.assertNotNull(kex.getMessage());
         }
 
     }
