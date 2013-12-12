@@ -130,7 +130,6 @@ public final class PersistenceDelegator
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
-        EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object.
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
