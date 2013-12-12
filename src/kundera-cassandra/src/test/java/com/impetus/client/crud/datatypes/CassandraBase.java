@@ -10,6 +10,8 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public abstract class CassandraBase
 {
@@ -23,6 +25,7 @@ public abstract class CassandraBase
 
     protected void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         if (RUN_IN_EMBEDDED_MODE)
         {
             startCluster();

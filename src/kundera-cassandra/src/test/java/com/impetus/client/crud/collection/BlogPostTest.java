@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for Storing and retrieving Blog posts. 1. Validates correct
@@ -55,6 +56,8 @@ public class BlogPostTest
     @Before
     public void setUp() throws Exception
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         if (RUN_IN_EMBEDDED_MOODE)
         {
             CassandraCli.cassandraSetUp();

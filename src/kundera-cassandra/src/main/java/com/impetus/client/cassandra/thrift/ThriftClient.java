@@ -911,19 +911,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             ColumnFamilyType.COLUMN, null);
                     Object e = null;
                     Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key);
-                    e = PelopsUtils.initialize(m, e, null);
+//                    e = PelopsUtils.initialize(m, e, null);
 
-                    Map<String, Object> relations = new HashMap<String, Object>();
-
-                    relations = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
+                    e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, e, relationNames, isRelational, relations);
-                    if (e != null && PropertyAccessorHelper.getId(e, m) != null)
-                    {
-                        e = isRelational && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e,
-                                m), relations) : e;
+                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames, isRelational);
+                    
+//                    if (e != null && PropertyAccessorHelper.getId(e, m) != null)
+//                    {
+//                        e = isRelational && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e,
+//                                m), relations) : e;
                         entities.add(e);
-                    }
+//                    }
                 }
             }
         }

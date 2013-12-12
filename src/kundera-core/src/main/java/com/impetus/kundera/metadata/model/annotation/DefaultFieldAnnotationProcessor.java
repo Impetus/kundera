@@ -3,9 +3,15 @@ package com.impetus.kundera.metadata.model.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.Table;
+import javax.persistence.metamodel.ManagedType;
+
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 public class DefaultFieldAnnotationProcessor implements FieldAnnotationProcessor
 {
@@ -30,9 +36,27 @@ public class DefaultFieldAnnotationProcessor implements FieldAnnotationProcessor
     }
 
     @Override
-    public void validateFieldAnnotation(Annotation annotation, Field field)
+    public void validateFieldAnnotation(Annotation annotation, Field field, ManagedType managedType)
     {
 
+        List<String> tables = ((DefaultEntityAnnotationProcessor) ((AbstractManagedType) managedType)
+                .getEntityAnnotation()).getSecondaryTablesName();
+
+        Annotation primaryTableannotation = ((AbstractManagedType) managedType).getEntityAnnotation().getAnnotation(
+                Table.class.getName());
+
+        String primaryTableName = "";
+        if (primaryTableannotation != null)
+        {
+            primaryTableName = ((Table) primaryTableannotation).name();
+        }
+
+        String tableNameOfColumn = getTableNameOfColumn();
+        if (tableNameOfColumn != null && !tables.contains(tableNameOfColumn) && !primaryTableName.isEmpty()
+                && !primaryTableName.equals(tableNameOfColumn))
+        {
+            throw new InvalidEntityDefinitionException("Inavalid table " + tableNameOfColumn + " for field " + field);
+        }
     }
 
     private void processFieldAnnotations(Field field)

@@ -29,6 +29,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -65,16 +66,16 @@ public class CassandraUtilities
 
     }
 
-    
     public static byte[] toBytes(final Object value)
     {
-        if(value != null)
+        if (value != null)
         {
-           return toBytes(value,value.getClass()).toByteArray();
+            return toBytes(value, value.getClass()).toByteArray();
         }
-        
+
         return null;
     }
+
     /**
      * @param value
      * @param f
@@ -166,8 +167,12 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
+     * 
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
+     * 
      * 
      * 
      * 
@@ -192,10 +197,19 @@ public class CassandraUtilities
             autoDdlOption = persistenceUnitMetadata != null ? persistenceUnitMetadata
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
-        
+
         // check if id attribute is embeddable
         boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m);
-        return autoDdlOption == null || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
-                : CassandraConstants.CQL_KEY;
+        return autoDdlOption == null || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute())
+                .getJPAColumnName() : CassandraConstants.CQL_KEY;
+    }
+
+    public static Object getEntity(Object e)
+    {
+        if (e != null)
+        {
+            return e.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) e).getEntity() : e;
+        }
+        return null;
     }
 }

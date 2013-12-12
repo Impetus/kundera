@@ -27,6 +27,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -77,9 +78,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                 .getSecondaryTablesName();
         secondaryTables.add(m.getTableName());
         Object e = null;
-        e = PelopsUtils.initialize(m, e, null);
-
-        Map<String, Object> relations = new HashMap<String, Object>();
+//        e = PelopsUtils.initialize(m, e, null);
 
         for (String tableName : secondaryTables)
         {
@@ -87,17 +86,32 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                     .getColumnOrSuperColumnsFromRows(new ColumnParent(tableName), rowKeys,
                             Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
 
-            ThriftRow tr = new ThriftRow();
-            tr.setId(rowKey);
-            tr.setColumnFamilyName(tableName);
+            for (ByteBuffer key : thriftColumnOrSuperColumns.keySet())
+            {
+                if (!thriftColumnOrSuperColumns.get(key).isEmpty())
+                {
+                    ThriftRow tr = new ThriftRow();
+                    tr.setId(rowKey);
+                    tr.setColumnFamilyName(tableName);
 
-            tr = thriftTranslator.translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(),
-                    m.getType(), tr);
+                    tr = thriftTranslator.translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(),
+                            m.getType(), tr);
 
-            relations = populateEntity(tr, m, e, relationNames, isWrapReq, relations);
+                    e = populateEntity(tr, m, CassandraUtilities.getEntity(e), relationNames, isWrapReq);
+                }
+            }
         }
-        return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), relations)
-                : e;
+        
+        return e;
+//        if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
+//        {
+//            return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
+//                    relations) : e;
+//        }
+//        else
+//        {
+//            return null;
+//        }
     }
 
     /** Translation Methods */

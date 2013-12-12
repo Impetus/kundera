@@ -82,12 +82,13 @@ public class HBaseReader implements Reader
             {
                 byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
                 Get g = new Get(rowKeyBytes);
+                
                 // TODO: After more than one column family for 1 table. this
                 // should work. currently failing for embeddable entities.
-                // if(columnFamily != null)
-                // {
-                // g.addFamily(Bytes.toBytes(columnFamily));
-                // }
+                 if(columnFamily != null)
+                 {
+                   g.addFamily(Bytes.toBytes(columnFamily));
+                 }
 
                 if (filter != null)
                 {

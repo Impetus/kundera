@@ -556,7 +556,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
                     if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
                     {
-                        mutator.writeCounterColumns(metadata.getTableName(),
+                        mutator.writeCounterColumns(tf.getColumnFamilyName(),
                                 CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
                                 Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
                     }
@@ -565,7 +565,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     {
                         for (CounterSuperColumn sc : thriftCounterSuperColumns)
                         {
-                            mutator.writeSubCounterColumns(metadata.getTableName(),
+                            mutator.writeSubCounterColumns(tf.getColumnFamilyName(),
                                     CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
                                     Bytes.fromByteArray(sc.getName()), sc.getColumns());
                         }
@@ -584,7 +584,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                         }
 
                         // Bytes.from
-                        mutator.writeColumns(metadata.getTableName(),
+                        mutator.writeColumns(tf.getColumnFamilyName(),
                                 CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
                                 Arrays.asList(tf.getColumns().toArray(new Column[0])));
                     }
@@ -598,7 +598,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                                 log.info("Persisting super column family record for row key {}", tf.getId());
                             }
 
-                            mutator.writeSubColumns(metadata.getTableName(),
+                            mutator.writeSubColumns(tf.getColumnFamilyName(),
                                     CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
                                     Bytes.fromByteArray(sc.getName()), sc.getColumns());
                         }

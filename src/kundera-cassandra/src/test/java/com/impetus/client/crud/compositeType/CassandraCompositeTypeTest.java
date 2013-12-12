@@ -428,7 +428,7 @@ public class CassandraCompositeTypeTest
         {
             
             Assert.assertEquals(
-                    "InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
+                    "javax.persistence.PersistenceException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
                     e.getMessage());
         }
 

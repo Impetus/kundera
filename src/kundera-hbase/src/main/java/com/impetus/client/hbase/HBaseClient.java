@@ -64,6 +64,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityReader;
@@ -571,8 +572,19 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getSchema(), metadata.getTableName(),
-                ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), pKey);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+        .getSecondaryTablesName();
+secondaryTables.add(metadata.getTableName());
+
+for (String colTableName : secondaryTables)
+{
+    deleteByColumn(metadata.getSchema(), colTableName,
+            ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), pKey);
+}
+        
     }
 
     /*
@@ -917,28 +929,34 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             List<String> relationNames, String tableName, List results, FilterList filter,String... columns) throws IOException
     {
         List<AbstractManagedType> subManagedType = getSubManagedType(entityClass, entityMetadata);
+        
+        
+               if (!subManagedType.isEmpty())
+               {
+                   for (AbstractManagedType subEntity : subManagedType)
+                   {
+                       EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                       results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
+                               subEntityMetadata.getRelationNames(), filter, columns);
+                       // Result will not be empty for match sub entity.
+                       
+                       if (!results.isEmpty())
+                       {
+                           break;
+                       }
+                   }
+               }
+               else
+               {
 
-        if (!subManagedType.isEmpty())
-        {
-            for (AbstractManagedType subEntity : subManagedType)
-            {
-                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
-                results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
-                        subEntityMetadata.getRelationNames(), filter,columns);
-                // Result will not be empty for match sub entity.
-                if (!results.isEmpty())
-                {
-                    break;
-                }
-            }
-        }
-        else
-        {
-
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
-                    relationNames, filter,columns);
-        }
-        return results;
+                   results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+                           relationNames, filter, columns);
+                  
+               }
+             
+     
+         
+          return results;
     }
 
     private List<AbstractManagedType> getSubManagedType(Class entityClass, EntityMetadata entityMetadata)
@@ -947,7 +965,9 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityClass);
-
+        
+        
+       
         List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
         return subManagedType;
     }

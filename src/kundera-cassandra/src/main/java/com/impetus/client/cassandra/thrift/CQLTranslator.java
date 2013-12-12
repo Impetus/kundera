@@ -218,7 +218,6 @@ public final class CQLTranslator
     {
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
-        SingularAttribute idAttribute = m.getIdAttribute();
         while (iterator.hasNext())
         {
             Attribute attribute = iterator.next();
@@ -241,37 +240,14 @@ public final class CQLTranslator
                 builders.put(tableName, builder);
             }
             Field field = (Field) attribute.getJavaMember();
-            if (!attribute.equals(idAttribute))
+            if (!attribute.equals(m.getIdAttribute()) && !((AbstractAttribute)attribute).getJPAColumnName().equals(((AbstractAttribute)m.getIdAttribute()).getJPAColumnName()))
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
                 {
-                    if (field.getType().equals(idAttribute.getBindableJavaType()))
-                    {/*
-                      * // builder. // Means it is a compound key! As other //
-                      * iterate for it's fields to populate it's values in //
-                      * order! EmbeddableType compoundKey =
-                      * metaModel.embeddable(field.getType()); Object
-                      * compoundKeyObj =
-                      * PropertyAccessorHelper.getObject(record, field); for
-                      * (Field compositeColumn :
-                      * field.getType().getDeclaredFields()) { if
-                      * (!ReflectUtils.isTransientOrStatic(compositeColumn)) {
-                      * onTranslation(type, builder, columnBuilder,
-                      * ((AbstractAttribute)
-                      * (compoundKey.getAttribute(compositeColumn.getName())))
-                      * .getJPAColumnName(), compoundKeyObj, compositeColumn); }
-                      * }
-                      */
-                        throw new PersistenceException(
-                                "Super columns are not supported via cql for compound/composite keys!");
-                    }
-                    // else
-                    // {
-                    // throw new PersistenceException(
-                    // "Super columns are not supported via cql for compound/composite keys!");
-                    // }
+                    throw new PersistenceException(
+                            "Super columns are not supported via cql for compound/composite keys!");
                 }
-                else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation())
+                else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation()/* && m.getIdAttribute().getName().equals(attribute.getName())*/)
                 {
                     onTranslation(type, builder, columnBuilder, ((AbstractAttribute) attribute).getJPAColumnName(),
                             record, field);
@@ -283,6 +259,7 @@ public final class CQLTranslator
         {
             StringBuilder builder = builders.get(tableName);
             StringBuilder columnBuilder = columnBuilders.get(tableName);
+            SingularAttribute idAttribute = m.getIdAttribute();
             Field field = (Field) idAttribute.getJavaMember();
             if (metaModel.isEmbeddable(((AbstractAttribute) idAttribute).getBindableJavaType()))
             {

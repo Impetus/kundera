@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -214,16 +215,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 Object e = null;
                 Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.toByteArray());
-                e = PelopsUtils.initialize(m, e, id);
-
-                Map<String, Object> relationValue = new HashMap<String, Object>();
+                // e = PelopsUtils.initialize(m, e, id);
 
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
                 ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0),
                         new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
-                relationValue = getDataHandler().populateEntity(tr, m, e, relations, isRelation, relationValue);
-                e = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-                        relationValue) : e;
+                e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+                // e = isRelation && !relationValue.isEmpty() ? new
+                // EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
+                // relationValue) : e;
                 entities.add(e);
             }
 
@@ -244,17 +244,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 Object e = null;
                 Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.toByteArray());
-                e = PelopsUtils.initialize(m, e, id);
-
-                Map<String, Object> relationValue = new HashMap<String, Object>();
+                // e = PelopsUtils.initialize(m, e, id);
 
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
                 ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0),
                         new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
-                relationValue = getDataHandler().populateEntity(tr, m, e, relations, isRelation, relationValue);
-                e = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-                        relationValue) : e;
-                entities.add(e);
+                e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+
+                if (e != null)
+                {
+                    entities.add(e);
+                }
             }
         }
         return entities;
@@ -287,52 +287,45 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         for (Bytes key : qResults.keySet())
         {
-            List<Column> columns = qResults.get(key);
-            Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.toByteArray());
-            ThriftRow tr = new ThriftRow(id, m.getTableName(), columns, new ArrayList<SuperColumn>(0),
-                    new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-            Object o = null;
-            o = PelopsUtils.initialize(m, o, id);
-
-            Map<String, Object> relationValue = new HashMap<String, Object>();
-            if (!subManagedType.isEmpty())
+            if (!qResults.get(key).isEmpty())
             {
-                for (AbstractManagedType subEntity : subManagedType)
-                {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager
-                            .getEntityMetadata(subEntity.getJavaType());
+                List<Column> columns = qResults.get(key);
+                Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.toByteArray());
+                ThriftRow tr = new ThriftRow(id, m.getTableName(), columns, new ArrayList<SuperColumn>(0),
+                        new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
+                Object o = null;
 
-                    relationValue = getDataHandler().populateEntity(tr, subEntityMetadata, o,
-                            subEntityMetadata.getRelationNames(), isRelation, relationValue);
-                    if (o != null)
+                if (!subManagedType.isEmpty())
+                {
+                    for (AbstractManagedType subEntity : subManagedType)
                     {
-                        o = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(o, PropertyAccessorHelper.getId(
-                                o, subEntityMetadata), relationValue) : o;
-                        break;
+                        EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
+                                .getJavaType());
+
+                        o = getDataHandler().populateEntity(tr, subEntityMetadata, CassandraUtilities.getEntity(o),
+                                subEntityMetadata.getRelationNames(), isRelation);
+                        if (o != null)
+                        {
+                            break;
+                        }
                     }
+
+                }
+                else
+                {
+                    o = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(o), relations, isRelation);
                 }
 
-            }
-            else
-            {
-                relationValue = getDataHandler().populateEntity(tr, m, o, relations, isRelation, relationValue);
+                if (log.isInfoEnabled())
+                {
+                    log.info("Populating data for entity of clazz {} and row key {}.", m.getEntityClazz(), tr.getId());
+                }
+
                 if (o != null)
                 {
-                    o = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(o,
-                            PropertyAccessorHelper.getId(o, m), relationValue) : o;
+                    entities.add(o);
                 }
             }
-
-            if (log.isInfoEnabled())
-            {
-                log.info("Populating data for entity of clazz {} and row key {}.", m.getEntityClazz(), tr.getId());
-            }
-
-            if (o != null)
-            {
-                entities.add(o);
-            }
-
         }
     }
 
@@ -357,18 +350,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             Object e = null;
             Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.toByteArray());
-            e = PelopsUtils.initialize(m, e, id);
-
-            Map<String, Object> relationValue = new HashMap<String, Object>();
+            // e = PelopsUtils.initialize(m, e, id);
 
             List<SuperColumn> superColumns = qResults.get(key);
 
             ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0), superColumns,
                     new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
 
-            relationValue = getDataHandler().populateEntity(tr, m, e, relations, isRelation, relationValue);
-            e = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-                    relationValue) : e;
+            e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+            // e = isRelation && !relationValue.isEmpty() ? new EnhanceEntity(e,
+            // PropertyAccessorHelper.getId(e, m),
+            // relationValue) : e;
 
             if (log.isInfoEnabled())
             {
@@ -817,20 +809,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the data handler
      * @return the list
      */
-    public List executeSelectQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler, boolean isNative,
-            String... cqlQuery)
+    public List executeSelectQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
+            boolean isNative, String... cqlQuery)
     {
         if (log.isInfoEnabled())
         {
             log.info("Executing cql query {}.", cqlQuery);
         }
-       
+
         List entities = new ArrayList<Object>();
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getMetamodel(entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
@@ -838,16 +830,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         if (subManagedType.isEmpty())
         {
-            entities.addAll(cqlClient.executeQuery(clazz, relationalField, dataHandler, true,isNative, cqlQuery));
+            entities.addAll(cqlClient.executeQuery(clazz, relationalField, dataHandler, true, isNative, cqlQuery));
         }
         else
         {
             for (AbstractManagedType subEntity : subManagedType)
             {
-                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
-                        .getJavaType());
-                
-                entities.addAll(cqlClient.executeQuery(subEntityMetadata.getEntityClazz(), relationalField, dataHandler, true,isNative, cqlQuery));
+                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+
+                entities.addAll(cqlClient.executeQuery(subEntityMetadata.getEntityClazz(), relationalField,
+                        dataHandler, true, isNative, cqlQuery));
             }
         }
         return entities;
@@ -931,16 +923,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Object id = PropertyAccessorHelper
                             .getObject(m.getIdAttribute().getJavaType(), rowKey.toByteArray());
                     Object e = null;
-                    e = PelopsUtils.initialize(m, e, id);
-
-                    Map<String, Object> relationValue = new HashMap<String, Object>();
-                    relationValue = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
+                    // e = PelopsUtils.initialize(m, e, id);
+                    e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, e, relationNames, isRelational, relationValue);
+                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames,
+                            isRelational);
                     if (e != null)
                     {
-                        e = isRelational && !relationValue.isEmpty() ? new EnhanceEntity(e,
-                                PropertyAccessorHelper.getId(e, m), relationValue) : e;
+                        // e = isRelational && !relationValue.isEmpty() ? new
+                        // EnhanceEntity(e,
+                        // PropertyAccessorHelper.getId(e, m), relationValue) :
+                        // e;
                         entities.add(e);
                     }
                 }
@@ -999,9 +992,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), rowKey);
 
             Object e = null;
-            e = PelopsUtils.initialize(m, e, id);
-
-            Map<String, Object> relationValue = new HashMap<String, Object>();
+            // e = PelopsUtils.initialize(m, e, id);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> data = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>(1);
             data.put(ByteBuffer.wrap(rowKey), columns);
@@ -1010,12 +1001,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             tr.setColumnFamilyName(m.getTableName());
             tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
 
-            relationValue = dataHandler.populateEntity(tr, m, e, relations, isWrapReq, relationValue);
+            e = dataHandler.populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isWrapReq);
 
-            if (PropertyAccessorHelper.getId(e, m) != null)
+            if (e != null)
             {
-                e = isWrapReq && !relationValue.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-                        relationValue) : e;
+                // e = isWrapReq && !relationValue.isEmpty() ? new
+                // EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
+                // relationValue) : e;
                 results.add(e);
             }
         }
@@ -1082,7 +1074,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     insert_Query = insert_Query + " USING TTL " + ttl;
                 }
             }
-
             insert_Queries.add(insert_Query);
         }
         return insert_Queries;
@@ -1101,7 +1092,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected List<String> createUpdateQueryForCounter(EntityMetadata entityMetadata, Object entity,
             Cassandra.Client cassandra_client, List<RelationHolder> rlHolders)
     {
-        Map<String, StringBuilder> builders = new HashMap<String, StringBuilder>();
+        Map<String, String> builders = new HashMap<String, String>();
 
         CQLTranslator translator = new CQLTranslator();
 
@@ -1121,25 +1112,30 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 String tableName = ((AbstractAttribute) attrib).getTableName() != null ? ((AbstractAttribute) attrib)
                         .getTableName() : entityMetadata.getTableName();
 
-                StringBuilder builder = builders.get(tableName);
-                if (builder == null)
+                String queryString = builders.get(tableName);
+                StringBuilder builder;
+                if (queryString == null)
                 {
                     builder = new StringBuilder();
-                    builders.put(tableName, builder);
+                }
+                else
+                {
+                    builder = new StringBuilder(queryString);
                 }
                 translator.buildSetClauseForCounters(builder, ((AbstractAttribute) attrib).getJPAColumnName(),
                         PropertyAccessorHelper.getObject(entity, attrib.getName()));
+                builders.put(tableName, builder.toString());
             }
         }
         for (RelationHolder rl : rlHolders)
         {
-            translator.buildSetClauseForCounters(builders.get(entityMetadata.getTableName()), rl.getRelationName(),
-                    rl.getRelationValue());
+            translator.buildSetClauseForCounters(new StringBuilder(builders.get(entityMetadata.getTableName())),
+                    rl.getRelationName(), rl.getRelationValue());
         }
 
         for (String tableName : builders.keySet())
         {
-            StringBuilder builder = builders.get(tableName);
+            StringBuilder builder = new StringBuilder(builders.get(tableName));
 
             String update_Query = translator.UPDATE_QUERY;
 
@@ -1159,7 +1155,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 log.info("Returning update query {}.", queryBuilder.toString());
             }
 
-            builders.put(tableName, queryBuilder);
+            builders.put(tableName, queryBuilder.toString());
         }
         return new ArrayList(builders.values());
     }
@@ -2079,12 +2075,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List returnedEntities = new ArrayList();
             try
             {
-
-                Map<String, Object> relations = new HashMap<String, Object>();
-
                 for (String cqlQuery : cqlQueries)
                 {
-                    String query = appMetadata.getQuery(cqlQuery);
                     if (log.isInfoEnabled())
                     {
                         log.info("Executing query {}.", cqlQuery);
@@ -2097,7 +2089,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         while (iter.hasNext())
                         {
                             Object e = null;
-                            e = PelopsUtils.initialize(entityMetadata, e, null);
+                            // e = PelopsUtils.initialize(entityMetadata, e,
+                            // null);
                             CqlRow row = iter.next();
                             Object rowKey = null;
 
@@ -2106,13 +2099,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                     new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                     new ArrayList<CounterSuperColumn>(0));
 
-                            relations = dataHandler.populateEntity(thriftRow, entityMetadata, e, relationalField,
-                                    relationalField != null && !relationalField.isEmpty(), relations);
+                            e = dataHandler.populateEntity(thriftRow, entityMetadata, CassandraUtilities.getEntity(e),
+                                    relationalField, relationalField != null && !relationalField.isEmpty());
 
-                            if (e != null && PropertyAccessorHelper.getId(e, entityMetadata) != null)
+                            if (e != null)
                             {
-                                e = relationalField != null && !relationalField.isEmpty() && !relations.isEmpty() ? new EnhanceEntity(
-                                        e, PropertyAccessorHelper.getId(e, entityMetadata), relations) : e;
+                                // e = relationalField != null &&
+                                // !relationalField.isEmpty() &&
+                                // !relations.isEmpty() ? new EnhanceEntity(
+                                // e, PropertyAccessorHelper.getId(e,
+                                // entityMetadata), relations) : e;
                                 returnedEntities.add(e);
                             }
                             else if (isNative)

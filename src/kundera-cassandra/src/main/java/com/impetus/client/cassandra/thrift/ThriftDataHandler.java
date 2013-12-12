@@ -29,6 +29,7 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
@@ -93,9 +94,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                     .getSecondaryTablesName();
             secondaryTables.add(m.getTableName());
 
-            e = PelopsUtils.initialize(m, e, null);
-
-            Map<String, Object> relations = new HashMap<String, Object>();
+//            e = PelopsUtils.initialize(m, e, null);
 
             for (String tableName : secondaryTables)
             {
@@ -106,18 +105,19 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                 thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
                 if (!columnOrSuperColumns.isEmpty())
                 {
-                    e = populateEntityFromSlice(m, relationNames, isWrapReq, e, thriftColumnOrSuperColumns, relations);
+                    e = populateEntityFromSlice(m, relationNames, isWrapReq, CassandraUtilities.getEntity(e) , thriftColumnOrSuperColumns);
                 }
             }
-            if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
-            {
-                return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-                        relations) : e;
-            }
-            else
-            {
-                return null;
-            }
+//            if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
+//            {
+//                return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
+//                        relations) : e;
+//            }
+//            else
+//            {
+//                return null;
+//            }
+            return e;
         }
         finally
         {
@@ -141,7 +141,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      * @throws CharacterCodingException
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow, Map<String, Object> relations)
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow)
             throws CharacterCodingException
     {
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
@@ -153,7 +153,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
             tr.setId(id);
             tr = dataGenerator.translateToThriftRow(columnOrSuperColumnsFromRow, m.isCounterColumnType(), m.getType(),
                     tr);
-            relations = populateEntity(tr, m, e, relationNames, isWrapReq, relations);
+            e = populateEntity(tr, m, e, relationNames, isWrapReq);
         }
         return e;
     }

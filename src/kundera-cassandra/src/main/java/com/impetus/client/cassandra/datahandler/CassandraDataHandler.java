@@ -108,7 +108,7 @@ public interface CassandraDataHandler
      *            the is wrap req
      * @return the object
      */
-    Map<String, Object> populateEntity(ThriftRow tr, EntityMetadata m, Object entity, List<String> relationNames, boolean isWrapReq, Map<String, Object> relations);
+    Object populateEntity(ThriftRow tr, EntityMetadata m, Object entity, List<String> relationNames, boolean isWrapReq);
 
     /**
      * @param e

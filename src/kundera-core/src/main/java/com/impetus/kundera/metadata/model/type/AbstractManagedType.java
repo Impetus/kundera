@@ -76,7 +76,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private InheritanceModel model;
 
-    private EntityAnnotationProcessor entityAnnotation;
+    private EntityAnnotationProcessor entityAnnotationProcessor;
 
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
 
@@ -105,7 +105,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             ((AbstractManagedType<? super X>) this.superClazzType).addSubManagedType(this);
         }
         this.model = buildInheritenceModel();
-        entityAnnotation = new DefaultEntityAnnotationProcessor(clazz);
+        entityAnnotationProcessor = new DefaultEntityAnnotationProcessor(clazz);
     }
 
     /*
@@ -1298,7 +1298,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     public EntityAnnotationProcessor getEntityAnnotation()
     {
-        return entityAnnotation;
+        return entityAnnotationProcessor;
     }
 
 }

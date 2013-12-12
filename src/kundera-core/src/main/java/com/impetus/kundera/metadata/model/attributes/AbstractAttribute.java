@@ -99,6 +99,8 @@ public abstract class AbstractAttribute<X, T>
         this.member = member;
         this.columnName = getValidJPAColumnName();
         this.fieldAnnotationProcessor = new DefaultFieldAnnotationProcessor(member);
+        this.fieldAnnotationProcessor.validateFieldAnnotation(
+                fieldAnnotationProcessor.getAnnotation(Column.class.getName()), (Field) member, this.managedType);
         this.tableName = getTableName();
     }
 
@@ -204,19 +206,7 @@ public abstract class AbstractAttribute<X, T>
      */
     public String getTableName()
     {
-//        Column column = ((AbstractManagedType) this.managedType).getAttributeBinding(member);
-//        if (column != null)
-//        {
-//            tableName = column.table();
-//        }
-//
-//        if (tableName == null || tableName.isEmpty())
-//        {
-//            return null;
-//        }
-//        return tableName;
-        
-        return ((DefaultFieldAnnotationProcessor)fieldAnnotationProcessor).getTableNameOfColumn();
+        return ((DefaultFieldAnnotationProcessor) fieldAnnotationProcessor).getTableNameOfColumn();
     }
 
     /**
