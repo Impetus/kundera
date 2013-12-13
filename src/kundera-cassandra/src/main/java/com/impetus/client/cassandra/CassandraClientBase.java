@@ -810,7 +810,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @return the list
      */
     public List executeSelectQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
-            boolean isNative, String... cqlQuery)
+            boolean isNative, String cqlQuery)
     {
         if (log.isInfoEnabled())
         {
@@ -1355,7 +1355,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the relational field
      * @return the list
      */
-    public abstract List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String... cqlQuery);
+    public abstract List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery);
 
     /**
      * Find.
@@ -2034,6 +2034,20 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     protected class CQLClient
     {
+        /**
+         * 
+         * @param entityMetadata
+         * @param entity
+         * @param conn
+         * @param rlHolders
+         * @param ttlColumns
+         * @throws UnsupportedEncodingException
+         * @throws InvalidRequestException
+         * @throws TException
+         * @throws UnavailableException
+         * @throws TimedOutException
+         * @throws SchemaDisagreementException
+         */
         public void persist(EntityMetadata entityMetadata, Object entity,
                 org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders, Object ttlColumns)
                 throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
@@ -2066,7 +2080,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
          * @return
          */
         public List executeQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
-                boolean isCql3Enabled, boolean isNative, String... cqlQueries)
+                boolean isCql3Enabled, boolean isNative, String cqlQuery)
         {
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
             ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -2075,49 +2089,42 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List returnedEntities = new ArrayList();
             try
             {
-                for (String cqlQuery : cqlQueries)
+                if (log.isInfoEnabled())
                 {
-                    if (log.isInfoEnabled())
+                    log.info("Executing query {}.", cqlQuery);
+                }
+                result = executeCQLQuery(cqlQuery, isCql3Enabled);
+                if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+                {
+                    returnedEntities = new ArrayList<Object>(result.getRowsSize());
+                    Iterator<CqlRow> iter = result.getRowsIterator();
+                    while (iter.hasNext())
                     {
-                        log.info("Executing query {}.", cqlQuery);
-                    }
-                    result = executeCQLQuery(cqlQuery, isCql3Enabled);
-                    if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
-                    {
-                        returnedEntities = new ArrayList<Object>(result.getRowsSize());
-                        Iterator<CqlRow> iter = result.getRowsIterator();
-                        while (iter.hasNext())
+                        Object e = null;
+                        // e = PelopsUtils.initialize(entityMetadata, e,
+                        // null);
+                        CqlRow row = iter.next();
+                        Object rowKey = null;
+
+                        ThriftRow thriftRow = null;
+                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                new ArrayList<CounterSuperColumn>(0));
+
+                        e = dataHandler.populateEntity(thriftRow, entityMetadata, CassandraUtilities.getEntity(e),
+                                relationalField, relationalField != null && !relationalField.isEmpty());
+
+                        e = populateSecondaryTableData(relationalField, dataHandler, isCql3Enabled, entityMetadata, e);
+
+                        if (e != null)
                         {
-                            Object e = null;
-                            // e = PelopsUtils.initialize(entityMetadata, e,
-                            // null);
-                            CqlRow row = iter.next();
-                            Object rowKey = null;
-
-                            ThriftRow thriftRow = null;
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
-                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                    new ArrayList<CounterSuperColumn>(0));
-
-                            e = dataHandler.populateEntity(thriftRow, entityMetadata, CassandraUtilities.getEntity(e),
-                                    relationalField, relationalField != null && !relationalField.isEmpty());
-
-                            if (e != null)
-                            {
-                                // e = relationalField != null &&
-                                // !relationalField.isEmpty() &&
-                                // !relations.isEmpty() ? new EnhanceEntity(
-                                // e, PropertyAccessorHelper.getId(e,
-                                // entityMetadata), relations) : e;
-                                returnedEntities.add(e);
-                            }
-                            else if (isNative)
-                            {
-                                returnedEntities.add(row.getColumns().get(0));
-                            }
+                            returnedEntities.add(e);
+                        }
+                        else if (isNative)
+                        {
+                            returnedEntities.add(row.getColumns().get(0));
                         }
                     }
-
                 }
             }
             catch (Exception e)
@@ -2126,6 +2133,71 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 throw new PersistenceException(e);
             }
             return returnedEntities;
+        }
+
+        /**
+         * 
+         * @param relationalField
+         * @param dataHandler
+         * @param isCql3Enabled
+         * @param cqlQuery
+         * @param entityMetadata
+         * @param iter
+         * @param e
+         * @return
+         */
+        private Object populateSecondaryTableData(List<String> relationalField, CassandraDataHandler dataHandler,
+                boolean isCql3Enabled, EntityMetadata entityMetadata, Object e)
+        {
+            CqlResult result;
+            // For secondary tables.
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+            if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata
+                        .getEntityClazz());
+                List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                        .getSecondaryTablesName();
+
+                CQLTranslator translator = new CQLTranslator();
+
+                for (String tableName : secondaryTables)
+                {
+                    // Building query.
+                    StringBuilder queryBuilder = new StringBuilder("select * from \"" + tableName + "\" where ");
+                    Attribute attribute = entityMetadata.getIdAttribute();
+                    translator.buildWhereClause(queryBuilder,
+                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType(),
+                            CassandraUtilities.getIdColumnName(entityMetadata, getExternalProperties()),
+                            PropertyAccessorHelper.getId(e, entityMetadata), translator.EQ_CLAUSE, false);
+                    // strip last "AND" clause.
+                    queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
+
+                    // Executing.
+                    result = executeCQLQuery(queryBuilder.toString(), isCql3Enabled);
+
+                    if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+                    {
+                        Iterator<CqlRow> iterator = result.getRowsIterator();
+                        while (iterator.hasNext())
+                        {
+                            // null);
+                            CqlRow cqlRow = iterator.next();
+
+                            ThriftRow tr = null;
+                            tr = new ThriftRow(null, entityMetadata.getTableName(), cqlRow.getColumns(),
+                                    new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                                    new ArrayList<CounterSuperColumn>(0));
+
+                            e = dataHandler.populateEntity(tr, entityMetadata, CassandraUtilities.getEntity(e),
+                                    relationalField, relationalField != null && !relationalField.isEmpty());
+                            break;
+                        }
+                    }
+                }
+            }
+            return e;
         }
 
         /**
@@ -2141,26 +2213,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 List<String> relationNames)
         {
             CQLTranslator translator = new CQLTranslator();
-            // For secondary tables.
-            AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
-            List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
-                    .getSecondaryTablesName();
-            secondaryTables.add(metadata.getTableName());
 
-            List<String> queries = new ArrayList<String>();
+            // List<String> queries = new ArrayList<String>();
 
-            for (String tableName : secondaryTables)
-            {
-                String select_Query = translator.SELECTALL_QUERY;
-                select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
-                        translator.ensureCase(new StringBuilder(), tableName, false).toString());
-                StringBuilder builder = new StringBuilder(select_Query);
-                onWhereClause(metadata, rowId, translator, builder, metaModel);
-                queries.add(builder.toString());
-            }
+            String tableName = metadata.getTableName();
+            // for (String tableName : secondaryTables)
+            // {
+            String select_Query = translator.SELECTALL_QUERY;
+            select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
+                    translator.ensureCase(new StringBuilder(), tableName, false).toString());
+            StringBuilder builder = new StringBuilder(select_Query);
+            onWhereClause(metadata, rowId, translator, builder, metaModel);
+            // queries.add(builder.toString());
+            // }
 
             return CassandraClientBase.this.executeQuery(metadata.getEntityClazz(), relationNames, false,
-                    queries.toArray(new String[0]));
+                    builder.toString());
 
             // String select_Query = translator.SELECTALL_QUERY;
             // select_Query = StringUtils.replace(select_Query,
