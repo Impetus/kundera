@@ -37,7 +37,12 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.8 is released tag.
+####Please Note: trunk is current development branch. kundera-2.9 is released tag.
+
+#### 13-November-2013 - Kundera 2.9 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.8:
+* Support for Secondary table.
+* Support Abstract entity.
 
 #### 21-October-2013 - Kundera 2.8 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.7:
