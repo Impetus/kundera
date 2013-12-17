@@ -46,8 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.index.DocumentIndexer;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -141,71 +139,44 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         if (log.isDebugEnabled())
             log.info("On getResultList() executing query: " + query);
-        List results = new ArrayList();
 
-        EntityMetadata m = getEntityMetadata();
-        Client client = persistenceDelegeator.getClient(m);
-
-        handlePostEvent(m);
+        // as per JPA post event should happen before fetching data from database.
         
-        if (!m.isRelationViaJoinTable() && (m.getRelationNames() == null || (m.getRelationNames().isEmpty())))
-        {
-            results = populateEntities(m, client);
-        }
-        else
-        {
-            results = recursivelyPopulateEntities(m, client);
-        }
-
-        // If intended for delete/update.
+        handlePostEvent();
+        
+        List results = null;
+        
         if (kunderaQuery.isDeleteUpdate())
         {
-            onDeleteOrUpdate(results);
-        }      
-        
-        if(results != null)
+            executeUpdate();
+        } else
         {
-            for(Object obj : results)
-            {
-                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(m, obj);
-            }
+            //TODO:: each client should invoke fetch.
+            results = fetch();
+            assignReferenceToProxy(results);
         }
+        
         return results != null ? results : new ArrayList();
     }
 
-    protected void handlePostEvent(EntityMetadata m)
-    {
-        if(!kunderaQuery.isDeleteUpdate())
-        {
-            persistenceDelegeator.getEventDispatcher().fireEventListeners(m, null, PostLoad.class);
-        }
-    }
 
-
-    public List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
+    protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
         // if it does not then it means it is a parent.
-        List<Object> result = null;
+        List<Object> result = new ArrayList<Object>(enhanceEntities.size());
         if (enhanceEntities != null)
         {
             for (Object e : enhanceEntities)
             {
-                if (result == null)
-                {
-                    result = new ArrayList<Object>(enhanceEntities.size());
-                }
-
                 if (!(e instanceof EnhanceEntity))
                 {
                     e = new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), null);
                 }
-
                 EnhanceEntity ee = (EnhanceEntity) e;
-
                 result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                        persistenceDelegeator,false));
+                        persistenceDelegeator, false));
             }
         }
 
@@ -246,25 +217,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return result;
     }
 
-    /**
-     * Populate relations.
-     * 
-     * @param relations
-     *            the relations
-     * @param o
-     *            the o
-     * @return the map
-     */
-    protected Map<String, Object> populateRelations(List<String> relations, Object[] o)
-    {
-        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
-        int counter = 1;
-        for (String r : relations)
-        {
-            relationVal.put(r, o[counter++]);
-        }
-        return relationVal;
-    }
 
     /**
      * Gets the lucene query from jpa query.
@@ -273,125 +225,35 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     protected String getLuceneQueryFromJPAQuery()
     {
-        StringBuffer sb = new StringBuffer();
 
+        LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
         EntityMetadata metadata = getKunderaQuery().getEntityMetadata();
-
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(metadata.getEntityClazz());
+
         for (Object object : kunderaQuery.getFilterClauseQueue())
         {
             if (object instanceof FilterClause)
             {
-                boolean appended = false;
                 FilterClause filter = (FilterClause) object;
-                // sb.append("+");
-                // property
-                sb.append(metadata.getIndexName());
-                sb.append(".");
-
-                if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, filter.getProperty(), true) != null)
-                {
-                    sb.append(filter.getProperty().substring(filter.getProperty().indexOf(".") + 1,
-                            filter.getProperty().length()));
-                }
-                else
-                {
-                    sb.append(filter.getProperty());
-                }
-
-                // joiner
-                String appender = "";
-                if (filter.getCondition().equals("="))
-                {
-                    sb.append(":");
-                }
-                else if (filter.getCondition().equalsIgnoreCase("like"))
-                {
-                    sb.append(":");
-                    appender = "*";
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">"))
-                {
-                    String fieldName = metadata.getFieldName(filter.getProperty());
-                    // ;
-                    sb.append(appendRange(filter.getValue().toString(), false, true, entity.getAttribute(fieldName)
-                            .getJavaType()));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">="))
-                {
-                    String fieldName = metadata.getFieldName(filter.getProperty());
-                    // entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), true, true, entity.getAttribute(fieldName)
-                            .getJavaType()));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<"))
-                {
-                    String fieldName = metadata.getFieldName(filter.getProperty());
-                    // entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), false, false, entity.getAttribute(fieldName)
-                            .getJavaType()));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<="))
-                {
-                    String fieldName = metadata.getFieldName(filter.getProperty());
-                    // entity.getAttribute(fieldName).getJavaType();
-                    sb.append(appendRange(filter.getValue().toString(), true, false, entity.getAttribute(fieldName)
-                            .getJavaType()));
-                    appended = true;
-                }
-
-                // value. if not already appended.
-                if (!appended)
-                {
-                    sb.append(filter.getValue());
-                    sb.append(appender);
-                }
+                String property = filter.getProperty();
+                String condition = filter.getCondition();
+                String valueAsString = filter.getValue().toString();
+                String fieldName = metadata.getFieldName(property);
+                Class valueClazz = ((AbstractAttribute) entity.getAttribute(fieldName)).getBindableJavaType();
+                queryBuilder.appendIndexName(metadata.getIndexName())
+                        .appendPropertyName(getPropertyName(metadata, property))
+                        .buildQuery(condition, valueAsString, valueClazz);
             }
-            else
-            {
-                sb.append(" " + object + " ");
-            }
+
         }
 
-        // add Entity_CLASS field too.
-        if (sb.length() > 0)
-        {
-            sb.append(" AND ");
-        }
-        // sb.append("+");
-        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
-        sb.append(":");
-        // sb.append(getEntityClass().getName());
-        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+        queryBuilder.appendEntityName(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+        return queryBuilder.getQuery();
 
-        return sb.toString();
     }
-
-
-    /**
-     * Fetch data from lucene.
-     * 
-     * @param client
-     *            the client
-     * @return the sets the
-     */
-    protected Set<String> fetchDataFromLucene(Class<?> clazz, Client client)
-    {
-        String luceneQuery = getLuceneQueryFromJPAQuery();
-        // use lucene to query and get Pk's only.
-        // go to client and get relation with values.!
-        // populate EnhanceEntity
-        Map<String, Object> results = client.getIndexManager().search(clazz, luceneQuery);
-        Set rSet = new HashSet(results.values());
-        return rSet;
-    }
-
 
     /**
      * Append range.
@@ -418,7 +280,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
                 || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
                 || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(BigInteger.class))
+                || clazz.isAssignableFrom(BigInteger.class)
+                || clazz.isAssignableFrom(Double.class)
+                || clazz.isAssignableFrom(double.class))
         {
             sb.append(isGreaterThan ? "*" : value);
 
@@ -469,31 +333,29 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     protected EntityMetadata getEntityMetadata()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        EntityMetadata m = null;
-        
-        String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-        
-        if (isNative)
-        {
-            Class clazz = kunderaQuery.getEntityClass()/*appMetadata.getMappedClass(getJPAQuery())*/;
-            m = KunderaMetadataManager.getEntityMetadata(clazz);
-        }
-        else
-        {
-            m = kunderaQuery.getEntityMetadata();
-        }
-        return m;
+        return kunderaQuery.getEntityMetadata();
     }
 
+    protected int onUpdateDeleteEvent()
+    {
+        if (kunderaQuery.isDeleteUpdate())
+        {
+            List result = fetch();
+            onDeleteOrUpdate(result);
+            return result != null ? result.size() : 0;
+        }
+
+        return 0;
+
+    }
+    
     /**
      * Performs delete or update based on query.
      * 
      * @param results
      *            list of objects to be merged/deleted.
      */
-    private void onDeleteOrUpdate(List results)
+    protected void onDeleteOrUpdate(List results)
     {
 
         if (results != null)
@@ -1099,4 +961,72 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     public abstract void close();
     
     public abstract <E> Iterator<E> iterate();
+
+
+    /**
+     * Handle post even callbacks.
+     * 
+     */
+    protected void handlePostEvent()
+    {
+        EntityMetadata metadata = getEntityMetadata();
+        if(!kunderaQuery.isDeleteUpdate())
+        {
+            persistenceDelegeator.getEventDispatcher().fireEventListeners(metadata, null, PostLoad.class);
+        }
+    }
+
+    /**
+     *  Returns collection of fetched entities.
+     *  
+     * @return 
+     */
+    protected List fetch()
+    {
+        EntityMetadata metadata = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(metadata);
+        List results = isRelational(metadata) ? recursivelyPopulateEntities(metadata, client):populateEntities(metadata, client);
+        return results;
+    }
+
+    /**
+     * Returns true, if associated entity holds relational references(e.g. @OneToMany etc.) else false.
+     * 
+     * @param m entity metadata
+     * 
+     * @return  true, if holds relation else false
+     */
+    private boolean isRelational(EntityMetadata m)
+    {
+        // if related via join table OR contains relations.
+        return m.isRelationViaJoinTable() || (m.getRelationNames() != null && (!m.getRelationNames().isEmpty()));
+    }
+
+    
+    /**
+     * If returned collection of object holds a reference to 
+     * @param results
+     */
+    private void assignReferenceToProxy(List results)
+    {
+        if(results != null)
+        {
+            for(Object obj : results)
+            {
+                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(getEntityMetadata(), obj);
+            }
+        }
+    }
+
+    private String getPropertyName(final EntityMetadata metadata, final String property)
+    {
+        if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true) != null)
+        {
+            return property.substring(property.indexOf(".") + 1,
+                    property.length());
+        }
+        
+        return property; 
+                
+    }
 }

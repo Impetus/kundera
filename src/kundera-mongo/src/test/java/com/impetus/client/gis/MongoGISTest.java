@@ -295,15 +295,11 @@ public class MongoGISTest
     {
         dao.createEntityManager();
 
-        List<Person> persons = dao.updateNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
-        Assert.assertNotNull(persons);
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertTrue(persons.size() == 1);
-        Assert.assertEquals("Kuldeep", persons.get(0).getName());
-        dao.closeEntityManager();
+        int updateCount = dao.updateNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertTrue(updateCount == 1);
 
         dao.createEntityManager();
-        persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        List<Person> persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertTrue(persons.size() == 1);
@@ -315,15 +311,12 @@ public class MongoGISTest
     {
         dao.createEntityManager();
 
-        List<Person> persons = dao.deleteNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
-        Assert.assertNotNull(persons);
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertTrue(persons.size() == 1);
-        Assert.assertEquals("Kuldeep", persons.get(0).getName());
+        int deleteCount = dao.deleteNameWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        Assert.assertTrue(deleteCount == 1);
         dao.closeEntityManager();
 
         dao.createEntityManager();
-        persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
+        List<Person> persons = dao.findWithinCircle(5.0, 5.0, 0.0, SurfaceType.FLAT);
         Assert.assertNotNull(persons);
         Assert.assertTrue(persons.isEmpty());
         dao.closeEntityManager();

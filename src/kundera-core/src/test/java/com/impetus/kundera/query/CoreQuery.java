@@ -80,10 +80,10 @@ public class CoreQuery<E> extends QueryImpl<E>
         return getLuceneQueryFromJPAQuery();
     }
     
-    public Set<String> fetchByLuceneQuery()
+    /*public Set<String> fetchByLuceneQuery()
     {
         return fetchDataFromLucene(getEntityMetadata().getEntityClazz(), persistenceDelegeator.getClient(getEntityMetadata()));
-    }
+    }*/
     
     public List<Object> populateUsingLucene()
     {
@@ -108,7 +108,7 @@ public class CoreQuery<E> extends QueryImpl<E>
     @Override
     protected int onExecuteUpdate()
     {
-        return getResultList().size();
+        return onUpdateDeleteEvent();
     }
 
     @Override

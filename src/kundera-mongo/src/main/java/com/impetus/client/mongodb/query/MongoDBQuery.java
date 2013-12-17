@@ -16,11 +16,7 @@
 package com.impetus.client.mongodb.query;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -466,35 +462,8 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        if (kunderaQuery.isDeleteUpdate())
-        {
-            List result = getResultList();
-            return result != null ? result.size() : 0;
-        }
-
-        return 0;
+        return onUpdateDeleteEvent();
     }
-
-//    /**
-//     * @param valObj
-//     * @return
-//     */
-//    public Object populateValue(Object valObj, Class clazz)
-//    {
-//        if (isUTF8Value(clazz))
-//        {
-//            return valObj.toString();
-//        }
-//        return valObj;
-//    }
-//
-//    private boolean isUTF8Value(Class<?> clazz)
-//    {
-//        return (clazz.isAssignableFrom(BigDecimal.class))
-//                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-//                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
-//                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
-//    }
 
     @Override
     public void close()

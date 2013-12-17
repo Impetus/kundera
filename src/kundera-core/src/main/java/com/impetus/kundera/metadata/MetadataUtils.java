@@ -413,43 +413,8 @@ public class MetadataUtils
         {
             return null;
         }
-        //
-        // if (!m.getColumnFieldNames().contains(criteria))
-        // {
-        // for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
-        // {
-        // List<Column> columns = embeddedColumn.getColumns();
-        // for (Column column : columns)
-        // {
-        // if (viaColumnName && column.getName().equals(criteria))
-        // {
-        // enclosingEmbeddedFieldName = embeddedColumn.getName();
-        // break;
-        // }
-        //
-        // if (!viaColumnName && column.getField().getName().equals(criteria))
-        // {
-        // enclosingEmbeddedFieldName = embeddedColumn.getName();
-        // break;
-        // }
-        // }
-        // }
-        //
-        // }
         return enclosingEmbeddedFieldName;
     }
-
-    /*
-     * public static String getEnclosingEmbeddedFieldName(EntityMetadata m,
-     * String columnName) { String enclosingEmbeddedFieldName = null; if
-     * (!m.getColumnFieldNames().contains(columnName)) { for (EmbeddedColumn
-     * embeddedColumn : m.getEmbeddedColumnsAsList()) { List<Column> columns =
-     * embeddedColumn.getColumns(); for (Column column : columns) { if
-     * (column.getName().equals(columnName)) { enclosingEmbeddedFieldName =
-     * embeddedColumn.getName(); break; } } }
-     * 
-     * } return enclosingEmbeddedFieldName; }
-     */
 
     private static void getEmbeddableType(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
             Map<String, Field> superColumnNameToFieldMap)

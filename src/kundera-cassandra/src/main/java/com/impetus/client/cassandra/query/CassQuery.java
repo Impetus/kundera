@@ -266,8 +266,7 @@ public class CassQuery extends QueryImpl
             // convert to CQL and execute
             if (!isQueryConvertibleToCQL(kunderaQuery))
             {
-                List result = getResultList();
-                return result != null ? result.size() : 0;
+                return onUpdateDeleteEvent();
             }
             else
             {

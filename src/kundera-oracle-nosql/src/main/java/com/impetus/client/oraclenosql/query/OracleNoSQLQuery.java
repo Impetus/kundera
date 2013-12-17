@@ -127,13 +127,7 @@ public class OracleNoSQLQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        if (kunderaQuery.isDeleteUpdate())
-        {
-            List result = getResultList();
-            return result != null ? result.size() : 0;
-        }
-
-        return 0;
+        return onUpdateDeleteEvent();
     }
 
     private OracleNoSQLQueryInterpreter translateQuery(Queue clauseQueue, EntityMetadata entityMetadata)

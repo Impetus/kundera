@@ -152,7 +152,7 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        return 0;
+        return onUpdateDeleteEvent();
     }
 
     @Override

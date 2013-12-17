@@ -118,13 +118,7 @@ public class RedisQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        if (kunderaQuery.isDeleteUpdate())
-        {
-            List result = getResultList();
-            return result != null ? result.size() : 0;
-        }
-
-        return 0;
+        return onUpdateDeleteEvent();
     }
 
     private RedisQueryInterpreter onTranslation(Queue clauseQueue, EntityMetadata entityMetadata)

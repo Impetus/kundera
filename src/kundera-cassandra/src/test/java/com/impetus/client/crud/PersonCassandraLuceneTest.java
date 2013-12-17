@@ -49,7 +49,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.property.PropertyAccessorFactory;
