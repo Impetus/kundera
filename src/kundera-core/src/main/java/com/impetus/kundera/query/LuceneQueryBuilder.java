@@ -22,6 +22,12 @@ import java.util.Map;
 
 import com.impetus.kundera.index.DocumentIndexer;
 
+/**
+ * Builder interface to build lucene query.
+ * 
+ * @author vivek.mishra
+ *
+ */
 public final class LuceneQueryBuilder
 {
 
@@ -152,7 +158,7 @@ public final class LuceneQueryBuilder
                 || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
                 || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
                 || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(BigInteger.class))
+                || clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(double.class))
         {
             sb.append(isGreaterThan ? "*" : value);
 
