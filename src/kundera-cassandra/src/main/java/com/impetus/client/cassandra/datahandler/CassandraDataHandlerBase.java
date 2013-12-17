@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
-import com.impetus.client.cassandra.schemamanager.CassandraDataTypeBuilder;
+import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -442,7 +442,7 @@ public abstract class CassandraDataHandlerBase
 
                         // Column Value
                         // String id = CassandraUtilities.toUTF8(rowKey);
-                        String id = (String) CassandraDataTypeBuilder.decompose(
+                        String id = (String) CassandraDataTranslator.decompose(
                                 ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(), rowKey, false);
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
 
@@ -1157,11 +1157,11 @@ public abstract class CassandraDataHandlerBase
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (String) thriftColumnValue);
                 }
-                else if (CassandraDataTypeBuilder.getCassandraDataTypeClass(((AbstractAttribute) attribute)
-                        .getBindableJavaType()) != null)
+                else if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
+                        .getBindableJavaType()))
                 {
                     PropertyAccessorHelper
-                            .set(entity, (Field) attribute.getJavaMember(), CassandraDataTypeBuilder.decompose(
+                            .set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator.decompose(
                                     ((AbstractAttribute) attribute).getBindableJavaType(), thriftColumnValue, false));
                 }
                 else
@@ -1188,10 +1188,10 @@ public abstract class CassandraDataHandlerBase
                 {
                     setCollectionValue(entity, thriftColumnValue, attribute);
                 }
-                else if (CassandraDataTypeBuilder.getCassandraDataTypeClass(((AbstractAttribute) attribute)
-                        .getBindableJavaType()) != null)
+                else if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
+                        .getBindableJavaType()) )
                 {
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTypeBuilder
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator
                             .decompose(((AbstractAttribute) attribute).getBindableJavaType(), thriftColumnValue, true));
 
                 }
@@ -1215,11 +1215,11 @@ public abstract class CassandraDataHandlerBase
         try
         {
 
-            if (CassandraDataTypeBuilder.getCassandraDataTypeClass(((AbstractAttribute) attribute)
-                    .getBindableJavaType()) != null)
+            if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
+                    .getBindableJavaType()))
             {
 
-                objValue = CassandraDataTypeBuilder.decompose(((AbstractAttribute) attribute).getBindableJavaType(),
+                objValue = CassandraDataTranslator.decompose(((AbstractAttribute) attribute).getBindableJavaType(),
                         thriftColumnValue, true);
                 return objValue;
             }
@@ -1386,11 +1386,11 @@ public abstract class CassandraDataHandlerBase
             if (attribute != null && field.get(e) != null)
             {
 
-                if (CassandraDataTypeBuilder.getCassandraDataTypeClass(((AbstractAttribute) attribute)
-                        .getBindableJavaType()) != null)
+                if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
+                        .getBindableJavaType()))
                 {
 
-                    value = CassandraDataTypeBuilder.compose(((AbstractAttribute) attribute).getBindableJavaType(),
+                    value = CassandraDataTranslator.compose(((AbstractAttribute) attribute).getBindableJavaType(),
                             field.get(e), false);
                 }
                 else
