@@ -26,12 +26,12 @@ public final class LuceneQueryBuilder
 {
 
     private static final Map<String, condition> conditions = new HashMap<String, LuceneQueryBuilder.condition>();
-    
+
     private StringBuilder builder = new StringBuilder();
 
     public static enum condition
     {
-        EQ, LIKE, GT, LT, LTE, GTE;
+        EQ, LIKE, GT, LT, LTE, GTE,AND,OR;
     }
 
     static
@@ -42,48 +42,52 @@ public final class LuceneQueryBuilder
         conditions.put("<", condition.LT);
         conditions.put(">=", condition.GTE);
         conditions.put("<=", condition.LTE);
+        conditions.put("and", condition.AND);
+        conditions.put("or", condition.OR);
     }
 
     /**
      * @param condition
      * @param builder
      */
-    public final LuceneQueryBuilder buildQuery(final String condition, final String value,
-            final Class valueClazz)
+    public final LuceneQueryBuilder buildQuery(final String condition, final String value, final Class valueClazz)
     {
 
-        condition c = conditions.get(condition.toLowerCase());
-        if( c != null)
-        switch (c)
-        {
-        case EQ:
-            builder.append(":");
-            builder.append(value);
-            break;
-        case LIKE:
-            builder.append(":");
-            builder.append("*");
-            builder.append(value);
-            break;
+        condition c = conditions.get(condition.toLowerCase().trim());
+        if (c != null)
+            switch (c)
+            {
+            case EQ:
+                builder.append(":");
+                builder.append(value);
+                break;
+                
+            case LIKE:
+                builder.append(":");
+                builder.append("*");
+                builder.append(value);
+                break;
 
-        case GT:
-            builder.append(appendRange(value, false, true, valueClazz));
-            break;
-        case LT:
-            builder.append(appendRange(value, true, true, valueClazz));
-            break;
-        case GTE:
-            builder.append(appendRange(value, false, false, valueClazz));
-            break;
+            case GT:
+                builder.append(appendRange(value, false, true, valueClazz));
+                break;
+                
+            case LT:
+                builder.append(appendRange(value, false, false, valueClazz));
+                break;
+                
+            case GTE:
+                builder.append(appendRange(value, true, true, valueClazz));
+                break;
 
-        case LTE:
-            builder.append(appendRange(value, true, false, valueClazz));
-            break;
+            case LTE:
+                builder.append(appendRange(value, true, false, valueClazz));
+                break;
 
-        default:
-            builder.append(" " + value + " ");
-            break;
-        }
+            default:
+                builder.append(" " + value + " ");
+                break;
+            }
 
         return this;
     }
@@ -121,7 +125,7 @@ public final class LuceneQueryBuilder
     {
         return builder.toString();
     }
-    
+
     /**
      * Append range.
      * 
@@ -164,5 +168,4 @@ public final class LuceneQueryBuilder
         return sb.toString();
     }
 
-    
 }

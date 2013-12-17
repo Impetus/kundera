@@ -16,8 +16,6 @@
 package com.impetus.kundera.query;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -151,7 +149,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             executeUpdate();
         } else
         {
-            //TODO:: each client should invoke fetch.
             results = fetch();
             assignReferenceToProxy(results);
         }
@@ -165,7 +162,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
         // if it does not then it means it is a parent.
-        List<Object> result = new ArrayList<Object>(enhanceEntities.size());
+        List<Object> result = new ArrayList<Object>();
         if (enhanceEntities != null)
         {
             for (Object e : enhanceEntities)
@@ -242,10 +239,14 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 String condition = filter.getCondition();
                 String valueAsString = filter.getValue().toString();
                 String fieldName = metadata.getFieldName(property);
-                Class valueClazz = ((AbstractAttribute) entity.getAttribute(fieldName)).getBindableJavaType();
+                Class valueClazz = getValueType(entity, fieldName);
+                
                 queryBuilder.appendIndexName(metadata.getIndexName())
                         .appendPropertyName(getPropertyName(metadata, property))
                         .buildQuery(condition, valueAsString, valueClazz);
+            } else
+            {
+                queryBuilder.buildQuery(object.toString(), object.toString(), String.class);
             }
 
         }
@@ -255,48 +256,16 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     }
 
-    /**
-     * Append range.
-     * 
-     * @param value
-     *            the value
-     * @param inclusive
-     *            the inclusive
-     * @param isGreaterThan
-     *            the is greater than
-     * @return the string
-     */
-    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan, Class clazz)
+    private Class getValueType(EntityType entity, String fieldName)
     {
-        String appender = " ";
-        StringBuilder sb = new StringBuilder();
-        sb.append(":");
-        sb.append(inclusive ? "[" : "{");
-        sb.append(isGreaterThan ? value : "*");
-        sb.append(appender);
-        sb.append("TO");
-        sb.append(appender);
-        if (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
-                || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
-                || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
-                || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(BigInteger.class)
-                || clazz.isAssignableFrom(Double.class)
-                || clazz.isAssignableFrom(double.class))
+        Class valueClazz = null;
+        if(fieldName != null)
         {
-            sb.append(isGreaterThan ? "*" : value);
-
+            valueClazz = ((AbstractAttribute) entity.getAttribute(fieldName)).getBindableJavaType();
         }
-        else
-        {
-            sb.append(isGreaterThan ? "null" : value);
-        }
-
-        // sb.append(isGreaterThan ? "null" : value);
-
-        sb.append(inclusive ? "]" : "}");
-        return sb.toString();
+        return valueClazz;
     }
+
 
     /**
      * Populate entities, Method to populate data in case no relation exist!.

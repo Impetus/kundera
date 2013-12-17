@@ -15,6 +15,8 @@
  */
 package com.impetus.client.neo4j.query;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -208,6 +210,50 @@ public class Neo4JQuery extends QueryImpl
     {
         // TODO Auto-generated method stub
         return null;
+    }
+
+
+    /**
+     * Append range.
+     * 
+     * @param value
+     *            the value
+     * @param inclusive
+     *            the inclusive
+     * @param isGreaterThan
+     *            the is greater than
+     * @return the string
+     */
+    protected String appendRange(String value, boolean inclusive, boolean isGreaterThan, Class clazz)
+    {
+        String appender = " ";
+        StringBuilder sb = new StringBuilder();
+        sb.append(":");
+        sb.append(inclusive ? "[" : "{");
+        sb.append(isGreaterThan ? value : "*");
+        sb.append(appender);
+        sb.append("TO");
+        sb.append(appender);
+        if (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
+                || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
+                || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
+                || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
+                || clazz.isAssignableFrom(BigInteger.class)
+                || clazz.isAssignableFrom(Double.class)
+                || clazz.isAssignableFrom(double.class))
+        {
+            sb.append(isGreaterThan ? "*" : value);
+
+        }
+        else
+        {
+            sb.append(isGreaterThan ? "null" : value);
+        }
+
+        // sb.append(isGreaterThan ? "null" : value);
+
+        sb.append(inclusive ? "]" : "}");
+        return sb.toString();
     }
 
 }
