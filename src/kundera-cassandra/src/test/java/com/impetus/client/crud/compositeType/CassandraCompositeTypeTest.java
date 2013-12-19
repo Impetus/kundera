@@ -434,6 +434,89 @@ public class CassandraCompositeTypeTest
 
     }
     
+    @Test
+    public void onInClause()
+    {
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        user1.setTweetBody("my first tweet");
+        user1.setTweetDate(currentDate);
+        em.persist(user1);
+
+        key = new CassandraCompoundKey("cgangwal's", 2, timeLineId);
+        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        user2.setTweetBody("my second tweet");
+        user2.setTweetDate(currentDate);
+        em.persist(user2);
+
+        key = new CassandraCompoundKey("kmishra", 3, timeLineId);
+        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        user3.setTweetBody("my third tweet");
+        user3.setTweetDate(currentDate);
+        em.persist(user3);
+
+        em.flush();
+
+        
+        em.clear();
+
+        String inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
+        Query q = em.createQuery(inClause);
+       
+        List<CassandraPrimeUser> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
+        Assert.assertEquals(3, results.size());
+        
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
+        q = em.createQuery(inClause);
+       
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
+        Assert.assertEquals(3, results.size());
+        
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
+        q = em.createQuery(inClause);
+       
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals(2, results.size());
+        
+        
+        
+        try
+        {
+            inClause = "Select u from CassandraPrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
+            q = em.createQuery(inClause);
+            results = q.getResultList();
+                    
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            Assert.assertEquals(
+                    "javax.persistence.PersistenceException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    e.getMessage());
+        }
+
+    }
+    
 
     @Test
     public void onBatchInsert()
