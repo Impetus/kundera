@@ -17,6 +17,7 @@ package com.impetus.kundera.persistence.context;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
@@ -81,8 +82,7 @@ class EventLogQueue
     {
         if (deleteEvents == null)
         {
-            deleteEvents = new HashMap<Object, EventLog>();
-            ;
+            deleteEvents = new ConcurrentHashMap<Object, EventLog>();
         }
 
         deleteEvents.put(log.getEntityId(), log);
@@ -99,7 +99,7 @@ class EventLogQueue
     {
         if (updateEvents == null)
         {
-            updateEvents = new HashMap<Object, EventLog>();
+            updateEvents = new ConcurrentHashMap<Object, EventLog>();
 
         }
 
@@ -116,7 +116,7 @@ class EventLogQueue
     {
         if (insertEvents == null)
         {
-            insertEvents = new HashMap<Object, EventLog>();
+            insertEvents = new ConcurrentHashMap<Object, EventLog>();
         }
 
         insertEvents.put(log.getEntityId(), log);
