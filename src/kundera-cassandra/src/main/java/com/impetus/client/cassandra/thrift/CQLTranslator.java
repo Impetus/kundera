@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,6 +138,10 @@ public final class CQLTranslator
     public static final String CLOSE_BRACKET = ")";
 
     public static final String SPACE_STRING = " ";
+    
+    public static final String IN_CLAUSE = "IN";
+    
+    public static final String OPEN_BRACKET = "(";
 
     public CQLTranslator()
     {
@@ -334,10 +339,51 @@ public final class CQLTranslator
     public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
             boolean useToken)
     {
+        
         builder = ensureCase(builder, field, useToken);
+        builder.append(SPACE_STRING);
         builder.append(clause);
-        appendValue(builder, fieldClazz, value, false, useToken);
+        builder.append(SPACE_STRING);
+        builder = onWhereClause(builder, fieldClazz, field, value, clause, useToken);
         builder.append(AND_CLAUSE);
+    }
+    
+    /**
+     * Build where clause with given clause.
+     * 
+     * @param builder
+     * @param field
+     * @param value
+     * @param clause
+     * @return 
+     */
+    public StringBuilder onWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
+            boolean useToken)
+    {
+        
+        if(clause.trim().equals(IN_CLAUSE)) {
+            builder.append(OPEN_BRACKET);
+            String itemValues = String.valueOf(value);
+            itemValues = itemValues.startsWith(OPEN_BRACKET) && itemValues.endsWith(CLOSE_BRACKET) 
+                            ? itemValues.substring(1, itemValues.length()-1) : itemValues;
+            List<String> items = Arrays.asList(((String) itemValues).split("\\s*,\\s*"));
+            int counter = 0;
+            for(String str : items) {
+              str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'"))
+                ? str.substring(1, str.length()-1) : str;
+              appendValue(builder, fieldClazz, str, false, false);
+              counter ++;
+              if(counter < items.size())
+              {
+                builder.append(COMMA_STR);
+              }
+                           
+            }
+            builder.append(CLOSE_BRACKET);
+        } else {
+            appendValue(builder, fieldClazz, value, false, useToken);
+        }
+        return builder;
     }
 
     /**
@@ -817,4 +863,6 @@ public final class CQLTranslator
         builder.append(SPACE_STRING);
         builder.append(orderType);
     }
+    
+    
 }
