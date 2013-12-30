@@ -168,11 +168,11 @@ public class KunderaHBaseClient extends DB
      */
     public int insert(String table, String key, HashMap<String, ByteIterator> values)
     {
-        if (em == null || !em.isOpen())
+/*        if (em == null || !em.isOpen())
         {
             em = emf.createEntityManager();
         }
-
+*/
         try
         {
             HBaseUser u = new HBaseUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
