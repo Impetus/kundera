@@ -19,7 +19,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<kundera.version>2.9</kundera.version>
+		<kundera.version>2.10-SNAPSHOT</kundera.version>
 	</properties>
 
 	<dependencies>
