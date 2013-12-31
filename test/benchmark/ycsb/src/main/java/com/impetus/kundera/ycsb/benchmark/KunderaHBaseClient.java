@@ -97,12 +97,12 @@ public class KunderaHBaseClient extends DB
         {
             Object o = em.find(HBaseUser.class, key);
             assert o != null;
-            j++;
+            /*j++;
             if (j % 5000 == 0)
             {
                 em.clear();
-            }
-//            em.clear();
+            }*/
+            em.clear();
             return Ok;
         }
         catch (Exception e)

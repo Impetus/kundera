@@ -54,8 +54,9 @@ public class HbaseSecondaryTableTest
     public void test()
     {
         EntityManager em = emf.createEntityManager();
+        cli.addColumnFamily("KunderaExamples", "HBASE_SECONDARY_TABLE");
+        cli.addColumnFamily("KunderaExamples", "t_country");
         
-       
 
         EmbeddedEntity embeddedEntity = new EmbeddedEntity();
         embeddedEntity.setEmailId("kuldeep.mishra@gmail.com");

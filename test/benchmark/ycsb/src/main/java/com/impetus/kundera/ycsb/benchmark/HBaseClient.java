@@ -56,13 +56,13 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
     public boolean _debug = false;
 
-    public String _table = "";
+    public static String _table = "usertable";
 
     public HTableInterface _hTable = null;
 
-    public String _columnFamily = "";
+    public static String _columnFamily = "user";
 
-    public byte _columnFamilyBytes[];
+    public static byte _columnFamilyBytes[]= Bytes.toBytes(_columnFamily);
 
     public static final int Ok = 0;
 
@@ -76,14 +76,14 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 
     public static final int poolSize = 100;
 
-    private HTablePool hTablePool = new HTablePool(config, poolSize);
+    private static HTablePool hTablePool = new HTablePool(config, poolSize);
 
     /**
      * Initialize any state for this DB. Called once per DB instance; there is
      * one DB instance per client thread.
      */
     public void init() throws DBException
-    {
+    {/*
         if ((getProperties().getProperty("debug") != null)
                 && (getProperties().getProperty("debug").compareTo("true") == 0))
         {
@@ -101,7 +101,7 @@ public class HBaseClient extends com.yahoo.ycsb.DB
         }
         _columnFamilyBytes = Bytes.toBytes(_columnFamily);
 
-    }
+    */}
 
     /**
      * Cleanup any state for this DB. Called once per DB instance; there is one
