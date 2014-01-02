@@ -45,6 +45,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.yahoo.ycsb.ByteArrayByteIterator;
 import com.yahoo.ycsb.ByteIterator;
@@ -279,11 +280,15 @@ public class ThriftClient extends DB
 
         try
         {
-            SlicePredicate predicate;
+            SlicePredicate predicate = new SlicePredicate();
             if (fields == null)
             {
-                predicate = new SlicePredicate().setSlice_range(new SliceRange(emptyByteBuffer, emptyByteBuffer, false,
-                        1000000));
+//                SlicePredicate predicate = new SlicePredicate();
+                predicate = new SlicePredicate();
+                predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+
+//                predicate = new SlicePredicate().setSlice_range(new SliceRange(emptyByteBuffer, emptyByteBuffer, false,
+//                        1000000));
 
             }
             else
@@ -308,7 +313,9 @@ public class ThriftClient extends DB
             Column column;
             String name;
             ByteIterator value;
-            for (ColumnOrSuperColumn oneresult : results)
+            
+            assert results != null && !results.isEmpty();
+/*            for (ColumnOrSuperColumn oneresult : results)
             {
 
                 column = oneresult.column;
@@ -324,7 +331,7 @@ public class ThriftClient extends DB
                     logger.info("(" + name + "=" + value + ")");
                 }
             }
-
+*/
             if (_debug)
             {
                 logger.info("ConsistencyLevel=" + readConsistencyLevel.toString());
