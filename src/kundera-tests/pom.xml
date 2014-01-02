@@ -221,7 +221,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Required for running tests for embedded cassandra mode -->
+		<!-- Required for running tests for embedded cassandra mode 
 		<dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
@@ -232,9 +232,9 @@
 			<artifactId>clhm-production</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
-		<!-- <dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
-			<version>3.9.0.GA</version> </dependency> -->
-		<!-- Cassandra Dependencies -->
+		 <dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
+			<version>3.9.0.GA</version> </dependency>
+		Cassandra Dependencies
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
@@ -256,7 +256,7 @@
 			<artifactId>snappy</artifactId>
 			<version>1.0.1-rc4</version>
 		</dependency>
-
+-->
 		<!-- HBase depndencies -->
 		<dependency>
 			<groupId>org.apache.hbase</groupId>

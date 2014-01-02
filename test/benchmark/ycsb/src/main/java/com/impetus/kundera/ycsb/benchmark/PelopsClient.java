@@ -27,7 +27,11 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.utils.ByteBufferUtil;
+import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Mutator;
@@ -44,250 +48,272 @@ import common.Logger;
  * @author Kuldeep Mishra
  * 
  */
-public class PelopsClient extends DB {
+public class PelopsClient extends DB
+{
 
-	private static Logger logger = Logger
-			.getLogger(PelopsClient.class);
+    private static Logger logger = Logger.getLogger(PelopsClient.class);
 
-	static Random random = new Random();
+    static Random random = new Random();
 
-	private static final int Ok = 0;
+    private static final int Ok = 0;
 
-	private static final int Error = -1;
+    private static final int Error = -1;
 
-	private String column_family;
+    private String column_family;
 
-	private static final String COLUMN_FAMILY_PROPERTY = "columnfamilyOrTable";
+    private static final String COLUMN_FAMILY_PROPERTY = "columnfamilyOrTable";
 
-	private static final String COLUMN_FAMILY_PROPERTY_DEFAULT = "data";
+    private static final String COLUMN_FAMILY_PROPERTY_DEFAULT = "data";
 
-	private static final String READ_CONSISTENCY_LEVEL_PROPERTY = "cassandra.readconsistencylevel";
+    private static final String READ_CONSISTENCY_LEVEL_PROPERTY = "cassandra.readconsistencylevel";
 
-	private static final String READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT = "ONE";
+    private static final String READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT = "ONE";
 
-	private static final String WRITE_CONSISTENCY_LEVEL_PROPERTY = "cassandra.writeconsistencylevel";
+    private static final String WRITE_CONSISTENCY_LEVEL_PROPERTY = "cassandra.writeconsistencylevel";
 
-	private static final String WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT = "ONE";
+    private static final String WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT = "ONE";
 
-	private static String _keyspace = "kundera";
+    private static String _keyspace = "kundera";
 
-	private static String _host = "localhost";
+    private static String _host = "localhost";
 
-	private static int _port = 9160;
+    private static int _port = 9160;
 
-	private ConsistencyLevel writeConsistencyLevel = ConsistencyLevel.ONE;
+    private static String poolName = _host + ":" + _port + ":" + _keyspace; 
+    private ConsistencyLevel writeConsistencyLevel = ConsistencyLevel.ONE;
 
-	private ConsistencyLevel readConsistencyLevel = ConsistencyLevel.ONE;
+    private ConsistencyLevel readConsistencyLevel = ConsistencyLevel.ONE;
 
-	static {
-		
-		Pelops.getDbConnPool(getPoolName());
-		String[] contactNodes = new String[] { _host };
-		Cluster cluster = new Cluster(contactNodes, new IConnection.Config(
-				_port, true, -1), false);
-		Pelops.addPool(getPoolName(), cluster, _keyspace);
-	}
+    static
+    {
 
-	/**
-	 * Initialize any state for this DB. Called once per DB instance; there is
-	 * one DB instance per client thread.
-	 */
-	public synchronized void init() throws DBException {
-		String hosts = getProperties().getProperty("hosts");
-		if (hosts == null) {
-			throw new DBException(
-					"Required property \"hosts\" missing for CassandraClient");
-		}
+        Pelops.getDbConnPool(getPoolName());
+        String[] contactNodes = new String[] { _host };
+        Cluster cluster = new Cluster(contactNodes, new IConnection.Config(_port, true, -1), false);
+        Pelops.addPool(getPoolName(), cluster, _keyspace);
+    }
 
-               column_family = "pelopsuser";
-	//	column_family = getProperties().getProperty(COLUMN_FAMILY_PROPERTY,
-	//			COLUMN_FAMILY_PROPERTY_DEFAULT);
+    /**
+     * Initialize any state for this DB. Called once per DB instance; there is
+     * one DB instance per client thread.
+     */
+    public synchronized void init() throws DBException
+    {
+        String hosts = getProperties().getProperty("hosts");
+        if (hosts == null)
+        {
+            throw new DBException("Required property \"hosts\" missing for CassandraClient");
+        }
 
-		readConsistencyLevel = ConsistencyLevel.valueOf(getProperties()
-				.getProperty(READ_CONSISTENCY_LEVEL_PROPERTY,
-						READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
+        column_family = "pelopsuser";
+        // column_family = getProperties().getProperty(COLUMN_FAMILY_PROPERTY,
+        // COLUMN_FAMILY_PROPERTY_DEFAULT);
 
-		writeConsistencyLevel = ConsistencyLevel.valueOf(getProperties()
-				.getProperty(WRITE_CONSISTENCY_LEVEL_PROPERTY,
-						WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
+        readConsistencyLevel = ConsistencyLevel.valueOf(getProperties().getProperty(READ_CONSISTENCY_LEVEL_PROPERTY,
+                READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
 
-		String[] allhosts = hosts.split(",");
-		_host = allhosts[random.nextInt(allhosts.length)];
+        writeConsistencyLevel = ConsistencyLevel.valueOf(getProperties().getProperty(WRITE_CONSISTENCY_LEVEL_PROPERTY,
+                WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
 
-		/*
-		 * if (Pelops.getDbConnPool(getPoolName()) == null) {
-		 * System.out.println("calling");
-		 * 
-		 * }
-		 */
-	}
+        String[] allhosts = hosts.split(",");
+        _host = allhosts[random.nextInt(allhosts.length)];
 
-	/**
-	 * Cleanup any state for this DB. Called once per DB instance; there is one
-	 * DB instance per client thread.
-	 */
-	public void cleanup() throws DBException {
-//		Pelops.shutdown();
-//		Pelops.removePool(getPoolName());
-	}
+        /*
+         * if (Pelops.getDbConnPool(getPoolName()) == null) {
+         * System.out.println("calling");
+         * 
+         * }
+         */
+    }
 
-	/**
-	 * Read a record from the database. Each field/value pair from the result
-	 * will be stored in a HashMap.
-	 * 
-	 * @param table
-	 *            The name of the table
-	 * @param key
-	 *            The record key of the record to read.
-	 * @param fields
-	 *            The list of fields to read, or null for all of them
-	 * @param result
-	 *            A HashMap of field/value pairs for the result
-	 * @return Zero on success, a non-zero error code on error
-	 */
-	public int read(String table, String key, Set<String> fields,
-			HashMap<String, ByteIterator> result) {
-		try {
-			Selector selector = Pelops.createSelector(getPoolName());
-			List<Column> columns = selector.getColumnsFromRow(column_family,
-					key, Selector.newColumnsPredicateAll(false),
-					readConsistencyLevel);
-			assert columns != null;
-			return Ok;
-		} catch (Exception e) {
-			logger.error(e);
-			return Error;
-		}
-	}
+    /**
+     * Cleanup any state for this DB. Called once per DB instance; there is one
+     * DB instance per client thread.
+     */
+    public void cleanup() throws DBException
+    {
+        // Pelops.shutdown();
+        // Pelops.removePool(getPoolName());
+    }
 
-	/**
-	 * Perform a range scan for a set of records in the database. Each
-	 * field/value pair from the result will be stored in a HashMap.
-	 * 
-	 * @param table
-	 *            The name of the table
-	 * @param startkey
-	 *            The record key of the first record to read.
-	 * @param recordcount
-	 *            The number of records to read
-	 * @param fields
-	 *            The list of fields to read, or null for all of them
-	 * @param result
-	 *            A Vector of HashMaps, where each HashMap is a set field/value
-	 *            pairs for one record
-	 * @return Zero on success, a non-zero error code on error
-	 */
-	public int scan(String table, String startkey, int recordcount,
-			Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
-		return Ok;
-	}
+    /**
+     * Read a record from the database. Each field/value pair from the result
+     * will be stored in a HashMap.
+     * 
+     * @param table
+     *            The name of the table
+     * @param key
+     *            The record key of the record to read.
+     * @param fields
+     *            The list of fields to read, or null for all of them
+     * @param result
+     *            A HashMap of field/value pairs for the result
+     * @return Zero on success, a non-zero error code on error
+     */
+    public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result)
+    {
+        try
+        {
+            List<ByteBuffer> keys = new ArrayList<ByteBuffer>();
+            keys.add(ByteBufferUtil.bytes(key));
+            Selector selector = Pelops.createSelector(getPoolName());
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columns = selector./*getColumnsFromRow(column_family, key,
+                    Selector.newColumnsPredicateAll(true, 1000), readConsistencyLevel);*/
+             getColumnOrSuperColumnsFromRows(new ColumnParent(column_family),
+             keys,
+             Selector.newColumnsPredicateAll(true, 10000),
+             readConsistencyLevel);
 
-	/**
-	 * Update a record in the database. Any field/value pairs in the specified
-	 * values HashMap will be written into the record with the specified record
-	 * key, overwriting any existing values with the same field name.
-	 * 
-	 * @param table
-	 *            The name of the table
-	 * @param key
-	 *            The record key of the record to write.
-	 * @param values
-	 *            A HashMap of field/value pairs to update in the record
-	 * @return Zero on success, a non-zero error code on error
-	 */
-	public int update(String table, String key,
-			HashMap<String, ByteIterator> values) {
-		return insert(table, key, values);
-	}
+            assert columns != null;
+            return Ok;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            return Error;
+        }
+    }
 
-	/**
-	 * Insert a record in the database. Any field/value pairs in the specified
-	 * values HashMap will be written into the record with the specified record
-	 * key.
-	 * 
-	 * @param table
-	 *            The name of the table
-	 * @param key
-	 *            The record key of the record to insert.
-	 * @param values
-	 *            A HashMap of field/value pairs to insert in the record
-	 * @return Zero on success, a non-zero error code on error
-	 */
-	public int insert(String table, String key,
-			HashMap<String, ByteIterator> values) {
-		Mutator mutator = Pelops.createMutator(getPoolName());
-		try {
-			List<Column> columns = new ArrayList<Column>();
-			for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-				Column col = new Column();
-				col.setName(ByteBuffer.wrap(entry.getKey().getBytes("UTF-8")));
-				col.setValue(ByteBuffer.wrap(entry.getValue().toArray()));
-				col.setTimestamp(System.currentTimeMillis());
+    /**
+     * Perform a range scan for a set of records in the database. Each
+     * field/value pair from the result will be stored in a HashMap.
+     * 
+     * @param table
+     *            The name of the table
+     * @param startkey
+     *            The record key of the first record to read.
+     * @param recordcount
+     *            The number of records to read
+     * @param fields
+     *            The list of fields to read, or null for all of them
+     * @param result
+     *            A Vector of HashMaps, where each HashMap is a set field/value
+     *            pairs for one record
+     * @return Zero on success, a non-zero error code on error
+     */
+    public int scan(String table, String startkey, int recordcount, Set<String> fields,
+            Vector<HashMap<String, ByteIterator>> result)
+    {
+        return Ok;
+    }
 
-				columns.add(col);
-			}
+    /**
+     * Update a record in the database. Any field/value pairs in the specified
+     * values HashMap will be written into the record with the specified record
+     * key, overwriting any existing values with the same field name.
+     * 
+     * @param table
+     *            The name of the table
+     * @param key
+     *            The record key of the record to write.
+     * @param values
+     *            A HashMap of field/value pairs to update in the record
+     * @return Zero on success, a non-zero error code on error
+     */
+    public int update(String table, String key, HashMap<String, ByteIterator> values)
+    {
+        return insert(table, key, values);
+    }
 
-			mutator.writeColumns(column_family, key, columns);
-			mutator.execute(writeConsistencyLevel);
+    /**
+     * Insert a record in the database. Any field/value pairs in the specified
+     * values HashMap will be written into the record with the specified record
+     * key.
+     * 
+     * @param table
+     *            The name of the table
+     * @param key
+     *            The record key of the record to insert.
+     * @param values
+     *            A HashMap of field/value pairs to insert in the record
+     * @return Zero on success, a non-zero error code on error
+     */
+    public int insert(String table, String key, HashMap<String, ByteIterator> values)
+    {
+        Mutator mutator = Pelops.createMutator(getPoolName());
+        try
+        {
+            List<Column> columns = new ArrayList<Column>();
+            for (Map.Entry<String, ByteIterator> entry : values.entrySet())
+            {
+                Column col = new Column();
+                col.setName(ByteBuffer.wrap(entry.getKey().getBytes("UTF-8")));
+                col.setValue(ByteBuffer.wrap(entry.getValue().toArray()));
+                col.setTimestamp(System.currentTimeMillis());
 
-			return Ok;
-		} catch (Exception e) {
-			logger.error(e);
-			return Error;
-		}
-	}
+                columns.add(col);
+            }
 
-	/**
-	 * Delete a record from the database.
-	 * 
-	 * @param table
-	 *            The name of the table
-	 * @param key
-	 *            The record key of the record to delete.
-	 * @return Zero on success, a non-zero error code on error
-	 */
-	public int delete(String table, String key) {
-		return Error;
-	}
+            mutator.writeColumns(column_family, Bytes.fromUTF8(key), columns);
+            mutator.execute(writeConsistencyLevel);
 
-	public static void main(String[] args) {
-		PelopsClient cli = new PelopsClient();
+            return Ok;
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            return Error;
+        }
+    }
 
-		Properties props = new Properties();
+    /**
+     * Delete a record from the database.
+     * 
+     * @param table
+     *            The name of the table
+     * @param key
+     *            The record key of the record to delete.
+     * @return Zero on success, a non-zero error code on error
+     */
+    public int delete(String table, String key)
+    {
+        return Error;
+    }
 
-		props.setProperty("hosts", "localhost");
-		cli.setProperties(props);
+    public static void main(String[] args)
+    {
+        PelopsClient cli = new PelopsClient();
 
-		try {
-			cli.init();
-		} catch (Exception e) {
-			logger.error(e);
-			System.exit(0);
-		}
+        Properties props = new Properties();
 
-		HashMap<String, ByteIterator> vals = new HashMap<String, ByteIterator>();
-		vals.put("age", new StringByteIterator("57"));
-		vals.put("middlename", new StringByteIterator("bradley"));
-		vals.put("favoritecolor", new StringByteIterator("blue"));
-		int res = cli.insert("usertable", "BrianFrankCooper", vals);
-		System.out.println("Result of insert: " + res);
+        props.setProperty("hosts", "localhost");
+        cli.setProperties(props);
 
-		HashMap<String, ByteIterator> result = new HashMap<String, ByteIterator>();
-		HashSet<String> fields = new HashSet<String>();
-		fields.add("middlename");
-		fields.add("age");
-		fields.add("favoritecolor");
-		res = cli.read("usertable", "BrianFrankCooper", null, result);
-		System.out.println("Result of read: " + res);
-		for (String s : result.keySet()) {
-			System.out.println("[" + s + "]=[" + result.get(s) + "]");
-		}
+        try
+        {
+            cli.init();
+        }
+        catch (Exception e)
+        {
+            logger.error(e);
+            System.exit(0);
+        }
 
-		res = cli.delete("usertable", "BrianFrankCooper");
-		System.out.println("Result of delete: " + res);
-	}
+        HashMap<String, ByteIterator> vals = new HashMap<String, ByteIterator>();
+        vals.put("age", new StringByteIterator("57"));
+        vals.put("middlename", new StringByteIterator("bradley"));
+        vals.put("favoritecolor", new StringByteIterator("blue"));
+        int res = cli.insert("usertable", "BrianFrankCooper", vals);
+        System.out.println("Result of insert: " + res);
 
-	protected static String getPoolName() {
-		return _host + ":" + _port + ":" + _keyspace;
-	}
+        HashMap<String, ByteIterator> result = new HashMap<String, ByteIterator>();
+        HashSet<String> fields = new HashSet<String>();
+        fields.add("middlename");
+        fields.add("age");
+        fields.add("favoritecolor");
+        res = cli.read("usertable", "BrianFrankCooper", null, result);
+        System.out.println("Result of read: " + res);
+        for (String s : result.keySet())
+        {
+            System.out.println("[" + s + "]=[" + result.get(s) + "]");
+        }
+
+        res = cli.delete("usertable", "BrianFrankCooper");
+        System.out.println("Result of delete: " + res);
+    }
+
+    protected static String getPoolName()
+    {
+        return poolName;
+    }
 }

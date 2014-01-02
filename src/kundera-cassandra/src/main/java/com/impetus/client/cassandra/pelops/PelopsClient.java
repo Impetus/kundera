@@ -585,8 +585,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                         // Bytes.from
                         mutator.writeColumns(tf.getColumnFamilyName(),
-                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),
-                                Arrays.asList(tf.getColumns().toArray(new Column[0])));
+                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),tf.getColumns()
+                                /*Arrays.asList(tf.getColumns().toArray(new Column[0]))*/);
                     }
 
                     if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
