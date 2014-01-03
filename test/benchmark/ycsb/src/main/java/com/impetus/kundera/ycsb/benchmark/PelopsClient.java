@@ -37,6 +37,7 @@ import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
@@ -79,25 +80,28 @@ public class PelopsClient extends DB
 
     private static int _port = 9160;
 
-    private static String poolName = _host + ":" + _port + ":" + _keyspace; 
+    private static String poolName = _host + ":" + _port + ":" + _keyspace;
+
     private ConsistencyLevel writeConsistencyLevel = ConsistencyLevel.ONE;
 
     private ConsistencyLevel readConsistencyLevel = ConsistencyLevel.ONE;
 
+    private static IThriftPool pool;
+
     static
     {
 
-        Pelops.getDbConnPool(getPoolName());
         String[] contactNodes = new String[] { _host };
         Cluster cluster = new Cluster(contactNodes, new IConnection.Config(_port, true, -1), false);
         Pelops.addPool(getPoolName(), cluster, _keyspace);
+        pool = Pelops.getDbConnPool(getPoolName());
     }
 
     /**
      * Initialize any state for this DB. Called once per DB instance; there is
      * one DB instance per client thread.
      */
-    public synchronized void init() throws DBException
+    public void init() throws DBException
     {
         String hosts = getProperties().getProperty("hosts");
         if (hosts == null)
@@ -108,15 +112,17 @@ public class PelopsClient extends DB
         column_family = "pelopsuser";
         // column_family = getProperties().getProperty(COLUMN_FAMILY_PROPERTY,
         // COLUMN_FAMILY_PROPERTY_DEFAULT);
-
-        readConsistencyLevel = ConsistencyLevel.valueOf(getProperties().getProperty(READ_CONSISTENCY_LEVEL_PROPERTY,
-                READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
-
-        writeConsistencyLevel = ConsistencyLevel.valueOf(getProperties().getProperty(WRITE_CONSISTENCY_LEVEL_PROPERTY,
-                WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
-
-        String[] allhosts = hosts.split(",");
-        _host = allhosts[random.nextInt(allhosts.length)];
+        //
+        // readConsistencyLevel =
+        // ConsistencyLevel.valueOf(getProperties().getProperty(READ_CONSISTENCY_LEVEL_PROPERTY,
+        // READ_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
+        //
+        // writeConsistencyLevel =
+        // ConsistencyLevel.valueOf(getProperties().getProperty(WRITE_CONSISTENCY_LEVEL_PROPERTY,
+        // WRITE_CONSISTENCY_LEVEL_PROPERTY_DEFAULT));
+        //
+        // String[] allhosts = hosts.split(",");
+        // _host = allhosts[random.nextInt(allhosts.length)];
 
         /*
          * if (Pelops.getDbConnPool(getPoolName()) == null) {
@@ -157,12 +163,26 @@ public class PelopsClient extends DB
             List<ByteBuffer> keys = new ArrayList<ByteBuffer>();
             keys.add(ByteBufferUtil.bytes(key));
             Selector selector = Pelops.createSelector(getPoolName());
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columns = selector./*getColumnsFromRow(column_family, key,
-                    Selector.newColumnsPredicateAll(true, 1000), readConsistencyLevel);*/
-             getColumnOrSuperColumnsFromRows(new ColumnParent(column_family),
-             keys,
-             Selector.newColumnsPredicateAll(true, 10000),
-             readConsistencyLevel);
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columns = selector./*
+                                                                           * getColumnsFromRow
+                                                                           * (
+                                                                           * column_family
+                                                                           * ,
+                                                                           * key
+                                                                           * ,
+                                                                           * Selector
+                                                                           * .
+                                                                           * newColumnsPredicateAll
+                                                                           * (
+                                                                           * true
+                                                                           * ,
+                                                                           * 1000
+                                                                           * ),
+                                                                           * readConsistencyLevel
+                                                                           * );
+                                                                           */
+            getColumnOrSuperColumnsFromRows(new ColumnParent(column_family), keys,
+                    Selector.newColumnsPredicateAll(false, 10000), readConsistencyLevel);
 
             assert columns != null;
             return Ok;
@@ -230,7 +250,7 @@ public class PelopsClient extends DB
      */
     public int insert(String table, String key, HashMap<String, ByteIterator> values)
     {
-        Mutator mutator = Pelops.createMutator(getPoolName());
+        Mutator mutator = Pelops.createMutator(_host + ":" + _port + ":" + _keyspace);
         try
         {
             List<Column> columns = new ArrayList<Column>();

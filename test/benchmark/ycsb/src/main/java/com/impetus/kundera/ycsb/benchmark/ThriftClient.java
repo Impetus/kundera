@@ -201,6 +201,7 @@ public class ThriftClient extends DB
 
                 }
             }
+
             if (connectexception != null)
             {
                 logger.info("Unable to connect to " + myhost + " after " + ConnectionRetries + " tries");
@@ -224,6 +225,7 @@ public class ThriftClient extends DB
                     throw new DBException(e);
                 }
             }
+            client.set_keyspace(_table);
         }
         catch (Exception e)
         {
@@ -267,7 +269,6 @@ public class ThriftClient extends DB
          */
         try
         {
-            client.set_keyspace(_table);
             /*
              * _table = table;
              */}
