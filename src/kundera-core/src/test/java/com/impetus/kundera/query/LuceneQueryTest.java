@@ -15,17 +15,27 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.index.LuceneIndexingException;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.query.Person.Day;
 
 /**
  * @author vivek.mishra
@@ -89,6 +99,72 @@ public class LuceneQueryTest
      
         Assert.assertEquals(0,luceneQuery.onExecuteUpdate());
     }
+    
+    @Test
+    public void testOnWhereClause()
+    {
+        
+        Person p1 = new Person();
+        p1.setAge(32);
+        p1.setDay(Day.TUESDAY);
+        p1.setPersonId("p1");
+        p1.setSalary(6000.345);
+        
+        em.persist(p1);
+        em.clear();
+        
+        Person p2 = new Person();
+        p2.setAge(24);
+        p2.setDay(Day.MONDAY);
+        p2.setPersonId("p2");
+        p2.setSalary(8000.345);
+        
+        em.persist(p2);
+        em.clear();
+        
+        String query = "Select p from Person p WHERE p.salary > 500.0";
+        Query findQuery = em.createQuery(query, Person.class);
+        List<Person> allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(2, allPersons.size());
+        
+              
+        query = "Select p from Person p WHERE p.salary >= 500.0";
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(2, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary = 6000.345";
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary <= 7000.345";
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+        Assert.assertEquals(new Integer(32),allPersons.get(0).getAge());
+        
+        query = "Select p from Person p WHERE p.salary < 7000.345";
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+        Assert.assertEquals(new Integer(32),allPersons.get(0).getAge());
+        
+        query = "Select p from Person p WHERE p.salary < 6000.345"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(0, allPersons.size());
+       
+        
+           
+        
+    }
+    
 
     
     /**
@@ -97,8 +173,8 @@ public class LuceneQueryTest
     @After
     public void tearDown() throws Exception
     {
-        em.close();
-        emf.close();
+//        em.close();
+//        emf.close();
     }
 
 }

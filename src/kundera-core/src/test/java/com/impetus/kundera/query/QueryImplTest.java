@@ -82,6 +82,7 @@ public class QueryImplTest
         p1.setAge(98);
         p1.setPersonId("1");
         p1.setDay(Day.SATURDAY);
+        p1.setSalary(6000.345);
         
         em.persist(p1);
         
@@ -91,6 +92,7 @@ public class QueryImplTest
         p2.setAge(100);
         p2.setPersonId("2");
         p2.setDay(Day.SATURDAY);
+        p2.setSalary(10000.345);
         
         em.persist(p2);
         
@@ -306,6 +308,14 @@ public class QueryImplTest
         queryObj.setParameter("personName", "Amresh");       
         Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
+        
+        query = "Select p from Person p where p.salary >=:salary";        
+        delegator = CoreTestUtilities.getDelegator(em);  
+        kunderaQuery = parseQuery(query);
+        queryObj = new CoreQuery(query, kunderaQuery, delegator);        
+        queryObj.setParameter("salary", 500.0);       
+        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(queryObj.populateUsingLucene());
         
         onassertBi1MAssociation(delegator);
         onassertBiM1Association(delegator);
