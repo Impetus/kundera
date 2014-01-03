@@ -159,6 +159,11 @@ public class LuceneQueryTest
         findQuery = em.createQuery(query, Person.class);
         allPersons = findQuery.getResultList();
         Assert.assertEquals(0, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary < 6000.345"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(0, allPersons.size());
        
         
            
@@ -173,8 +178,8 @@ public class LuceneQueryTest
     @After
     public void tearDown() throws Exception
     {
-//        em.close();
-//        emf.close();
+        em.close();
+        emf.close();
     }
 
 }
