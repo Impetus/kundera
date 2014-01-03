@@ -166,11 +166,11 @@ public class KunderaPelopsClient extends DB
         {
             PelopsUser u = new PelopsUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
             em.persist(u);
-            j++;
+            /*j++;
             if (j % 5000 == 0)
-            {
+            {*/
                 em.clear();
-             }
+//             }
             return Ok;
         }
         catch (Exception e)

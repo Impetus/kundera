@@ -178,11 +178,11 @@ public class KunderaThriftClient extends DB
         {
             ThriftUser u = new ThriftUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
             em.persist(u);
-           j++;
+           /*j++;
             if (j % 5000 == 0)
-            {
+            {*/
                 em.clear();
-             }
+//             }
             return Ok;
         }
         catch (Exception e)
