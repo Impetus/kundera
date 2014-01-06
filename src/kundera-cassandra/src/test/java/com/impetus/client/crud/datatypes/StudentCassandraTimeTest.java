@@ -659,7 +659,7 @@ public class StudentCassandraTimeTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraTime\"");
     }
 
 }

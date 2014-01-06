@@ -1,6 +1,5 @@
 package com.impetus.client.crud.datatypes;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -20,8 +19,6 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
@@ -552,43 +549,6 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         em.close();
     }
 
-    public void startCluster()
-    {
-        try
-        {
-            CassandraCli.cassandraSetUp();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InvalidRequestException e)
-        {
-            e.printStackTrace();
-        }
-        catch (UnavailableException e)
-        {
-            e.printStackTrace();
-        }
-        catch (TimedOutException e)
-        {
-            e.printStackTrace();
-        }
-        catch (SchemaDisagreementException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void stopCluster()
-    {
-        // TODO Auto-generated method stub
-
-    }
 
     public void createSchema()
     {
@@ -664,7 +624,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraBigDecimal\"");
+//        CassandraCli.dropKeySpace(keyspace);
     }
 
 }

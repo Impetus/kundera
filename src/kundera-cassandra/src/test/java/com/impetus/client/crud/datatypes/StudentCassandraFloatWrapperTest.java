@@ -657,7 +657,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraFloatWrapper\"");
     }
 
 }
