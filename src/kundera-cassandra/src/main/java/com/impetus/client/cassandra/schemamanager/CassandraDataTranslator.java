@@ -78,7 +78,7 @@ import com.impetus.kundera.property.accessor.ShortAccessor;
  * @author chhavi.gangwal
  */
 
-public final class CassandraDataTranslator<X>
+public final class CassandraDataTranslator
 {
 
     /** The log. */
