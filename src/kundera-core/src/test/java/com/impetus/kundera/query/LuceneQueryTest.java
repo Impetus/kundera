@@ -24,16 +24,11 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.index.LuceneIndexer;
-import com.impetus.kundera.index.LuceneIndexingException;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.Person.Day;
 
@@ -164,13 +159,33 @@ public class LuceneQueryTest
         findQuery = em.createQuery(query, Person.class);
         allPersons = findQuery.getResultList();
         Assert.assertEquals(0, allPersons.size());
-       
         
-           
+        query = "Select p from Person p WHERE p.salary > -2000"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(2, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary = -200.00"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(0, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary >= -200.00"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(2, allPersons.size());
+        
+        query = "Select p from Person p WHERE p.salary < -400.00"; 
+        findQuery = em.createQuery(query, Person.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(0, allPersons.size());
+        
+       
+               
         
     }
     
-
+   
     
     /**
      * @throws java.lang.Exception
