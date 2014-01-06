@@ -1917,7 +1917,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception ex)
         {
-            log.error("Error during executing query {}, Caused by: {} .", cqlQuery, ex);
+            if(log.isErrorEnabled())
+            {
+                log.error("Error during executing query {}, Caused by: {} .", cqlQuery, ex);
+            }
             throw new PersistenceException(ex);
         }
         finally
