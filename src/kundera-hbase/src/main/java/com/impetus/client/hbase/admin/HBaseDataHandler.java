@@ -1268,7 +1268,7 @@ public class HBaseDataHandler implements DataHandler
                     .getTableName() : columnFamily;
             
        
-            addColumnFamilyToTable(tableName, columFamilyTableName);
+//            addColumnFamilyToTable(tableName, columFamilyTableName);
             persistentDataWrappers = getHBaseWrapperObj(rowId,entity, columFamilyTableName,
                     persistentDataWrappers, persistentData);
            

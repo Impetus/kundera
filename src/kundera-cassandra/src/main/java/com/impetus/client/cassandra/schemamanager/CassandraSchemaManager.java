@@ -283,7 +283,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             createOrUpdateColumnFamily(tableInfo, ksDef);
 
             // Create Index Table if required
-            createInvertedIndexTable(tableInfo);
+            createInvertedIndexTable(tableInfo, ksDef);
 
         }
     }
@@ -704,7 +704,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             ireforAddColumnbBuilder.append(column.getColumnName() + " because it conflicts with an existing column");
             if (ireforAddColumn.getWhy() != null && ireforAddColumn.getWhy().equals(ireforAddColumnbBuilder.toString()))
             {
-//                alterColumnType(tableInfo, translator, column);
+                // alterColumnType(tableInfo, translator, column);
             }
             else
             {
@@ -837,21 +837,23 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param tableInfo
      *            the table info
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws TException
-     *             the t exception
+     * @throws Exception 
      */
-    private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
-            SchemaDisagreementException, TException
+    private void createInvertedIndexTable(TableInfo tableInfo, KsDef ksDef) throws Exception
     {
         CfDef cfDef = getInvertedIndexCF(tableInfo);
         if (cfDef != null)
         {
-            cassandra_client.system_add_column_family(cfDef);
+            try
+            {
+                cassandra_client.system_add_column_family(cfDef);
+            }
+            catch (InvalidRequestException irex)
+            {
+                updateExistingColumnFamily(tableInfo, ksDef, irex);
+            }
         }
+
     }
 
     /**

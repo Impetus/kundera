@@ -40,7 +40,7 @@ public abstract class StudentCassandraBase<E extends StudentEntityDef> extends B
 {
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public boolean AUTO_MANAGE_SCHEMA = true;
+    public boolean AUTO_MANAGE_SCHEMA = false;
 
     /** The emf. */
     protected EntityManagerFactory emf;

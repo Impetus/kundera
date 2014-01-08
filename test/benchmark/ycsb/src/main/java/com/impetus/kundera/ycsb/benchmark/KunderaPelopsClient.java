@@ -39,7 +39,7 @@ public class KunderaPelopsClient extends DB
 
     private static Logger logger = Logger.getLogger(KunderaPelopsClient.class);
 
-    static Random random = new Random();
+//    static Random random = new Random();
 
     private static final int Ok = 0;
 
@@ -68,7 +68,7 @@ public class KunderaPelopsClient extends DB
     public void cleanup() throws DBException
     {
         em.clear();
-        em.close();
+//        em.close();
     }
 
     /**
@@ -92,10 +92,11 @@ public class KunderaPelopsClient extends DB
             Object o = em.find(PelopsUser.class, key);
             assert o != null;
             j++;
-            if (j % 5000 == 0)
-            {
-                em.clear();
-             }
+            em.clear();
+//            if (j % 5000 == 0)
+//            {
+//                em.clear();
+//             }
             return Ok;
         }
         catch (Exception e)
@@ -165,11 +166,11 @@ public class KunderaPelopsClient extends DB
         {
             PelopsUser u = new PelopsUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
             em.persist(u);
-            j++;
+            /*j++;
             if (j % 5000 == 0)
-            {
+            {*/
                 em.clear();
-             }
+//             }
             return Ok;
         }
         catch (Exception e)

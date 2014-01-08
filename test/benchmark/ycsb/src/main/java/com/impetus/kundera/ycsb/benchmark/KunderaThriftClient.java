@@ -70,7 +70,7 @@ public class KunderaThriftClient extends DB
     public void cleanup() throws DBException
     {
         em.clear();
-        em.close();
+//        em.close();.
     }
 
     /**
@@ -97,11 +97,11 @@ public class KunderaThriftClient extends DB
         {
             Object o = em.find(ThriftUser.class, key);
             assert o != null;
-            j++;
+           /* j++;
             if (j % 5000 == 0)
-            {
+            {*/
                 em.clear();
-             }
+//             }
 //            em.clear();
             return Ok;
         }
@@ -178,11 +178,11 @@ public class KunderaThriftClient extends DB
         {
             ThriftUser u = new ThriftUser(key, getString(key, "24"), getString(key, "gzb"), getString(key, "mishra"));
             em.persist(u);
-           j++;
+           /*j++;
             if (j % 5000 == 0)
-            {
+            {*/
                 em.clear();
-             }
+//             }
             return Ok;
         }
         catch (Exception e)

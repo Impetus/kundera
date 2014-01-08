@@ -660,7 +660,7 @@ public class StudentCassandraFloatPrimitiveTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraFloatPrimitive\"");
     }
 
 }

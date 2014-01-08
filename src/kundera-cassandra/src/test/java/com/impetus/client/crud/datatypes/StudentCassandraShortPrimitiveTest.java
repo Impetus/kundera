@@ -654,7 +654,7 @@ public class StudentCassandraShortPrimitiveTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraShortPrimitive\"");
     }
 
 }

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.impetus.kundera.index.DocumentIndexer;
 
@@ -39,6 +40,10 @@ public final class LuceneQueryBuilder
     {
         EQ, LIKE, GT, LT, LTE, GTE,AND,OR;
     }
+    
+    private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\]\\{\\}\\~\\*\\?]";
+    private static final Pattern LUCENE_PATTERN = Pattern.compile(LUCENE_ESCAPE_CHARS);
+    private static final String REPLACEMENT_STRING = "\\\\$0";
 
     static
     {
@@ -55,46 +60,48 @@ public final class LuceneQueryBuilder
     /**
      * @param condition
      * @param builder
+     * Code inspired : http://www.javalobby.org/java/forums/t86124.html
      */
     public final LuceneQueryBuilder buildQuery(final String condition, final String value, final Class valueClazz)
     {
 
         condition c = conditions.get(condition.toLowerCase().trim());
+        String lucenevalue = LUCENE_PATTERN.matcher(value).replaceAll(REPLACEMENT_STRING);
         if (c != null)
             switch (c)
             {
             case EQ:
                 builder.append(":");
-                builder.append(value);
+                builder.append(lucenevalue);
                 break;
                 
             case LIKE:
                 builder.append(":");
                 builder.append("*");
-                builder.append(value);
+                builder.append(lucenevalue);
                 break;
 
             case GT:
-                builder.append(appendRange(value, false, true, valueClazz));
+                builder.append(appendRange(lucenevalue, false, true, valueClazz));
                 break;
                 
             case LT:
-                builder.append(appendRange(value, false, false, valueClazz));
+                builder.append(appendRange(lucenevalue, false, false, valueClazz));
                 break;
                 
             case GTE:
-                builder.append(appendRange(value, true, true, valueClazz));
+                builder.append(appendRange(lucenevalue, true, true, valueClazz));
                 break;
 
             case LTE:
-                builder.append(appendRange(value, true, false, valueClazz));
+                builder.append(appendRange(lucenevalue, true, false, valueClazz));
                 break;
 
             default:
-                builder.append(" " + value + " ");
+                builder.append(" " + lucenevalue + " ");
                 break;
             }
-
+        
         return this;
     }
 

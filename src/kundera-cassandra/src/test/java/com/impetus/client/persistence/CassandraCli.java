@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.service.EmbeddedCassandraService;
@@ -44,6 +45,7 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +68,9 @@ public final class CassandraCli
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(CassandraCli.class);
 
+    private static List<String> puWithSchemaGeneration = new ArrayList<String>();
+    
+    
     /**
      * Cassandra set up.
      * 
@@ -93,6 +98,17 @@ public final class CassandraCli
         initClient();
     }
 
+    public static void archivePu(final String peristenceunit)
+    {
+        puWithSchemaGeneration.add(peristenceunit);
+    }
+    
+    public static boolean isArchived(final String persistenceUnit)
+    {
+        return puWithSchemaGeneration.contains(persistenceUnit);
+    }
+    
+    
     /**
      * Create keyspace.
      * 

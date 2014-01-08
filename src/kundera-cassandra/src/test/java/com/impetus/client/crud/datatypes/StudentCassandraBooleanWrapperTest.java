@@ -632,7 +632,7 @@ public class StudentCassandraBooleanWrapperTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.dropKeySpace(keyspace);
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraBooleanWrapper\"");
     }
 
 }

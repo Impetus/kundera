@@ -180,18 +180,19 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Required for running tests for embedded cassandra mode -->
-		<!-- <dependency> <groupId>org.cliffc</groupId> <artifactId>high-scale-lib</artifactId> 
-			<version>UNKNOWN</version> </dependency> <dependency> <groupId>com.reardencommerce</groupId> 
-			<artifactId>clhm-production</artifactId> <version>UNKNOWN</version> </dependency> 
-			<dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
-			<version>3.9.0.GA</version> </dependency> Cassandra Dependencies <dependency> 
-			<groupId>org.apache.cassandra</groupId> <artifactId>cassandra-all</artifactId> 
-			<version>1.2.9</version> </dependency> <dependency> <groupId>org.apache.cassandra</groupId> 
-			<artifactId>cassandra-thrift</artifactId> <version>1.2.9</version> </dependency> 
-			<dependency> <groupId>org.apache.cassandra</groupId> <artifactId>cassandra-clientutil</artifactId> 
-			<version>1.2.9</version> <scope>test</scope> </dependency> <dependency> <groupId>org.xerial</groupId> 
-			<artifactId>snappy</artifactId> <version>1.0.1-rc4</version> </dependency> -->
+		<!-- Required for running tests for embedded cassandra mode <dependency> 
+			<groupId>org.cliffc</groupId> <artifactId>high-scale-lib</artifactId> <version>UNKNOWN</version> 
+			</dependency> <dependency> <groupId>com.reardencommerce</groupId> <artifactId>clhm-production</artifactId> 
+			<version>UNKNOWN</version> </dependency> <dependency> <groupId>javassist</groupId> 
+			<artifactId>javassist</artifactId> <version>3.9.0.GA</version> </dependency> 
+			Cassandra Dependencies <dependency> <groupId>org.apache.cassandra</groupId> 
+			<artifactId>cassandra-all</artifactId> <version>1.2.4</version> </dependency> 
+			<dependency> <groupId>org.apache.cassandra</groupId> <artifactId>cassandra-thrift</artifactId> 
+			<version>1.2.4</version> </dependency> <dependency> <groupId>org.apache.cassandra</groupId> 
+			<artifactId>cassandra-clientutil</artifactId> <version>1.2.4</version> <scope>test</scope> 
+			</dependency> <dependency> <groupId>org.xerial</groupId> <artifactId>snappy</artifactId> 
+			<version>1.0.1-rc4</version> </dependency> -->
+
 		<!-- HBase depndencies -->
 		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
 			<version>0.94.3</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
@@ -413,12 +414,8 @@
 
 		<!-- <dependency> <groupId>org.apache.openejb</groupId> <artifactId>openejb-core</artifactId> 
 			<version>3.1</version> <scope>test</scope> </dependency> -->
-		<!-- <dependency>
-			<groupId>directory-naming</groupId>
-			<artifactId>naming-java</artifactId>
-			<version>0.8</version>
-			<scope>test</scope>
-		</dependency> -->
+		<!-- <dependency> <groupId>directory-naming</groupId> <artifactId>naming-java</artifactId> 
+			<version>0.8</version> <scope>test</scope> </dependency> -->
 
 	</dependencies>
 

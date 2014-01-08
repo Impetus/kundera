@@ -44,7 +44,6 @@ import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.JPQLParseException;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -509,7 +508,6 @@ public class CassandraCompositeTypeTest
         }
         catch (Exception e)
         {
-            System.out.println(e.getMessage());
             Assert.assertEquals(
                     "javax.persistence.PersistenceException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
                     e.getMessage());

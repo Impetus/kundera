@@ -78,12 +78,7 @@ import com.impetus.kundera.property.accessor.ShortAccessor;
  * @author chhavi.gangwal
  */
 
-/**
- * @author impadmin
- *
- * @param <X>
- */
-public final class CassandraDataTranslator<X>
+public final class CassandraDataTranslator
 {
 
     /** The log. */
@@ -260,9 +255,7 @@ public final class CassandraDataTranslator<X>
             case UUID:
                 return UUIDTypeBuilder.compose(dataValue, dataTypeClazz);
             case BYTES:
-
                 return BytesTypeBuilder.compose(dataValue, dataTypeClazz);
-
             case BOOLEAN:
                 return BooleanTypeBuilder.compose(dataValue, dataTypeClazz);
             case INT32:
@@ -274,13 +267,9 @@ public final class CassandraDataTranslator<X>
             case ENUM:
                 return EnumTypeBuilder.compose(dataValue, dataTypeClazz);
             case CHARACTER:
-
                 return CharacterTypeBuilder.compose(dataValue, dataTypeClazz);
-
             case SHORT:
-
                 return ShortTypeBuilder.compose(dataValue, dataTypeClazz);
-
             case BIGINT:
                 return BigIntegerTypeBuilder.compose(dataValue, dataTypeClazz);
             case TIMESTAMP:
@@ -316,9 +305,8 @@ public final class CassandraDataTranslator<X>
     {
         if (dataValue != null)
         {
-            switch (getCassandraDataTypeClass(dataTypeClazz))
+            if (dataTypeClazz.isAssignableFrom(Map.class))
             {
-            case MAP:
                 return MapTypeBuilder.compose(dataValue, mapGenericClassses);
             }
 

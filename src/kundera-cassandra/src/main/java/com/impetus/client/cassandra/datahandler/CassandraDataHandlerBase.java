@@ -43,6 +43,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1276,8 +1277,10 @@ public abstract class CassandraDataHandlerBase
             if (!attribute.getName().equals(m.getIdAttribute().getName()) && !attribute.isAssociation())
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
-                byte[] name = PropertyAccessorFactory.STRING
-                        .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
+                byte[] name = ByteBufferUtil.bytes(((AbstractAttribute) attribute).getJPAColumnName()).array(); 
+                        
+//                        PropertyAccessorFactory.STRING
+//                        .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
 
                 // if attribute is embeddable.
                 if (metaModel.isEmbeddable(attribute.isCollection() ? ((PluralAttribute) attribute)

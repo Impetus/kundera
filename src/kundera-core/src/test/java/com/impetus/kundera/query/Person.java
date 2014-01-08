@@ -27,7 +27,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "PERSON", schema = "KunderaTests@patest")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age"), @Index(name = "salary") })
 public class Person
 {
 /*    public static final String UID = "uid";
@@ -56,6 +56,10 @@ public class Person
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+    
+    /** The salary. */
+    @Column(name = "SALARY")
+    private Double salary;
 
     @Column(name = "ENUM")
     @Enumerated(EnumType.STRING)
@@ -147,6 +151,22 @@ public class Person
     public void setDay(Day day)
     {
         this.day = day;
+    }
+    
+    /**
+     * @param salary the salary to set
+     */
+    public void setSalary(Double salary)
+    {
+        this.salary = salary;
+    }
+
+    /**
+     * @param day the day to set
+     */
+    public Double getSalary()
+    {
+        return this.salary;
     }
     
     
