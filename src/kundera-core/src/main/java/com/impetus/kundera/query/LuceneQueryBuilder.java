@@ -161,11 +161,12 @@ public final class LuceneQueryBuilder
         sb.append(appender);
         sb.append("TO");
         sb.append(appender);
-        if (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
+        //composite key over lucene is not working issue #491
+        if (clazz != null  && (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
                 || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
                 || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
                 || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(double.class))
+                || clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(double.class)))
         {
             sb.append(isGreaterThan ? "*" : value);
 

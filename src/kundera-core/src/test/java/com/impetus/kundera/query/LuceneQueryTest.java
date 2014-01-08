@@ -16,6 +16,7 @@
 package com.impetus.kundera.query;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -25,12 +26,22 @@ import javax.persistence.Query;
 import junit.framework.Assert;
 
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.entities.EmbeddableEntity;
+import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
+import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.Person.Day;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * @author vivek.mishra
@@ -38,7 +49,8 @@ import com.impetus.kundera.query.Person.Day;
  */
 public class LuceneQueryTest
 {
-
+    private static final String LUCENE_DIR_PATH = "./lucene";
+    
     private static final String PU = "patest";
 
     private EntityManagerFactory emf;
@@ -185,6 +197,106 @@ public class LuceneQueryTest
         
     }
     
+    @Test
+    public void testOnUpdate()
+    {
+        
+        Person p1 = new Person();
+        p1.setPersonName("vivek");
+        p1.setAge(32);
+        p1.setDay(Day.TUESDAY);
+        p1.setPersonId("p1");
+        p1.setSalary(6000.345);
+        
+        em.persist(p1);
+        em.clear();
+        
+              
+        Person p = em.find(Person.class, "p1");
+        Assert.assertNotNull(p);
+        Assert.assertEquals("vivek", p.getPersonName());
+        p.setAge(12);
+        p.setPersonName("newvivek");
+                   
+       em.merge(p);
+       em.clear();
+       
+      
+       Query findQuery = em.createQuery("Select p from Person p WHERE p.personName = vivek");
+       List<Person> allPersons = findQuery.getResultList();
+       Assert.assertEquals(0, allPersons.size());  
+       
+       findQuery = em.createQuery("Select p from Person p WHERE p.personName = newvivek");
+       allPersons = findQuery.getResultList();
+       Assert.assertEquals(new Integer(12), allPersons.get(0).getAge()); 
+        
+    }
+    
+    @Test
+    public void testEmbeddable()
+    {
+        
+        SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
+        entity.setKey(1);
+        entity.setName("entity");
+        entity.setField("name");
+        
+        EmbeddableEntity embed1 = new EmbeddableEntity();
+        embed1.setField("embeddedField1");
+        
+        EmbeddableEntityTwo embed2 = new EmbeddableEntityTwo();
+        embed2.setField(1f);
+        embed2.setName("name");
+
+        entity.setEmbeddableEntity(embed1);
+        entity.setEmbeddableEntityTwo(embed2);
+        
+        em.persist(entity);
+        
+        SingularEntityEmbeddable p = em.find(SingularEntityEmbeddable.class, 1);
+        Assert.assertNotNull(p);
+        p.getEmbeddableEntity().setField("embeddedFieldChange");
+        
+        em.merge(p);
+        
+        p = em.find(SingularEntityEmbeddable.class, 1);
+        Assert.assertEquals("embeddedFieldChange", p.getEmbeddableEntity().getField());
+        
+    }
+    
+    @Test
+    public void testCollection()
+    {
+        
+        SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
+        entity.setKey(1);
+        entity.setName("entity");
+        entity.setField("name");
+        
+        EmbeddableEntity embed1 = new EmbeddableEntity();
+        embed1.setField("embeddedField1");
+        
+        EmbeddableEntityTwo embed2 = new EmbeddableEntityTwo();
+        embed2.setField(1f);
+        embed2.setName("name");
+
+        entity.setEmbeddableEntity(embed1);
+        entity.setEmbeddableEntityTwo(embed2);
+        
+        em.persist(entity);
+        
+        SingularEntityEmbeddable p = em.find(SingularEntityEmbeddable.class, 1);
+        Assert.assertNotNull(p);
+        p.getEmbeddableEntity().setField("embeddedFieldChange");
+        
+        em.merge(p);
+        
+        p = em.find(SingularEntityEmbeddable.class, 1);
+        Assert.assertEquals("embeddedFieldChange", p.getEmbeddableEntity().getField());
+        
+    }
+    
+    
    
     
     /**
@@ -195,6 +307,7 @@ public class LuceneQueryTest
     {
         em.close();
         emf.close();
+        LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
     }
 
 }

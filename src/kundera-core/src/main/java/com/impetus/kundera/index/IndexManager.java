@@ -109,16 +109,28 @@ public class IndexManager
                 if (indexer.getClass().isAssignableFrom(LuceneIndexer.class))
                 {
                     Object id = PropertyAccessorHelper.getId(entity, metadata);
-
-                    boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                            .entityExistsInIndex(entity.getClass());
-                    if (documentExists)
+                    boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                    .documentExistsInIndex(metadata, id);
+                    
+                    if (documentExistsInIndex) 
                     {
-                        ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
-                        ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
-                    }
-                    ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
+                        
+                        ((com.impetus.kundera.index.lucene.Indexer) indexer).update(metadata, entity, id,
+                                parentId != null ? parentId.toString() : null );
+                    } 
+                    else 
+                    {
+                        
+                        boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                        .entityExistsInIndex(entity.getClass());
+                        if (documentExists)
+                        {
+                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
+                             ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
+                       }
+                       ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
                             parentId != null ? parentId.toString() : null, clazz);
+                    }
                 }
                 else
                 {

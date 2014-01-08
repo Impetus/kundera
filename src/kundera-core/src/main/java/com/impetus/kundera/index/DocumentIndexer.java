@@ -134,7 +134,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
         // Add super column name to document
         addSuperColumnNameToDocument(embeddedColumnName, currentDoc);
 
-        indexParentKey(parentId, currentDoc, clazz);
+        addParentKeyToDocument(parentId, currentDoc, clazz);
         return currentDoc;
     }
 
@@ -148,7 +148,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param clazz
      *            the clazz
      */
-    protected void indexParentKey(String parentId, Document currentDoc, Class<?> clazz)
+    protected void addParentKeyToDocument(String parentId, Document currentDoc, Class<?> clazz)
     {
         if (parentId != null)
         {
@@ -203,6 +203,44 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
 
         // Store document into Index
         indexDocument(metadata, currentDoc);
+
+    }
+    
+    /**
+     * Index super column.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param object
+     *            the object
+     * @param currentDoc
+     *            the current doc
+     * @param embeddedObject
+     *            the embedded object
+     * @param superColumn
+     *            the super column
+     */
+    protected void createSuperColumnDocument(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
+            EmbeddableType superColumn)
+    {
+
+        // Add all super column fields into document
+        Set<Attribute> attributes = superColumn.getAttributes();
+        Iterator<Attribute> iter = attributes.iterator();
+        while (iter.hasNext())
+        {
+            Attribute attr = iter.next();
+            java.lang.reflect.Field field = (java.lang.reflect.Field) attr.getJavaMember();
+            String colName = field.getName();
+            String indexName = metadata.getIndexName();
+            addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
+
+        }
+     
+        // Add all entity fields to document
+        addEntityFieldsToDocument(metadata, object, currentDoc);
+
+       
 
     }
 

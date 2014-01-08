@@ -90,4 +90,8 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * Flushes out indexes.
      */
     void flush();
+
+    boolean documentExistsInIndex(EntityMetadata metadata, Object id);
+    
+    void update(EntityMetadata metadata, Object entity, Object id, String parentId);
 }
