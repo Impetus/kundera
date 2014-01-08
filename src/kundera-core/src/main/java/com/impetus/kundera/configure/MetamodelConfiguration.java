@@ -96,7 +96,10 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         {
             if (appMetadata.getMetamodelMap().get(persistenceUnit.trim()) != null)
             {
-                log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+                if (log.isDebugEnabled())
+                {
+                    log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+                }
             }
             else
             {
@@ -117,7 +120,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         if (persistenceUnit == null)
         {
             throw new IllegalArgumentException(
-                    "Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
+                    "Must have a persistenceUnitName in order to load entity metadata, you provided :" + persistenceUnit);
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -182,7 +185,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             reader = new ClasspathReader(classesToScan);
             // resources = reader.findResourcesByContextLoader();
         }
-       
+
         InputStream[] iStreams = null;
         PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
         if (this.getClass().getClassLoader() instanceof URLClassLoader && !puMetadata.getExcludeUnlistedClasses())
@@ -285,26 +288,26 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
 
     }
 
-    /**
-     * @param resources
-     * @param reader
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void validateEntityForClientSpecificProperty(List<Class<?>> classes, final String persistenceUnit)
-    {
-        for (Class clazz : classes)
-        {
-            String pu = getPersistenceUnitOfEntity(clazz);
-            EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalPropertyMap, persistenceUnits));
-            if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
-                    && persistenceUnit.equalsIgnoreCase(pu))
-            {
-                validator.validateEntity(clazz);
-            }
-        }
-    }
+//    /**
+//     * @param resources
+//     * @param reader
+//     * @throws IOException
+//     * @throws ClassNotFoundException
+//     */
+//    private void validateEntityForClientSpecificProperty(List<Class<?>> classes, final String persistenceUnit)
+//    {
+//        for (Class clazz : classes)
+//        {
+//            String pu = getPersistenceUnitOfEntity(clazz);
+//            EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
+//                    externalPropertyMap, persistenceUnits));
+//            if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
+//                    && persistenceUnit.equalsIgnoreCase(pu))
+//            {
+//                validator.validateEntity(clazz);
+//            }
+//        }
+//    }
 
     private String getPersistenceUnitOfEntity(Class clazz)
     {

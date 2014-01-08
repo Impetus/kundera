@@ -98,7 +98,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
         Map<String, Object> propsMap = new HashMap<String, Object>();
-        
+
         if (properties != null)
         {
             propsMap.putAll(properties);
@@ -142,7 +142,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         this.util = new KunderaPersistenceUnitUtil(cache);
 
         if (logger.isDebugEnabled())
+        {
             logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
+        }
     }
 
     /**
@@ -172,7 +174,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             for (String pu : persistenceUnits)
             {
                 ((ClientLifeCycleManager) clientFactories.get(pu)).destroy();
-//                KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
+                // KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
             }
             this.persistenceUnits = null;
             this.properties = null;
@@ -202,7 +204,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             return new EntityManagerImpl(this, transactionType, PersistenceContextType.EXTENDED);
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -224,7 +226,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             return new EntityManagerImpl(this, map, transactionType, PersistenceContextType.EXTENDED);
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -256,7 +258,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             throw new NotImplementedException("Criteria Query currently not supported by Kundera");
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -275,7 +277,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -295,7 +297,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             return properties;
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -314,7 +316,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
         }
-        throw new IllegalStateException("entity manager factory has been closed");
+        throw new IllegalStateException("Entity manager factory has been closed.");
     }
 
     /**
@@ -331,7 +333,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         if (!isOpen())
         {
-            throw new IllegalStateException("EntityManagerFactory is closed");
+            throw new IllegalStateException("Entity manager factory has been closed.");
         }
         return this.util;
     }
@@ -400,6 +402,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return persistenceUnits;
     }
 
+    /**
+     * 
+     * @param pu
+     * @return
+     */
     ClientFactory getClientFactory(final String pu)
     {
         ClientFactory clientFactory = clientFactories.get(pu);

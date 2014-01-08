@@ -696,12 +696,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         String batch_Size = null;
         if (puProperties != null)
         {
-            Object externalBatchSize = /*
-                                        * clientProperties != null ?
-                                        * clientProperties
-                                        * .get(PersistenceProperties
-                                        * .KUNDERA_BATCH_SIZE) :
-                                        */puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE);
+            Object externalBatchSize = puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE);
             externalBatchSize = externalBatchSize != null ? externalBatchSize.toString() : null;
             batch_Size = puProperties != null ? (String) externalBatchSize : null;
             if (batch_Size != null)

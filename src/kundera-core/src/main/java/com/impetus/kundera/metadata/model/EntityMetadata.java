@@ -28,8 +28,6 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -50,7 +48,7 @@ public final class EntityMetadata
      */
 
     /** class corresponding to this meta. */
-    Class<?> entityClazz;
+    private Class<?> entityClazz;
 
     /** Name of Persistence Object. */
     private String tableName;
@@ -74,11 +72,6 @@ public final class EntityMetadata
 
     private SingularAttribute idAttribute;
 
-    // private List<String> colToBeIndexed;
-    // private List<IndexedColumn> colToBeIndexed;
-    // private Map<String, com.impetus.kundera.newannotations.Index>
-    // colToBeIndexed;
-
     private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
 
     /** The read identifier method. */
@@ -88,14 +81,8 @@ public final class EntityMetadata
     private Method writeIdentifierMethod;
 
     /** The index prperties. */
-    // private List<PropertyIndex> indexPrperties = new
-    // ArrayList<PropertyIndex>();
-
     private Map<String, PropertyIndex> indexPrperties = new HashMap<String, PropertyIndex>();
 
-    // entity listeners map
-    // key=>ListenerAnnotations, like @PrePersist, @PreUpdate etc.;
-    // value=>EntityLisntener Class and method
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
 
@@ -112,9 +99,6 @@ public final class EntityMetadata
 
     // Whether it contains One-To-Many relationship
     private boolean isParent;
-
-    /** The log. */
-    private static Logger log = LoggerFactory.getLogger(EntityMetadata.class);
 
     private EntityType entityType;
 
@@ -490,32 +474,6 @@ public final class EntityMetadata
     }
 
     /**
-     * Checks if is embeddable.
-     * 
-     * @param fieldClass
-     *            the field class
-     * @return true, if is embeddable
-     */
-    // public boolean isEmbeddable(Class<?> fieldClass)
-    // {
-    // return embeddableCollection.contains(fieldClass);
-    // }
-
-    /**
-     * Adds the to embed collection.
-     * 
-     * @param fieldClass
-     *            the field class
-     */
-    // public void addToEmbedCollection(Class<?> fieldClass)
-    // {
-    // if (!embeddableCollection.contains(fieldClass))
-    // {
-    // embeddableCollection.add(fieldClass);
-    // }
-    // }
-
-    /**
      * Checks if is cacheable.
      * 
      * @return the cacheable
@@ -593,7 +551,7 @@ public final class EntityMetadata
                 builder.append("\t\t" + rel.getTargetEntity().getName() + "#" + rel.getProperty().getName());
                 builder.append(" (" + rel.getCascades());
                 builder.append(", " + rel.getType());
-                builder.append(", " + rel.fetchType);
+                builder.append(", " + rel.getFetchType());
                 builder.append(")\n");
             }
             builder.append("\t)\n");

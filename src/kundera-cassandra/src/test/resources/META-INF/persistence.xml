@@ -7,6 +7,7 @@
 
 	<persistence-unit name="cass_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.datatypes.entities.EntityWithCollection</class>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -15,7 +16,7 @@
 			<property name="kundera.client" value="pelops" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
-				<!-- <property name="kundera.ddl.auto.prepare" value="create" />  -->
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
@@ -148,6 +149,32 @@
 
 	<persistence-unit name="CassandraDataTypeTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.datatypes.entities.StudentString</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentInt</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBigInteger</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBigDecimal</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBytePrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentByteWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentInteger</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentFloatPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentFloatWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDoublePrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDoubleWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentChar</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentCharacter</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentLongPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentLongWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentShortPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentShortWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentSqlDate</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentTimestamp</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentTime</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentUUID</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDate</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentCalendar</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBooleanPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBooleanWrapper</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />

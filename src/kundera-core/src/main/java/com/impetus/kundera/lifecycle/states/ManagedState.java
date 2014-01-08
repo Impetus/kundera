@@ -45,10 +45,10 @@ public class ManagedState extends NodeState
 
         // Cascade persist operation for related entities for whom cascade=ALL
         // or PERSIST
-//        if(((Node)nodeStateContext).isDirty())
-//        {
+        if (((Node) nodeStateContext).isDirty())
+        {
             recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
-//        }
+        }
     }
 
     @Override
@@ -99,13 +99,18 @@ public class ManagedState extends NodeState
         // one in persistence cache
         // nodeStateContext.setDirty(true);
 
-        ((Node) nodeStateContext).setUpdate(true);
-        // Add this node into persistence cache
-        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
+        if (((Node) nodeStateContext).isDirty() || ((Node) nodeStateContext).isInState(DetachedState.class))
+        {
+            ((Node) nodeStateContext).setUpdate(true);
+            // Add this node into persistence cache
+            nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
 
-        // Cascade merge operation for all related entities for whom cascade=ALL
-        // or MERGE
-        recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
+            // Cascade merge operation for all related entities for whom
+            // cascade=ALL
+            // or MERGE
+            recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
+
+        }
     }
 
     @Override
@@ -124,7 +129,7 @@ public class ManagedState extends NodeState
         {
             return;
         }
-        
+
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
         // Recursively retrieve relationship entities (if there are any)
         if (ee != null && ee.getEntity() != null)
@@ -143,7 +148,7 @@ public class ManagedState extends NodeState
             {
                 // This entity has associated entities, find them recursively.
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
-                        nodeStateContext.getPersistenceDelegator(),false);
+                        nodeStateContext.getPersistenceDelegator(), false);
             }
         }
 

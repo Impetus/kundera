@@ -27,9 +27,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -50,7 +48,7 @@ public class RDBMSQuery extends QueryImpl
     private EntityReader reader;
 
     /**
-     * Instantiates a new rDBMS query.
+     * Instantiates a new RDBMS query.
      * 
      * @param query
      *            the query
@@ -72,10 +70,11 @@ public class RDBMSQuery extends QueryImpl
     {
         // retrieve
         if (log.isDebugEnabled())
+        {
             log.debug("On handleAssociation() retrieve associations ");
-
+        }
         initializeReader();
-        List<EnhanceEntity> ls = getReader().populateRelation(m, client,this.maxResult);
+        List<EnhanceEntity> ls = getReader().populateRelation(m, client, this.maxResult);
 
         return setRelationEntities(ls, client, m);
     }
@@ -90,8 +89,9 @@ public class RDBMSQuery extends QueryImpl
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         if (log.isDebugEnabled())
+        {
             log.debug("on start of fetching non associated entities");
-
+        }
         List<Object> result = new ArrayList<Object>();
 
         initializeReader();
@@ -101,8 +101,8 @@ public class RDBMSQuery extends QueryImpl
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(
-                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
+                List r = ((HibernateClient) client).find(kunderaQuery.isNative() ? getJPAQuery()
+                        : ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
 
                 for (Object o : r)
@@ -122,7 +122,7 @@ public class RDBMSQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            log.error("Error during query execution ", e);
+            log.error("Error during query execution, Caused by: {}.", e);
             throw new QueryHandlerException(e);
         }
         return result;
@@ -138,7 +138,7 @@ public class RDBMSQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new RDBMSEntityReader(getLuceneQueryFromJPAQuery(), getJPAQuery(),kunderaQuery);
+            reader = new RDBMSEntityReader(getJPAQuery(), kunderaQuery);
         }
         return reader;
     }
@@ -161,11 +161,8 @@ public class RDBMSQuery extends QueryImpl
      */
     private void initializeReader()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        boolean isNative = kunderaQuery.isNative();
 
-        String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-        
         if (!isNative)
         {
             ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
@@ -178,7 +175,7 @@ public class RDBMSQuery extends QueryImpl
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override

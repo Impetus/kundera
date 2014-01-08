@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.query.RDBMSQuery;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -70,9 +71,6 @@ import com.impetus.kundera.proxy.ProxyHelper;
  */
 public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
-//    /** The sf. */
-//    private SessionFactory sf;
-
     private RDBMSClientFactory clientFactory;
 
     /** The s. */
@@ -158,23 +156,22 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public Object find(Class clazz, Object key)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), clazz);
-
-        if (s == null)
-        {
-            s = getStatelessSession();
-            //
-            // s.beginTransaction();
-        }
+        s = getStatelessSession();
 
         Object result = null;
         try
         {
-            result = s.get(clazz, getKey(key, (Field) entityMetadata.getIdAttribute().getJavaMember()));
+            result = s.get(clazz, (Serializable) key);
+        }
+        catch (ClassCastException ccex)
+        {
+            log.error("Class can not be serializable, Caused by {}.", ccex);
+            throw new KunderaException(ccex);
         }
         catch (Exception e)
         {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
+            throw new KunderaException(e);
         }
         return result;
 
@@ -191,9 +188,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
-        List<E> objs = new ArrayList<E>();
         Session s = getSession();
-        Transaction tx = s.beginTransaction();
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
 
@@ -254,7 +249,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (HibernateException e)
         {
-            log.error("Error while persisting object of {}", metadata.getEntityClazz(), e);
+            log.error("Error while persisting object of {}, Caused by {}.", metadata.getEntityClazz(), e);
             throw new PersistenceException(e);
         }
     }
@@ -283,22 +278,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Class columnJavaType)
     {
-
         StringBuffer sqlQuery = new StringBuffer();
         sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ")
                 .append(getFromClause(schemaName, joinTableName)).append(" WHERE ").append(joinColumnName).append("='")
                 .append(parentId).append("'");
 
         Session s = getSession();
-        Transaction tx = s.beginTransaction();
 
         SQLQuery query = s.createSQLQuery(sqlQuery.toString());
 
         List<E> foreignKeys = new ArrayList<E>();
 
         foreignKeys = query.list();
-
-        tx.commit();
 
         return foreignKeys;
     }
@@ -319,7 +310,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 .append(" WHERE ").append(columnName).append("='").append(childIdStr).append("'");
 
         Session s = getSession();
-        // Transaction tx = s.beginTransaction();
 
         SQLQuery query = s.createSQLQuery(sqlQuery.toString());
 
@@ -342,7 +332,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-
         StringBuffer query = new StringBuffer();
 
         query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
@@ -426,10 +415,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     private Session getSession()
     {
-        return  clientFactory.getSession();
+        return clientFactory.getSession();
     }
 
-    
     /**
      * Find.
      * 
@@ -443,11 +431,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
-        List<Object[]> result = new ArrayList<Object[]>();
-
         s = getStatelessSession();
 
-//        s.beginTransaction().begin();
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
         if (relations != null)
         {
@@ -468,7 +453,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 }
             }
         }
-//        s.getTransaction().commit();
         return q.list();
     }
 
@@ -482,14 +466,14 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String tableName = m.getTableName();
-        String aliasName = "_" + tableName;
+
         StringBuilder queryBuilder = new StringBuilder("Select ");
-        // queryBuilder.append(aliasName);
+
         queryBuilder.append("* ");
         queryBuilder.append("From ");
         queryBuilder.append(getFromClause(m.getSchema(), tableName));
         queryBuilder.append(" ");
-        // queryBuilder.append(aliasName);
+
         queryBuilder.append(" Where ");
         queryBuilder.append(colName);
         queryBuilder.append(" = ");
@@ -497,15 +481,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append(colValue);
         queryBuilder.append("'");
         s = getStatelessSession();
-//        s.beginTransaction();
 
         List results = find(queryBuilder.toString(), m.getRelationNames(), m);
         return populateEnhanceEntities(m, m.getRelationNames(), results);
-
-        // SQLQuery q =
-        // s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
-        // // tx.commit();
-        // return q.list();
     }
 
     /*
@@ -530,52 +508,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * Gets the key.
-     * 
-     * @param pKey
-     *            the key
-     * @param f
-     *            the f
-     * @return the key
-     */
-    private Serializable getKey(Object pKey, Field f)
-    {
-        if (pKey != null)
-        {
-            if (f.getType().isAssignableFrom(long.class) || f.getType().isAssignableFrom(Long.class))
-            {
-                return Long.valueOf(pKey.toString());
-            }
-            else if (f.getType().isAssignableFrom(int.class) || f.getType().isAssignableFrom(Integer.class))
-            {
-                return Integer.valueOf(pKey.toString());
-            }
-            else if (f.getType().isAssignableFrom(String.class))
-            {
-                return (String) pKey;
-            }
-            else if (f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
-            {
-                return Boolean.valueOf(pKey.toString());
-            }
-            else if (f.getType().isAssignableFrom(double.class) || f.getType().isAssignableFrom(Double.class))
-            {
-                return Double.valueOf(pKey.toString());
-            }
-            else if (f.getType().isAssignableFrom(float.class) || f.getType().isAssignableFrom(Float.class))
-            {
-                return Float.valueOf(pKey.toString());
-            }
-            else
-            {
-                throw new PersistenceException("Unsupported type:" + pKey.getClass());
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Gets the data type.
      * 
      * @param entityMetadata
@@ -597,7 +529,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             pKeys[cnt++] = accessor.fromString(idField.getClass(), r.toString());
         }
-
         return pKeys;
     }
 
@@ -614,11 +545,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         return clause;
     }
-
-//    private SessionFactory getSessionFactory()
-//    {
-//        return sf;
-//    }
 
     /**
      * Updates foreign keys into master table
@@ -640,7 +566,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
                         + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
 
-                log.warn("Executing query {}", updateSql);
                 s.createSQLQuery(updateSql).executeUpdate();
             }
         }
@@ -671,15 +596,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     }
                     catch (IllegalArgumentException e)
                     {
-                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                        log.error("Error while Fetching relationship value of {}, Caused by {}.",
+                                metadata.getEntityClazz(), e);
                     }
                     catch (IllegalAccessException e)
                     {
-                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                        log.error("Error while Fetching relationship value of {}, Caused by {}.",
+                                metadata.getEntityClazz(), e);
                     }
                     catch (InvocationTargetException e)
                     {
-                        log.error("Error while Fetching relationship value of {}", metadata.getEntityClazz(), e);
+                        log.error("Error while Fetching relationship value of {}, Caused by {}.",
+                                metadata.getEntityClazz(), e);
                     }
 
                     if (foreignKey != null)
@@ -691,9 +619,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     }
                 }
             }
-
         }
-
         return proxyRemoved;
     }
 
@@ -742,16 +668,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (InstantiationException e)
         {
-            log.error("Error during populating entities:" + e.getMessage());
+            log.error("Error during populating entities, Caused by {}.", e);
             throw new EntityReaderException(e);
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error during populating entities:" + e.getMessage());
+            log.error("Error during populating entities, Caused by {}.", e);
             throw new EntityReaderException(e);
         }
         return ls;
-
     }
 
     /**
@@ -773,5 +698,4 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         return relationVal;
     }
-
 }

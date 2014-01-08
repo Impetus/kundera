@@ -202,11 +202,11 @@ public class InheritenceDomainTest
          em.persist(uacc);
          em.getTransaction().commit();
          
-         //TODOO: Stack over flow error.
+         //TODO: Stack over flow error.
          
 //         Uncomment this to test https://github.com/impetus-opensource/Kundera/issues/460
-//         uacc.setDispName("UpdatedTest");
-//         em.persist(fbprofile);
+         uacc.setDispName("UpdatedTest");
+         em.persist(fbprofile);
          
 //         em.persist(twprofile1);
          em.clear();

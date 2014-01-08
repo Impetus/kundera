@@ -53,17 +53,12 @@ class HBaseClientProperties
                 {
                     if (key.equals(FILTER) && value instanceof Filter)
                     {
-
                         this.hbaseClient.setFilter((Filter) value);
-
                     }
                     else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
                     {
-
                         setBatchSize(value);
-
                     }
-
                     // Add more
                 }
             }
@@ -74,15 +69,11 @@ class HBaseClientProperties
     {
         if (value instanceof Integer)
         {
-
             this.hbaseClient.setBatchSize((Integer) value);
-
         }
         else if (value instanceof String)
         {
-
             this.hbaseClient.setBatchSize(Integer.valueOf((String) value));
-
         }
 
     }

@@ -69,11 +69,6 @@ public class HBaseQuery extends QueryImpl
     private static Logger log = LoggerFactory.getLogger(HBaseQuery.class);
 
     /**
-     * Holds reference to entity reader.
-     */
-    private EntityReader reader = new HBaseEntityReader();
-
-    /**
      * Constructor using fields.
      * 
      * @param query
@@ -125,7 +120,7 @@ public class HBaseQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return reader;
+        return new HBaseEntityReader(kunderaQuery);
     }
 
     /*
@@ -345,7 +340,7 @@ public class HBaseQuery extends QueryImpl
         void translate(KunderaQuery query, EntityMetadata m, ClientMetadata clientMetadata)
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-           
+
             for (Object obj : query.getFilterClauseQueue())
             {
                 boolean isIdColumn = false;
@@ -368,14 +363,14 @@ public class HBaseQuery extends QueryImpl
                     String opr = obj.toString();
                     if (MetadataUtils.useSecondryIndex(clientMetadata))
                     {
-                     if (opr.trim().equalsIgnoreCase("or"))
-                     {
-                        log.error("Support for OR clause is not enabled with in Hbase");
-                        throw new QueryHandlerException("Unsupported clause " + opr + " for Hbase");
-                     }
+                        if (opr.trim().equalsIgnoreCase("or"))
+                        {
+                            log.error("Support for OR clause is not enabled with in Hbase");
+                            throw new QueryHandlerException("Unsupported clause " + opr + " for Hbase");
+                        }
                     }
                 }
-             
+
             }
         }
 

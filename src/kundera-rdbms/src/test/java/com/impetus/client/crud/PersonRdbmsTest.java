@@ -30,8 +30,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.PersonRDBMS;
+
 public class PersonRdbmsTest extends BaseTest
 {
+
+    private static final String SCHEMA = "KunderaTests";
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -41,7 +45,7 @@ public class PersonRdbmsTest extends BaseTest
 
     private Map<Object, Object> col;
 
-    private RDBMSCli cli;
+    // private RDBMSCli cli;
 
     /**
      * Sets the up.
@@ -61,22 +65,22 @@ public class PersonRdbmsTest extends BaseTest
     public void onInsertRdbms() throws Exception
     {
 
-        try
-        {
-            cli = new RDBMSCli("testdb");
-            cli.createSchema("testdb");
-            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            cli.update("DELETE FROM TESTDB.PERSON");
-            cli.update("DROP TABLE TESTDB.PERSON");
-            cli.update("DROP SCHEMA TESTDB");
-            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)"); // nothing
-                                                                                                                                // to
-                                                                                                                                // do
-        }
+        // try
+        // {
+        // cli = new RDBMSCli(SCHEMA);
+        // cli.createSchema(SCHEMA);
+        // cli.update("CREATE TABLE KUNDERATESTS.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
+        // }
+        // catch (Exception e)
+        // {
+        // e.printStackTrace();
+        // cli.update("DELETE FROM KUNDERATESTS.PERSON");
+        // cli.update("DROP TABLE KUNDERATESTS.PERSON");
+        // cli.update("DROP SCHEMA KUNDERATESTS");
+        // cli.update("CREATE TABLE KUNDERATESTS.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
+        // // nothing
+        // // do
+        // }
 
         Object p1 = prepareRDBMSInstance("1", 10);
         Object p2 = prepareRDBMSInstance("2", 20);
@@ -102,8 +106,8 @@ public class PersonRdbmsTest extends BaseTest
         em.persist(p3);
 
         em.close();
-        emf.close();
-        emf = Persistence.createEntityManagerFactory("testHibernate");
+        // emf.close();
+        // emf = Persistence.createEntityManagerFactory("testHibernate");
 
         em = emf.createEntityManager();
 
@@ -120,7 +124,11 @@ public class PersonRdbmsTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonRDBMS", PersonRDBMS.class, "1", "2", "personId");
 
+        // Test IN clause.
         testINClause();
+
+        // Test Native queries.
+        testNativeQuery();
 
     }
 
@@ -185,6 +193,24 @@ public class PersonRdbmsTest extends BaseTest
 
     }
 
+    private void testNativeQuery()
+    {
+
+        Query findQuery;
+        List<PersonRDBMS> allPersons;
+        findQuery = em.createNativeQuery("Select * from PERSON where PERSON_NAME IN ('vivek' , 'kk')",
+                PersonRDBMS.class);
+
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(3, allPersons.size());
+
+        findQuery = em.createNativeQuery("Select * from PERSON where AGE IN (10, 25)", PersonRDBMS.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+    }
+
     // @Test
     public void onMergeRdbms()
     {
@@ -230,15 +256,15 @@ public class PersonRdbmsTest extends BaseTest
         emf.close();
         try
         {
-            cli.update("DELETE FROM TESTDB.PERSON");
-            cli.update("DROP TABLE TESTDB.PERSON");
-            cli.update("DROP SCHEMA TESTDB");
-            cli.closeConnection();
+            // cli.update("DELETE FROM KUNDERATESTS.PERSON");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSON");
+            // cli.update("DROP SCHEMA KUNDERATESTS");
+            // cli.closeConnection();
         }
         catch (Exception e)
         {
             // Nothing to do
         }
-//        cli.dropSchema("testdb");
+        // cli.dropSchema("KUNDERATESTS");
     }
 }

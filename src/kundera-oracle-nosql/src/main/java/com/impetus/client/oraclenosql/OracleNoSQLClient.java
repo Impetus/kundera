@@ -993,7 +993,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-
         new OracleNoSQLClientProperties().populateClientProperties(client, properties);
     }
 

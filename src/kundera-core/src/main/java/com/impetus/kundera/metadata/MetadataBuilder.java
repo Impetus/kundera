@@ -79,14 +79,14 @@ public class MetadataBuilder
         this.persistenceUnit = puName;
         this.client = client;
         this.puProperties = puProperties;
-        validator = new EntityValidatorImpl(puProperties);
-        metadataProcessors = new ArrayList<MetadataProcessor>();
+        this.validator = new EntityValidatorImpl(puProperties);
+        this.metadataProcessors = new ArrayList<MetadataProcessor>();
 
         // add processors to chain.
-        metadataProcessors.add(new TableProcessor(puProperties));
-        metadataProcessors.add(new CacheableAnnotationProcessor());
-        metadataProcessors.add(new IndexProcessor());
-        metadataProcessors.add(new EntityListenersProcessor());
+        this.metadataProcessors.add(new TableProcessor(puProperties));
+        this.metadataProcessors.add(new CacheableAnnotationProcessor());
+        this.metadataProcessors.add(new IndexProcessor());
+        this.metadataProcessors.add(new EntityListenersProcessor());
         
     }
 

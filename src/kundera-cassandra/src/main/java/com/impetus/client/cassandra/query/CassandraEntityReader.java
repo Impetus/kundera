@@ -38,6 +38,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -70,9 +71,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @param luceneQuery
      *            the lucene query
      */
-    public CassandraEntityReader(String luceneQuery)
+    public CassandraEntityReader(KunderaQuery kunderaQuery)
     {
-        this.luceneQueryFromJPAQuery = luceneQuery;
+        this.kunderaQuery = kunderaQuery;
     }
 
     /**

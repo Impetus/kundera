@@ -584,11 +584,86 @@ public class DeepEqualsTest extends TestCase
         assertFalse(DeepEquals.deepEquals(a1, a2));
         a2.setPhotographerId(1);
 
+        // Case 1: All same
+        assertTrue(DeepEquals.deepEquals(a1, a2));
+        assertTrue(DeepEquals.deepEquals(b12, b22));
+        assertTrue(DeepEquals.deepEquals(c14, c24));
+
+        // Case 2: Change Photo object
         String originalPhotoCaption = c24.getPhotoCaption();
         c24.setPhotoCaption("AAAAAAAAAAAAA");
-        assertFalse(DeepEquals.deepEquals(a1, a2));
+
+        assertTrue(DeepEquals.deepEquals(a1, a2));
+        assertTrue(DeepEquals.deepEquals(b12, b22));
+        assertFalse(DeepEquals.deepEquals(c14, c24));
+
         c24.setPhotoCaption(originalPhotoCaption);
 
+        // Case 3: Change Album object
+        String originalAlbumDiscription = b22.getAlbumDescription();
+        b22.setAlbumDescription("Second Album of Second Photographer");
+
+        assertTrue(DeepEquals.deepEquals(a1, a2));
+        assertFalse(DeepEquals.deepEquals(b12, b22));
+        assertTrue(DeepEquals.deepEquals(c14, c24));
+
+        b22.setAlbumDescription(originalAlbumDiscription);
+
+        // Case 4: Change album and photo object
+        c24.setPhotoCaption("AAAAAAAAAAAAA");
+        b22.setAlbumDescription("Second Album of Second Photographer");
+
+        assertTrue(DeepEquals.deepEquals(a1, a2));
+        assertFalse(DeepEquals.deepEquals(b12, b22));
+        assertFalse(DeepEquals.deepEquals(c14, c24));
+
+        b22.setAlbumDescription(originalAlbumDiscription);
+        c24.setPhotoCaption(originalPhotoCaption);
+
+        // Case 5: Change Photographer object
+        String originalPhotographerName = a2.getPhotographerName();
+        a2.setPhotographerName("Kuldeep");
+
+        assertFalse(DeepEquals.deepEquals(a1, a2));
+        assertTrue(DeepEquals.deepEquals(b12, b22));
+        assertTrue(DeepEquals.deepEquals(c14, c24));
+
+        a2.setPhotographerName(originalPhotographerName);
+
+        // Case 6: Change Photographer and photo object
+        c24.setPhotoCaption("AAAAAAAAAAAAA");
+        a2.setPhotographerName("Kuldeep");
+
+        assertFalse(DeepEquals.deepEquals(a1, a2));
+        assertTrue(DeepEquals.deepEquals(b12, b22));
+        assertFalse(DeepEquals.deepEquals(c14, c24));
+
+        a2.setPhotographerName(originalPhotographerName);
+        c24.setPhotoCaption(originalPhotoCaption);
+
+        // Case 7: Change Photographer and album object
+        b22.setAlbumDescription("Second Album of Second Photographer");
+        a2.setPhotographerName("Kuldeep");
+
+        assertFalse(DeepEquals.deepEquals(a1, a2));
+        assertFalse(DeepEquals.deepEquals(b12, b22));
+        assertTrue(DeepEquals.deepEquals(c14, c24));
+
+        a2.setPhotographerName(originalPhotographerName);
+        b22.setAlbumDescription(originalAlbumDiscription);
+
+        // Case 8: Change Photographer, album and photo object
+        c24.setPhotoCaption("AAAAAAAAAAAAA");
+        b22.setAlbumDescription("Second Album of Second Photographer");
+        a2.setPhotographerName("Kuldeep");
+
+        assertFalse(DeepEquals.deepEquals(a1, a2));
+        assertFalse(DeepEquals.deepEquals(b12, b22));
+        assertFalse(DeepEquals.deepEquals(c14, c24));
+
+        a2.setPhotographerName(originalPhotographerName);
+        b22.setAlbumDescription(originalAlbumDiscription);
+        c24.setPhotoCaption(originalPhotoCaption);
     }
 
     // @Test

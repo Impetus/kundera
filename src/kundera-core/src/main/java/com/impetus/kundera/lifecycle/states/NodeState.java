@@ -110,7 +110,6 @@ public abstract class NodeState
                         }
                         else
                         {
-
                             childNode.merge();
                         }
                     }

@@ -29,6 +29,7 @@
 			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
@@ -50,12 +51,12 @@
 		</dependency>
 
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
 			<version>0.8</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> -->
 
 		<!-- contiperf dependency should not be here -->
 

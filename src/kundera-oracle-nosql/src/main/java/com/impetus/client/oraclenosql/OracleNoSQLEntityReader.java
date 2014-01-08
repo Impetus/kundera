@@ -22,6 +22,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Implementation of {@link EntityReader} for Oracle NoSQL database
@@ -35,9 +36,9 @@ public class OracleNoSQLEntityReader extends AbstractEntityReader implements Ent
 
     }
 
-    public OracleNoSQLEntityReader(String luceneQuery)
+    public OracleNoSQLEntityReader(KunderaQuery kunderaQuery)
     {
-        this.luceneQueryFromJPAQuery = luceneQuery;
+        this.kunderaQuery = kunderaQuery;
     }
 
     @Override

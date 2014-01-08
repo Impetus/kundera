@@ -25,6 +25,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * @author vivek.mishra
@@ -77,7 +78,7 @@ public class CoreQuery<E> extends QueryImpl<E>
 
     public String getLuceneQuery()
     {
-        return getLuceneQueryFromJPAQuery();
+        return KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
     }
     
     /*public Set<String> fetchByLuceneQuery()

@@ -169,18 +169,19 @@ public class RDBMSCli
     {
         try
         {
-        String sql = "CREATE schema " + schemaName + " AUTHORIZATION DBA";
-        update(sql);
-        }catch(Exception e)
+            String sql = "CREATE schema " + schemaName + " AUTHORIZATION DBA";
+            update(sql);
+        }
+        catch (Exception e)
         {
             // do nothing..
         }
-//        update("set " + schemaName);
+        // update("set " + schemaName);
     }
 
     public void dropSchema(final String schemaName) throws SQLException
     {
-        String sql = "drop schema " + schemaName ;
+        String sql = "drop schema " + schemaName;
         update(sql);
     }
 
@@ -191,7 +192,7 @@ public class RDBMSCli
 
         try
         {
-            db = new RDBMSCli("db_file");
+            db = new RDBMSCli("testdb");
         }
         catch (Exception ex1)
         {
@@ -202,7 +203,7 @@ public class RDBMSCli
 
         try
         {
-
+            
             // make an empty table // // by declaring the id column IDENTITY,
             // the db
             // will automatically // generate unique values for new rows- useful

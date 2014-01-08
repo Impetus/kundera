@@ -2101,8 +2101,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     while (iter.hasNext())
                     {
                         Object e = null;
-                        // e = PelopsUtils.initialize(entityMetadata, e,
-                        // null);
+
                         CqlRow row = iter.next();
                         Object rowKey = null;
 
@@ -2214,32 +2213,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             CQLTranslator translator = new CQLTranslator();
 
-            // List<String> queries = new ArrayList<String>();
-
             String tableName = metadata.getTableName();
-            // for (String tableName : secondaryTables)
-            // {
             String select_Query = translator.SELECTALL_QUERY;
             select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                     translator.ensureCase(new StringBuilder(), tableName, false).toString());
             StringBuilder builder = new StringBuilder(select_Query);
             onWhereClause(metadata, rowId, translator, builder, metaModel);
-            // queries.add(builder.toString());
-            // }
-
             return CassandraClientBase.this.executeQuery(metadata.getEntityClazz(), relationNames, false,
                     builder.toString());
-
-            // String select_Query = translator.SELECTALL_QUERY;
-            // select_Query = StringUtils.replace(select_Query,
-            // CQLTranslator.COLUMN_FAMILY,
-            // translator.ensureCase(new StringBuilder(),
-            // metadata.getTableName(), false).toString());
-            // StringBuilder builder = new StringBuilder(select_Query);
-            // onWhereClause(metadata, rowId, translator, builder, metaModel);
-            // return CassandraClientBase.this.executeQuery(builder.toString(),
-            // metadata.getEntityClazz(), relationNames,false);
-
         }
 
         /**

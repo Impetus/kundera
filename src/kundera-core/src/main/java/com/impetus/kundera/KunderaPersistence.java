@@ -87,6 +87,7 @@ public class KunderaPersistence implements PersistenceProvider
             catch (PersistenceUnitConfigurationException pcex)
             {
                 // Means it is not for kundera persistence!
+                logger.error("EnrityManagerFactory not created, returning null.");
                 return null;
             }
         }
@@ -101,13 +102,15 @@ public class KunderaPersistence implements PersistenceProvider
     private void initializeKundera(String persistenceUnit, Map props)
     {
         // Invoke Application MetaData
-        logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) "
-                + persistenceUnit);
+        if (logger.isInfoEnabled())
+        {
+            logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) {}.",
+                    persistenceUnit);
+        }
 
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         new Configurator(props, persistenceUnits).configure();
-
     }
 
     /**

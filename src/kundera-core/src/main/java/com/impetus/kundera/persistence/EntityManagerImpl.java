@@ -47,8 +47,6 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.loader.ClientFactory;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
 import com.impetus.kundera.query.KunderaTypedQuery;
@@ -118,17 +116,15 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
             PersistenceContextType persistenceContextType)
     {
-        this.factory = factory;
-        this.persistenceContextType = persistenceContextType;
-        this.transactionType = transactionType;
         if (logger.isDebugEnabled())
         {
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         }
-        // session = new EntityManagerSession((Cache) factory.getCache());
+        this.factory = factory;
+        this.persistenceContextType = persistenceContextType;
+        this.transactionType = transactionType;
         this.persistenceCache = new PersistenceCache();
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
-
         this.persistenceDelegator = new PersistenceDelegator(this.persistenceCache);
 
         for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
@@ -329,7 +325,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public final void clear()
     {
         checkClosed();
-        // session.clear();
 
         // TODO Do we need a client and persistenceDelegator close here?
         if (!PersistenceUnitTransactionType.JTA.equals(this.transactionType))
@@ -434,16 +429,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     {
         checkClosed();
         checkTransactionNeeded();
-        // Add to meta data first.
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-//        if (appMetadata.getQuery(sqlString) == null)
-//        {
-//            appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
-//        }
 
         return getPersistenceDelegator().createNativeQuery(sqlString, resultClass);
-
     }
 
     /*
@@ -581,6 +568,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     @Override
     public void refresh(Object entity, Map<String, Object> properties)
     {
+        checkClosed();
+        
         // Store current properties in a variable for post-find reset
         Map<String, Object> currentProperties = getProperties();
 
@@ -604,7 +593,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
         checkClosed();
-        throw new NotImplementedException("lock currently not supported by Kundera");
+        throw new NotImplementedException("Lock currently not supported by Kundera.");
     }
 
     /*
@@ -617,7 +606,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void refresh(Object paramObject, LockModeType paramLockModeType)
     {
         checkClosed();
-        throw new NotImplementedException("Lock mode type currently not supported by Kundera");
+        throw new NotImplementedException("Lock mode type currently not supported by Kundera.");
 
     }
 
@@ -631,7 +620,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
         checkClosed();
-        throw new NotImplementedException("LockModeType currently not supported by Kundera");
+        throw new NotImplementedException("LockModeType currently not supported by Kundera.");
     }
 
     /**
@@ -653,7 +642,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
         if (entity == null)
         {
-            throw new IllegalArgumentException("Entity is null, can't detach it");
+            throw new IllegalArgumentException("Entity is null, can't detach it.");
         }
         getPersistenceDelegator().detach(entity);
     }
@@ -667,7 +656,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public LockModeType getLockMode(Object paramObject)
     {
         checkClosed();
-        throw new NotImplementedException("Lock mode type currently not supported by Kundera");
+        throw new NotImplementedException("Lock mode type currently not supported by Kundera.");
     }
 
     /**
@@ -706,7 +695,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
     {
         checkClosed();
-        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+        throw new NotImplementedException("Criteria Query currently not supported by Kundera.");
     }
 
     /*
@@ -744,7 +733,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public <T> T unwrap(Class<T> paramClass)
     {
         checkClosed();
-        throw new NotImplementedException("unwrap currently not supported by Kundera");
+        throw new NotImplementedException("Unwrap currently not supported by Kundera");
     }
 
     @Override
@@ -977,7 +966,10 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      */
     private Client discoverClient(String persistenceUnit)
     {
-        logger.info("Returning client instance for:" + persistenceUnit);
+        if (logger.isInfoEnabled())
+        {
+            logger.info("Returning client instance for persistence unit {}.", persistenceUnit);
+        }
 
         ClientFactory clientFactory = ((EntityManagerFactoryImpl) getEntityManagerFactory())
                 .getClientFactory(persistenceUnit);
@@ -985,6 +977,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         {
             return clientFactory.getClientInstance();
         }
-        throw new ClientResolverException(" No client configured for: " + persistenceUnit);
+        throw new ClientResolverException("No client configured for persistence unit " + persistenceUnit + ".");
     }
 }

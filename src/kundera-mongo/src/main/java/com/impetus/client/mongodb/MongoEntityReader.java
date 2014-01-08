@@ -22,6 +22,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * The Class MongoEntityReader. Default entity reader for mongo db.
@@ -30,6 +31,16 @@ import com.impetus.kundera.persistence.EntityReader;
  */
 public class MongoEntityReader extends AbstractEntityReader implements EntityReader
 {
+
+    public MongoEntityReader()
+    {
+
+    }
+
+    public MongoEntityReader(KunderaQuery kunderaQuery)
+    {
+        this.kunderaQuery = kunderaQuery;
+    }
 
     /*
      * (non-Javadoc)

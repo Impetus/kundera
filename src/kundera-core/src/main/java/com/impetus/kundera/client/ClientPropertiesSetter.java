@@ -25,6 +25,11 @@ import java.util.Map;
 public interface ClientPropertiesSetter
 {
 
+    /**
+     * 
+     * @param client
+     * @param properties
+     */
     void populateClientProperties(Client client, Map<String, Object> properties);
 
 }

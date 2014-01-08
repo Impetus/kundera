@@ -8,10 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.couchdb.CouchDBUtils;
 import com.impetus.client.couchdb.utils.CouchDBTestUtils;
-import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class CouchDBMappedSuperClassTest extends MappedSuperClassBase
 {

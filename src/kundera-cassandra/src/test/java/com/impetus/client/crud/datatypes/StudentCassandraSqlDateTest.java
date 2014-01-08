@@ -26,7 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraSqlDate;
+import com.impetus.client.crud.datatypes.entities.StudentSqlDate;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraSqlDateTest extends CassandraBase
@@ -73,21 +73,21 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert random value of Date
-        StudentCassandraSqlDate student = new StudentCassandraSqlDate();
+        StudentSqlDate student = new StudentSqlDate();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((Date) getRandomValue(Date.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
 
         // Insert max value of Date
-        StudentCassandraSqlDate studentMax = new StudentCassandraSqlDate();
+        StudentSqlDate studentMax = new StudentSqlDate();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Date) getMaxValue(Date.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of Date
-        StudentCassandraSqlDate studentMin = new StudentCassandraSqlDate();
+        StudentSqlDate studentMin = new StudentSqlDate();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Date) getMinValue(Date.class));
         studentMin.setName((String) getMinValue(String.class));
@@ -100,7 +100,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraSqlDate studentMax = em.find(StudentCassandraSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -110,7 +110,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraSqlDate studentMin = em.find(StudentCassandraSqlDate.class, getMinValue(Date.class));
+        StudentSqlDate studentMin = em.find(StudentSqlDate.class, getMinValue(Date.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -120,7 +120,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraSqlDate student = em.find(StudentCassandraSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate student = em.find(StudentSqlDate.class, getRandomValue(Date.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -130,7 +130,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraSqlDate student = em.find(StudentCassandraSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate student = em.find(StudentSqlDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -142,7 +142,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraSqlDate newStudent = em.find(StudentCassandraSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -167,17 +167,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentSqlDate s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getMinValue(Date.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -195,16 +195,16 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.id between " + getMinValue(Date.class) + " and "
+        query = "Select s From StudentSqlDate s where s.id between " + getMinValue(Date.class) + " and "
                 + getMaxValue(Date.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             if (student.getId().equals(getMaxValue(Date.class)))
             {
@@ -235,17 +235,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getMaxValue(Date.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -262,17 +262,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getMaxValue(Date.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -299,7 +299,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraSqlDate studentMax = em.find(StudentCassandraSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -309,7 +309,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraSqlDate.class, getMaxValue(Date.class));
+        studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -320,7 +320,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraSqlDate s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentSqlDate s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -329,7 +329,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraSqlDate newStudent = em.find(StudentCassandraSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue(Date.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -340,7 +340,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraSqlDate s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentSqlDate s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -348,7 +348,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraSqlDate newStudent = em.find(StudentCassandraSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue(Date.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -360,17 +360,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Amresh and s.age between "
+        query = "Select s From StudentSqlDate s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getRandomValue(Date.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -387,17 +387,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentSqlDate s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getRandomValue(Date.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -415,17 +415,17 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             if (student.getId().equals(getMaxValue(Date.class)))
             {
@@ -452,16 +452,16 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentSqlDate s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             Assert.assertEquals(getRandomValue(Date.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -480,16 +480,16 @@ public class StudentCassandraSqlDateTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraSqlDate> students;
+        List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraSqlDate s where s.name = Kuldeep";
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             if (student.getId().equals(getMaxValue(Date.class)))
             {
@@ -516,13 +516,13 @@ public class StudentCassandraSqlDateTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraSqlDate s ";
+        String query = "Select s From StudentSqlDate s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraSqlDate> students = q.getResultList();
+        List<StudentSqlDate> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraSqlDate student : students)
+        for (StudentSqlDate student : students)
         {
             if (student.getId().equals(getMaxValue(Date.class)))
             {
@@ -593,7 +593,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraSqlDate";
+            cfDef.name = "StudentSqlDate";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DateType");
             cfDef.setComparator_type("UTF8Type");
@@ -616,10 +616,10 @@ public class StudentCassandraSqlDateTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraSqlDate"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentSqlDate"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraSqlDate");
+                        CassandraCli.client.system_drop_column_family("StudentSqlDate");
 
                     }
                 }

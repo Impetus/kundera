@@ -102,7 +102,7 @@ public class RedisQuery extends QueryImpl
     {
         // TODO Auto-generated method stub
         // WHY is it required!!!
-        return new RedisEntityReader();
+        return new RedisEntityReader(kunderaQuery);
     }
 
     /*

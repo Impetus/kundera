@@ -41,10 +41,9 @@ class CassandraClientProperties
     private static final String CONSISTENCY_LEVEL = "consistency.level";
 
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
-    
+
     private CassandraClientBase cassandraClientBase;
-    
-    
+
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         this.cassandraClientBase = (CassandraClientBase) client;
@@ -53,18 +52,16 @@ class CassandraClientProperties
         {
             for (String key : properties.keySet())
             {
-                
+
                 Object value = properties.get(key);
-                
+
                 if (checkNull(key, value))
                 {
-                   
+
                     if (key.equals(CONSISTENCY_LEVEL))
                     {
                         setConsistencylevel(value);
-                       
                     }
-
                     else if (key.equals(CQL_VERSION) && value instanceof String)
                     {
                         this.cassandraClientBase.setCqlVersion((String) value);
@@ -72,14 +69,10 @@ class CassandraClientProperties
                     else if (key.equals(TTL_PER_SESSION))
                     {
                         setTTLPerSession(value);
-
-                                            }
+                    }
                     else if (key.equals(TTL_PER_REQUEST))
                     {
                         setTTLPerRequest(value);
-
-                        
-
                     }
                     else if (key.equals(TTL_VALUES) && value instanceof Map)
                     {
@@ -96,8 +89,7 @@ class CassandraClientProperties
             }
         }
     }
-   
-    
+
     /**
      * set ttl per request
      */
@@ -122,10 +114,9 @@ class CassandraClientProperties
             this.cassandraClientBase.setTtlPerRequest((Boolean) value);
 
         }
-        
+
     }
-    
-    
+
     /**
      * set ttl per session
      */
@@ -151,10 +142,8 @@ class CassandraClientProperties
 
         }
 
-        
     }
 
-    
     /**
      * set consistency level
      */
@@ -168,10 +157,9 @@ class CassandraClientProperties
         {
             this.cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
         }
-        
+
     }
-    
-    
+
     /**
      * check key value map not null
      */

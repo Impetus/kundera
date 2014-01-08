@@ -102,7 +102,7 @@ public class Neo4JQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new Neo4JEntityReader();
+            reader = new Neo4JEntityReader(kunderaQuery);
         }
         return reader;
     }

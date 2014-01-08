@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraDoublePrimitive;
+import com.impetus.client.crud.datatypes.entities.StudentDoublePrimitive;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraDoublePrimitiveTest extends CassandraBase
@@ -72,21 +72,21 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of Double
-        StudentCassandraDoublePrimitive studentMax = new StudentCassandraDoublePrimitive();
+        StudentDoublePrimitive studentMax = new StudentDoublePrimitive();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Double) getMaxValue(Double.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of Double
-        StudentCassandraDoublePrimitive studentMin = new StudentCassandraDoublePrimitive();
+        StudentDoublePrimitive studentMin = new StudentDoublePrimitive();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Double) getMinValue(Double.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of Double
-        StudentCassandraDoublePrimitive student = new StudentCassandraDoublePrimitive();
+        StudentDoublePrimitive student = new StudentDoublePrimitive();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((Double) getRandomValue(Double.class));
         student.setName((String) getRandomValue(String.class));
@@ -98,7 +98,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraDoublePrimitive studentMax = em.find(StudentCassandraDoublePrimitive.class, getMaxValue(Double.class));
+        StudentDoublePrimitive studentMax = em.find(StudentDoublePrimitive.class, getMaxValue(Double.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -108,7 +108,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraDoublePrimitive studentMin = em.find(StudentCassandraDoublePrimitive.class, getMinValue(Double.class));
+        StudentDoublePrimitive studentMin = em.find(StudentDoublePrimitive.class, getMinValue(Double.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -118,7 +118,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraDoublePrimitive student = em.find(StudentCassandraDoublePrimitive.class, getRandomValue(Double.class));
+        StudentDoublePrimitive student = em.find(StudentDoublePrimitive.class, getRandomValue(Double.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -128,7 +128,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraDoublePrimitive student = em.find(StudentCassandraDoublePrimitive.class, getMaxValue(Double.class));
+        StudentDoublePrimitive student = em.find(StudentDoublePrimitive.class, getMaxValue(Double.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -140,7 +140,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraDoublePrimitive newStudent = em.find(StudentCassandraDoublePrimitive.class, getMaxValue(Double.class));
+        StudentDoublePrimitive newStudent = em.find(StudentDoublePrimitive.class, getMaxValue(Double.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -165,17 +165,17 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentDoublePrimitive s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getMinValue(Double.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -193,9 +193,9 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.id between ?1 and ?2";
+        query = "Select s From StudentDoublePrimitive s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(double.class));
         q.setParameter(2, getMaxValue(double.class));
@@ -203,7 +203,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             if (student.getId() == ((Double) getMaxValue(Double.class)).doubleValue())
             {
@@ -234,16 +234,16 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentDoublePrimitive s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getMaxValue(Double.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -260,17 +260,17 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentDoublePrimitive s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getMaxValue(Double.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -297,7 +297,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraDoublePrimitive studentMax = em.find(StudentCassandraDoublePrimitive.class, getMaxValue(Double.class));
+        StudentDoublePrimitive studentMax = em.find(StudentDoublePrimitive.class, getMaxValue(Double.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -307,7 +307,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraDoublePrimitive.class, getMaxValue(Double.class));
+        studentMax = em.find(StudentDoublePrimitive.class, getMaxValue(Double.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -318,7 +318,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraDoublePrimitive s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentDoublePrimitive s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -327,7 +327,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraDoublePrimitive newStudent = em.find(StudentCassandraDoublePrimitive.class, getRandomValue(Double.class));
+        StudentDoublePrimitive newStudent = em.find(StudentDoublePrimitive.class, getRandomValue(Double.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -338,7 +338,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraDoublePrimitive s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentDoublePrimitive s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -346,7 +346,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraDoublePrimitive newStudent = em.find(StudentCassandraDoublePrimitive.class, getRandomValue(Double.class));
+        StudentDoublePrimitive newStudent = em.find(StudentDoublePrimitive.class, getRandomValue(Double.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -358,17 +358,17 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Amresh and s.age between "
+        query = "Select s From StudentDoublePrimitive s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getRandomValue(Double.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -385,17 +385,17 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentDoublePrimitive s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getRandomValue(Double.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -413,17 +413,17 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentDoublePrimitive s where s.name = Kuldeep and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             if (student.getId() == ((Double) getMaxValue(Double.class)).doubleValue())
             {
@@ -450,16 +450,16 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentDoublePrimitive s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             Assert.assertEquals(getRandomValue(Double.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -478,16 +478,16 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraDoublePrimitive> students;
+        List<StudentDoublePrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraDoublePrimitive s where s.name = Kuldeep";
+        query = "Select s From StudentDoublePrimitive s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             if (student.getId() == ((Double) getMaxValue(Double.class)).doubleValue())
             {
@@ -514,13 +514,13 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraDoublePrimitive s ";
+        String query = "Select s From StudentDoublePrimitive s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraDoublePrimitive> students = q.getResultList();
+        List<StudentDoublePrimitive> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraDoublePrimitive student : students)
+        for (StudentDoublePrimitive student : students)
         {
             if (student.getId() == ((Double) getMaxValue(Double.class)).doubleValue())
             {
@@ -591,7 +591,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraDoublePrimitive";
+            cfDef.name = "StudentDoublePrimitive";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DoubleType");
             cfDef.setComparator_type("UTF8Type");
@@ -614,10 +614,10 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraDoublePrimitive"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentDoublePrimitive"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraDoublePrimitive");
+                        CassandraCli.client.system_drop_column_family("StudentDoublePrimitive");
 
                     }
                 }

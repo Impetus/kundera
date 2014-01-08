@@ -65,9 +65,6 @@ public class QueryResolver
         String mappedQuery = appMetadata.getQuery(jpaQuery);
 
         isNative = mappedQuery != null ? appMetadata.isNative(jpaQuery) : isNative;
-        
-        
-//        mappedClass = appMetadata.getMappedClass(jpaQuery)
 
         EntityMetadata m = null;
 
@@ -80,20 +77,16 @@ public class QueryResolver
             parser.parse();
 
             kunderaQuery.postParsingInit();
-            // pu = kunderaQuery.getPersistenceUnit();
             m = kunderaQuery.getEntityMetadata();
         }
         else
         {
             // Means if it is a namedNativeQuery.
-            if(appMetadata.isNative(jpaQuery))
+            if (appMetadata.isNative(jpaQuery))
             {
                 mappedClass = appMetadata.getMappedClass(jpaQuery);
             }
-            // Class mappedClass = appMetadata.getMappedClass(jpaQuery);
 
-            // pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
-            
             kunderaQuery.isNativeQuery = true;
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
 
@@ -115,9 +108,6 @@ public class QueryResolver
             }
         }
 
-        // PersistenceUnitMetadata puMetadata =
-        // KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-
         Query query = null;
 
         try
@@ -129,9 +119,7 @@ public class QueryResolver
             log.error(e.getMessage());
             throw new QueryHandlerException(e);
         }
-
         return query;
-
     }
 
     /**

@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.couchdb.entities.CouchDBCompoundKey;
 import com.impetus.client.couchdb.entities.CouchDBPrimeUser;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.query.Query;
 
 public class CouchDBCompositeKeyTest
 {

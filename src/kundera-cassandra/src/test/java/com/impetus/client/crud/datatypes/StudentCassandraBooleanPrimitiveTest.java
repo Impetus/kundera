@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraBooleanPrimitive;
+import com.impetus.client.crud.datatypes.entities.StudentBooleanPrimitive;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.query.QueryHandlerException;
 
@@ -73,14 +73,14 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of boolean
-        StudentCassandraBooleanPrimitive studentMax = new StudentCassandraBooleanPrimitive();
+        StudentBooleanPrimitive studentMax = new StudentBooleanPrimitive();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Boolean) getMaxValue(boolean.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of boolean
-        StudentCassandraBooleanPrimitive studentMin = new StudentCassandraBooleanPrimitive();
+        StudentBooleanPrimitive studentMin = new StudentBooleanPrimitive();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Boolean) getMinValue(boolean.class));
         studentMin.setName((String) getMinValue(String.class));
@@ -93,7 +93,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBooleanPrimitive studentMax = em.find(StudentCassandraBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentBooleanPrimitive studentMax = em.find(StudentBooleanPrimitive.class, getMaxValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -103,7 +103,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBooleanPrimitive studentMin = em.find(StudentCassandraBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentBooleanPrimitive studentMin = em.find(StudentBooleanPrimitive.class, getMinValue(boolean.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -114,7 +114,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraBooleanPrimitive student = em.find(StudentCassandraBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentBooleanPrimitive student = em.find(StudentBooleanPrimitive.class, getMaxValue(boolean.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -126,7 +126,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBooleanPrimitive newStudent = em.find(StudentCassandraBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentBooleanPrimitive newStudent = em.find(StudentBooleanPrimitive.class, getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -151,17 +151,17 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentBooleanPrimitive s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             Assert.assertEquals(getMinValue(boolean.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -179,9 +179,9 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.id between ?1 and ?2";
+        query = "Select s From StudentBooleanPrimitive s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(boolean.class));
         q.setParameter(2, getMaxValue(boolean.class));
@@ -189,7 +189,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
             {
@@ -213,10 +213,10 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Kuldeep or s.age > " + getMinValue(short.class);
+        query = "Select s From StudentBooleanPrimitive s where s.name = Kuldeep or s.age > " + getMinValue(short.class);
         try
         {
             q = em.createQuery(query);
@@ -224,7 +224,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             Assert.assertNotNull(students);
             Assert.assertEquals(1, students.size());
             count = 0;
-            for (StudentCassandraBooleanPrimitive student : students)
+            for (StudentBooleanPrimitive student : students)
             {
                 Assert.assertEquals(getMaxValue(boolean.class), student.getId());
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -246,17 +246,17 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentBooleanPrimitive s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             Assert.assertEquals(getMaxValue(boolean.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -283,7 +283,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBooleanPrimitive studentMax = em.find(StudentCassandraBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentBooleanPrimitive studentMax = em.find(StudentBooleanPrimitive.class, getMinValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMinValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -293,7 +293,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraBooleanPrimitive.class, getMinValue(boolean.class));
+        studentMax = em.find(StudentBooleanPrimitive.class, getMinValue(boolean.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -304,7 +304,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraBooleanPrimitive s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentBooleanPrimitive s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -313,7 +313,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBooleanPrimitive newStudent = em.find(StudentCassandraBooleanPrimitive.class, getRandomValue(boolean.class));
+        StudentBooleanPrimitive newStudent = em.find(StudentBooleanPrimitive.class, getRandomValue(boolean.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -324,7 +324,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraBooleanPrimitive s SET s.name=Vivek where s.id=true";
+        String updateQuery = "Update StudentBooleanPrimitive s SET s.name=Vivek where s.id=true";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -332,7 +332,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBooleanPrimitive newStudent = em.find(StudentCassandraBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentBooleanPrimitive newStudent = em.find(StudentBooleanPrimitive.class, getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -344,16 +344,16 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Kuldeep and s.age between "
+        query = "Select s From StudentBooleanPrimitive s where s.name = Kuldeep and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
             {
@@ -377,9 +377,9 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentBooleanPrimitive s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -394,17 +394,17 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentBooleanPrimitive s where s.name = Kuldeep and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
             {
@@ -431,16 +431,16 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.age = " + getMinValue(short.class);
+        query = "Select s From StudentBooleanPrimitive s where s.age = " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             Assert.assertEquals(getMinValue(boolean.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -459,16 +459,16 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBooleanPrimitive> students;
+        List<StudentBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBooleanPrimitive s where s.name = Kuldeep";
+        query = "Select s From StudentBooleanPrimitive s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
             {
@@ -495,13 +495,13 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraBooleanPrimitive s ";
+        String query = "Select s From StudentBooleanPrimitive s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraBooleanPrimitive> students = q.getResultList();
+        List<StudentBooleanPrimitive> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
-        for (StudentCassandraBooleanPrimitive student : students)
+        for (StudentBooleanPrimitive student : students)
         {
             if (student.getId() == ((Boolean) getMaxValue(boolean.class)).booleanValue())
             {
@@ -565,7 +565,7 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraBooleanPrimitive";
+            cfDef.name = "StudentBooleanPrimitive";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("BooleanType");
             cfDef.setComparator_type("UTF8Type");
@@ -588,10 +588,10 @@ public class StudentCassandraBooleanPrimitiveTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraBooleanPrimitive"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentBooleanPrimitive"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraBooleanPrimitive");
+                        CassandraCli.client.system_drop_column_family("StudentBooleanPrimitive");
 
                     }
                 }

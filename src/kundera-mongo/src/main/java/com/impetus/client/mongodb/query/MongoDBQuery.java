@@ -122,8 +122,13 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-            
+            boolean isNative = kunderaQuery.isNative()/*
+                                                       * query == null ? true :
+                                                       * appMetadata
+                                                       * .isNative(getJPAQuery
+                                                       * ())
+                                                       */;
+
             if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
@@ -161,13 +166,18 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-            
+            boolean isNative = kunderaQuery.isNative()/*
+                                                       * query == null ? true :
+                                                       * appMetadata
+                                                       * .isNative(getJPAQuery
+                                                       * ())
+                                                       */;
+
             if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
-            
+
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
                     m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult,
@@ -190,7 +200,7 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new MongoEntityReader();
+        return new MongoEntityReader(kunderaQuery);
     }
 
     /**
@@ -478,7 +488,7 @@ public class MongoDBQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
-                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),persistenceDelegeator,
-                getFetchSize() != null ? getFetchSize() : this.maxResult);
+                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),
+                persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
 }

@@ -141,7 +141,7 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new ESEntityReader();
+        return new ESEntityReader(kunderaQuery);
     }
 
     /*

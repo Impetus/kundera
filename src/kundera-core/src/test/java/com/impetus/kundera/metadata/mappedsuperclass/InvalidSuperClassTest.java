@@ -23,6 +23,7 @@ import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 /**
@@ -43,10 +44,10 @@ public class InvalidSuperClassTest
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
             Assert.fail("Should have gone to catch block!");
         }
-        catch (InvalidEntityDefinitionException iedx)
+        catch (MetamodelLoaderException mlex)
         {
-            Assert.assertTrue(StringUtils.startsWith(iedx.getMessage(),
-                    "JPA operation over MappedSuperclass are not allowed"));
+            Assert.assertTrue(StringUtils.startsWith(mlex.getMessage(),
+                    "Class:class com.impetus.kundera.metadata.mappedsuperclass.InvalidPersonEntityis annotated with @MappedSuperClass and @Entity not allowed"));
         }
     }
 

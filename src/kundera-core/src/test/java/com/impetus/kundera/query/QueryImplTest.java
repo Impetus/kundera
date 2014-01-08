@@ -47,6 +47,7 @@ import com.impetus.kundera.polyglot.entities.AddressBM1;
 import com.impetus.kundera.polyglot.entities.PersonB1M;
 import com.impetus.kundera.polyglot.entities.PersonBM1;
 import com.impetus.kundera.query.Person.Day;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
@@ -107,7 +108,7 @@ public class QueryImplTest
         List<Person> results = queryObj.getResultList();
         
         Assert.assertEquals(1,results.size());
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); //assert on lucene query transformation.
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); //assert on lucene query transformation.
         Assert.assertNotNull(queryObj.populateUsingLucene()); //assert on lucene query transformation.
         
         final String deleteQuery = "Delete from Person p where p.personId = ?1";
@@ -126,7 +127,7 @@ public class QueryImplTest
         }
         Assert.assertNotNull(queryObj.getParameter(1, String.class));
         Assert.assertNotNull(queryObj.getParameterValue(1));
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
 
         try
@@ -188,7 +189,7 @@ public class QueryImplTest
         results = queryObj.getResultList();
         
         Assert.assertEquals(0,results.size());
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
         
 
@@ -241,7 +242,7 @@ public class QueryImplTest
             kunderaQuery = parseQuery(updateQuery);       
             queryObj = new CoreQuery(updateQuery, kunderaQuery, delegator);
             queryObj.executeUpdate();
-            Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+            Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
             Assert.assertNotNull(queryObj.populateUsingLucene()); 
         }
         catch (Exception e)
@@ -272,7 +273,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age >=:age";        
@@ -280,7 +281,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age <:age";        
@@ -288,7 +289,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age <=:age";        
@@ -296,7 +297,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.personName like :personName";        
@@ -304,7 +305,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("personName", "Amresh");       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
         
         onassertBi1MAssociation(delegator);

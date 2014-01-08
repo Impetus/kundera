@@ -30,6 +30,7 @@ import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class LuceneQuery.
@@ -82,7 +83,7 @@ public class LuceneQuery extends QueryImpl
         String q = luceneQuery;
         if (null == q)
         {
-            q = getLuceneQueryFromJPAQuery();
+            q = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
         }
 
         if (log.isDebugEnabled())
@@ -92,7 +93,7 @@ public class LuceneQuery extends QueryImpl
         Client client = persistenceDelegeator.getClient(m);
 
         handlePostEvent();
-        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(),q, -1, maxResult);
+        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), q, -1, maxResult);
 
         if (kunderaQuery.isAliasOnly())
         {
@@ -163,7 +164,6 @@ public class LuceneQuery extends QueryImpl
 
     }
 
-
     @Override
     public void close()
     {
@@ -171,7 +171,6 @@ public class LuceneQuery extends QueryImpl
 
     }
 
- 
     @Override
     public Iterator iterate()
     {

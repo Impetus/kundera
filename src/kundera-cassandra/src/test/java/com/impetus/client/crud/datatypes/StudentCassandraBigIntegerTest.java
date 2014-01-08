@@ -26,7 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraBigInteger;
+import com.impetus.client.crud.datatypes.entities.StudentBigInteger;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraBigIntegerTest extends CassandraBase
@@ -73,21 +73,21 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of BigInteger
-        StudentCassandraBigInteger studentMax = new StudentCassandraBigInteger();
+        StudentBigInteger studentMax = new StudentBigInteger();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((BigInteger) getMaxValue(BigInteger.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of BigInteger
-        StudentCassandraBigInteger studentMin = new StudentCassandraBigInteger();
+        StudentBigInteger studentMin = new StudentBigInteger();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((BigInteger) getMinValue(BigInteger.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of BigInteger
-        StudentCassandraBigInteger student = new StudentCassandraBigInteger();
+        StudentBigInteger student = new StudentBigInteger();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((BigInteger) getRandomValue(BigInteger.class));
         student.setName((String) getRandomValue(String.class));
@@ -99,8 +99,8 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBigInteger studentMax = em
-                .find(StudentCassandraBigInteger.class, getMaxValue(BigInteger.class));
+        StudentBigInteger studentMax = em
+                .find(StudentBigInteger.class, getMaxValue(BigInteger.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -110,8 +110,8 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigInteger studentMin = em
-                .find(StudentCassandraBigInteger.class, getMinValue(BigInteger.class));
+        StudentBigInteger studentMin = em
+                .find(StudentBigInteger.class, getMinValue(BigInteger.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -121,8 +121,8 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigInteger student = em
-                .find(StudentCassandraBigInteger.class, getRandomValue(BigInteger.class));
+        StudentBigInteger student = em
+                .find(StudentBigInteger.class, getRandomValue(BigInteger.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -132,7 +132,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraBigInteger student = em.find(StudentCassandraBigInteger.class, getMaxValue(BigInteger.class));
+        StudentBigInteger student = em.find(StudentBigInteger.class, getMaxValue(BigInteger.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -144,8 +144,8 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigInteger newStudent = em
-                .find(StudentCassandraBigInteger.class, getMaxValue(BigInteger.class));
+        StudentBigInteger newStudent = em
+                .find(StudentBigInteger.class, getMaxValue(BigInteger.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -170,17 +170,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentBigInteger s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getMinValue(BigInteger.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -198,9 +198,9 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.id between ?1 and ?2";
+        query = "Select s From StudentBigInteger s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(BigInteger.class));
         q.setParameter(2, getMaxValue(BigInteger.class));
@@ -208,7 +208,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             if (student.getId().equals(getMaxValue(BigInteger.class)))
             {
@@ -232,17 +232,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentBigInteger s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getMaxValue(BigInteger.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -259,17 +259,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentBigInteger s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getMaxValue(BigInteger.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -296,8 +296,8 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBigInteger studentMax = em
-                .find(StudentCassandraBigInteger.class, getMaxValue(BigInteger.class));
+        StudentBigInteger studentMax = em
+                .find(StudentBigInteger.class, getMaxValue(BigInteger.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -307,7 +307,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraBigInteger.class, getMaxValue(BigInteger.class));
+        studentMax = em.find(StudentBigInteger.class, getMaxValue(BigInteger.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -318,7 +318,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraBigInteger s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentBigInteger s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -327,7 +327,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigInteger newStudent = em.find(StudentCassandraBigInteger.class,
+        StudentBigInteger newStudent = em.find(StudentBigInteger.class,
                 getRandomValue(BigInteger.class));
         Assert.assertNull(newStudent);
         em.close();
@@ -339,7 +339,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraBigInteger s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentBigInteger s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -347,7 +347,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigInteger newStudent = em.find(StudentCassandraBigInteger.class,
+        StudentBigInteger newStudent = em.find(StudentBigInteger.class,
                 getRandomValue(BigInteger.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
@@ -360,17 +360,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Amresh and s.age between "
+        query = "Select s From StudentBigInteger s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getRandomValue(BigInteger.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -387,17 +387,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Amresh and s.age > "
+        query = "Select s From StudentBigInteger s where s.name = Amresh and s.age > "
                 + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getRandomValue(BigInteger.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -415,17 +415,17 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentBigInteger s where s.name = Kuldeep and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             if (student.getId().equals(getMaxValue(BigInteger.class)))
             {
@@ -452,16 +452,16 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentBigInteger s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             Assert.assertEquals(getRandomValue(BigInteger.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -480,16 +480,16 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigInteger> students;
+        List<StudentBigInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigInteger s where s.name = Kuldeep";
+        query = "Select s From StudentBigInteger s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             if (student.getId().equals(getMaxValue(BigInteger.class)))
             {
@@ -516,13 +516,13 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraBigInteger s ";
+        String query = "Select s From StudentBigInteger s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraBigInteger> students = q.getResultList();
+        List<StudentBigInteger> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraBigInteger student : students)
+        for (StudentBigInteger student : students)
         {
             if (student.getId().equals(getMaxValue(BigInteger.class)))
             {
@@ -593,7 +593,7 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraBigInteger";
+            cfDef.name = "StudentBigInteger";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("IntegerType");
             cfDef.setComparator_type("UTF8Type");
@@ -616,10 +616,10 @@ public class StudentCassandraBigIntegerTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraBigInteger"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentBigInteger"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraBigInteger");
+                        CassandraCli.client.system_drop_column_family("StudentBigInteger");
 
                     }
                 }
