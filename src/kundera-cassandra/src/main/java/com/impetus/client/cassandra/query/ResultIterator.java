@@ -15,6 +15,7 @@
  */
 package com.impetus.client.cassandra.query;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.NoSuchElementException;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.cassandra.thrift.IndexClause;
@@ -246,7 +248,8 @@ class ResultIterator<E> implements IResultIterator<E>
 
             parsedQuery = appendWhereClauseWithScroll(parsedQuery);
             results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(),
-                    m.getRelationNames(), isNative,parsedQuery) : null;
+                    m.getRelationNames(), isNative, parsedQuery) : null;
+
         }
         else
         {
@@ -254,8 +257,8 @@ class ResultIterator<E> implements IResultIterator<E>
             {
                 final String nativeQuery = appendWhereClauseWithScroll(queryString != null ? queryString
                         : ((QueryImpl) query).getJPAQuery());
-                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative,
-                        nativeQuery) : null;
+                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
+                        isNative, nativeQuery) : null;
             }
             else
             {
@@ -312,8 +315,12 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private String appendWhereClauseWithScroll(String parsedQuery)
     {
-        String queryWithoutLimit = parsedQuery.replaceAll(
-                parsedQuery.substring(parsedQuery.lastIndexOf(CQLTranslator.LIMIT), parsedQuery.length()), "");
+        String queryWithoutLimit = (parsedQuery
+                .lastIndexOf(CQLTranslator.LIMIT) != -1) ? parsedQuery
+                .replaceAll(parsedQuery.substring(
+                parsedQuery.lastIndexOf(CQLTranslator.LIMIT),
+                parsedQuery.length()), "") : parsedQuery;
+                
 
         CQLTranslator translator = new CQLTranslator();
 
@@ -416,8 +423,29 @@ class ResultIterator<E> implements IResultIterator<E>
             Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
             Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
             StringBuilder builder = new StringBuilder(CQLTranslator.TOKEN);
-            translator
-                    .appendColumnName(builder, CassandraUtilities.getIdColumnName(entityMetadata, externalProperties)/* idName */);
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
+
+            EmbeddableType keyObj = null;
+            Bytes bytes = null;
+            String columnName;
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+                Field embeddedField = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields()[0];
+                Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
+                Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
+                columnName = ((AbstractAttribute)partitionKey).getJPAColumnName();
+                id = partitionKeyValue;
+                idClazz = ((AbstractAttribute)partitionKey).getBindableJavaType();
+
+            }
+            else
+            {
+                columnName = CassandraUtilities.getIdColumnName(entityMetadata, externalProperties);
+            }
+
+            translator.appendColumnName(builder, columnName);
             builder.append(CQLTranslator.CLOSE_BRACKET);
             builder.append(" > ");
             builder.append(CQLTranslator.TOKEN);
@@ -475,7 +503,25 @@ class ResultIterator<E> implements IResultIterator<E>
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
         String idName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
-        Bytes bytes = query.getBytesValue(idName, entityMetadata, id);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        EmbeddableType keyObj = null;
+        Bytes bytes = null;
+
+        // if the key attribute is composite
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+            Field embeddedField = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields()[0];
+            Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
+            Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
+            bytes = CassandraUtilities.toBytes(partitionKeyValue, (Field) partitionKey.getJavaMember());
+        }
+        else
+        {
+            bytes = query.getBytesValue(idName, entityMetadata, id);
+        }
 
         return bytes.toByteArray();
 
