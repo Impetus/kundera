@@ -152,29 +152,11 @@
 									<directory>${project.basedir}/target/test-classes/com/impetus/kundera/index/</directory>
  -->									<excludes>
 										<exclude>**/index/LuceneIndexer.class</exclude>
+										<exclude>**/persistence/EntityReaderTest.class</exclude>
 									</excludes>
 <!-- 								</fileset>
 							</filesets>
  -->						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<echo>******** Displaying value of property ********</echo>
-								<echo>${project.basedir}/target/test-classes/com/impetus/kundera/index</echo>
-							</tasks>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
