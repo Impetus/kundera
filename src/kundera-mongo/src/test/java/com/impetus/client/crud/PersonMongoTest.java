@@ -130,6 +130,17 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(Month.JAN, results.get(0).getMonth());
+        
+        query = em.createQuery("select p from PersonMongo p");
+        query.setMaxResults(1);
+        PersonMongo result = (PersonMongo)(query.getSingleResult());
+        Assert.assertNotNull(result);
+        Assert.assertEquals(Month.JAN, result.getMonth());
+        
+        query = em.createQuery("select p from PersonMongo p where p.personName = kuldeep");
+        result = (PersonMongo)(query.getSingleResult());
+        Assert.assertNull(result);
+       
 
         selectIdQuery();
 

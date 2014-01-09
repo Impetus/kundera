@@ -147,7 +147,7 @@ public class MongoDBQuery extends QueryImpl
         isSingleResult = true;
         List results = getResultList();
         isSingleResult = false;
-        return results.isEmpty() ? results : results.get(0);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
