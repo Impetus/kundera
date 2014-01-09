@@ -67,43 +67,43 @@
 		</dependency> -->
 		
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>${kundera.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>com.impetus.client</groupId>
+					<groupId>com.impetus.kundera.client</groupId>
 					<artifactId>kundera-elastic-search</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
 			<version>${kundera.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-redis</artifactId>
 			<version>${kundera.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
 			<version>${kundera.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
 			<version>${kundera.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
 			<version>${kundera.version}</version>
 			<exclusions>
@@ -115,13 +115,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
 			<version>${kundera.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-couchdb</artifactId>
 			<version>${kundera.version}</version>
 
