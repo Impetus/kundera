@@ -119,7 +119,7 @@ public class EntityReaderTest
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(p1.getAddresses()));
 
-        p1.setAddresses(null);
+//        p1.setAddresses(null);
 
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
 
