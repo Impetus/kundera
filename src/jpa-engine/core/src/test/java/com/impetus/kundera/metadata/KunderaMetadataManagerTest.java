@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.validator.GeneratedIdStrategyIdentity;
 
@@ -42,6 +43,7 @@ public class KunderaMetadataManagerTest
     @Before
     public void setup()
     {
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         Persistence.createEntityManagerFactory(persistenceUnit);
     }
 
