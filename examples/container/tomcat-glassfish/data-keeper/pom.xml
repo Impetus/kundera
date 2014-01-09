@@ -29,17 +29,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.core</groupId>
+			<groupId>com.impetus.kundera.core</groupId>
 			<artifactId>kundera-core</artifactId>
 			<version>2.6</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>2.6</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
 			<version>2.6</version>
 		</dependency>
