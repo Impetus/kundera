@@ -116,7 +116,7 @@ public class EntityListenersProcessor implements MetadataProcessor
         // iterate through all public methods of entityClass
         // since this is already an @Entity class, it will sure have a default
         // no-arg constructor
-        for (Method method : entityClass.getDeclaredMethods())
+        for (Method method : entityClass.getMethods())
         {
             // find valid jpa annotations for this method
             List<Class<?>> jpaAnnotations = getValidJPAAnnotationsFromMethod(entityClass, method, 0, entityClass);
