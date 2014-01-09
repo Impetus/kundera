@@ -228,6 +228,7 @@
       </activation>
       <modules>
         <module>jpa-engine</module>
+        <module>kundera-elastic-search</module>
         <module>kundera-cassandra</module>
       </modules>
     </profile>
