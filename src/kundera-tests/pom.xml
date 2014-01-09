@@ -5,7 +5,7 @@
 		<artifactId>kundera</artifactId>
 		<version>2.10-SNAPSHOT</version>
 	</parent>
-	<groupId>com.impetus</groupId>
+	<groupId>com.impetus.kundera</groupId>
 	<artifactId>kundera-tests</artifactId>
 	<version>2.10-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -313,66 +313,68 @@
 		<!-- kundera dependencies -->
 
 		<dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
-			<version>2.10-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.lucene</groupId>
-					<artifactId>lucene-core</artifactId>
-				</exclusion>
-			</exclusions>
+	        	<groupId>com.impetus.kundera.core</groupId>
+                	<artifactId>kundera-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>fallback-impl</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.kundera.rest</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rest</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-redis</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-couchdb</artifactId>
 			<version>2.10-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-elastic-search</artifactId>
 			<version>2.10-SNAPSHOT</version>
 			<exclusions>
@@ -386,41 +388,36 @@
 		<!-- kundera tests dependencies -->
 
 		<dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
+	        	<groupId>com.impetus.kundera.core</groupId>
+                	<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.lucene</groupId>
-					<artifactId>lucene-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
+
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -428,7 +425,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.kundera.rest</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rest</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -436,7 +433,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-couchdb</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -450,7 +447,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-redis</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -458,14 +455,14 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-elastic-search</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -478,7 +475,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- <dependency> <groupId>com.impetus.client</groupId> <artifactId>kundera-oracle-nosql</artifactId> 
+		<!-- <dependency> <groupId>com.impetus.kundera.client</groupId> <artifactId>kundera-oracle-nosql</artifactId> 
 			<version>2.5-SNAPSHOT</version> <type>test-jar</type> <scope>test</scope> 
 			</dependency> -->
 

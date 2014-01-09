@@ -6,7 +6,7 @@
 		<groupId>com.impetus</groupId>
 		<version>2.10-SNAPSHOT</version>
 	</parent>
-	<groupId>com.impetus.client</groupId>
+	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>kundera-couchdb</artifactId>
 	<packaging>jar</packaging>
 	<name>kundera-couchdb</name>
@@ -25,17 +25,19 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
+	        	<groupId>com.impetus.kundera.core</groupId>
+                	<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
+	        	<groupId>com.impetus.kundera.core</groupId>
+                	<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+
 		<!-- Apache HttpComponents -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

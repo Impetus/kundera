@@ -1,0 +1,50 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.impetus.jpa:fallback-impl:jar:2.10-SNAPSHOT
+[WARNING] 'build.plugins.plugin.(groupId:artifactId)' must be unique but found duplicate declaration of plugin org.apache.maven.plugins:maven-source-plugin @ com.impetus:kundera:2.10-SNAPSHOT, /home/impadmin/source/trunk/Kundera/src/pom.xml, line 292, column 15
+[WARNING] 'build.plugins.plugin.(groupId:artifactId)' must be unique but found duplicate declaration of plugin org.jacoco:jacoco-maven-plugin @ com.impetus:kundera:2.10-SNAPSHOT, /home/impadmin/source/trunk/Kundera/src/pom.xml, line 336, column 12
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-compiler-plugin is missing. @ com.impetus:kundera:2.10-SNAPSHOT, /home/impadmin/source/trunk/Kundera/src/pom.xml, line 246, column 15
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-checkstyle-plugin is missing. @ com.impetus:kundera:2.10-SNAPSHOT, /home/impadmin/source/trunk/Kundera/src/pom.xml, line 269, column 15
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-source-plugin is missing. @ com.impetus:kundera:2.10-SNAPSHOT, /home/impadmin/source/trunk/Kundera/src/pom.xml, line 292, column 15
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building kundera-fallback-impl 2.10-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.1:tree (default-cli) @ fallback-impl ---
+[INFO] com.impetus.jpa:fallback-impl:jar:2.10-SNAPSHOT
+[INFO] +- junit:junit:jar:4.8.2:test
+[INFO] +- com.impetus.jpa:core-impl:jar:2.10-SNAPSHOT:compile
+[INFO] |  +- commons-lang:commons-lang:jar:2.4:compile
+[INFO] |  +- javax.persistence:persistence-api:jar:2.0:compile
+[INFO] |  +- cglib:cglib:jar:2.2.2:compile
+[INFO] |  |  \- asm:asm:jar:3.3.1:compile
+[INFO] |  +- commons-logging:commons-logging:jar:1.1.1:compile
+[INFO] |  +- javassist:javassist:jar:3.12.1.GA:compile
+[INFO] |  +- com.google.guava:guava:jar:13.0.1:compile
+[INFO] |  +- javax.transaction:jta:jar:1.1:compile
+[INFO] |  +- com.thoughtworks.xstream:xstream:jar:1.4.3:compile
+[INFO] |  |  +- xmlpull:xmlpull:jar:1.1.3.1:compile
+[INFO] |  |  \- xpp3:xpp3_min:jar:1.1.4c:compile
+[INFO] |  \- com.vividsolutions:jts:jar:1.11:compile
+[INFO] +- com.impetus.jpa:core-impl:test-jar:tests:2.10-SNAPSHOT:test
+[INFO] +- net.sf.ehcache:ehcache-core:jar:2.5.2:compile
+[INFO] +- org.apache.lucene:lucene-core:jar:4.4.0:compile
+[INFO] +- org.apache.lucene:lucene-analyzers-common:jar:4.4.0:compile
+[INFO] +- org.apache.lucene:lucene-queryparser:jar:4.4.0:compile
+[INFO] |  +- org.apache.lucene:lucene-queries:jar:4.4.0:compile
+[INFO] |  \- org.apache.lucene:lucene-sandbox:jar:4.4.0:compile
+[INFO] +- org.slf4j:slf4j-api:jar:1.7.5:compile
+[INFO] \- commons-configuration:commons-configuration:jar:1.9:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 6.738s
+[INFO] Finished at: Tue Jan 07 23:01:53 IST 2014
+[INFO] Final Memory: 14M/159M
+[INFO] ------------------------------------------------------------------------
