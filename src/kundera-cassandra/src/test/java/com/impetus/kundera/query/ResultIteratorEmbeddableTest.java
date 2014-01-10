@@ -37,8 +37,8 @@ import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
- * @author vivek.mishra
- * junit for {@link IResultIterator}.
+ * @author chhavi.gangwal
+ * junit for {@link IResultIteratorEmbeddableTest}.
  */
 public class ResultIteratorEmbeddableTest 
 {
