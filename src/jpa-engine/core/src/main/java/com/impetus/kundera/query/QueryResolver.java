@@ -171,8 +171,8 @@ public class QueryResolver
         Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
-        Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
-        query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator);
+        Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class);
+        query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator);
 
         return query;
     }

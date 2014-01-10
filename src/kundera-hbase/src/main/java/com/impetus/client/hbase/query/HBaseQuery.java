@@ -81,10 +81,9 @@ public class HBaseQuery extends QueryImpl
      * @param persistenceDelegator
      *            persistence delegator interface.
      */
-    public HBaseQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*

@@ -70,7 +70,7 @@ public class LuceneQueryTest
         queryParser.parse();
         kunderaQuery.postParsingInit();
 
-        LuceneQuery luceneQuery = new LuceneQuery(query,kunderaQuery,null);
+        LuceneQuery luceneQuery = new LuceneQuery(kunderaQuery,null);
         
         try
         {

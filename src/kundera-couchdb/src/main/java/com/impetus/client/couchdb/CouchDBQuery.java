@@ -52,10 +52,9 @@ public class CouchDBQuery extends QueryImpl
 {
     private static final Logger log = LoggerFactory.getLogger(CouchDBQuery.class);
 
-    public CouchDBQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CouchDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /**

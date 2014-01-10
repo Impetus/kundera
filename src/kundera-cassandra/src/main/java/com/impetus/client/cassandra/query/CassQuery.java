@@ -97,10 +97,9 @@ public class CassQuery extends QueryImpl
      * @param persistenceDelegator
      *            the persistence delegator
      */
-    public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*

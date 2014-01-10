@@ -52,10 +52,9 @@ public class Neo4JQuery extends QueryImpl
      * @param query
      * @param persistenceDelegator
      */
-    public Neo4JQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public Neo4JQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
         if (getHints().containsKey(NATIVE_QUERY_TYPE))
         {
             queryType = (Neo4JQueryType) getHints().get(NATIVE_QUERY_TYPE);

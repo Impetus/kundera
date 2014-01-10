@@ -110,7 +110,7 @@ public class QueryImplTest
         KunderaQueryParser queryParser;
         KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-        CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+        CoreQuery query = new CoreQuery(kunderaQuery, delegator);
 
         try
         {
@@ -230,7 +230,7 @@ public class QueryImplTest
             KunderaQueryParser queryParser;
             KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-            CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+            CoreQuery query = new CoreQuery(kunderaQuery, delegator);
             
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);            
             String[] columns = query.getColumns(new String[]{"personName", "age"}, m);

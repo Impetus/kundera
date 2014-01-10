@@ -53,11 +53,9 @@ public class OracleNoSQLQuery extends QueryImpl
 {
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
-    public OracleNoSQLQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
-
+        super(kunderaQuery, persistenceDelegator);
     }
 
     @Override

@@ -18,7 +18,6 @@ package com.impetus.kundera.query;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -34,10 +33,9 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 public class CoreQuery<E> extends QueryImpl<E>
 {
 
-    public CoreQuery(String query, final KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CoreQuery(final KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
 
