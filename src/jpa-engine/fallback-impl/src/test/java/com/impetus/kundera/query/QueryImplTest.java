@@ -432,8 +432,8 @@ public class QueryImplTest
 
     private KunderaQuery parseQuery(final String query)
     {
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         return kunderaQuery;

@@ -58,10 +58,10 @@ public class KunderaQueryParser
      * @param queryString
      *            The Single-String query
      */
-    public KunderaQueryParser(KunderaQuery query, String queryString)
+    public KunderaQueryParser(KunderaQuery query)
     {
         this.query = query;
-        this.queryString = queryString;
+        this.queryString = query.getJPAQuery();
     }
 
     /**

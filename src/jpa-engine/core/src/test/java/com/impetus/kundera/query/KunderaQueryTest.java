@@ -73,8 +73,8 @@ public class KunderaQueryTest
     public void test()
     {
         String query = "Select p from Person p";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         Assert.assertNotNull(kunderaQuery.getEntityClass());
@@ -92,8 +92,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from p";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.fail();
@@ -107,8 +107,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p form Person p";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.fail();
@@ -122,8 +122,8 @@ public class KunderaQueryTest
         try
         {
             query = "Selct p from Person p";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.assertNotNull(kunderaQuery.getEntityClass());
@@ -146,8 +146,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from Person p where";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.fail();
@@ -161,8 +161,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from Person p where p";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.fail();
@@ -175,8 +175,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from invalidPerson p";
-                    kunderaQuery = new KunderaQuery();
-                    queryParser = new KunderaQueryParser(kunderaQuery, query);
+                    kunderaQuery = new KunderaQuery(query);
+                    queryParser = new KunderaQueryParser(kunderaQuery);
                     queryParser.parse();
                     kunderaQuery.postParsingInit();
         }catch (QueryHandlerException qhex) 
@@ -187,8 +187,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p.ABC from Person p";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
         }
@@ -200,8 +200,8 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from Person p order by p.personName ASCENDING";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, query);
+            kunderaQuery = new KunderaQuery(query);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
         }
@@ -216,8 +216,8 @@ public class KunderaQueryTest
     public void testOnIndexParameter()
     {
         String query = "Select p from Person p where p.personName = ?1 and p.age= ?2";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter(1, "pname");
@@ -267,8 +267,8 @@ public class KunderaQueryTest
         }
 
         query = "Select p from Person p where p.age between ?1 and ?2 ";
-        kunderaQuery = new KunderaQuery();
-        queryParser = new KunderaQueryParser(kunderaQuery, query);
+        kunderaQuery = new KunderaQuery(query);
+        queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter(1, 32);
@@ -288,8 +288,8 @@ public class KunderaQueryTest
     public void testOnNameParameter()
     {
         String query = "Select p from Person p where p.personName = :name and p.age= :age";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter("name", "pname");
@@ -318,8 +318,8 @@ public class KunderaQueryTest
     public void testInvalidIndexParameter()
     {
         String query = "Select p from Person p where p.personName = ?1 and p.age= ?2";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter(1, "pname");
@@ -339,8 +339,8 @@ public class KunderaQueryTest
     public void testInvalidNameParameter()
     {
         String query = "Select p from Person p where p.personName = :name and p.age= :age";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter("name", "pname");
@@ -361,8 +361,8 @@ public class KunderaQueryTest
     public void testUpdateClause()
     {
         String query = "Update Person p set p.age= ?1 where p.personName = ?2 and p.age = ?3";
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter(1, 33);

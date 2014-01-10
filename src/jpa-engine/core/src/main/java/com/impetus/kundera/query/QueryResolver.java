@@ -60,7 +60,8 @@ public class QueryResolver
         {
             throw new QueryHandlerException("Query String should not be null ");
         }
-        KunderaQuery kunderaQuery = new KunderaQuery();
+        
+        KunderaQuery kunderaQuery = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
 
@@ -74,8 +75,8 @@ public class QueryResolver
         // In case of named native query
         if (!isNative)
         {
-            KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, mappedQuery != null ? mappedQuery
-                    : jpaQuery);
+            kunderaQuery = new KunderaQuery(mappedQuery != null ? mappedQuery : jpaQuery);
+            KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery);
 
             parser.parse();
 
@@ -94,7 +95,10 @@ public class QueryResolver
 
             // pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
             
+            kunderaQuery = new KunderaQuery(jpaQuery);
+            
             kunderaQuery.isNativeQuery = true;
+            
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
 
             Field entityClazzField = null;
