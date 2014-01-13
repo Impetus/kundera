@@ -66,9 +66,6 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Query
 {
 
-    /** The query. */
-    protected String query;
-
     /** The kundera query. */
     protected KunderaQuery kunderaQuery;
 
@@ -89,6 +86,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     private Integer fetchSize;
 
+    
     /**
      * Instantiates a new query impl.
      * 
@@ -99,12 +97,12 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * @param persistenceUnits
      *            the persistence units
      */
-    public QueryImpl(String query, PersistenceDelegator persistenceDelegator)
+    public QueryImpl(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-
-        this.query = query;
+        this.kunderaQuery = kunderaQuery;
         this.persistenceDelegeator = persistenceDelegator;
     }
+    
 
     /**
      * Gets the jPA query.
@@ -113,7 +111,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     public String getJPAQuery()
     {
-        return query;
+        return kunderaQuery.getJPAQuery();
     }
 
     /**
@@ -136,7 +134,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     public List<?> getResultList()
     {
         if (log.isDebugEnabled())
-            log.info("On getResultList() executing query: " + query);
+            log.info("On getResultList() executing query: " + getJPAQuery());
 
         // as per JPA post event should happen before fetching data from database.
         
@@ -845,7 +843,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     private void onNativeCondition()
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        if (appMetadata.isNative(query))
+        if (appMetadata.isNative(getJPAQuery()))
         {
             throw new IllegalStateException(
                     "invoked on a native query when the implementation does not support this use");

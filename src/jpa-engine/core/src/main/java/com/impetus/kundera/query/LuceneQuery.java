@@ -60,10 +60,9 @@ public class LuceneQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public LuceneQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator pd)
+    public LuceneQuery(KunderaQuery kunderaQuery, PersistenceDelegator pd)
     {
-        super(jpaQuery, pd);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery,pd);
     }
 
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
@@ -76,7 +75,7 @@ public class LuceneQuery extends QueryImpl
     public List<?> getResultList()
     {
         if (log.isDebugEnabled())
-            log.debug("JPA Query: " + query);
+            log.debug("JPA Query: " + getJPAQuery());
 
         // get luence query
         String q = luceneQuery;

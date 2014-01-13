@@ -62,7 +62,6 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -98,10 +97,9 @@ public class CassQuery extends QueryImpl
      * @param persistenceDelegator
      *            the persistence delegator
      */
-    public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*

@@ -113,6 +113,8 @@ public class KunderaQuery
     private TypedParameter typedParameter;
 
     boolean isNativeQuery;
+    
+    private String jpaQuery;
 
     /**
      * Instantiates a new kundera query.
@@ -120,8 +122,9 @@ public class KunderaQuery
      * @param persistenceUnits
      *            the persistence units
      */
-    public KunderaQuery()
+    public KunderaQuery(final String jpaQuery)
     {
+        this.jpaQuery = jpaQuery;
     }
 
     /**
@@ -1147,6 +1150,11 @@ public class KunderaQuery
         return isDeleteUpdate;
     }
 
+    public String getJPAQuery()
+    {
+        return this.jpaQuery;
+    }
+    
     /**
      * Return parsed token string.
      * 

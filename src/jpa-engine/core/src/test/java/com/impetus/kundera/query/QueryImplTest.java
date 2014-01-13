@@ -78,8 +78,8 @@ public class QueryImplTest
 
     private KunderaQuery parseQuery(final String query)
     {
-        KunderaQuery kunderaQuery = new KunderaQuery();
-        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         return kunderaQuery;
@@ -110,7 +110,7 @@ public class QueryImplTest
         KunderaQueryParser queryParser;
         KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-        CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+        CoreQuery query = new CoreQuery(kunderaQuery, delegator);
 
         try
         {
@@ -230,7 +230,7 @@ public class QueryImplTest
             KunderaQueryParser queryParser;
             KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-            CoreQuery query = new CoreQuery(queryStr, kunderaQuery, delegator);
+            CoreQuery query = new CoreQuery(kunderaQuery, delegator);
             
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);            
             String[] columns = query.getColumns(new String[]{"personName", "age"}, m);
@@ -261,20 +261,20 @@ public class QueryImplTest
         try
         {
             String queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId";
-            KunderaQuery kunderaQuery = new KunderaQuery();
-            KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            KunderaQuery kunderaQuery = new KunderaQuery(queryStr);
+            KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();        
             kunderaQuery.postParsingInit();
             
             queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId HAVING 1";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            kunderaQuery = new KunderaQuery(queryStr);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             
             queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId ORDER BY personName";
-            kunderaQuery = new KunderaQuery();
-            queryParser = new KunderaQueryParser(kunderaQuery, queryStr);
+            kunderaQuery = new KunderaQuery(queryStr);
+            queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
         }
