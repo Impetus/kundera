@@ -178,24 +178,14 @@ public class ResultIteratorTest extends BaseTest
     
     public void OnScrollForNativeQuery()
     {
-    	Object[] p = new Object[1005];
-    	for(int i=0;i<1005;i++)
-        {
-        	
-    	   p[i]=prepareData(UUID.randomBase64UUID(), i);
-    	   
-        	em.persist(p[i]);
-        }
+    	Object p = prepareData(UUID.randomBase64UUID(), 99);
+    	
+        em.persist(p);
     	em.flush();
         em.clear();
-        final String queryWithoutClause = "Select * from \"PERSONCASSANDRA\" ";
-
-        assertOnScrollFOrNativeQuery(queryWithoutClause,1005);
-    }
-    
-    
-    
-    
+       
+       assertOnScrollForNativeQuery(null,1);
+     }
     
     
     private void onScroll()
@@ -243,27 +233,20 @@ public class ResultIteratorTest extends BaseTest
     }
 
    
-    private void assertOnScrollFOrNativeQuery(final String queryWithoutClause, int expectedCount)
+    private void assertOnScrollForNativeQuery(final String queryWithoutClause, int expectedCount)
     {
-        Query query = (Query) em.createNativeQuery("q",
+        Query query = (Query) em.createNamedQuery("q",
                 PersonCassandra.class);
         
-        assertOnFetch(query, 0, expectedCount);
-        assertOnFetch(query,1000,expectedCount);  // less records
-
-        assertOnFetch(query,1445,expectedCount); // more fetch size than available in db.
-        assertOnFetch(query,3,expectedCount); // more fetch size than available in db.
-        
-        
-        
-    }
+       assertOnFetch(query,10,expectedCount);  
+        }
     
     
     
     
     private void assertOnScroll(final String queryWithoutClause, int expectedCount)
     {
-        Query query = (Query) em.createQuery(queryWithoutClause,
+        Query query = (Query) em.createNamedQuery(queryWithoutClause,
                 PersonCassandra.class);
         
         assertOnFetch(query, 0, expectedCount);
@@ -276,10 +259,13 @@ public class ResultIteratorTest extends BaseTest
         
     }
 
-    private void assertOnFetch(Query query, Integer fetchSize, int available)
+    
+   private void assertOnFetch(Query query, Integer fetchSize, int available)
     {
         query.setFetchSize(fetchSize);
         int counter=0;
+        try
+        {
         Iterator<PersonCassandra> iter = query.iterate();
 
         while (iter.hasNext())
@@ -298,6 +284,11 @@ public class ResultIteratorTest extends BaseTest
         {
             Assert.assertNotNull(nsex.getMessage());
         }
+        }catch(UnsupportedOperationException e)
+        { 
+        	Assert.assertEquals("Iteration not supported over native queries",e.getMessage());
+        }
+        
     }
 
     public void tearDown(final String keyspace)
