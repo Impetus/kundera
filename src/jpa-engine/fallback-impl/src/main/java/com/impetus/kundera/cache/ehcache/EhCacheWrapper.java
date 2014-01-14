@@ -16,6 +16,7 @@
 package com.impetus.kundera.cache.ehcache;
 
 import net.sf.ehcache.Element;
+import net.sf.ehcache.Status;
 
 import org.apache.commons.lang.NotImplementedException;
 
@@ -127,7 +128,10 @@ public class EhCacheWrapper implements Cache
     @Override
     public void evictAll()
     {
-        ehcache.removeAll();
+        if(ehcache.getStatus().equals(Status.STATUS_ALIVE))
+        {
+            ehcache.removeAll();
+        }
     }
 
 }

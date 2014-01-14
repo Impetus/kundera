@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.StringTokenizer;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
@@ -251,7 +252,16 @@ public class MongoDBQuery extends QueryImpl
                     // Means it is a case of composite column.
                     property = property.substring(property.indexOf(".") + 1);
                     isCompositeColumn = true;
-                }
+                } /*else if(StringUtils.contains(property, '.'))
+                {
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    StringTokenizer tokenizer = new StringTokenizer(property,".");
+                    String embeddedAttributeAsStr = tokenizer.nextToken();
+                    String embeddableAttributeAsStr = tokenizer.nextToken();
+                    Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
+                    
+                    
+                }*/
                 else
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());

@@ -14,9 +14,6 @@
 			<!-- <property name="kundera.ddl.auto.prepare" value="create"/> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 </persistence>

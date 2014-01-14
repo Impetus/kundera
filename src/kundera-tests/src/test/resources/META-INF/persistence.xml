@@ -15,9 +15,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
 		</properties>
 	</persistence-unit>
@@ -33,9 +30,6 @@
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 	</persistence-unit>
@@ -50,9 +44,6 @@
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 
@@ -67,9 +58,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 
@@ -82,9 +70,6 @@
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 		</properties>
@@ -101,9 +86,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 

@@ -78,7 +78,7 @@ public class EhCacheProvider implements CacheProvider
             String configurationResourceName = cacheResourceName;
             if (configurationResourceName == null || configurationResourceName.length() == 0)
             {
-                manager = new CacheManager();
+                manager = CacheManager.create();
             }
             else
             {
@@ -137,7 +137,7 @@ public class EhCacheProvider implements CacheProvider
             }
             if (configurationResourceName == null || configurationResourceName.length() == 0)
             {
-                manager = new CacheManager();
+                manager = CacheManager.create();
             }
             else
             {
@@ -148,7 +148,7 @@ public class EhCacheProvider implements CacheProvider
                             + "of the classpath rather than in a package.");
                 }
                 URL url = loadResource(configurationResourceName);
-                manager = new CacheManager(url);
+                manager = CacheManager.create(url);
             }
         }
         catch (net.sf.ehcache.CacheException e)
@@ -272,7 +272,7 @@ public class EhCacheProvider implements CacheProvider
     {
         if (manager != null)
         {
-            manager.shutdown();
+            manager.removalAll();
             manager = null;
         }
         cache = null;
