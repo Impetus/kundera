@@ -39,7 +39,7 @@ public class EhCacheProviderTest extends TestCase
     EhCacheProvider cacheProvider;
 
     /** The cache resource. */
-    String cacheResource = "/ehcache-test.xml";;
+    String cacheResource = "/ehcache-test.xml";
 
     /** The cache name. */
     String cacheName = "Kundera";

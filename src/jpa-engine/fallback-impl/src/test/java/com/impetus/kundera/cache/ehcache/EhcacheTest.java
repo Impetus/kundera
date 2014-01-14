@@ -36,6 +36,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.Person.Day;
 
 /**
+ * Junit for ehcache.
  * @author vivek.mishra
  * 
  */

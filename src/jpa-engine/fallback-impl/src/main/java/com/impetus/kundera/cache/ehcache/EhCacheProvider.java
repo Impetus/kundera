@@ -89,7 +89,8 @@ public class EhCacheProvider implements CacheProvider
                             + "of the classpath rather than in a package.");
                 }
                 URL url = loadResource(configurationResourceName);
-                manager = new CacheManager(url);
+//                manager = new CacheManager(url);
+                manager = CacheManager.create(url);
             }
         }
         catch (net.sf.ehcache.CacheException e)
