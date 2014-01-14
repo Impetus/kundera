@@ -57,7 +57,7 @@ public class PersistenceCacheManager
             node.setTraversed(false);
         }
 
-        for (Node node : persistenceCache.getEmbeddedCache().getAllNodes())
+/*        for (Node node : persistenceCache.getEmbeddedCache().getAllNodes())
         {
             node.setTraversed(false);
         }
@@ -70,7 +70,7 @@ public class PersistenceCacheManager
         for (Node node : persistenceCache.getTransactionalCache().getAllNodes())
         {
             node.setTraversed(false);
-        }
+        }*/
     }
 
     /**

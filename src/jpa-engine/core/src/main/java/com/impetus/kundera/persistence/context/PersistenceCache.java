@@ -28,15 +28,15 @@ public class PersistenceCache
     /* Main Cache of entity objects */
     private CacheBase mainCache;
 
-    /* Cache of embedded objects */
+/*     Cache of embedded objects 
     private CacheBase embeddedCache;
 
-    /* Cache of objects within element collection */
+     Cache of objects within element collection 
     private CacheBase elementCollectionCache;
 
-    /* Cache of transactional objects */
+     Cache of transactional objects 
     private CacheBase transactionalCache;
-
+*/
     // FlushManager flushManager;
 
     private PersistenceContextType persistenceContextType;
@@ -56,15 +56,20 @@ public class PersistenceCache
 
     public PersistenceCache()
     {
-        initialize();
+        initialize(null);
+    }
+    
+    public PersistenceCache(com.impetus.kundera.cache.Cache l2Cache)
+    {
+        initialize(l2Cache);
     }
 
-    private void initialize()
+    private void initialize(com.impetus.kundera.cache.Cache l2Cache)
     {
-        mainCache = new MainCache();
-        embeddedCache = new EmbeddedCache();
-        elementCollectionCache = new ElementCollectionCache();
-        transactionalCache = new TransactionalCache();
+        mainCache = new MainCache(l2Cache);
+//        embeddedCache = new EmbeddedCache(l2Cache);
+//        elementCollectionCache = new ElementCollectionCache(l2Cache);
+//        transactionalCache = new TransactionalCache(l2Cache);
 
         // flushStack = new FlushStack();
         // joinTableDataMap = new HashMap<String, JoinTableData>();
@@ -84,7 +89,7 @@ public class PersistenceCache
             mainCache.clear();
         }
 
-        if (embeddedCache != null)
+/*        if (embeddedCache != null)
         {
             embeddedCache.clear();
         }
@@ -96,7 +101,7 @@ public class PersistenceCache
         {
             transactionalCache.clear();
         }
-    }
+*/    }
 
     /**
      * @return the mainCache
@@ -106,66 +111,66 @@ public class PersistenceCache
         return mainCache;
     }
 
-    /**
+/*    *//**
      * @param mainCache
      *            the mainCache to set
-     */
+     *//*
     public void setMainCache(CacheBase mainCache)
     {
         this.mainCache = mainCache;
     }
-
-    /**
+*/
+/*    *//**
      * @return the embeddedCache
-     */
+     *//*
     public CacheBase getEmbeddedCache()
     {
         return embeddedCache;
     }
 
-    /**
+    *//**
      * @param embeddedCache
      *            the embeddedCache to set
-     */
+     *//*
     public void setEmbeddedCache(CacheBase embeddedCache)
     {
         this.embeddedCache = embeddedCache;
     }
 
-    /**
+    *//**
      * @return the elementCollectionCache
-     */
+     *//*
     public CacheBase getElementCollectionCache()
     {
         return elementCollectionCache;
     }
 
-    /**
+    *//**
      * @param elementCollectionCache
      *            the elementCollectionCache to set
-     */
+     *//*
     public void setElementCollectionCache(CacheBase elementCollectionCache)
     {
         this.elementCollectionCache = elementCollectionCache;
     }
 
-    /**
+    *//**
      * @return the transactionalCache
-     */
+     *//*
     public CacheBase getTransactionalCache()
     {
         return transactionalCache;
     }
 
-    /**
+    *//**
      * @param transactionalCache
      *            the transactionalCache to set
-     */
+     *//*
     public void setTransactionalCache(CacheBase transactionalCache)
     {
         this.transactionalCache = transactionalCache;
     }
-
+*/
     /**
      * @return the persistenceContextType
      */

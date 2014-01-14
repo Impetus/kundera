@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import javax.persistence.Cache;
+
 /**
  * <Prove description of functionality provided by this Type>
  * 
@@ -22,5 +24,11 @@ package com.impetus.kundera.persistence.context;
  */
 public class TransactionalCache extends CacheBase
 {
+
+    public TransactionalCache(com.impetus.kundera.cache.Cache l2Cache)
+    {
+        super(l2Cache);
+    }
+
 
 }

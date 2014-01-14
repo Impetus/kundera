@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import javax.persistence.Cache;
+
 /**
  * Main cache for the persistence context
  * 
@@ -22,5 +24,10 @@ package com.impetus.kundera.persistence.context;
  */
 public class MainCache extends CacheBase
 {
+
+    public MainCache(com.impetus.kundera.cache.Cache l2Cache)
+    {
+        super(l2Cache);
+    }
 
 }

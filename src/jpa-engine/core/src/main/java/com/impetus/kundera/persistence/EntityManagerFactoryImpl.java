@@ -46,6 +46,8 @@ import com.impetus.kundera.configure.ClientMetadataBuilder;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Implementation class for {@link EntityManagerFactory}
@@ -113,8 +115,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         configureClientFactories();
 
         // Initialize L2 cache
-        this.cacheProvider = initSecondLevelCache();
-        this.cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        
+        
 
         // Invoke Client Loaders
         // logger.info("Loading Client(s) For Persistence Unit(s) " +
@@ -124,9 +126,15 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         for (String pu : persistenceUnits)
         {
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
             PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(pu)
                     .getTransactionType();
             txTypes.add(txType);
+            if(cacheProvider == null)
+            {
+                this.cacheProvider = initSecondLevelCache(puMetadata);
+                this.cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+            }
         }
 
         if (txTypes.size() != 1)
@@ -293,7 +301,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         if (isOpen())
         {
-            return properties;
+            return properties ;
         }
         throw new IllegalStateException("entity manager factory has been closed");
     }
@@ -354,11 +362,19 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * 
      * @return the cache provider
      */
-    private CacheProvider initSecondLevelCache()
+    private CacheProvider initSecondLevelCache(final PersistenceUnitMetadata puMetadata)
     {
+        
         String classResourceName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
+        
+        classResourceName = classResourceName != null ? classResourceName : puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
+        
         String cacheProviderClassName = (String) getProperties()
                 .get(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
+        
+        cacheProviderClassName = cacheProviderClassName != null ? cacheProviderClassName : puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
 
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)

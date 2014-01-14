@@ -47,15 +47,21 @@ public class CacheBase {
 
     private Set<Node> headNodes;
 
-    public CacheBase() {
-        headNodes = new HashSet<Node>();
-        nodeMappings = new ConcurrentHashMap<String, Node>();
+    private com.impetus.kundera.cache.Cache l2Cache;
+    
+    public CacheBase(com.impetus.kundera.cache.Cache l2Cache) {
+        this.headNodes = new HashSet<Node>();
+        this.nodeMappings = new ConcurrentHashMap<String, Node>();
+        this.l2Cache = l2Cache;
     }
 
     public Node getNodeFromCache(String nodeId) {
         Node node = nodeMappings.get(nodeId);
-        return node;
+        //if not present in first level cache, check from second level cache.
+        return node != null ? node:lookupL2Cache(nodeId);
     }
+
+    
 
     public Node getNodeFromCache(Object entity) {
         if (entity == null) {
@@ -71,7 +77,7 @@ public class CacheBase {
         return getNodeFromCache(nodeId);
     }
 
-    public void addNodeToCache(Node node) {
+    public synchronized void addNodeToCache(Node node) {
         // Make a deep copy of Node data and and set into node
         // Original data object is now detached from Node and is possibly
         // referred by user code
@@ -84,6 +90,11 @@ public class CacheBase {
          */
 
         processNodeMapping(node);
+        
+        if(l2Cache != null)
+        {
+            l2Cache.put(node.getNodeId(), node);
+        }
     }
 
     public void processNodeMapping(Node node) {
@@ -118,7 +129,7 @@ public class CacheBase {
         }
     }
 
-    public void removeNodeFromCache(Node node) {
+    public synchronized void removeNodeFromCache(Node node) {
         if (getHeadNodes().contains(node)) {
             getHeadNodes().remove(node);
         }
@@ -127,9 +138,12 @@ public class CacheBase {
             nodeMappings.remove(node.getNodeId());
         }
 
+        evictFroml2Cache(node);
         logCacheEvent("REMOVED FROM ", node.getNodeId());
         node = null; // Eligible for GC
     }
+
+    
 
     public void addGraphToCache(ObjectGraph graph, PersistenceCache persistenceCache) {
         // Add each node in the graph to cache
@@ -186,6 +200,11 @@ public class CacheBase {
         {
             this.headNodes.clear();
         }
+        
+        if(this.l2Cache != null)
+        {
+            l2Cache.evictAll();
+        }
     }
 
 
@@ -196,4 +215,17 @@ public class CacheBase {
         return Collections.synchronizedSet(headNodes);
     }
 
+    private Node lookupL2Cache(String nodeId)
+    {
+        
+        return (Node) (l2Cache != null? l2Cache.get(nodeId):null);
+    }
+
+    private void evictFroml2Cache(Node node)
+    {
+        if(l2Cache != null)
+        {
+            this.l2Cache.evict(node.getClass(),node.getNodeId());
+        }
+    }
 }

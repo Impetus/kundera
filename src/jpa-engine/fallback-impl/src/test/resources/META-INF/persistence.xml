@@ -109,7 +109,8 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.client.property" value="${HOME}/Desktop/kunderaExternalProperties.xml" />
+			<property name="kundera.client.property"
+				value="${HOME}/Desktop/kunderaExternalProperties.xml" />
 		</properties>
 	</persistence-unit>
 
@@ -229,7 +230,7 @@
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="invalidmappedsu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.metadata.mappedsuperclass.InvalidPersonEntity</class>
@@ -243,7 +244,7 @@
 		</properties>
 	</persistence-unit>
 
-	
+
 	<persistence-unit name="keyspace">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.metadata.entities.OToOOwnerEntity</class>
@@ -257,7 +258,7 @@
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="inheritanceTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.metadata.processor.Rectangle</class>
@@ -265,7 +266,7 @@
 		<class>com.impetus.kundera.metadata.processor.Geometry</class>
 		<class>com.impetus.kundera.metadata.processor.Shape</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-	   <properties>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="testSchema" />
@@ -273,9 +274,24 @@
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
 		</properties>
 	</persistence-unit>
-	
-	
-	
+
+
+	<persistence-unit name="ehacheTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.entity.EhCacheEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="testSchema" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
 </persistence>
 
 

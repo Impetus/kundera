@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.loader.ClientFactory;
@@ -126,10 +127,12 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         }
         // session = new EntityManagerSession((Cache) factory.getCache());
-        this.persistenceCache = new PersistenceCache();
+        this.persistenceCache = new PersistenceCache((Cache) factory.getCache());
+        
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
 
         this.persistenceDelegator = new PersistenceDelegator(this.persistenceCache);
+        
 
         for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
         {

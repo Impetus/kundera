@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import javax.persistence.Cache;
+
 /**
  * <Prove description of functionality provided by this Type>
  * 
@@ -22,5 +24,10 @@ package com.impetus.kundera.persistence.context;
  */
 public class EmbeddedCache extends CacheBase
 {
+
+    public EmbeddedCache(com.impetus.kundera.cache.Cache l2Cache)
+    {
+        super(l2Cache);
+    }
 
 }

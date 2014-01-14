@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.persistence.Cache;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 
@@ -99,6 +100,7 @@ public final class PersistenceDelegator
     private boolean enableFlush;
 
     private Coordinator coordinator;
+
 
     /**
      * Instantiates a new persistence delegator.
@@ -804,6 +806,8 @@ public final class PersistenceDelegator
         return clientMap;
     }
 
+    
+    
     /**
      * Executes batch.
      */
