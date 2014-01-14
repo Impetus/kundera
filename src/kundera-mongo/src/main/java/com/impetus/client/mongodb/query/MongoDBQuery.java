@@ -252,16 +252,18 @@ public class MongoDBQuery extends QueryImpl
                     // Means it is a case of composite column.
                     property = property.substring(property.indexOf(".") + 1);
                     isCompositeColumn = true;
-                } /*else if(StringUtils.contains(property, '.'))
+                } /* if a composite key. "." assuming "." is part of property in case of embeddable only*/
+                else if(StringUtils.contains(property, '.'))
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());
                     StringTokenizer tokenizer = new StringTokenizer(property,".");
                     String embeddedAttributeAsStr = tokenizer.nextToken();
                     String embeddableAttributeAsStr = tokenizer.nextToken();
                     Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
+                    EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute)embeddedAttribute).getBindableJavaType());
+                    f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
                     
-                    
-                }*/
+                }
                 else
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());

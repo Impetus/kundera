@@ -107,7 +107,7 @@ public class PersonnelEmbeddedTest
         Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
         Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
         
-/*        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = and p.age=24").getResultList();
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 and p.age=24").getResultList();
         Assert.assertNotNull(personnels);
         Assert.assertFalse(personnels.isEmpty());
         Assert.assertNotNull(personnels.get(0));
@@ -115,6 +115,18 @@ public class PersonnelEmbeddedTest
         Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
         Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
         Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
-*/        
+
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 and p.age=2").getResultList();
+        Assert.assertTrue(personnels.isEmpty());
+
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 or p.age=24").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertNotNull(personnels.get(0));
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail());
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
+        Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
+        Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+
     }
 }
