@@ -1,5 +1,6 @@
 package com.impetus.client.oraclenosql.datatypes.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -9,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "StudentOracleNoSQLDate", schema = "OracleNoSqlTests@twikvstore")
-public class StudentOracleNoSQLDate
+public class StudentOracleNoSQLDate implements Serializable
 {
 
     @Id

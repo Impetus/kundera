@@ -1,5 +1,6 @@
 package com.impetus.client.oraclenosql.datatypes.entities;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
@@ -9,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "StudentOracleNoSQLBigDecimal", schema = "OracleNoSqlTests@twikvstore")
-public class StudentOracleNoSQLBigDecimal
+public class StudentOracleNoSQLBigDecimal implements Serializable
 {
 
     @Id

@@ -147,6 +147,7 @@ public class ObjectGraphBuilder
         else
         {
             node = nodeInPersistenceCache;
+            node.setPersistenceCache(persistenceCache);
 
             // Determine whether this node is dirty based on comparison between
             // Node data and entity data

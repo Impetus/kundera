@@ -403,6 +403,7 @@ public class Node implements NodeStateContext
     public void setPersistenceDelegator(PersistenceDelegator pd)
     {
         this.pd = pd;
+        setPersistenceCache(pd.getPersistenceCache());
     }
 
     @Override
