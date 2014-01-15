@@ -18,7 +18,7 @@ With 2.9.1 release onwards artifact group id has been changed from
 	<dependency>
 		<groupId>com.impetus.client</groupId>
 		<artifactId>kundera-cassandra</artifactId>
-		<version>2.9</version>
+		<version>2.9.1</version>
 	</dependency>
 ```	
 TO
@@ -26,7 +26,7 @@ TO
 	<dependency>
 		<groupId>com.impetus.kundera.client</groupId>
 		<artifactId>kundera-cassandra</artifactId>
-		<version>${kundera.version}</version>
+		<version>2.9.1</version>
 	</dependency>
 ```
 Up and running in 5 minutes
