@@ -308,10 +308,10 @@
 			<property name="kundera.client" value="thrift" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-		</properties>
+ -->		</properties>
 	</persistence-unit>
 
 	<persistence-unit name="load-balancing-test">
@@ -325,10 +325,10 @@
 			<property name="kundera.client" value="thrift" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.client.property" value="kunderaLoadbalancingTest.xml" />
+ -->			<property name="kundera.client.property" value="kunderaLoadbalancingTest.xml" />
 		</properties>
 	</persistence-unit>
 
@@ -342,10 +342,10 @@
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
+ -->			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
 
 		</properties>
 	</persistence-unit>
@@ -360,9 +360,9 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-		</properties>
+ -->		</properties>
 	</persistence-unit>
 </persistence>
