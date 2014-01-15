@@ -53,7 +53,11 @@ public class EhCacheWrapper implements Cache
     @Override
     public Object get(Object key)
     {
-        Element element = ehcache.get(key);
+        Element element = null;
+        if(isAlive())
+        {
+            element = ehcache.get(key);
+        }
         return element == null ? null : element.getObjectValue();
     }
 
@@ -70,6 +74,7 @@ public class EhCacheWrapper implements Cache
     @Override
     public void put(Object key, Object value)
     {
+        if(isAlive())
         ehcache.put(new Element(key, value));
     }
 
@@ -82,7 +87,11 @@ public class EhCacheWrapper implements Cache
     @Override
     public int size()
     {
-        return ehcache.getSize();
+        if(isAlive())
+        {
+            return ehcache.getSize();
+        }
+        return 0;
     }
 
     /*
@@ -93,7 +102,12 @@ public class EhCacheWrapper implements Cache
     @Override
     public boolean contains(Class arg0, Object arg1)
     {
-        return (ehcache.get(arg1) != null);
+        if(isAlive())
+        {
+            return (ehcache.get(arg1) != null);
+        }
+        
+        return false;
     }
 
     /*
@@ -117,6 +131,7 @@ public class EhCacheWrapper implements Cache
     public void evict(Class arg0, Object arg1)
     {
         // TODO Can we use Class with ehcache
+        if(isAlive())
         ehcache.remove(arg1);
     }
 
@@ -128,10 +143,15 @@ public class EhCacheWrapper implements Cache
     @Override
     public void evictAll()
     {
-        if(ehcache.getStatus().equals(Status.STATUS_ALIVE))
+        if(isAlive())
         {
             ehcache.removeAll();
         }
+    }
+
+    private boolean isAlive()
+    {
+        return ehcache.getStatus().equals(Status.STATUS_ALIVE);
     }
 
 }
