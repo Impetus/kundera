@@ -196,7 +196,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ, Constants.INVALID,
-                Constants.INVALID);
+                getMaxResults());
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
