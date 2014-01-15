@@ -97,7 +97,7 @@ public class FlushStackManagerTest
     public void setUp() throws Exception
     {
         getEntityManagerFactory();
-        new PersistenceUnitConfiguration("kunderatest").configure();
+        new PersistenceUnitConfiguration(null, "kunderatest").configure();
         pc = new PersistenceCache();
         graphBuilder = new ObjectGraphBuilder(pc, new PersistenceDelegator(pc));
     }
@@ -193,7 +193,7 @@ public class FlushStackManagerTest
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
 
         Deque<Node> fs = flushManager.getFlushStack();
-        Assert.assertEquals(3, fs.size());
+        Assert.assertEquals(2, fs.size());
     }
 
     @Test
@@ -336,7 +336,7 @@ public class FlushStackManagerTest
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
         Deque<Node> fs = flushManager.getFlushStack();
-        Assert.assertEquals(6, fs.size());
+        Assert.assertEquals(3, fs.size());
     }
 
     @Test
@@ -434,7 +434,7 @@ public class FlushStackManagerTest
 
         flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
         Deque<Node> fs = flushManager.getFlushStack();
-        Assert.assertEquals(5, fs.size());
+        Assert.assertEquals(1, fs.size());
         flushManager.clearFlushStack();
 
         a2.addAlbum(b2);
@@ -445,7 +445,7 @@ public class FlushStackManagerTest
         flushManager = new FlushManager();
         flushManager.buildFlushStack(graph2.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
-        Assert.assertEquals(3, fs.size());
+        Assert.assertEquals(1, fs.size());
     }
 
     @Test

@@ -751,7 +751,7 @@ public final class PersistenceDelegator
      */
     void populateClientProperties(Map properties)
     {
-        if (!properties.isEmpty())
+        if (properties != null && !properties.isEmpty())
         {
             Map<String, Client> clientMap = getDelegate();
             if (clientMap != null && !clientMap.isEmpty())

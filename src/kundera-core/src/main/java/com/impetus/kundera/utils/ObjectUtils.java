@@ -164,45 +164,45 @@ public class ObjectUtils
                             // Copy element collections for List and Set
                             if (sourceEmbeddedObj instanceof Collection)
                             {
-                                Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
+                                    Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
 
-                                for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
-                                {
-                                    Object targetEcObj = null;
-                                    if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
+                                    for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
                                     {
-                                        PropertyAccessor accessor = PropertyAccessorFactory
-                                                .getPropertyAccessor(sourceEcObj.getClass());
-                                        if (accessor != null)
+                                        Object targetEcObj = null;
+                                        if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
                                         {
-                                            targetEcObj = accessor.getCopy(sourceEcObj);
-                                        }
-                                    }
-                                    else if (PersistenceType.EMBEDDABLE.equals(embeddedColumn.getPersistenceType()))
-                                    {
-                                        targetEcObj = genericClass.newInstance();
-
-                                        for (Field f : genericClass.getDeclaredFields())
-                                        {
-                                            if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                            PropertyAccessor accessor = PropertyAccessorFactory
+                                                    .getPropertyAccessor(sourceEcObj.getClass());
+                                            if (accessor != null)
                                             {
-                                                PropertyAccessorHelper.set(targetEcObj, f,
-                                                        PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                                targetEcObj = accessor.getCopy(sourceEcObj);
                                             }
                                         }
-                                    }
-                                    if (List.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
+                                        else if (PersistenceType.EMBEDDABLE.equals(embeddedColumn.getPersistenceType()))
+                                        {
+                                            targetEcObj = genericClass.newInstance();
 
+                                            for (Field f : genericClass.getDeclaredFields())
+                                            {
+                                                if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                                {
+                                                    PropertyAccessorHelper.set(targetEcObj, f,
+                                                            PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                                }
+                                            }
+                                        }
+                                        if (List.class.isAssignableFrom(ecDeclaredClass))
+                                        {
+                                            Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                            m.invoke(targetCollectionObject, targetEcObj);
+
+                                        }
+                                        else if (Set.class.isAssignableFrom(ecDeclaredClass))
+                                        {
+                                            Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                            m.invoke(targetCollectionObject, targetEcObj);
+                                        }
                                     }
-                                    else if (Set.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
-                                    }
-                                }
                             }
 
                             // Copy element collection for Map

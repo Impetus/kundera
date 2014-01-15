@@ -45,10 +45,10 @@ public class ManagedState extends NodeState
 
         // Cascade persist operation for related entities for whom cascade=ALL
         // or PERSIST
-        if (((Node) nodeStateContext).isDirty())
-        {
-            recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
-        }
+//        if (((Node) nodeStateContext).isDirty())
+//        {
+//            recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
+//        }
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ManagedState extends NodeState
 
         // Recurse remove operation for all related entities for whom
         // cascade=ALL or REMOVE
-        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
+//        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
 
     @Override
@@ -99,8 +99,8 @@ public class ManagedState extends NodeState
         // one in persistence cache
         // nodeStateContext.setDirty(true);
 
-        if (((Node) nodeStateContext).isDirty() || ((Node) nodeStateContext).isInState(DetachedState.class))
-        {
+//        if (((Node) nodeStateContext).isDirty() || ((Node) nodeStateContext).isInState(DetachedState.class))
+//        {
             ((Node) nodeStateContext).setUpdate(true);
             // Add this node into persistence cache
             nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
@@ -108,9 +108,9 @@ public class ManagedState extends NodeState
             // Cascade merge operation for all related entities for whom
             // cascade=ALL
             // or MERGE
-            recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
+//            recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
 
-        }
+//        }
     }
 
     @Override
