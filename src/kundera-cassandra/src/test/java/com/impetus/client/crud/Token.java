@@ -21,7 +21,7 @@ public class Token
     @Column(name = "token_id")
     private String id;
 
-    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
     private TokenClient client;
     
