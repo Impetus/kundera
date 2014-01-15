@@ -87,14 +87,7 @@ public class QueryResolver
             {
                 mappedClass = appMetadata.getMappedClass(jpaQuery);
             }
-
-<<<<<<< HEAD
-=======
-            // pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
-            
-            kunderaQuery = new KunderaQuery(jpaQuery);
-            
->>>>>>> 22a1baceffb70982443594b3baf36925996c70c0
+           
             kunderaQuery.isNativeQuery = true;
             
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);

@@ -193,15 +193,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result,
             String[] columnsToSelect)
     {
-<<<<<<< HEAD
         String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ,
                 Constants.INVALID, Constants.INVALID);
-=======
-        String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ, Constants.INVALID,
-                getMaxResults());
->>>>>>> 22a1baceffb70982443594b3baf36925996c70c0
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 

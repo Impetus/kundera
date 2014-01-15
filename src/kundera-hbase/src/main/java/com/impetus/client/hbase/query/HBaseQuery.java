@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
-import com.impetus.client.hbase.query.HBaseQuery.QueryTranslator;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -54,6 +53,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.query.QueryImpl;
 
 /**
  * Query implementation for HBase, translates JPQL into HBase Filters using
@@ -340,6 +340,7 @@ public class HBaseQuery extends QueryImpl
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
 
+            boolean useFilter = MetadataUtils.useSecondryIndex(clientMetadata);
             for (Object obj : query.getFilterClauseQueue())
             {
                 boolean isIdColumn = false;
