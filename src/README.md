@@ -10,6 +10,21 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 
 [Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
 
+Note
+====
+With 2.9.1 release onwards artifact group id has been changed from
+
+	<dependency>
+		<groupId>com.impetus.client</groupId>
+		<artifactId>kundera-cassandra</artifactId>
+		<version>2.9</version>
+	</dependency>
+TO
+	<dependency>
+		<groupId>com.impetus.kundera.client</groupId>
+		<artifactId>kundera-cassandra</artifactId>
+		<version>${kundera.version}</version>
+	</dependency>
 
 Up and running in 5 minutes
 ============================
