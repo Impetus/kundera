@@ -345,6 +345,7 @@ public class HBaseQuery extends QueryImpl
         {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
            
+            boolean useFilter = MetadataUtils.useSecondryIndex(clientMetadata);
             for (Object obj : query.getFilterClauseQueue())
             {
                 boolean isIdColumn = false;
@@ -359,7 +360,7 @@ public class HBaseQuery extends QueryImpl
                     {
                         isIdColumn = true;
                     }
-                    onParseFilter(condition, name, value, isIdColumn, m);
+                    onParseFilter(condition, name, value, isIdColumn, m, useFilter);
                 }
                 else
                 {
@@ -408,9 +409,9 @@ public class HBaseQuery extends QueryImpl
          * @param m
          *            entity metadata.
          */
-        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
+        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m, boolean useFilter)
         {
-            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn);
+            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn,useFilter);
             byte[] valueInBytes = getBytes(name, m, value);
 
             if (!isIdColumn)
