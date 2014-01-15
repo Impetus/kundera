@@ -111,7 +111,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.query = (CassQuery) query;
         this.entityMetadata = m;
         this.reader = reader;
-        scrollComplete = false;
+        this.scrollComplete = false;
         this.fetchSize = fetchSize;
 
     }
@@ -202,6 +202,7 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (Exception e)
         {
+
             throw new PersistenceException("Error while scrolling over results, Caused by :.", e);
         }
 
@@ -242,62 +243,51 @@ class ResultIterator<E> implements IResultIterator<E>
 
         boolean isNative = ((CassQuery) query).isNative();
 
-        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
+        if (((CassandraClientBase) client).isCql3Enabled(m))
         {
             String parsedQuery = query.onQueryOverCQL3(m, client, metaModel, null);
 
             parsedQuery = appendWhereClauseWithScroll(parsedQuery);
             results = parsedQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(),
                     m.getRelationNames(), isNative, parsedQuery) : null;
-
         }
         else
         {
-            if (isNative)
+            // Index in Inverted Index table if applicable
+            boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
+                    MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
+            Map<Boolean, List<IndexClause>> ixClause = query.prepareIndexClause(m, useInvertedIndex);
+            if (useInvertedIndex && !((QueryImpl) query).getKunderaQuery().getFilterClauseQueue().isEmpty())
             {
-                final String nativeQuery = appendWhereClauseWithScroll(queryString != null ? queryString
-                        : ((QueryImpl) query).getJPAQuery());
-                results = nativeQuery != null ? ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,
-                        isNative, nativeQuery) : null;
+                result = (List) ((CassandraEntityReader) this.reader).readFromIndexTable(m, client, ixClause);
             }
             else
             {
-                // Index in Inverted Index table if applicable
-                boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
-                        MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
-                Map<Boolean, List<IndexClause>> ixClause = query.prepareIndexClause(m, useInvertedIndex);
-                if (useInvertedIndex && !((QueryImpl) query).getKunderaQuery().getFilterClauseQueue().isEmpty())
+                boolean isRowKeyQuery = ixClause.keySet().iterator().next();
+
+                List<IndexExpression> expressions = !ixClause.get(isRowKeyQuery).isEmpty() ? ixClause
+                        .get(isRowKeyQuery).get(0).getExpressions() : null;
+
+                Map<String, byte[]> rowKeys = ((CassandraEntityReader) this.reader).getRowKeyValue(expressions,
+                        ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
+
+                byte[] minValue = start == null ? rowKeys.get(MIN_) : start;
+                byte[] maxVal = rowKeys.get(MAX_);
+
+                results = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
+                        && !m.getRelationNames().isEmpty(), m.getRelationNames(),
+                        query.getColumnList(m, ((QueryImpl) query).getKunderaQuery().getResult(), null), expressions,
+                        maxResult);
+
+                if (maxResult == 1)
                 {
-                    result = (List) ((CassandraEntityReader) this.reader).readFromIndexTable(m, client, ixClause);
+                    maxResult++;
                 }
-                else
+                else if (maxResult > 1 && checkOnEmptyResult() && maxResult != results.size())
                 {
-                    boolean isRowKeyQuery = ixClause.keySet().iterator().next();
-
-                    List<IndexExpression> expressions = !ixClause.get(isRowKeyQuery).isEmpty() ? ixClause
-                            .get(isRowKeyQuery).get(0).getExpressions() : null;
-
-                    Map<String, byte[]> rowKeys = ((CassandraEntityReader) this.reader).getRowKeyValue(expressions,
-                            ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
-
-                    byte[] minValue = start == null ? rowKeys.get(MIN_) : start;
-                    byte[] maxVal = rowKeys.get(MAX_);
-
-                    results = ((CassandraClientBase) client).findByRange(minValue, maxVal, m,
-                            m.getRelationNames() != null && !m.getRelationNames().isEmpty(), m.getRelationNames(),
-                            query.getColumnList(m, ((QueryImpl) query).getKunderaQuery().getResult(), null),
-                            expressions, maxResult);
-
-                    if (maxResult == 1)
-                    {
-                        maxResult++;
-                    }
-                    else if (maxResult > 1 && checkOnEmptyResult() && maxResult != results.size())
-                    {
-                        // means iterating over last record only, so need for
-                        // database trip anymore!.
-                        results = null;
-                    }
+                    // means iterating over last record only, so need for
+                    // database trip anymore!.
+                    results = null;
                 }
             }
         }
@@ -315,12 +305,9 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private String appendWhereClauseWithScroll(String parsedQuery)
     {
-        String queryWithoutLimit = (parsedQuery
-                .lastIndexOf(CQLTranslator.LIMIT) != -1) ? parsedQuery
-                .replaceAll(parsedQuery.substring(
-                parsedQuery.lastIndexOf(CQLTranslator.LIMIT),
-                parsedQuery.length()), "") : parsedQuery;
-                
+
+        String queryWithoutLimit = parsedQuery.replaceAll(
+                parsedQuery.substring(parsedQuery.lastIndexOf(CQLTranslator.LIMIT), parsedQuery.length()), "");
 
         CQLTranslator translator = new CQLTranslator();
 
@@ -435,9 +422,9 @@ class ResultIterator<E> implements IResultIterator<E>
                 Field embeddedField = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields()[0];
                 Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
                 Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
-                columnName = ((AbstractAttribute)partitionKey).getJPAColumnName();
+                columnName = ((AbstractAttribute) partitionKey).getJPAColumnName();
                 id = partitionKeyValue;
-                idClazz = ((AbstractAttribute)partitionKey).getBindableJavaType();
+                idClazz = ((AbstractAttribute) partitionKey).getBindableJavaType();
 
             }
             else
@@ -452,6 +439,7 @@ class ResultIterator<E> implements IResultIterator<E>
             translator.appendValue(builder, idClazz, id, false, false);
             builder.append(CQLTranslator.CLOSE_BRACKET);
             return builder.toString();
+
         }
         return null;
     }
@@ -492,11 +480,6 @@ class ResultIterator<E> implements IResultIterator<E>
         return filterIdResult;
     }
 
-    /**
-     * id attribute's value in byte[]
-     * 
-     * @return id attribute's value in byte[]
-     */
     private byte[] idValueInByteArr()
     {
         Object entity = results.get(results.size() - 1);

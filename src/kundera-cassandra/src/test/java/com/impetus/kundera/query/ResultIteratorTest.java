@@ -91,7 +91,7 @@ public class ResultIteratorTest extends BaseTest
    @Test
     public void testScrollViaCQL2ForNativeQuery() throws Exception
     {
-        setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_3_0);
+        setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_2_0);
         OnScrollForNativeQuery();
         tearDown("KunderaExamples");
     }
@@ -99,7 +99,7 @@ public class ResultIteratorTest extends BaseTest
    @Test
    public void testScrollViaCQL2() throws Exception
    {
-       setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_3_0);
+       setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_2_0);
        onScroll();
        tearDown("KunderaExamples");
    }
@@ -293,6 +293,8 @@ public class ResultIteratorTest extends BaseTest
 
     public void tearDown(final String keyspace)
     {
+//        em.close();
+//        emf.close();
         CassandraCli.dropKeySpace(keyspace);
     }
 }
