@@ -68,10 +68,9 @@ public class RDBMSQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public RDBMSQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     @Override

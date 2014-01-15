@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.StringTokenizer;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
@@ -79,10 +80,9 @@ public class MongoDBQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public MongoDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(jpaQuery, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*
@@ -147,7 +147,7 @@ public class MongoDBQuery extends QueryImpl
         isSingleResult = true;
         List results = getResultList();
         isSingleResult = false;
-        return results.isEmpty() ? results : results.get(0);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
@@ -249,6 +249,17 @@ public class MongoDBQuery extends QueryImpl
                     // Means it is a case of composite column.
                     property = property.substring(property.indexOf(".") + 1);
                     isCompositeColumn = true;
+                } /* if a composite key. "." assuming "." is part of property in case of embeddable only*/
+                else if(StringUtils.contains(property, '.'))
+                {
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    StringTokenizer tokenizer = new StringTokenizer(property,".");
+                    String embeddedAttributeAsStr = tokenizer.nextToken();
+                    String embeddableAttributeAsStr = tokenizer.nextToken();
+                    Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
+                    EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute)embeddedAttribute).getBindableJavaType());
+                    f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
+                    property = ((AbstractAttribute)embeddedAttribute).getJPAColumnName() + "." + ((AbstractAttribute)embeddableEntity.getAttribute(embeddableAttributeAsStr)).getJPAColumnName(); 
                 }
                 else
                 {

@@ -144,7 +144,7 @@ public final class HBaseUtils
      *            the id present
      * @return the operator
      */
-    public static CompareOp getOperator(String condition, boolean idPresent)
+    public static CompareOp getOperator(String condition, boolean idPresent, boolean useFilter)
     {
         if (/* !idPresent && */condition.equals("="))
         {
@@ -166,7 +166,7 @@ public final class HBaseUtils
         {
             return CompareOp.LESS_OR_EQUAL;
         }
-        else
+        else if (useFilter)
         {
             if (!idPresent)
             {
@@ -179,7 +179,7 @@ public final class HBaseUtils
 
             }
         }
-
+        return null;
     }
 
 }

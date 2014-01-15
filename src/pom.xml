@@ -12,7 +12,6 @@
   <artifactId>kundera</artifactId>
   <version>2.10-SNAPSHOT</version>
   <packaging>pom</packaging>
-
   <name>kundera-trunk</name>
   <url>https://github.com/impetus-opensource/Kundera</url>
 
@@ -125,7 +124,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-elastic-search</module>
         <module>kundera-cassandra</module>
         <module>kundera-hbase</module>
@@ -145,7 +144,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-elastic-search</module>
       </modules>
     </profile>
@@ -156,7 +155,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-rdbms</module>
       </modules>
     </profile>
@@ -168,7 +167,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-redis</module>
       </modules>
     </profile>
@@ -178,7 +177,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-oracle-nosql</module>
       </modules>
     </profile>
@@ -188,7 +187,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-couchdb</module>
       </modules>
     </profile>
@@ -198,7 +197,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-hbase</module>
       </modules>
     </profile>
@@ -208,7 +207,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
         <module>kundera-mongo</module>
       </modules>
     </profile>
@@ -218,7 +217,7 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
       <module>kundera-neo4j</module>
       </modules>
     </profile>	
@@ -228,7 +227,8 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>kundera-core</module>
+        <module>jpa-engine</module>
+        <module>kundera-elastic-search</module>
         <module>kundera-cassandra</module>
       </modules>
     </profile>

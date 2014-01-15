@@ -24,14 +24,17 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * @author vivek.mishra
  * 
  */
 
 @Entity
-@Table(name = "CompositeUser", schema = "CompositeCassandra@composite_pu")
-// @Index(index = true,columns = { "tweetBody","tweetDate" })
+@Table(name = "CompositeUser")
+@IndexCollection(columns = { @Index(name = "name") })
 public class CassandraPrimeUser
 {
 

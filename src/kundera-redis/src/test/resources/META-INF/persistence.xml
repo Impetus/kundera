@@ -15,9 +15,6 @@
 			<property name="kundera.client" value="redis" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
 			<property name="kundera.password" value="Kundera@123" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="kundera.transaction.timeout" value="30" /> -->
 			<!-- <property name="kundera.pool.size.max.active" value="10" /> -->
 			<property name="kundera.client.property" value="RedisTest.xml" />

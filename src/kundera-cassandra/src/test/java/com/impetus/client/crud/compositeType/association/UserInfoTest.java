@@ -64,6 +64,7 @@ public class UserInfoTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
+        CassandraCli.dropKeySpace("CompositeCassandra");
         loadData();
         Map<String, String> props = new HashMap<String, String>(1);
         props.put("kundera.ddl.auto.prepare", "");

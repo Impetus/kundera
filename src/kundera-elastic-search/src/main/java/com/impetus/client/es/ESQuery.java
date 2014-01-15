@@ -44,24 +44,10 @@ import com.impetus.kundera.query.QueryImpl;
 public class ESQuery<E> extends QueryImpl
 {
 
-    /**
-     * Constructor using fields.
-     * 
-     * @param query
-     *            jpa query.
-     * @param persistenceDelegator
-     *            persistence delegator.
-     */
-    public ESQuery(String query, PersistenceDelegator persistenceDelegator)
-    {
-        super(query, persistenceDelegator);
-    }
 
-    public ESQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public ESQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
-
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*

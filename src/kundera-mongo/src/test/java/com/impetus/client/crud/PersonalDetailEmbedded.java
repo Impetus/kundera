@@ -16,6 +16,7 @@
 
 package com.impetus.client.crud;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
@@ -26,6 +27,7 @@ import javax.persistence.Embedded;
 @Embeddable
 public class PersonalDetailEmbedded
 {
+    @Column(name="PHONENO")
     private long phoneNo;
 
     private String emailId;

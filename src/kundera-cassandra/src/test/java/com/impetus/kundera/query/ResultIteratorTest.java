@@ -24,6 +24,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.elasticsearch.common.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,12 +80,32 @@ public class ResultIteratorTest extends BaseTest
     }
 
     @Test
-    public void testScrollViaCQL2() throws Exception
+    public void testScrollViaCQL3ForNativeQuery() throws Exception
     {
         setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_3_0);
-        onScroll();
+        OnScrollForNativeQuery();
         tearDown("KunderaExamples");
     }
+    
+    
+   @Test
+    public void testScrollViaCQL2ForNativeQuery() throws Exception
+    {
+        setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_2_0);
+        OnScrollForNativeQuery();
+        tearDown("KunderaExamples");
+    }
+   
+   @Test
+   public void testScrollViaCQL2() throws Exception
+   {
+       setUp(SEC_IDX_CASSANDRA_TEST,"KunderaExamples",CassandraConstants.CQL_VERSION_2_0);
+       onScroll();
+       tearDown("KunderaExamples");
+   }
+   
+   
+   
 
     @Test
     public void testCQL3ScrollAssociation() throws Exception 
@@ -155,11 +176,25 @@ public class ResultIteratorTest extends BaseTest
         Assert.assertTrue(count == expected);
     }
     
+    public void OnScrollForNativeQuery()
+    {
+    	Object p = prepareData(UUID.randomBase64UUID(), 99);
+    	
+        em.persist(p);
+    	em.flush();
+        em.clear();
+       
+       assertOnScrollForNativeQuery(null,1);
+     }
+    
+    
     private void onScroll()
     {
-        Object p1 = prepareData("1", 10);
+        
+        Object p1= prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
+       
 
         em.persist(p1);
         em.persist(p2);
@@ -167,9 +202,7 @@ public class ResultIteratorTest extends BaseTest
 
         em.flush();
         em.clear();
-        final String queryWithoutClause = "Select p from PersonCassandra p";
 
-        assertOnScroll(queryWithoutClause,3);
 
         final String queryWithClause = "Select p from PersonCassandra p where p.personName = vivek";
         
@@ -199,25 +232,40 @@ public class ResultIteratorTest extends BaseTest
         assertOnScroll(queryWithIdClause,1);
     }
 
+   
+    private void assertOnScrollForNativeQuery(final String queryWithoutClause, int expectedCount)
+    {
+        Query query = (Query) em.createNamedQuery("q",
+                PersonCassandra.class);
+        
+       assertOnFetch(query,10,expectedCount);  
+        }
+    
+    
+    
+    
     private void assertOnScroll(final String queryWithoutClause, int expectedCount)
     {
-        Query query = (Query) em.createQuery(queryWithoutClause,
+        Query query = (Query) em.createNamedQuery(queryWithoutClause,
                 PersonCassandra.class);
         
         assertOnFetch(query, 0, expectedCount);
         assertOnFetch(query,2,expectedCount);  // less records
 
-        assertOnFetch(query,4,expectedCount); // more fetch size than available in db.
+        assertOnFetch(query,5,expectedCount); // more fetch size than available in db.
         assertOnFetch(query,3,expectedCount); // more fetch size than available in db.
         
         assertOnFetch(query,null,expectedCount); //set to null; 
         
     }
 
-    private void assertOnFetch(Query query, Integer fetchSize, int available)
+    
+   private void assertOnFetch(Query query, Integer fetchSize, int available)
     {
         query.setFetchSize(fetchSize);
         int counter=0;
+        try
+        {
         Iterator<PersonCassandra> iter = query.iterate();
 
         while (iter.hasNext())
@@ -236,10 +284,17 @@ public class ResultIteratorTest extends BaseTest
         {
             Assert.assertNotNull(nsex.getMessage());
         }
+        }catch(UnsupportedOperationException e)
+        { 
+        	Assert.assertEquals("Iteration not supported over native queries",e.getMessage());
+        }
+        
     }
 
     public void tearDown(final String keyspace)
     {
+//        em.close();
+//        emf.close();
         CassandraCli.dropKeySpace(keyspace);
     }
 }

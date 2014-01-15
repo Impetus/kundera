@@ -20,6 +20,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -28,7 +30,10 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "PERSONCASSANDRA", schema = "KunderaExamples@secIdxCassandraTest")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
-public class PersonCassandra
+@NamedNativeQuery(name="q", query="select * from \"PERSONCASSANDRA\"")
+
+
+  public class PersonCassandra
 {
     public static final String UID = "uid";
 

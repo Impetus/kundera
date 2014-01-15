@@ -97,10 +97,9 @@ public class CassQuery extends QueryImpl
      * @param persistenceDelegator
      *            the persistence delegator
      */
-    public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*
@@ -837,13 +836,17 @@ public class CassQuery extends QueryImpl
     @Override
     public Iterator iterate()
     {
+    	if(kunderaQuery.isNative())
+    	{
+    		throw new UnsupportedOperationException("Iteration not supported over native queries");
+    	}
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         externalProperties = ((CassandraClientBase) client).getExternalProperties();
 
         if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
-            throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");
+            throw new UnsupportedOperationException("Scrolling over cassandra is unsupported for lucene queries");
         }
 
         return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(),

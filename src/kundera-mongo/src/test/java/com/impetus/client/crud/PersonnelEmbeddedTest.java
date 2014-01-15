@@ -29,6 +29,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.client.utils.MongoUtils;
+
 /**
  * @author Kuldeep.Mishra
  * 
@@ -55,6 +58,7 @@ public class PersonnelEmbeddedTest
     @After
     public void tearDown() throws Exception
     {
+        MongoUtils.dropDatabase(emf, "mongoTest");
         em.close();
         emf.close();
     }
@@ -106,5 +110,27 @@ public class PersonnelEmbeddedTest
         Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
         Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
         Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+        
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 and p.age=24").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertNotNull(personnels.get(0));
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail());
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
+        Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
+        Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 and p.age=2").getResultList();
+        Assert.assertTrue(personnels.isEmpty());
+
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 or p.age=24").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertNotNull(personnels.get(0));
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail());
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
+        Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
+        Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+
     }
 }

@@ -6,7 +6,7 @@
 		<groupId>com.impetus</groupId>
 		<version>2.10-SNAPSHOT</version>
 	</parent>
-	<groupId>com.impetus.kundera.rest</groupId>
+	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>kundera-rest</artifactId>
 	<name>kundera-rest</name>
 	<url>http://maven.apache.org</url>
@@ -47,18 +47,19 @@
 
 		<!-- Kundera Libraries -->
 		<dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
+	        	<groupId>com.impetus.kundera.core</groupId>
+                	<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
-			<groupId>com.impetus.client</groupId>
+			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>

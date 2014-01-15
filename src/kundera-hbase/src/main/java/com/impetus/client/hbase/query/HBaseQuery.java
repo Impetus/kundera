@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
+import com.impetus.client.hbase.query.HBaseQuery.QueryTranslator;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -53,7 +54,6 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
-import com.impetus.kundera.query.QueryImpl;
 
 /**
  * Query implementation for HBase, translates JPQL into HBase Filters using
@@ -76,10 +76,9 @@ public class HBaseQuery extends QueryImpl
      * @param persistenceDelegator
      *            persistence delegator interface.
      */
-    public HBaseQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*
@@ -355,7 +354,7 @@ public class HBaseQuery extends QueryImpl
                     {
                         isIdColumn = true;
                     }
-                    onParseFilter(condition, name, value, isIdColumn, m);
+                    onParseFilter(condition, name, value, isIdColumn, m, useFilter);
                 }
                 else
                 {
@@ -404,9 +403,9 @@ public class HBaseQuery extends QueryImpl
          * @param m
          *            entity metadata.
          */
-        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
+        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m, boolean useFilter)
         {
-            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn);
+            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn,useFilter);
             byte[] valueInBytes = getBytes(name, m, value);
 
             if (!isIdColumn)

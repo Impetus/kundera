@@ -14,9 +14,6 @@
 			<property name="kundera.keyspace" value="KunderaExamples" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
 			<property name="kundera.ddl.auto.prepare" value="create" />
@@ -31,9 +28,6 @@
 			<property name="kundera.keyspace" value="KunderaHbaseTests" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
 			<property name="kundera.ddl.auto.prepare" value="create"/>
@@ -50,9 +44,6 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 
@@ -66,9 +57,6 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaTest.xml" />
 		</properties>
 	</persistence-unit>
@@ -82,9 +70,6 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.batch.size" value="5" />
 		</properties>
 	</persistence-unit>
@@ -97,9 +82,6 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="twibaseTest">
@@ -110,9 +92,6 @@
 			<property name="kundera.keyspace" value="KunderaExamples" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
 			<property name="kundera.ddl.auto.prepare" value="create" />
@@ -128,9 +107,6 @@
 			<property name="kundera.keyspace" value="kundera" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 		</properties>
 	</persistence-unit>

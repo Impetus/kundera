@@ -43,10 +43,9 @@ import com.impetus.kundera.query.QueryImpl;
 public class RedisQuery extends QueryImpl
 {
 
-    public RedisQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public RedisQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(jpaQuery, persistenceDelegator);
-        this.kunderaQuery = kunderaQuery;
+        super(kunderaQuery, persistenceDelegator);
     }
 
     /*
