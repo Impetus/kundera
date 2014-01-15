@@ -262,7 +262,7 @@ public class MongoDBQuery extends QueryImpl
                     Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
                     EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute)embeddedAttribute).getBindableJavaType());
                     f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
-                    
+                    property = ((AbstractAttribute)embeddedAttribute).getJPAColumnName() + "." + ((AbstractAttribute)embeddableEntity.getAttribute(embeddableAttributeAsStr)).getJPAColumnName(); 
                 }
                 else
                 {

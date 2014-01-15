@@ -29,6 +29,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.client.utils.MongoUtils;
+
 /**
  * @author Kuldeep.Mishra
  * 
@@ -55,6 +58,7 @@ public class PersonnelEmbeddedTest
     @After
     public void tearDown() throws Exception
     {
+        MongoUtils.dropDatabase(emf, "mongoTest");
         em.close();
         emf.close();
     }
