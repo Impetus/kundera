@@ -458,7 +458,7 @@ public class MongoDBQuery extends QueryImpl
             orderByClause = new BasicDBObject();
             for (SortOrdering order : orders)
             {
-                orderByClause.append(order.getColumnName(), order.getColumnName().equals(SortOrder.ASC) ? 1 : -1);
+                orderByClause.append(order.getColumnName(), order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
             }
         }
 
