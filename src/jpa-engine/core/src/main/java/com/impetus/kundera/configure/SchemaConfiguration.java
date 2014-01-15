@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.OrderBy;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -379,6 +382,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     private void addColumnToTableInfo(EntityMetadata entityMetadata, Type type, TableInfo tableInfo)
     {
         // Add columns to table info.
+
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -390,14 +394,17 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
+            
             if (!attr.isAssociation())
             {
                 if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
                 {
+                  
+                    
                     EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
 
                     EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(tableInfo, embeddable, attr.getName(),
-                            attr.getJavaType());
+                            attr.getJavaType(), ((Field)((Field)attr.getJavaMember())));
 
                     if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
                     {
@@ -406,8 +413,9 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 }
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
+                   
                     ColumnInfo columnInfo = getColumn(tableInfo, attr,
-                            columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null);
+                            columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null, null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                     {
                         tableInfo.addColumnInfo(columnInfo);
@@ -495,11 +503,19 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      * @param embeddableType
      * @param embeddableColName
      * @param embeddedEntityClass
+     * @param field 
      * @return
      */
     private EmbeddedColumnInfo getEmbeddedColumn(TableInfo tableInfo, EmbeddableType embeddableType,
-            String embeddableColName, Class embeddedEntityClass)
+            String embeddableColName, Class embeddedEntityClass, Field field)
     {
+       
+        String[] orderByColumns = null;
+        if(field.isAnnotationPresent(OrderBy.class))
+        {
+            OrderBy order = (OrderBy) field.getAnnotation(OrderBy.class);
+            orderByColumns = order.value().split("\\s*,\\s*");
+        }
         EmbeddedColumnInfo embeddedColumnInfo = new EmbeddedColumnInfo(embeddableType);
         embeddedColumnInfo.setEmbeddedColumnName(embeddableColName);
         Map<String, PropertyIndex> indexedColumns = IndexProcessor.getIndexesOnEmbeddable(embeddedEntityClass);
@@ -511,7 +527,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            columns.add(getColumn(tableInfo, attr, indexedColumns.get(attr.getName())));
+            columns.add(getColumn(tableInfo, attr, indexedColumns.get(attr.getName()), orderByColumns));
         }
         embeddedColumnInfo.setColumns(columns);
         return embeddedColumnInfo;
@@ -524,9 +540,17 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      *            of Column.
      * @return Object of ColumnInfo.
      */
-    private ColumnInfo getColumn(TableInfo tableInfo, Attribute column, PropertyIndex indexedColumn)
+    private ColumnInfo getColumn(TableInfo tableInfo, Attribute column, PropertyIndex indexedColumn, String[] orderByColumns)
     {
         ColumnInfo columnInfo = new ColumnInfo();
+       
+        if(column.getJavaType().isAnnotationPresent(OrderBy.class))
+        {
+            OrderBy order = (OrderBy) column.getJavaType().getAnnotation(OrderBy.class);
+            orderByColumns = order.value().split("\\s*,\\s*");
+            
+        }
+        columnInfo.setOrderBy(getOrderByColumn(orderByColumns, column));
 
         if (column.getJavaType().isEnum())
         {
@@ -545,7 +569,39 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             tableInfo.addToIndexedColumnList(indexInfo);
             // Add more if required
         }
+        
         return columnInfo;
+    }
+    
+    /**
+     * getOrderByColumn  method return order by value of the column
+     * 
+     * @param String[] orderByColumns
+     * 
+     * @param Attribute column
+     * 
+     * @return orderColumnValue.
+     */
+    private String getOrderByColumn(String[] orderByColumns, Attribute column)
+    {
+
+        if (orderByColumns != null)
+        {
+            for (String orderColumn : orderByColumns)
+            {
+                String[] orderValue = orderColumn.split("\\s");
+                String orderColumnName =  orderValue[0].substring(orderValue[0].lastIndexOf('.')+1);
+                String orderColumnValue = orderValue[1];
+               
+                if (orderColumnName.equals(((AbstractAttribute) column).getName())
+                        || orderColumnName.equals(((AbstractAttribute) column).getJPAColumnName()))
+                {
+                    return orderColumnValue;
+                }
+            }
+        }
+        return null;
+
     }
 
     /**

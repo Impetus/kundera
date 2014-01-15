@@ -16,7 +16,6 @@
 package com.impetus.client.cassandra.thrift;
 
 import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -142,6 +141,8 @@ public final class CQLTranslator
     public static final String IN_CLAUSE = "IN";
     
     public static final String OPEN_BRACKET = "(";
+    
+    public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
 
     public CQLTranslator()
     {
