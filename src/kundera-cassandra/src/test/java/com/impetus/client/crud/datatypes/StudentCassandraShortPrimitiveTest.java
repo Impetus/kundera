@@ -553,27 +553,27 @@ public class StudentCassandraShortPrimitiveTest extends CassandraBase
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 
@@ -639,15 +639,15 @@ public class StudentCassandraShortPrimitiveTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

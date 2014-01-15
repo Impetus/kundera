@@ -51,7 +51,7 @@ public class TwitterService extends SuperDao implements Twitter
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                
             }
         }
 

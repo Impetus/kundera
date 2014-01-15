@@ -119,15 +119,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            e.printStackTrace();
+            
         }
         catch (ClientProtocolException e)
         {
-            e.printStackTrace();
+            
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         finally
         {
@@ -148,15 +148,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            e.printStackTrace();
+            
         }
         catch (ClientProtocolException e)
         {
-            e.printStackTrace();
+            
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         finally
         {

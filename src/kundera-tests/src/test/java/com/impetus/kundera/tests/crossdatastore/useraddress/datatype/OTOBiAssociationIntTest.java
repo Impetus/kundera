@@ -179,7 +179,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }

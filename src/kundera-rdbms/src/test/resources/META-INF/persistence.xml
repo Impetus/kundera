@@ -58,7 +58,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="hibernate.max_fetch_depth" value="0" />
 			<!-- <property name="hibernate.show_sql" value="true" /> <property name="hibernate.format_sql" 
 				value="true" /> -->
@@ -99,7 +99,7 @@
 			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" />
 			<property name="hibernate.max_fetch_depth" value="0" /> -->
 			<property name="kundera.client.property" value="hibernate.properties" />
-			<property name="kundera.keyspace" value="KunderaTests" />
+			<!-- <property name="kundera.keyspace" value="KunderaTests" /> -->
 		</properties>
 	</persistence-unit>
 

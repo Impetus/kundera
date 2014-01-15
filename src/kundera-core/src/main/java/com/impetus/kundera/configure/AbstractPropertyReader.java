@@ -101,8 +101,7 @@ public abstract class AbstractPropertyReader
             }
         
         }
-//        else
-//        {
+
         if(inStream != null)
         {
             xStream = getXStreamObject();

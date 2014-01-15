@@ -5,27 +5,27 @@ import java.sql.Date;
 public class SqlDateDataGenerator implements DataGenerator<Date>
 {
 
-    private static final Long LONG = new Long(123456789);
+    private static final Date RANDOM_DATE = new Date(System.currentTimeMillis());
 
     @Override
     public Date randomValue()
     {
 
-        return new Date(LONG);
+        return RANDOM_DATE;
     }
 
     @Override
     public Date maxValue()
     {
 
-        return new Date(Long.MAX_VALUE);
+        return new Date(2100, 1, 1);
     }
 
     @Override
     public Date minValue()
     {
 
-        return new Date(0L);
+        return new Date(1970, 1, 1);
     }
 
     @Override

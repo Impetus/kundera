@@ -489,19 +489,19 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         }
         catch (NotFoundException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

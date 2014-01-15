@@ -101,7 +101,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
     }
@@ -123,7 +123,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -138,7 +138,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -200,7 +200,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -219,7 +219,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }

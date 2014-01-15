@@ -178,7 +178,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -196,7 +196,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }

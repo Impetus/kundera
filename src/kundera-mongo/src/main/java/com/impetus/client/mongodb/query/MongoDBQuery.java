@@ -122,12 +122,7 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*
-                                                       * query == null ? true :
-                                                       * appMetadata
-                                                       * .isNative(getJPAQuery
-                                                       * ())
-                                                       */;
+            boolean isNative = kunderaQuery.isNative();
 
             if (isNative)
             {
@@ -166,12 +161,7 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*
-                                                       * query == null ? true :
-                                                       * appMetadata
-                                                       * .isNative(getJPAQuery
-                                                       * ())
-                                                       */;
+            boolean isNative = kunderaQuery.isNative();
 
             if (isNative)
             {
@@ -228,10 +218,8 @@ public class MongoDBQuery extends QueryImpl
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
-                // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                // String value = filter.getValue().toString();
                 Object value = filter.getValue();
 
                 // value is string but field.getType is different, then get
@@ -241,7 +229,6 @@ public class MongoDBQuery extends QueryImpl
 
                 // if alias is still present .. means it is an enclosing
                 // document search.
-                //
 
                 if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {

@@ -137,7 +137,7 @@ public class RedisGeneratedIdTest
         }
         catch (KunderaException e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
 

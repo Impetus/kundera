@@ -315,7 +315,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(query, kunderaQuery, delegator);        
         queryObj.setParameter("salary", 500.0);       
-        Assert.assertNotNull(queryObj.getLuceneQueryFromJPAQuery()); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         onassertBi1MAssociation(delegator);

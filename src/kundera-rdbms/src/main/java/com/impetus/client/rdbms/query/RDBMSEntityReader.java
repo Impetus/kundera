@@ -50,12 +50,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -186,40 +184,22 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         List<EnhanceEntity> ls = null;
         List result = ((HibernateClient) client).find(sqlQuery, relationNames, m);
 
-        try
+        if (!result.isEmpty())
         {
-            if (!result.isEmpty())
+            ls = new ArrayList<EnhanceEntity>(result.size());
+            for (Object o : result)
             {
-                ls = new ArrayList<EnhanceEntity>(result.size());
-                for (Object o : result)
+                EnhanceEntity entity = null;
+                if (!o.getClass().isAssignableFrom(EnhanceEntity.class))
                 {
-                    Class clazz = m.getEntityClazz();
-                    Object entity = clazz.newInstance();
-                    boolean noRelationFound = true;
-                    if (!o.getClass().isAssignableFrom(clazz))
-                    {
-                        entity = ((Object[]) o)[0];
-                        noRelationFound = false;
-                    }
-                    else
-                    {
-                        entity = o;
-                    }
-                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), noRelationFound ? null
-                            : populateRelations(relationNames, (Object[]) o));
-                    ls.add(e);
+                    entity = new EnhanceEntity(o, getId(o, m), null);
                 }
+                else
+                {
+                    entity = (EnhanceEntity) o;
+                }
+                ls.add(entity);
             }
-        }
-        catch (InstantiationException e)
-        {
-            log.error("Error during populating entities:" + e.getMessage());
-            throw new EntityReaderException(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error during populating entities:" + e.getMessage());
-            throw new EntityReaderException(e);
         }
         return ls;
     }
@@ -304,18 +284,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 }
             }
         }
-        for (Relation r : entityMetadata.getRelations())
-        {
-            if (!r.getType().equals(ForeignKey.MANY_TO_MANY)
-                    && (r.getProperty().isAnnotationPresent(OneToOne.class) && StringUtils.isBlank(r.getMappedBy()) || r
-                            .getProperty().isAnnotationPresent(ManyToOne.class)))
-            {
-                queryBuilder.append(aliasName);
-                queryBuilder.append(".");
-                queryBuilder.append(r.getJoinColumnName());
-                queryBuilder.append(", ");
-            }
-        }
 
         // Remove last ","
         queryBuilder.deleteCharAt(queryBuilder.lastIndexOf(","));
@@ -391,8 +359,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                                         (Field) embeddedAttribute.getJavaMember());
                                 addClause(entityMetadata, aliasName, queryBuilder, entityType, embeddedAttributevalue,
                                         condition, propertyName, embeddedAttribute);
+                                queryBuilder.append(" and ");
                             }
 
+                            queryBuilder.delete(queryBuilder.lastIndexOf("and"), queryBuilder.lastIndexOf("and") + 3);
                         }
                         else
                         {
@@ -452,6 +422,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     {
         boolean isString = isStringProperty(entityType, attribute);
 
+//        queryBuilder.append(aliasName);
+//        queryBuilder.append(".");
         queryBuilder.append(StringUtils.replace(((AbstractAttribute) attribute).getJPAColumnName(), aliasName,
                 aliasName));
 
@@ -603,6 +575,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             }
             return o != null ? new EnhanceEntity(o, getId(o, m), null) : null;
         }
+
+        // return super.findById(primaryKey, m, client);
     }
 
     /**

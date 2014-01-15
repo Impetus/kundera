@@ -47,7 +47,7 @@ public class TwitterServiceHbase extends SuperDaoHbase implements TwitterHbase
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                
             }
         }
 

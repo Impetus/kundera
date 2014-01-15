@@ -16,26 +16,24 @@
 package com.impetus.kundera.client.crud.mappedsuperclass;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- * Debit transaction extends {@link Transaction}
+ * Credit transaction extends {@link Transaction}
  *
  */
+
 @Entity
-@DiscriminatorValue(value="debit")
-
-@AttributeOverrides(value = { @AttributeOverride(name = "txId", column = @Column(name = "DEBIT_ID")),
-        @AttributeOverride(name = "bankIdentifier", column = @Column(name = "DEBIT_BANK_IDENT")),
-        @AttributeOverride(name = "transactionDt", column = @Column(name = "TX_DT")) })
-
-public class DebitTransaction extends Transaction
+@Table(name = "TRNX_CREDIT", schema = "TESTDB")
+@DiscriminatorValue(value = "CREDIT")
+@AttributeOverride(name="bankIdentifier",column= @Column(name="CREDIT_BANK_IDENT"))
+public class RDBMSCreditTransaction extends Transaction
 {
 
     @Column
@@ -45,7 +43,7 @@ public class DebitTransaction extends Transaction
     @Enumerated(EnumType.STRING)
     private Status txStatus;
 
-    public DebitTransaction()
+    public RDBMSCreditTransaction()
     {
         
     }

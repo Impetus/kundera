@@ -76,14 +76,9 @@ public final class MongoDBDataHandler
     public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m,
             DBObject document, List<String> relations, Map<String, Object> relationValue)
     {
-        // Entity object
-        // Object entity = null;
-
         // Map to hold property-name=>foreign-entity relations
         try
         {
-            // entity = entityClass.newInstance();
-
             // Populate primary key column
             Object rowKey = document.get("_id");
             Class<?> rowKeyValueClass = rowKey.getClass();

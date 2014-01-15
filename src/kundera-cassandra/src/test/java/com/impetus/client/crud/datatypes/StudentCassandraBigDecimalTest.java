@@ -76,21 +76,21 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         // Insert max value of BigDecimal
         StudentBigDecimal studentMax = new StudentBigDecimal();
         studentMax.setAge((Short) getMaxValue(short.class));
-        studentMax.setId((BigDecimal) getMaxValue(BigDecimal.class));
+        studentMax.setStudentId((BigDecimal) getMaxValue(BigDecimal.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of BigDecimal
         StudentBigDecimal studentMin = new StudentBigDecimal();
         studentMin.setAge((Short) getMinValue(short.class));
-        studentMin.setId((BigDecimal) getMinValue(BigDecimal.class));
+        studentMin.setStudentId((BigDecimal) getMinValue(BigDecimal.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of BigDecimal
         StudentBigDecimal student = new StudentBigDecimal();
         student.setAge((Short) getRandomValue(short.class));
-        student.setId((BigDecimal) getRandomValue(BigDecimal.class));
+        student.setStudentId((BigDecimal) getRandomValue(BigDecimal.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
         em.close();
@@ -183,7 +183,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
             Assert.assertEquals(getMinValue(String.class), student.getName());
             count++;
@@ -211,13 +211,13 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         int count = 0;
         for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(BigDecimal.class)))
+            else if (student.getStudentId().equals(getMinValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -245,7 +245,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -272,7 +272,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -373,7 +373,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -400,7 +400,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -428,7 +428,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -436,7 +436,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -464,7 +464,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -492,7 +492,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         count = 0;
         for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -500,7 +500,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -525,13 +525,13 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         int count = 0;
         for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(BigDecimal.class)))
+            else if (student.getStudentId().equals(getMinValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -539,7 +539,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -609,15 +609,15 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

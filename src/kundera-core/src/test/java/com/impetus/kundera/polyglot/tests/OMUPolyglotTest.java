@@ -146,7 +146,7 @@ public class OMUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -166,7 +166,7 @@ public class OMUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }

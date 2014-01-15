@@ -70,6 +70,10 @@ public class RDBMSCli
         conn = DriverManager.getConnection("jdbc:hsqldb:mem:" + db_file_name_prefix, // filenames
                 "sa", // username
                 ""); // password
+        
+        conn.setAutoCommit(true);
+        
+//        conn.setClientInfo("hsqldb.write_delay", "false");
     }
 
     public void shutdown() throws SQLException
@@ -80,7 +84,7 @@ public class RDBMSCli
         // db writes out to files and performs clean shuts down
         // otherwise there will be an unclean shutdown
         // when program ends
-        st.execute("clean SHUTDOWN");
+        st.execute("SHUTDOWN");
         closeConnection();
     }
 
@@ -135,7 +139,6 @@ public class RDBMSCli
         {
             System.out.println("db error : " + expression);
         }
-
         st.close();
     } // void update()
 
@@ -182,7 +185,7 @@ public class RDBMSCli
     public void dropSchema(final String schemaName) throws SQLException
     {
         String sql = "drop schema " + schemaName;
-        update(sql);
+        update(sql);        
     }
 
     public static void main(String[] args)

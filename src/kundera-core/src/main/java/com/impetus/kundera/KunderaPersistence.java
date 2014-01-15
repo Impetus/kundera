@@ -74,7 +74,7 @@ public class KunderaPersistence implements PersistenceProvider
         {
             throw new KunderaException("Persistence unit should not be null");
         }
-        synchronized (persistenceUnit)
+        synchronized (this)
         {
             try
             {

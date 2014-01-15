@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ import com.impetus.client.crud.entities.PersonRDBMS;
 public class PersonRdbmsTest extends BaseTest
 {
 
-    private static final String SCHEMA = "KunderaTests";
+    private static final String SCHEMA = "testdb";
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -45,7 +46,7 @@ public class PersonRdbmsTest extends BaseTest
 
     private Map<Object, Object> col;
 
-    // private RDBMSCli cli;
+    private RDBMSCli cli;
 
     /**
      * Sets the up.
@@ -64,23 +65,22 @@ public class PersonRdbmsTest extends BaseTest
     @Test
     public void onInsertRdbms() throws Exception
     {
-
-        // try
-        // {
-        // cli = new RDBMSCli(SCHEMA);
-        // cli.createSchema(SCHEMA);
-        // cli.update("CREATE TABLE KUNDERATESTS.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
-        // }
-        // catch (Exception e)
-        // {
-        // e.printStackTrace();
-        // cli.update("DELETE FROM KUNDERATESTS.PERSON");
-        // cli.update("DROP TABLE KUNDERATESTS.PERSON");
-        // cli.update("DROP SCHEMA KUNDERATESTS");
-        // cli.update("CREATE TABLE KUNDERATESTS.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
-        // // nothing
-        // // do
-        // }
+        try
+        {
+            cli = new RDBMSCli(SCHEMA);
+            cli.createSchema(SCHEMA);
+            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
+        }
+        catch (Exception e)
+        {
+            
+            cli.update("DELETE FROM TESTDB.PERSON");
+            cli.update("DROP TABLE TESTDB.PERSON");
+            cli.update("DROP SCHEMA TESTDB");
+            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
+            // nothing
+            // do
+        }
 
         Object p1 = prepareRDBMSInstance("1", 10);
         Object p2 = prepareRDBMSInstance("2", 20);
@@ -198,17 +198,26 @@ public class PersonRdbmsTest extends BaseTest
 
         Query findQuery;
         List<PersonRDBMS> allPersons;
-        findQuery = em.createNativeQuery("Select * from PERSON where PERSON_NAME IN ('vivek' , 'kk')",
+        findQuery = em.createNativeQuery("Select * from testdb.PERSON where PERSON_NAME IN ('vivek' , 'kk')",
                 PersonRDBMS.class);
 
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertEquals(3, allPersons.size());
 
-        findQuery = em.createNativeQuery("Select * from PERSON where AGE IN (10, 25)", PersonRDBMS.class);
+        findQuery = em.createNativeQuery("Select * from testdb.PERSON where AGE IN (10, 25)", PersonRDBMS.class);
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertEquals(1, allPersons.size());
+
+        findQuery = em.createNativeQuery("Select count(*) from testdb.PERSON", PersonRDBMS.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+        Assert.assertTrue(allPersons.get(0) instanceof Map);
+        Assert.assertTrue(((Map<String, Object>) allPersons.get(0)).get("C1") != null);
+        Assert.assertTrue(((Map<String, Object>) allPersons.get(0)).get("C1") instanceof BigInteger);
+        Assert.assertTrue(((BigInteger) ((Map<String, Object>) allPersons.get(0)).get("C1")).intValue() == 3);
     }
 
     // @Test
@@ -241,13 +250,7 @@ public class PersonRdbmsTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
+    {
         for (Object val : col.values())
         {
             em.remove(val);
@@ -256,15 +259,15 @@ public class PersonRdbmsTest extends BaseTest
         emf.close();
         try
         {
-            // cli.update("DELETE FROM KUNDERATESTS.PERSON");
-            // cli.update("DROP TABLE KUNDERATESTS.PERSON");
-            // cli.update("DROP SCHEMA KUNDERATESTS");
-            // cli.closeConnection();
+            cli.update("DELETE FROM TESTDB.PERSON");
+            cli.update("DROP TABLE TESTDB.PERSON");
+            cli.update("DROP SCHEMA TESTDB");
+            cli.closeConnection();
         }
         catch (Exception e)
         {
             // Nothing to do
         }
-        // cli.dropSchema("KUNDERATESTS");
+        // cli.dropSchema("TESTDB");
     }
 }

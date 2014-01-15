@@ -109,12 +109,12 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
 

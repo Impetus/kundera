@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.sql.SQLException;
+
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Query;
 
@@ -26,22 +28,24 @@ import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
- * @author vivek.mishra
- * Junit for  {@link MappedSuperclass} in RDBMS
- *
+ * @author vivek.mishra Junit for {@link MappedSuperclass} in RDBMS
+ * 
  */
 public class RDBMSMappedSuperClassTest extends MappedSuperClassBase
 {
 
     private RDBMSCli cli;
 
+    private static final String SCHEMA = "testdb";
+
     @Before
     public void setUp() throws Exception
     {
+        createSchema();
         _PU = "mappedPu";
         setUpInternal();
     }
-    
+
     @Test
     public void test() throws Exception
     {
@@ -51,23 +55,64 @@ public class RDBMSMappedSuperClassTest extends MappedSuperClassBase
         assertInternal(true);
     }
 
-    
     @After
     public void tearDown() throws Exception
     {
-//        // Delete by query.
-        String deleteQuery = "Delete from CreditTransaction p";
-        
+        // // Delete by query.
+        String deleteQuery = "Delete from RDBMSCreditTransaction p";
+
         Query query = em.createQuery(deleteQuery);
         query.executeUpdate();
 
-        deleteQuery = "Delete from DebitTransaction p";
-        
+        deleteQuery = "Delete from RDBMSDebitTransaction p";
+
         query = em.createQuery(deleteQuery);
         query.executeUpdate();
 
         tearDownInternal();
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        dropSchema();
 
+    }
+
+    private void createSchema() throws SQLException
+    {
+        try
+        {
+            cli = new RDBMSCli(SCHEMA);
+            cli.createSchema(SCHEMA);
+            cli.update("CREATE TABLE TESTDB.TRNX_CREDIT (txId VARCHAR(255) PRIMARY KEY, amount int, txStatus VARCHAR(255), tx_type VARCHAR(255), CREDIT_BANK_IDENT VARCHAR(255), transactionDt date)");
+            cli.update("CREATE TABLE TESTDB.DebitTransaction (DEBIT_ID VARCHAR(255) PRIMARY KEY, amount int, DEBIT_BANK_IDENT VARCHAR(256), txStatus VARCHAR(255), TX_DT date, tx_type VARCHAR(255))");
+        }
+        catch (Exception e)
+        {
+
+            cli.update("DELETE FROM TESTDB.TRNX_CREDIT");
+            cli.update("DELETE FROM TESTDB.ADDRESS");
+            cli.update("DROP TABLE TESTDB.TRNX_CREDIT");
+            cli.update("DROP TABLE TESTDB.ADDRESS");
+            cli.update("DROP SCHEMA TESTDB");
+            cli.update("CREATE TABLE TESTDB.TRNX_CREDIT (txId VARCHAR(255) PRIMARY KEY, amount int, txStatus VARCHAR(255), tx_type VARCHAR(255), CREDIT_BANK_IDENT VARCHAR(255), transactionDt date)");
+            cli.update("CREATE TABLE TESTDB.DebitTransaction (DEBIT_ID VARCHAR(255) PRIMARY KEY, amount int, DEBIT_BANK_IDENT VARCHAR(256), txStatus VARCHAR(255), TX_DT date, tx_type VARCHAR(255))");
+            // nothing
+            // do
+        }
+    }
+
+    private void dropSchema()
+    {
+        try
+        {
+            cli.update("DELETE FROM TESTDB.TRNX_CREDIT");
+            cli.update("DELETE FROM TESTDB.DebitTransaction");
+            cli.update("DROP TABLE TESTDB.TRNX_CREDIT");
+            cli.update("DROP TABLE TESTDB.DebitTransaction");
+            cli.update("DROP SCHEMA TESTDB");
+            cli.closeConnection();
+        }
+        catch (Exception e)
+        {
+            // Nothing to do
+        }
     }
 }

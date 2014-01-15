@@ -92,7 +92,7 @@ public class EntityManagerFactoryImplTest
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            
         }
         Assert.assertEquals("emf1", c1.t.getName());
         checkEMFPropertiesAfterCreating(_PU1, c1.emf);
@@ -105,7 +105,7 @@ public class EntityManagerFactoryImplTest
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            
         }
         Assert.assertEquals("emf2", c2.t.getName());
         checkEMFPropertiesAfterCreating(_PU2, c2.emf);

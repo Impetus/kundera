@@ -13,57 +13,46 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.client.crud.mappedsuperclass;
+package com.impetus.client.crud.entities;
 
-import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-/**
- * @author vivek.mishra
- * Credit transaction extends {@link Transaction}
- *
- */
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@DiscriminatorValue(value = "credit")
-@AttributeOverride(name="bankIdentifier",column= @Column(name="CREDIT_BANK_IDENT"))
-public class CreditTransaction extends Transaction
+@Table(name = "ADDRESS", schema = "TESTDB")
+@IndexCollection(columns = { @Index(name = "street") })
+public class AddressRDBMSMTM
 {
+    @Id
+    @Column(name = "ADDRESS_ID")
+    private String addressId;
 
-    @Column
-    private Integer amount;
+    @Column(name = "STREET")
+    private String street;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Status txStatus;
-
-    public CreditTransaction()
+    public String getAddressId()
     {
-        
-    }
-    
-    public Integer getAmount()
-    {
-        return amount;
+        return addressId;
     }
 
-    public void setAmount(Integer amount)
+    public void setAddressId(String addressId)
     {
-        this.amount = amount;
+        this.addressId = addressId;
     }
 
-    public Status getTxStatus()
+    public String getStreet()
     {
-        return txStatus;
+        return street;
     }
 
-    public void setTxStatus(Status txStatus)
+    public void setStreet(String street)
     {
-        this.txStatus = txStatus;
+        this.street = street;
     }
 
 }
