@@ -14,18 +14,21 @@ Note
 ====
 With 2.9.1 release onwards artifact group id has been changed from
 
+```
 	<dependency>
 		<groupId>com.impetus.client</groupId>
 		<artifactId>kundera-cassandra</artifactId>
 		<version>2.9</version>
 	</dependency>
+```	
 TO
+```
 	<dependency>
 		<groupId>com.impetus.kundera.client</groupId>
 		<artifactId>kundera-cassandra</artifactId>
 		<version>${kundera.version}</version>
 	</dependency>
-
+```
 Up and running in 5 minutes
 ============================
 If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow below steps from [this link] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes "Getting started in 5 minutes"):
