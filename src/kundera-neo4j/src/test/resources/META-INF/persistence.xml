@@ -16,9 +16,6 @@
 			<property name="kundera.dialect" value="neo4j" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.neo4j.Neo4JClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 		</properties>
@@ -32,9 +29,6 @@
 			<property name="kundera.dialect" value="neo4j" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.neo4j.Neo4JClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaNeo4JTest.xml"/>
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 			<property name="kundera.batch.size" value="5" />
