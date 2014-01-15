@@ -30,6 +30,7 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphUtils;
+import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -93,7 +94,7 @@ public class CacheBase {
         
         if(l2Cache != null)
         {
-            l2Cache.put(node.getNodeId(), node);
+            l2Cache.put(node.getNodeId(), node.getData());
         }
     }
 
@@ -217,15 +218,25 @@ public class CacheBase {
 
     private Node lookupL2Cache(String nodeId)
     {
+        Node node = null;
+        if(l2Cache != null)
+        {
+            Object entity = l2Cache.get(nodeId);
+            if(entity != null)
+            {
+                node = new Node(nodeId, entity.getClass(), new ManagedState(), null, nodeId.substring(nodeId.indexOf("$")+1));        
+            }
+        }
         
-        return (Node) (l2Cache != null? l2Cache.get(nodeId):null);
+        
+        return node;
     }
 
     private void evictFroml2Cache(Node node)
     {
         if(l2Cache != null)
         {
-            this.l2Cache.evict(node.getClass(),node.getNodeId());
+            this.l2Cache.evict(node.getDataClass(),node.getNodeId());
         }
     }
 }

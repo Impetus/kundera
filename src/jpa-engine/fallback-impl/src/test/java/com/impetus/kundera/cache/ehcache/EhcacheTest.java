@@ -77,10 +77,10 @@ public class EhcacheTest
         Node node1 = persistenceDelegator.getPersistenceCache().getMainCache().getNodeFromCache(entity1);
 
         // check if it is present in second level cache.
-        Node foundNode1 = (Node) l2Cache.get(node1.getNodeId());
+        EhCacheEntity foundNode1 = (EhCacheEntity) l2Cache.get(node1.getNodeId());
         
         Assert.assertNotNull(foundNode1);
-        Assert.assertEquals(foundNode1.getData(),node1.getData()); // should be same object.
+        Assert.assertEquals(foundNode1,node1.getData()); // should be same object.
 
         // remove entity 1.
         em.remove(entity1);
@@ -89,24 +89,25 @@ public class EhcacheTest
 
         Assert.assertNotNull(l2Cache.get(node2.getNodeId()));
         
-        Node foundNode2 = (Node) l2Cache.get(node2.getNodeId());
-        Assert.assertEquals(foundNode2.getData(),node2.getData()); // should be same object.
+        EhCacheEntity foundNode2 = (EhCacheEntity) l2Cache.get(node2.getNodeId());
+        Assert.assertEquals(foundNode2,node2.getData()); // should be same object.
         Assert.assertNull(l2Cache.get(node1.getNodeId()));
         
         entity1.setAge(99);
         em.persist(entity1);
+        em.flush();
         
         // get node from first level cache.
         node1 = persistenceDelegator.getPersistenceCache().getMainCache().getNodeFromCache(entity1);
 
         // check if it is present in second level cache.
-        foundNode1 = (Node) l2Cache.get(node1.getNodeId());
+        foundNode1 = (EhCacheEntity) l2Cache.get(node1.getNodeId());
         
         Assert.assertNotNull(foundNode1);
-        Assert.assertEquals(foundNode1.getData(),node1.getData()); // should be same object.
+        Assert.assertEquals(foundNode1,node1.getData()); // should be same object.
         
-        Assert.assertEquals(((EhCacheEntity)foundNode1.getData()).getAge(), new Integer(99));
-        Assert.assertEquals(((EhCacheEntity)foundNode1.getData()).getAge(), entity1.getAge());
+        Assert.assertEquals(foundNode1.getAge(), new Integer(99));
+        Assert.assertEquals(foundNode1.getAge(), entity1.getAge());
 
         
         em.clear(); // evict all.

@@ -16,6 +16,8 @@
 
 package com.impetus.kundera.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,8 +32,13 @@ import com.impetus.kundera.query.Person.Day;
  *
  */
 @Entity
-public class EhCacheEntity
+public class EhCacheEntity implements Serializable
 {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     /** The person id. */
     @Id

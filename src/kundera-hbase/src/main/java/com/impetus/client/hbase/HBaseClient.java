@@ -595,7 +595,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false);
+        CompareOp operator = HBaseUtils.getOperator("=", false,false);
 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
@@ -683,7 +683,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false);
+        CompareOp operator = HBaseUtils.getOperator("=", false,false);
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
