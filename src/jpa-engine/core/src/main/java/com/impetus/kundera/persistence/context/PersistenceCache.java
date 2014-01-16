@@ -56,17 +56,17 @@ public class PersistenceCache
 
     public PersistenceCache()
     {
-        initialize(null);
+        initialize(null,this);
     }
     
     public PersistenceCache(com.impetus.kundera.cache.Cache l2Cache)
     {
-        initialize(l2Cache);
+        initialize(l2Cache,this);
     }
 
-    private void initialize(com.impetus.kundera.cache.Cache l2Cache)
+    private void initialize(com.impetus.kundera.cache.Cache l2Cache, PersistenceCache pc)
     {
-        mainCache = new MainCache(l2Cache);
+        mainCache = new MainCache(l2Cache,this);
 //        embeddedCache = new EmbeddedCache(l2Cache);
 //        elementCollectionCache = new ElementCollectionCache(l2Cache);
 //        transactionalCache = new TransactionalCache(l2Cache);

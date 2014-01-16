@@ -49,11 +49,14 @@ public class CacheBase {
     private Set<Node> headNodes;
 
     private com.impetus.kundera.cache.Cache l2Cache;
+
+    private PersistenceCache persistenceCache;
     
-    public CacheBase(com.impetus.kundera.cache.Cache l2Cache) {
+    public CacheBase(com.impetus.kundera.cache.Cache l2Cache, PersistenceCache pc) {
         this.headNodes = new HashSet<Node>();
         this.nodeMappings = new ConcurrentHashMap<String, Node>();
         this.l2Cache = l2Cache;
+        this.persistenceCache = pc;
     }
 
     public Node getNodeFromCache(String nodeId) {
@@ -224,7 +227,8 @@ public class CacheBase {
             Object entity = l2Cache.get(nodeId);
             if(entity != null)
             {
-                node = new Node(nodeId, entity.getClass(), new ManagedState(), null, nodeId.substring(nodeId.indexOf("$")+1));        
+                node = new Node(nodeId, entity.getClass(), new ManagedState(), this.persistenceCache, nodeId.substring(nodeId.indexOf("$")+1));  
+                node.setData(entity);
             }
         }
         

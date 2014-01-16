@@ -154,9 +154,6 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="picbase">
@@ -167,9 +164,6 @@
 			<property name="kundera.keyspace" value="Pickr" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="index.home.dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
@@ -183,9 +177,6 @@
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 
@@ -200,9 +191,6 @@
 			<property name="kundera.client" value="redis" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
 			<property name="kundera.password" value="Kundera@123" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.transaction.timeout" value="30" />
 			<property name="kundera.indexer.class" value="com.impetus.client.redis.RedisIndexer" />
 		</properties>
@@ -219,9 +207,6 @@
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="imdbNeo4J">
@@ -232,9 +217,6 @@
 			<property name="kundera.datastore.file.path" value="target/imdb.db" />
 			<property name="kundera.dialect" value="neo4j" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.neo4j.Neo4JClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.client.property" value="kunderaNeo4JTest.xml" />
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 		</properties>
@@ -266,9 +248,6 @@
 			<property name="kundera.keyspace" value="imdb" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 		</properties>
 	</persistence-unit>
@@ -283,9 +262,6 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
@@ -302,9 +278,6 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
@@ -322,9 +295,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 
@@ -342,9 +312,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="addMongoNoAnnotateTest">
@@ -360,9 +327,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="secIdxAddCassandraNoAnnotateTest">
@@ -377,9 +341,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 	</persistence-unit>
@@ -395,9 +356,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
 	
@@ -413,9 +371,6 @@
 			<property name="kundera.ddl.auto.prepare" value="create-drop" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 

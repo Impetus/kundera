@@ -25,9 +25,9 @@ import javax.persistence.Cache;
 public class ElementCollectionCache extends CacheBase
 {
 
-    public ElementCollectionCache(com.impetus.kundera.cache.Cache l2Cache)
+    public ElementCollectionCache(com.impetus.kundera.cache.Cache l2Cache, PersistenceCache pc)
     {
-        super(l2Cache);
+        super(l2Cache, pc);
     }
 
 }
