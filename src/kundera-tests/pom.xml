@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.impetus</groupId>
@@ -147,28 +146,70 @@
 			</exclusions>
 
 		</dependency>
-		<!-- <dependency> <groupId>commons-collections</groupId> <artifactId>commons-collections</artifactId> 
-			<version>3.2.1</version> </dependency> <dependency> <groupId>commons-lang</groupId> 
-			<artifactId>commons-lang</artifactId> <version>2.4</version> </dependency> 
-			<dependency> <groupId>commons-logging</groupId> <artifactId>commons-logging</artifactId> 
-			<version>1.1.1</version> </dependency> <dependency> <groupId>log4j</groupId> 
-			<artifactId>log4j</artifactId> <version>1.2.16</version> </dependency> <dependency> 
-			<groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> <version>1.7.2</version> 
-			</dependency> <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
-			<version>1.7.2</version> </dependency> <dependency> <groupId>commons-codec</groupId> 
-			<artifactId>commons-codec</artifactId> <version>1.2</version> </dependency> 
-			<dependency> <groupId>javax.persistence</groupId> <artifactId>persistence-api</artifactId> 
-			<version>2.0</version> </dependency> -->
-
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>2.0</version>
+		</dependency>
 		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
-			<version>3.5.0</version> </dependency> <dependency> <groupId>net.sf.ehcache</groupId> 
-			<artifactId>ehcache</artifactId> <version>2.2.0</version> </dependency> <dependency> 
-			<groupId>cglib</groupId> <artifactId>cglib</artifactId> <version>2.2</version> 
-			</dependency> <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
-			<version>r08</version> </dependency> <dependency> <groupId>com.github.stephenc</groupId> 
-			<artifactId>jamm</artifactId> <version>0.2.2</version> </dependency> <dependency> 
-			<groupId>org.xerial</groupId> <artifactId>snappy</artifactId> <version>1.0.1-rc4</version> 
-			</dependency> -->
+			<version>3.5.0</version> </dependency> -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<!-- <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
+			<version>r08</version> </dependency> -->
+		<dependency>
+			<groupId>com.github.stephenc</groupId>
+			<artifactId>jamm</artifactId>
+			<version>0.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>snappy</artifactId>
+			<version>1.0.1-rc4</version>
+		</dependency>
 
 
 		<!-- Non public dependencies- being picked from kundera svn repository -->
@@ -180,29 +221,74 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Required for running tests for embedded cassandra mode <dependency> 
-			<groupId>org.cliffc</groupId> <artifactId>high-scale-lib</artifactId> <version>UNKNOWN</version> 
-			</dependency> <dependency> <groupId>com.reardencommerce</groupId> <artifactId>clhm-production</artifactId> 
-			<version>UNKNOWN</version> </dependency> <dependency> <groupId>javassist</groupId> 
-			<artifactId>javassist</artifactId> <version>3.9.0.GA</version> </dependency> 
-			Cassandra Dependencies <dependency> <groupId>org.apache.cassandra</groupId> 
-			<artifactId>cassandra-all</artifactId> <version>1.2.4</version> </dependency> 
-			<dependency> <groupId>org.apache.cassandra</groupId> <artifactId>cassandra-thrift</artifactId> 
-			<version>1.2.4</version> </dependency> <dependency> <groupId>org.apache.cassandra</groupId> 
-			<artifactId>cassandra-clientutil</artifactId> <version>1.2.4</version> <scope>test</scope> 
-			</dependency> <dependency> <groupId>org.xerial</groupId> <artifactId>snappy</artifactId> 
-			<version>1.0.1-rc4</version> </dependency> -->
-
+		<!-- Required for running tests for embedded cassandra mode 
+		<dependency>
+			<groupId>org.cliffc</groupId>
+			<artifactId>high-scale-lib</artifactId>
+			<version>UNKNOWN</version>
+		</dependency>
+		<dependency>
+			<groupId>com.reardencommerce</groupId>
+			<artifactId>clhm-production</artifactId>
+			<version>UNKNOWN</version>
+		</dependency>
+		 <dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
+			<version>3.9.0.GA</version> </dependency>
+		Cassandra Dependencies
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-all</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-thrift</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-clientutil</artifactId>
+			<version>1.2.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>snappy</artifactId>
+			<version>1.0.1-rc4</version>
+		</dependency>
+-->
 		<!-- HBase depndencies -->
-		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
-			<version>0.94.3</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
-			<artifactId>slf4j-api</artifactId> </exclusion> </exclusions> </dependency> 
-			<dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
-			<version>0.94.3</version> <type>test-jar</type> <scope>test</scope> </dependency> 
-			<dependency> <groupId>org.apache.hadoop</groupId> <artifactId> hadoop-test 
-			</artifactId> <version>1.0.2</version> <scope>test</scope> </dependency> 
-			<dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-core</artifactId> 
-			<version>1.0.2</version> </dependency> -->
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase</artifactId>
+			<version>0.92.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase</artifactId>
+			<version>0.92.1</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId> hadoop-test </artifactId>
+			<version>1.0.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 		<!-- contiperf dependency -->
 
@@ -218,8 +304,11 @@
 			<version>2.6</version>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
-			<version>3.5.0</version> </dependency> -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>3.5.0</version>
+		</dependency>
 
 		<!-- kundera dependencies -->
 
@@ -390,10 +479,19 @@
 			<version>2.5-SNAPSHOT</version> <type>test-jar</type> <scope>test</scope> 
 			</dependency> -->
 
-		<!-- <dependency> <groupId>org.hibernate</groupId> <artifactId>hibernate-core</artifactId> 
-			<version>4.1.7.Final</version> <scope>test</scope> </dependency> <dependency> 
-			<groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.8.2</version> 
-			<scope>test</scope> </dependency> -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>4.1.7.Final</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
 
 
 		<!-- Unit Testing libraries -->
@@ -411,8 +509,12 @@
 
 		<!-- <dependency> <groupId>org.apache.openejb</groupId> <artifactId>openejb-core</artifactId> 
 			<version>3.1</version> <scope>test</scope> </dependency> -->
-		<!-- <dependency> <groupId>directory-naming</groupId> <artifactId>naming-java</artifactId> 
-			<version>0.8</version> <scope>test</scope> </dependency> -->
+		<dependency>
+			<groupId>directory-naming</groupId>
+			<artifactId>naming-java</artifactId>
+			<version>0.8</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
