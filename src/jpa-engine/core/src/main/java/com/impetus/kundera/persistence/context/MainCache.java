@@ -25,9 +25,9 @@ import javax.persistence.Cache;
 public class MainCache extends CacheBase
 {
 
-    public MainCache(com.impetus.kundera.cache.Cache l2Cache)
+    public MainCache(com.impetus.kundera.cache.Cache l2Cache, PersistenceCache pc)
     {
-        super(l2Cache);
+        super(l2Cache,pc);
     }
 
 }

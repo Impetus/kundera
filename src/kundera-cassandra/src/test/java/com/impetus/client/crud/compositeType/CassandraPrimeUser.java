@@ -22,6 +22,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import com.impetus.kundera.index.Index;
@@ -39,6 +40,7 @@ public class CassandraPrimeUser
 {
 
     @EmbeddedId
+    @OrderBy("key.tweetId ASC, key.timeLineId DESC")
     private CassandraCompoundKey key;
 
     @Column

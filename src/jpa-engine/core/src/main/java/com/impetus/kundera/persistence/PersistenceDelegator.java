@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.persistence.Cache;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 
@@ -143,6 +142,7 @@ public final class PersistenceDelegator
             // Get write lock before writing object required for transaction.
             lock.writeLock().lock();
 
+            node.setPersistenceDelegator(this);
             node.persist();
 
             // build flush stack.
@@ -247,6 +247,10 @@ public final class PersistenceDelegator
             {
                 lock.readLock().unlock();
             }
+        } else
+        {
+            node.setPersistenceDelegator(this);
+            
         }
         Object nodeData = node.getData();
         if (nodeData == null)
@@ -347,6 +351,7 @@ public final class PersistenceDelegator
             // state
 
             // Change state of node, after successful flush processing.
+            node.setPersistenceDelegator(this);
             node.remove();
 
             // build flush stack.
@@ -457,7 +462,7 @@ public final class PersistenceDelegator
             // Action/ExecutionQueue/ActivityQueue :-> id, name, EndPoint,
             // changed
             // state
-
+            node.setPersistenceDelegator(this);
             node.merge();
 
             // build flush stack.
@@ -647,6 +652,7 @@ public final class PersistenceDelegator
             try
             {
                 lock.readLock().lock();
+                node.setPersistenceDelegator(this);
                 node.refresh();
             }
             finally

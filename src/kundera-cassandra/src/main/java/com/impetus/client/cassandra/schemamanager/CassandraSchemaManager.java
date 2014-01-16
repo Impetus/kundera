@@ -280,6 +280,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         for (TableInfo tableInfo : tableInfos)
         {
+
             createOrUpdateColumnFamily(tableInfo, ksDef);
 
             // Create Index Table if required
@@ -545,13 +546,24 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
             queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
                     primaryKeyBuilder.toString()));
+            
+            StringBuilder clusterKeyOrderingBuilder = new StringBuilder();
+            appendClusteringOrder(translator, compositeColumns.get(0).getColumns(), clusterKeyOrderingBuilder, 
+                    primaryKeyBuilder);
+            if (clusterKeyOrderingBuilder.length() != 0)
+            {
+             // append cluster key order clause
+               queryBuilder.append(translator.CREATE_COLUMNFAMILY_CLUSTER_ORDER.replace(CQLTranslator.COLUMNS, clusterKeyOrderingBuilder.toString()));
+              
+            }
+            
         }
         else
         {
             queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
                     tableInfo.getIdColumnName()));
         }
-
+   
         // set column family properties defined in configuration property/xml
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
@@ -572,17 +584,51 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     private void appendPrimaryKey(CQLTranslator translator, EmbeddableType compoEmbeddableType, Field[] fields,
-            StringBuilder primaryKeyBuilder)
+            StringBuilder queryBuilder)
     {
         for (Field f : fields)
         {
             if (!ReflectUtils.isTransientOrStatic(f))
             {
                 Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
-                translator.appendColumnName(primaryKeyBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
-                primaryKeyBuilder.append(" ,");
+                translator.appendColumnName(queryBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+                queryBuilder.append(" ,");
             }
         }
+    }
+
+    private void appendClusteringOrder(CQLTranslator translator, List<ColumnInfo> compositeColumns,
+            StringBuilder clusterKeyOrderingBuilder, StringBuilder primaryKeyBuilder)
+    {
+        //to retrieve the order in which cluster key is formed
+        String[] primaryKeys = primaryKeyBuilder.toString().split("\\s*,\\s*");
+        for (String primaryKey : primaryKeys)
+        {
+            //to compare the objects without enclosing quotes
+            primaryKey = primaryKey.trim().substring(1, primaryKey.trim().length() - 1);
+            for (ColumnInfo colInfo : compositeColumns)
+            {
+
+                if (primaryKey.equals(colInfo.getColumnName()))
+                {
+                     if (colInfo.getOrderBy() != null)
+                        {
+                            translator.appendColumnName(clusterKeyOrderingBuilder, colInfo.getColumnName());
+                            clusterKeyOrderingBuilder.append(translator.SPACE_STRING);
+                            clusterKeyOrderingBuilder.append(colInfo.getOrderBy());
+                            clusterKeyOrderingBuilder.append(translator.COMMA_STR);
+                        }
+
+                    
+                }
+            }
+        }
+        if (clusterKeyOrderingBuilder.length() != 0)
+        {
+            clusterKeyOrderingBuilder.deleteCharAt(clusterKeyOrderingBuilder.toString().lastIndexOf(","));
+            clusterKeyOrderingBuilder.append(translator.CLOSE_BRACKET);
+        }
+
     }
 
     private StringBuilder stripLastChar(String columnFamilyQuery, StringBuilder queryBuilder)
@@ -757,6 +803,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         for (ColumnInfo colInfo : compositeColumns)
         {
+
             if (columns == null || (columns != null && !columns.contains(colInfo)))
             {
                 String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType(), true);
@@ -837,7 +884,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param tableInfo
      *            the table info
-     * @throws Exception 
+     * @throws Exception
      */
     private void createInvertedIndexTable(TableInfo tableInfo, KsDef ksDef) throws Exception
     {

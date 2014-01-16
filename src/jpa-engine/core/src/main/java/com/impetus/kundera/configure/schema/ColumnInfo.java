@@ -31,6 +31,9 @@ public class ColumnInfo
 
     /** The column name variable . */
     private String columnName;
+    
+    /** The column order by variable . */
+    private String order;
 
     /** The type variable. */
     private Class type;
@@ -87,6 +90,8 @@ public class ColumnInfo
         strBuilder.append(columnName);
         strBuilder.append(" | isIndexable: ==>");
         strBuilder.append(isIndexable);
+        strBuilder.append(" | orderby: ==>");
+        strBuilder.append(order);
         return strBuilder.toString();
     }
 
@@ -147,5 +152,15 @@ public class ColumnInfo
     public void setType(Class type)
     {
         this.type = type;
+    }
+
+    public void setOrderBy(String order)
+    {
+        this.order = order;
+    }
+
+    public String getOrderBy()
+    {
+        return order;
     }
 }
