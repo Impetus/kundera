@@ -252,8 +252,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             return query != null ? query : jpaQuery;
         }
 
-        // Removing the UNDERSCORE prefix as Oracle 11g complains about invalid characters error while executing the request.
-        String aliasName = entityMetadata.getTableName();
+        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
+        String aliasName = entityMetadata.getTableName() + "_";
 
         StringBuilder queryBuilder = new StringBuilder("Select ");
 
