@@ -266,27 +266,22 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         {
             ksDef = CassandraCli.client.describe_keyspace("Pickr");
             CassandraCli.client.set_keyspace("Pickr");
-            List<CfDef> cfDefn = ksDef.getCf_defs();
 
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PHOTOGRAPHER"))
-                {
-                    CassandraCli.client.system_drop_column_family("PHOTOGRAPHER");
-                }
-                if (cfDef1.getName().equalsIgnoreCase("ALBUM"))
-                {
-                    CassandraCli.client.system_drop_column_family("ALBUM");
-                }
-                if (cfDef1.getName().equalsIgnoreCase("PHOTO"))
-                {
-                    CassandraCli.client.system_drop_column_family("PHOTO");
-                }
+            if (!CassandraCli.columnFamilyExist("PHOTOGRAPHER", "Pickr")) {
+                CassandraCli.client.system_add_column_family(pCfDef);
+            } else {
+                CassandraCli.truncateColumnFamily("Pickr", "PHOTOGRAPHER");
             }
-            CassandraCli.client.system_add_column_family(pCfDef);
-            CassandraCli.client.system_add_column_family(photoLinkCfDef);
-            CassandraCli.client.system_add_column_family(aCfDef);
+            if (!CassandraCli.columnFamilyExist("ALBUM", "Pickr")) {
+                CassandraCli.client.system_add_column_family(photoLinkCfDef);
+            } else {
+                CassandraCli.truncateColumnFamily("Pickr", "ALBUM");
+            }
+            if (!CassandraCli.columnFamilyExist("PHOTO", "Pickr")) {
+                CassandraCli.client.system_add_column_family(aCfDef);
+            } else {
+                CassandraCli.truncateColumnFamily("Pickr", "PHOTO");
+            }
         }
         catch (NotFoundException e)
         {

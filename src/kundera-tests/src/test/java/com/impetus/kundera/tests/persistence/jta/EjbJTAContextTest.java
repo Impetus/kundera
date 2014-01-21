@@ -190,7 +190,8 @@ public class EjbJTAContextTest
         initialContext.unbind("java:comp/UserTransaction");
         initialContext.destroySubcontext("java:comp");
 
-        CassandraCli.dropKeySpace("KunderaTests");
+      // CassandraCli.dropKeySpace("KunderaTests");
+        CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
     }
 
     /**
@@ -231,20 +232,25 @@ public class EjbJTAContextTest
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests")) {
+                CassandraCli.client.system_add_column_family(user_Def);
+            } else {
+                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
             }
-            CassandraCli.client.system_add_column_family(user_Def);
+
+//            List<CfDef> cfDefn = ksDef.getCf_defs();
+//
+//            for (CfDef cfDef1 : cfDefn)
+//            {
+//
+//                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+//                {
+//
+//                    CassandraCli.client.system_drop_column_family("PERSONNEL");
+//
+//                }
+//            }
+//            CassandraCli.client.system_add_column_family(user_Def);
 
         }
         catch (NotFoundException e)

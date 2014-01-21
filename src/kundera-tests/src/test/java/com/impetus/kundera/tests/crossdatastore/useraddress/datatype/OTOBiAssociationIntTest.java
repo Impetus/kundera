@@ -244,7 +244,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        shutDownRdbmsServer();
+       // shutDownRdbmsServer();
         // tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
@@ -256,7 +256,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL";
+        cfDef.name = "PERSONNEL_INT";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
@@ -282,16 +282,26 @@ public class OTOBiAssociationIntTest extends TwinAssociation
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
             // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
-            }
+//            for (CfDef cfDef1 : cfDefn)
+//            {
+//
+//                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+//                {
+//
+//                    CassandraCli.client.system_drop_column_family("PERSONNEL");
+//
+//                }
+//            }
+//            CassandraCli.client.system_add_column_family(cfDef);
+//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//                CassandraCli.client.system_add_column_family(cfDef);
+//            } else {
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//            }
+            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+                
+            } 
             CassandraCli.client.system_add_column_family(cfDef);
 
         }
@@ -311,7 +321,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
 
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS";
+        cfDef2.name = "ADDRESS_INT";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setDefault_validation_class("DecimalType");
         cfDef2.setComparator_type("UTF8Type");
@@ -328,19 +338,24 @@ public class OTOBiAssociationIntTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            List<CfDef> cfDefss = ksDef.getCf_defs();
-            // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef : cfDefss)
-            {
-
-                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("ADDRESS");
-
-                }
-            }
+//            List<CfDef> cfDefss = ksDef.getCf_defs();
+//            // CassandraCli.client.set_keyspace("KunderaTests");
+//            for (CfDef cfDef : cfDefss)
+//            {
+//
+//                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
+//                {
+//
+//                    CassandraCli.client.system_drop_column_family("ADDRESS");
+//
+//                }
+//            }
+//            CassandraCli.client.system_add_column_family(cfDef2);
+            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            } 
             CassandraCli.client.system_add_column_family(cfDef2);
+            
         }
         catch (NotFoundException e)
         {

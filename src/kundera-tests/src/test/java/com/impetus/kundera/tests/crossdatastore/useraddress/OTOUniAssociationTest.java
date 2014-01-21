@@ -234,7 +234,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     public void tearDown() throws Exception
     {
         // tearDownInternal(ALL_PUs_UNDER_TEST);
-        shutDownRdbmsServer();
+      //  shutDownRdbmsServer();
     }
 
     /**
@@ -278,21 +278,14 @@ public class OTOUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests")) {
+                CassandraCli.client.system_add_column_family(cfDef);
+            } else {
+                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
             }
-            CassandraCli.client.system_add_column_family(cfDef);
+
+
+
 
         }
         catch (NotFoundException e)
@@ -326,18 +319,13 @@ public class OTOUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            List<CfDef> cfDefss = ksDef.getCf_defs();
-            for (CfDef cfDef : cfDefss)
-            {
-
-                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("ADDRESS");
-
-                }
+            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests")) {
+                CassandraCli.client.system_add_column_family(cfDef2);
+            } else {
+                CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
             }
-            CassandraCli.client.system_add_column_family(cfDef2);
+
+
         }
         catch (NotFoundException e)
         {
@@ -417,8 +405,8 @@ public class OTOUniAssociationTest extends TwinAssociation
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(150))");
+//            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+//            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(150))");
         }
     }
 
@@ -434,13 +422,14 @@ public class OTOUniAssociationTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            //cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+//            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+//            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 

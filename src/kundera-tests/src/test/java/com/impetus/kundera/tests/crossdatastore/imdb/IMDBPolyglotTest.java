@@ -261,20 +261,16 @@ public class IMDBPolyglotTest extends TwinAssociation
             ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
             CassandraCli.client.set_keyspace(KEYSPACE);
 
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase(ACTOR))
-                {
-
-                    CassandraCli.client.system_drop_column_family(MOVIE);
-
-                }
+        //    List<CfDef> cfDefn = ksDef.getCf_defs();
+            
+            if (!CassandraCli.columnFamilyExist(KEYSPACE, ACTOR )) {
+                CassandraCli.client.system_add_column_family(cfDef);
+            } else {
+                CassandraCli.truncateColumnFamily(KEYSPACE, ACTOR);
             }
-            CassandraCli.client.system_add_column_family(cfDef);
+
+
+            
 
         }
         catch (NotFoundException e)
@@ -313,16 +309,15 @@ public class IMDBPolyglotTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
             CassandraCli.client.set_keyspace(KEYSPACE);
-            List<CfDef> cfDefss = ksDef.getCf_defs();
-
-            for (CfDef cfDef : cfDefss)
-            {
-                if (cfDef.getName().equalsIgnoreCase(MOVIE))
-                {
-                    CassandraCli.client.system_drop_column_family(MOVIE);
-                }
+        //    List<CfDef> cfDefss = ksDef.getCf_defs();
+            if (!CassandraCli.columnFamilyExist(KEYSPACE , MOVIE )) {
+                CassandraCli.client.system_add_column_family(cfDef2);
+            } else {
+                CassandraCli.truncateColumnFamily(KEYSPACE, MOVIE);
             }
-            CassandraCli.client.system_add_column_family(cfDef2);
+
+
+
         }
         catch (NotFoundException e)
         {
