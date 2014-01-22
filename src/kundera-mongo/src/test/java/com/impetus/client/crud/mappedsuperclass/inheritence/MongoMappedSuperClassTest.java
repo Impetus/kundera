@@ -31,7 +31,6 @@ import org.junit.Test;
 
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction;
-import com.impetus.kundera.client.crud.mappedsuperclass.DebitTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
 import com.impetus.kundera.client.mongo.mappedsuperclass.Ledger;

@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
-import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 /**
  * @author vivek.mishra

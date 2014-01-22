@@ -8,8 +8,6 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

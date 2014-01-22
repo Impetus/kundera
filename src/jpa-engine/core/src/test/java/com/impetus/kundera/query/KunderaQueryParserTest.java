@@ -23,12 +23,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.query.JPQLParseException;
-import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
-import com.impetus.kundera.query.KunderaQueryParser;
 
 /**
  * The Class KunderaQueryParserTest.

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.OrderBy;
 import javax.persistence.metamodel.Attribute;

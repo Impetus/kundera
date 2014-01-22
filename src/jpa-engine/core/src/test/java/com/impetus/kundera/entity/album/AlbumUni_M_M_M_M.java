@@ -27,8 +27,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import sun.awt.color.CMM.CSAccessor;
-
 import com.impetus.kundera.entity.photo.PhotoUni_M_M_M_M;
 
 /**

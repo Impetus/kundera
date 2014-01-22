@@ -17,9 +17,6 @@ package com.impetus.kundera.query;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -35,18 +32,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.polyglot.entities.AddressB1M;
-import com.impetus.kundera.polyglot.entities.AddressBM1;
-import com.impetus.kundera.polyglot.entities.PersonB1M;
-import com.impetus.kundera.polyglot.entities.PersonBM1;
-import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**

@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.config;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.Field;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

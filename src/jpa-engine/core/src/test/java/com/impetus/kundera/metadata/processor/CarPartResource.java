@@ -16,7 +16,6 @@
 package com.impetus.kundera.metadata.processor;
 
 import javax.persistence.Column;
-
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 

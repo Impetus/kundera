@@ -41,8 +41,8 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.LuceneQueryBuilder;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.LuceneQueryBuilder;
 
 public class KunderaCoreUtils
 {

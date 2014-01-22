@@ -18,8 +18,6 @@ package com.impetus.kundera.client.crud.inheritence;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 /**
  * Facebook profile entity

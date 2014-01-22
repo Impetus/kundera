@@ -16,21 +16,18 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;

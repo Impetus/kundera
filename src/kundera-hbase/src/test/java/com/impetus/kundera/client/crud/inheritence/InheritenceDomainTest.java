@@ -32,7 +32,6 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Junit for abstract entity class's operation.

@@ -25,7 +25,6 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -21,7 +21,6 @@ import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Queable;
 import redis.clients.jedis.Transaction;
 
 import com.impetus.client.redis.RedisClient.AttributeWrapper;

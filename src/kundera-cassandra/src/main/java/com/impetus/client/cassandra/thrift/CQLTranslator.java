@@ -52,8 +52,6 @@ import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;

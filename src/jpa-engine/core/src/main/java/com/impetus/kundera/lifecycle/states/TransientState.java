@@ -17,7 +17,6 @@ package com.impetus.kundera.lifecycle.states;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.utils.DeepEquals;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**

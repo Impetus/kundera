@@ -21,11 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,7 +36,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.persistence.event.PersonEventDispatch;
 
 /**
  * @author Kuldeep Mishra

@@ -15,33 +15,9 @@
  */
 package com.impetus.kundera.graph;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.MapKeyJoinColumn;
-
-import org.apache.commons.lang.StringUtils;
-
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
-import com.impetus.kundera.lifecycle.states.NodeState;
-import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.IdGenerator;
-import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.PersistenceValidator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
-import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.KunderaProxy;
-import com.impetus.kundera.proxy.ProxyHelper;
-import com.impetus.kundera.proxy.collection.ProxyCollection;
-import com.impetus.kundera.utils.DeepEquals;
 
 /**
  * Assign head node

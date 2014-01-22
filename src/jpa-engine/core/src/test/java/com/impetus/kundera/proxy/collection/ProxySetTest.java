@@ -28,7 +28,6 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 

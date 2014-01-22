@@ -23,16 +23,15 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
-
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.PersonMongoNameAnnotation.Day;
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.client.crud.PersonMongoNameAnnotation.Day;
 
 /**
  * Test case to perform check entity name annotation support

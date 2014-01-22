@@ -15,7 +15,6 @@
  */
 package com.impetus.client.mongodb.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
