@@ -867,7 +867,7 @@ public class CassQuery extends QueryImpl
         isSingleResult = true;
         List results = getResultList();
         isSingleResult = false;
-        return results.isEmpty() ? results : results.get(0);
+        return onReturnResults(results);
     }
 
     /**
