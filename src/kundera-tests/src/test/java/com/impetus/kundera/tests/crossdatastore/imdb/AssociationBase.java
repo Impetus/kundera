@@ -265,13 +265,13 @@ public abstract class AssociationBase
         if (AUTO_MANAGE_SCHEMA)
         {
             if (persistenceUnits.indexOf(CASSANDRA_PU) > 0)
-                truncateCassandra();
+               // truncateCassandra();
 
             if (persistenceUnits.indexOf(RDBMS_PU) > 0)
             {
 
                 truncateRdbms();
-                shutDownRdbmsServer();
+              //  shutDownRdbmsServer();
             }
             if (persistenceUnits.indexOf(REDIS_PU) > 0)
                 truncateRedis();
@@ -373,7 +373,7 @@ public abstract class AssociationBase
         try
         {
             cli.update("DELETE FROM IMDB.MOVIE");
-            cli.update("DROP TABLE IMDB.MOVIE");
+          //  cli.update("DROP TABLE IMDB.MOVIE");
 
         }
         catch (Exception e)
