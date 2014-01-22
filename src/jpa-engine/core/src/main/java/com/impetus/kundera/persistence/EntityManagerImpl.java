@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.loader.ClientFactory;
