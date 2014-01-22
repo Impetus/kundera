@@ -194,12 +194,12 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         PersonnelUniMToM p1 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_1");
         Assert.assertNotNull(p1);
-        p1.setPersonName("Saurabh");
         Assert.assertEquals(2, p1.getAddresses().size());
         for (HabitatUniMToM address : p1.getAddresses())
         {
             address.setStreet("Brand New Street");
         }
+        p1.setPersonName("Saurabh");
         dao.merge(p1);
         PersonnelUniMToM p1AfterMerge = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_1");
         Assert.assertNotNull(p1AfterMerge);

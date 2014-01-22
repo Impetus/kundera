@@ -284,36 +284,38 @@ public class DeepEquals
 
             for (Field field : fields)
             {
-                if (!(field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(OneToMany.class)
-                        || field.isAnnotationPresent(ManyToOne.class) || field.isAnnotationPresent(ManyToMany.class)))
+                try
                 {
-                    try
+                    DualKey dk = new DualKey(field.get(dualKey._key1), field.get(dualKey._key2));
+
+                    if (dk != null)
                     {
-                        DualKey dk = new DualKey(field.get(dualKey._key1), field.get(dualKey._key2));
-                        if (dk != null)
+                        boolean isPersistentCollection = false;
+                        if (dk._key1 != null)
                         {
-                            boolean isPersistentCollection = false;
-                            if (dk._key1 != null)
-                            {
-                                isPersistentCollection = ProxyHelper.isProxyCollection(dk._key1);
-                            }
+                            isPersistentCollection = ProxyHelper.isProxyCollection(dk._key1);
+                        }
 
-                            if (isPersistentCollection)
-                            {
-                                dk._key1 = null;
-                            }
+                        if (isPersistentCollection)
+                        {
+                            dk._key1 = null;
+                        }
 
-                            if (!isPersistentCollection && !visited.contains(dk))
+                        if (!isPersistentCollection && !visited.contains(dk))
+                        {
+                            if (!(field.isAnnotationPresent(OneToOne.class)
+                                    || field.isAnnotationPresent(OneToMany.class)
+                                    || field.isAnnotationPresent(ManyToOne.class) || field
+                                        .isAnnotationPresent(ManyToMany.class)))
                             {
                                 stack.addFirst(dk);
                             }
                         }
-
                     }
-                    catch (Exception e)
-                    {
-                        continue;
-                    }
+                }
+                catch (Exception e)
+                {
+                    continue;
                 }
             }
         }

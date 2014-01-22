@@ -46,7 +46,6 @@ import com.impetus.kundera.configure.ClientMetadataBuilder;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**

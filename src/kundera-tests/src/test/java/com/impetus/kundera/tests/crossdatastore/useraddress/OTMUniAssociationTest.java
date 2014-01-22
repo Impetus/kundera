@@ -211,8 +211,6 @@ public class OTMUniAssociationTest extends TwinAssociation
     public void tearDown() throws Exception
     {
         shutDownRdbmsServer();
-        // tearDownInternal(ALL_PUs_UNDER_TEST);
-
     }
 
     /**
@@ -261,7 +259,6 @@ public class OTMUniAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         cfDef.setKey_validation_class("UTF8Type");
@@ -279,7 +276,6 @@ public class OTMUniAssociationTest extends TwinAssociation
 
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
-            // CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef1 : cfDefn)
             {
 

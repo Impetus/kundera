@@ -18,8 +18,6 @@ import com.impetus.client.crud.datatypes.entities.StudentSqlDate;
 public class StudentRdbmsSqlDateTest extends RdbmsBase
 {
 
-    
-
     @Before
     public void setUp() throws Exception
     {
@@ -61,32 +59,47 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         // Insert random value of Date
         StudentSqlDate student = new StudentSqlDate();
         student.setAge((Short) getRandomValue(short.class));
-        student.setId((Date) getRandomValue(Date.class));
+        student.setId((Date) getRandomValue());
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
 
         // Insert max value of Date
         StudentSqlDate studentMax = new StudentSqlDate();
         studentMax.setAge((Short) getMaxValue(short.class));
-        studentMax.setId((Date) getMaxValue(Date.class));
+        studentMax.setId((Date) getMaxValue());
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of Date
         StudentSqlDate studentMin = new StudentSqlDate();
         studentMin.setAge((Short) getMinValue(short.class));
-        studentMin.setId((Date) getMinValue(Date.class));
+        studentMin.setId((Date) getMinValue());
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         em.close();
     }
 
+    private Object getMinValue()
+    {
+        return new Date(1970, 1, 1);
+    }
+
+    private Object getRandomValue()
+    {
+        return new Date(System.currentTimeMillis());
+    }
+
+    private Object getMaxValue()
+    {
+        return new Date(2100, 1, 1);
+    }
+
     public void testFindById(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue());
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -96,7 +109,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentSqlDate studentMin = em.find(StudentSqlDate.class, getMinValue(Date.class));
+        StudentSqlDate studentMin = em.find(StudentSqlDate.class, getMinValue());
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -106,7 +119,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentSqlDate student = em.find(StudentSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate student = em.find(StudentSqlDate.class, getRandomValue());
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -116,7 +129,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentSqlDate student = em.find(StudentSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate student = em.find(StudentSqlDate.class, getMaxValue());
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -128,7 +141,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getMaxValue());
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -165,7 +178,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(getMinValue(Date.class), student.getId());
+            Assert.assertEquals(getMinValue(), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
             Assert.assertEquals(getMinValue(String.class), student.getName());
             count++;
@@ -183,8 +196,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         Query q;
         List<StudentSqlDate> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentSqlDate s where s.id between " + getMinValue(Date.class) + " and "
-                + getMaxValue(Date.class);
+        query = "Select s From StudentSqlDate s where s.id between " + getMinValue() + " and " + getMaxValue();
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -192,13 +204,13 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         int count = 0;
         for (StudentSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(Date.class)))
+            else if (student.getId().equals(getMinValue()))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -206,9 +218,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             }
             else
             {
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getDate(), student.getId().getDate());
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getYear(), student.getId().getYear());
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getMonth(), student.getId().getMonth());
+                Assert.assertEquals(((Date) getRandomValue()).getDate(), student.getId().getDate());
+                Assert.assertEquals(((Date) getRandomValue()).getYear(), student.getId().getYear());
+                Assert.assertEquals(((Date) getRandomValue()).getMonth(), student.getId().getMonth());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -226,8 +238,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class);
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -235,9 +246,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getDate(), student.getId().getDate());
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getYear(), student.getId().getYear());
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getMonth(), student.getId().getMonth());
+            Assert.assertEquals(((Date) getMaxValue()).getDate(), student.getId().getDate());
+            Assert.assertEquals(((Date) getMaxValue()).getYear(), student.getId().getYear());
+            Assert.assertEquals(((Date) getMaxValue()).getMonth(), student.getId().getMonth());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -255,8 +266,8 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -264,9 +275,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getDate(), student.getId().getDate());
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getYear(), student.getId().getYear());
-            Assert.assertEquals(((Date) getMaxValue(Date.class)).getMonth(), student.getId().getMonth());
+            Assert.assertEquals(((Date) getMaxValue()).getDate(), student.getId().getDate());
+            Assert.assertEquals(((Date) getMaxValue()).getYear(), student.getId().getYear());
+            Assert.assertEquals(((Date) getMaxValue()).getMonth(), student.getId().getMonth());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -291,7 +302,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
+        StudentSqlDate studentMax = em.find(StudentSqlDate.class, getMaxValue());
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -301,7 +312,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentSqlDate.class, getMaxValue(Date.class));
+        studentMax = em.find(StudentSqlDate.class, getMaxValue());
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -321,7 +332,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue());
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -340,7 +351,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue(Date.class));
+        StudentSqlDate newStudent = em.find(StudentSqlDate.class, getRandomValue());
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -355,8 +366,8 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentSqlDate s where s.name = Amresh and s.age between "
-                + getMinValue(short.class) + " and " + getMaxValue(short.class);
+        query = "Select s From StudentSqlDate s where s.name = Amresh and s.age between " + getMinValue(short.class)
+                + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -364,9 +375,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getDate(), student.getId().getDate());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getYear(), student.getId().getYear());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getMonth(), student.getId().getMonth());
+            Assert.assertEquals(((Date) getRandomValue()).getDate(), student.getId().getDate());
+            Assert.assertEquals(((Date) getRandomValue()).getYear(), student.getId().getYear());
+            Assert.assertEquals(((Date) getRandomValue()).getMonth(), student.getId().getMonth());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -393,9 +404,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getDate(), student.getId().getDate());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getYear(), student.getId().getYear());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getMonth(), student.getId().getMonth());
+            Assert.assertEquals(((Date) getRandomValue()).getDate(), student.getId().getDate());
+            Assert.assertEquals(((Date) getRandomValue()).getYear(), student.getId().getYear());
+            Assert.assertEquals(((Date) getRandomValue()).getMonth(), student.getId().getMonth());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -414,8 +425,8 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         List<StudentSqlDate> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age >= "
-                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentSqlDate s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+                + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -423,7 +434,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -431,9 +442,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             }
             else
             {
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getDate(), student.getId().getDate());
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getYear(), student.getId().getYear());
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getMonth(), student.getId().getMonth());
+                Assert.assertEquals(((Date) getMinValue()).getDate(), student.getId().getDate());
+                Assert.assertEquals(((Date) getMinValue()).getYear(), student.getId().getYear());
+                Assert.assertEquals(((Date) getMinValue()).getMonth(), student.getId().getMonth());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -461,9 +472,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getDate(), student.getId().getDate());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getYear(), student.getId().getYear());
-            Assert.assertEquals(((Date) getRandomValue(Date.class)).getMonth(), student.getId().getMonth());
+            Assert.assertEquals(((Date) getRandomValue()).getDate(), student.getId().getDate());
+            Assert.assertEquals(((Date) getRandomValue()).getYear(), student.getId().getYear());
+            Assert.assertEquals(((Date) getRandomValue()).getMonth(), student.getId().getMonth());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -491,7 +502,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         count = 0;
         for (StudentSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -499,9 +510,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             }
             else
             {
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getDate(), student.getId().getDate());
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getYear(), student.getId().getYear());
-                Assert.assertEquals(((Date) getMinValue(Date.class)).getMonth(), student.getId().getMonth());
+                Assert.assertEquals(((Date) getMinValue()).getDate(), student.getId().getDate());
+                Assert.assertEquals(((Date) getMinValue()).getYear(), student.getId().getYear());
+                Assert.assertEquals(((Date) getMinValue()).getMonth(), student.getId().getMonth());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -526,13 +537,13 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
         int count = 0;
         for (StudentSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(Date.class)))
+            else if (student.getId().equals(getMinValue()))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -540,9 +551,9 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
             }
             else
             {
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getDate(), student.getId().getDate());
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getYear(), student.getId().getYear());
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getMonth(), student.getId().getMonth());
+                Assert.assertEquals(((Date) getRandomValue()).getDate(), student.getId().getDate());
+                Assert.assertEquals(((Date) getRandomValue()).getYear(), student.getId().getYear());
+                Assert.assertEquals(((Date) getRandomValue()).getMonth(), student.getId().getMonth());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -554,7 +565,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
 
     public void startCluster()
     {
-    	
+
     }
 
     public void stopCluster()

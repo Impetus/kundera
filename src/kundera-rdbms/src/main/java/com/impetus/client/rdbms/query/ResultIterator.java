@@ -73,6 +73,8 @@ class ResultIterator<E> implements IResultIterator<E>
     {
         if (firstResultIndex < maxResultIndex)
         {
+            // TODO:namedquery, JPQL, HQL => iterate, native => then don't
+
             result = sqlQuery.setFirstResult(firstResultIndex++).setMaxResults(1).list();
         }
 

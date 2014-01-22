@@ -152,7 +152,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 }
                 catch (Exception e)
                 {
-                    log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
+                    log.error("Error while executing handleAssociation for RDBMS, Caused by {}.", e);
                     throw new QueryHandlerException(e);
                 }
             }
@@ -364,6 +364,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
                             queryBuilder.delete(queryBuilder.lastIndexOf("and"), queryBuilder.lastIndexOf("and") + 3);
                         }
+                        else if (((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equals(propertyName))
+                        {
+                            addClause(entityMetadata, aliasName, queryBuilder, entityType, value, condition,
+                                    propertyName, entityMetadata.getIdAttribute());
+                        }
                         else
                         {
                             addClause(entityMetadata, aliasName, queryBuilder, entityType, value, condition,
@@ -422,8 +427,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     {
         boolean isString = isStringProperty(entityType, attribute);
 
-//        queryBuilder.append(aliasName);
-//        queryBuilder.append(".");
+        // queryBuilder.append(aliasName);
+        // queryBuilder.append(".");
         queryBuilder.append(StringUtils.replace(((AbstractAttribute) attribute).getJPAColumnName(), aliasName,
                 aliasName));
 

@@ -436,7 +436,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
-        List entities = new ArrayList();
+         List entities = new ArrayList();
 
         s = getStatelessSession();
 
