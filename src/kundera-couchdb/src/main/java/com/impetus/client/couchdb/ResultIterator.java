@@ -93,7 +93,7 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
         }
     }
 

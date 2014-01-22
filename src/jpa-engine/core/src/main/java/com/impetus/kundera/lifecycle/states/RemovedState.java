@@ -40,7 +40,7 @@ public class RemovedState extends NodeState
 
         // Recurse persist operation on all related entities for whom
         // cascade=ALL or PERSIST
-        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
+//        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class RemovedState extends NodeState
 
         // Recurse remove operation for all related entities for whom
         // cascade=ALL or REMOVE
-        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
+//        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
 
     @Override

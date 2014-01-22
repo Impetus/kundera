@@ -92,7 +92,10 @@ public class ObjectGraphBuilder
      */
     private Node getNode(Object entity, ObjectGraph graph, NodeState initialNodeState)
     {
-
+        if (entity == null)
+        {
+            return null;
+        }
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
 
         // entity metadata could be null.
@@ -178,8 +181,9 @@ public class ObjectGraphBuilder
 
             if (childObject != null && !ProxyHelper.isProxy(childObject))
             {
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PropertyAccessorHelper.getGenericClass(relation.getProperty()));
-                
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PropertyAccessorHelper
+                        .getGenericClass(relation.getProperty()));
+
                 if (metadata != null && relation.isJoinedByPrimaryKey())
                 {
                     PropertyAccessorHelper.setId(childObject, metadata,
@@ -238,7 +242,7 @@ public class ObjectGraphBuilder
 
         Node childNodeInCache = persistenceCache.getMainCache().getNodeFromCache(childNodeId);
 
-        return childNodeInCache != null ? childNodeInCache.getCurrentNodeState():new TransientState();
+        return childNodeInCache != null ? childNodeInCache.getCurrentNodeState() : new TransientState();
     }
 
     /**

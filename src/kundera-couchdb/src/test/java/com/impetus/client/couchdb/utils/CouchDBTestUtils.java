@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -38,7 +36,6 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.scheme.SchemeSocketFactory;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
@@ -46,10 +43,7 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.HttpContext;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.impetus.client.couchdb.CouchDBConstants;
-import com.impetus.client.couchdb.CouchDBDesignDocument;
-import com.impetus.client.couchdb.CouchDBDesignDocument.MapReduce;
 import com.impetus.client.couchdb.CouchDBUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -125,15 +119,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            e.printStackTrace();
+            
         }
         catch (ClientProtocolException e)
         {
-            e.printStackTrace();
+            
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         finally
         {
@@ -154,15 +148,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            e.printStackTrace();
+            
         }
         catch (ClientProtocolException e)
         {
-            e.printStackTrace();
+            
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         finally
         {

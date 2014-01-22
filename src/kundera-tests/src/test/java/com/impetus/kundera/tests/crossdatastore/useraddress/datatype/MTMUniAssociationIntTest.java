@@ -220,11 +220,11 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         PersonnelUniMToMInt p1 = (PersonnelUniMToMInt) dao.findPerson(PersonnelUniMToMInt.class, 12345);
         Assert.assertNotNull(p1);
-        p1.setPersonName("Saurabh");
         for (HabitatUniMToMBigInteger address : p1.getAddresses())
         {
             address.setStreet("Brand New Street");
         }
+        p1.setPersonName("Saurabh");
         dao.merge(p1);
         PersonnelUniMToMInt p1AfterMerge = (PersonnelUniMToMInt) dao.findPerson(PersonnelUniMToMInt.class, 12345);
         Assert.assertNotNull(p1AfterMerge);
@@ -236,11 +236,11 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 
         PersonnelUniMToMInt p2 = (PersonnelUniMToMInt) dao.findPerson(PersonnelUniMToMInt.class, 12346);
         Assert.assertNotNull(p2);
-        p2.setPersonName("Vijay");
         for (HabitatUniMToMBigInteger address : p2.getAddresses())
         {
             address.setStreet("Brand New Street");
         }
+        p2.setPersonName("Vijay");
         dao.merge(p2);
         PersonnelUniMToMInt p2AfterMerge = (PersonnelUniMToMInt) dao.findPerson(PersonnelUniMToMInt.class, 12346);
         Assert.assertNotNull(p2AfterMerge);
@@ -512,19 +512,19 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         }
         catch (NotFoundException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

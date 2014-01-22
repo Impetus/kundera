@@ -109,17 +109,17 @@ public class EmbeddedRDBMSUserTest
         catch (InvalidRequestException e)
         {
 
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
 
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
 
-            e.printStackTrace();
+            
         }
         EntityManager em = emf.createEntityManager();
         // em.getTransaction().begin();

@@ -231,7 +231,7 @@ public class ManyToManyAssociationTest
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            
         }
     }
 

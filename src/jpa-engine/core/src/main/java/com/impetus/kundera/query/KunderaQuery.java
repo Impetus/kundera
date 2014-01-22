@@ -447,25 +447,10 @@ public class KunderaQuery
 
         // parse and structure for "between" clause , if present, else it will
         // return original clause
-        clauses = parseFilterForBetweenClause(clauses/* , indexName */);
-        // clauses = parseFilterForInClause(clauses, indexName);
+        clauses = parseFilterForBetweenClause(clauses);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
-        /*
-         * if(((AbstractManagedType)entityType).isInherited()) { String
-         * discrColumn =
-         * ((AbstractManagedType)entityType).getDiscriminatorColumn(); String
-         * discrValue =
-         * ((AbstractManagedType)entityType).getDiscriminatorValue();
-         * 
-         * if(discrColumn != null && discrValue != null) {
-         * if(!clauses.isEmpty()) { clauses.add(" AND "); }
-         * 
-         * clauses.add(entityAlias+"."+discrColumn+ "= " + discrValue ); } }
-         */// entityAlias
-
-        // entityType
 
         for (String clause : clauses)
         {
@@ -484,12 +469,10 @@ public class KunderaQuery
                 {
                     property = property.substring((entityAlias + ".").length());
                 }
-                // String columnName = getColumnNameFromFieldName(metadata,
-                // property);
+
                 String columnName = null;
                 try
                 {
-                    // String columnName = metadata.getColumnName(property);
                     columnName = ((AbstractAttribute) entityType.getAttribute(property)).getJPAColumnName();
                 }
                 catch (IllegalArgumentException iaex)
@@ -520,10 +503,8 @@ public class KunderaQuery
                 }
 
                 FilterClause filterClause = new FilterClause(
-                /*
-                 * MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName
-                 * : indexName + "." +
-                 */columnName, condition, tokens.get(2));
+
+                columnName, condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 
                 onTypedParameter(tokens, filterClause, property);
@@ -544,8 +525,6 @@ public class KunderaQuery
         }
 
         addDiscriminatorClause(clauses, entityType);
-
-        // appendDiscriminator();
     }
 
     private void addDiscriminatorClause(List<String> clauses, EntityType entityType)

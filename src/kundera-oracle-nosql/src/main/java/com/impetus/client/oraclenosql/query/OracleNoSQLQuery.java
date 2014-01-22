@@ -119,7 +119,7 @@ public class OracleNoSQLQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new OracleNoSQLEntityReader(getLuceneQueryFromJPAQuery());
+        return new OracleNoSQLEntityReader(kunderaQuery);
     }
 
     @Override

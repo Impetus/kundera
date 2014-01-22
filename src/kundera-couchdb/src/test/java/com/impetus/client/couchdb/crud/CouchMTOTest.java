@@ -122,7 +122,7 @@ public class CouchMTOTest
 
         foundPerson1 = em.find(PersonCouchMTO.class, 1);
         foundPerson2 = em.find(PersonCouchMTO.class, 2);
-        
+
         Assert.assertNull(foundPerson1);
         Assert.assertNull(foundPerson2);
     }

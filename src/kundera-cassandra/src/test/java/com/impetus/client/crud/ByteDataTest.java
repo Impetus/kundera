@@ -216,7 +216,7 @@ public class ByteDataTest extends BaseTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
         }
 
     }

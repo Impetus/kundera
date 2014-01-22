@@ -58,7 +58,7 @@ public class ProfilePictureDao
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
 
         em.persist(pp);

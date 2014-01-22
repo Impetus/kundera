@@ -132,18 +132,16 @@ public class CassQuery extends QueryImpl
 
         if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
                 && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
-        // if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
-
         {
-            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative,
+            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
                     onQueryOverCQL3(m, client, metaModel, null));
         }
         else
         {
             if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative, query != null ? query
-                        : getJPAQuery());
+                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
+                        query != null ? query : getJPAQuery());
             }
             else
             {
@@ -207,12 +205,12 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null,isNative,
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(),isNative,
+            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
                     onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
         }
         else
@@ -254,7 +252,7 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null,isNative,
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null, isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (kunderaQuery.isDeleteUpdate())
@@ -508,7 +506,7 @@ public class CassQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
+            reader = new CassandraEntityReader(kunderaQuery);
         }
 
         return reader;
@@ -867,7 +865,7 @@ public class CassQuery extends QueryImpl
         isSingleResult = true;
         List results = getResultList();
         isSingleResult = false;
-        return results.isEmpty() ? results : results.get(0);
+        return onReturnResults(results);
     }
 
     /**

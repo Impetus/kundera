@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import javax.persistence.PersistenceException;
+
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.client.Client;
@@ -53,7 +55,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private PersistenceDelegator persistenceDelegator;
 
-    public ResultIterator(MongoDBClient client, EntityMetadata m, BasicDBObject basicDBObject,
+    ResultIterator(MongoDBClient client, EntityMetadata m, BasicDBObject basicDBObject,
             BasicDBObject orderByClause, BasicDBObject keys, PersistenceDelegator pd, int fetchSize)
     {
         this.m = m;
@@ -61,19 +63,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.fetchSize = fetchSize;
         this.persistenceDelegator = pd;
         this.handler = new MongoDBDataHandler();
-        onQuery(orderByClause, basicDBObject, keys);
-    }
-
-    private void onQuery(BasicDBObject orderByClause, BasicDBObject mongoQuery, BasicDBObject keys)
-    {
-        try
-        {
-            cursor = client.getDBCursorInstance(mongoQuery, orderByClause, fetchSize, keys, m.getTableName());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        this.cursor = client.getDBCursorInstance(basicDBObject, orderByClause, fetchSize, keys, m.getTableName());
     }
 
     @Override
@@ -122,6 +112,12 @@ class ResultIterator<E> implements IResultIterator<E>
         return null;
     }
 
+    /**
+     * 
+     * @param entityClazz
+     * @param entity
+     * @return
+     */
     private E instantiateEntity(Class<?> entityClazz, Object entity)
     {
         try
@@ -134,29 +130,33 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (InstantiationException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new PersistenceException("Error while instantiating entity " + entityClazz + ".", e);
         }
         catch (IllegalAccessException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new PersistenceException("Error while instantiating entity " + entityClazz + ".", e);
         }
-        return null;
     }
 
     @Override
     public void remove()
     {
-        throw new UnsupportedOperationException("remove method is not supported over pagination");
+        throw new UnsupportedOperationException("Remove method is not supported over pagination");
     }
 
     @Override
     public List<E> next(int chunkSize)
     {
-        throw new UnsupportedOperationException("fetch in chunks is not yet supported");
+        throw new UnsupportedOperationException("Fetch in chunks is not yet supported");
     }
 
+    /**
+     * 
+     * @param enhanceEntity
+     * @param client
+     * @param m
+     * @return
+     */
     private E setRelationEntities(Object enhanceEntity, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.

@@ -588,24 +588,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-
-            // Object entity = instantiateEntity(entityClazz, null);
-            // Map<String, Object> relationValue = null;
-            // relationValue = handler.getEntityFromDocument(entityClazz,
-            // entity, m, fetchedDocument,
-            // m.getRelationNames(), relationValue);
-            // if (relationValue != null && !relationValue.isEmpty())
-            // {
-            // entity = new EnhanceEntity(entity,
-            // PropertyAccessorHelper.getId(entity, m), relationValue);
-            // }
-            // results.add(entity);
-
             populateEntity(m, results, fetchedDocument);
-            // Object entity = handler.getEntityFromDocument(m.getEntityClazz(),
-            // m, fetchedDocument, m.getRelationNames());
-            // results.add(entity);
-
         }
 
         return results.isEmpty() ? null : results;

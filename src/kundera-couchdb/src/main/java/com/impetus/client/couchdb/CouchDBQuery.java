@@ -87,7 +87,7 @@ public class CouchDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new CouchDBEntityReader();
+        return new CouchDBEntityReader(kunderaQuery);
     }
 
     @Override

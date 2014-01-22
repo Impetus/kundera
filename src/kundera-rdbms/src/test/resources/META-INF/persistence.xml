@@ -24,8 +24,7 @@
 		<properties>
 			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-<!-- 			<property name="kundera.keyspace" value="testdb" />
- -->			<!-- DO NOT delete these -->
+			<!-- <property name="kundera.keyspace" value="testdb" /> -->			<!-- DO NOT delete these -->
 			<!-- <property name="current_session_context_class" value="thread" /> -->
 			<!-- <property name="hibernate.show_sql" value="true" /> -->
 			<!-- <property name="hibernate.format_sql" value="true" /> <property name="hibernate.connection.driver_class" 
@@ -49,9 +48,8 @@
 				value="thread" /> -->
 			<!-- <property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider" 
 				/> -->
-<!-- 			<property name="hibernate.show_sql" value="true" />
-			<property name="hibernate.format_sql" value="true" />
- -->			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
+			<!-- <property name="hibernate.show_sql" value="true" /> <property name="hibernate.format_sql" 
+				value="true" /> -->			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="kundera.client.property" value="hibernate.properties" />
 		</properties>
 	</persistence-unit>
@@ -60,11 +58,49 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" /> -->
 			<property name="hibernate.max_fetch_depth" value="0" />
-<!-- 			<property name="hibernate.show_sql" value="true" />
-			<property name="hibernate.format_sql" value="true" />
- -->			<property name="kundera.client.property" value="hibernate.properties" />
+			<!-- <property name="hibernate.show_sql" value="true" /> <property name="hibernate.format_sql" 
+				value="true" /> -->
+			<property name="kundera.client.property" value="hibernate.properties" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="RdbmsDataTypeTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.datatypes.entities.StudentString</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentInt</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBigInteger</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBigDecimal</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBytePrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentByteWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentInteger</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentFloatPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentFloatWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDoublePrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDoubleWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentChar</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentCharacter</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentLongPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentLongWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentShortPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentShortWrapper</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentSqlDate</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentTimestamp</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentTime</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentUUID</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentDate</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentCalendar</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBooleanPrimitive</class>
+		<class>com.impetus.client.crud.datatypes.entities.StudentBooleanWrapper</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<!-- <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<property name="hibernate.max_fetch_depth" value="0" /> -->
+			<property name="kundera.client.property" value="hibernate.properties" />
+			<!-- <property name="kundera.keyspace" value="KunderaTests" /> -->
+		</properties>
+	</persistence-unit>
+
 </persistence>

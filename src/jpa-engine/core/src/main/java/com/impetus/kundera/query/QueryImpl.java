@@ -29,6 +29,8 @@ import java.util.Set;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
@@ -36,7 +38,6 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -54,8 +54,8 @@ import com.impetus.kundera.metadata.model.type.DefaultEntityType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class QueryImpl.
@@ -136,24 +136,25 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         if (log.isDebugEnabled())
             log.info("On getResultList() executing query: " + getJPAQuery());
 
-        // as per JPA post event should happen before fetching data from database.
-        
+        // as per JPA post event should happen before fetching data from
+        // database.
+
         handlePostEvent();
-        
+
         List results = null;
-        
+
         if (kunderaQuery.isDeleteUpdate())
         {
             executeUpdate();
-        } else
+        }
+        else
         {
             results = fetch();
             assignReferenceToProxy(results);
         }
-        
+
         return results != null ? results : new ArrayList();
     }
-
 
     protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
@@ -194,9 +195,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result,
             String[] columnsToSelect)
     {
-        String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ, Constants.INVALID,
-                getMaxResults());
+        String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+        Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ,
+                Constants.INVALID, Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
@@ -212,59 +213,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return result;
     }
 
-
-    /**
-     * Gets the lucene query from jpa query.
-     * 
-     * @return the lucene query from jpa query
-     */
-    protected String getLuceneQueryFromJPAQuery()
-    {
-
-        LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
-        EntityMetadata metadata = getKunderaQuery().getEntityMetadata();
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
-
-        EntityType entity = metaModel.entity(metadata.getEntityClazz());
-
-        for (Object object : kunderaQuery.getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                String property = filter.getProperty();
-                String condition = filter.getCondition();
-                String valueAsString = filter.getValue().toString();
-                String fieldName = metadata.getFieldName(property);
-                Class valueClazz = getValueType(entity, fieldName);
-                
-                queryBuilder.appendIndexName(metadata.getIndexName())
-                        .appendPropertyName(getPropertyName(metadata, property))
-                        .buildQuery(condition, valueAsString, valueClazz);
-            } else
-            {
-                queryBuilder.buildQuery(object.toString(), object.toString(), String.class);
-            }
-
-        }
-
-        queryBuilder.appendEntityName(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
-        return queryBuilder.getQuery();
-
-    }
-
-    private Class getValueType(EntityType entity, String fieldName)
-    {
-        Class valueClazz = null;
-        if(fieldName != null)
-        {
-            valueClazz = ((AbstractAttribute) entity.getAttribute(fieldName)).getBindableJavaType();
-        }
-        return valueClazz;
-    }
-
-
     /**
      * Populate entities, Method to populate data in case no relation exist!.
      * 
@@ -276,6 +224,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
+    /**
+     * Recursively populate entities.
+     * 
+     * @param m
+     * @param client
+     * @return
+     */
     protected abstract List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client);
 
     /**
@@ -315,7 +270,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return 0;
 
     }
-    
+
     /**
      * Performs delete or update based on query.
      * 
@@ -355,10 +310,11 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                             Attribute attribute = entityType.getAttribute(columnName);
 
                             // TODO : catch column name.
-                            
-                            if(c.getValue() instanceof String)
+
+                            if (c.getValue() instanceof String)
                             {
-                                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue().toString());                                
+                                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue()
+                                        .toString());
                             }
                             else
                             {
@@ -865,7 +821,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     private <T> Parameter<T> onTypeCheck(Class<T> paramClass, Parameter<T> parameter)
     {
-        if (parameter != null && parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
+        if (parameter != null && parameter.getParameterType() != null
+                && parameter.getParameterType().equals(paramClass))
         {
             return parameter;
         }
@@ -926,9 +883,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     }
 
     public abstract void close();
-    
-    public abstract <E> Iterator<E> iterate();
 
+    public abstract <E> Iterator<E> iterate();
 
     /**
      * Handle post even callbacks.
@@ -937,31 +893,57 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     protected void handlePostEvent()
     {
         EntityMetadata metadata = getEntityMetadata();
-        if(!kunderaQuery.isDeleteUpdate())
+        if (!kunderaQuery.isDeleteUpdate())
         {
             persistenceDelegeator.getEventDispatcher().fireEventListeners(metadata, null, PostLoad.class);
         }
     }
 
     /**
-     *  Returns collection of fetched entities.
-     *  
-     * @return 
+     * Returns collection of fetched entities.
+     * 
+     * @return
      */
     protected List fetch()
     {
         EntityMetadata metadata = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(metadata);
-        List results = isRelational(metadata) ? recursivelyPopulateEntities(metadata, client):populateEntities(metadata, client);
+        List results = isRelational(metadata) ? recursivelyPopulateEntities(metadata, client) : populateEntities(
+                metadata, client);
         return results;
     }
 
+    protected void onValidateSingleResult(List results)
+    {
+      if(results == null || results.isEmpty())
+      {
+          log.error("No result found for {} ", kunderaQuery.getJPAQuery());
+          throw new NoResultException("No result found!");
+      }
+      
+      if(results.size() > 1)
+      {
+          log.error("Non unique results found for query {} ", kunderaQuery.getJPAQuery());
+          throw new NonUniqueResultException("Containing more than one result!");
+      }
+      
+    }
+    
+
+    protected Object onReturnResults(List results)
+    {
+        onValidateSingleResult(results);
+        return results.get(0);
+    }
+
     /**
-     * Returns true, if associated entity holds relational references(e.g. @OneToMany etc.) else false.
+     * Returns true, if associated entity holds relational references(e.g. @OneToMany
+     * etc.) else false.
      * 
-     * @param m entity metadata
+     * @param m
+     *            entity metadata
      * 
-     * @return  true, if holds relation else false
+     * @return true, if holds relation else false
      */
     private boolean isRelational(EntityMetadata m)
     {
@@ -969,31 +951,20 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return m.isRelationViaJoinTable() || (m.getRelationNames() != null && (!m.getRelationNames().isEmpty()));
     }
 
-    
     /**
-     * If returned collection of object holds a reference to 
+     * If returned collection of object holds a reference to
+     * 
      * @param results
      */
     private void assignReferenceToProxy(List results)
     {
-        if(results != null)
+        if (results != null)
         {
-            for(Object obj : results)
+            for (Object obj : results)
             {
-                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(getEntityMetadata(), obj);
+                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
+                        .setProxyOwners(getEntityMetadata(), obj);
             }
         }
-    }
-
-    private String getPropertyName(final EntityMetadata metadata, final String property)
-    {
-        if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true) != null)
-        {
-            return property.substring(property.indexOf(".") + 1,
-                    property.length());
-        }
-        
-        return property; 
-                
     }
 }

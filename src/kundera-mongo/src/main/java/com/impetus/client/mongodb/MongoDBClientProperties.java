@@ -56,20 +56,15 @@ public class MongoDBClientProperties
                 {
                     if (key.equals(WRITE_CONCERN) && value instanceof WriteConcern)
                     {
-
                         this.mongoDBClient.setWriteConcern((WriteConcern) value);
-
                     }
                     else if (key.equals(DB_ENCODER) && value instanceof DBEncoder)
                     {
-
                         this.mongoDBClient.setEncoder((DBEncoder) value);
-
                     }
                     else if (key.equals(BATCH_SIZE))
                     {
                         setBatchSize(value);
-
                     }
                 }
                 // Add more properties as needed
@@ -85,14 +80,11 @@ public class MongoDBClientProperties
         if (value instanceof Integer)
         {
             this.mongoDBClient.setBatchSize((Integer) value);
-
         }
         else if (value instanceof String)
         {
-
             this.mongoDBClient.setBatchSize(Integer.valueOf((String) value));
         }
-
     }
 
     /**

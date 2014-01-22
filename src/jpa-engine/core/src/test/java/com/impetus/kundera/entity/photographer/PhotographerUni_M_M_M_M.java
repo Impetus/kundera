@@ -18,6 +18,7 @@ package com.impetus.kundera.entity.photographer;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -45,7 +46,7 @@ public class PhotographerUni_M_M_M_M
     @Column(name = "PHOTOGRAPHER_NAME")
     private String photographerName;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "PHOTOGRAPHER_ALBUM", joinColumns = { @JoinColumn(name = "PHOTOGRAPHER_ID") }, inverseJoinColumns = { @JoinColumn(name = "ALBUM_ID") })
     private List<AlbumUni_M_M_M_M> albums;
 

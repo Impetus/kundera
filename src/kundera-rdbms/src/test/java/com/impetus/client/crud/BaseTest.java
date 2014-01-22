@@ -20,6 +20,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.client.crud.entities.PersonRDBMS;
+
 import junit.framework.Assert;
 
 /**

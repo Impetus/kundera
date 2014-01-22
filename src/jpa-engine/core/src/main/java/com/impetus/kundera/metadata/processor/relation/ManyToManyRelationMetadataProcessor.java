@@ -64,12 +64,6 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         boolean isJoinedByMap = false;
         if (m2mAnnotation != null && relationField.getType().isAssignableFrom(Map.class))
         {
-            /*
-             * if(! relationField.isAnnotationPresent(MapKeyJoinColumn.class)) {
-             * throw new InvalidEntityDefinitionException(
-             * "All @ManyToMany relationship whose field type is Map, must be annotated with @MapKeyJoinColumn"
-             * ); }
-             */
             isJoinedByMap = true;
         }
 

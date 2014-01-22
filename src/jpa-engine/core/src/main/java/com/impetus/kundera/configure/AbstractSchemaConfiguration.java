@@ -16,6 +16,5 @@ public abstract class AbstractSchemaConfiguration
         this.persistenceUnits= persistenceUnits;
         this.externalPropertyMap = externalPropertyMap;
     }
-    
-    
+        
 }

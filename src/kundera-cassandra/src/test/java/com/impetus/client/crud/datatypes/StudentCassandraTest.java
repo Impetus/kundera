@@ -634,7 +634,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail("Failure onInsert test, caused by :" + e);
         }
     }
@@ -866,27 +866,27 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 
@@ -904,23 +904,23 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 

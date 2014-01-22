@@ -122,8 +122,8 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-            
+            boolean isNative = kunderaQuery.isNative();
+
             if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
@@ -147,7 +147,8 @@ public class MongoDBQuery extends QueryImpl
         isSingleResult = true;
         List results = getResultList();
         isSingleResult = false;
-        return results.isEmpty() ? null : results.get(0);
+        return onReturnResults(results);
+
     }
 
     @Override
@@ -161,13 +162,13 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
-            boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-            
+            boolean isNative = kunderaQuery.isNative();
+
             if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
-            
+
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
                     m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult,
@@ -190,7 +191,7 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new MongoEntityReader();
+        return new MongoEntityReader(kunderaQuery);
     }
 
     /**
@@ -218,10 +219,8 @@ public class MongoDBQuery extends QueryImpl
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
-                // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                // String value = filter.getValue().toString();
                 Object value = filter.getValue();
 
                 // value is string but field.getType is different, then get
@@ -231,7 +230,6 @@ public class MongoDBQuery extends QueryImpl
 
                 // if alias is still present .. means it is an enclosing
                 // document search.
-                //
 
                 if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {
@@ -489,7 +487,7 @@ public class MongoDBQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
-                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),persistenceDelegeator,
-                getFetchSize() != null ? getFetchSize() : this.maxResult);
+                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),
+                persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
 }

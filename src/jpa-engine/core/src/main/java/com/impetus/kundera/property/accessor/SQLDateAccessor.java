@@ -107,7 +107,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
             return null;
         }
 
-        return String.valueOf(date.getTime());
+        return /*String.valueOf(date.getTime())*/date.toString();
     }
 
     /*

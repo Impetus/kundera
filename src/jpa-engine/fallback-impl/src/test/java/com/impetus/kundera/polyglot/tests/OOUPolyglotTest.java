@@ -67,7 +67,7 @@ public class OOUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -82,7 +82,7 @@ public class OOUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -138,7 +138,7 @@ public class OOUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }
@@ -157,7 +157,7 @@ public class OOUPolyglotTest extends PersonAddressTestBase
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             Assert.fail();
         }
     }

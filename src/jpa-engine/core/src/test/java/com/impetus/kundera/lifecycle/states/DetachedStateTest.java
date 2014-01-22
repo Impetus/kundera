@@ -144,12 +144,12 @@ public class DetachedStateTest
         Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isUpdate());
 
-        for (Node childNode : storeNode.getChildren().values())
-        {
-            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
-            Assert.assertTrue(childNode.isUpdate());
-        }
+//        for (Node childNode : storeNode.getChildren().values())
+//        {
+//            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+//            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
+//            Assert.assertTrue(childNode.isUpdate());
+//        }
     }
 
     /**

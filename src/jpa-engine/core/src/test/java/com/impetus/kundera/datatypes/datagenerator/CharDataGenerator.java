@@ -1,36 +1,32 @@
 package com.impetus.kundera.datatypes.datagenerator;
 
-public class CharDataGenerator implements DataGenerator<Character>
-{
 
-    private static final char CHAR = 'a';
+public class CharDataGenerator implements DataGenerator<Character> {
 
-    @Override
-    public Character randomValue()
-    {
+	private static final char CHAR = 'a';
 
-        return CHAR;
-    }
+	@Override
+	public Character randomValue() {
 
-    @Override
-    public Character maxValue()
-    {
+		return CHAR;
+	}
 
-        return Character.MAX_VALUE;
-    }
+	@Override
+	public Character maxValue() {
 
-    @Override
-    public Character minValue()
-    {
+		return 'z';
+	}
 
-        return Character.MIN_VALUE;
-    }
+	@Override
+	public Character minValue() {
 
-    @Override
-    public Character partialValue()
-    {
+		return Character.MIN_VALUE;
+	}
 
-        return null;
-    }
+	@Override
+	public Character partialValue() {
+
+		return null;
+	}
 
 }

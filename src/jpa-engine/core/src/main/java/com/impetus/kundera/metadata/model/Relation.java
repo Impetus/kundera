@@ -24,8 +24,6 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.EntityType;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -51,7 +49,7 @@ public final class Relation
     private Class<?> propertyType;
 
     /** The fetch type. */
-    FetchType fetchType;
+    private FetchType fetchType;
 
     /** The cascades. */
     private List<CascadeType> cascades;

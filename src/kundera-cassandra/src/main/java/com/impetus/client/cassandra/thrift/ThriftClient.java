@@ -340,36 +340,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("ThriftClient is closed.");
         }
         return findByRowKeys(entityClass, relationNames, isWrapReq, metadata, rowIds);
-        /*
-         * if (!isOpen()) { throw new
-         * PersistenceException("ThriftClient is closed."); }
-         * 
-         * List entities = null;
-         * 
-         * MetamodelImpl metaModel = (MetamodelImpl)
-         * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-         * metadata.getPersistenceUnit());
-         * 
-         * EntityType entityType = metaModel.entity(metadata.getEntityClazz());
-         * 
-         * List<AbstractManagedType> subManagedType = ((AbstractManagedType)
-         * entityType).getSubManagedType();
-         * 
-         * try { if (!subManagedType.isEmpty()) { for (AbstractManagedType
-         * subEntity : subManagedType) { EntityMetadata subEntityMetadata =
-         * KunderaMetadataManager .getEntityMetadata(subEntity.getJavaType());
-         * entities = dataHandler.fromThriftRow(entityClass, subEntityMetadata,
-         * subEntityMetadata.getRelationNames(), isWrapReq,
-         * getConsistencyLevel(), rowIds);
-         * 
-         * if (entities != null && !entities.isEmpty()) { break; } } } else {
-         * entities = dataHandler.fromThriftRow(entityClass, metadata,
-         * relationNames, isWrapReq, getConsistencyLevel(), rowIds); } } catch
-         * (Exception e) {
-         * log.error("Error while retrieving records for entity {}, row keys {}"
-         * , entityClass, rowIds); throw new KunderaException(e); } return
-         * entities;
-         */}
+    }
 
     /**
      * Finds a {@link List} of entities from database for given super columns
@@ -911,24 +882,27 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             ColumnFamilyType.COLUMN, null);
                     Object e = null;
                     Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key);
-//                    e = PelopsUtils.initialize(m, e, null);
+                    // e = PelopsUtils.initialize(m, e, null);
 
                     e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames, isRelational);
-                    
-//                    if (e != null && PropertyAccessorHelper.getId(e, m) != null)
-//                    {
-//                        e = isRelational && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e,
-//                                m), relations) : e;
-                        entities.add(e);
-//                    }
+                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames,
+                            isRelational);
+
+                    // if (e != null && PropertyAccessorHelper.getId(e, m) !=
+                    // null)
+                    // {
+                    // e = isRelational && !relations.isEmpty() ? new
+                    // EnhanceEntity(e, PropertyAccessorHelper.getId(e,
+                    // m), relations) : e;
+                    entities.add(e);
+                    // }
                 }
             }
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             log.error("Error while populating data for relations of column family {}, Caused by: .", m.getTableName(),
                     e);
             throw new KunderaException(e);

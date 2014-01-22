@@ -1,27 +1,26 @@
 package com.impetus.kundera.datatypes.datagenerator;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 public class BigDecimalDataGenerator implements DataGenerator<BigDecimal>
 {
-    private static final LongDataGenerator LONG_DATA_GENERATOR = new LongDataGenerator();
-
     @Override
     public BigDecimal randomValue()
     {
-        return BigDecimal.valueOf(LONG_DATA_GENERATOR.randomValue());
+        return new BigDecimal(1234);
     }
 
     @Override
     public BigDecimal maxValue()
     {
-        return new BigDecimal(23.45);
+        return new BigDecimal(23.45, new MathContext(4));
     }
 
     @Override
     public BigDecimal minValue()
     {
-        return new BigDecimal(0.001);
+        return new BigDecimal(0.01, new MathContext(1));
     }
 
     @Override

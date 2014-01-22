@@ -26,7 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraUUID;
+import com.impetus.client.crud.datatypes.entities.StudentUUID;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraUUIDTest extends CassandraBase
@@ -63,10 +63,10 @@ public class StudentCassandraUUIDTest extends CassandraBase
      */
     private void testNativeQuery(boolean b)
     {
-        String s = "Select * From " + "\"StudentCassandraUUID\"";
+        String s = "Select * From " + "\"StudentUUID\"";
         EntityManager em = emf.createEntityManager();
-        Query q = em.createNativeQuery(s, StudentCassandraUUID.class);
-        List<StudentCassandraUUID> results = q.getResultList();
+        Query q = em.createNativeQuery(s, StudentUUID.class);
+        List<StudentUUID> results = q.getResultList();
         Assert.assertNotNull(results);
 
     }
@@ -87,21 +87,21 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of UUID
-        StudentCassandraUUID studentMax = new StudentCassandraUUID();
+        StudentUUID studentMax = new StudentUUID();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((UUID) getMaxValue(UUID.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of UUID
-        StudentCassandraUUID studentMin = new StudentCassandraUUID();
+        StudentUUID studentMin = new StudentUUID();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((UUID) getMinValue(UUID.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of UUID
-        StudentCassandraUUID student = new StudentCassandraUUID();
+        StudentUUID student = new StudentUUID();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((UUID) getRandomValue(UUID.class));
         student.setName((String) getRandomValue(String.class));
@@ -113,7 +113,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraUUID studentMax = em.find(StudentCassandraUUID.class, getMaxValue(UUID.class));
+        StudentUUID studentMax = em.find(StudentUUID.class, getMaxValue(UUID.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -123,7 +123,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraUUID studentMin = em.find(StudentCassandraUUID.class, getMinValue(UUID.class));
+        StudentUUID studentMin = em.find(StudentUUID.class, getMinValue(UUID.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -133,7 +133,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraUUID student = em.find(StudentCassandraUUID.class, getRandomValue(UUID.class));
+        StudentUUID student = em.find(StudentUUID.class, getRandomValue(UUID.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -143,7 +143,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraUUID student = em.find(StudentCassandraUUID.class, getMaxValue(UUID.class));
+        StudentUUID student = em.find(StudentUUID.class, getMaxValue(UUID.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -155,7 +155,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraUUID newStudent = em.find(StudentCassandraUUID.class, getMaxValue(UUID.class));
+        StudentUUID newStudent = em.find(StudentUUID.class, getMaxValue(UUID.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -180,17 +180,17 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentUUID s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getMinValue(UUID.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -208,16 +208,16 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.id between " + getMinValue(UUID.class) + " and "
+        query = "Select s From StudentUUID s where s.id between " + getMinValue(UUID.class) + " and "
                 + getMaxValue(UUID.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             if (student.getId().equals(getMaxValue(UUID.class)))
             {
@@ -248,16 +248,16 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentUUID s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getMaxValue(UUID.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -274,17 +274,17 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentUUID s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getMaxValue(UUID.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -311,7 +311,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraUUID studentMax = em.find(StudentCassandraUUID.class, getMaxValue(UUID.class));
+        StudentUUID studentMax = em.find(StudentUUID.class, getMaxValue(UUID.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -321,7 +321,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraUUID.class, getMaxValue(UUID.class));
+        studentMax = em.find(StudentUUID.class, getMaxValue(UUID.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -332,7 +332,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraUUID s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentUUID s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -341,7 +341,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraUUID newStudent = em.find(StudentCassandraUUID.class, getRandomValue(UUID.class));
+        StudentUUID newStudent = em.find(StudentUUID.class, getRandomValue(UUID.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -352,7 +352,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraUUID s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentUUID s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -360,7 +360,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraUUID newStudent = em.find(StudentCassandraUUID.class, getRandomValue(UUID.class));
+        StudentUUID newStudent = em.find(StudentUUID.class, getRandomValue(UUID.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -372,17 +372,17 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Amresh and s.age between "
+        query = "Select s From StudentUUID s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getRandomValue(UUID.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -399,17 +399,17 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentUUID s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getRandomValue(UUID.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -427,17 +427,17 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+        query = "Select s From StudentUUID s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             if (student.getId().equals(getMaxValue(UUID.class)))
             {
@@ -464,16 +464,16 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentUUID s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             Assert.assertEquals(getRandomValue(UUID.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -492,16 +492,16 @@ public class StudentCassandraUUIDTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraUUID> students;
+        List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraUUID s where s.name = Kuldeep";
+        query = "Select s From StudentUUID s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             if (student.getId().equals(getMaxValue(UUID.class)))
             {
@@ -528,13 +528,13 @@ public class StudentCassandraUUIDTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraUUID s ";
+        String query = "Select s From StudentUUID s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraUUID> students = q.getResultList();
+        List<StudentUUID> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraUUID student : students)
+        for (StudentUUID student : students)
         {
             if (student.getId().equals(getMaxValue(UUID.class)))
             {
@@ -568,27 +568,27 @@ public class StudentCassandraUUIDTest extends CassandraBase
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 
@@ -605,7 +605,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraUUID";
+            cfDef.name = "StudentUUID";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("UUIDType");
             cfDef.setComparator_type("UTF8Type");
@@ -628,10 +628,10 @@ public class StudentCassandraUUIDTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraUUID"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentUUID"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraUUID");
+                        CassandraCli.client.system_drop_column_family("StudentUUID");
 
                     }
                 }
@@ -656,15 +656,15 @@ public class StudentCassandraUUIDTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

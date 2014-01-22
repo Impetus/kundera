@@ -30,7 +30,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "foo_table", schema = "KunderaTests@cassandra_pu")
+@Table(name = "foo_table")
 public class EntityWithCollection
 {
     @Id

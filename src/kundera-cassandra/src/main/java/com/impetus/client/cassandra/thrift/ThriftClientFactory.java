@@ -75,7 +75,6 @@ public class ThriftClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-            // setExternalProperties(externalProperty);
             schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName(), externalProperties);
         }
         return schemaManager;

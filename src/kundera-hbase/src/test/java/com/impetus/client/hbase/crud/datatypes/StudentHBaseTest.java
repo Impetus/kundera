@@ -93,12 +93,12 @@ public class StudentHBaseTest extends StudentBase<StudentHBase>
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
 

@@ -94,8 +94,6 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                     .getSecondaryTablesName();
             secondaryTables.add(m.getTableName());
 
-//            e = PelopsUtils.initialize(m, e, null);
-
             for (String tableName : secondaryTables)
             {
                 List<ColumnOrSuperColumn> columnOrSuperColumns = conn.getClient().get_slice(key,
@@ -108,15 +106,6 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                     e = populateEntityFromSlice(m, relationNames, isWrapReq, CassandraUtilities.getEntity(e) , thriftColumnOrSuperColumns);
                 }
             }
-//            if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
-//            {
-//                return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-//                        relations) : e;
-//            }
-//            else
-//            {
-//                return null;
-//            }
             return e;
         }
         finally

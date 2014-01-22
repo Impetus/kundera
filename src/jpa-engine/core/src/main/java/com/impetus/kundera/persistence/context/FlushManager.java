@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.persistence.context;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
@@ -27,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import javax.persistence.CascadeType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -72,6 +74,35 @@ public class FlushManager
 
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(FlushManager.class);
+
+    private static Map<EventType, List<CascadeType>> cascadePermission = new HashMap<EventType, List<CascadeType>>();
+
+    static
+    {
+        List<CascadeType> cascades = new ArrayList<CascadeType>();
+        cascades.add(CascadeType.ALL);
+        cascades.add(CascadeType.PERSIST);
+
+        cascadePermission.put(EventType.INSERT, cascades);
+
+        cascades.remove(CascadeType.PERSIST);
+        cascades.add(CascadeType.MERGE);
+        cascadePermission.put(EventType.UPDATE, cascades);
+
+        cascades.remove(CascadeType.MERGE);
+        cascades.add(CascadeType.REMOVE);
+        cascadePermission.put(EventType.DELETE, cascades);
+
+        // cascades.remove(CascadeType.REMOVE);
+        // cascades.add(CascadeType.REFRESH);
+        // cascadePermission.put(com.impetus.kundera.lifecycle.states.NodeState.OPERATION.REFRESH,
+        // cascades);
+
+        // cascades.remove(CascadeType.REFRESH);
+        // cascades.add(CascadeType.DETACH);
+        // cascadePermission.put(com.impetus.kundera.lifecycle.states.NodeState.OPERATION.DETACH,
+        // cascades);
+    }
 
     /**
      * Instantiates a new flush manager.
@@ -111,6 +142,8 @@ public class FlushManager
 
         Map<NodeLink, Node> children = node.getChildren();
 
+        performOperation(node, eventType);
+
         // If this is a leaf node (not having any child, no need to go any
         // deeper
         if (children != null)
@@ -122,24 +155,31 @@ public class FlushManager
 
             for (NodeLink nodeLink : children.keySet())
             {
-                Relation.ForeignKey multiplicity = nodeLink.getMultiplicity();
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
 
-                switch (multiplicity)
+                if (cascadeTypes.contains(cascadePermission.get(eventType).get(0))
+                        || cascadeTypes.contains(cascadePermission.get(eventType).get(1)))
                 {
-                case ONE_TO_ONE:
-                    oneToOneChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case ONE_TO_MANY:
-                    oneToManyChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case MANY_TO_ONE:
-                    manyToOneChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case MANY_TO_MANY:
-                    manyToManyChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                }
+                    Relation.ForeignKey multiplicity = nodeLink.getMultiplicity();
 
+                    Node childNode = children.get(nodeLink);
+
+                    switch (multiplicity)
+                    {
+                    case ONE_TO_ONE:
+                        oneToOneChildren.put(nodeLink, childNode);
+                        break;
+                    case ONE_TO_MANY:
+                        oneToManyChildren.put(nodeLink, childNode);
+                        break;
+                    case MANY_TO_ONE:
+                        manyToOneChildren.put(nodeLink, childNode);
+                        break;
+                    case MANY_TO_MANY:
+                        manyToManyChildren.put(nodeLink, childNode);
+                        break;
+                    }
+                }
             }
 
             // Process One-To-Many children
@@ -248,14 +288,23 @@ public class FlushManager
                 Map<NodeLink, Node> parents = childNode.getParents();
                 for (NodeLink parentLink : parents.keySet())
                 {
-                    Relation.ForeignKey multiplicity = parentLink.getMultiplicity();
-                    if (multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
+                    List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+
+                    if (cascadeTypes.contains(cascadePermission.get(eventType).get(0))
+                            || cascadeTypes.contains(cascadePermission.get(eventType).get(1)))
                     {
+                        Relation.ForeignKey multiplicity = parentLink.getMultiplicity();
+
                         Node parentNode = parents.get(parentLink);
 
-                        if (!parentNode.isTraversed() && parentNode.isDirty())
+//                        performOperation(parentNode, eventType);
+
+                        if (multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
                         {
-                            addNodesToFlushStack(parentNode, eventType);
+                            if (!parentNode.isTraversed() && parentNode.isDirty())
+                            {
+                                addNodesToFlushStack(parentNode, eventType);
+                            }
                         }
                     }
                 }
@@ -520,4 +569,33 @@ public class FlushManager
         joinTableDataCollection = null;
         joinTableDataCollection = new ArrayList<JoinTableData>();
     }
+
+    /**
+     * @param nodeStateContext
+     */
+    private void performOperation(Node node, EventType eventType)
+    {
+        switch (eventType)
+        {
+        case INSERT:
+            node.persist();
+            break;
+
+        case UPDATE:
+            if (node.isInState(TransientState.class))
+            {
+                node.persist();
+            }
+            else
+            {
+                node.merge();
+            }
+            break;
+
+        case DELETE:
+            node.remove();
+            break;
+        }
+    }
+
 }

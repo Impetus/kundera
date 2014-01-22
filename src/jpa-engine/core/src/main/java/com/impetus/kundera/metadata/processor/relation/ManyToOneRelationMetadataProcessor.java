@@ -65,8 +65,7 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
 
         Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
-                ann.optional(), null, // mappedBy is
-                                      // null
+                ann.optional(), null, // mappedBy is null
                 Relation.ForeignKey.MANY_TO_ONE);
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
@@ -92,13 +91,7 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         else if (isJoinedByTable)
         {
             throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
-            /*
-             * JoinTableMetadata jtMetadata = new
-             * JoinTableMetadata(relationField);
-             * 
-             * relation.setRelatedViaJoinTable(true);
-             * relation.setJoinTableMetadata(jtMetadata);
-             */}
+        }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);

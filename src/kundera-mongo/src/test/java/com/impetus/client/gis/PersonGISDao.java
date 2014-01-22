@@ -55,7 +55,7 @@ public class PersonGISDao
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                
             }
         }
 
