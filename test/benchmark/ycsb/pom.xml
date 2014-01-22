@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 
-        <parent>
-	<groupId>com.impetus.kundera</groupId>
-	<artifactId>kundera-benchmark</artifactId>
-	<version>2.10-SNAPSHOT</version>
+	<parent>
+		<groupId>com.impetus.kundera</groupId>
+		<artifactId>kundera-benchmark</artifactId>
+		<version>2.10-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.impetus.kundera.ycsb</groupId>
@@ -50,22 +50,11 @@
 
 		<!-- kundera dependencies -->
 
-		<!-- <dependency>
-			<groupId>com.impetus.core</groupId>
-			<artifactId>kundera-core</artifactId>
-			<version>2.9-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
-		
+		<!-- <dependency> <groupId>com.impetus.core</groupId> <artifactId>kundera-core</artifactId> 
+			<version>2.9-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
+			<artifactId>slf4j-log4j12</artifactId> </exclusion> <exclusion> <groupId>log4j</groupId> 
+			<artifactId>log4j</artifactId> </exclusion> </exclusions> </dependency> -->
+
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
@@ -128,6 +117,12 @@
 		</dependency>
 
 
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -205,16 +200,10 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
-<!-- 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<argLine>-Xms512M -Xmx2048M -XX:+UseConcMarkSweepGC
-						-XX:+UseParNewGC</argLine>
-				</configuration>
-			</plugin>
- -->		</plugins>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 
+				<version>2.9</version> <configuration> <argLine>-Xms512M -Xmx2048M -XX:+UseConcMarkSweepGC 
+				-XX:+UseParNewGC</argLine> </configuration> </plugin> -->
+		</plugins>
 	</build>
 
 </project>
