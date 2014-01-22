@@ -126,21 +126,28 @@ public class CrossDataStoreTransactionTest
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef1 : cfDefn)
-            {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests")) {
+                CassandraCli.client.system_add_column_family(cfDef);
+            } else {
+                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
             }
-            CassandraCli.client.system_add_column_family(cfDef);
+
+//            List<CfDef> cfDefn = ksDef.getCf_defs();
+//
+//            // CassandraCli.client.set_keyspace("KunderaTests");
+//            for (CfDef cfDef1 : cfDefn)
+//            {
+//
+//                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+//                {
+//
+//                    CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
+//
+//                } else{
+//                    CassandraCli.client.system_add_column_family(cfDef);
+//                }
+//            }
+//            
 
         }
         catch (NotFoundException e)
@@ -186,18 +193,24 @@ public class CrossDataStoreTransactionTest
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            List<CfDef> cfDefss = ksDef.getCf_defs();
-            for (CfDef cfDef : cfDefss)
-            {
-
-                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("ADDRESS");
-
-                }
+            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests")) {
+                CassandraCli.client.system_add_column_family(cfDef2);
+            } else {
+                CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
             }
-            CassandraCli.client.system_add_column_family(cfDef2);
+//            List<CfDef> cfDefss = ksDef.getCf_defs();
+//            for (CfDef cfDef : cfDefss)
+//            {
+//
+//                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
+//                {
+//                    CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
+//
+//                } else{
+//                    CassandraCli.client.system_add_column_family(cfDef2);
+//                }
+//            }
+            
         }
         catch (NotFoundException e)
         {
@@ -213,7 +226,8 @@ public class CrossDataStoreTransactionTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("KunderaTests");
+        //CassandraCli.dropKeySpace("KunderaTests");
+        CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS", "PERSONNEL");
     }
 
 }

@@ -101,8 +101,8 @@ public abstract class PickrBaseTest
         catch (Exception e)
         {
             cli.update("DELETE FROM PICKR.PHOTOGRAPHER");
-            cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
-            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER (PHOTOGRAPHER_ID INT PRIMARY KEY, PHOTOGRAPHER_NAME VARCHAR(256),ALBUM_ID VARCHAR(150))");
+//            cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
+//            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER (PHOTOGRAPHER_ID INT PRIMARY KEY, PHOTOGRAPHER_NAME VARCHAR(256),ALBUM_ID VARCHAR(150))");
         }
         try
         {
@@ -111,8 +111,8 @@ public abstract class PickrBaseTest
         catch (Exception e)
         {
             cli.update("DELETE FROM PICKR.PHOTOGRAPHER_ALBUM");
-            cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
-            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER_ALBUM (PHOTOGRAPHER_ID INT , ALBUM_ID VARCHAR(150))");
+//            cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
+//            cli.update("CREATE TABLE PICKR.PHOTOGRAPHER_ALBUM (PHOTOGRAPHER_ID INT , ALBUM_ID VARCHAR(150))");
         }
 
     }
@@ -131,7 +131,8 @@ public abstract class PickrBaseTest
         // pickr.close();
         if (AUTO_MANAGE_SCHEMA)
         {
-            CassandraCli.dropKeySpace("Pickr");
+            truncateSchema();
+           // CassandraCli.dropKeySpace("Pickr");
             truncateMongo();
 
             deleteRDBMSSchemaAndTables();
@@ -193,6 +194,16 @@ public abstract class PickrBaseTest
             log.error(e.getMessage());
         }
     }
+    
+    private void truncateSchema() throws InvalidRequestException, SchemaDisagreementException
+    {
+        log.warn("Truncating....");
+
+        
+        CassandraCli.truncateColumnFamily("Pickr", "PHOTOGRAPHER","ALBUM", "PHOTO", "ALBUM_PHOTO");
+    //    CassandraCli.dropColumnFamily("Pickr", "MOVIE");
+       
+    }
 
     private void deleteRDBMSSchemaAndTables()
     {
@@ -200,10 +211,12 @@ public abstract class PickrBaseTest
         try
         {
             cli.update("DELETE FROM PICKR.PHOTOGRAPHER");
-            cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
+         //   cli.update("DROP TABLE PICKR.PHOTOGRAPHER");
             cli.update("DELETE FROM PICKR.PHOTOGRAPHER_ALBUM");
-            cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
-            cli.dropSchema(SCHEMA);
+        //    cli.update("DROP TABLE PICKR.PHOTOGRAPHER_ALBUM");
+          //  cli.dropSchema(SCHEMA);
+            
+            
         }
         catch (SQLException e)
         {
