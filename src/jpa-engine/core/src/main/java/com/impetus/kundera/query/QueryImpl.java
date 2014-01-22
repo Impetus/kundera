@@ -29,6 +29,8 @@ import java.util.Set;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
@@ -909,6 +911,29 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         List results = isRelational(metadata) ? recursivelyPopulateEntities(metadata, client) : populateEntities(
                 metadata, client);
         return results;
+    }
+
+    protected void onValidateSingleResult(List results)
+    {
+      if(results == null || results.isEmpty())
+      {
+          log.error("No result found for {} ", kunderaQuery.getJPAQuery());
+          throw new NoResultException("No result found!");
+      }
+      
+      if(results.size() > 1)
+      {
+          log.error("Non unique results found for query {} ", kunderaQuery.getJPAQuery());
+          throw new NonUniqueResultException("Containing more than one result!");
+      }
+      
+    }
+    
+
+    protected Object onReturnResults(List results)
+    {
+        onValidateSingleResult(results);
+        return results.get(0);
     }
 
     /**

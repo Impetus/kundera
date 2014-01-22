@@ -46,6 +46,8 @@ public abstract class TwinAssociation extends AssociationBase
     /** The combinations. */
     protected static List<Map<Class, String>> combinations = new ArrayList<Map<Class, String>>();
 
+    protected static List<String> traversedPus = new ArrayList<String>();
+
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(TwinAssociation.class);
 
@@ -96,21 +98,25 @@ public abstract class TwinAssociation extends AssociationBase
             {
                 metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i]);
 
-                for (int i1 = 0; i1 < ALL_PUs_UNDER_TEST.length; i1++)
-                {
-                    if (i != i1)
+//                if (traversedPus.isEmpty() || !traversedPus.contains(ALL_PUs_UNDER_TEST[i]))
+//                {
+                  for (int i1 = 0; i1 < ALL_PUs_UNDER_TEST.length; i1++)
                     {
-                        Map<Class<?>, EntityType<?>> original = getManagedTypes((MetamodelImpl) metaModel);
-
-                        Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                                ALL_PUs_UNDER_TEST[i1]);
-                        Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
-                        if (original != null && copy != null)
+                        if (i != i1)
                         {
-                            original.putAll(copy);
+                            traversedPus.add(ALL_PUs_UNDER_TEST[i1]);
+                            Map<Class<?>, EntityType<?>> original = getManagedTypes((MetamodelImpl) metaModel);
+
+                            Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                                    ALL_PUs_UNDER_TEST[i1]);
+                            Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
+                            if (original != null && copy != null)
+                            {
+                                original.putAll(copy);
+                            }
                         }
                     }
-                }
+               // }
             }
 
             for (Map<Class, String> c : combinations)
@@ -156,7 +162,7 @@ public abstract class TwinAssociation extends AssociationBase
         }
         catch (Exception e)
         {
-            log.error("Error while switching persistence units",e);
+            log.error("Error while switching persistence units", e);
             throw new RuntimeException(e);
         }
     }

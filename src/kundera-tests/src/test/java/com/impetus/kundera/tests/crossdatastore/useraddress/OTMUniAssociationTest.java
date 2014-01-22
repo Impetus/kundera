@@ -178,7 +178,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            
+
             Assert.fail();
         }
     }
@@ -196,7 +196,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            
+
             Assert.fail();
         }
     }
@@ -211,6 +211,8 @@ public class OTMUniAssociationTest extends TwinAssociation
     public void tearDown() throws Exception
     {
         shutDownRdbmsServer();
+        // shutDownRdbmsServer();
+        // tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
     /**
@@ -274,19 +276,14 @@ public class OTMUniAssociationTest extends TwinAssociation
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
 
-            List<CfDef> cfDefn = ksDef.getCf_defs();
-
-            for (CfDef cfDef1 : cfDefn)
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests"))
             {
-
-                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-
-                }
+                CassandraCli.client.system_add_column_family(cfDef);
             }
-            CassandraCli.client.system_add_column_family(cfDef);
+            else
+            {
+                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
+            }
 
         }
         catch (NotFoundException e)
@@ -324,19 +321,15 @@ public class OTMUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            List<CfDef> cfDefss = ksDef.getCf_defs();
-            // CassandraCli.client.set_keyspace("KunderaTests");
-            for (CfDef cfDef : cfDefss)
+            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests"))
             {
-
-                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-                {
-
-                    CassandraCli.client.system_drop_column_family("ADDRESS");
-
-                }
+                CassandraCli.client.system_add_column_family(cfDef2);
             }
-            CassandraCli.client.system_add_column_family(cfDef2);
+            else
+            {
+                CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
+            }
+
         }
         catch (NotFoundException e)
         {
@@ -358,13 +351,14 @@ public class OTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
+            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(150), ADDRESS_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
         }
     }
 
@@ -385,8 +379,8 @@ public class OTMUniAssociationTest extends TwinAssociation
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
+            // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
         }
     }
 

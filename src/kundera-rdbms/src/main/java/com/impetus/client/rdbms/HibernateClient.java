@@ -539,6 +539,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String tableName = m.getTableName();
 
+        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
         StringBuilder queryBuilder = new StringBuilder("Select ");
 
         queryBuilder.append("* ");

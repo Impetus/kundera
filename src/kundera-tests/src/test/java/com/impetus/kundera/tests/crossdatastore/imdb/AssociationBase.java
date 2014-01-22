@@ -218,10 +218,12 @@ public abstract class AssociationBase
                     {
                         if (mAdd.getTableName().equalsIgnoreCase(MOVIE))
                         {
+                            System.out.println("in movie here");
                             loadDataForMovie();
                         }
                         else if (mAdd.getTableName().equalsIgnoreCase(ACTOR))
                         {
+                            System.out.println("in actor here");
                             loadDataForActor();
                         }
                     }
@@ -315,9 +317,14 @@ public abstract class AssociationBase
     protected void truncateSchema() throws InvalidRequestException, SchemaDisagreementException
     {
         log.warn("Truncating....");
-        CassandraCli.dropColumnFamily("ACTOR", KEYSPACE);
-        CassandraCli.dropColumnFamily("MOVIE", KEYSPACE);
-        CassandraCli.dropKeySpace(KEYSPACE);
+//        CassandraCli.dropColumnFamily("ACTOR", KEYSPACE);
+//        CassandraCli.dropColumnFamily("MOVIE", KEYSPACE);
+//        CassandraCli.dropKeySpace(KEYSPACE);
+        
+        CassandraCli.truncateColumnFamily(KEYSPACE, "ACTOR");
+        CassandraCli.truncateColumnFamily(KEYSPACE, "MOVIE");
+        //CassandraCli.dropColumnFamily(KEYSPACE, "MOVIE");
+       
     }
 
     protected abstract void loadDataForActor() throws TException, InvalidRequestException, UnavailableException,
@@ -394,8 +401,8 @@ public abstract class AssociationBase
                 catch (Exception e)
                 {
                     cli.update("DELETE FROM IMDB.MOVIE");
-                    cli.update("DROP TABLE IMDB.MOVIE");
-                    cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
+//                    cli.update("DROP TABLE IMDB.MOVIE");
+//                    cli.update("CREATE TABLE IMDB.MOVIE (MOVIE_ID VARCHAR(256) PRIMARY KEY, TITLE VARCHAR(256), YEAR VARCHAR(256))");
                 }
 
             }

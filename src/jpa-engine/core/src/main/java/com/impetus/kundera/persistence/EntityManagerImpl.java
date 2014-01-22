@@ -121,7 +121,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         }
         // session = new EntityManagerSession((Cache) factory.getCache());
-        this.persistenceCache = new PersistenceCache(null/*(Cache) factory.getCache()*/);
+        this.persistenceCache = new PersistenceCache((Cache) factory.getCache());
         
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
 
