@@ -11,7 +11,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "StudentBigInteger")
+@Table(name = "StudentBigInteger", schema = "KunderaCassandraDataType@CassandraDataTypeTest")
 @IndexCollection(columns = { @Index(name = "age"), @Index(name = "name") })
 public class StudentBigInteger {
 

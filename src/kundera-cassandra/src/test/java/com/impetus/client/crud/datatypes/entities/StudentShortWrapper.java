@@ -9,7 +9,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "StudentShortWrapper")
+@Table(name = "StudentShortWrapper", schema = "KunderaCassandraDataType@CassandraDataTypeTest")
 @IndexCollection(columns = { @Index(name = "age"), @Index(name = "name") })
 public class StudentShortWrapper
 {
