@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -138,9 +139,14 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(Month.JAN, result.getMonth());
         
         query = em.createQuery("select p from PersonMongo p where p.personName = kuldeep");
-        result = (PersonMongo)(query.getSingleResult());
-        Assert.assertNull(result);
-       
+        try
+        {
+            result = (PersonMongo)(query.getSingleResult());
+            Assert.fail("Should have gone to catch block!");
+        } catch(NoResultException nrex)
+        {
+            Assert.assertNotNull(nrex.getMessage());
+        }
 
         selectIdQuery();
 
