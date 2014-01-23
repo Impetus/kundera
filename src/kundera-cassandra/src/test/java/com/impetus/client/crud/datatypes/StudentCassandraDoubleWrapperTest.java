@@ -657,7 +657,7 @@ public class StudentCassandraDoubleWrapperTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraDoubleWrapper\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentDoubleWrapper\"");
     }
 
 }

@@ -657,7 +657,7 @@ public class StudentCassandraIntegerTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraInteger\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentInteger\"");
     }
 
 }

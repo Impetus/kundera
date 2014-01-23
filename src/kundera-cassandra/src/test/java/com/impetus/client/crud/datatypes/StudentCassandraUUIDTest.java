@@ -671,7 +671,7 @@ public class StudentCassandraUUIDTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraUUID\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentUUID\"");
     }
 
 }

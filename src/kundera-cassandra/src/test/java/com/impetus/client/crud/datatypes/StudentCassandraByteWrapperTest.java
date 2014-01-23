@@ -661,7 +661,7 @@ public class StudentCassandraByteWrapperTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraByteWrapper\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentByteWrapper\"");
     }
 
 }

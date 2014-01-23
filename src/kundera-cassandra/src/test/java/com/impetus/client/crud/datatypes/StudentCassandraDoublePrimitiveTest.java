@@ -657,7 +657,7 @@ public class StudentCassandraDoublePrimitiveTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraDoublePrimitive\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentDoublePrimitive\"");
     }
 
 }

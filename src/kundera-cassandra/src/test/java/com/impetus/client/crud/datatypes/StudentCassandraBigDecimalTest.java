@@ -624,7 +624,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentCassandraBigDecimal\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentBigDecimal\"");
 //        CassandraCli.dropKeySpace(keyspace);
     }
 

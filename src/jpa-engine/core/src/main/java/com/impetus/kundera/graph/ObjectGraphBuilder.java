@@ -157,13 +157,15 @@ public class ObjectGraphBuilder
             // If dirty, set the entity data into node and mark it as dirty
             if (!DeepEquals.deepEquals(node.getData(), entity))
             {
-                node.setData(entity);
                 node.setDirty(true);
             }
             else if (node.isProcessed())
             {
                 node.setDirty(false);
             }
+            
+            node.setData(entity);
+            
 
             // If node is NOT in managed state, its data needs to be
             // replaced with the one provided in entity object

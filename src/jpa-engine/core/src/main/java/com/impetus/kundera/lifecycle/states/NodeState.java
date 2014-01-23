@@ -93,7 +93,7 @@ public abstract class NodeState
 
                 switch (operation)
                 {
-                case PERSIST:
+                /*case PERSIST:
                     if (cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
@@ -121,7 +121,7 @@ public abstract class NodeState
                         Node childNode = children.get(nodeLink);
                         childNode.remove();
                     }
-                    break;
+                    break;*/
 
                 case REFRESH:
                     if (cascadeTypes.contains(CascadeType.REFRESH) || cascadeTypes.contains(CascadeType.ALL))
